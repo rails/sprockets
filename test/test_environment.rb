@@ -52,15 +52,7 @@ class EnvironmentTest < Test::Unit::TestCase
   end
   
   protected
-    def assert_absolute_location(location, pathname)
-      assert_equal location, pathname.absolute_location
-    end
-    
     def assert_load_path_equals(load_path_absolute_locations, environment)
       assert load_path_absolute_locations.zip(environment.load_path).map { |location, pathname| location == pathname.absolute_location }.all?
-    end
-    
-    def assert_absolute_location_ends_with(location_ending, pathname)
-      assert pathname.absolute_location[/#{Regexp.escape(location_ending)}$/]
     end
 end

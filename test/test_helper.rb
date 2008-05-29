@@ -12,4 +12,12 @@ class Test::Unit::TestCase
     def source_directories_in_fixtures_path
       Dir[File.join(FIXTURES_PATH, "**", "src")]
     end
+
+    def assert_absolute_location(location, pathname)
+      assert_equal location, pathname.absolute_location
+    end
+    
+    def assert_absolute_location_ends_with(location_ending, pathname)
+      assert pathname.absolute_location[/#{Regexp.escape(location_ending)}$/]
+    end
 end
