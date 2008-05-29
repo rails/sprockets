@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require File.join(File.dirname(__FILE__), *%w".. lib sprockets")
+
+environment  = Sprockets::Environment.new(".")
+preprocessor = Sprockets::Preprocessor.new(environment)
+
+ARGV.each do |filename|
+  preprocessor.require(environment.find(filename).source_file)
+end
+
+print preprocessor.output_file
