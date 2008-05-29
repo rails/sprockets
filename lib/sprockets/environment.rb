@@ -3,18 +3,11 @@ module Sprockets
     attr_reader :root, :load_path
     
     def initialize(root, load_path = [])
-      @root = pathname_from(File.expand_path(root))
-      @load_path = [@root]
-      
-      load_path.each do |location|
+      @load_path = [@root = Pathname.new(self, root)]
+
+      load_path.reverse_each do |location|
         register_load_location(location)
       end
-    end
-    
-    def absolute_location_from(location)
-      location = location.to_s
-      location = File.join(root.absolute_location, location) unless location[/^\//]
-      File.expand_path(location)
     end
     
     def pathname_from(location)
@@ -31,5 +24,12 @@ module Sprockets
     def find(location)
       load_path.map { |pathname| pathname.find(location) }.compact.first
     end
+    
+    protected
+      def absolute_location_from(location)
+        location = location.to_s
+        location = File.join(root.absolute_location, location) unless location[/^\//]
+        File.expand_path(location)
+      end
   end
 end

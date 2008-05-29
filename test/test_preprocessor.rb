@@ -2,7 +2,7 @@ require "test_helper"
 
 class PreprocessorTest < Test::Unit::TestCase
   def setup
-    @environment  = Sprockets::Environment.new(FIXTURES_PATH, source_directories_in_fixtures_path)
+    @environment  = environment_for_fixtures
     @preprocessor = Sprockets::Preprocessor.new(@environment)
   end
 
@@ -88,9 +88,5 @@ class PreprocessorTest < Test::Unit::TestCase
       initial_indent  = lines.first[/^\s*/].length
       unindented_text = lines.map { |line| line[initial_indent..-1] }.join($/)
       assert output_text[unindented_text]
-    end
-    
-    def source_directories_in_fixtures_path
-      Dir[File.join(FIXTURES_PATH, "**", "src")]
     end
 end
