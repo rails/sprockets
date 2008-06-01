@@ -40,9 +40,4 @@ class PathnameTest < Test::Unit::TestCase
   def test_to_s_should_return_absolute_location
     assert_equal pathname("src/foo.js").to_s, pathname("src/foo.js").absolute_location
   end
-
-  protected
-    def pathname(location)
-      Sprockets::Pathname.new(@environment, File.join(FIXTURES_PATH, location))
-    end
 end

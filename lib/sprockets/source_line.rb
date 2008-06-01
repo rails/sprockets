@@ -17,7 +17,7 @@ module Sprockets
     end
 
     def require
-      @require ||= (comment || "")[/^=\s+require\s+(\"(.*?)\"|<(.*?)>)/, 1]
+      @require ||= (comment || "")[/^=\s+require\s+(\"(.*?)\"|<(.*?)>)\s*$/, 1]
     end
     
     def require?
