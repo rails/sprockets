@@ -9,15 +9,24 @@ class PreprocessorTest < Test::Unit::TestCase
   def test_double_slash_comments_that_are_not_requires_should_be_removed_by_default
     require_file_for_this_test
     assert_output_file_does_not_contain_line "// This is a double-slash comment that should not appear in the resulting output file."
-    assert_output_file_contains_line "/* This is a slash-star comment that should appear in the resulting output file. */"
+    assert_output_file_does_not_contain_line "/* This is a slash-star comment that should not appear in the resulting output file. */"
   end
 
   def test_double_slash_comments_that_are_not_requires_should_be_ignored_when_strip_comments_is_false
     @preprocessor = Sprockets::Preprocessor.new(@environment, :strip_comments => false)
     require_file_for_this_test
     assert_output_file_contains_line "// This is a double-slash comment that should appear in the resulting output file."
+    assert_output_file_contains_line "/* This is a slash-star comment that should appear in the resulting output file. */"
   end
-  
+
+  def test_multiline_comments_should_be_removed_by_default
+    require_file_for_this_test
+    assert_output_file_does_not_contain_line "/**"
+    assert_output_file_does_not_contain_line " *  This is a slash-star comment"
+    assert_output_file_does_not_contain_line " *  that should appear in the resulting output file."
+    assert_output_file_does_not_contain_line "**/"
+  end
+
   def test_requiring_a_single_file_should_replace_the_require_comment_with_the_file_contents
     require_file_for_this_test
     assert_output_file_contains <<-LINES
@@ -76,11 +85,11 @@ class PreprocessorTest < Test::Unit::TestCase
     end
     
     def assert_output_file_does_not_contain_line(line)
-      assert source_lines_matching(line).empty?
+      assert source_lines_matching(line).empty?, "Expected #{line.inspect} to not exist"
     end
     
     def assert_output_file_contains_line(line)
-      assert source_lines_matching(line).any?
+      assert source_lines_matching(line).any?, "Expected #{line.inspect} to exist"
     end
     
     def assert_output_file_contains(indented_text)

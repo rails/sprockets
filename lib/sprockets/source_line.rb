@@ -16,6 +16,14 @@ module Sprockets
       !!comment
     end
 
+    def begins_multiline_comment?
+      line =~ /^\s*\/\*(.*)/
+    end
+
+    def closes_multiline_comment?
+      line =~ /^(.*)*\*\/\s*/
+    end
+
     def require
       @require ||= (comment || "")[/^=\s+require\s+(\"(.*?)\"|<(.*?)>)\s*$/, 1]
     end

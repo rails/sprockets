@@ -9,7 +9,17 @@ class SourceLineTest < Test::Unit::TestCase
     assert source_line(" //").comment?
     assert source_line("\t//").comment?
   end
-  
+
+  def test_line_that_begins_a_multiline_comment
+    assert source_line(" /*").begins_multiline_comment?
+    assert source_line(" /**").begins_multiline_comment?
+  end
+
+  def test_line_that_closes_a_multiline_comment
+    assert source_line(" */").closes_multiline_comment?
+    assert source_line(" **/").closes_multiline_comment?
+  end
+
   def test_line_that_contains_but_does_not_begin_with_double_slash_should_not_be_a_comment
     assert !source_line("f //").comment?
     assert !source_line("f //= require <foo>").comment?
