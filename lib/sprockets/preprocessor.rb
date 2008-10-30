@@ -30,14 +30,14 @@ module Sprockets
       end
       
       def record_source_line(source_line)
-        skip_multiline_comments(source_line) do
+        skip_pdoc_comments(source_line) do
           unless source_line.comment? && strip_comments?
             output_file.record(source_line)
           end
         end
       end
 
-      def skip_multiline_comments(source_line)
+      def skip_pdoc_comments(source_line)
         yield unless strip_comments?
 
         @commented ||= false

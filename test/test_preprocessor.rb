@@ -9,7 +9,7 @@ class PreprocessorTest < Test::Unit::TestCase
   def test_double_slash_comments_that_are_not_requires_should_be_removed_by_default
     require_file_for_this_test
     assert_output_file_does_not_contain_line "// This is a double-slash comment that should not appear in the resulting output file."
-    assert_output_file_does_not_contain_line "/* This is a slash-star comment that should not appear in the resulting output file. */"
+    assert_output_file_contains_line "/* This is a slash-star comment that should not appear in the resulting output file. */"
   end
 
   def test_double_slash_comments_that_are_not_requires_should_be_ignored_when_strip_comments_is_false

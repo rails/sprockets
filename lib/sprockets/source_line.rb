@@ -17,11 +17,11 @@ module Sprockets
     end
 
     def begins_multiline_comment?
-      line =~ /^\s*\/\*(.*)/
+      line =~ /^\s*\/\*\*(.*)/
     end
 
     def closes_multiline_comment?
-      line =~ /^(.*)*\*\/\s*/
+      line =~ /^(.*)*\*\*\/\s*/
     end
 
     def require
