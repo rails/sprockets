@@ -37,14 +37,14 @@ module Sprockets
     end
     
     def to_s(constants = source_file.environment.constants)
-      line.gsub(/<%=(.*?)%>/) do
+      line.chomp.gsub(/<%=(.*?)%>/) do
         constant = $1.strip
         if value = constants[constant]
           value
         else
           raise UndefinedConstantError, "couldn't find constant `#{constant}' in #{inspect}"
         end
-      end
+      end + $/
     end
   end
 end
