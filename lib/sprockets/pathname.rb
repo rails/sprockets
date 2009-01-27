@@ -21,6 +21,10 @@ module Sprockets
       SourceFile.new(environment, self)
     end
     
+    def contents
+      IO.read(absolute_location)
+    end
+    
     def ==(pathname)
       environment == pathname.environment &&
         absolute_location == pathname.absolute_location

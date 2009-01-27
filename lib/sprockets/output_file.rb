@@ -12,9 +12,7 @@ module Sprockets
     end
     
     def to_s
-      @source_lines.map do |source_line|
-        source_line.line
-      end.join
+      @source_lines.join
     end
   end
 end

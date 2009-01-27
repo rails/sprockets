@@ -51,4 +51,14 @@ class SourceLineTest < Test::Unit::TestCase
     source_file = Sprockets::SourceFile.new(environment, pathname)
     assert_equal "line 25 of /a/b/c.js", source_line("hello", source_file, 25).inspect
   end
+  
+  def test_interpolation_of_constants
+    assert_equal 'var VERSION = "1.0";', source_line('var VERSION = "<%= VERSION %>";').to_s("VERSION" => "1.0")
+  end
+  
+  def test_interpolation_of_missing_constant_raises_undefined_constant_error
+    assert_raises(Sprockets::UndefinedConstantError) do
+      source_line('<%= NONEXISTENT %>').to_s("VERSION" => "1.0")
+    end
+  end
 end

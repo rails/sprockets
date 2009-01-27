@@ -51,6 +51,12 @@ class EnvironmentTest < Test::Unit::TestCase
     assert_nil environment.find("nonexistent.js")
   end
   
+  def test_constants_should_return_a_hash_of_all_constants_defined_in_the_load_path
+    constants = environment_for_fixtures.constants
+    assert_kind_of Hash, constants
+    assert_equal %w(HELLO ONE TWO VERSION), constants.keys.sort
+  end
+  
   protected
     def assert_load_path_equals(load_path_absolute_locations, environment)
       assert load_path_absolute_locations.zip(environment.load_path).map { |location, pathname| location == pathname.absolute_location }.all?

@@ -22,7 +22,16 @@ module Sprockets
     end
     
     def find(location)
-      load_path.map { |pathname| pathname.find(location) }.compact.first
+      find_all(location).first
+    end
+    
+    def constants(reload = false)
+      @constants = nil if reload
+      @constants ||= find_all("constants.yml").inject({}) do |constants, pathname|
+        contents = YAML.load(pathname.contents) rescue nil
+        contents = {} unless contents.is_a?(Hash)
+        constants.merge(contents)
+      end
     end
     
     protected
@@ -30,6 +39,10 @@ module Sprockets
         location = location.to_s
         location = File.join(root.absolute_location, location) unless location[/^\//]
         File.expand_path(location)
+      end
+      
+      def find_all(location)
+        load_path.map { |pathname| pathname.find(location) }.compact
       end
   end
 end

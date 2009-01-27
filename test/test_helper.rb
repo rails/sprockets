@@ -38,6 +38,6 @@ class Test::Unit::TestCase
     end
 
     def source_line(line, source_file = nil, line_number = 1)
-      Sprockets::SourceLine.new(source_file, line, line_number)
+      Sprockets::SourceLine.new(source_file || source_file("dummy"), line, line_number)
     end
 end

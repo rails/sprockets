@@ -3,6 +3,7 @@ require "test_helper"
 class OutputFileTest < Test::Unit::TestCase
   def setup
     @output_file = Sprockets::OutputFile.new
+    @environment = environment_for_fixtures
   end
   
   def test_record
