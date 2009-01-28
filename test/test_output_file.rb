@@ -18,4 +18,11 @@ class OutputFileTest < Test::Unit::TestCase
     @output_file.record(source_line("world\n"))
     assert_equal "hello\nworld\n", @output_file.to_s
   end
+  
+  def test_save_to
+    filename = File.join(FIXTURES_PATH, "output.js")
+    @output_file.save_to(filename)
+    assert_equal @output_file.to_s, IO.read(filename)
+    File.unlink(filename)
+  end
 end
