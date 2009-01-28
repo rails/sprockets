@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "sprockets"
-  s.version = "0.2.0"
-  s.date = "2009-01-27"
+  s.version = "0.3.0"
+  s.date = "2009-01-28"
   s.summary = "JavaScript dependency management and concatenation"
   s.email = "sstephenson@gmail.com"
   s.homepage = "http://github.com/sstephenson/sprockets"
@@ -9,6 +9,6 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
   s.authors = ["Sam Stephenson"]
   s.files = Dir["Rakefile", "bin/**/*", "lib/**/*", "test/**/*"]
-  s.test_files = Dir["test/test_*.rb"]
+  s.test_files = Dir["test/test_*.rb"] unless $SAFE > 0
   s.executables = ["sprocketize"]
 end
