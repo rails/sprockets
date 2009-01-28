@@ -22,5 +22,11 @@ module Sprockets
     def ==(source_file)
       pathname == source_file.pathname
     end
+    
+    def mtime
+      File.mtime(pathname.absolute_location)
+    rescue Errno::ENOENT
+      0
+    end
   end
 end

@@ -8,9 +8,9 @@ class OutputFileTest < Test::Unit::TestCase
   
   def test_record
     assert_equal [], @output_file.source_lines
-    assert_equal "hello\n", @output_file.record("hello\n")
-    assert_equal "world\n", @output_file.record("world\n")
-    assert_equal ["hello\n", "world\n"], @output_file.source_lines
+    assert_equal "hello\n", @output_file.record(source_line("hello\n")).to_s
+    assert_equal "world\n", @output_file.record(source_line("world\n")).to_s
+    assert_equal ["hello\n", "world\n"], @output_file.source_lines.map { |source_line| source_line.to_s }
   end
   
   def test_to_s
