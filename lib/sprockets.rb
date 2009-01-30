@@ -1,6 +1,7 @@
 $:.unshift File.dirname(__FILE__)
 
 require "yaml"
+require "fileutils"
 
 require "sprockets/version"
 require "sprockets/error"
