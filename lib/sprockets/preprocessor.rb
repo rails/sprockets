@@ -1,11 +1,12 @@
 module Sprockets
   class Preprocessor
-    attr_reader :environment, :output_file, :source_files
+    attr_reader :environment, :output_file, :source_files, :asset_paths
     
     def initialize(environment, options = {})
       @environment = environment
       @output_file = OutputFile.new
       @source_files = []
+      @asset_paths = []
       @options = options
     end
     
@@ -16,10 +17,17 @@ module Sprockets
       source_file.each_source_line do |source_line|
         if source_line.require?
           require_from_source_line(source_line)
+        elsif source_line.provide?
+          provide_from_source_line(source_line)
         else
           record_source_line(source_line)
         end
       end
+    end
+    
+    def provide(asset_path)
+      return if !asset_path || asset_paths.include?(asset_path)
+      asset_paths << asset_path
     end
     
     protected
@@ -27,6 +35,10 @@ module Sprockets
     
       def require_from_source_line(source_line)
         require pathname_from(source_line).source_file
+      end
+      
+      def provide_from_source_line(source_line)
+        provide asset_path_from(source_line)
       end
       
       def record_source_line(source_line)
@@ -84,6 +96,10 @@ module Sprockets
         File.join(File.dirname(location), File.basename(location, ".js") + ".js")
       end
       
+      def asset_path_from(source_line)
+        source_line.source_file.find(source_line.provide, :directory)
+      end
+
       def raise_load_error_for(source_line)
         kind = kind_of_require_from(source_line).to_s.tr("_", " ")
         file = File.split(location_from(source_line)).last

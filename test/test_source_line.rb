@@ -45,6 +45,17 @@ class SourceLineTest < Test::Unit::TestCase
     assert_equal "\"foo\"", source_line("//= require \"foo\"").require
   end
 
+  def test_line_that_contains_a_provide_comment_should_be_a_provide
+    assert source_line("//= provide \"../assets\"").provide?
+    assert !source_line("//= provide").provide?
+    assert !source_line("//= provide <../assets>").provide?
+  end
+  
+  def test_provide_should_be_extracted_from_provide_lines
+    assert_nil source_line("//= provide").provide
+    assert_equal "../assets", source_line("//= provide \"../assets\"").provide
+  end
+
   def test_inspect_should_include_source_file_location_and_line_number
     environment = environment_for_fixtures
     pathname    = Sprockets::Pathname.new(environment, "/a/b/c.js")

@@ -8,9 +8,9 @@ module Sprockets
     end
 
     # Returns a Pathname for the location relative to this pathname's absolute location.
-    def find(location)
+    def find(location, kind = :file)
       location = File.join(absolute_location, location)
-      File.file?(location) ? Pathname.new(environment, location) : nil
+      File.send("#{kind}?", location) ? Pathname.new(environment, location) : nil
     end
 
     def parent_pathname

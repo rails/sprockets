@@ -5,6 +5,7 @@ require "optparse"
 
 load_path = (ENV["SPROCKETS_PATH"] || "").split(":")
 filenames = []
+options = { :load_path => load_path, :source_files => filenames, :expand_paths => false }
 
 OptionParser.new do |opts|
   opts.summary_width = 28
@@ -21,6 +22,10 @@ OptionParser.new do |opts|
   
   opts.on("-I DIRECTORY", "--include-dir=DIRECTORY", "Adds the directory to the Sprockets load path") do |directory|
     load_path << directory
+  end
+  
+  opts.on("-a DIRECTORY", "--asset-root=DIRECTORY", "Copy provided assets into DIRECTORY") do |directory|
+    options[:asset_root] = directory
   end
   
   opts.on_tail("-h", "--help", "Shows this help message") do
@@ -44,5 +49,6 @@ OptionParser.new do |opts|
   end
 end
 
-secretary = Sprockets::Secretary.new(:load_path => load_path, :source_files => filenames, :expand_paths => false)
+secretary = Sprockets::Secretary.new(options)
+secretary.install_assets if options[:asset_root]
 print secretary.output_file
