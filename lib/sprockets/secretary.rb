@@ -46,6 +46,14 @@ module Sprockets
       preprocessor.output_file
     end
     
+    def install_assets
+      if @options[:asset_root]
+        preprocessor.asset_paths.each do |asset_path|
+          copy_assets_from(asset_path.absolute_location)
+        end
+      end
+    end
+    
     protected
       def expand_paths(paths, options = {})
         if options.has_key?(:expand_paths) ? options[:expand_paths] : @options[:expand_paths]
@@ -61,6 +69,30 @@ module Sprockets
         else
           File.join(@options[:root], path)
         end
+      end
+      
+      def copy_assets_from(asset_path)
+        relative_file_paths_beneath(asset_path).each do |filename|
+          source, destination = File.join(asset_path, filename), File.join(asset_root, File.dirname(filename))
+          if !File.directory?(source)
+            FileUtils.mkdir_p(destination)
+            FileUtils.cp(source, destination)
+          end
+        end
+      end
+      
+      def relative_file_paths_beneath(path)
+        Dir[File.join(path, "**", "*")].map do |filename|
+          File.join(*path_pieces(filename)[path_pieces(path).length..-1])
+        end
+      end
+      
+      def asset_root
+        from_root(@options[:asset_root])
+      end
+      
+      def path_pieces(path)
+        path.split(File::SEPARATOR)
       end
   end
 end

@@ -97,7 +97,7 @@ module Sprockets
       end
       
       def asset_path_from(source_line)
-        source_line.source_file.find(source_line.provide)
+        source_line.source_file.find(source_line.provide, :directory)
       end
 
       def raise_load_error_for(source_line)

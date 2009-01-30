@@ -15,8 +15,8 @@ module Sprockets
       end
     end
     
-    def find(location)
-      pathname.parent_pathname.find(location)
+    def find(location, kind = :file)
+      pathname.parent_pathname.find(location, kind)
     end
     
     def ==(source_file)

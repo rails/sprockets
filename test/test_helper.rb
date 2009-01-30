@@ -1,5 +1,7 @@
 require File.join(File.dirname(__FILE__), *%w".. lib sprockets")
 require "test/unit"
+require "fileutils"
+require "tmpdir"
 
 class Test::Unit::TestCase
   FIXTURES_PATH = File.expand_path(File.join(File.dirname(__FILE__), "fixtures")) unless defined?(FIXTURES_PATH)
@@ -39,5 +41,15 @@ class Test::Unit::TestCase
 
     def source_line(line, source_file = nil, line_number = 1)
       Sprockets::SourceLine.new(source_file || source_file("dummy"), line, line_number)
+    end
+    
+    def with_temporary_directory
+      path = File.join(Dir.tmpdir, [caller[0][/`(.*)'/, 1], Time.now.to_f].join("_"))
+      begin
+        FileUtils.mkdir(path)
+        yield path
+      ensure
+        FileUtils.rm_rf(path)
+      end
     end
 end
