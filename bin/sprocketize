@@ -44,15 +44,5 @@ OptionParser.new do |opts|
   end
 end
 
-environment  = Sprockets::Environment.new(".", load_path)
-preprocessor = Sprockets::Preprocessor.new(environment)
-
-filenames.each do |filename|
-  if pathname = environment.find(filename)
-    preprocessor.require(pathname.source_file)
-  else
-    raise Sprockets::LoadError, "no such file `#{filename}'"
-  end
-end
-
-print preprocessor.output_file
+secretary = Sprockets::Secretary.new(:load_path => load_path, :source_files => filenames, :expand_paths => false)
+print secretary.output_file
