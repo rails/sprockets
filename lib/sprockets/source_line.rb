@@ -32,6 +32,14 @@ module Sprockets
       !!require
     end
     
+    def provide
+      @provide ||= (comment || "")[/^=\s+provide\s+\"(.*?)\"\s*$/, 1]
+    end
+    
+    def provide?
+      !!provide
+    end
+    
     def inspect
       "line #@number of #{@source_file.pathname}"
     end
