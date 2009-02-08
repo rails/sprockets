@@ -10,6 +10,10 @@ module Sprockets
     attr_reader :environment, :preprocessor
     
     def initialize(options = {})
+      reset!(options)
+    end
+
+    def reset!(options = @options)
       @options = DEFAULT_OPTIONS.merge(options)
       @environment  = Sprockets::Environment.new(@options[:root])
       @preprocessor = Sprockets::Preprocessor.new(@environment)
