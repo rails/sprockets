@@ -58,6 +58,10 @@ module Sprockets
       end
     end
     
+    def source_last_modified
+      preprocessor.source_files.map { |s| s.mtime }.max
+    end
+    
     protected
       def expand_paths(paths, options = {})
         if options.has_key?(:expand_paths) ? options[:expand_paths] : @options[:expand_paths]
