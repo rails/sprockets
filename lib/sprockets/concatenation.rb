@@ -1,5 +1,5 @@
 module Sprockets
-  class OutputFile
+  class Concatenation
     attr_reader :source_lines
     
     def initialize

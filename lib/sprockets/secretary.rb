@@ -46,8 +46,8 @@ module Sprockets
       end
     end
     
-    def output_file
-      preprocessor.output_file
+    def concatenation
+      preprocessor.concatenation
     end
     
     def install_assets

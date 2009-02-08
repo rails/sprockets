@@ -1,10 +1,10 @@
 module Sprockets
   class Preprocessor
-    attr_reader :environment, :output_file, :source_files, :asset_paths
+    attr_reader :environment, :concatenation, :source_files, :asset_paths
     
     def initialize(environment, options = {})
       @environment = environment
-      @output_file = OutputFile.new
+      @concatenation = Concatenation.new
       @source_files = []
       @asset_paths = []
       @options = options
@@ -44,7 +44,7 @@ module Sprockets
       def record_source_line(source_line)
         skip_pdoc_comments(source_line) do
           unless source_line.comment? && strip_comments?
-            output_file.record(source_line)
+            concatenation.record(source_line)
           end
         end
       end

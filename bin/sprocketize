@@ -51,4 +51,4 @@ end
 
 secretary = Sprockets::Secretary.new(options)
 secretary.install_assets if options[:asset_root]
-print secretary.output_file
+print secretary.concatenation
