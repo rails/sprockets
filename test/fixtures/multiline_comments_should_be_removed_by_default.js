@@ -1,4 +1,4 @@
 /**
- *  This is a slash-star comment
+ *  This is a PDoc comment
  *  that should appear in the resulting output file.
 **/

@@ -17,12 +17,18 @@ class PreprocessorTest < Test::Unit::TestCase
     require_file_for_this_test
     assert_concatenation_contains_line "// This is a double-slash comment that should appear in the resulting output file."
     assert_concatenation_contains_line "/* This is a slash-star comment that should appear in the resulting output file. */"
+
+    assert_concatenation_contains_line "/* This is multiline slash-star comment"
+    assert_concatenation_contains_line "*  that should appear in the resulting"
+    assert_concatenation_contains_line "*  output file */"
+
+    assert_concatenation_contains_line "This is not a PDoc comment that should appear in the resulting output file."
   end
 
   def test_multiline_comments_should_be_removed_by_default
     require_file_for_this_test
     assert_concatenation_does_not_contain_line "/**"
-    assert_concatenation_does_not_contain_line " *  This is a slash-star comment"
+    assert_concatenation_does_not_contain_line " *  This is a PDoc comment"
     assert_concatenation_does_not_contain_line " *  that should appear in the resulting output file."
     assert_concatenation_does_not_contain_line "**/"
   end

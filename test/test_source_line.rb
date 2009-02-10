@@ -11,13 +11,23 @@ class SourceLineTest < Test::Unit::TestCase
   end
 
   def test_line_that_begins_a_multiline_comment
-    assert !source_line(" /*").begins_multiline_comment?
+    assert source_line(" /*").begins_multiline_comment?
     assert source_line(" /**").begins_multiline_comment?
   end
 
-  def test_line_that_closes_a_multiline_comment
-    assert !source_line(" */").closes_multiline_comment?
-    assert source_line(" **/").closes_multiline_comment?
+  def test_line_that_begins_a_pdoc_comment
+    assert !source_line(" /*").begins_pdoc_comment?
+    assert source_line(" /**").begins_pdoc_comment?
+  end
+
+  def test_line_that_ends_a_multiline_comment
+    assert source_line(" */").ends_multiline_comment?
+    assert source_line(" **/").ends_multiline_comment?
+  end
+
+  def test_line_that_ends_a_pdoc_comment
+    assert !source_line(" */").ends_pdoc_comment?
+    assert source_line(" **/").ends_pdoc_comment?
   end
 
   def test_line_that_contains_but_does_not_begin_with_double_slash_should_not_be_a_comment

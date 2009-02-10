@@ -42,26 +42,8 @@ module Sprockets
       end
       
       def record_source_line(source_line)
-        skip_pdoc_comments(source_line) do
-          unless source_line.comment? && strip_comments?
-            concatenation.record(source_line)
-          end
-        end
-      end
-
-      def skip_pdoc_comments(source_line)
-        yield unless strip_comments?
-
-        @commented ||= false
-
-        if source_line.begins_multiline_comment?
-          @commented = true
-        end
-
-        yield unless @commented
-
-        if source_line.closes_multiline_comment?
-          @commented = false
+        unless source_line.comment? && strip_comments?
+          concatenation.record(source_line)
         end
       end
 

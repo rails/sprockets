@@ -7,7 +7,7 @@ module Sprockets
       @line = line
       @number = number
     end
-    
+
     def comment
       @comment ||= line[/^\s*\/\/(.*)/, 1]
     end
@@ -16,11 +16,23 @@ module Sprockets
       !!comment
     end
 
+    def comment!
+      @comment = line
+    end
+
     def begins_multiline_comment?
+      line =~ /^\s*\/\*(.*)/
+    end
+
+    def begins_pdoc_comment?
       line =~ /^\s*\/\*\*(.*)/
     end
 
-    def closes_multiline_comment?
+    def ends_multiline_comment?
+      line =~ /^(.*)*\*\/\s*/
+    end
+
+    def ends_pdoc_comment?
       line =~ /^(.*)*\*\*\/\s*/
     end
 
