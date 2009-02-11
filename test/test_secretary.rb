@@ -42,7 +42,7 @@ class SecretaryTest < Test::Unit::TestCase
       assert_equal paths_relative_to(temp, 
         "images", "images/script_with_assets", "images/script_with_assets/one.png", 
         "images/script_with_assets/two.png", "stylesheets", "stylesheets/script_with_assets.css"),
-        Dir[File.join(temp, "**", "*")]
+        Dir[File.join(temp, "**", "*")].sort
     end
   end
   
@@ -57,7 +57,7 @@ class SecretaryTest < Test::Unit::TestCase
       assert_equal paths_relative_to(temp, 
         "images", "images/script_with_assets", "images/script_with_assets/one.png", 
         "images/script_with_assets/two.png", "stylesheets", "stylesheets/script_with_assets.css"),
-        Dir[File.join(temp, "**", "*")]
+        Dir[File.join(temp, "**", "*")].sort
     end
   end
   
@@ -72,7 +72,7 @@ class SecretaryTest < Test::Unit::TestCase
       assert_equal paths_relative_to(temp, 
         "images", "images/script_with_assets", "images/script_with_assets/one.png", 
         "images/script_with_assets/two.png", "stylesheets", "stylesheets/script_with_assets.css"),
-        Dir[File.join(temp, "**", "*")]
+        Dir[File.join(temp, "**", "*")].sort
     end
   end
   
