@@ -1,3 +1,4 @@
-*.txt
+doc
+pkg
 tmp
-
+README.html
