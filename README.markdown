@@ -211,6 +211,10 @@ The Sprockets source code is hosted on [GitHub](http://github.com/). Check out a
     
 You can fork the Sprockets project on GitHub, commit your changes, and [send a pull request](http://github.com/guides/pull-requests) if you'd like your feature or bug fix to be considered for the next release. Please make sure to update the unit tests as well.
 
+### Reporting bugs
+
+If you find a bug in Sprockets and aren't feeling motivated to fix it yourself, you can file a ticket at the [Sprockets Lighthouse project](http://prototype.lighthouseapp.com/projects/8888-sprockets).
+
 
 ## License
 
