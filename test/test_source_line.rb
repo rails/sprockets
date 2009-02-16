@@ -82,4 +82,8 @@ class SourceLineTest < Test::Unit::TestCase
       source_line('<%= NONEXISTENT %>').to_s("VERSION" => "1.0")
     end
   end
+  
+  def test_to_s_should_strip_trailing_whitespace_before_adding_line_ending
+    assert_equal "hello();\n", source_line("hello();     \t  \r\n").to_s({})
+  end
 end

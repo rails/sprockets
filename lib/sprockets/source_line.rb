@@ -57,14 +57,26 @@ module Sprockets
     end
     
     def to_s(constants = source_file.environment.constants)
-      line.chomp.gsub(/<%=(.*?)%>/) do
-        constant = $1.strip
-        if value = constants[constant]
-          value
-        else
-          raise UndefinedConstantError, "couldn't find constant `#{constant}' in #{inspect}"
-        end
-      end + $/
+      result = line.chomp
+      interpolate_constants!(result, constants)
+      strip_trailing_whitespace!(result)
+      result + $/
     end
+    
+    protected
+      def interpolate_constants!(result, constants)
+        result.gsub!(/<%=(.*?)%>/) do
+          constant = $1.strip
+          if value = constants[constant]
+            value
+          else
+            raise UndefinedConstantError, "couldn't find constant `#{constant}' in #{inspect}"
+          end
+        end
+      end
+      
+      def strip_trailing_whitespace!(result)
+        result.gsub!(/\s+$/, "")
+      end
   end
 end
