@@ -1,5 +1,6 @@
 require "test_helper"
 require "enumerator"
+Enumerator = Enumerable::Enumerator unless defined?(Enumerator) # for 1.9.1 compatibility
 
 class SourceFileTest < Test::Unit::TestCase
   def setup
@@ -7,7 +8,7 @@ class SourceFileTest < Test::Unit::TestCase
   end
   
   def test_each_source_line
-    source_file_lines = Enumerable::Enumerator.new(source_file("src/foo/bar.js"), :each_source_line).to_a
+    source_file_lines = Enumerator.new(source_file("src/foo/bar.js"), :each_source_line).to_a
     assert_equal content_of_fixture("src/foo/bar.js"), source_file_lines.map { |line| line.line }.join
     assert_equal 4, source_file_lines.length
   end
