@@ -113,7 +113,7 @@ Constants share a global namespace, so you can refer to constants defined anywhe
 
 ## Using Sprockets
 
-Sprockets is distributed as a Ruby library. It comes with a command-line tool called `sprocketize` for generating concatenations and installing provided assets. You can also use the `sprockets-rails` plugin to sprocketize your Rails application.
+Sprockets is distributed as a Ruby library. It comes with a command-line tool called `sprocketize` for generating concatenations and installing provided assets. You can also use the `sprockets-rails` plugin to sprocketize your Rails application. A simple CGI is bundled with Sprockets for use in other environments.
 
 ### Sprockets as a Ruby library
 
@@ -202,6 +202,11 @@ Here's a walkthrough of the installation process:
 8. Adjust your HTML templates to call `<%= sprockets_include_tag %>` instead of `<%= javascript_include_tag ... %>`.
 
 Once `sprockets-rails` is installed, you can check out Sprockets plugins into the `vendor/sprockets/` directory. By default, `sprockets-rails` configures Sprockets' load path to search `vendor/sprockets/*/src/`, as well as `vendor/plugins/*/javascripts/`. This means that the `javascripts/` directories of Rails plugins are automatically installed into your Sprockets load path.
+
+### Using the bundled Sprockets CGI script
+
+Sprockets comes with a simple CGI script for serving JavaScript outside of a Ruby environment. You can find it, along with brief documentation and installation instructions, as `ext/nph-sprockets.cgi` in your copy of the Sprockets source code. (If you installed Sprockets with RubyGems, you can find the location of the Sprockets source code with the `gem which sprockets` command.)
+
 
 ## Contributing to Sprockets
 
