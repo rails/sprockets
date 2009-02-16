@@ -70,7 +70,7 @@ class SourceLineTest < Test::Unit::TestCase
     environment = environment_for_fixtures
     pathname    = Sprockets::Pathname.new(environment, "/a/b/c.js")
     source_file = Sprockets::SourceFile.new(environment, pathname)
-    assert_equal "line 25 of /a/b/c.js", source_line("hello", source_file, 25).inspect
+    assert_equal "line 25 of #{File.expand_path("/a/b/c.js")}", source_line("hello", source_file, 25).inspect
   end
   
   def test_interpolation_of_constants

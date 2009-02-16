@@ -24,7 +24,7 @@ class Test::Unit::TestCase
     end
 
     def assert_absolute_location(location, pathname)
-      assert_equal location, pathname.absolute_location
+      assert_equal File.expand_path(location), pathname.absolute_location
     end
     
     def assert_absolute_location_ends_with(location_ending, pathname)

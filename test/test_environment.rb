@@ -59,6 +59,6 @@ class EnvironmentTest < Test::Unit::TestCase
   
   protected
     def assert_load_path_equals(load_path_absolute_locations, environment)
-      assert load_path_absolute_locations.zip(environment.load_path).map { |location, pathname| location == pathname.absolute_location }.all?
+      assert load_path_absolute_locations.zip(environment.load_path).map { |location, pathname| File.expand_path(location) == pathname.absolute_location }.all?
     end
 end
