@@ -22,7 +22,7 @@ module Sprockets
     end
     
     def find(location)
-      if absolute?(location) && File.exists?(location)
+      if Sprockets.absolute?(location) && File.exists?(location)
         pathname_from(location)
       else
         find_all(location).first
@@ -39,13 +39,9 @@ module Sprockets
     end
     
     protected
-      def absolute?(location)
-        location[0, 1] == File::SEPARATOR
-      end
-      
       def absolute_location_from(location)
         location = location.to_s
-        location = File.join(root.absolute_location, location) unless absolute?(location)
+        location = File.join(root.absolute_location, location) unless Sprockets.absolute?(location)
         File.expand_path(location)
       end
       

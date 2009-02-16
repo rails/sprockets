@@ -72,7 +72,7 @@ module Sprockets
       end
       
       def from_root(path)
-        if path[0, 1] == File::SEPARATOR
+        if Sprockets.absolute?(path)
           path
         else
           File.join(@options[:root], path)
