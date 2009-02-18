@@ -6,7 +6,7 @@
 # script will search its directory and parent directories for a YAML file named
 # "config/sprockets.yml" in order to load configuration information.
 #
-# If you set the environment variable "sprockets.generate_output_file" to 
+# If you set the environment variable "sprockets_generate_output_file" to 
 # "true" the concatenation will be cached to disk. Use it in conjunction with 
 # URL rewriting to cache your Sprockets output on the first request.
 #
@@ -59,7 +59,7 @@
 # All requests to /sprockets.js will transparently proxy /nph-sprockets.cgi if
 # mysite/public/sprockets.js does not exist. In production, you can add
 #
-#     SetEnv sprockets.generate_output_file true
+#     SetEnv sprockets_generate_output_file true
 #
 # to your Apache configuration and mysites/public/sprockets.js will be cached
 # on the first request to /sprockets.js.
@@ -90,7 +90,7 @@ ensure
 end
 
 def generate_output_file?
-  (ENV["REDIRECT_sprockets.generate_output_file"] || ENV["sprockets.generate_output_file"]) =~ /true/i
+  (ENV["REDIRECT_sprockets_generate_output_file"] || ENV["sprockets_generate_output_file"]) =~ /true/i
 end
 
 configuration_file = search_upwards_for("config/sprockets.yml")
@@ -119,7 +119,7 @@ begin
     :source_files => configuration[:source_files]
   )
   
-  secretary.concatenation.save_to(configuration[:output_file]) if generate_output_file?
+  secretary.concatenation.save_to(File.join(sprockets_root, configuration[:output_file])) if generate_output_file?
   respond_with(:content => secretary.concatenation.to_s, :type => "text/javascript")
   
 rescue Exception => e

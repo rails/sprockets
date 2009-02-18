@@ -1,4 +1,7 @@
+* Change the CGI output generation environment variable name to "sprockets_generate_output_file" and use the right path in Concatenation#save_to.
+
 * Prefer "vendor/gems/sprockets/lib" to "vendor/sprockets/lib" when looking for an externaled Sprockets checkout in nph-sprockets.cgi.
+
 
 *1.0.0* (February 17, 2009)
 
