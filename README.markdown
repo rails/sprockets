@@ -1,6 +1,8 @@
 Sprockets
 =========
 
+[http://getsprockets.org/](http://getsprockets.org/)
+
 Sprockets is a Ruby library that preprocesses and concatenates JavaScript source files. It takes any number of source files and preprocesses them line-by-line in order to build a single concatenation. Specially formatted lines act as directives to the Sprockets preprocessor, telling it to require the contents of another file or library first or to provide a set of asset files (such as images or stylesheets) to the document root. Sprockets attempts to fulfill required dependencies by searching a set of directories called the load path.
 
 
@@ -84,7 +86,7 @@ You may need to parameterize and insert constants into your source code. Sprocke
 Continuing the `color_picker` example, assume `plugins/color_picker/src/constants.yml` contains the following:
 
     COLOR_PICKER_VERSION: 1.0.0
-    COLOR_PICKER_AUTHOR: Sam Stephenson <sam@37signals.com>
+    COLOR_PICKER_AUTHOR: Sam Stephenson <sam@example.org>
     
 The constants are specified in a single place, and you can now insert them into your source code without repetition:
 
@@ -100,7 +102,7 @@ The constants are specified in a single place, and you can now insert them into 
 The resulting concatenated output will have the constant values substituted in place:
 
     /* Color Picker plugin, version 1.0.0
-     * (c) 2009 Sam Stephenson <sam@37signals.com>
+     * (c) 2009 Sam Stephenson <sam@example.org>
      * Distributed under the terms of an MIT-style license */
  
     var ColorPicker = {
