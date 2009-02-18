@@ -68,7 +68,7 @@ require "yaml"
 require "fileutils"
 
 def respond_with(options = {})
-  options = { :code => 200, :content => "", :type => "text/html" }.merge(options)
+  options = { :code => 200, :content => "", :type => "text/plain" }.merge(options)
   print "HTTP/1.0 #{options[:code]}\r\n"
   print "Content-Type: #{options[:type]}\r\n"
   print "Content-Length: #{options[:content].length}\r\n"
@@ -98,7 +98,9 @@ sprockets_root     = File.dirname(File.dirname(configuration_file))
 configuration      = YAML.load(IO.read(configuration_file))
 
 begin
-  if File.directory?(sprockets_dir = File.join(sprockets_root, "vendor/sprockets/lib"))
+  if File.directory?(sprockets_dir = File.join(sprockets_root, "vendor/gems/sprockets/lib"))
+    $:.unshift sprockets_dir
+  elsif File.directory?(sprockets_dir = File.join(sprockets_root, "vendor/sprockets/lib"))
     $:.unshift sprockets_dir
   else
     require "rubygems"
