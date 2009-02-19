@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "sprockets"
   s.has_rdoc = false
   s.authors = ["Sam Stephenson"]
-  s.files = Dir["Rakefile", "bin/**/*", "lib/**/*", "test/**/*"]
+  s.files = Dir["Rakefile", "bin/**/*", "lib/**/*", "test/**/*", "ext/**/*"]
   s.test_files = Dir["test/test_*.rb"] unless $SAFE > 0
   s.executables = ["sprocketize"]
 end
