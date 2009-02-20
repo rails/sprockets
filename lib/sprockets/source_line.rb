@@ -29,11 +29,11 @@ module Sprockets
     end
 
     def ends_multiline_comment?
-      line =~ /^(.*)*\*\/\s*/
+      line =~ /^(.*)\*\/\s*/
     end
 
     def ends_pdoc_comment?
-      line =~ /^(.*)*\*\*\/\s*/
+      line =~ /^(.*)\*\*\/\s*/
     end
 
     def require
