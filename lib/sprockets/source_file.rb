@@ -48,7 +48,7 @@ module Sprockets
     def mtime
       File.mtime(pathname.absolute_location)
     rescue Errno::ENOENT
-      0
+      Time.now
     end
   end
 end
