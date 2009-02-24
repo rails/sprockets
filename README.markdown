@@ -185,7 +185,7 @@ Here's a walkthrough of the installation process:
 
 2. `script/plugin install git://github.com/sstephenson/sprockets-rails.git`
 
-   You now have `app/javascripts/` and `vendor/sprockets/` directories in your application, as well as a `config/sprockets.yml` file.
+    You now have `app/javascripts/` and `vendor/sprockets/` directories in your application, as well as a `config/sprockets.yml` file.
 
 3. Edit your `config/routes.rb` file to add routes for `SprocketsController`:
 
