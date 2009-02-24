@@ -11,6 +11,9 @@ Rake::TestTask.new do |t|
 end
 
 Rake::GemPackageTask.new(eval(IO.read(File.join(File.dirname(__FILE__), "sprockets.gemspec")))) do |pkg|
+  require File.join(File.dirname(__FILE__), "lib", "sprockets", "version")
+  raise "Error: Sprockets::Version doesn't match gemspec" if Sprockets::Version::STRING != pkg.version.to_s
+  
   pkg.need_zip = true
   pkg.need_tar = true
 end
