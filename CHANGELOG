@@ -1,3 +1,6 @@
+* Avoid hanging when preprocessing minified source files. (Maciej Pasternacki) [#9 state:resolved]
+
+
 *1.0.1* (February 19, 2009)
 
 * Change the CGI output generation environment variable name to "sprockets_generate_output_file" and use the right path in Concatenation#save_to.
