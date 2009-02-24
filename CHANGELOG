@@ -1,3 +1,5 @@
+* Fix Secretary#source_last_modified not to raise an exception when one of the preprocessor's source files has been moved or deleted. (Jonathan Goldman) [#10 state:resolved]
+
 * Avoid hanging when preprocessing minified source files. (Maciej Pasternacki) [#9 state:resolved]
 
 
