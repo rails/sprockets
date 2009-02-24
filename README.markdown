@@ -183,15 +183,11 @@ Here's a walkthrough of the installation process:
 
 1. `gem install --remote sprockets`
 
-2. `cd my_rails_application/vendor/plugins`
+2. `script/plugin install git://github.com/sstephenson/sprockets-rails.git`
 
-3. `git clone git://github.com/sstephenson/sprockets-rails.git`
+   You now have `app/javascripts/` and `vendor/sprockets/` directories in your application, as well as a `config/sprockets.yml` file.
 
-4. `ruby sprockets-rails/install.rb`
-
-5. You now have `app/javascripts/` and `vendor/sprockets/` directories in your application, as well as a `config/sprockets.yml` file.
-
-6. Edit your `config/routes.rb` file to add routes for `SprocketsController`:
+3. Edit your `config/routes.rb` file to add routes for `SprocketsController`:
 
         ActionController::Routing::Routes.draw do |map|
           # Add the following line:
@@ -199,9 +195,9 @@ Here's a walkthrough of the installation process:
           ...
         end
 
-7. Move your JavaScript source files from `public/javascripts/` into `app/javascripts/`. All files in all subdirectories of `app/javascripts/` will be required by Sprockets in alphabetical order, with the exception of `app/javascripts/application.js`, which is required _before any other file_. (You can change this behavior by editing the `source_files` line of `config/sprockets.yml`.)
+4. Move your JavaScript source files from `public/javascripts/` into `app/javascripts/`. All files in all subdirectories of `app/javascripts/` will be required by Sprockets in alphabetical order, with the exception of `app/javascripts/application.js`, which is required _before any other file_. (You can change this behavior by editing the `source_files` line of `config/sprockets.yml`.)
 
-8. Adjust your HTML templates to call `<%= sprockets_include_tag %>` instead of `<%= javascript_include_tag ... %>`.
+5. Adjust your HTML templates to call `<%= sprockets_include_tag %>` instead of `<%= javascript_include_tag ... %>`.
 
 Once `sprockets-rails` is installed, you can check out Sprockets plugins into the `vendor/sprockets/` directory. By default, `sprockets-rails` configures Sprockets' load path to search `vendor/sprockets/*/src/`, as well as `vendor/plugins/*/javascripts/`. This means that the `javascripts/` directories of Rails plugins are automatically installed into your Sprockets load path.
 
