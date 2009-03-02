@@ -1,3 +1,8 @@
+* Add a :strip_comments option to Secretary that is passed through to its Preprocessor. [#12 state:resolved]
+
+
+*1.0.2* (February 24, 2009)
+
 * Update the sprockets-rails installation instructions to use `script/plugin`. [#7 state:resolved]
 
 * Fix Secretary#source_last_modified not to raise an exception when one of the preprocessor's source files has been moved or deleted. (Jonathan Goldman) [#10 state:resolved]

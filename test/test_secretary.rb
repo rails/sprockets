@@ -76,6 +76,12 @@ class SecretaryTest < Test::Unit::TestCase
     end
   end
   
+  def test_secretary_passes_strip_comments_option_through_to_preprocessor
+    secretary = Sprockets::Secretary.new(:root => FIXTURES_PATH, :strip_comments => false)
+    secretary.add_source_file("src/script_with_comments.js")
+    assert_equal content_of_fixture("src/script_with_comments.js"), secretary.concatenation.to_s
+  end
+  
   protected
     def paths_relative_to(root, *paths)
       paths.map { |path| File.join(root, path) }
