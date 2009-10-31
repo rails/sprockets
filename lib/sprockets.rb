@@ -8,7 +8,7 @@ module Sprockets
     def running_on_windows?
       RUBY_PLATFORM =~ /(win|w)32$/
     end
-  
+
     def absolute?(location)
       same_when_expanded?(location) || platform_absolute_path?(location)
     end
@@ -39,4 +39,4 @@ require "sprockets/source_file"
 require "sprockets/concatenation"
 require "sprockets/preprocessor"
 require "sprockets/secretary"
-
+require "sprockets/server"
