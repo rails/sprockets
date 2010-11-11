@@ -1,0 +1,8 @@
+/*
+ * Header
+ */
+
+// =require "x"
+
+(function() {
+})();
