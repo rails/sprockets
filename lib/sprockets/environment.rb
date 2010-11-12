@@ -20,11 +20,7 @@ module Sprockets
     end
 
     def find_asset(logical_path)
-      if source_file = find_source_file(logical_path)
-        Asset.new(self, source_file)
-      else
-        raise "couldn't find asset '#{asset_path}'"
-      end
+      Asset.new(self, find_source_file(logical_path))
     end
 
     def find_source_file(logical_path)
