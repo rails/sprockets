@@ -42,8 +42,12 @@ module Sprockets
       directive_parser.directives
     end
 
-    def source
-      directive_parser.processed_source
+    def header
+      directive_parser.processed_header
+    end
+
+    def body
+      directive_parser.body
     end
   end
 end

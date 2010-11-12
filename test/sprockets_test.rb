@@ -11,6 +11,10 @@ class Sprockets::TestCase < Test::Unit::TestCase
   end
 
   def fixture(path)
-    IO.read(File.join(FIXTURE_ROOT, path))
+    IO.read(fixture_path(path))
+  end
+
+  def fixture_path(path)
+    File.join(FIXTURE_ROOT, path)
   end
 end
