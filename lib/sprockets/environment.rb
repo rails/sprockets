@@ -23,6 +23,8 @@ module Sprockets
       Asset.new(self, find_source_file(logical_path))
     end
 
+    alias_method :[], :find_asset
+
     def find_source_file(logical_path)
       if path = @trail.find(logical_path)
         SourceFile.new(path)
