@@ -4,7 +4,7 @@ require "sprockets"
 class Sprockets::TestCase < Test::Unit::TestCase
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
 
-  undef_method :default_test
+  undef_method :default_test if method_defined? :default_test
 
   def self.test(name, &block)
     define_method("test #{name.inspect}", &block)
