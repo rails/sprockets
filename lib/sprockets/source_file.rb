@@ -1,10 +1,10 @@
 module Sprockets
   class SourceFile
-    attr_reader :path
+    attr_reader :path, :source
 
     def initialize(path)
       @path = File.expand_path(path)
-      @raw_source = IO.read(path).gsub(/\r?\n/, "\n")
+      @source = IO.read(path).gsub(/\r?\n/, "\n")
     end
 
     def basename
@@ -20,7 +20,7 @@ module Sprockets
     end
 
     def engine_extensions
-      extensions[1..-1].reverse
+      (extensions[1..-1] || []).reverse
     end
 
     def content_type
@@ -31,7 +31,7 @@ module Sprockets
     end
 
     def directive_parser
-      @directive_parser ||= DirectiveParser.new(@raw_source)
+      @directive_parser ||= DirectiveParser.new(source)
     end
 
     def directives

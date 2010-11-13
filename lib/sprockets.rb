@@ -1,4 +1,5 @@
 require "hike"
+require "rack"
 require "shellwords"
 require "strscan"
 require "tilt"
