@@ -1,3 +1,5 @@
+require 'digest/md5'
+
 module Sprockets
   class Asset
     attr_reader :environment, :source_paths, :source
@@ -50,7 +52,7 @@ module Sprockets
 
     # TODO
     def md5
-      "5d41402abc4b2a76b9719d911017c592"
+      Digest::MD5.hexdigest(source)
     end
 
     def etag
