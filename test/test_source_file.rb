@@ -58,6 +58,10 @@ class SourceFileTest < Sprockets::TestCase
     assert_equal "\nhello()\n", source_file("application.js.coffee").body
   end
 
+  test "mtime" do
+    assert_equal File.mtime(fixture_path("default/empty")), source_file("empty").mtime
+  end
+
   def source_file(path)
     Sprockets::SourceFile.new(fixture_path("default/#{path}"))
   end

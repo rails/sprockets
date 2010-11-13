@@ -2,11 +2,12 @@ require 'rack/mime'
 
 module Sprockets
   class SourceFile
-    attr_reader :path, :source
+    attr_reader :path, :source, :mtime
 
     def initialize(path)
-      @path = File.expand_path(path)
+      @path   = File.expand_path(path)
       @source = IO.read(path).gsub(/\r?\n/, "\n")
+      @mtime  = compute_mtime
     end
 
     def basename
@@ -47,5 +48,10 @@ module Sprockets
     def body
       directive_parser.body
     end
+
+    private
+      def compute_mtime
+        File.mtime(path)
+      end
   end
 end
