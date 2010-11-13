@@ -1,9 +1,3 @@
-require "hike"
-require "rack"
-require "shellwords"
-require "strscan"
-require "tilt"
-
 module Sprockets
   autoload :Asset,           "sprockets/asset"
   autoload :DirectiveParser, "sprockets/directive_parser"

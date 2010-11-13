@@ -1,4 +1,5 @@
-require 'digest/md5'
+require "digest/md5"
+require "tilt"
 
 module Sprockets
   class Asset
