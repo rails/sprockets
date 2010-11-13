@@ -35,5 +35,40 @@ module Sprockets
 
       result
     end
+
+    def each
+      yield source
+    end
+
+    def length
+      source.length
+    end
+
+    def content_type
+      'application/javascript'
+    end
+
+    # TODO
+    def md5
+      "5d41402abc4b2a76b9719d911017c592"
+    end
+
+    def etag
+      %("#{md5}")
+    end
+
+    # TODO
+    def created_at
+      Time.now
+    end
+
+    # TODO
+    def stale?
+      true
+    end
+
+    def empty?
+      source == ""
+    end
   end
 end
