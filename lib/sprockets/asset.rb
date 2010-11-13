@@ -1,17 +1,17 @@
 module Sprockets
   class Asset
-    attr_reader :environment, :source_files, :source
+    attr_reader :environment, :source_paths, :source
 
     def initialize(environment, source_file)
       @environment  = environment
-      @source_files = []
+      @source_paths = []
       @source       = ""
       require(source_file)
     end
 
     def require(source_file)
-      unless source_files.include?(source_file)
-        source_files << source_file
+      unless source_paths.include?(source_file.path)
+        source_paths << source_file.path
         source << process(source_file)
       end
     end

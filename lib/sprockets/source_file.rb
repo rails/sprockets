@@ -3,12 +3,8 @@ module Sprockets
     attr_reader :path
 
     def initialize(path)
-      @path = path
+      @path = File.expand_path(path)
       @raw_source = IO.read(path).gsub(/\r?\n/, "\n")
-    end
-
-    def eql?(source_file)
-      path.eql?(source_file.path)
     end
 
     def basename
