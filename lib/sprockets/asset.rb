@@ -3,13 +3,16 @@ require "tilt"
 
 module Sprockets
   class Asset
-    attr_reader :environment, :source_paths, :source, :mtime
+    attr_reader :environment, :content_type, :format_extension, :mtime
+    attr_reader :source_paths, :source
 
     def initialize(environment, source_file)
-      @environment  = environment
-      @source_paths = []
-      @source       = ""
-      @mtime        = source_file.mtime
+      @environment      = environment
+      @content_type     = source_file.content_type
+      @format_extension = source_file.format_extension
+      @mtime            = source_file.mtime
+      @source_paths     = []
+      @source           = ""
       require(source_file)
     end
 
@@ -50,10 +53,6 @@ module Sprockets
 
     def length
       source.length
-    end
-
-    def content_type
-      'application/javascript'
     end
 
     # TODO
