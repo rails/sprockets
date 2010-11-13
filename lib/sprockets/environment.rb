@@ -1,3 +1,5 @@
+require "hike"
+
 module Sprockets
   class Environment
     class << self

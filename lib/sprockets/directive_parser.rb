@@ -1,3 +1,6 @@
+require "shellwords"
+require "strscan"
+
 module Sprockets
   class DirectiveParser
     attr_reader :source, :scanner, :header, :body

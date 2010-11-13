@@ -1,4 +1,4 @@
-require 'rack/mime'
+require "rack/mime"
 
 module Sprockets
   class SourceFile
