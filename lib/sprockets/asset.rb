@@ -2,12 +2,13 @@ require 'digest/md5'
 
 module Sprockets
   class Asset
-    attr_reader :environment, :source_paths, :source
+    attr_reader :environment, :source_paths, :source, :mtime
 
     def initialize(environment, source_file)
       @environment  = environment
       @source_paths = []
       @source       = ""
+      @mtime        = source_file.mtime
       require(source_file)
     end
 
@@ -29,6 +30,10 @@ module Sprockets
     def process_source(source_file)
       processor = Processor.new(environment, source_file)
       result    = ""
+
+      if source_file.mtime > mtime
+        @mtime = source_file.mtime
+      end
 
       processor.required_files.each { |file| require(file) }
       result << source_file.header
@@ -57,11 +62,6 @@ module Sprockets
 
     def etag
       %("#{md5}")
-    end
-
-    # TODO
-    def created_at
-      Time.now
     end
 
     # TODO

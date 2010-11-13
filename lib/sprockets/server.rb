@@ -85,7 +85,7 @@ module Sprockets
       end
 
       def not_modified?(asset, env)
-        env["HTTP_IF_MODIFIED_SINCE"] == asset.created_at.httpdate
+        env["HTTP_IF_MODIFIED_SINCE"] == asset.mtime.httpdate
       end
 
       def etag_match?(asset, env)
@@ -106,7 +106,7 @@ module Sprockets
           headers["Content-Length"] = asset.length.to_s
 
           headers["Cache-Control"]  = "public, must-revalidate"
-          headers["Last-Modified"]  = asset.created_at.httpdate
+          headers["Last-Modified"]  = asset.mtime.httpdate
           headers["ETag"]           = asset.etag
 
           if env["QUERY_STRING"] == asset.md5
