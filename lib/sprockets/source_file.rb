@@ -1,3 +1,5 @@
+require 'rack/mime'
+
 module Sprockets
   class SourceFile
     attr_reader :path, :source
