@@ -55,7 +55,6 @@ module Sprockets
       source.length
     end
 
-    # TODO
     def md5
       Digest::MD5.hexdigest(source)
     end
@@ -64,9 +63,8 @@ module Sprockets
       %("#{md5}")
     end
 
-    # TODO
     def stale?
-      true
+      mtime < @source_paths.map { |p| File.mtime(p) }.max
     end
 
     def empty?
