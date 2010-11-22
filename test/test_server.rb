@@ -39,4 +39,9 @@ class TestServer < Sprockets::TestCase
     assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\n",
       last_response.body
   end
+
+  test "serve source with content type headers" do
+    get "/javascripts/application.js"
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+  end
 end
