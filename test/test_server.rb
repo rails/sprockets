@@ -95,6 +95,23 @@ class TestServer < Sprockets::TestCase
     assert asset_before.equal?(asset_after)
   end
 
+  # TODO
+  # test "add new source to glob" do
+  #   get "/javascripts/glob.js"
+  #   assert_equal "var foo;\nvar bar;\n", last_response.body
+
+  #   File.open(fixture_path("server/app/javascripts/baz.js"), "w") do |f|
+  #     f.puts "var baz;"
+  #   end
+
+  #   begin
+  #     get "/javascripts/glob.js"
+  #     assert_equal "var foo;\nvar bar;\nvar baz;\n", last_response.body
+  #   ensure
+  #     FileUtils.rm(fixture_path("server/app/javascripts/baz.js"))
+  #   end
+  # end
+
   private
     def touch_fixture(path)
       system "touch", fixture_path(path)
