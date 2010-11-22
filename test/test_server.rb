@@ -33,4 +33,10 @@ class TestServer < Sprockets::TestCase
     get "/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
   end
+
+  test "serve source with dependencies" do
+    get "/javascripts/application.js"
+    assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\n",
+      last_response.body
+  end
 end
