@@ -95,6 +95,14 @@ class TestServer < Sprockets::TestCase
     assert asset_before.equal?(asset_after)
   end
 
+  test "query string md5 sets expiration to the future" do
+    get "/javascripts/application.js"
+    etag = last_response.headers['ETag']
+
+    get "/javascripts/application.js?#{etag[1..-2]}"
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+  end
+
   # TODO
   # test "add new source to glob" do
   #   get "/javascripts/glob.js"
