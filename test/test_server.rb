@@ -108,6 +108,11 @@ class TestServer < Sprockets::TestCase
     assert_equal 404, last_response.status
   end
 
+  test "illegal require outside load path" do
+    get "/javascripts/../config/passwd"
+    assert_equal 403, last_response.status
+  end
+
   # TODO
   # test "add new source to glob" do
   #   get "/javascripts/glob.js"
