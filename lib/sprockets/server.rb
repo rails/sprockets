@@ -18,10 +18,10 @@ module Sprockets
 
       asset = rebundle(env)
 
-      if not_modified?(asset, env) || etag_match?(asset, env)
-        not_modified_response(asset, env)
-      elsif asset.empty?
+      if asset.nil?
         not_found_response
+      elsif not_modified?(asset, env) || etag_match?(asset, env)
+        not_modified_response(asset, env)
       else
         ok_response(asset, env)
       end
@@ -65,6 +65,8 @@ module Sprockets
           self.assets = assets
         end
         asset
+      rescue SourceFile::MissingError
+        nil
       end
 
       def asset_stale?(asset)

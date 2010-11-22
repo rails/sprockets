@@ -66,9 +66,5 @@ module Sprockets
     def stale?
       mtime < @source_paths.map { |p| File.mtime(p) }.max
     end
-
-    def empty?
-      source == ""
-    end
   end
 end

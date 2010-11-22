@@ -103,6 +103,11 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
+  test "missing source" do
+    get "/javascripts/none.js"
+    assert_equal 404, last_response.status
+  end
+
   # TODO
   # test "add new source to glob" do
   #   get "/javascripts/glob.js"

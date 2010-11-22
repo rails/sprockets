@@ -31,7 +31,8 @@ module Sprockets
       if path = @trail.find(logical_path)
         SourceFile.new(path)
       else
-        raise "couldn't find source file '#{logical_path}'"
+        raise SourceFile::MissingError,
+          "couldn't find source file '#{logical_path}'"
       end
     end
   end
