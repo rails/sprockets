@@ -15,7 +15,7 @@ module Sprockets
     /mx
 
     DIRECTIVE_PATTERN = /
-      ^ [\s\W]* = (\w+.*) $
+      ^ [\W]* = (\w+.*) $
     /x
 
     def initialize(source)
