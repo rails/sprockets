@@ -85,11 +85,11 @@ class TestServer < Sprockets::TestCase
 
   test "if sources didnt change the server shouldnt rebundle" do
     get "/javascripts/application.js"
-    asset_before = @javascripts_app.send(:lookup_asset, "PATH_INFO" => "/application.js")
+    asset_before = javascripts_app.send(:lookup_asset, "PATH_INFO" => "/application.js")
     assert asset_before
 
     get "/javascripts/application.js"
-    asset_after = @javascripts_app.send(:lookup_asset, "PATH_INFO" => "/application.js")
+    asset_after = javascripts_app.send(:lookup_asset, "PATH_INFO" => "/application.js")
     assert asset_after
 
     assert asset_before.equal?(asset_after)
@@ -129,6 +129,15 @@ class TestServer < Sprockets::TestCase
   #     FileUtils.rm(fixture_path("server/app/javascripts/baz.js"))
   #   end
   # end
+
+  test "lookup asset md5" do
+    assert_equal "3aede9c70a76e611d43a1c5f1fb1708a",
+      javascripts_app.lookup_md5("/application.js")
+    assert_equal "fcad2374010e1942ce8980d47f96d898",
+      javascripts_app.lookup_md5("/foo.js")
+    assert_equal "1fd506e80d8895b905a83d3256ba17ff",
+      javascripts_app.lookup_md5("/bar.js")
+  end
 
   private
     def touch_fixture(path)
