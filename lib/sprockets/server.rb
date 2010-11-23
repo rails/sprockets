@@ -91,7 +91,7 @@ module Sprockets
       end
 
       def etag_match?(asset, env)
-        env["HTTP_IF_NONE_MATCH"] == asset.etag
+        env["HTTP_IF_NONE_MATCH"] == etag(asset)
       end
 
       def not_modified_response(asset, env)
@@ -109,12 +109,16 @@ module Sprockets
 
           headers["Cache-Control"]  = "public, must-revalidate"
           headers["Last-Modified"]  = asset.mtime.httpdate
-          headers["ETag"]           = asset.etag
+          headers["ETag"]           = etag(asset)
 
           if env["QUERY_STRING"] == asset.md5
             headers["Cache-Control"] << ", max-age=31557600"
           end
         end
+      end
+
+      def etag(asset)
+        %("#{asset.md5}")
       end
   end
 end

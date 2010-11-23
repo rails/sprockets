@@ -64,10 +64,6 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_equal "35d470ef8621efa573dee227a4feaba3", asset("project.js").md5
   end
 
-  test "asset etag" do
-    assert_equal '"35d470ef8621efa573dee227a4feaba3"', asset("project.js").etag
-  end
-
   test "asset is stale when one of its source files is modified" do
     asset = asset("application.js")
     assert !asset.stale?

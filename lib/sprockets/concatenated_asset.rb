@@ -44,10 +44,6 @@ module Sprockets
       Digest::MD5.hexdigest(source)
     end
 
-    def etag
-      %("#{md5}")
-    end
-
     def stale?
       mtime < @source_paths.map { |p| File.mtime(p) }.max
     end
