@@ -38,6 +38,10 @@ class AssetTest < Sprockets::TestCase
   end
 
   test "asset mtime is the latest mtime of all processed sources" do
+    mtime = Time.now
+    path  = source_file("project.js").path
+    File.utime(mtime, mtime, path)
+    assert_equal File.mtime(path), asset("application.js").mtime
   end
 
   test "asset inherits the format extension and content type of the original file" do
