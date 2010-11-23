@@ -16,7 +16,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "missing source file raises an exception" do
-    assert_raises(Sprockets::SourceFile::MissingError) do
+    assert_raises(Sprockets::FileNotFound) do
       @env.find_source_file("null")
     end
   end

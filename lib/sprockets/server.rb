@@ -65,7 +65,7 @@ module Sprockets
           self.assets = assets
         end
         asset
-      rescue SourceFile::MissingError
+      rescue FileNotFound
         nil
       end
 

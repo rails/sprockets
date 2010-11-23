@@ -2,8 +2,6 @@ require "rack/mime"
 
 module Sprockets
   class SourceFile
-    class MissingError < Error; end;
-
     attr_reader :path, :source, :mtime
 
     def initialize(path)
