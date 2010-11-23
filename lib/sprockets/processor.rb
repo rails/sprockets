@@ -1,7 +1,5 @@
 module Sprockets
   class Processor
-    class ContentTypeMismatch < Error; end
-
     attr_reader :environment, :source_file
     attr_reader :included_files, :required_files
 
