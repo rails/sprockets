@@ -45,6 +45,9 @@ class AssetTest < Sprockets::TestCase
   end
 
   test "asset inherits the format extension and content type of the original file" do
+    asset = asset("project.js")
+    assert_equal ".js", asset.format_extension
+    assert_equal "application/javascript", asset.content_type
   end
 
   def asset(logical_path)
