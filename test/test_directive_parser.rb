@@ -62,6 +62,13 @@ class DirectiveParserTest < Sprockets::TestCase
     end
   end
 
+  test "space between = and directive word" do
+    directive_parser("space_between_directive_word").tap do |parser|
+      assert_equal "var foo;\n", parser.processed_source
+      assert_equal [["require", "foo"]], parser.directives
+    end
+  end
+
   def directive_parser(fixture_name)
     Sprockets::DirectiveParser.new(directive_fixture(fixture_name))
   end
