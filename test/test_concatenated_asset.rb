@@ -83,6 +83,6 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   def source_file(logical_path)
-    @env.find_source_file(logical_path)
+    Sprockets::SourceFile.new(@env.resolve(logical_path))
   end
 end

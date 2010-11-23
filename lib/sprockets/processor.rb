@@ -18,7 +18,7 @@ module Sprockets
     end
 
     def process_include_directive(path)
-      included_files << environment.find_source_file(path)
+      included_files << find_source_file(path)
     end
 
     def process_require_all_directive(path)
@@ -28,7 +28,11 @@ module Sprockets
     def process_require_directive(path)
       extensions = path.scan(/\.[^.]+/)
       path = "#{path}#{source_file.format_extension}" if extensions.empty?
-      required_files << environment.find_source_file(path)
+      required_files << find_source_file(path)
+    end
+
+    def find_source_file(path)
+      SourceFile.new(environment.resolve(path))
     end
   end
 end

@@ -10,14 +10,14 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal Dir.pwd, @env.root
   end
 
-  test "find source file in environment" do
+  test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.find_source_file("gallery.js").path
+      @env.resolve("gallery.js").path
   end
 
-  test "missing source file raises an exception" do
+  test "missing file raises an exception" do
     assert_raises(Sprockets::FileNotFound) do
-      @env.find_source_file("null")
+      @env.resolve("null")
     end
   end
 

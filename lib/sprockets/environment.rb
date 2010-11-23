@@ -21,19 +21,26 @@ module Sprockets
       @trail.paths
     end
 
+    def resolve(logical_path)
+      if path = @trail.find(logical_path)
+        Pathname.new(path)
+      else
+        raise FileNotFound, "couldn't find file '#{logical_path}'"
+      end
+    end
+
     def find_asset(logical_path)
-      ConcatenatedAsset.require(self, find_source_file(logical_path))
+      pathname = resolve(logical_path)
+
+      if concatenatable?(pathname.format_extension)
+        ConcatenatedAsset.require(self, SourceFile.new(pathname))
+      end
     end
 
     alias_method :[], :find_asset
 
-    def find_source_file(logical_path)
-      if path = @trail.find(logical_path)
-        SourceFile.new(path)
-      else
-        raise FileNotFound,
-          "couldn't find source file '#{logical_path}'"
-      end
+    def concatenatable?(format_extension)
+      %w( .js .css ).include?(format_extension)
     end
   end
 end

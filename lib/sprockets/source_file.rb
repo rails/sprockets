@@ -6,7 +6,7 @@ module Sprockets
 
     def initialize(path)
       @pathname = Pathname.new(path)
-      @source   = IO.read(path).gsub(/\r?\n/, "\n")
+      @source   = IO.read(self.path).gsub(/\r?\n/, "\n")
       @mtime    = File.mtime(self.path)
     end
 
