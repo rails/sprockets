@@ -40,7 +40,7 @@ module Sprockets
       source.length
     end
 
-    def md5
+    def digest
       Digest::MD5.hexdigest(source)
     end
 

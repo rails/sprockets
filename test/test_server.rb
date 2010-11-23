@@ -99,7 +99,7 @@ class TestServer < Sprockets::TestCase
     assert asset_before.equal?(asset_after)
   end
 
-  test "query string md5 sets expiration to the future" do
+  test "query string digest sets expiration to the future" do
     get "/javascripts/application.js"
     etag = last_response.headers['ETag']
 
@@ -134,12 +134,12 @@ class TestServer < Sprockets::TestCase
   #   end
   # end
 
-  test "lookup asset md5" do
+  test "lookup asset digest" do
     assert_equal "3aede9c70a76e611d43a1c5f1fb1708a",
-      javascripts_app.lookup_md5("/application.js")
+      javascripts_app.lookup_digest("/application.js")
     assert_equal "fcad2374010e1942ce8980d47f96d898",
-      javascripts_app.lookup_md5("/foo.js")
+      javascripts_app.lookup_digest("/foo.js")
     assert_equal "1fd506e80d8895b905a83d3256ba17ff",
-      javascripts_app.lookup_md5("/bar.js")
+      javascripts_app.lookup_digest("/bar.js")
   end
 end

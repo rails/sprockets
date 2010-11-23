@@ -27,9 +27,9 @@ module Sprockets
       end
     end
 
-    def lookup_md5(path)
+    def lookup_digest(path)
       if asset = rebundle("PATH_INFO" => path)
-        asset.md5
+        asset.digest
       end
     end
 
@@ -111,14 +111,14 @@ module Sprockets
           headers["Last-Modified"]  = asset.mtime.httpdate
           headers["ETag"]           = etag(asset)
 
-          if env["QUERY_STRING"] == asset.md5
+          if env["QUERY_STRING"] == asset.digest
             headers["Cache-Control"] << ", max-age=31557600"
           end
         end
       end
 
       def etag(asset)
-        %("#{asset.md5}")
+        %("#{asset.digest}")
       end
   end
 end

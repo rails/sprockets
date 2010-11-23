@@ -60,8 +60,8 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_equal 46, asset("project.js").length
   end
 
-  test "asset md5" do
-    assert_equal "35d470ef8621efa573dee227a4feaba3", asset("project.js").md5
+  test "asset digest" do
+    assert_equal "35d470ef8621efa573dee227a4feaba3", asset("project.js").digest
   end
 
   test "asset is stale when one of its source files is modified" do
