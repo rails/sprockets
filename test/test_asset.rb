@@ -68,6 +68,16 @@ class AssetTest < Sprockets::TestCase
     assert_equal '"35d470ef8621efa573dee227a4feaba3"', asset("project.js").etag
   end
 
+  test "asset is stale when one of its source files is modified" do
+    asset = asset("application.js")
+    assert !asset.stale?
+
+    mtime = Time.now + 1
+    File.utime(mtime, mtime, source_file("project.js").path)
+
+    assert asset.stale?
+  end
+
   def asset(logical_path)
     Sprockets::Asset.require(@env, source_file(logical_path))
   end
