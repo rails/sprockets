@@ -33,6 +33,8 @@ class AssetTest < Sprockets::TestCase
   end
 
   test "included dependencies are inserted after the header of the dependent file" do
+    assert_equal "# My Application" + source_file("project.js").source + "\nhello()\n",
+      asset("included_header.js").source
   end
 
   test "asset mtime is the latest mtime of all processed sources" do
