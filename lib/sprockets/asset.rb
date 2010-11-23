@@ -6,14 +6,19 @@ module Sprockets
     attr_reader :environment, :content_type, :format_extension, :mtime
     attr_reader :source_paths, :source
 
-    def initialize(environment, source_file)
+    def self.require(environment, source_file)
+      asset = new(environment, source_file.content_type, source_file.format_extension)
+      asset.require(source_file)
+      asset
+    end
+
+    def initialize(environment, content_type, format_extension)
       @environment      = environment
-      @content_type     = source_file.content_type
-      @format_extension = source_file.format_extension
-      @mtime            = source_file.mtime
+      @content_type     = content_type
+      @format_extension = format_extension
+      @mtime            = Time.at(0)
       @source_paths     = []
       @source           = ""
-      require(source_file)
     end
 
     def require(source_file)

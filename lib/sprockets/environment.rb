@@ -22,7 +22,7 @@ module Sprockets
     end
 
     def find_asset(logical_path)
-      Asset.new(self, find_source_file(logical_path))
+      Asset.require(self, find_source_file(logical_path))
     end
 
     alias_method :[], :find_asset
