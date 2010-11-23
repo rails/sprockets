@@ -67,9 +67,9 @@ module Sprockets
           @mtime = source_file.mtime
         end
 
-        processor.required_pathnames.each { |pathname| require(pathname) }
+        processor.required_pathnames.each { |p| require(p) }
         result << source_file.header
-        processor.included_pathnames.each { |pathname| result << process(pathname) }
+        processor.included_pathnames.each { |p| result << process(p) }
         result << source_file.body
 
         result
