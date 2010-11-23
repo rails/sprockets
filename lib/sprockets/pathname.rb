@@ -23,7 +23,7 @@ module Sprockets
     end
 
     def engine_extensions
-      (extensions[1..-1] || []).reverse
+      extensions[1..-1] || []
     end
 
     def content_type

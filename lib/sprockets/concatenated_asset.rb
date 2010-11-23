@@ -55,7 +55,7 @@ module Sprockets
     protected
       def process(pathname)
         result = process_source(pathname)
-        pathname.engine_extensions.each do |extension|
+        pathname.engine_extensions.reverse_each do |extension|
           result = Tilt[extension].new { result }.render
         end
         result

@@ -25,7 +25,7 @@ class SourceFileTest < Sprockets::TestCase
     assert_equal [], source_file("empty").engine_extensions
     assert_equal [], source_file("gallery.js").engine_extensions
     assert_equal [".coffee"], source_file("application.js.coffee").engine_extensions
-    assert_equal [".erb", ".coffee"], source_file("project.js.coffee.erb").engine_extensions
+    assert_equal [".coffee", ".erb"], source_file("project.js.coffee.erb").engine_extensions
     assert_equal [".erb"], source_file("gallery.css.erb").engine_extensions
   end
 
