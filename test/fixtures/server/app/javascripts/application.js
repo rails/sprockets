@@ -1,4 +1,4 @@
-// =require "foo.js"
+// =require "foo"
 
 (function() {
   application.boot();

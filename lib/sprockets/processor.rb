@@ -1,5 +1,7 @@
 module Sprockets
   class Processor
+    class ContentTypeMismatch < Error; end
+
     attr_reader :environment, :source_file
     attr_reader :included_files, :required_files
 
@@ -26,6 +28,14 @@ module Sprockets
     end
 
     def process_require_directive(path)
+      ext = File.extname(path)
+      if ext == ""
+        path = "#{path}#{source_file.format_extension}"
+      elsif ext != source_file.format_extension
+        raise ContentTypeMismatch, "#{source_file.path} is " +
+          "'#{source_file.format_extension}', but tried to require '#{ext}'"
+      end
+
       required_files << environment.find_source_file(path)
     end
   end
