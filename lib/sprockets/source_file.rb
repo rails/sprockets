@@ -2,35 +2,36 @@ require "rack/mime"
 
 module Sprockets
   class SourceFile
-    attr_reader :path, :source, :mtime
+    attr_reader :pathname, :source, :mtime
 
     def initialize(path)
-      @path   = File.expand_path(path)
-      @source = IO.read(path).gsub(/\r?\n/, "\n")
-      @mtime  = compute_mtime
+      @pathname = Pathname.new(path)
+      @source   = IO.read(path).gsub(/\r?\n/, "\n")
+      @mtime    = File.mtime(self.path)
+    end
+
+    def path
+      pathname.path
     end
 
     def basename
-      @basename ||= File.basename(path)
+      pathname.basename
     end
 
     def extensions
-      @extensions ||= basename.scan(/\.[^.]+/)
+      pathname.extensions
     end
 
     def format_extension
-      extensions.first
+      pathname.format_extension
     end
 
     def engine_extensions
-      (extensions[1..-1] || []).reverse
+      pathname.engine_extensions
     end
 
     def content_type
-      @content_type ||= begin
-        type = Rack::Mime.mime_type(format_extension)
-        type[/^text/] ? "#{type}; charset=utf-8" : type
-      end
+      pathname.content_type
     end
 
     def directive_parser
@@ -48,10 +49,5 @@ module Sprockets
     def body
       directive_parser.body
     end
-
-    private
-      def compute_mtime
-        File.mtime(path)
-      end
   end
 end
