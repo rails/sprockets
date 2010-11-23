@@ -1,9 +1,8 @@
 require "shellwords"
-require "strscan"
 
 module Sprockets
   class DirectiveParser
-    attr_reader :source, :scanner, :header, :body
+    attr_reader :source, :header, :body
 
     HEADER_PATTERN = /
       ^ \s* (
@@ -19,10 +18,9 @@ module Sprockets
     /x
 
     def initialize(source)
-      @source  = source
-      @scanner = StringScanner.new(source)
-      @header  = @scanner.scan(HEADER_PATTERN) || ""
-      @body    = @scanner.rest
+      @source = source
+      @header = @source[HEADER_PATTERN, 0] || ""
+      @body   = $' || @source
     end
 
     def header_lines
