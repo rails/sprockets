@@ -34,6 +34,8 @@ module Sprockets
 
       if concatenatable?(pathname.format_extension)
         ConcatenatedAsset.new(self, pathname)
+      else
+        StaticAsset.new(self, pathname)
       end
     end
 

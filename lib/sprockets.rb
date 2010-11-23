@@ -9,4 +9,5 @@ module Sprockets
   autoload :Processor,           "sprockets/processor"
   autoload :Server,              "sprockets/server"
   autoload :SourceFile,          "sprockets/source_file"
+  autoload :StaticAsset,         "sprockets/static_asset"
 end

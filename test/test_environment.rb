@@ -21,8 +21,13 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
-  test "find asset in environment" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.find_asset("gallery.js").source_paths.first
+  test "find concatenated asset in environment" do
+    assert_equal "var Gallery = {};\n",
+      @env.find_asset("gallery.js").source
+  end
+
+  test "find static asset in environment" do
+    assert_equal "Hello world\n",
+      @env.find_asset("hello.txt").read
   end
 end

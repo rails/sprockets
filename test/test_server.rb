@@ -145,4 +145,11 @@ class TestServer < Sprockets::TestCase
     assert_equal "1fd506e80d8895b905a83d3256ba17ff",
       javascripts_app.lookup_digest("/bar.js")
   end
+
+  test "serving static assets" do
+    get "/javascripts/hello.txt"
+    assert_equal 200, last_response.status
+    assert_equal "text/plain", last_response.content_type
+    assert_equal File.read(fixture_path("server/app/javascripts/hello.txt")), last_response.body
+  end
 end

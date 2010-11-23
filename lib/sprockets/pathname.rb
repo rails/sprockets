@@ -27,10 +27,7 @@ module Sprockets
     end
 
     def content_type
-      @content_type ||= begin
-        type = Rack::Mime.mime_type(format_extension)
-        type[/^text/] ? "#{type}; charset=utf-8" : type
-      end
+      @content_type ||= Rack::Mime.mime_type(format_extension)
     end
 
     def to_s

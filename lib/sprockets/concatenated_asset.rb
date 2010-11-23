@@ -1,4 +1,5 @@
 require "digest/md5"
+require "rack/utils"
 require "tilt"
 
 module Sprockets
@@ -37,7 +38,7 @@ module Sprockets
     end
 
     def length
-      source.length
+      Rack::Utils.bytesize(source)
     end
 
     def digest

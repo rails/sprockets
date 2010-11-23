@@ -34,7 +34,7 @@ class SourceFileTest < Sprockets::TestCase
     assert_equal "application/javascript", source_file("gallery.js").content_type
     assert_equal "application/javascript", source_file("application.js.coffee").content_type
     assert_equal "application/javascript", source_file("project.js.coffee.erb").content_type
-    assert_equal "text/css; charset=utf-8", source_file("gallery.css.erb").content_type
+    assert_equal "text/css", source_file("gallery.css.erb").content_type
   end
 
   test "directive_parser" do
