@@ -79,10 +79,14 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    Sprockets::ConcatenatedAsset.require(@env, source_file(logical_path))
+    Sprockets::ConcatenatedAsset.new(@env, resolve(logical_path))
+  end
+
+  def resolve(logical_path)
+    @env.resolve(logical_path)
   end
 
   def source_file(logical_path)
-    Sprockets::SourceFile.new(@env.resolve(logical_path))
+    Sprockets::SourceFile.new(resolve(logical_path))
   end
 end

@@ -1,13 +1,13 @@
 module Sprockets
   class Processor
     attr_reader :environment, :source_file
-    attr_reader :included_files, :required_files
+    attr_reader :included_pathnames, :required_pathnames
 
     def initialize(environment, source_file)
-      @environment    = environment
-      @source_file    = source_file
-      @included_files = []
-      @required_files = []
+      @environment        = environment
+      @source_file        = source_file
+      @included_pathnames = []
+      @required_pathnames = []
       process_directives
     end
 
@@ -18,7 +18,7 @@ module Sprockets
     end
 
     def process_include_directive(path)
-      included_files << find_source_file(path)
+      included_pathnames << environment.resolve(path)
     end
 
     def process_require_all_directive(path)
@@ -28,11 +28,7 @@ module Sprockets
     def process_require_directive(path)
       extensions = path.scan(/\.[^.]+/)
       path = "#{path}#{source_file.format_extension}" if extensions.empty?
-      required_files << find_source_file(path)
-    end
-
-    def find_source_file(path)
-      SourceFile.new(environment.resolve(path))
+      required_pathnames << environment.resolve(path)
     end
   end
 end

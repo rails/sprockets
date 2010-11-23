@@ -6,34 +6,29 @@ module Sprockets
     attr_reader :environment, :content_type, :format_extension, :mtime
     attr_reader :source_paths, :source
 
-    def self.require(environment, source_file)
-      asset = new(environment, source_file.content_type, source_file.format_extension)
-      asset.require(source_file)
-      asset
-    end
-
-    def initialize(environment, content_type, format_extension)
+    def initialize(environment, pathname)
       @environment      = environment
-      @content_type     = content_type
-      @format_extension = format_extension
+      @content_type     = pathname.content_type
+      @format_extension = pathname.format_extension
       @mtime            = Time.at(0)
       @source_paths     = []
       @source           = ""
+      require(pathname)
     end
 
-    def requirable?(source_file)
-      content_type == source_file.content_type
+    def requirable?(pathname)
+      content_type == pathname.content_type
     end
 
-    def require(source_file)
-      if requirable?(source_file)
-        unless source_paths.include?(source_file.path)
-          source_paths << source_file.path
-          source << process(source_file)
+    def require(pathname)
+      if requirable?(pathname)
+        unless source_paths.include?(pathname.path)
+          source_paths << pathname.path
+          source << process(pathname)
         end
       else
-        raise ContentTypeMismatch, "#{source_file.path} is " +
-          "'#{source_file.format_extension}', not '#{format_extension}'"
+        raise ContentTypeMismatch, "#{pathname.path} is " +
+          "'#{pathname.format_extension}', not '#{format_extension}'"
       end
     end
 
@@ -58,25 +53,26 @@ module Sprockets
     end
 
     protected
-      def process(source_file)
-        result = process_source(source_file)
-        source_file.engine_extensions.each do |extension|
+      def process(pathname)
+        result = process_source(pathname)
+        pathname.engine_extensions.each do |extension|
           result = Tilt[extension].new { result }.render
         end
         result
       end
 
-      def process_source(source_file)
-        processor = Processor.new(environment, source_file)
-        result    = ""
+      def process_source(pathname)
+        source_file = SourceFile.new(pathname)
+        processor   = Processor.new(environment, source_file)
+        result      = ""
 
         if source_file.mtime > mtime
           @mtime = source_file.mtime
         end
 
-        processor.required_files.each { |file| require(file) }
+        processor.required_pathnames.each { |pathname| require(pathname) }
         result << source_file.header
-        processor.included_files.each { |file| result << process(file) }
+        processor.included_pathnames.each { |pathname| result << process(pathname) }
         result << source_file.body
 
         result

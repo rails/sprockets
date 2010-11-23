@@ -33,7 +33,7 @@ module Sprockets
       pathname = resolve(logical_path)
 
       if concatenatable?(pathname.format_extension)
-        ConcatenatedAsset.require(self, SourceFile.new(pathname))
+        ConcatenatedAsset.new(self, pathname)
       end
     end
 
