@@ -50,6 +50,24 @@ class AssetTest < Sprockets::TestCase
     assert_equal "application/javascript", asset.content_type
   end
 
+  test "asset is a rack response body" do
+    body = ""
+    asset("project.js").each { |part| body += part }
+    assert_equal asset("project.js").source, body
+  end
+
+  test "asset length is source length" do
+    assert_equal 46, asset("project.js").length
+  end
+
+  test "asset md5" do
+    assert_equal "35d470ef8621efa573dee227a4feaba3", asset("project.js").md5
+  end
+
+  test "asset etag" do
+    assert_equal '"35d470ef8621efa573dee227a4feaba3"', asset("project.js").etag
+  end
+
   def asset(logical_path)
     Sprockets::Asset.require(@env, source_file(logical_path))
   end
