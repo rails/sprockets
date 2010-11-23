@@ -7,6 +7,8 @@ Gem::Specification.new do |s|
 
   s.files = Dir["Rakefile", "lib/**/*"]
 
+  s.add_dependency "hike"
+
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = "sstephenson@gmail.com"
   s.homepage = "http://getsprockets.org/"
