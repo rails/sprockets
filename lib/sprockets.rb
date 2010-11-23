@@ -1,9 +1,9 @@
 module Sprockets
   autoload :Asset,               "sprockets/asset"
-  autoload :ContentTypeMismatch, "sprockets/error"
+  autoload :ContentTypeMismatch, "sprockets/errors"
   autoload :DirectiveParser,     "sprockets/directive_parser"
   autoload :Environment,         "sprockets/environment"
-  autoload :Error,               "sprockets/error"
+  autoload :Error,               "sprockets/errors"
   autoload :Processor,           "sprockets/processor"
   autoload :Server,              "sprockets/server"
   autoload :SourceFile,          "sprockets/source_file"
