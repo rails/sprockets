@@ -2,15 +2,12 @@ require "hike"
 
 module Sprockets
   class Environment
-    class << self
-      attr_accessor :engine_extensions
-    end
-
-    self.engine_extensions = %w( coffee erb less sass scss str )
+    DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
+    CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
-      @trail.extensions.replace(self.class.engine_extensions)
+      engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS)
     end
 
     def root
@@ -19,6 +16,10 @@ module Sprockets
 
     def paths
       @trail.paths
+    end
+
+    def engine_extensions
+      @trail.extensions
     end
 
     def resolve(logical_path)
@@ -41,8 +42,9 @@ module Sprockets
 
     alias_method :[], :find_asset
 
-    def concatenatable?(format_extension)
-      %w( .js .css ).include?(format_extension)
-    end
+    protected
+      def concatenatable?(format_extension)
+        CONCATENATABLE_EXTENSIONS.include?(format_extension)
+      end
   end
 end
