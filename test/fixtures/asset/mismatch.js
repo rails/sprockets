@@ -1,1 +1,1 @@
-// =require "projects.css"
+// =require "project.css"

@@ -27,13 +27,7 @@ module Sprockets
 
     def process_require_directive(path)
       extensions = path.scan(/\.[^.]+/)
-      if extensions.empty?
-        path = "#{path}#{source_file.format_extension}"
-      elsif extensions.first != source_file.format_extension
-        raise ContentTypeMismatch, "#{source_file.path} is " +
-          "'#{source_file.format_extension}', but tried to require '#{extensions.first}'"
-      end
-
+      path = "#{path}#{source_file.format_extension}" if extensions.empty?
       required_files << environment.find_source_file(path)
     end
   end

@@ -21,35 +21,20 @@ module Sprockets
       @source           = ""
     end
 
+    def requirable?(source_file)
+      content_type == source_file.content_type
+    end
+
     def require(source_file)
-      unless source_paths.include?(source_file.path)
-        source_paths << source_file.path
-        source << process(source_file)
+      if requirable?(source_file)
+        unless source_paths.include?(source_file.path)
+          source_paths << source_file.path
+          source << process(source_file)
+        end
+      else
+        raise ContentTypeMismatch, "#{source_file.path} is " +
+          "'#{source_file.format_extension}', not '#{format_extension}'"
       end
-    end
-
-    def process(source_file)
-      result = process_source(source_file)
-      source_file.engine_extensions.each do |extension|
-        result = Tilt[extension].new { result }.render
-      end
-      result
-    end
-
-    def process_source(source_file)
-      processor = Processor.new(environment, source_file)
-      result    = ""
-
-      if source_file.mtime > mtime
-        @mtime = source_file.mtime
-      end
-
-      processor.required_files.each { |file| require(file) }
-      result << source_file.header
-      processor.included_files.each { |file| result << process(file) }
-      result << source_file.body
-
-      result
     end
 
     def each
@@ -71,5 +56,30 @@ module Sprockets
     def stale?
       mtime < @source_paths.map { |p| File.mtime(p) }.max
     end
+
+    protected
+      def process(source_file)
+        result = process_source(source_file)
+        source_file.engine_extensions.each do |extension|
+          result = Tilt[extension].new { result }.render
+        end
+        result
+      end
+
+      def process_source(source_file)
+        processor = Processor.new(environment, source_file)
+        result    = ""
+
+        if source_file.mtime > mtime
+          @mtime = source_file.mtime
+        end
+
+        processor.required_files.each { |file| require(file) }
+        result << source_file.header
+        processor.included_files.each { |file| result << process(file) }
+        result << source_file.body
+
+        result
+      end
   end
 end
