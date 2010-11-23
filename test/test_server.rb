@@ -60,7 +60,9 @@ class TestServer < Sprockets::TestCase
 
     assert_equal time_before_touching, time_after_touching
 
-    touch_fixture "server/app/javascripts/foo.js"
+    path  = fixture_path "server/app/javascripts/foo.js"
+    mtime = Time.now + 1
+    File.utime(mtime, mtime, path)
 
     get "/javascripts/application.js"
     time_after_touching = last_response.headers['Last-Modified']
@@ -72,7 +74,9 @@ class TestServer < Sprockets::TestCase
     get "/javascripts/application.js"
     assert_equal 200, last_response.status
 
-    touch_fixture "server/app/javascripts/bar.js"
+    path = fixture_path "server/app/javascripts/bar.js"
+    mtime = Time.now + 1
+    File.utime(mtime, mtime, path)
 
     get "/javascripts/bar.js", {},
       'HTTP_IF_MODIFIED_SINCE' =>
@@ -138,9 +142,4 @@ class TestServer < Sprockets::TestCase
     assert_equal "1fd506e80d8895b905a83d3256ba17ff",
       javascripts_app.lookup_md5("/bar.js")
   end
-
-  private
-    def touch_fixture(path)
-      system "touch", fixture_path(path)
-    end
 end
