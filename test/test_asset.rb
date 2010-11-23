@@ -4,20 +4,16 @@ class AssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.paths << fixture_path('asset')
-    @asset = Sprockets::Asset.new(@env, "application/javascript", ".js")
   end
 
   test "requiring the same file multiple times has no effect" do
-    @asset.require(source_file("project.js"))
-    source = @asset.source
-
-    @asset.require(source_file("project.js"))
-    assert_equal source, @asset.source
+    @asset = Sprockets::Asset.require(@env, source_file("multiple.js"))
+    assert_equal source_file("project.js").source, @asset.source
   end
 
   test "requiring a file of a different format raises an exception" do
     assert_raise Sprockets::ContentTypeMismatch do
-      @asset.require(source_file("project.css"))
+      Sprockets::Asset.require(@env, source_file("mismatch.js"))
     end
   end
 
