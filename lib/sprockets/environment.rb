@@ -3,14 +3,14 @@ require "hike"
 module Sprockets
   class Environment
     class << self
-      attr_accessor :extensions
+      attr_accessor :engine_extensions
     end
 
-    self.extensions = %w( coffee erb less sass scss str )
+    self.engine_extensions = %w( coffee erb less sass scss str )
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
-      @trail.extensions.replace(self.class.extensions)
+      @trail.extensions.replace(self.class.engine_extensions)
     end
 
     def root
