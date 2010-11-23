@@ -52,6 +52,10 @@ class TestServer < Sprockets::TestCase
   end
 
   test "updated file updates the last modified header" do
+    time = Time.now
+    path = fixture_path "server/app/javascripts/foo.js"
+    File.utime(time, time, path)
+
     get "/javascripts/application.js"
     time_before_touching = last_response.headers['Last-Modified']
 
@@ -60,8 +64,7 @@ class TestServer < Sprockets::TestCase
 
     assert_equal time_before_touching, time_after_touching
 
-    path  = fixture_path "server/app/javascripts/foo.js"
-    mtime = Time.now + 1
+    mtime = Time.now + 60
     File.utime(mtime, mtime, path)
 
     get "/javascripts/application.js"
