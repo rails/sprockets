@@ -2,7 +2,7 @@ require "digest/md5"
 require "tilt"
 
 module Sprockets
-  class Asset
+  class ConcatenatedAsset
     attr_reader :environment, :content_type, :format_extension, :mtime
     attr_reader :source_paths, :source
 

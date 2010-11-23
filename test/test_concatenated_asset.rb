@@ -1,6 +1,6 @@
 require "sprockets_test"
 
-class AssetTest < Sprockets::TestCase
+class ConcatenatedAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.paths << fixture_path('asset')
@@ -79,7 +79,7 @@ class AssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    Sprockets::Asset.require(@env, source_file(logical_path))
+    Sprockets::ConcatenatedAsset.require(@env, source_file(logical_path))
   end
 
   def source_file(logical_path)

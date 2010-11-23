@@ -1,5 +1,5 @@
 module Sprockets
-  autoload :Asset,               "sprockets/asset"
+  autoload :ConcatenatedAsset,   "sprockets/concatenated_asset"
   autoload :ContentTypeMismatch, "sprockets/errors"
   autoload :DirectiveParser,     "sprockets/directive_parser"
   autoload :Environment,         "sprockets/environment"
