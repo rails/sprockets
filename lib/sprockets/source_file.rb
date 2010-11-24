@@ -1,5 +1,3 @@
-require "rack/mime"
-
 module Sprockets
   class SourceFile
     attr_reader :pathname, :source, :mtime
@@ -12,26 +10,6 @@ module Sprockets
 
     def path
       pathname.path
-    end
-
-    def basename
-      pathname.basename
-    end
-
-    def extensions
-      pathname.extensions
-    end
-
-    def format_extension
-      pathname.format_extension
-    end
-
-    def engine_extensions
-      pathname.engine_extensions
-    end
-
-    def content_type
-      pathname.content_type
     end
 
     def directive_parser

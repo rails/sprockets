@@ -27,7 +27,7 @@ module Sprockets
 
     def process_require_directive(path)
       extensions = path.scan(/\.[^.]+/)
-      path = "#{path}#{source_file.format_extension}" if extensions.empty?
+      path = "#{path}#{source_file.pathname.format_extension}" if extensions.empty?
       required_pathnames << environment.resolve(path)
     end
   end

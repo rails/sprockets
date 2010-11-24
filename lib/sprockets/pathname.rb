@@ -1,3 +1,5 @@
+require 'rack/mime'
+
 module Sprockets
   class Pathname
     attr_reader :path
