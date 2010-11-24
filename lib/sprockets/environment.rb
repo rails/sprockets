@@ -22,8 +22,8 @@ module Sprockets
       @trail.extensions
     end
 
-    def resolve(logical_path)
-      if path = @trail.find(logical_path)
+    def resolve(logical_path, options = {})
+      if path = @trail.find(logical_path, options)
         Pathname.new(path)
       else
         raise FileNotFound, "couldn't find file '#{logical_path}'"

@@ -37,6 +37,20 @@ class ConcatenatedAssetTest < Sprockets::TestCase
       asset("included_header.js").source
   end
 
+  test "requiring a file with a relative path" do
+    assert_equal source_file("project.js").source, asset("relative/require.js").source
+  end
+
+  test "including a file with a relative path" do
+    assert_equal "// Included relatively" + source_file("project.js").source + "\nhello()\n", asset("relative/include.js").source
+  end
+
+  test "can't require files outside the load path" do
+    assert_raise Sprockets::FileNotFound do
+      asset("relative/require_outside_path.js")
+    end
+  end
+
   test "asset mtime is the latest mtime of all processed sources" do
     mtime = Time.now
     path  = source_file("project.js").path

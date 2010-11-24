@@ -18,7 +18,7 @@ module Sprockets
     end
 
     def process_include_directive(path)
-      included_pathnames << environment.resolve(path)
+      included_pathnames << resolve(path)
     end
 
     def process_require_all_directive(path)
@@ -26,9 +26,21 @@ module Sprockets
     end
 
     def process_require_directive(path)
-      extensions = path.scan(/\.[^.]+/)
+      extensions = File.basename(path).scan(/\.[^.]+/)
       path = "#{path}#{source_file.pathname.format_extension}" if extensions.empty?
-      required_pathnames << environment.resolve(path)
+      required_pathnames << resolve(path)
+    end
+
+    def resolve(path)
+      if relative?(path)
+        environment.resolve(path, :relative_to => source_file.path)
+      else
+        environment.resolve(path)
+      end
+    end
+
+    def relative?(path)
+      path[/^\.\.?\//]
     end
   end
 end
