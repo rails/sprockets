@@ -17,22 +17,6 @@ module Sprockets
       require(pathname)
     end
 
-    def requirable?(pathname)
-      content_type == pathname.content_type
-    end
-
-    def require(pathname)
-      if requirable?(pathname)
-        unless source_paths.include?(pathname.path)
-          source_paths << pathname.path
-          source << process(pathname)
-        end
-      else
-        raise ContentTypeMismatch, "#{pathname.path} is " +
-          "'#{pathname.format_extension}', not '#{format_extension}'"
-      end
-    end
-
     def each
       yield source
     end
@@ -50,6 +34,22 @@ module Sprockets
     end
 
     protected
+      def requirable?(pathname)
+        content_type == pathname.content_type
+      end
+
+      def require(pathname)
+        if requirable?(pathname)
+          unless source_paths.include?(pathname.path)
+            source_paths << pathname.path
+            source << process(pathname)
+          end
+        else
+          raise ContentTypeMismatch, "#{pathname.path} is " +
+            "'#{pathname.format_extension}', not '#{format_extension}'"
+        end
+      end
+
       def process(pathname)
         result = process_source(pathname)
         pathname.engine_extensions.reverse_each do |extension|
