@@ -68,7 +68,7 @@ module Sprockets
         end
 
         processor.required_pathnames.each { |p| require(p) }
-        result << source_file.header
+        result << source_file.header << "\n" unless source_file.header.empty?
         processor.included_pathnames.each { |p| result << process(p) }
         result << source_file.body
 

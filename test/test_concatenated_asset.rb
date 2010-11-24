@@ -33,7 +33,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "included dependencies are inserted after the header of the dependent file" do
-    assert_equal "# My Application" + source_file("project.js").source + "\nhello()\n",
+    assert_equal "# My Application\n" + source_file("project.js").source + "\nhello()\n",
       asset("included_header.js").source
   end
 
@@ -42,7 +42,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "including a file with a relative path" do
-    assert_equal "// Included relatively" + source_file("project.js").source + "\nhello()\n", asset("relative/include.js").source
+    assert_equal "// Included relatively\n" + source_file("project.js").source + "\nhello()\n", asset("relative/include.js").source
   end
 
   test "can't require files outside the load path" do
