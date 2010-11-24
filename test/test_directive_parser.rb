@@ -43,6 +43,13 @@ class DirectiveParserTest < Sprockets::TestCase
     end
   end
 
+  test "headers must occur at the beginning of the file" do
+    directive_parser("code_before_comment").tap do |parser|
+      assert_equal "", parser.processed_header
+      assert_equal directive_fixture("code_before_comment"), parser.processed_source
+    end
+  end
+
   test "no header" do
     directive_parser("no_header").tap do |parser|
       assert_equal directive_fixture("no_header"), parser.processed_source

@@ -5,7 +5,7 @@ module Sprockets
     attr_reader :source, :header, :body
 
     HEADER_PATTERN = /
-      ^ \s* (
+      \A \s* (
         (\/\* ([\s\S]*?) \*\/) |
         (\#\#\# ([\s\S]*?) \#\#\#) |
         (\/\/ ([^\n]*) \n?)+ |
