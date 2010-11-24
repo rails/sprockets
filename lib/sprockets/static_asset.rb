@@ -5,7 +5,7 @@ module Sprockets
   class StaticAsset
     attr_reader :pathname, :mtime, :length, :digest
 
-    def initialize(environment, pathname)
+    def initialize(pathname)
       @pathname = pathname
 
       contents = read
