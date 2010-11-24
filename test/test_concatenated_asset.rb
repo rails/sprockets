@@ -56,6 +56,10 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "__FILE__ is properly set in templates" do
+    assert_equal %(var filename = "#{resolve("filename.js").path}";\n), asset("filename.js").source
+  end
+
   test "asset mtime is the latest mtime of all processed sources" do
     mtime = Time.now
     path  = source_file("project.js").path
