@@ -32,6 +32,11 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_equal source_file("users.js").source, asset("multipleengine.js").source
   end
 
+  test "processing a source file in compat mode" do
+    assert_equal source_file("project.js").source + source_file("users.js").source,
+      asset("compat.js").source
+  end
+
   test "included dependencies are inserted after the header of the dependent file" do
     assert_equal "# My Application\n" + source_file("project.js").source + "\nhello()\n",
       asset("included_header.js").source

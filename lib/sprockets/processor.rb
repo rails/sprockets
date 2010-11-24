@@ -8,6 +8,7 @@ module Sprockets
       @source_file        = source_file
       @included_pathnames = []
       @required_pathnames = []
+      @compat             = false
       process_directives
     end
 
@@ -15,6 +16,10 @@ module Sprockets
       source_file.directives.each do |name, *args|
         send("process_#{name}_directive", *args)
       end
+    end
+
+    def process_compat_directive
+      @compat = true
     end
 
     def process_include_directive(path)
@@ -26,9 +31,21 @@ module Sprockets
     end
 
     def process_require_directive(path)
+      if @compat
+        if path =~ /<([^>]+)>/
+          path = $1
+        else
+          path = "./#{path}" unless path =~ /^\./
+        end
+      end
+
       extensions = File.basename(path).scan(/\.[^.]+/)
       path = "#{path}#{source_file.pathname.format_extension}" if extensions.empty?
       required_pathnames << resolve(path)
+    end
+
+    def process_provide_directive(path)
+      # TODO
     end
 
     def resolve(path)
