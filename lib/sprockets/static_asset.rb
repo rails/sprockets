@@ -3,42 +3,35 @@ require "rack/utils"
 
 module Sprockets
   class StaticAsset
-    attr_reader :pathname
+    attr_reader :pathname, :mtime, :length, :digest
 
     def initialize(environment, pathname)
       @pathname = pathname
-    end
 
-    def digest
-      Digest::MD5.hexdigest(read)
-    end
-
-    def each
-      yield read
-    end
-
-    def length
-      Rack::Utils.bytesize(read)
+      contents = read
+      @mtime   = File.mtime(pathname.path)
+      @length  = Rack::Utils.bytesize(contents)
+      @digest  = Digest::MD5.hexdigest(contents)
     end
 
     def content_type
       pathname.content_type
     end
 
-    def mtime
-      File.mtime(pathname.path)
-    end
-
     def stale?
-      false
+      mtime < File.mtime(to_path)
     end
 
     def read
-      File.read(pathname.path)
+      File.read(to_path)
+    end
+
+    def each
+      yield read
     end
 
     def to_path
-      pathname.path
+      pathname.to_s
     end
   end
 end
