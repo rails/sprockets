@@ -12,6 +12,10 @@ module Sprockets
       @path = File.expand_path(path)
     end
 
+    def dirname
+      @dirname ||= File.dirname(path)
+    end
+
     def basename
       @basename ||= File.basename(path)
     end

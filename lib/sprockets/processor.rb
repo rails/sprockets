@@ -49,15 +49,7 @@ module Sprockets
     end
 
     def resolve(path)
-      if relative?(path)
-        environment.resolve(path, :relative_to => source_file.path)
-      else
-        environment.resolve(path)
-      end
-    end
-
-    def relative?(path)
-      path[/^\.\.?\//]
+      environment.resolve(path, :base_path => source_file.pathname.dirname)
     end
   end
 end
