@@ -2,7 +2,7 @@ require 'rack/mime'
 
 module Sprockets
   class Pathname
-    attr_reader :path
+    attr_reader :path, :dirname, :basename
 
     def self.new(path)
       path.is_a?(self) ? path : super(path)
@@ -10,14 +10,7 @@ module Sprockets
 
     def initialize(path)
       @path = File.expand_path(path)
-    end
-
-    def dirname
-      @dirname ||= File.dirname(path)
-    end
-
-    def basename
-      @basename ||= File.basename(path)
+      @dirname, @basename = File.split(@path)
     end
 
     def extensions
