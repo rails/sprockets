@@ -22,10 +22,6 @@ module Sprockets
       mtime < File.mtime(to_path)
     end
 
-    def read
-      File.read(to_path)
-    end
-
     def each
       yield read
     end
@@ -33,5 +29,14 @@ module Sprockets
     def to_path
       pathname.to_s
     end
+
+    def to_s
+      read
+    end
+
+    protected
+      def read
+        File.read(to_path)
+      end
   end
 end

@@ -23,11 +23,11 @@ class TestEnvironment < Sprockets::TestCase
 
   test "find concatenated asset in environment" do
     assert_equal "var Gallery = {};\n",
-      @env.find_asset("gallery.js").source
+      @env.find_asset("gallery.js").to_s
   end
 
   test "find static asset in environment" do
     assert_equal "Hello world\n",
-      @env.find_asset("hello.txt").read
+      @env.find_asset("hello.txt").to_s
   end
 end

@@ -5,7 +5,6 @@ require "tilt"
 module Sprockets
   class ConcatenatedAsset
     attr_reader :environment, :content_type, :format_extension, :mtime
-    attr_reader :source_paths, :source
 
     def initialize(environment, pathname)
       @environment      = environment
@@ -33,7 +32,13 @@ module Sprockets
       mtime < @source_paths.map { |p| File.mtime(p) }.max
     end
 
+    def to_s
+      @source
+    end
+
     protected
+      attr_reader :source_paths, :source
+
       def requirable?(pathname)
         content_type == pathname.content_type
       end
