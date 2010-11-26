@@ -28,7 +28,7 @@ module Sprockets
     end
 
     def stale?
-      mtime < @source_paths.map { |p| File.mtime(p) }.max
+      @source_paths.any? { |p| mtime < File.mtime(p) }
     end
 
     def to_s
