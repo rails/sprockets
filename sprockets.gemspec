@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name = "sprockets"
   s.version = "2.0.0"
-  s.summary = "JavaScript dependency management and concatenation"
-  s.description = "Sprockets is a Ruby library that preprocesses and concatenates JavaScript source files."
+  s.summary = "Rack-based asset packaging system"
+  s.description = "Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
 
   s.files = Dir["Rakefile", "lib/**/*"]
 
