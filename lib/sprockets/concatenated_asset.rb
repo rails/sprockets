@@ -1,4 +1,4 @@
-require "digest/md5"
+require "digest/sha1"
 require "rack/utils"
 require "tilt"
 
@@ -26,7 +26,7 @@ module Sprockets
     end
 
     def digest
-      Digest::MD5.hexdigest(source)
+      Digest::SHA1.hexdigest(source)
     end
 
     def stale?

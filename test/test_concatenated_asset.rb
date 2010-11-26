@@ -84,7 +84,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "asset digest" do
-    assert_equal "35d470ef8621efa573dee227a4feaba3", asset("project.js").digest
+    assert_equal "729a810640240adfd653c3d958890cfc4ec0ea84", asset("project.js").digest
   end
 
   test "asset is stale when one of its source files is modified" do

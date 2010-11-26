@@ -47,7 +47,7 @@ class TestServer < Sprockets::TestCase
 
   test "serve source with etag headers" do
     get "/javascripts/application.js"
-    assert_equal '"3aede9c70a76e611d43a1c5f1fb1708a"',
+    assert_equal '"6413e7ce345409919a84538cb5577e2cd17bb72f"',
       last_response.headers['ETag']
   end
 
@@ -138,11 +138,11 @@ class TestServer < Sprockets::TestCase
   # end
 
   test "lookup asset digest" do
-    assert_equal "3aede9c70a76e611d43a1c5f1fb1708a",
+    assert_equal "6413e7ce345409919a84538cb5577e2cd17bb72f",
       javascripts_app.lookup_digest("/application.js")
-    assert_equal "fcad2374010e1942ce8980d47f96d898",
+    assert_equal "7459690e935b97c26600f77b922b02c996093a18",
       javascripts_app.lookup_digest("/foo.js")
-    assert_equal "1fd506e80d8895b905a83d3256ba17ff",
+    assert_equal "6926abfadc26f2451ebaf03d868050ffa9440d38",
       javascripts_app.lookup_digest("/bar.js")
   end
 
