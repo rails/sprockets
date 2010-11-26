@@ -4,28 +4,27 @@ require "tilt"
 
 module Sprockets
   class ConcatenatedAsset
-    attr_reader :environment, :content_type, :format_extension, :mtime
+    attr_reader :environment, :content_type, :format_extension
+    attr_reader :mtime, :length
 
     def initialize(environment, pathname)
       @environment      = environment
       @content_type     = pathname.content_type
       @format_extension = pathname.format_extension
-      @mtime            = Time.at(0)
       @source_paths     = []
-      @source           = ""
+      @source           = []
+      @mtime            = Time.at(0)
+      @length           = 0
+      @digest           = Digest::SHA1.new
       require(pathname)
     end
 
-    def each
-      yield source
-    end
-
-    def length
-      Rack::Utils.bytesize(source)
-    end
-
     def digest
-      Digest::SHA1.hexdigest(source)
+      @digest.hexdigest
+    end
+
+    def each(&block)
+      @source.each(&block)
     end
 
     def stale?
@@ -33,11 +32,17 @@ module Sprockets
     end
 
     def to_s
-      @source
+      @source.join
     end
 
     protected
       attr_reader :source_paths, :source
+
+      def <<(str)
+        @length += str.length
+        @digest << str
+        @source << str
+      end
 
       def requirable?(pathname)
         content_type == pathname.content_type
@@ -47,7 +52,7 @@ module Sprockets
         if requirable?(pathname)
           unless source_paths.include?(pathname.path)
             source_paths << pathname.path
-            source << process(pathname)
+            self << process(pathname)
           end
         else
           raise ContentTypeMismatch, "#{pathname.path} is " +
