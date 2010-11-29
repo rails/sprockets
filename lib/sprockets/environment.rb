@@ -38,6 +38,8 @@ module Sprockets
       else
         StaticAsset.new(pathname)
       end
+    rescue FileNotFound
+      nil
     end
 
     alias_method :[], :find_asset

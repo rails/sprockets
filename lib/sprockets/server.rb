@@ -65,8 +65,6 @@ module Sprockets
           self.assets = assets
         end
         asset
-      rescue FileNotFound
-        nil
       end
 
       def asset_stale?(asset)

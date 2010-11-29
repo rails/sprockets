@@ -30,4 +30,8 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "Hello world\n",
       @env.find_asset("hello.txt").to_s
   end
+
+  test "missing asset returns nil" do
+    assert_equal nil, @env.find_asset("missing.js")
+  end
 end
