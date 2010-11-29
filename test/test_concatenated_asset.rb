@@ -58,6 +58,26 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "require_tree requires all descendant files in alphabetical order" do
+    assert_equal(
+      asset("tree/all_with_require.js").to_s,
+      asset("tree/all_with_require_tree.js").to_s
+    )
+  end
+
+  test "require_tree without an argument defaults to the current directory" do
+    assert_equal(
+      "a()\n\nb()\n\n",
+      asset("tree/without_argument/require_tree_without_argument.js").to_s
+    )
+  end
+
+  test "require_tree with a logical path argument raises an exception" do
+    assert_raise(Sprockets::ArgumentError) do
+      asset("tree/with_logical_path/require_tree_with_logical_path.js").to_s
+    end
+  end
+
   test "__FILE__ is properly set in templates" do
     assert_equal %(var filename = "#{resolve("filename.js").path}";\n),
       asset("filename.js").to_s

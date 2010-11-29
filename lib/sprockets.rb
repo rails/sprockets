@@ -1,4 +1,5 @@
 module Sprockets
+  autoload :ArgumentError,       "sprockets/errors"
   autoload :ConcatenatedAsset,   "sprockets/concatenated_asset"
   autoload :ContentTypeMismatch, "sprockets/errors"
   autoload :DirectiveParser,     "sprockets/directive_parser"

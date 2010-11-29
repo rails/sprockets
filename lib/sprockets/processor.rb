@@ -26,30 +26,57 @@ module Sprockets
       included_pathnames << resolve(path)
     end
 
-    def process_require_all_directive(path)
-      # ?!?@?!@?!?!?!
-    end
-
     def process_require_directive(path)
       if @compat
         if path =~ /<([^>]+)>/
           path = $1
         else
-          path = "./#{path}" unless path =~ /^\./
+          path = "./#{path}" unless relative?(path)
         end
       end
 
       extensions = File.basename(path).scan(/\.[^.]+/)
-      path = "#{path}#{source_file.pathname.format_extension}" if extensions.empty?
+      path = "#{path}#{format_extension}" if extensions.empty?
       required_pathnames << resolve(path)
+    end
+
+    def process_require_tree_directive(path = ".")
+      if relative?(path)
+        each_pathname_in_tree(path) do |pathname|
+          required_pathnames << pathname
+        end
+      else
+        raise ArgumentError, "require_tree argument must be a relative path"
+      end
     end
 
     def process_provide_directive(path)
       # TODO
     end
 
+    def each_pathname_in_tree(path)
+      root = File.expand_path(File.join(base_path, path))
+      Dir[root + "/**/*"].sort.each do |filename|
+        next unless File.file?(filename)
+        pathname = Pathname.new(filename)
+        yield pathname if pathname.format_extension == format_extension
+      end
+    end
+
+    def relative?(path)
+      path =~ /^\.($|\.?\/)/
+    end
+
     def resolve(path)
-      environment.resolve(path, :base_path => source_file.pathname.dirname)
+      environment.resolve(path, :base_path => base_path)
+    end
+
+    def base_path
+      source_file.pathname.dirname
+    end
+
+    def format_extension
+      source_file.pathname.format_extension
     end
   end
 end
