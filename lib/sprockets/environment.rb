@@ -1,4 +1,5 @@
-require "hike"
+require 'hike'
+require 'thread'
 
 module Sprockets
   class Environment
@@ -8,6 +9,17 @@ module Sprockets
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS)
+
+      @cache = {}
+      @lock  = nil
+    end
+
+    def multithread
+      @lock ? true : false
+    end
+
+    def multithread=(val)
+      @lock = val ? Mutex.new : nil
     end
 
     def root
@@ -30,7 +42,7 @@ module Sprockets
       end
     end
 
-    def find_asset(logical_path)
+    def build_asset(logical_path)
       pathname = resolve(logical_path)
 
       if concatenatable?(pathname.format_extension)
@@ -40,6 +52,30 @@ module Sprockets
       end
     rescue FileNotFound
       nil
+    end
+
+    def find_fresh_asset(logical_path)
+      if (asset = @cache[logical_path]) && !asset.stale?
+        asset
+      else
+        nil
+      end
+    end
+
+    def find_asset(logical_path)
+      if asset = find_fresh_asset(logical_path)
+        asset
+      elsif @lock
+        @lock.synchronize do
+          if asset = find_fresh_asset(logical_path)
+            asset
+          else
+            @cache[logical_path] = build_asset(logical_path)
+          end
+        end
+      else
+        @cache[logical_path] = build_asset(logical_path)
+      end
     end
 
     alias_method :[], :find_asset

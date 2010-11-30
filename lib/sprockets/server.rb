@@ -1,22 +1,21 @@
-require 'thread'
 require 'time'
 
 module Sprockets
   class Server
-    attr_accessor :environment, :lock, :assets
+    attr_accessor :environment
 
     def initialize(environment = Environment.new)
       self.environment = environment
-      self.lock        = Mutex.new
-      self.assets      = {}
     end
 
     def call(env)
+      environment.multithread = env["rack.multithread"]
+
       if forbidden_request?(env)
         return forbidden_response
       end
 
-      asset = rebundle(env)
+      asset = environment[env["PATH_INFO"]]
 
       if asset.nil?
         not_found_response
@@ -28,48 +27,10 @@ module Sprockets
     end
 
     def lookup_digest(path)
-      if asset = rebundle("PATH_INFO" => path)
+      if asset = environment[path]
         asset.digest
       end
     end
-
-    protected
-      def lookup_asset(env)
-        self.assets[env["PATH_INFO"]]
-      end
-
-      def rebundle(env)
-        if env["rack.multithread"]
-          synchronized_rebundle(env)
-        else
-          rebundle!(env)
-        end
-      end
-
-      def synchronized_rebundle(env)
-        asset = lookup_asset(env)
-        if asset_stale?(asset)
-          lock.synchronize { rebundle!(env) }
-        else
-          asset
-        end
-      end
-
-      def rebundle!(env)
-        asset = lookup_asset(env)
-        if asset_stale?(asset)
-          path_info = env["PATH_INFO"]
-          asset = environment[path_info]
-          assets = self.assets.dup
-          assets[path_info] = asset
-          self.assets = assets
-        end
-        asset
-      end
-
-      def asset_stale?(asset)
-        asset.nil? || asset.stale?
-      end
 
     private
       def forbidden_request?(env)
