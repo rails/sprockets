@@ -34,6 +34,10 @@ module Sprockets
       @trail.extensions
     end
 
+    def server
+      @server ||= Server.new(self)
+    end
+
     def resolve(logical_path, options = {})
       if path = @trail.find(logical_path, options)
         Pathname.new(path)
