@@ -34,4 +34,9 @@ class TestEnvironment < Sprockets::TestCase
   test "missing asset returns nil" do
     assert_equal nil, @env["missing.js"]
   end
+
+  test "lookup asset digest" do
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc",
+      @env["gallery.js"].digest
+  end
 end

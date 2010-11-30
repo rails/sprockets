@@ -137,15 +137,6 @@ class TestServer < Sprockets::TestCase
   #   end
   # end
 
-  test "lookup asset digest" do
-    assert_equal "6413e7ce345409919a84538cb5577e2cd17bb72f",
-      javascripts_app.lookup_digest("/application.js")
-    assert_equal "7459690e935b97c26600f77b922b02c996093a18",
-      javascripts_app.lookup_digest("/foo.js")
-    assert_equal "6926abfadc26f2451ebaf03d868050ffa9440d38",
-      javascripts_app.lookup_digest("/bar.js")
-  end
-
   test "serving static assets" do
     get "/javascripts/hello.txt"
     assert_equal 200, last_response.status

@@ -26,12 +26,6 @@ module Sprockets
       end
     end
 
-    def lookup_digest(path)
-      if asset = environment[path]
-        asset.digest
-      end
-    end
-
     private
       def forbidden_request?(env)
         env["PATH_INFO"].include?("..")
