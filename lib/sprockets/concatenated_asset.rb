@@ -82,6 +82,11 @@ module Sprockets
         processor.included_pathnames.each { |p| result << process(p) }
         result << source_file.body
 
+        # LEGACY
+        if processor.compat? && (constants = processor.constants).any?
+          result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
+        end
+
         result
       end
   end

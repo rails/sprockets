@@ -120,6 +120,11 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert asset.stale?
   end
 
+  test "legacy constants.yml" do
+    assert_equal "var Prototype = { version: '2.0' };\n",
+      asset("constants.js").to_s
+  end
+
   def asset(logical_path)
     Sprockets::ConcatenatedAsset.new(@env, resolve(logical_path))
   end

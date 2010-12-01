@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Sprockets
   class Processor
     attr_reader :environment, :source_file
@@ -10,6 +12,17 @@ module Sprockets
       @required_pathnames = []
       @compat             = false
       process_directives
+    end
+
+    def compat?
+      @compat
+    end
+
+    # LEGACY
+    def constants
+      root_path = environment.paths.detect { |path| source_file.path[path] }
+      path = File.join(root_path, "constants.yml")
+      File.exist?(path) ? YAML.load_file(path) : {}
     end
 
     def process_directives
