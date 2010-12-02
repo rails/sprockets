@@ -1,5 +1,6 @@
 require "digest/sha1"
 require "rack/utils"
+require "set"
 require "tilt"
 
 module Sprockets
@@ -11,7 +12,7 @@ module Sprockets
       @environment      = environment
       @content_type     = pathname.content_type
       @format_extension = pathname.format_extension
-      @source_paths     = []
+      @source_paths     = Set.new
       @source           = []
       @mtime            = Time.at(0)
       @length           = 0
