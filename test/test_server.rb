@@ -120,22 +120,25 @@ class TestServer < Sprockets::TestCase
     assert_equal 403, last_response.status
   end
 
-  # TODO
-  # test "add new source to glob" do
-  #   get "/javascripts/glob.js"
-  #   assert_equal "var foo;\nvar bar;\n", last_response.body
+  test "add new source to tree" do
+    get "/javascripts/tree.js"
+    assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\n", last_response.body
 
-  #   File.open(fixture_path("server/app/javascripts/baz.js"), "w") do |f|
-  #     f.puts "var baz;"
-  #   end
+    File.open(fixture_path("server/app/javascripts/baz.js"), "w") do |f|
+      f.puts "var baz;"
+    end
 
-  #   begin
-  #     get "/javascripts/glob.js"
-  #     assert_equal "var foo;\nvar bar;\nvar baz;\n", last_response.body
-  #   ensure
-  #     FileUtils.rm(fixture_path("server/app/javascripts/baz.js"))
-  #   end
-  # end
+    path = fixture_path "server/app/javascripts"
+    mtime = Time.now + 60
+    File.utime(mtime, mtime, path)
+
+    begin
+      get "/javascripts/tree.js"
+      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\n", last_response.body
+    ensure
+      FileUtils.rm(fixture_path("server/app/javascripts/baz.js"))
+    end
+  end
 
   test "serving static assets" do
     get "/javascripts/hello.txt"

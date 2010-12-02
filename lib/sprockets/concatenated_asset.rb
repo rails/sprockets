@@ -50,7 +50,9 @@ module Sprockets
       end
 
       def require(pathname)
-        if requirable?(pathname)
+        if File.directory?(pathname.path)
+          source_paths << pathname.path
+        elsif requirable?(pathname)
           unless source_paths.include?(pathname.path)
             source_paths << pathname.path
             self << process(pathname)

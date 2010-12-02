@@ -55,6 +55,9 @@ module Sprockets
 
     def process_require_tree_directive(path = ".")
       if relative?(path)
+        root = File.expand_path(File.join(base_path, path))
+        required_pathnames << Pathname.new(root)
+
         each_pathname_in_tree(path) do |pathname|
           required_pathnames << pathname
         end
@@ -70,9 +73,14 @@ module Sprockets
     def each_pathname_in_tree(path)
       root = File.expand_path(File.join(base_path, path))
       Dir[root + "/**/*"].sort.each do |filename|
-        next unless File.file?(filename)
         pathname = Pathname.new(filename)
-        yield pathname if pathname.format_extension == format_extension
+
+        if File.directory?(filename)
+          yield pathname
+        elsif File.file?(filename) &&
+            pathname.format_extension == format_extension
+          yield pathname
+        end
       end
     end
 
