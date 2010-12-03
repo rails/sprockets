@@ -50,7 +50,8 @@ module Sprockets
       end
 
       def stale_query_string?(asset, env)
-        env['QUERY_STRING'] != '' && env['QUERY_STRING'] != asset.digest
+        !env['QUERY_STRING'].nil? && !env['QUERY_STRING'].empty? &&
+          env['QUERY_STRING'] != asset.digest
       end
 
       def not_modified_response(asset, env)
