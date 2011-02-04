@@ -35,6 +35,12 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal nil, @env["missing.js"]
   end
 
+  test "asset with missing requires raises an exception" do
+    assert_raises Sprockets::FileNotFound do
+      @env["missing_require.js"]
+    end
+  end
+
   test "lookup asset digest" do
     assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc",
       @env["gallery.js"].digest

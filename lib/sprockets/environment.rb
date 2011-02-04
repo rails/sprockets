@@ -47,15 +47,17 @@ module Sprockets
     end
 
     def build_asset(logical_path)
-      pathname = resolve(logical_path)
-
-      if concatenatable?(pathname.format_extension)
-        ConcatenatedAsset.new(self, pathname)
+      begin
+        pathname = resolve(logical_path)
+      rescue FileNotFound
+        nil
       else
-        StaticAsset.new(pathname)
+        if concatenatable?(pathname.format_extension)
+          ConcatenatedAsset.new(self, pathname)
+        else
+          StaticAsset.new(pathname)
+        end
       end
-    rescue FileNotFound
-      nil
     end
 
     def find_fresh_asset(logical_path)

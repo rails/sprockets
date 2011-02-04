@@ -9,6 +9,7 @@ class TestServer < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.paths << fixture_path("server/app/javascripts")
+    @env.paths << fixture_path("server/vendor/javascripts")
   end
 
   def javascripts_app
@@ -118,6 +119,12 @@ class TestServer < Sprockets::TestCase
   test "missing source" do
     get "/javascripts/none.js"
     assert_equal 404, last_response.status
+  end
+
+  test "raise exception if require is missing" do
+    assert_raises Sprockets::FileNotFound do
+      get "/javascripts/missing_require.js"
+    end
   end
 
   test "illegal require outside load path" do
