@@ -12,6 +12,10 @@ module Sprockets
       pathname.path
     end
 
+    def content_type
+      pathname.content_type
+    end
+
     def directive_parser
       @directive_parser ||= DirectiveParser.new(source)
     end

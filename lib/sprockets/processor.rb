@@ -54,14 +54,14 @@ module Sprockets
 
       pathname = Pathname.new(path)
       if pathname.extensions.any?
-        if source_file.pathname.content_type != pathname.content_type
+        if source_file.content_type != pathname.content_type
           raise ContentTypeMismatch, "#{pathname.path} is " +
             "'#{pathname.format_extension}', not '#{source_file.pathname.format_extension}'"
         end
       end
 
       resolve(path) do |candidate|
-        if source_file.pathname.content_type == candidate.content_type
+        if source_file.content_type == candidate.content_type
           required_pathnames << candidate
           return
         end
@@ -95,7 +95,7 @@ module Sprockets
         if File.directory?(filename)
           yield pathname
         elsif File.file?(filename) &&
-            pathname.content_type == source_file.pathname.content_type
+            pathname.content_type == source_file.content_type
           yield pathname
         end
       end
