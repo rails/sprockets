@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
 
   s.files = Dir["Rakefile", "lib/**/*"]
 
-  s.add_dependency "hike", ">= 0.3.0"
+  s.add_dependency "hike", ">= 0.4.0"
   s.add_dependency "rack", ">= 1.0.0"
   s.add_dependency "tilt", ">= 1.1.0"
 
