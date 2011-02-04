@@ -95,7 +95,7 @@ module Sprockets
         if File.directory?(filename)
           yield pathname
         elsif File.file?(filename) &&
-            pathname.format_extension == source_file.pathname.format_extension
+            pathname.content_type == source_file.pathname.content_type
           yield pathname
         end
       end
