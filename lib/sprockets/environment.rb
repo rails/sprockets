@@ -1,10 +1,23 @@
 require 'hike'
 require 'thread'
+require 'tilt'
 
 module Sprockets
   class Environment
     DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
+
+    @template_mappings = {}
+
+    def self.register(ext, klass)
+      ext = ext.to_s.sub(/^\./, '').downcase
+      @template_mappings[ext] = klass
+    end
+
+    def self.lookup_engine(ext)
+      ext = ext.to_s.sub(/^\./, '').downcase
+      @template_mappings[ext] || Tilt[ext]
+    end
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
