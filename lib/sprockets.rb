@@ -7,6 +7,7 @@ module Sprockets
   autoload :Environment,         "sprockets/environment"
   autoload :Error,               "sprockets/errors"
   autoload :FileNotFound,        "sprockets/errors"
+  autoload :JavascriptTemplate,  "sprockets/javascript_template"
   autoload :Pathname,            "sprockets/pathname"
   autoload :Processor,           "sprockets/processor"
   autoload :Server,              "sprockets/server"

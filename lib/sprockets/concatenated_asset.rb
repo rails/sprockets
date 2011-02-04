@@ -64,7 +64,7 @@ module Sprockets
 
       def process(pathname)
         result = process_source(pathname)
-        scope, locals = Context.new(pathname), {}
+        scope, locals = Context.new(environment, pathname), {}
         pathname.engines.reverse_each do |engine|
           result = engine.new(pathname.path) { result }.render(scope, locals)
         end

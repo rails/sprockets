@@ -19,6 +19,8 @@ module Sprockets
       @template_mappings[ext] || Tilt[ext]
     end
 
+    register 'jst', JavascriptTemplate
+
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
