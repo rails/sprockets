@@ -20,9 +20,13 @@ module Sprockets
 
     # LEGACY
     def constants
-      root_path = environment.paths.detect { |path| source_file.path[path] }
-      path = File.join(root_path, "constants.yml")
-      File.exist?(path) ? YAML.load_file(path) : {}
+      if compat?
+        root_path = environment.paths.detect { |path| source_file.path[path] }
+        path = File.join(root_path, "constants.yml")
+        File.exist?(path) ? YAML.load_file(path) : {}
+      else
+        {}
+      end
     end
 
     def process_directives
