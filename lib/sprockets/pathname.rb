@@ -1,4 +1,5 @@
 require 'rack/mime'
+require 'tilt'
 
 module Sprockets
   class Pathname
@@ -23,6 +24,10 @@ module Sprockets
 
     def engine_extensions
       extensions[1..-1] || []
+    end
+
+    def engines
+      engine_extensions.map { |extension| Tilt[extension] }
     end
 
     def content_type

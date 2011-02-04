@@ -1,7 +1,6 @@
 require "digest/sha1"
 require "rack/utils"
 require "set"
-require "tilt"
 
 module Sprockets
   class ConcatenatedAsset
@@ -65,8 +64,8 @@ module Sprockets
 
       def process(pathname)
         result = process_source(pathname)
-        pathname.engine_extensions.reverse_each do |extension|
-          result = Tilt[extension].new(pathname.path) { result }.render
+        pathname.engines.reverse_each do |engine|
+          result = engine.new(pathname.path) { result }.render
         end
         result
       end
