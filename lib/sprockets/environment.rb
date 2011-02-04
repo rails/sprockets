@@ -44,11 +44,10 @@ module Sprockets
           yield Pathname.new(path)
         end
       else
-        if path = @trail.find(logical_path, options)
-          Pathname.new(path)
-        else
-          raise FileNotFound, "couldn't find file '#{logical_path}'"
+        resolve(logical_path, options) do |pathname|
+          return pathname
         end
+        raise FileNotFound, "couldn't find file '#{logical_path}'"
       end
     end
 
