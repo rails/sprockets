@@ -8,7 +8,7 @@ module Sprockets
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
-      engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS)
+      engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
 
       @cache = {}
       @lock  = nil
@@ -39,10 +39,16 @@ module Sprockets
     end
 
     def resolve(logical_path, options = {})
-      if path = @trail.find(logical_path, options)
-        Pathname.new(path)
+      if block_given?
+        @trail.find(logical_path, options) do |path|
+          yield Pathname.new(path)
+        end
       else
-        raise FileNotFound, "couldn't find file '#{logical_path}'"
+        if path = @trail.find(logical_path, options)
+          Pathname.new(path)
+        else
+          raise FileNotFound, "couldn't find file '#{logical_path}'"
+        end
       end
     end
 

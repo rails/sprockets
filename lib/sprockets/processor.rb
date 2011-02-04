@@ -52,9 +52,22 @@ module Sprockets
         end
       end
 
-      extensions = File.basename(path).scan(/\.[^.]+/)
-      path = "#{path}#{format_extension}" if extensions.empty?
-      required_pathnames << resolve(path)
+      pathname = Pathname.new(path)
+      if pathname.extensions.any?
+        if source_file.pathname.content_type != pathname.content_type
+          raise ContentTypeMismatch, "#{pathname.path} is " +
+            "'#{pathname.format_extension}', not '#{source_file.pathname.format_extension}'"
+        end
+      end
+
+      resolve(path) do |candidate|
+        if source_file.pathname.content_type == candidate.content_type
+          required_pathnames << candidate
+          return
+        end
+      end
+
+      raise FileNotFound, "couldn't find file '#{path}'"
     end
 
     def process_require_tree_directive(path = ".")
@@ -82,7 +95,7 @@ module Sprockets
         if File.directory?(filename)
           yield pathname
         elsif File.file?(filename) &&
-            pathname.format_extension == format_extension
+            pathname.format_extension == source_file.pathname.format_extension
           yield pathname
         end
       end
@@ -92,16 +105,12 @@ module Sprockets
       path =~ /^\.($|\.?\/)/
     end
 
-    def resolve(path)
-      environment.resolve(path, :base_path => base_path)
+    def resolve(path, &block)
+      environment.resolve(path, :base_path => base_path, &block)
     end
 
     def base_path
       source_file.pathname.dirname
-    end
-
-    def format_extension
-      source_file.pathname.format_extension
     end
   end
 end
