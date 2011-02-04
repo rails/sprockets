@@ -106,6 +106,10 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_equal 46, asset("project.js").length
   end
 
+  test "asset length is source length with unicode characters" do
+    assert_equal 4, asset("unicode.js").length
+  end
+
   test "asset digest" do
     assert_equal "729a810640240adfd653c3d958890cfc4ec0ea84", asset("project.js").digest
   end

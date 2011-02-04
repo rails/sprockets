@@ -40,7 +40,7 @@ module Sprockets
       attr_reader :source_paths, :source
 
       def <<(str)
-        @length += str.length
+        @length += Rack::Utils.bytesize(str)
         @digest << str
         @source << str
       end
