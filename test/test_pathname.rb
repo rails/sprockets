@@ -67,5 +67,10 @@ class TestPathname < Sprockets::TestCase
       Pathname.new("project.js.coffee.erb").content_type
     assert_equal "text/css",
       Pathname.new("gallery.css.erb").content_type
+
+    if Tilt::CoffeeScriptTemplate.respond_to?(:default_mime_type)
+      assert_equal "application/javascript",
+        Pathname.new("application.coffee").content_type
+    end
   end
 end
