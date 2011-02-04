@@ -37,6 +37,8 @@ class TestPathname < Sprockets::TestCase
     assert_equal ".js", Pathname.new("application.js.coffee").format_extension
     assert_equal ".js", Pathname.new("project.js.coffee.erb").format_extension
     assert_equal ".css", Pathname.new("gallery.css.erb").format_extension
+    assert_equal nil, Pathname.new("gallery.erb").format_extension
+    assert_equal nil, Pathname.new("gallery.foo").format_extension
   end
 
   test "engine_extensions" do
@@ -50,6 +52,8 @@ class TestPathname < Sprockets::TestCase
       Pathname.new("project.js.coffee.erb").engine_extensions
     assert_equal [".erb"],
       Pathname.new("gallery.css.erb").engine_extensions
+    assert_equal [".erb"],
+      Pathname.new("gallery.erb").engine_extensions
   end
 
   test "content_type" do

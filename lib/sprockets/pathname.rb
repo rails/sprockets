@@ -19,11 +19,14 @@ module Sprockets
     end
 
     def format_extension
-      extensions.first
+      if (ext = extensions.first) && Rack::Mime.mime_type(ext, nil)
+        ext
+      end
     end
 
     def engine_extensions
-      extensions[1..-1] || []
+      offset = format_extension ? 1 : 0
+      extensions[offset..-1] || []
     end
 
     def engines
