@@ -53,7 +53,7 @@ module Sprockets
       end
 
       pathname = Pathname.new(path)
-      if pathname.extensions.any?
+      if pathname.format_extension
         if source_file.content_type != pathname.content_type
           raise ContentTypeMismatch, "#{pathname.path} is " +
             "'#{pathname.format_extension}', not '#{source_file.pathname.format_extension}'"

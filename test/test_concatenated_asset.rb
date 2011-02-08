@@ -33,6 +33,11 @@ class ConcatenatedAssetTest < Sprockets::TestCase
       asset("multipleengine.js").to_s
   end
 
+  test "processing a source file with unknown extensions" do
+    assert_equal source_file("users.js").source + "jQuery\n",
+      asset("unknownexts.min.js").to_s
+  end
+
   test "processing a source file in compat mode" do
     assert_equal source_file("project.js").source + source_file("users.js").source,
       asset("compat.js").to_s

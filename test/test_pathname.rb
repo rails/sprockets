@@ -39,21 +39,28 @@ class TestPathname < Sprockets::TestCase
     assert_equal ".css", Pathname.new("gallery.css.erb").format_extension
     assert_equal nil, Pathname.new("gallery.erb").format_extension
     assert_equal nil, Pathname.new("gallery.foo").format_extension
+    assert_equal ".js", Pathname.new("jquery.js").format_extension
+    assert_equal ".js", Pathname.new("jquery.min.js").format_extension
+    assert_equal ".js", Pathname.new("jquery.tmpl.js").format_extension
+    assert_equal ".js", Pathname.new("jquery.tmpl.min.js").format_extension
   end
 
   test "engine_extensions" do
-    assert_equal [],
-      Pathname.new("empty").engine_extensions
-    assert_equal [],
-      Pathname.new("gallery.js").engine_extensions
+    assert_equal [], Pathname.new("empty").engine_extensions
+    assert_equal [], Pathname.new("gallery.js").engine_extensions
     assert_equal [".coffee"],
       Pathname.new("application.js.coffee").engine_extensions
     assert_equal [".coffee", ".erb"],
       Pathname.new("project.js.coffee.erb").engine_extensions
-    assert_equal [".erb"],
-      Pathname.new("gallery.css.erb").engine_extensions
-    assert_equal [".erb"],
-      Pathname.new("gallery.erb").engine_extensions
+    assert_equal [".erb"], Pathname.new("gallery.css.erb").engine_extensions
+    assert_equal [".erb"], Pathname.new("gallery.erb").engine_extensions
+    assert_equal [], Pathname.new("jquery.js").engine_extensions
+    assert_equal [], Pathname.new("jquery.min.js").engine_extensions
+    assert_equal [], Pathname.new("jquery.tmpl.min.js").engine_extensions
+    assert_equal [".erb"], Pathname.new("jquery.js.erb").engine_extensions
+    assert_equal [".erb"], Pathname.new("jquery.min.js.erb").engine_extensions
+    assert_equal [".coffee"],
+      Pathname.new("jquery.min.coffee").engine_extensions
   end
 
   test "content_type" do
@@ -67,6 +74,8 @@ class TestPathname < Sprockets::TestCase
       Pathname.new("project.js.coffee.erb").content_type
     assert_equal "text/css",
       Pathname.new("gallery.css.erb").content_type
+    assert_equal "application/javascript",
+      Pathname.new("jquery.tmpl.min.js").content_type
 
     if Tilt::CoffeeScriptTemplate.respond_to?(:default_mime_type)
       assert_equal "application/javascript",

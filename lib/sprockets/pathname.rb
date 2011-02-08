@@ -18,14 +18,17 @@ module Sprockets
     end
 
     def format_extension
-      if (ext = extensions.first) && lookup_mime_type(ext)
-        ext
-      end
+      extensions.detect { |ext| lookup_mime_type(ext) }
     end
 
     def engine_extensions
-      offset = format_extension ? 1 : 0
-      extensions[offset..-1] || []
+      exts = extensions
+
+      if offset = extensions.index(format_extension)
+        exts = extensions[offset+1..-1]
+      end
+
+      exts.select { |ext| Environment.lookup_engine(ext) }
     end
 
     def engines
