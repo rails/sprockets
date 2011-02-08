@@ -84,7 +84,7 @@ module Sprockets
     end
 
     def process_provide_directive(path)
-      # TODO
+      @environment.paths << File.expand_path(path, base_path)
     end
 
     def each_pathname_in_tree(path)
