@@ -1,6 +1,8 @@
 require "digest/sha1"
+require "json"
 require "rack/utils"
 require "set"
+require "time"
 
 module Sprockets
   class ConcatenatedAsset
@@ -20,7 +22,7 @@ module Sprockets
     end
 
     def digest
-      @digest.hexdigest
+      @digest.is_a?(String) ? @digest : @digest.hexdigest
     end
 
     def each(&block)
@@ -33,6 +35,44 @@ module Sprockets
 
     def to_s
       @source.join
+    end
+
+    def eql?(other)
+      other.class == self.class &&
+        other.content_type == self.content_type &&
+        other.format_extension == self.format_extension &&
+        other.source_paths == self.source_paths &&
+        other.mtime == self.mtime &&
+        other.digest == self.digest
+    end
+    alias_method :==, :eql?
+
+    def self.json_create(obj)
+      allocate.tap { |asset| asset.from_json(obj) }
+    end
+
+    def from_json(obj)
+      @content_type     = obj['content_type']
+      @format_extension = obj['format_extension']
+
+      @source_paths = Set.new(obj['source_paths'])
+      @source       = obj['source']
+      @mtime        = Time.parse(obj['mtime'])
+      @length       = obj['length']
+      @digest       = obj['digest']
+    end
+
+    def to_json(*args)
+      {
+        :json_class       => self.class.name,
+        :content_type     => content_type,
+        :format_extension => format_extension,
+        :source_paths     => source_paths.to_a,
+        :source           => source,
+        :mtime            => mtime,
+        :length           => length,
+        :digest           => digest
+      }.to_json(*args)
     end
 
     protected

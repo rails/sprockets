@@ -13,6 +13,11 @@ module Sprockets
       @dirname, @basename = File.split(@path)
     end
 
+    def eql?(other)
+      other.class == self.class && other.path == self.path
+    end
+    alias_method :==, :eql?
+
     def extensions
       @extensions ||= basename.scan(/\.[^.]+/)
     end

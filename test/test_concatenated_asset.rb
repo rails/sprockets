@@ -142,6 +142,41 @@ class ConcatenatedAssetTest < Sprockets::TestCase
       asset("constants.js").to_s
   end
 
+  test "serialize to json" do
+    json = asset("application.js").to_json
+    assert_match "Sprockets::ConcatenatedAsset", json
+    assert_match "application/javascript", json
+    assert_match ".js", json
+    assert_match "deacf69d66fa11710f3197cd175c744abf5bb8fd", json
+  end
+
+  test "unserialize from json" do
+    filename = File.join(fixture_path('asset'), "application.js")
+    asset = JSON.parse({
+      'json_class'       => "Sprockets::ConcatenatedAsset",
+      'content_type'     => "application/javascript",
+      'format_extension' => ".js",
+      'source_paths'     => [filename],
+      'source'           => [File.read(filename)],
+      'mtime'            => File.mtime(filename),
+      'length'           => File.read(filename).length,
+      'digest'           => "deacf69d66fa11710f3197cd175c744abf5bb8fd"
+    }.to_json)
+
+    assert_kind_of Sprockets::ConcatenatedAsset, asset
+    assert_equal "application/javascript", asset.content_type
+    assert_equal ".js", asset.format_extension
+    assert_equal Set.new([filename]), asset.send(:source_paths)
+    assert_equal 109, asset.to_s.length
+    assert_equal File.mtime(filename), asset.mtime
+    assert_equal 109, asset.length
+    assert_equal "deacf69d66fa11710f3197cd175c744abf5bb8fd", asset.digest
+  end
+
+  test "reciprocal serialization functions" do
+    # assert_equal @asset, JSON.parse(@asset.to_json)
+  end
+
   def asset(logical_path)
     Sprockets::ConcatenatedAsset.new(@env, resolve(logical_path))
   end
