@@ -4,11 +4,10 @@ require "set"
 
 module Sprockets
   class ConcatenatedAsset
-    attr_reader :environment, :content_type, :format_extension
+    attr_reader :content_type, :format_extension
     attr_reader :mtime, :length
 
     def initialize(environment, pathname)
-      @environment      = environment
       @content_type     = pathname.content_type
       @format_extension = pathname.format_extension
       @source_paths     = Set.new
@@ -16,7 +15,8 @@ module Sprockets
       @mtime            = Time.at(0)
       @length           = 0
       @digest           = Digest::SHA1.new
-      require(pathname)
+
+      require(environment, pathname)
     end
 
     def digest
@@ -48,13 +48,13 @@ module Sprockets
         content_type == pathname.content_type
       end
 
-      def require(pathname)
+      def require(environment, pathname)
         if File.directory?(pathname.path)
           source_paths << pathname.path
         elsif requirable?(pathname)
           unless source_paths.include?(pathname.path)
             source_paths << pathname.path
-            self << process(pathname)
+            self << process(environment, pathname)
           end
         else
           raise ContentTypeMismatch, "#{pathname.path} is " +
@@ -62,8 +62,8 @@ module Sprockets
         end
       end
 
-      def process(pathname)
-        result = process_source(pathname)
+      def process(environment, pathname)
+        result = process_source(environment, pathname)
         scope, locals = Context.new(environment, pathname), {}
         pathname.engines.reverse_each do |engine|
           result = engine.new(pathname.path) { result }.render(scope, locals)
@@ -71,7 +71,7 @@ module Sprockets
         result
       end
 
-      def process_source(pathname)
+      def process_source(environment, pathname)
         source_file = SourceFile.new(pathname)
         processor   = Processor.new(environment, source_file)
         result      = ""
@@ -80,9 +80,9 @@ module Sprockets
           @mtime = source_file.mtime
         end
 
-        processor.required_pathnames.each { |p| require(p) }
+        processor.required_pathnames.each { |p| require(environment, p) }
         result << source_file.header << "\n" unless source_file.header.empty?
-        processor.included_pathnames.each { |p| result << process(p) }
+        processor.included_pathnames.each { |p| result << process(environment, p) }
         result << source_file.body
 
         # LEGACY
