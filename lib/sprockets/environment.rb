@@ -21,11 +21,12 @@ module Sprockets
 
     register 'jst', JavascriptTemplate
 
-    def initialize(root = ".")
+    def initialize(root = ".", store = nil)
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
 
       @cache = {}
+      @store = Storage.new(store)
       @lock  = nil
     end
 
@@ -80,33 +81,39 @@ module Sprockets
       end
     end
 
-    def find_fresh_asset(logical_path)
-      if (asset = @cache[logical_path]) && !asset.stale?
-        asset
-      else
-        nil
-      end
-    end
-
-    def find_asset(logical_path)
-      if asset = find_fresh_asset(logical_path)
+    def find_asset(logical_path, digest = nil)
+      if digest && digest != ""
+        if asset = @store[digest]
+          asset
+        elsif asset = find_asset(logical_path)
+          asset if asset.digest == digest
+        end
+      elsif asset = find_fresh_asset(logical_path)
         asset
       elsif @lock
         @lock.synchronize do
           if asset = find_fresh_asset(logical_path)
             asset
-          else
-            @cache[logical_path] = build_asset(logical_path)
+          elsif asset = build_asset(logical_path)
+            @store[asset.digest] = @cache[logical_path] = asset
           end
         end
-      else
-        @cache[logical_path] = build_asset(logical_path)
+      elsif asset = build_asset(logical_path)
+        @store[asset.digest] = @cache[logical_path] = asset
       end
     end
 
     alias_method :[], :find_asset
 
     protected
+      def find_fresh_asset(logical_path)
+        if (asset = @cache[logical_path]) && !asset.stale?
+          asset
+        else
+          nil
+        end
+      end
+
       def concatenatable?(format_extension)
         CONCATENATABLE_EXTENSIONS.include?(format_extension)
       end

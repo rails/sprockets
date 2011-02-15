@@ -111,9 +111,9 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
-  test "invalid query string digest responds with gone" do
+  test "invalid query string digest responds with not found" do
     get "/javascripts/application.js?123"
-    assert_equal 410, last_response.status
+    assert_equal 404, last_response.status
   end
 
   test "missing source" do
