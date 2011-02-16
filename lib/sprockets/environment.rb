@@ -124,6 +124,7 @@ module Sprockets
       def find_fresh_asset(logical_path)
         if (asset = @cache[logical_path])
           if !asset.stale?
+            logger.info "[Sprockets] Asset #{logical_path} #{asset.digest} is fresh"
             asset
           else
             logger.warn "[Sprockets] Asset #{logical_path} #{asset.digest} is stale"
