@@ -12,6 +12,8 @@ module Sprockets
         @store.get(key)
       elsif @store.respond_to?(:[])
         @store[key]
+      elsif @store.respond_to?(:read)
+        @store.read(key)
       else
         nil
       end
@@ -26,6 +28,8 @@ module Sprockets
         @store.set(key, value.to_json)
       elsif @store.respond_to?(:[]=)
         @store[key] = value.to_json
+      elsif @store.respond_to?(:write)
+        @store.write(key, value.to_json)
       else
         nil
       end
