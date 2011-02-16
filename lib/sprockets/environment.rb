@@ -93,15 +93,15 @@ module Sprockets
       logger.debug "[Sprockets] Finding asset for #{logical_path}"
 
       if digest && digest != ""
-        if asset = @store[digest]
+        if (asset = @cache[logical_path]) && asset.digest == digest
           asset
-        elsif asset = find_asset(logical_path)
-          if asset.digest == digest
-            asset
-          else
-            logger.error "[Sprockets] Couldn't build #{logical_path} for #{asset.digest}"
-            nil
-          end
+        elsif asset = @store[digest]
+          asset
+        elsif (asset = find_asset(logical_path)) && asset.digest == digest
+          asset
+        else
+          logger.error "[Sprockets] Couldn't build #{logical_path} for #{digest}"
+          nil
         end
       elsif asset = find_fresh_asset(logical_path)
         asset
