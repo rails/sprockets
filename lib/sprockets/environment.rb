@@ -90,7 +90,7 @@ module Sprockets
     end
 
     def find_asset(logical_path, digest = nil)
-      logger.debug "[Sprockets] Finding asset for #{logical_path}"
+      logger.debug "[Sprockets] Finding asset for #{logical_path} #{digest}"
 
       if digest && digest != ""
         if (asset = @cache[logical_path]) && asset.digest == digest
