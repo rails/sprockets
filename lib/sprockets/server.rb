@@ -8,20 +8,29 @@ module Sprockets
       self.environment = environment
     end
 
+    def logger
+      environment.logger
+    end
+
     def call(env)
+      logger.info "[Sprockets] #{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
       environment.multithread = env["rack.multithread"]
 
       if forbidden_request?(env)
+        logger.info "[Sprockets] Forbidden"
         return forbidden_response
       end
 
       asset = environment[env["PATH_INFO"], env["QUERY_STRING"]]
 
       if asset.nil?
+        logger.info "[Sprockets] Not Found"
         not_found_response
       elsif not_modified?(asset, env) || etag_match?(asset, env)
+        logger.info "[Sprockets] Not Modified"
         not_modified_response(asset, env)
       else
+        logger.info "[Sprockets] OK"
         ok_response(asset, env)
       end
     end

@@ -1,4 +1,5 @@
 require 'hike'
+require 'logger'
 require 'thread'
 require 'tilt'
 
@@ -21,9 +22,14 @@ module Sprockets
 
     register 'jst', JavascriptTemplate
 
+    attr_accessor :logger
+
     def initialize(root = ".", store = nil)
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
+
+      @logger = Logger.new($stderr)
+      @logger.level = Logger::FATAL
 
       @cache = {}
       @store = Storage.new(store)
@@ -68,6 +74,8 @@ module Sprockets
     end
 
     def build_asset(logical_path)
+      logger.info "[Sprockets] Building asset for #{logical_path}"
+
       begin
         pathname = resolve(logical_path)
       rescue FileNotFound
@@ -82,11 +90,18 @@ module Sprockets
     end
 
     def find_asset(logical_path, digest = nil)
+      logger.debug "[Sprockets] Finding asset for #{logical_path}"
+
       if digest && digest != ""
         if asset = @store[digest]
           asset
         elsif asset = find_asset(logical_path)
-          asset if asset.digest == digest
+          if asset.digest == digest
+            asset
+          else
+            logger.error "[Sprockets] Couldn't build #{logical_path} for #{asset.digest}"
+            nil
+          end
         end
       elsif asset = find_fresh_asset(logical_path)
         asset
@@ -107,8 +122,13 @@ module Sprockets
 
     protected
       def find_fresh_asset(logical_path)
-        if (asset = @cache[logical_path]) && !asset.stale?
-          asset
+        if (asset = @cache[logical_path])
+          if !asset.stale?
+            asset
+          else
+            logger.warn "[Sprockets] Asset #{logical_path} #{asset.digest} is stale"
+            nil
+          end
         else
           nil
         end
