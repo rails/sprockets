@@ -69,12 +69,14 @@ module Sprockets
           headers["Content-Type"]   = asset.content_type
           headers["Content-Length"] = asset.length.to_s
 
-          headers["Cache-Control"]  = "public, must-revalidate"
+          headers["Cache-Control"]  = "public"
           headers["Last-Modified"]  = asset.mtime.httpdate
           headers["ETag"]           = etag(asset)
 
           if env["QUERY_STRING"] == asset.digest
             headers["Cache-Control"] << ", max-age=31536000"
+          else
+            headers["Cache-Control"] << ", must-revalidate"
           end
         end
       end
