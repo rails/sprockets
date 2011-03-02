@@ -74,7 +74,7 @@ module Sprockets
           headers["ETag"]           = etag(asset)
 
           if env["QUERY_STRING"] == asset.digest
-            headers["Cache-Control"] << ", max-age=31557600"
+            headers["Cache-Control"] << ", max-age=31536000"
           end
         end
       end
