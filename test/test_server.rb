@@ -111,6 +111,14 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
+  test "fingerprint digest sets expiration to the future" do
+    get "/javascripts/application.js"
+    etag = last_response.headers['ETag']
+
+    get "/javascripts/application-#{etag[1..-2]}.js"
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+  end
+
   test "invalid query string digest responds with not found" do
     get "/javascripts/application.js?123"
     assert_equal 404, last_response.status

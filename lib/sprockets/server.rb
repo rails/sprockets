@@ -21,7 +21,13 @@ module Sprockets
         return forbidden_response
       end
 
-      asset = environment[env["PATH_INFO"], env["QUERY_STRING"]]
+      # foo-0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33.js
+      if env['PATH_INFO'].split('/').last =~ /^[^.]+-([0-9a-f]{40})\./
+        env['QUERY_STRING'] = $1
+        env['PATH_INFO'] = env['PATH_INFO'].sub("-#{$1}", "")
+      end
+
+      asset = environment[env['PATH_INFO'], env["QUERY_STRING"]]
 
       if asset.nil?
         logger.info "[Sprockets] Not Found"
