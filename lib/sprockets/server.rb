@@ -74,6 +74,7 @@ module Sprockets
         Hash.new.tap do |headers|
           headers["Content-Type"]   = asset.content_type
           headers["Content-Length"] = asset.length.to_s
+          headers["Content-MD5"]    = asset.digest
 
           headers["Cache-Control"]  = "public"
           headers["Last-Modified"]  = asset.mtime.httpdate
