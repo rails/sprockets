@@ -11,7 +11,7 @@ class StaticAssetTest < Sprockets::TestCase
     json = @asset.to_json
     assert_match "Sprockets::StaticAsset", json
     assert_match @filename, json
-    assert_match "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d", json
+    assert_match "f0ef7081e1539ac00ef5b761b4fb01b3", json
   end
 
   test "unserialize from json" do

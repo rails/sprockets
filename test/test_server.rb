@@ -48,7 +48,7 @@ class TestServer < Sprockets::TestCase
 
   test "serve source with etag headers" do
     get "/javascripts/application.js"
-    assert_equal '"6413e7ce345409919a84538cb5577e2cd17bb72f"',
+    assert_equal '"3aede9c70a76e611d43a1c5f1fb1708a"',
       last_response.headers['ETag']
   end
 

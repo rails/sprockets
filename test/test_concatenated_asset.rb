@@ -124,7 +124,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "asset digest" do
-    assert_equal "729a810640240adfd653c3d958890cfc4ec0ea84", asset("project.js").digest
+    assert_equal "35d470ef8621efa573dee227a4feaba3", asset("project.js").digest
   end
 
   test "asset is stale when one of its source files is modified" do
@@ -147,7 +147,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_match "Sprockets::ConcatenatedAsset", json
     assert_match "application/javascript", json
     assert_match ".js", json
-    assert_match "deacf69d66fa11710f3197cd175c744abf5bb8fd", json
+    assert_match "a64bb1a34523baef725ad44d492269e1", json
   end
 
   test "unserialize from json" do

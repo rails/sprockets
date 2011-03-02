@@ -1,4 +1,4 @@
-require "digest/sha1"
+require "digest/md5"
 require "json"
 require "rack/utils"
 require "time"
@@ -13,7 +13,7 @@ module Sprockets
       contents = read
       @mtime   = File.mtime(@pathname.path)
       @length  = Rack::Utils.bytesize(contents)
-      @digest  = Digest::SHA1.hexdigest(contents)
+      @digest  = Digest::MD5.hexdigest(contents)
     end
 
     def content_type

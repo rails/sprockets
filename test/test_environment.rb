@@ -39,7 +39,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "find asset with digest" do
     assert_equal "Hello world\n",
-      @env["hello.txt", "33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d"].to_s
+      @env["hello.txt", "f0ef7081e1539ac00ef5b761b4fb01b3"].to_s
   end
 
   test "find asset with blank digest" do
@@ -62,7 +62,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "lookup asset digest" do
-    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc",
+    assert_equal "f1598cfbaf2a26f20367e4046957f6e0",
       @env["gallery.js"].digest
   end
 end

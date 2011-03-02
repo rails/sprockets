@@ -21,8 +21,8 @@ module Sprockets
         return forbidden_response
       end
 
-      # foo-0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33.js
-      if env['PATH_INFO'].split('/').last =~ /^[^.]+-([0-9a-f]{40})\./
+      # foo-acbd18db4cc2f85cedef654fccc4a4d8.js
+      if env['PATH_INFO'].split('/').last =~ /^[^.]+-([0-9a-f]{7,40})\./
         env['QUERY_STRING'] = $1
         env['PATH_INFO'] = env['PATH_INFO'].sub("-#{$1}", "")
       end

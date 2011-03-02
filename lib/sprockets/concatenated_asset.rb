@@ -1,4 +1,4 @@
-require "digest/sha1"
+require "digest/md5"
 require "json"
 require "rack/utils"
 require "set"
@@ -16,7 +16,7 @@ module Sprockets
       @source           = []
       @mtime            = Time.at(0)
       @length           = 0
-      @digest           = Digest::SHA1.new
+      @digest           = Digest::MD5.new
 
       require(environment, pathname)
     end
