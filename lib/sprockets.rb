@@ -13,5 +13,4 @@ module Sprockets
   autoload :Server,              "sprockets/server"
   autoload :SourceFile,          "sprockets/source_file"
   autoload :StaticAsset,         "sprockets/static_asset"
-  autoload :Storage,             "sprockets/storage"
 end

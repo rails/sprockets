@@ -2,7 +2,7 @@ require 'sprockets_test'
 
 class TestEnvironment < Sprockets::TestCase
   def setup
-    @env = Sprockets::Environment.new(".", {})
+    @env = Sprockets::Environment.new(".")
     @env.paths << fixture_path('default')
   end
 

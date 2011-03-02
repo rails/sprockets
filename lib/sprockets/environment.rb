@@ -24,7 +24,7 @@ module Sprockets
 
     attr_accessor :logger
 
-    def initialize(root = ".", store = nil)
+    def initialize(root = ".")
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
 
@@ -32,7 +32,6 @@ module Sprockets
       @logger.level = Logger::FATAL
 
       @cache = {}
-      @store = Storage.new(store)
       @lock  = nil
     end
 
@@ -95,8 +94,6 @@ module Sprockets
       if digest && digest != ""
         if (asset = @cache[logical_path]) && asset.digest == digest
           asset
-        elsif asset = @store[digest]
-          asset
         elsif (asset = find_asset(logical_path)) && asset.digest == digest
           asset
         else
@@ -110,11 +107,11 @@ module Sprockets
           if asset = find_fresh_asset(logical_path)
             asset
           elsif asset = build_asset(logical_path)
-            @store[asset.digest] = @cache[logical_path] = asset
+            @cache[logical_path] = asset
           end
         end
       elsif asset = build_asset(logical_path)
-        @store[asset.digest] = @cache[logical_path] = asset
+        @cache[logical_path] = asset
       end
     end
 
