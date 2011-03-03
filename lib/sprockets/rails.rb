@@ -8,7 +8,7 @@ module Rails
      "vendor/sprockets/*/lib",
      "vendor/plugins/*/assets",
      "vendor/plugins/*/javascripts",
-     "vendor/plugins/*/app/assets"
+     "vendor/plugins/*/app/assets",
      "vendor/plugins/*/app/javascripts"]
   end
 
