@@ -20,8 +20,6 @@ module Sprockets
       @template_mappings[ext] || Tilt[ext]
     end
 
-    register 'jst', JavascriptTemplate
-
     attr_accessor :logger
 
     # TODO: Review option name
