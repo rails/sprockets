@@ -24,6 +24,9 @@ module Sprockets
 
     attr_accessor :logger
 
+    # TODO: Review option name
+    attr_accessor :ensure_fresh_assets
+
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
@@ -33,6 +36,8 @@ module Sprockets
 
       @cache = {}
       @lock  = nil
+
+      @ensure_fresh_assets = true
     end
 
     def multithread
@@ -119,15 +124,26 @@ module Sprockets
 
     protected
       def find_fresh_asset(logical_path)
-        if (asset = @cache[logical_path])
-          if !asset.stale?
-            logger.info "[Sprockets] Asset #{logical_path} #{asset.digest} is fresh"
-            asset
+        asset = @cache[logical_path]
+
+        if ensure_fresh_assets
+          if asset
+            if asset.stale?
+              logger.warn "[Sprockets] Asset #{logical_path} #{asset.digest} is stale"
+              nil
+            else
+              logger.info "[Sprockets] Asset #{logical_path} #{asset.digest} is fresh"
+              asset
+            end
           else
-            logger.warn "[Sprockets] Asset #{logical_path} #{asset.digest} is stale"
+            logger.debug "[Sprockets] Asset #{logical_path} is not cached"
             nil
           end
+        elsif asset
+          logger.debug "[Sprockets] Asset #{logical_path} cached"
+          asset
         else
+          logger.debug "[Sprockets] Asset #{logical_path} is not cached"
           nil
         end
       end
