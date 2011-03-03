@@ -12,16 +12,12 @@ class TestServer < Sprockets::TestCase
     @env.paths << fixture_path("server/vendor/javascripts")
   end
 
-  def javascripts_app
-    @javascripts_app ||= Sprockets::Server.new(@env)
-  end
-
   def default_app
-    javascripts_app = self.javascripts_app
+    app = @env
 
     Rack::Builder.new do
       map "/javascripts" do
-        run javascripts_app
+        run app
       end
     end
   end
@@ -93,11 +89,11 @@ class TestServer < Sprockets::TestCase
 
   test "if sources didnt change the server shouldnt rebundle" do
     get "/javascripts/application.js"
-    asset_before = javascripts_app.environment["application.js"]
+    asset_before = @env["application.js"]
     assert asset_before
 
     get "/javascripts/application.js"
-    asset_after = javascripts_app.environment["application.js"]
+    asset_after = @env["application.js"]
     assert asset_after
 
     assert asset_before.equal?(asset_after)

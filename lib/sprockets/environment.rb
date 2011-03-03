@@ -36,6 +36,8 @@ module Sprockets
       @lock  = nil
 
       @ensure_fresh_assets = true
+
+      @server = Server.new(self)
     end
 
     def multithread
@@ -58,8 +60,8 @@ module Sprockets
       @trail.extensions
     end
 
-    def server
-      @server ||= Server.new(self)
+    def call(env)
+      @server.call(env)
     end
 
     def resolve(logical_path, options = {})
