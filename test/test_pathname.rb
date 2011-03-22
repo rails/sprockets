@@ -101,10 +101,17 @@ class TestPathname < Sprockets::TestCase
     end
   end
 
-  test "digest glob" do
+  test "fingerprinted?" do
+    assert !Pathname.new(fixture_path("print.css")).fingerprinted?
+    assert Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprinted?
+  end
+
+  test "fingerprint glob" do
     assert_equal fixture_path("application-#{'[0-9a-f]'*7}*.js"),
-      Pathname.new(fixture_path("application.js")).digest_glob
+      Pathname.new(fixture_path("application.js")).fingerprint_glob
     assert_equal fixture_path("project/index-#{'[0-9a-f]'*7}*.css.scss"),
-      Pathname.new(fixture_path("./people/../project/index.css.scss")).digest_glob
+      Pathname.new(fixture_path("./people/../project/index.css.scss")).fingerprint_glob
+    assert_equal fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css"),
+      Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprint_glob
   end
 end

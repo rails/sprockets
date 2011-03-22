@@ -137,10 +137,10 @@ module Sprockets
     alias_method :[], :find_asset
 
     protected
-      def find_static_asset(filename)
-        pathname = Pathname.new(File.join(static_root.to_s, filename))
+      def find_static_asset(path)
+        pathname = Pathname.new(File.join(static_root.to_s, path))
 
-        Dir[pathname.digest_glob].each do |filename|
+        Dir[pathname.fingerprint_glob].each do |filename|
           return StaticAsset.new(filename)
         end
 

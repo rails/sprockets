@@ -67,9 +67,17 @@ module Sprockets
       path
     end
 
-    def digest_glob
-      basename = "#{basename_without_extensions}-#{'[0-9a-f]'*7}*#{extensions.join}"
-      File.join(dirname, basename)
+    def fingerprinted?
+      basename_without_extensions =~ /-([0-9a-f]{7,40})$/
+    end
+
+    def fingerprint_glob
+      if fingerprinted?
+        path
+      else
+        basename = "#{basename_without_extensions}-#{'[0-9a-f]'*7}*#{extensions.join}"
+        File.join(dirname, basename)
+      end
     end
 
     private
