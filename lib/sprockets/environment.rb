@@ -93,7 +93,7 @@ module Sprockets
 
       paths.each do |path|
         if asset = find_asset(path)
-          filename = File.join(static_root, path)
+          filename = File.join(static_root.to_s, path.to_s)
 
           FileUtils.mkdir_p File.dirname(filename)
 
