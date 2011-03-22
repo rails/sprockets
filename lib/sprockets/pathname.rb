@@ -67,8 +67,14 @@ module Sprockets
       path
     end
 
+    def fingerprint
+      if basename_without_extensions =~ /-([0-9a-f]{7,40})$/
+        $1
+      end
+    end
+
     def fingerprinted?
-      basename_without_extensions =~ /-([0-9a-f]{7,40})$/
+      fingerprint ? true : false
     end
 
     def fingerprint_glob

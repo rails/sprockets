@@ -87,26 +87,6 @@ module Sprockets
       end
     end
 
-    def build_asset(logical_path)
-      logger.info "[Sprockets] Building asset for #{logical_path}"
-
-      if static_root && asset = find_static_asset(logical_path)
-        return asset
-      end
-
-      begin
-        pathname = resolve(logical_path)
-      rescue FileNotFound
-        nil
-      else
-        if concatenatable?(pathname)
-          ConcatenatedAsset.new(self, pathname)
-        else
-          StaticAsset.new(pathname)
-        end
-      end
-    end
-
     def find_asset(logical_path, digest = nil)
       logger.debug "[Sprockets] Finding asset for #{logical_path} #{digest}"
 
@@ -125,11 +105,11 @@ module Sprockets
         @lock.synchronize do
           if asset = find_fresh_asset(logical_path)
             asset
-          elsif asset = build_asset(logical_path)
+          elsif asset = build_asset(logical_path, digest)
             @cache[logical_path] = asset
           end
         end
-      elsif asset = build_asset(logical_path)
+      elsif asset = build_asset(logical_path, digest)
         @cache[logical_path] = asset
       end
     end
@@ -137,10 +117,32 @@ module Sprockets
     alias_method :[], :find_asset
 
     protected
-      def find_static_asset(path)
+      def build_asset(logical_path, digest)
+        logger.info "[Sprockets] Building asset for #{logical_path}"
+
+        if static_root && asset = find_static_asset(logical_path, digest)
+          return asset
+        end
+
+        begin
+          pathname = resolve(logical_path)
+        rescue FileNotFound
+          nil
+        else
+          if concatenatable?(pathname)
+            ConcatenatedAsset.new(self, pathname)
+          else
+            StaticAsset.new(pathname)
+          end
+        end
+      end
+
+      def find_static_asset(path, digest)
         pathname = Pathname.new(File.join(static_root.to_s, path))
 
         Dir[pathname.fingerprint_glob].each do |filename|
+          filename = Pathname.new(filename)
+          next if digest && filename.fingerprint != digest
           return StaticAsset.new(filename)
         end
 

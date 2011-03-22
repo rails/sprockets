@@ -101,6 +101,11 @@ class TestPathname < Sprockets::TestCase
     end
   end
 
+  test "fingerprint" do
+    assert_nil Pathname.new(fixture_path("print.css")).fingerprint
+    assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprint
+  end
+
   test "fingerprinted?" do
     assert !Pathname.new(fixture_path("print.css")).fingerprinted?
     assert Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprinted?
