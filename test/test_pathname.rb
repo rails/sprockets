@@ -18,6 +18,19 @@ class TestPathname < Sprockets::TestCase
       Pathname.new("javascripts/application.js.coffee").basename
   end
 
+  test "basename with extensions" do
+    assert_equal "empty",
+      Pathname.new("empty").basename_without_extensions
+    assert_equal "gallery",
+      Pathname.new("gallery.js").basename_without_extensions
+    assert_equal "application",
+      Pathname.new("application.js.coffee").basename_without_extensions
+    assert_equal "project",
+      Pathname.new("project.js.coffee.erb").basename_without_extensions
+    assert_equal "gallery",
+      Pathname.new("gallery.css.erb").basename_without_extensions
+  end
+
   test "extensions" do
     assert_equal [],
       Pathname.new("empty").extensions
@@ -81,5 +94,12 @@ class TestPathname < Sprockets::TestCase
       assert_equal "application/javascript",
         Pathname.new("application.coffee").content_type
     end
+  end
+
+  test "digest glob" do
+    assert_equal fixture_path("application-#{'[0-9a-f]'*7}*.js"),
+      Pathname.new(fixture_path("application.js")).digest_glob
+    assert_equal fixture_path("project/index-#{'[0-9a-f]'*7}*.css.scss"),
+      Pathname.new(fixture_path("./people/../project/index.css.scss")).digest_glob
   end
 end

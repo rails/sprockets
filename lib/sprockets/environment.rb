@@ -22,6 +22,8 @@ module Sprockets
 
     attr_accessor :logger
 
+    attr_accessor :static_root
+
     # TODO: Review option name
     attr_accessor :ensure_fresh_assets
 
@@ -36,6 +38,8 @@ module Sprockets
       @lock  = nil
 
       @ensure_fresh_assets = true
+
+      @static_root = nil
 
       @server = Server.new(self)
     end
@@ -66,6 +70,18 @@ module Sprockets
 
     def resolve(logical_path, options = {})
       if block_given?
+        if static_root
+          static_pathname = Pathname.new(File.join(static_root, logical_path))
+
+          Dir[static_pathname.digest_glob].each do |filename|
+            yield Pathname.new(filename)
+          end
+
+          if static_pathname.exist?
+            yield static_pathname
+          end
+        end
+
         @trail.find(logical_path, options) do |path|
           yield Pathname.new(path)
         end
@@ -85,7 +101,7 @@ module Sprockets
       rescue FileNotFound
         nil
       else
-        if concatenatable?(pathname.format_extension)
+        if concatenatable?(pathname)
           ConcatenatedAsset.new(self, pathname)
         else
           StaticAsset.new(pathname)
@@ -148,8 +164,13 @@ module Sprockets
         end
       end
 
-      def concatenatable?(format_extension)
-        CONCATENATABLE_EXTENSIONS.include?(format_extension)
+      def concatenatable?(pathname)
+        if static_root && pathname.path[static_root]
+          # Assets served from static root are never concatenatable
+          false
+        else
+          CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
+        end
       end
   end
 end

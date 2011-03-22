@@ -18,6 +18,14 @@ module Sprockets
     end
     alias_method :==, :eql?
 
+    def exist?
+      File.exist?(path)
+    end
+
+    def basename_without_extensions
+      File.basename(basename, extensions.join)
+    end
+
     def extensions
       @extensions ||= basename.scan(/\.[^.]+/)
     end
@@ -56,7 +64,12 @@ module Sprockets
     end
 
     def to_s
-      @path
+      path
+    end
+
+    def digest_glob
+      basename = "#{basename_without_extensions}-#{'[0-9a-f]'*7}*#{extensions.join}"
+      File.join(dirname, basename)
     end
 
     private

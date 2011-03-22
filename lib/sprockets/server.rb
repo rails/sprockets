@@ -13,7 +13,7 @@ module Sprockets
     end
 
     def call(env)
-      logger.info "[Sprockets] #{env['REQUEST_METHOD']} #{env['PATH_INFO']}"
+      logger.info "[Sprockets] #{env['REQUEST_METHOD']} #{env['PATH_INFO']} #{env['QUERY_STRING']}"
       environment.multithread = env["rack.multithread"]
 
       if forbidden_request?(env)
