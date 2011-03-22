@@ -77,4 +77,8 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "f1598cfbaf2a26f20367e4046957f6e0",
       @env["gallery.js"].digest
   end
+
+  test "url for asset" do
+    assert_equal "gallery-f1598cfbaf2a26f20367e4046957f6e0.js", @env.url("gallery.js")
+  end
 end
