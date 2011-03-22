@@ -8,6 +8,11 @@ class TestPathname < Sprockets::TestCase
     assert Pathname.new(path).equal?(path)
   end
 
+  test "construct from pathname" do
+    pathname = ::Pathname.new("javascripts/application.js.coffee").expand_path
+    assert_equal pathname.to_s, Pathname.new(pathname).to_s
+  end
+
   test "dirname" do
     assert_equal File.expand_path("javascripts", "."),
       Pathname.new("javascripts/application.js.coffee").dirname

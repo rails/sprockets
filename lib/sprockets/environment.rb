@@ -22,8 +22,6 @@ module Sprockets
 
     attr_accessor :logger
 
-    attr_accessor :static_root
-
     # TODO: Review option name
     attr_accessor :ensure_fresh_assets
 
@@ -52,6 +50,14 @@ module Sprockets
       @lock = val ? Mutex.new : nil
     end
 
+    def static_root
+      @static_root
+    end
+
+    def static_root=(root)
+      @static_root = root ? Pathname.new(root) : nil
+    end
+
     def root
       @trail.root
     end
@@ -71,7 +77,7 @@ module Sprockets
     def resolve(logical_path, options = {})
       if block_given?
         if static_root
-          static_pathname = Pathname.new(File.join(static_root, logical_path))
+          static_pathname = Pathname.new(File.join(static_root.to_s, logical_path))
 
           Dir[static_pathname.digest_glob].each do |filename|
             yield Pathname.new(filename)
@@ -165,7 +171,7 @@ module Sprockets
       end
 
       def concatenatable?(pathname)
-        if static_root && pathname.path[static_root]
+        if static_root && pathname.path[static_root.to_s]
           # Assets served from static root are never concatenatable
           false
         else
