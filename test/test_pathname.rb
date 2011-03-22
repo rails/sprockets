@@ -14,7 +14,7 @@ class TestPathname < Sprockets::TestCase
   end
 
   test "dirname" do
-    assert_equal File.expand_path("javascripts", "."),
+    assert_equal "javascripts",
       Pathname.new("javascripts/application.js.coffee").dirname
   end
 
@@ -102,21 +102,7 @@ class TestPathname < Sprockets::TestCase
   end
 
   test "fingerprint" do
-    assert_nil Pathname.new(fixture_path("print.css")).fingerprint
-    assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprint
-  end
-
-  test "fingerprinted?" do
-    assert !Pathname.new(fixture_path("print.css")).fingerprinted?
-    assert Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprinted?
-  end
-
-  test "fingerprint glob" do
-    assert_equal fixture_path("application-#{'[0-9a-f]'*7}*.js"),
-      Pathname.new(fixture_path("application.js")).fingerprint_glob
-    assert_equal fixture_path("project/index-#{'[0-9a-f]'*7}*.css.scss"),
-      Pathname.new(fixture_path("./people/../project/index.css.scss")).fingerprint_glob
-    assert_equal fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css"),
-      Pathname.new(fixture_path("print-f7531e2d0ea27233ce00b5f01c5bf335.css")).fingerprint_glob
+    assert_nil Pathname.new("print.css").fingerprint
+    assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", Pathname.new("print-f7531e2d0ea27233ce00b5f01c5bf335.css").fingerprint
   end
 end

@@ -45,6 +45,15 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal Sprockets::StaticAsset, @env["compiled.js"].class
   end
 
+  test "find asset with digest" do
+    assert_equal "Hello world\n",
+      @env["hello-f0ef7081e1539ac00ef5b761b4fb01b3.txt"].to_s
+  end
+
+  test "find asset with invalid digest" do
+    assert_nil @env["hello-ffffffff.txt"]
+  end
+
   test "find compiled asset with filename digest in static root" do
     assert_equal "(function() {\n  application.boot();\n})();\n",
       @env["compiled-digest.js"].to_s
@@ -52,29 +61,6 @@ class TestEnvironment < Sprockets::TestCase
       @env["compiled-digest-0aa2105d29558f3eb790d411d7d8fb66.js"].to_s
     assert_equal "(function() {})();\n",
       @env["compiled-digest-1c41eb0cf934a0c76babe875f982f9d1.js"].to_s
-  end
-
-  test "find asset with digest" do
-    assert_equal "Hello world\n",
-      @env["hello.txt", "f0ef7081e1539ac00ef5b761b4fb01b3"].to_s
-  end
-
-  test "find asset with blank digest" do
-    assert_equal "Hello world\n",
-      @env["hello.txt", ""].to_s
-  end
-
-  test "find asset with invalid digest" do
-    assert_nil @env["hello.txt", "invalid"]
-  end
-
-  test "find compiled asset with digest" do
-    assert_equal "(function() {\n  application.boot();\n})();\n",
-      @env["compiled-digest.js", "0aa2105d29558f3eb790d411d7d8fb66"].to_s
-    assert_equal "(function() {\n  application.boot();\n})();\n",
-      @env["compiled-digest-0aa2105d29558f3eb790d411d7d8fb66.js", "0aa2105d29558f3eb790d411d7d8fb66"].to_s
-    # assert_equal "(function() {})();\n",
-    #  @env["compiled-digest-1c41eb0cf934a0c76babe875f982f9d1.js", "1c41eb0cf934a0c76babe875f982f9d1"].to_s
   end
 
   test "missing asset returns nil" do

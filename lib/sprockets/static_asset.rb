@@ -9,7 +9,6 @@ module Sprockets
 
     def initialize(pathname)
       @pathname = Pathname.new(pathname)
-      @fingerprinted = @pathname.fingerprinted?
 
       contents = read
       @mtime   = File.mtime(@pathname.path)
@@ -22,7 +21,7 @@ module Sprockets
     end
 
     def stale?
-      if @fingerprinted
+      if pathname.fingerprint
         false
       else
         mtime < File.mtime(to_path)

@@ -71,7 +71,7 @@ module Sprockets
 
     def resolve(logical_path, options = {})
       if block_given?
-        @trail.find(logical_path, options) do |path|
+        @trail.find(logical_path.to_s, options) do |path|
           yield Pathname.new(path)
         end
       else
@@ -82,77 +82,35 @@ module Sprockets
       end
     end
 
-    def find_asset(logical_path, digest = nil)
-      logger.debug "[Sprockets] Finding asset for #{logical_path} #{digest}"
+    def find_asset(logical_path)
+      logger.debug "[Sprockets] Finding asset for #{logical_path}"
 
-      if digest && digest != ""
-        if (asset = @cache[logical_path]) && asset.digest == digest
-          asset
-        elsif (asset = find_asset(logical_path)) && asset.digest == digest
-          asset
-        else
-          logger.error "[Sprockets] Couldn't build #{logical_path} for #{digest}"
-          nil
-        end
-      elsif asset = find_fresh_asset(logical_path)
+      logical_path = Pathname.new(logical_path)
+
+      if asset = find_fresh_asset_from_cache(logical_path)
         asset
       elsif @lock
         @lock.synchronize do
-          if asset = find_fresh_asset(logical_path)
+          if asset = find_fresh_asset_from_cache(logical_path)
             asset
-          elsif asset = build_asset(logical_path, digest)
-            @cache[logical_path] = asset
+          elsif asset = build_asset(logical_path)
+            @cache[logical_path.to_s] = asset
           end
         end
-      elsif asset = build_asset(logical_path, digest)
-        @cache[logical_path] = asset
+      elsif asset = build_asset(logical_path)
+        @cache[logical_path.to_s] = asset
       end
     end
 
     alias_method :[], :find_asset
 
     protected
-      def build_asset(logical_path, digest)
-        logger.info "[Sprockets] Building asset for #{logical_path}"
-
-        if static_root && asset = find_static_asset(logical_path, digest)
-          return asset
-        end
-
-        begin
-          pathname = resolve(logical_path)
-        rescue FileNotFound
-          nil
-        else
-          if concatenatable?(pathname)
-            ConcatenatedAsset.new(self, pathname)
-          else
-            StaticAsset.new(pathname)
-          end
-        end
-      end
-
-      def find_static_asset(path, digest)
-        pathname = Pathname.new(File.join(static_root.to_s, path))
-
-        Dir[pathname.fingerprint_glob].each do |filename|
-          filename = Pathname.new(filename)
-          next if digest && filename.fingerprint != digest
-          return StaticAsset.new(filename)
-        end
-
-        if pathname.exist?
-          return StaticAsset.new(pathname)
-        end
-
-        nil
-      end
-
-      def find_fresh_asset(logical_path)
-        asset = @cache[logical_path]
-
-        if asset
-          if asset.stale?
+      def find_fresh_asset_from_cache(logical_path)
+        if asset = @cache[logical_path.to_s]
+          if logical_path.fingerprint
+            logger.debug "[Sprockets] Asset #{logical_path} is cached"
+            asset
+          elsif asset.stale?
             logger.warn "[Sprockets] Asset #{logical_path} #{asset.digest} is stale"
             nil
           else
@@ -163,6 +121,55 @@ module Sprockets
           logger.debug "[Sprockets] Asset #{logical_path} is not cached"
           nil
         end
+      end
+
+      def build_asset(logical_path)
+        logger.info "[Sprockets] Building asset for #{logical_path}"
+        find_static_asset(logical_path) || find_asset_in_load_path(logical_path)
+      end
+
+      def find_static_asset(logical_path)
+        return nil unless static_root
+
+        pathname = Pathname.new(File.join(static_root.to_s, logical_path.to_s))
+
+        if !pathname.fingerprint
+          basename = "#{pathname.basename_without_extensions}-#{'[0-9a-f]'*7}*"
+          basename = "#{basename}#{pathname.extensions.join}"
+
+          Dir[File.join(pathname.dirname, basename)].each do |filename|
+            return StaticAsset.new(filename)
+          end
+        end
+
+        if pathname.exist?
+          return StaticAsset.new(pathname)
+        end
+
+        nil
+      end
+
+      def find_asset_in_load_path(logical_path)
+        if fingerprint = logical_path.fingerprint
+          pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
+        else
+          pathname = resolve(logical_path)
+        end
+      rescue FileNotFound
+        nil
+      else
+        if concatenatable?(pathname)
+          asset = ConcatenatedAsset.new(self, pathname)
+        else
+          asset = StaticAsset.new(pathname)
+        end
+
+        if fingerprint && fingerprint != asset.digest
+          logger.error "[Sprockets] Couldn't find #{logical_path}"
+          return nil
+        end
+
+        asset
       end
 
       def concatenatable?(pathname)

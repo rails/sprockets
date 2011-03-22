@@ -9,7 +9,7 @@ module Sprockets
     end
 
     def initialize(path)
-      @path = File.expand_path(path)
+      @path = path.to_s
       @dirname, @basename = File.split(@path)
     end
 
@@ -68,21 +68,12 @@ module Sprockets
     end
 
     def fingerprint
-      if basename_without_extensions =~ /-([0-9a-f]{7,40})$/
-        $1
-      end
-    end
-
-    def fingerprinted?
-      fingerprint ? true : false
-    end
-
-    def fingerprint_glob
-      if fingerprinted?
-        path
+      if defined? @fingerprint
+        @fingerprint
+      elsif basename_without_extensions =~ /-([0-9a-f]{7,40})$/
+        @fingerprint = $1
       else
-        basename = "#{basename_without_extensions}-#{'[0-9a-f]'*7}*#{extensions.join}"
-        File.join(dirname, basename)
+        @fingerprint = nil
       end
     end
 

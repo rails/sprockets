@@ -99,25 +99,12 @@ class TestServer < Sprockets::TestCase
     assert asset_before.equal?(asset_after)
   end
 
-  test "query string digest sets expiration to the future" do
-    get "/javascripts/application.js"
-    md5 = last_response.headers['Content-MD5']
-
-    get "/javascripts/application.js?#{md5}"
-    assert_match %r{max-age}, last_response.headers['Cache-Control']
-  end
-
   test "fingerprint digest sets expiration to the future" do
     get "/javascripts/application.js"
     md5 = last_response.headers['Content-MD5']
 
     get "/javascripts/application-#{md5}.js"
     assert_match %r{max-age}, last_response.headers['Cache-Control']
-  end
-
-  test "invalid query string digest responds with not found" do
-    get "/javascripts/application.js?123"
-    assert_equal 404, last_response.status
   end
 
   test "missing source" do

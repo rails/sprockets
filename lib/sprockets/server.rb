@@ -21,13 +21,7 @@ module Sprockets
         return forbidden_response
       end
 
-      # foo-acbd18db4cc2f85cedef654fccc4a4d8.js
-      if env['PATH_INFO'].split('/').last =~ /^[^.]+-([0-9a-f]{7,40})\./
-        env['QUERY_STRING'] = $1
-        env['PATH_INFO'] = env['PATH_INFO'].sub("-#{$1}", "")
-      end
-
-      asset = environment[env['PATH_INFO'], env["QUERY_STRING"]]
+      asset = environment[env['PATH_INFO']]
 
       if asset.nil?
         logger.info "[Sprockets] Not Found"
@@ -80,7 +74,7 @@ module Sprockets
           headers["Last-Modified"]  = asset.mtime.httpdate
           headers["ETag"]           = etag(asset)
 
-          if env["QUERY_STRING"] == asset.digest
+          if Pathname.new(env["PATH_INFO"]).fingerprint
             headers["Cache-Control"] << ", max-age=31536000"
           else
             headers["Cache-Control"] << ", must-revalidate"
