@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'hike'
 require 'logger'
 require 'thread'
@@ -84,6 +85,22 @@ module Sprockets
         end
       else
         logical_path.to_s
+      end
+    end
+
+    def precompile(*paths)
+      raise "missing static root" unless static_root
+
+      paths.each do |path|
+        if asset = find_asset(path)
+          filename = File.join(static_root, path)
+
+          FileUtils.mkdir_p File.dirname(filename)
+
+          File.open(filename, 'w') do |f|
+            f.write asset.to_s
+          end
+        end
       end
     end
 
