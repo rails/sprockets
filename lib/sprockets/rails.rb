@@ -16,7 +16,6 @@ module Rails
     @assets ||= begin
       env = Sprockets::Environment.new(self.root.to_s)
       env.logger = self.logger
-      env.ensure_fresh_assets = !ActionController::Base.perform_caching
 
       self.default_sprockets_paths.each do |pattern|
         Dir[pattern].each do |dir|
