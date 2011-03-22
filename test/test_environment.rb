@@ -16,19 +16,15 @@ class TestEnvironment < Sprockets::TestCase
       @env.resolve("gallery.js").path
   end
 
-  test "resolve compiled asset in static root" do
-    assert_equal fixture_path('public/compiled.js'),
-      @env.resolve("compiled.js").path
-  end
-
-  test "resolve compiled asset with filename digest in static root" do
-    assert_equal fixture_path('public/compiled-digest-0aa2105d29558f3eb790d411d7d8fb66.js'),
-      @env.resolve("compiled-digest.js").path
-  end
-
   test "missing file raises an exception" do
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("null")
+    end
+  end
+
+  test "resolve ignores static root" do
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("compiled.js")
     end
   end
 

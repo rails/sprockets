@@ -76,18 +76,6 @@ module Sprockets
 
     def resolve(logical_path, options = {})
       if block_given?
-        if static_root
-          static_pathname = Pathname.new(File.join(static_root.to_s, logical_path))
-
-          Dir[static_pathname.digest_glob].each do |filename|
-            yield Pathname.new(filename)
-          end
-
-          if static_pathname.exist?
-            yield static_pathname
-          end
-        end
-
         @trail.find(logical_path, options) do |path|
           yield Pathname.new(path)
         end
@@ -101,6 +89,10 @@ module Sprockets
 
     def build_asset(logical_path)
       logger.info "[Sprockets] Building asset for #{logical_path}"
+
+      if static_root && asset = find_static_asset(logical_path)
+        return asset
+      end
 
       begin
         pathname = resolve(logical_path)
@@ -145,6 +137,20 @@ module Sprockets
     alias_method :[], :find_asset
 
     protected
+      def find_static_asset(filename)
+        pathname = Pathname.new(File.join(static_root.to_s, filename))
+
+        Dir[pathname.digest_glob].each do |filename|
+          return StaticAsset.new(filename)
+        end
+
+        if pathname.exist?
+          return StaticAsset.new(pathname)
+        end
+
+        nil
+      end
+
       def find_fresh_asset(logical_path)
         asset = @cache[logical_path]
 
@@ -171,12 +177,7 @@ module Sprockets
       end
 
       def concatenatable?(pathname)
-        if static_root && pathname.path[static_root.to_s]
-          # Assets served from static root are never concatenatable
-          false
-        else
-          CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
-        end
+        CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
       end
   end
 end
