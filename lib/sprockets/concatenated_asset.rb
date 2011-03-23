@@ -47,34 +47,6 @@ module Sprockets
     end
     alias_method :==, :eql?
 
-    def self.json_create(obj)
-      allocate.tap { |asset| asset.from_json(obj) }
-    end
-
-    def from_json(obj)
-      @content_type     = obj['content_type']
-      @format_extension = obj['format_extension']
-
-      @source_paths = Set.new(obj['source_paths'])
-      @source       = obj['source']
-      @mtime        = Time.parse(obj['mtime'])
-      @length       = obj['length']
-      @digest       = obj['digest']
-    end
-
-    def to_json(*args)
-      {
-        :json_class       => self.class.name,
-        :content_type     => content_type,
-        :format_extension => format_extension,
-        :source_paths     => source_paths.to_a,
-        :source           => source,
-        :mtime            => mtime,
-        :length           => length,
-        :digest           => digest
-      }.to_json(*args)
-    end
-
     protected
       attr_reader :source_paths, :source
 
