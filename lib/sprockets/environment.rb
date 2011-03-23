@@ -23,6 +23,8 @@ module Sprockets
 
     attr_accessor :logger
 
+    attr_accessor :css_compressor, :js_compressor
+
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
@@ -36,6 +38,23 @@ module Sprockets
       @static_root = nil
 
       @server = Server.new(self)
+    end
+
+    def use_default_compressors
+      begin
+        require 'yui/compressor'
+        self.css_compressor = YUI::CssCompressor.new
+        self.js_compressor  = YUI::JavaScriptCompressor.new(:munge => true)
+      rescue LoadError
+      end
+
+      begin
+        require 'closure-compiler'
+        self.js_compressor = Closure::Compiler.new
+      rescue LoadError
+      end
+
+      nil
     end
 
     def multithread

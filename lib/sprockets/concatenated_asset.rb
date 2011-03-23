@@ -19,6 +19,12 @@ module Sprockets
       @digest           = Digest::MD5.new
 
       require(environment, pathname)
+
+      if content_type == 'application/javascript' && environment.js_compressor
+        self.source = environment.js_compressor.compress(source.join)
+      elsif content_type == 'text/css' && environment.css_compressor
+        self.source = environment.css_compressor.compress(source.join)
+      end
     end
 
     def digest
@@ -49,6 +55,12 @@ module Sprockets
 
     protected
       attr_reader :source_paths, :source
+
+      def source=(str)
+        @length = Rack::Utils.bytesize(str)
+        @digest.update(str)
+        @source = [str]
+      end
 
       def <<(str)
         @length += Rack::Utils.bytesize(str)
