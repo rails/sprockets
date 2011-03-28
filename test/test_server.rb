@@ -110,6 +110,7 @@ class TestServer < Sprockets::TestCase
   test "missing source" do
     get "/javascripts/none.js"
     assert_equal 404, last_response.status
+    assert_equal "pass", last_response.headers['X-Cascade']
   end
 
   test "raise exception if require is missing" do

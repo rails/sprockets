@@ -45,7 +45,7 @@ module Sprockets
       end
 
       def not_found_response
-        [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9" }, [ "Not found" ] ]
+        [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9", "X-Cascade" => "pass" }, [ "Not found" ] ]
       end
 
       def not_modified?(asset, env)
