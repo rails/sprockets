@@ -54,6 +54,10 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["hello-ffffffff.txt"]
   end
 
+  test "find static directory returns nil" do
+    assert_nil @env["images"]
+  end
+
   test "find compiled asset with filename digest in static root" do
     assert_equal "(function() {\n  application.boot();\n})();\n",
       @env["compiled-digest.js"].to_s

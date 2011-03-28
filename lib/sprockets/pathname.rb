@@ -22,6 +22,10 @@ module Sprockets
       File.exist?(path)
     end
 
+    def file?
+      File.file?(path)
+    end
+
     def basename_without_extensions
       File.basename(basename, extensions.join)
     end

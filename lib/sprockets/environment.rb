@@ -196,7 +196,7 @@ module Sprockets
           end
         end
 
-        if pathname.exist?
+        if pathname.file?
           return StaticAsset.new(pathname)
         end
 
