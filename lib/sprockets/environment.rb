@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'hike'
 require 'logger'
+require 'rack/request'
 require 'thread'
 require 'tilt'
 
@@ -89,22 +90,43 @@ module Sprockets
       @server.call(env)
     end
 
-    def url(logical_path)
+    def path(logical_path, fingerprint = true, prefix = nil)
       logical_path = Pathname.new(logical_path)
 
-      if asset = find_asset(logical_path)
+      if fingerprint && asset = find_asset(logical_path)
         basename = logical_path.basename_without_extensions +
           "-" + asset.digest +
           logical_path.extensions.join
 
         if logical_path.dirname == '.'
-          basename
+          url = basename
         else
-          File.join(logical_path.dirname, basename)
+          url = File.join(logical_path.dirname, basename)
         end
       else
-        logical_path.to_s
+        url = logical_path.to_s
       end
+
+      url = File.join(prefix, url) if prefix
+      url = "/#{url}" unless url =~ /^\//
+
+      url
+    end
+
+    def url(env, logical_path, fingerprint = true, prefix = nil)
+      req = Rack::Request.new(env)
+
+      url = req.scheme + "://"
+      url << req.host
+
+      if req.scheme == "https" && req.port != 443 ||
+          req.scheme == "http" && req.port != 80
+        url << ":#{req.port}"
+      end
+
+      url << path(logical_path, fingerprint, prefix)
+
+      url
     end
 
     def precompile(*paths)

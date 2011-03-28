@@ -1,4 +1,5 @@
 require 'sprockets_test'
+require 'rack/mock'
 
 class TestEnvironment < Sprockets::TestCase
   def setup
@@ -82,7 +83,28 @@ class TestEnvironment < Sprockets::TestCase
       @env["gallery.js"].digest
   end
 
+  test "path for asset" do
+    assert_equal "/gallery-f1598cfbaf2a26f20367e4046957f6e0.js", @env.path("gallery.js")
+    assert_equal "/gallery.js", @env.path("gallery.js", false)
+    assert_equal "/gallery-f1598cfbaf2a26f20367e4046957f6e0.js", @env.path("/gallery.js")
+    assert_equal "/assets/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.path("gallery.js", true, "/assets")
+  end
+
   test "url for asset" do
-    assert_equal "gallery-f1598cfbaf2a26f20367e4046957f6e0.js", @env.url("gallery.js")
+    env = Rack::MockRequest.env_for("/")
+
+    assert_equal "http://example.org/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.url(env, "gallery.js")
+    assert_equal "http://example.org/gallery.js",
+      @env.url(env, "gallery.js", false)
+    assert_equal "http://example.org/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.url(env, "/gallery.js")
+    assert_equal "http://example.org/assets/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.url(env, "gallery.js", true, "assets")
+  end
+
+  test "missing path for asset" do
+    assert_equal "/missing.js", @env.path("missing.js")
   end
 end
