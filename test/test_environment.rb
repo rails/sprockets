@@ -107,4 +107,15 @@ class TestEnvironment < Sprockets::TestCase
   test "missing path for asset" do
     assert_equal "/missing.js", @env.path("missing.js")
   end
+
+  test "precompile" do
+    filename = fixture_path("public/gallery-f1598cfbaf2a26f20367e4046957f6e0.js")
+    begin
+      assert !File.exist?(filename)
+      @env.precompile("gallery.js")
+      assert File.exist?(filename)
+    ensure
+      File.unlink(filename)
+    end
+  end
 end
