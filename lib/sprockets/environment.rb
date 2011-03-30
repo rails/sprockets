@@ -198,17 +198,23 @@ module Sprockets
         return nil unless static_root
 
         pathname = Pathname.new(static_root.join(logical_path.to_s))
+        basename = ::Pathname.new(pathname.basename)
+        dirname  = ::Pathname.new(pathname.dirname)
+        entries  = dirname.entries
 
         if !pathname.fingerprint
-          basename = "#{pathname.basename_without_extensions}-#{'[0-9a-f]'*7}*"
-          basename = "#{basename}#{pathname.extensions.join}"
+          pattern = /^#{Regexp.escape(pathname.basename_without_extensions)}
+                     -[0-9a-f]{7,40}
+                     #{Regexp.escape(pathname.extensions.join)}$/x
 
-          Dir[File.join(pathname.dirname, basename)].each do |filename|
-            return StaticAsset.new(filename)
+          entries.each do |filename|
+            if filename.to_s =~ pattern
+              return StaticAsset.new(dirname.join(filename))
+            end
           end
         end
 
-        if pathname.file?
+        if entries.include?(basename) && pathname.file?
           return StaticAsset.new(pathname)
         end
 
