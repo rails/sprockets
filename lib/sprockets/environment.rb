@@ -179,10 +179,10 @@ module Sprockets
           if logical_path.fingerprint
             asset
           elsif asset.stale?
-            logger.warn "[Sprockets] Asset #{logical_path} #{asset.digest} is stale"
+            logger.warn "[Sprockets] #{logical_path} #{asset.digest} stale"
             nil
           else
-            logger.info "[Sprockets] Asset #{logical_path} #{asset.digest} is fresh"
+            logger.info "[Sprockets] #{logical_path} #{asset.digest} fresh"
             asset
           end
         else
@@ -224,16 +224,15 @@ module Sprockets
       rescue FileNotFound
         nil
       else
-        logger.info "[Sprockets] Bundling #{logical_path}"
-
         if concatenatable?(pathname)
+          logger.info "[Sprockets] #{logical_path} building"
           asset = ConcatenatedAsset.new(self, pathname)
         else
           asset = StaticAsset.new(pathname)
         end
 
         if fingerprint && fingerprint != asset.digest
-          logger.error "[Sprockets] Couldn't find #{logical_path}"
+          logger.error "[Sprockets] #{logical_path} #{fingerprint} nonexistent"
           return nil
         end
 
