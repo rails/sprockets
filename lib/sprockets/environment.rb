@@ -71,7 +71,7 @@ module Sprockets
     end
 
     def static_root=(root)
-      @static_root = root ? Pathname.new(root) : nil
+      @static_root = root ? ::Pathname.new(root) : nil
     end
 
     def root
@@ -129,11 +129,11 @@ module Sprockets
 
         if asset = find_asset(pathname)
           fingerprint_pathname = pathname.inject_fingerprint(asset.digest)
-          filename = File.join(static_root.to_s, fingerprint_pathname.to_s)
+          filename = static_root.join(fingerprint_pathname.to_s)
 
-          FileUtils.mkdir_p File.dirname(filename)
+          FileUtils.mkdir_p filename.dirname
 
-          File.open(filename, 'w') do |f|
+          filename.open('w') do |f|
             f.write asset.to_s
           end
         end
@@ -197,7 +197,7 @@ module Sprockets
       def find_static_asset(logical_path)
         return nil unless static_root
 
-        pathname = Pathname.new(File.join(static_root.to_s, logical_path.to_s))
+        pathname = Pathname.new(static_root.join(logical_path.to_s))
 
         if !pathname.fingerprint
           basename = "#{pathname.basename_without_extensions}-#{'[0-9a-f]'*7}*"
