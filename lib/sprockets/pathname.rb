@@ -71,7 +71,7 @@ module Sprockets
       path
     end
 
-    def fingerprint
+    def fingerprint(digest = nil)
       if defined? @fingerprint
         @fingerprint
       elsif basename_without_extensions =~ /-([0-9a-f]{7,40})$/
@@ -79,6 +79,17 @@ module Sprockets
       else
         @fingerprint = nil
       end
+    end
+
+    def inject_fingerprint(digest)
+      if fingerprint
+        path = self.path.sub(fingerprint, digest)
+      else
+        basename = "#{basename_without_extensions}-#{digest}#{extensions.join}"
+        path = dirname == '.' ? basename : File.join(dirname, basename)
+      end
+
+      self.class.new(path)
     end
 
     private

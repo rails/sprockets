@@ -105,4 +105,11 @@ class TestPathname < Sprockets::TestCase
     assert_nil Pathname.new("print.css").fingerprint
     assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", Pathname.new("print-f7531e2d0ea27233ce00b5f01c5bf335.css").fingerprint
   end
+
+  test "inject fingerprint" do
+    assert_equal "print-f7531e2d0ea27233ce00b5f01c5bf335.css",
+      Pathname.new("print.css").inject_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").path
+    assert_equal "/stylesheets/print-f7531e2d0ea27233ce00b5f01c5bf335.css",
+      Pathname.new("/stylesheets/print-37b51d194a7513e45b56f6524f2d51f2.css").inject_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").path
+  end
 end
