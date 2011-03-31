@@ -1,15 +1,19 @@
 Gem::Specification.new do |s|
   s.name = "sprockets"
-  s.version = "1.0.2"
-  s.date = "2009-02-24"
-  s.summary = "JavaScript dependency management and concatenation"
+  s.version = "2.0.0"
+  s.summary = "Rack-based asset packaging system"
+  s.description = "Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
+
+  s.files = Dir["Rakefile", "lib/**/*"]
+
+  s.add_dependency "hike", ">= 0.5.0"
+  s.add_dependency "rack", ">= 1.0.0"
+  s.add_dependency "tilt", ">= 1.1.0"
+  s.add_dependency "closure-compiler", ">= 1.0.0"
+  s.add_dependency "yui-compressor", ">= 0.9.4"
+
+  s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = "sstephenson@gmail.com"
   s.homepage = "http://getsprockets.org/"
-  s.description = "Sprockets is a Ruby library that preprocesses and concatenates JavaScript source files."
   s.rubyforge_project = "sprockets"
-  s.has_rdoc = false
-  s.authors = ["Sam Stephenson"]
-  s.files = Dir["Rakefile", "bin/**/*", "lib/**/*", "test/**/*", "ext/**/*"]
-  s.test_files = Dir["test/test_*.rb"] unless $SAFE > 0
-  s.executables = ["sprocketize"]
 end

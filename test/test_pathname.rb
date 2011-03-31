@@ -1,43 +1,115 @@
-require "test_helper"
+require 'sprockets_test'
 
-class PathnameTest < Test::Unit::TestCase
-  def setup
-    @environment = environment_for_fixtures
-  end
-  
-  def test_absolute_location_is_automatically_expanded
-    expanded_location = File.expand_path(File.join(FIXTURES_PATH, "foo"))
-    assert_absolute_location expanded_location, pathname("foo")
-    assert_absolute_location expanded_location, pathname("./foo")
-    assert_absolute_location expanded_location, pathname("./foo/../foo")
-  end
-  
-  def test_find_should_return_a_pathname_for_the_location_relative_to_the_absolute_location_of_the_pathname
-    assert_absolute_location_ends_with "src/foo/bar.js", pathname("src/foo").find("bar.js")
-  end
-  
-  def test_find_should_return_nil_when_the_location_relative_to_the_absolute_location_of_the_pathname_is_not_a_file_or_does_not_exist
-    assert_nil pathname("src/foo").find("nonexistent.js")
-  end
-  
-  def test_parent_pathname_should_return_a_pathname_for_the_parent_directory
-    assert_absolute_location_ends_with "src", pathname("src/foo").parent_pathname
-    assert_absolute_location_ends_with "foo", pathname("src/foo/foo.js").parent_pathname
-  end
-  
-  def test_source_file_should_return_a_source_file_for_the_pathname
-    source_file = pathname("src/foo.js").source_file
-    assert_kind_of Sprockets::SourceFile, source_file
-    assert_equal pathname("src/foo.js"), source_file.pathname
+class TestPathname < Sprockets::TestCase
+  include Sprockets
+
+  test "identity initialization" do
+    path = Pathname.new("javascripts/application.js.coffee")
+    assert Pathname.new(path).equal?(path)
   end
 
-  def test_equality_of_pathnames
-    assert_equal pathname("src/foo.js"), pathname("src/foo.js")
-    assert_equal pathname("src/foo.js"), pathname("src/foo/../foo.js")
-    assert_not_equal pathname("src/foo.js"), pathname("src/foo/foo.js")
+  test "construct from pathname" do
+    pathname = ::Pathname.new("javascripts/application.js.coffee").expand_path
+    assert_equal pathname.to_s, Pathname.new(pathname).to_s
   end
-  
-  def test_to_s_should_return_absolute_location
-    assert_equal pathname("src/foo.js").to_s, pathname("src/foo.js").absolute_location
+
+  test "dirname" do
+    assert_equal "javascripts",
+      Pathname.new("javascripts/application.js.coffee").dirname
+  end
+
+  test "basename" do
+    assert_equal "application.js.coffee",
+      Pathname.new("javascripts/application.js.coffee").basename
+  end
+
+  test "basename with extensions" do
+    assert_equal "empty",
+      Pathname.new("empty").basename_without_extensions
+    assert_equal "gallery",
+      Pathname.new("gallery.js").basename_without_extensions
+    assert_equal "application",
+      Pathname.new("application.js.coffee").basename_without_extensions
+    assert_equal "project",
+      Pathname.new("project.js.coffee.erb").basename_without_extensions
+    assert_equal "gallery",
+      Pathname.new("gallery.css.erb").basename_without_extensions
+  end
+
+  test "extensions" do
+    assert_equal [],
+      Pathname.new("empty").extensions
+    assert_equal [".js"],
+      Pathname.new("gallery.js").extensions
+    assert_equal [".js", ".coffee"],
+      Pathname.new("application.js.coffee").extensions
+    assert_equal [".js", ".coffee", ".erb"],
+      Pathname.new("project.js.coffee.erb").extensions
+    assert_equal [".css", ".erb"],
+      Pathname.new("gallery.css.erb").extensions
+  end
+
+  test "format_extension" do
+    assert_equal nil, Pathname.new("empty").format_extension
+    assert_equal ".js", Pathname.new("gallery.js").format_extension
+    assert_equal ".js", Pathname.new("application.js.coffee").format_extension
+    assert_equal ".js", Pathname.new("project.js.coffee.erb").format_extension
+    assert_equal ".css", Pathname.new("gallery.css.erb").format_extension
+    assert_equal nil, Pathname.new("gallery.erb").format_extension
+    assert_equal nil, Pathname.new("gallery.foo").format_extension
+    assert_equal ".js", Pathname.new("jquery.js").format_extension
+    assert_equal ".js", Pathname.new("jquery.min.js").format_extension
+    assert_equal ".js", Pathname.new("jquery.tmpl.js").format_extension
+    assert_equal ".js", Pathname.new("jquery.tmpl.min.js").format_extension
+  end
+
+  test "engine_extensions" do
+    assert_equal [], Pathname.new("empty").engine_extensions
+    assert_equal [], Pathname.new("gallery.js").engine_extensions
+    assert_equal [".coffee"],
+      Pathname.new("application.js.coffee").engine_extensions
+    assert_equal [".coffee", ".erb"],
+      Pathname.new("project.js.coffee.erb").engine_extensions
+    assert_equal [".erb"], Pathname.new("gallery.css.erb").engine_extensions
+    assert_equal [".erb"], Pathname.new("gallery.erb").engine_extensions
+    assert_equal [], Pathname.new("jquery.js").engine_extensions
+    assert_equal [], Pathname.new("jquery.min.js").engine_extensions
+    assert_equal [], Pathname.new("jquery.tmpl.min.js").engine_extensions
+    assert_equal [".erb"], Pathname.new("jquery.js.erb").engine_extensions
+    assert_equal [".erb"], Pathname.new("jquery.min.js.erb").engine_extensions
+    assert_equal [".coffee"],
+      Pathname.new("jquery.min.coffee").engine_extensions
+  end
+
+  test "content_type" do
+    assert_equal "application/octet-stream",
+      Pathname.new("empty").content_type
+    assert_equal "application/javascript",
+      Pathname.new("gallery.js").content_type
+    assert_equal "application/javascript",
+      Pathname.new("application.js.coffee").content_type
+    assert_equal "application/javascript",
+      Pathname.new("project.js.coffee.erb").content_type
+    assert_equal "text/css",
+      Pathname.new("gallery.css.erb").content_type
+    assert_equal "application/javascript",
+      Pathname.new("jquery.tmpl.min.js").content_type
+
+    if Tilt::CoffeeScriptTemplate.respond_to?(:default_mime_type)
+      assert_equal "application/javascript",
+        Pathname.new("application.coffee").content_type
+    end
+  end
+
+  test "fingerprint" do
+    assert_nil Pathname.new("print.css").fingerprint
+    assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", Pathname.new("print-f7531e2d0ea27233ce00b5f01c5bf335.css").fingerprint
+  end
+
+  test "inject fingerprint" do
+    assert_equal "print-f7531e2d0ea27233ce00b5f01c5bf335.css",
+      Pathname.new("print.css").inject_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").path
+    assert_equal "/stylesheets/print-f7531e2d0ea27233ce00b5f01c5bf335.css",
+      Pathname.new("/stylesheets/print-37b51d194a7513e45b56f6524f2d51f2.css").inject_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").path
   end
 end

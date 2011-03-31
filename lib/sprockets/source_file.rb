@@ -1,54 +1,35 @@
 module Sprockets
   class SourceFile
-    attr_reader :environment, :pathname
+    attr_reader :pathname, :source, :mtime
 
-    def initialize(environment, pathname)
-      @environment = environment
-      @pathname = pathname
+    def initialize(path)
+      @pathname = Pathname.new(path)
+      @source   = IO.read(self.path).gsub(/\r?\n/, "\n")
+      @mtime    = File.mtime(self.path)
     end
 
-    def source_lines
-      @lines ||= begin
-        lines = []
-
-        comments = []
-        File.open(pathname.absolute_location) do |file|
-          file.each do |line|
-            lines << line = SourceLine.new(self, line, file.lineno)
-
-            if line.begins_pdoc_comment? || comments.any?
-              comments << line
-            end
-
-            if line.ends_multiline_comment?
-              if line.ends_pdoc_comment?
-                comments.each { |l| l.comment! }
-              end
-              comments.clear
-            end
-          end
-        end
-
-        lines
-      end
+    def path
+      pathname.path
     end
 
-    def each_source_line(&block)
-      source_lines.each(&block)
+    def content_type
+      pathname.content_type
     end
 
-    def find(location, kind = :file)
-      pathname.parent_pathname.find(location, kind)
+    def directive_parser
+      @directive_parser ||= DirectiveParser.new(source)
     end
-    
-    def ==(source_file)
-      pathname == source_file.pathname
+
+    def directives
+      directive_parser.directives
     end
-    
-    def mtime
-      File.mtime(pathname.absolute_location)
-    rescue Errno::ENOENT
-      Time.now
+
+    def header
+      directive_parser.processed_header
+    end
+
+    def body
+      directive_parser.body
     end
   end
 end

@@ -1,64 +1,121 @@
-require "test_helper"
+require 'sprockets_test'
+require 'rack/mock'
 
-class EnvironmentTest < Test::Unit::TestCase
-  def test_load_path_locations_become_pathnames_for_absolute_locations_from_the_root
-    environment = Sprockets::Environment.new("/root", ["/a", "b"])
-    assert_load_path_equals ["/a", "/root/b", "/root"], environment
+class TestEnvironment < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new(".")
+    @env.paths << fixture_path('default')
+    @env.static_root = fixture_path('public')
   end
-  
-  def test_pathname_from_for_location_with_leading_slash_should_return_a_pathname_with_the_location_unchanged
-    environment = Sprockets::Environment.new("/root")
-    assert_absolute_location "/a", environment.pathname_from("/a")
+
+  test "working directory is the default root" do
+    assert_equal Dir.pwd, @env.root
   end
-  
-  def test_pathname_from_for_relative_location_should_return_a_pathname_for_the_expanded_absolute_location_from_root
-    environment = Sprockets::Environment.new("/root")
-    assert_absolute_location "/root/a", environment.pathname_from("a")
-    assert_absolute_location "/root/a", environment.pathname_from("./a")
-    assert_absolute_location "/a", environment.pathname_from("../a")
+
+  test "resolve in environment" do
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery.js").path
   end
-  
-  def test_register_load_location_should_unshift_the_location_onto_the_load_path
-    environment = Sprockets::Environment.new("/root")
-    environment.register_load_location("a")
-    assert_load_path_equals ["/root/a", "/root"], environment
-    environment.register_load_location("b")
-    assert_load_path_equals ["/root/b", "/root/a", "/root"], environment
-  end
-  
-  def test_register_load_location_should_remove_already_existing_locations_before_unshifting
-    environment = Sprockets::Environment.new("/root")
-    environment.register_load_location("a")
-    environment.register_load_location("b")
-    assert_load_path_equals ["/root/b", "/root/a", "/root"], environment
-    environment.register_load_location("a")
-    assert_load_path_equals ["/root/a", "/root/b", "/root"], environment
-  end
-  
-  def test_find_should_return_the_first_matching_pathname_in_the_load_path
-    environment = environment_for_fixtures
-    first_pathname = environment.find("foo.js")
-    assert_absolute_location_ends_with "src/foo.js", first_pathname
-    
-    environment.register_load_location(File.join(FIXTURES_PATH, "src", "foo"))
-    second_pathname = environment.find("foo.js")
-    assert_not_equal first_pathname, second_pathname
-    assert_absolute_location_ends_with "foo/foo.js", second_pathname
-  end
-  
-  def test_find_should_return_nil_when_no_matching_source_file_is_found
-    environment = environment_for_fixtures
-    assert_nil environment.find("nonexistent.js")
-  end
-  
-  def test_constants_should_return_a_hash_of_all_constants_defined_in_the_load_path
-    constants = environment_for_fixtures.constants
-    assert_kind_of Hash, constants
-    assert_equal %w(HELLO ONE TWO VERSION), constants.keys.sort
-  end
-  
-  protected
-    def assert_load_path_equals(load_path_absolute_locations, environment)
-      assert load_path_absolute_locations.zip(environment.load_path).map { |location, pathname| File.expand_path(location) == pathname.absolute_location }.all?
+
+  test "missing file raises an exception" do
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("null")
     end
+  end
+
+  test "resolve ignores static root" do
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("compiled.js")
+    end
+  end
+
+  test "find concatenated asset in environment" do
+    assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
+  end
+
+  test "find static asset in environment" do
+    assert_equal "Hello world\n", @env["hello.txt"].to_s
+  end
+
+  test "find compiled asset in static root" do
+    assert_equal "(function() {\n  application.boot();\n})();\n",
+      @env["compiled.js"].to_s
+  end
+
+  test "find compiled asset in static root is StaticAsset" do
+    assert_equal Sprockets::StaticAsset, @env["compiled.js"].class
+  end
+
+  test "find asset with digest" do
+    assert_equal "Hello world\n",
+      @env["hello-f0ef7081e1539ac00ef5b761b4fb01b3.txt"].to_s
+  end
+
+  test "find asset with invalid digest" do
+    assert_nil @env["hello-ffffffff.txt"]
+  end
+
+  test "find static directory returns nil" do
+    assert_nil @env["images"]
+  end
+
+  test "find compiled asset with filename digest in static root" do
+    assert_equal "(function() {\n  application.boot();\n})();\n",
+      @env["compiled-digest.js"].to_s
+    assert_equal "(function() {\n  application.boot();\n})();\n",
+      @env["compiled-digest-0aa2105d29558f3eb790d411d7d8fb66.js"].to_s
+    assert_equal "(function() {})();\n",
+      @env["compiled-digest-1c41eb0cf934a0c76babe875f982f9d1.js"].to_s
+  end
+
+  test "missing asset returns nil" do
+    assert_equal nil, @env["missing.js"]
+  end
+
+  test "asset with missing requires raises an exception" do
+    assert_raises Sprockets::FileNotFound do
+      @env["missing_require.js"]
+    end
+  end
+
+  test "lookup asset digest" do
+    assert_equal "f1598cfbaf2a26f20367e4046957f6e0",
+      @env["gallery.js"].digest
+  end
+
+  test "path for asset" do
+    assert_equal "/gallery-f1598cfbaf2a26f20367e4046957f6e0.js", @env.path("gallery.js")
+    assert_equal "/gallery.js", @env.path("gallery.js", false)
+    assert_equal "/gallery-f1598cfbaf2a26f20367e4046957f6e0.js", @env.path("/gallery.js")
+    assert_equal "/assets/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.path("gallery.js", true, "/assets")
+  end
+
+  test "url for asset" do
+    env = Rack::MockRequest.env_for("/")
+
+    assert_equal "http://example.org/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.url(env, "gallery.js")
+    assert_equal "http://example.org/gallery.js",
+      @env.url(env, "gallery.js", false)
+    assert_equal "http://example.org/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.url(env, "/gallery.js")
+    assert_equal "http://example.org/assets/gallery-f1598cfbaf2a26f20367e4046957f6e0.js",
+      @env.url(env, "gallery.js", true, "assets")
+  end
+
+  test "missing path for asset" do
+    assert_equal "/missing.js", @env.path("missing.js")
+  end
+
+  test "precompile" do
+    filename = fixture_path("public/gallery-f1598cfbaf2a26f20367e4046957f6e0.js")
+    begin
+      assert !File.exist?(filename)
+      @env.precompile("gallery.js")
+      assert File.exist?(filename)
+    ensure
+      File.unlink(filename)
+    end
+  end
 end
