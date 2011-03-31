@@ -215,7 +215,12 @@ module Sprockets
         pathname = Pathname.new(static_root.join(logical_path.to_s))
         basename = ::Pathname.new(pathname.basename)
         dirname  = ::Pathname.new(pathname.dirname)
-        entries  = dirname.entries
+
+        begin
+          entries = dirname.entries
+        rescue Errno::ENOENT
+          return nil
+        end
 
         if !pathname.fingerprint
           pattern = /^#{Regexp.escape(pathname.basename_without_extensions)}

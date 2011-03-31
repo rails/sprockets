@@ -68,6 +68,12 @@ class TestEnvironment < Sprockets::TestCase
       @env["compiled-digest-1c41eb0cf934a0c76babe875f982f9d1.js"].to_s
   end
 
+
+  test "find asset when static root doesn't exist" do
+    @env.static_root = fixture_path('missing')
+    assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
+  end
+
   test "missing asset returns nil" do
     assert_equal nil, @env["missing.js"]
   end
