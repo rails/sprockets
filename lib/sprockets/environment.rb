@@ -24,8 +24,6 @@ module Sprockets
 
     attr_accessor :logger
 
-    attr_accessor :css_compressor, :js_compressor
-
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
       engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
@@ -33,12 +31,28 @@ module Sprockets
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
 
-      @cache = {}
-      @lock  = nil
-
+      @lock = nil
       @static_root = nil
 
+      expire_cache
+
       @server = Server.new(self)
+    end
+
+    def expire_cache
+      @cache = {}
+    end
+
+    attr_reader :css_compressor, :js_compressor
+
+    def css_compressor=(compressor)
+      expire_cache
+      @css_compressor = compressor
+    end
+
+    def js_compressor=(compressor)
+      expire_cache
+      @js_compressor = compressor
     end
 
     def use_default_compressors
@@ -71,6 +85,7 @@ module Sprockets
     end
 
     def static_root=(root)
+      expire_cache
       @static_root = root ? ::Pathname.new(root) : nil
     end
 
