@@ -1,5 +1,6 @@
 require 'pathname'
 require 'rack/mime'
+# require 'sprockets/environment'
 
 module Sprockets
   class Pathname < ::Pathname

@@ -1,5 +1,6 @@
 require "digest/md5"
 require "json"
+require "sprockets/pathname"
 require "time"
 
 module Sprockets

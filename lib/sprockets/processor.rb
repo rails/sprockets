@@ -1,3 +1,5 @@
+require 'sprockets/errors'
+require 'sprockets/pathname'
 require 'yaml'
 
 module Sprockets

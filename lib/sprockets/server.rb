@@ -1,3 +1,4 @@
+require 'sprockets/pathname'
 require 'time'
 
 module Sprockets

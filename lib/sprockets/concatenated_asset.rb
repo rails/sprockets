@@ -2,6 +2,10 @@ require "digest/md5"
 require "json"
 require "rack/utils"
 require "set"
+require "sprockets/context"
+require "sprockets/errors"
+require "sprockets/processor"
+require "sprockets/source_file"
 require "time"
 
 module Sprockets

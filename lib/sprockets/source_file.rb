@@ -1,3 +1,6 @@
+require 'sprockets/directive_parser'
+require 'sprockets/pathname'
+
 module Sprockets
   class SourceFile
     attr_reader :pathname, :source, :mtime
