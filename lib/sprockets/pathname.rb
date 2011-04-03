@@ -71,7 +71,7 @@ module Sprockets
       path
     end
 
-    def fingerprint(digest = nil)
+    def fingerprint
       if defined? @fingerprint
         @fingerprint
       elsif basename_without_extensions =~ /-([0-9a-f]{7,40})$/
@@ -81,7 +81,7 @@ module Sprockets
       end
     end
 
-    def inject_fingerprint(digest)
+    def with_fingerprint(digest)
       if fingerprint
         path = self.path.sub(fingerprint, digest)
       else

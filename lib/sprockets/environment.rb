@@ -109,7 +109,7 @@ module Sprockets
       logical_path = Pathname.new(logical_path)
 
       if fingerprint && asset = find_asset(logical_path)
-        url = logical_path.inject_fingerprint(asset.digest).to_s
+        url = logical_path.with_fingerprint(asset.digest).to_s
       else
         url = logical_path.to_s
       end
@@ -143,7 +143,7 @@ module Sprockets
         pathname = Pathname.new(path)
 
         if asset = find_asset(pathname)
-          fingerprint_pathname = pathname.inject_fingerprint(asset.digest)
+          fingerprint_pathname = pathname.with_fingerprint(asset.digest)
           filename = static_root.join(fingerprint_pathname.to_s)
 
           FileUtils.mkdir_p filename.dirname
