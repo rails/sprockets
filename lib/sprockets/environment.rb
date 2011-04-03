@@ -7,7 +7,6 @@ require 'sprockets/pathname'
 require 'sprockets/server'
 require 'sprockets/static_asset'
 require 'sprockets/template_mappings'
-require 'thread'
 require 'tilt'
 
 module Sprockets
@@ -27,7 +26,6 @@ module Sprockets
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
 
-      @lock = nil
       @static_root = nil
 
       expire_cache
@@ -64,14 +62,6 @@ module Sprockets
       end
 
       nil
-    end
-
-    def multithread
-      @lock ? true : false
-    end
-
-    def multithread=(val)
-      @lock = val ? Mutex.new : nil
     end
 
     def static_root
@@ -163,14 +153,6 @@ module Sprockets
 
       if asset = find_fresh_asset_from_cache(logical_path)
         asset
-      elsif @lock
-        @lock.synchronize do
-          if asset = find_fresh_asset_from_cache(logical_path)
-            asset
-          elsif asset = build_asset(logical_path)
-            @cache[logical_path.to_s] = asset
-          end
-        end
       elsif asset = build_asset(logical_path)
         @cache[logical_path.to_s] = asset
       end

@@ -4,8 +4,6 @@ require 'time'
 module Sprockets
   module Server
     def call(env)
-      self.multithread = env["rack.multithread"]
-
       if forbidden_request?(env)
         return forbidden_response
       end
