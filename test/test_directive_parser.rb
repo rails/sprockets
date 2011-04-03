@@ -22,6 +22,13 @@ class DirectiveParserTest < Sprockets::TestCase
     end
   end
 
+  test "parsing single line slash-star comments" do
+    directive_parser("slash_star_single").tap do |parser|
+      assert_equal "\n\n(function() {\n})();\n", parser.processed_source
+      assert_equal [["require", "a"]], parser.directives
+    end
+  end
+
   test "parsing triple-hash comments" do
     directive_parser("triple_hash").tap do |parser|
       assert_equal "###\nHeader\n\n\n###\n\n(->)()\n", parser.processed_source

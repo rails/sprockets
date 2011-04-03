@@ -1,0 +1,4 @@
+/*= require "a" */
+
+(function() {
+})();
