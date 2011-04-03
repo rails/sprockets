@@ -1,6 +1,5 @@
 require "digest/md5"
 require "json"
-require "rack/utils"
 require "time"
 
 module Sprockets
@@ -10,10 +9,14 @@ module Sprockets
     def initialize(pathname)
       @pathname = Pathname.new(pathname)
 
-      contents = read
-      @mtime   = File.mtime(@pathname.path)
-      @length  = Rack::Utils.bytesize(contents)
-      @digest  = Digest::MD5.hexdigest(contents)
+      @mtime  = File.mtime(@pathname.path)
+      @length = File.size(@pathname.path)
+
+      if digest = @pathname.fingerprint
+        @digest = digest
+      else
+        @digest = Digest::MD5.hexdigest(read)
+      end
     end
 
     def content_type
