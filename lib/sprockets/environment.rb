@@ -2,11 +2,14 @@ require 'fileutils'
 require 'hike'
 require 'logger'
 require 'rack/request'
+require 'sprockets/server'
 require 'thread'
 require 'tilt'
 
 module Sprockets
   class Environment
+    include Server
+
     DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
@@ -35,8 +38,6 @@ module Sprockets
       @static_root = nil
 
       expire_cache
-
-      @server = Server.new(self)
     end
 
     def expire_cache
@@ -99,10 +100,6 @@ module Sprockets
 
     def engine_extensions
       @trail.extensions
-    end
-
-    def call(env)
-      @server.call(env)
     end
 
     def path(logical_path, fingerprint = true, prefix = nil)

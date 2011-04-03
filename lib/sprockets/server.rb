@@ -1,21 +1,15 @@
 require 'time'
 
 module Sprockets
-  class Server
-    attr_accessor :environment
-
-    def initialize(environment = Environment.new)
-      self.environment = environment
-    end
-
+  module Server
     def call(env)
-      environment.multithread = env["rack.multithread"]
+      self.multithread = env["rack.multithread"]
 
       if forbidden_request?(env)
         return forbidden_response
       end
 
-      asset = environment[env['PATH_INFO']]
+      asset = self[env['PATH_INFO']]
 
       if asset.nil?
         not_found_response
