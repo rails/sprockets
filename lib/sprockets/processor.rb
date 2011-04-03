@@ -70,6 +70,23 @@ module Sprockets
       raise FileNotFound, "couldn't find file '#{path}'"
     end
 
+    def process_require_directory_directive(path = ".")
+      if relative?(path)
+        root = File.expand_path(File.join(base_path, path))
+        required_pathnames << Pathname.new(root)
+
+        Dir[root + "/*"].sort.each do |filename|
+          pathname = Pathname.new(filename)
+          if pathname.file? &&
+              pathname.content_type == source_file.content_type
+            required_pathnames << pathname
+          end
+        end
+      else
+        raise ArgumentError, "require_tree argument must be a relative path"
+      end
+    end
+
     def process_require_tree_directive(path = ".")
       if relative?(path)
         root = File.expand_path(File.join(base_path, path))

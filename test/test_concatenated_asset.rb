@@ -63,6 +63,13 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "require_directory requires all child files in alphabetical order" do
+    assert_equal(
+      "ok(\"b.js.erb\")\n",
+      asset("tree/all_with_require_directory.js").to_s
+    )
+  end
+
   test "require_tree requires all descendant files in alphabetical order" do
     assert_equal(
       asset("tree/all_with_require.js").to_s,
