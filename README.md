@@ -1,3 +1,5 @@
+<div style="border: 1px solid #c00; background: #fff; padding: 5px 10px"><strong>This is an in-progress rewrite of Sprockets</strong> to be released as version 2.0. Please see the <a href="https://github.com/sstephenson/sprockets/tree/1.0.x">1.0.x branch</a> for information on the current release.</div>
+
 Sprockets 2
 ===========
 
