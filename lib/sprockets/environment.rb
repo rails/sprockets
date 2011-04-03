@@ -6,27 +6,17 @@ require 'sprockets/concatenated_asset'
 require 'sprockets/pathname'
 require 'sprockets/server'
 require 'sprockets/static_asset'
+require 'sprockets/template_mappings'
 require 'thread'
 require 'tilt'
 
 module Sprockets
   class Environment
+    extend TemplateMappings
     include Server
 
     DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
-
-    @template_mappings = {}
-
-    def self.register(ext, klass)
-      ext = ext.to_s.sub(/^\./, '').downcase
-      @template_mappings[ext] = klass
-    end
-
-    def self.lookup_engine(ext)
-      ext = ext.to_s.sub(/^\./, '').downcase
-      @template_mappings[ext] || Tilt[ext]
-    end
 
     attr_accessor :logger
 

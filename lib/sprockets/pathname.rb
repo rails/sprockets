@@ -1,6 +1,6 @@
 require 'pathname'
 require 'rack/mime'
-# require 'sprockets/environment'
+require 'sprockets/template_mappings'
 
 module Sprockets
   class Pathname < ::Pathname
@@ -27,11 +27,11 @@ module Sprockets
         exts = extensions[offset+1..-1]
       end
 
-      exts.select { |ext| Environment.lookup_engine(ext) }
+      exts.select { |ext| TemplateMappings.lookup_engine(ext) }
     end
 
     def engines
-      engine_extensions.map { |ext| Environment.lookup_engine(ext) }
+      engine_extensions.map { |ext| TemplateMappings.lookup_engine(ext) }
     end
 
     def engine_content_type
