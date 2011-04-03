@@ -10,6 +10,13 @@ require "time"
 
 module Sprockets
   class ConcatenatedAsset
+    DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
+    CONCATENATABLE_EXTENSIONS = %w( .css .js )
+
+    def self.concatenatable?(pathname)
+      CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
+    end
+
     attr_reader :content_type, :format_extension
     attr_reader :mtime, :length
 

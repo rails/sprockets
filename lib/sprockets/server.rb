@@ -9,7 +9,7 @@ module Sprockets
         return forbidden_response
       end
 
-      asset = self[env['PATH_INFO']]
+      asset = find_asset(env['PATH_INFO'])
 
       if asset.nil?
         not_found_response

@@ -33,8 +33,16 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
 
+  test "find concatenated asset in indexed environment" do
+    assert_equal "var Gallery = {};\n", @env.index["gallery.js"].to_s
+  end
+
   test "find static asset in environment" do
     assert_equal "Hello world\n", @env["hello.txt"].to_s
+  end
+
+  test "find static asset in indexed environment" do
+    assert_equal "Hello world\n", @env.index["hello.txt"].to_s
   end
 
   test "find compiled asset in static root" do
@@ -121,7 +129,7 @@ class TestEnvironment < Sprockets::TestCase
       @env.precompile("gallery.js")
       assert File.exist?(filename)
     ensure
-      File.unlink(filename)
+      File.unlink(filename) if File.exist?(filename)
     end
   end
 end

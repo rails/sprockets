@@ -1,47 +1,49 @@
 require 'fileutils'
 require 'hike'
 require 'logger'
-require 'sprockets/compression'
-require 'sprockets/concatenated_asset'
+require 'sprockets/environment_index'
 require 'sprockets/pathname'
 require 'sprockets/server'
-require 'sprockets/static_asset'
 require 'sprockets/template_mappings'
-require 'tilt'
 
 module Sprockets
   class Environment
     extend TemplateMappings
-    include Compression, Server
-
-    DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
-    CONCATENATABLE_EXTENSIONS = %w( .css .js )
+    include Server
 
     attr_accessor :logger
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
-      engine_extensions.replace(DEFAULT_ENGINE_EXTENSIONS + CONCATENATABLE_EXTENSIONS)
+      extensions = ConcatenatedAsset::DEFAULT_ENGINE_EXTENSIONS +
+        ConcatenatedAsset::CONCATENATABLE_EXTENSIONS
+      engine_extensions.replace(extensions)
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
 
       @static_root = nil
-
-      expire_cache
-    end
-
-    def expire_cache
       @cache = {}
     end
 
-    def static_root
-      @static_root
-    end
+    attr_accessor :static_root
+    attr_accessor :css_compressor, :js_compressor
 
-    def static_root=(root)
-      expire_cache
-      @static_root = root ? Pathname.new(root) : nil
+    def use_default_compressors
+      begin
+        require 'yui/compressor'
+        self.css_compressor = YUI::CssCompressor.new
+        self.js_compressor  = YUI::JavaScriptCompressor.new(:munge => true)
+      rescue LoadError
+      end
+
+      begin
+        require 'closure-compiler'
+        self.js_compressor = Closure::Compiler.new
+      rescue LoadError
+      end
+
+      nil
     end
 
     def root
@@ -57,35 +59,15 @@ module Sprockets
     end
 
     def precompile(*paths)
-      raise "missing static root" unless static_root
-
-      paths.each do |path|
-        pathname = Pathname.new(path)
-
-        if asset = find_asset(pathname)
-          fingerprint_pathname = pathname.with_fingerprint(asset.digest)
-          filename = static_root.join(fingerprint_pathname)
-
-          FileUtils.mkdir_p filename.dirname
-
-          filename.open('w') do |f|
-            f.write asset.to_s
-          end
-        end
-      end
+      index.precompile(*paths)
     end
 
-    def resolve(logical_path, options = {})
-      if block_given?
-        @trail.find(logical_path.to_s, options) do |path|
-          yield Pathname.new(path)
-        end
-      else
-        resolve(logical_path, options) do |pathname|
-          return pathname
-        end
-        raise FileNotFound, "couldn't find file '#{logical_path}'"
-      end
+    def index
+      EnvironmentIndex.new(self, @trail, @static_root)
+    end
+
+    def resolve(logical_path, options = {}, &block)
+      index.resolve(logical_path, options, &block)
     end
 
     def find_asset(logical_path)
@@ -93,11 +75,10 @@ module Sprockets
 
       if asset = find_fresh_asset_from_cache(logical_path)
         asset
-      elsif asset = build_asset(logical_path)
+      elsif asset = index.find_asset(logical_path)
         @cache[logical_path.to_s] = asset
       end
     end
-
     alias_method :[], :find_asset
 
     protected
@@ -115,68 +96,6 @@ module Sprockets
         else
           nil
         end
-      end
-
-      def build_asset(logical_path)
-        find_static_asset(logical_path) || find_asset_in_load_path(logical_path)
-      end
-
-      def find_static_asset(logical_path)
-        return nil unless static_root
-
-        pathname = Pathname.new(static_root.join(logical_path))
-
-        begin
-          entries = pathname.dirname.entries
-        rescue Errno::ENOENT
-          return nil
-        end
-
-        if !pathname.fingerprint
-          pattern = /^#{Regexp.escape(pathname.basename_without_extensions.to_s)}
-                     -[0-9a-f]{7,40}
-                     #{Regexp.escape(pathname.extensions.join)}$/x
-
-          entries.each do |filename|
-            if filename.to_s =~ pattern
-              return StaticAsset.new(pathname.dirname.join(filename))
-            end
-          end
-        end
-
-        if entries.include?(pathname.basename) && pathname.file?
-          return StaticAsset.new(pathname)
-        end
-
-        nil
-      end
-
-      def find_asset_in_load_path(logical_path)
-        if fingerprint = logical_path.fingerprint
-          pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
-        else
-          pathname = resolve(logical_path)
-        end
-      rescue FileNotFound
-        nil
-      else
-        if concatenatable?(pathname)
-          logger.info "[Sprockets] #{logical_path} building"
-          asset = ConcatenatedAsset.new(self, pathname)
-        else
-          asset = StaticAsset.new(pathname)
-        end
-
-        if fingerprint && fingerprint != asset.digest
-          logger.error "[Sprockets] #{logical_path} #{fingerprint} nonexistent"
-          return nil
-        end
-
-        asset
-      end
-
-      def concatenatable?(pathname)
-        CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
       end
   end
 end
