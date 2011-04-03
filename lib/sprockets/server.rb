@@ -1,3 +1,4 @@
+require 'rack/request'
 require 'sprockets/pathname'
 require 'time'
 
@@ -17,6 +18,37 @@ module Sprockets
       else
         ok_response(asset, env)
       end
+    end
+
+    def path(logical_path, fingerprint = true, prefix = nil)
+      logical_path = Pathname.new(logical_path)
+
+      if fingerprint && asset = find_asset(logical_path)
+        url = logical_path.with_fingerprint(asset.digest).to_s
+      else
+        url = logical_path.to_s
+      end
+
+      url = File.join(prefix, url) if prefix
+      url = "/#{url}" unless url =~ /^\//
+
+      url
+    end
+
+    def url(env, logical_path, fingerprint = true, prefix = nil)
+      req = Rack::Request.new(env)
+
+      url = req.scheme + "://"
+      url << req.host
+
+      if req.scheme == "https" && req.port != 443 ||
+          req.scheme == "http" && req.port != 80
+        url << ":#{req.port}"
+      end
+
+      url << path(logical_path, fingerprint, prefix)
+
+      url
     end
 
     private
