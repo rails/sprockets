@@ -73,15 +73,15 @@ module Sprockets
       end
 
       def require(environment, pathname)
-        if File.directory?(pathname.path)
-          source_paths << pathname.path
+        if pathname.directory?
+          source_paths << pathname.to_s
         elsif requirable?(pathname)
-          unless source_paths.include?(pathname.path)
-            source_paths << pathname.path
+          unless source_paths.include?(pathname.to_s)
+            source_paths << pathname.to_s
             self << process(environment, pathname)
           end
         else
-          raise ContentTypeMismatch, "#{pathname.path} is " +
+          raise ContentTypeMismatch, "#{pathname} is " +
             "'#{pathname.format_extension}', not '#{format_extension}'"
         end
       end
@@ -90,7 +90,7 @@ module Sprockets
         result = process_source(environment, pathname)
         scope, locals = Context.new(environment, pathname), {}
         pathname.engines.reverse_each do |engine|
-          result = engine.new(pathname.path) { result }.render(scope, locals)
+          result = engine.new(pathname.to_s) { result }.render(scope, locals)
         end
         result
       end

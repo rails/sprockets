@@ -4,12 +4,8 @@ module Sprockets
 
     def initialize(path)
       @pathname = Pathname.new(path)
-      @source   = IO.read(self.path).gsub(/\r?\n/, "\n")
-      @mtime    = File.mtime(self.path)
-    end
-
-    def path
-      pathname.path
+      @source   = IO.read(self.pathname).gsub(/\r?\n/, "\n")
+      @mtime    = pathname.mtime
     end
 
     def content_type

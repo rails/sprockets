@@ -9,31 +9,21 @@ class TestPathname < Sprockets::TestCase
   end
 
   test "construct from pathname" do
-    pathname = ::Pathname.new("javascripts/application.js.coffee").expand_path
+    pathname = Pathname.new("javascripts/application.js.coffee").expand_path
     assert_equal pathname.to_s, Pathname.new(pathname).to_s
-  end
-
-  test "dirname" do
-    assert_equal "javascripts",
-      Pathname.new("javascripts/application.js.coffee").dirname
-  end
-
-  test "basename" do
-    assert_equal "application.js.coffee",
-      Pathname.new("javascripts/application.js.coffee").basename
   end
 
   test "basename with extensions" do
     assert_equal "empty",
-      Pathname.new("empty").basename_without_extensions
+      Pathname.new("empty").basename_without_extensions.to_s
     assert_equal "gallery",
-      Pathname.new("gallery.js").basename_without_extensions
+      Pathname.new("gallery.js").basename_without_extensions.to_s
     assert_equal "application",
-      Pathname.new("application.js.coffee").basename_without_extensions
+      Pathname.new("application.js.coffee").basename_without_extensions.to_s
     assert_equal "project",
-      Pathname.new("project.js.coffee.erb").basename_without_extensions
+      Pathname.new("project.js.coffee.erb").basename_without_extensions.to_s
     assert_equal "gallery",
-      Pathname.new("gallery.css.erb").basename_without_extensions
+      Pathname.new("gallery.css.erb").basename_without_extensions.to_s
   end
 
   test "extensions" do
@@ -108,8 +98,8 @@ class TestPathname < Sprockets::TestCase
 
   test "with fingerprint" do
     assert_equal "print-f7531e2d0ea27233ce00b5f01c5bf335.css",
-      Pathname.new("print.css").with_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").path
+      Pathname.new("print.css").with_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").to_s
     assert_equal "/stylesheets/print-f7531e2d0ea27233ce00b5f01c5bf335.css",
-      Pathname.new("/stylesheets/print-37b51d194a7513e45b56f6524f2d51f2.css").with_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").path
+      Pathname.new("/stylesheets/print-37b51d194a7513e45b56f6524f2d51f2.css").with_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").to_s
   end
 end

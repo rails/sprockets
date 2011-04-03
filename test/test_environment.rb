@@ -14,7 +14,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js").path
+      @env.resolve("gallery.js").to_s
   end
 
   test "missing file raises an exception" do

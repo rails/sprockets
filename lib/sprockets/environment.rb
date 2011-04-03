@@ -86,7 +86,7 @@ module Sprockets
 
     def static_root=(root)
       expire_cache
-      @static_root = root ? ::Pathname.new(root) : nil
+      @static_root = root ? Pathname.new(root) : nil
     end
 
     def root
@@ -144,7 +144,7 @@ module Sprockets
 
         if asset = find_asset(pathname)
           fingerprint_pathname = pathname.with_fingerprint(asset.digest)
-          filename = static_root.join(fingerprint_pathname.to_s)
+          filename = static_root.join(fingerprint_pathname)
 
           FileUtils.mkdir_p filename.dirname
 
@@ -212,29 +212,27 @@ module Sprockets
       def find_static_asset(logical_path)
         return nil unless static_root
 
-        pathname = Pathname.new(static_root.join(logical_path.to_s))
-        basename = ::Pathname.new(pathname.basename)
-        dirname  = ::Pathname.new(pathname.dirname)
+        pathname = Pathname.new(static_root.join(logical_path))
 
         begin
-          entries = dirname.entries
+          entries = pathname.dirname.entries
         rescue Errno::ENOENT
           return nil
         end
 
         if !pathname.fingerprint
-          pattern = /^#{Regexp.escape(pathname.basename_without_extensions)}
+          pattern = /^#{Regexp.escape(pathname.basename_without_extensions.to_s)}
                      -[0-9a-f]{7,40}
                      #{Regexp.escape(pathname.extensions.join)}$/x
 
           entries.each do |filename|
             if filename.to_s =~ pattern
-              return StaticAsset.new(dirname.join(filename))
+              return StaticAsset.new(pathname.dirname.join(filename))
             end
           end
         end
 
-        if entries.include?(basename) && pathname.file?
+        if entries.include?(pathname.basename) && pathname.file?
           return StaticAsset.new(pathname)
         end
 

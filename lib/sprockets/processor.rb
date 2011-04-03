@@ -21,7 +21,7 @@ module Sprockets
     # LEGACY
     def constants
       if compat?
-        root_path = environment.paths.detect { |path| source_file.path[path] }
+        root_path = environment.paths.detect { |path| source_file.pathname.to_s[path] }
         path = File.join(root_path, "constants.yml")
         File.exist?(path) ? YAML.load_file(path) : {}
       else
@@ -55,7 +55,7 @@ module Sprockets
       pathname = Pathname.new(path)
       if pathname.format_extension
         if source_file.content_type != pathname.content_type
-          raise ContentTypeMismatch, "#{pathname.path} is " +
+          raise ContentTypeMismatch, "#{pathname} is " +
             "'#{pathname.format_extension}', not '#{source_file.pathname.format_extension}'"
         end
       end
@@ -109,9 +109,9 @@ module Sprockets
       Dir[root + "/**/*"].sort.each do |filename|
         pathname = Pathname.new(filename)
 
-        if File.directory?(filename)
+        if pathname.directory?
           yield pathname
-        elsif File.file?(filename) &&
+        elsif pathname.file? &&
             pathname.content_type == source_file.content_type
           yield pathname
         end

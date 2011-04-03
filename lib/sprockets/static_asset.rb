@@ -9,13 +9,13 @@ module Sprockets
     def initialize(pathname)
       @pathname = Pathname.new(pathname)
 
-      @mtime  = File.mtime(@pathname.path)
-      @length = File.size(@pathname.path)
+      @mtime  = @pathname.mtime
+      @length = @pathname.size
 
       if digest = @pathname.fingerprint
         @digest = digest
       else
-        @digest = Digest::MD5.hexdigest(read)
+        @digest = Digest::MD5.hexdigest(pathname.read)
       end
     end
 
@@ -27,12 +27,12 @@ module Sprockets
       if pathname.fingerprint
         false
       else
-        mtime < File.mtime(to_path)
+        mtime < pathname.mtime
       end
     end
 
     def each
-      yield read
+      yield pathname.read
     end
 
     def to_path
@@ -40,7 +40,7 @@ module Sprockets
     end
 
     def to_s
-      read
+      pathname.read
     end
 
     def eql?(other)
@@ -50,10 +50,5 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
-
-    protected
-      def read
-        File.read(to_path)
-      end
   end
 end

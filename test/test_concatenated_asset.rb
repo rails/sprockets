@@ -91,13 +91,13 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "__FILE__ is properly set in templates" do
-    assert_equal %(var filename = "#{resolve("filename.js").path}";\n),
+    assert_equal %(var filename = "#{resolve("filename.js")}";\n),
       asset("filename.js").to_s
   end
 
   test "asset mtime is the latest mtime of all processed sources" do
     mtime = Time.now
-    path  = source_file("project.js").path
+    path  = source_file("project.js").pathname
     File.utime(mtime, mtime, path)
     assert_equal File.mtime(path), asset("application.js").mtime
   end
@@ -139,7 +139,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert !asset.stale?
 
     mtime = Time.now + 1
-    File.utime(mtime, mtime, source_file("project.js").path)
+    File.utime(mtime, mtime, source_file("project.js").pathname)
 
     assert asset.stale?
   end

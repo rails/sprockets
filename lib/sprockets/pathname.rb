@@ -1,37 +1,18 @@
+require 'pathname'
 require 'rack/mime'
 
 module Sprockets
-  class Pathname
-    attr_reader :path, :dirname, :basename
-
+  class Pathname < ::Pathname
     def self.new(path)
-      path.is_a?(self) ? path : super(path)
-    end
-
-    def initialize(path)
-      @path = path.to_s
-      @dirname, @basename = File.split(@path)
-    end
-
-    def eql?(other)
-      other.class == self.class && other.path == self.path
-    end
-    alias_method :==, :eql?
-
-    def exist?
-      File.exist?(path)
-    end
-
-    def file?
-      File.file?(path)
+      path.kind_of?(self) ? path : super(path)
     end
 
     def basename_without_extensions
-      File.basename(basename, extensions.join)
+      basename(extensions.join)
     end
 
     def extensions
-      @extensions ||= basename.scan(/\.[^.]+/)
+      @extensions ||= basename.to_s.scan(/\.[^.]+/)
     end
 
     def format_extension
@@ -67,14 +48,10 @@ module Sprockets
         'application/octet-stream'
     end
 
-    def to_s
-      path
-    end
-
     def fingerprint
       if defined? @fingerprint
         @fingerprint
-      elsif basename_without_extensions =~ /-([0-9a-f]{7,40})$/
+      elsif basename_without_extensions.to_s =~ /-([0-9a-f]{7,40})$/
         @fingerprint = $1
       else
         @fingerprint = nil
@@ -83,10 +60,10 @@ module Sprockets
 
     def with_fingerprint(digest)
       if fingerprint
-        path = self.path.sub(fingerprint, digest)
+        path = self.to_s.sub(fingerprint, digest)
       else
         basename = "#{basename_without_extensions}-#{digest}#{extensions.join}"
-        path = dirname == '.' ? basename : File.join(dirname, basename)
+        path = dirname.to_s == '.' ? basename : dirname.join(basename)
       end
 
       self.class.new(path)
