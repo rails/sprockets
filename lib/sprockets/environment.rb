@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'hike'
 require 'logger'
+require 'sprockets/compression'
 require 'sprockets/concatenated_asset'
 require 'sprockets/pathname'
 require 'sprockets/server'
@@ -11,7 +12,7 @@ require 'tilt'
 module Sprockets
   class Environment
     extend TemplateMappings
-    include Server
+    include Compression, Server
 
     DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
@@ -32,35 +33,6 @@ module Sprockets
 
     def expire_cache
       @cache = {}
-    end
-
-    attr_reader :css_compressor, :js_compressor
-
-    def css_compressor=(compressor)
-      expire_cache
-      @css_compressor = compressor
-    end
-
-    def js_compressor=(compressor)
-      expire_cache
-      @js_compressor = compressor
-    end
-
-    def use_default_compressors
-      begin
-        require 'yui/compressor'
-        self.css_compressor = YUI::CssCompressor.new
-        self.js_compressor  = YUI::JavaScriptCompressor.new(:munge => true)
-      rescue LoadError
-      end
-
-      begin
-        require 'closure-compiler'
-        self.js_compressor = Closure::Compiler.new
-      rescue LoadError
-      end
-
-      nil
     end
 
     def static_root
