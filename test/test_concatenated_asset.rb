@@ -7,13 +7,17 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "requiring the same file multiple times has no effect" do
-    assert_equal source_file("project.js").source, asset("multiple.js").to_s
+    assert_equal source_file("project.js").source+"\n", asset("multiple.js").to_s
   end
 
   test "requiring a file of a different format raises an exception" do
     assert_raise Sprockets::ContentTypeMismatch do
       asset("mismatch.js")
     end
+  end
+
+  test "concating joins files with blank line" do
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", asset("application.js").to_s
   end
 
   test "dependencies appear in the source before files that required them" do
@@ -39,22 +43,22 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "processing a source file in compat mode" do
-    assert_equal source_file("project.js").source + source_file("users.js").source,
+    assert_equal source_file("project.js").source + "\n" + source_file("users.js").source,
       asset("compat.js").to_s
   end
 
   test "included dependencies are inserted after the header of the dependent file" do
-    assert_equal "# My Application\n" + source_file("project.js").source + "\nhello()\n",
+    assert_equal "# My Application\n" + source_file("project.js").source + "\n\nhello()\n",
       asset("included_header.js").to_s
   end
 
   test "requiring a file with a relative path" do
-    assert_equal source_file("project.js").source,
+    assert_equal source_file("project.js").source + "\n",
       asset("relative/require.js").to_s
   end
 
   test "including a file with a relative path" do
-    assert_equal "// Included relatively\n" + source_file("project.js").source + "\nhello()\n", asset("relative/include.js").to_s
+    assert_equal "// Included relatively\n" + source_file("project.js").source + "\n\nhello()\n", asset("relative/include.js").to_s
   end
 
   test "can't require files outside the load path" do

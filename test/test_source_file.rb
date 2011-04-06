@@ -20,6 +20,7 @@ class SourceFileTest < Sprockets::TestCase
   test "body" do
     assert_equal "", source_file("empty").body
     assert_equal "\nhello()\n", source_file("application.js.coffee").body
+    assert_equal "var Foo;\n", source_file("noreturn.js").body
   end
 
   test "mtime" do

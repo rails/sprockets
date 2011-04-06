@@ -28,7 +28,9 @@ module Sprockets
     end
 
     def body
-      directive_parser.body
+      body = directive_parser.body
+      body += "\n" if body != "" && body !~ /\n\Z/m
+      body
     end
   end
 end
