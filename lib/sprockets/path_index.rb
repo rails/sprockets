@@ -26,11 +26,8 @@ module Sprockets
 
     def resolve(logical_path, options = {})
       if block_given?
-        @trail.find(logical_path.to_s, options) do |path|
-          yield Pathname.new(path)
-        end
-
-        @trail.find(Pathname.new(logical_path).index.to_s, options) do |path|
+        index_path = Pathname.new(logical_path).index.to_s
+        @trail.find(logical_path.to_s, index_path, options) do |path|
           yield Pathname.new(path)
         end
       else
