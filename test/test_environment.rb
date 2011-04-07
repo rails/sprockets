@@ -63,6 +63,14 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["hello-ffffffff.txt"]
   end
 
+  test "find index.js in directory" do
+    assert_equal "var A;\nvar B;\n", @env["mobile.js"].to_s
+  end
+
+  test "find index.css in directory" do
+    assert_equal ".c {}\n.d {}\n/*\n */\n\n", @env["mobile.css"].to_s
+  end
+
   test "find static directory returns nil" do
     assert_nil @env["images"]
   end
@@ -75,7 +83,6 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "(function() {})();\n",
       @env["compiled-digest-1c41eb0cf934a0c76babe875f982f9d1.js"].to_s
   end
-
 
   test "find asset when static root doesn't exist" do
     @env.static_root = fixture_path('missing')

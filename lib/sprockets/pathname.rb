@@ -49,6 +49,16 @@ module Sprockets
         'application/octet-stream'
     end
 
+    def index
+      if basename_without_extensions.to_s == 'index'
+        self
+      else
+        basename = "#{basename_without_extensions}/index#{extensions.join}"
+        path = dirname.to_s == '.' ? basename : dirname.join(basename)
+        self.class.new(path)
+      end
+    end
+
     def fingerprint
       if defined? @fingerprint
         @fingerprint

@@ -29,6 +29,10 @@ module Sprockets
         @trail.find(logical_path.to_s, options) do |path|
           yield Pathname.new(path)
         end
+
+        @trail.find(Pathname.new(logical_path).index.to_s, options) do |path|
+          yield Pathname.new(path)
+        end
       else
         resolve(logical_path, options) do |pathname|
           return pathname
