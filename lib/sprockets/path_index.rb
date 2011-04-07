@@ -24,6 +24,10 @@ module Sprockets
       @trail.paths
     end
 
+    def engine_extensions
+      @trail.extensions
+    end
+
     def resolve(logical_path, options = {})
       if block_given?
         index_path = Pathname.new(logical_path).index.to_s

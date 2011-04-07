@@ -26,6 +26,10 @@ module Sprockets
       @path_index.paths
     end
 
+    def engine_extensions
+      @path_index.engine_extensions
+    end
+
     def static_root
       @static_index.root
     end

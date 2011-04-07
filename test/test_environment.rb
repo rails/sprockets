@@ -22,6 +22,15 @@ module EnvironmentTests
     assert_equal fixture_path("public"), @env.static_root.to_s
   end
 
+  test "paths" do
+    assert_equal [fixture_path("default")], @env.paths
+  end
+
+  test "engine extensions" do
+    assert_equal [".coffee", ".erb", ".less", ".sass", ".scss", ".str", ".css", ".js"],
+      @env.engine_extensions
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
