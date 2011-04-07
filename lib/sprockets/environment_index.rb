@@ -26,6 +26,10 @@ module Sprockets
       @path_index.paths
     end
 
+    def index
+      self
+    end
+
     def precompile(*paths)
       raise "missing static root" unless @static_index.root
 

@@ -1,11 +1,9 @@
 require 'sprockets_test'
 require 'rack/mock'
 
-class TestEnvironment < Sprockets::TestCase
-  def setup
-    @env = Sprockets::Environment.new(".")
-    @env.paths << fixture_path('default')
-    @env.static_root = fixture_path('public')
+module EnvironmentTests
+  def self.test(name, &block)
+    define_method("test #{name.inspect}", &block)
   end
 
   test "working directory is the default root" do
@@ -33,16 +31,8 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
 
-  test "find concatenated asset in indexed environment" do
-    assert_equal "var Gallery = {};\n", @env.index["gallery.js"].to_s
-  end
-
   test "find static asset in environment" do
     assert_equal "Hello world\n", @env["hello.txt"].to_s
-  end
-
-  test "find static asset in indexed environment" do
-    assert_equal "Hello world\n", @env.index["hello.txt"].to_s
   end
 
   test "find compiled asset in static root" do
@@ -85,8 +75,8 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "find asset when static root doesn't exist" do
-    @env.static_root = fixture_path('missing')
-    assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
+    env = new_environment { |e| e.static_root = fixture_path('missing') }
+    assert_equal "var Gallery = {};\n", env["gallery.js"].to_s
   end
 
   test "missing asset returns nil" do
@@ -138,5 +128,37 @@ class TestEnvironment < Sprockets::TestCase
     ensure
       File.unlink(filename) if File.exist?(filename)
     end
+  end
+end
+
+class TestEnvironment < Sprockets::TestCase
+  include EnvironmentTests
+
+  def new_environment
+    env = Sprockets::Environment.new(".")
+    env.paths << fixture_path('default')
+    env.static_root = fixture_path('public')
+    yield env if block_given?
+    env
+  end
+
+  def setup
+    @env = new_environment
+  end
+end
+
+class TestEnvironmentIndex < Sprockets::TestCase
+  include EnvironmentTests
+
+  def new_environment
+    env = Sprockets::Environment.new(".")
+    env.paths << fixture_path('default')
+    env.static_root = fixture_path('public')
+    yield env if block_given?
+    env.index
+  end
+
+  def setup
+    @env = new_environment
   end
 end
