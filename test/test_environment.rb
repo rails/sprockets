@@ -10,6 +10,14 @@ module EnvironmentTests
     assert_equal Dir.pwd, @env.root
   end
 
+  test "active css compressor" do
+    assert_nil @env.css_compressor
+  end
+
+  test "active js compressor" do
+    assert_nil @env.js_compressor
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
