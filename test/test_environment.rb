@@ -143,6 +143,12 @@ module EnvironmentTests
   end
 end
 
+class WhitespaceCompressor
+  def self.compress(source)
+    source.gsub(/\s+/, "")
+  end
+end
+
 class TestEnvironment < Sprockets::TestCase
   include EnvironmentTests
 
@@ -156,12 +162,6 @@ class TestEnvironment < Sprockets::TestCase
 
   def setup
     @env = new_environment
-  end
-
-  class WhitespaceCompressor
-    def self.compress(source)
-      source.gsub(/\s+/, "")
-    end
   end
 
   test "changing static root expires old assets" do
@@ -202,11 +202,41 @@ class TestEnvironmentIndex < Sprockets::TestCase
     assert !@env.respond_to?(:static_root=)
   end
 
+  test "change in environment static root does not affect index" do
+    env = Sprockets::Environment.new(".")
+    env.static_root = fixture_path('public')
+    index = env.index
+
+    assert_equal fixture_path('public'), index.static_root.to_s
+    env.static_root = fixture_path('static')
+    assert_equal fixture_path('public'), index.static_root.to_s
+  end
+
   test "does not allow css compressor to be changed" do
     assert !@env.respond_to?(:css_compressor=)
   end
 
+  test "change in environment css compressor does not affect index" do
+    env = Sprockets::Environment.new(".")
+    env.css_compressor = WhitespaceCompressor
+    index = env.index
+
+    assert_equal WhitespaceCompressor, index.css_compressor
+    env.css_compressor = nil
+    assert_equal WhitespaceCompressor, index.css_compressor
+  end
+
   test "does not allow js compressor to be changed" do
     assert !@env.respond_to?(:js_compressor=)
+  end
+
+  test "change in environment js compressor does not affect index" do
+    env = Sprockets::Environment.new(".")
+    env.js_compressor = WhitespaceCompressor
+    index = env.index
+
+    assert_equal WhitespaceCompressor, index.js_compressor
+    env.js_compressor = nil
+    assert_equal WhitespaceCompressor, index.js_compressor
   end
 end
