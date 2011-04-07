@@ -23,11 +23,23 @@ module Sprockets
       @logger.level = Logger::FATAL
 
       @static_root = nil
-      @cache = {}
+
+      expire_cache
     end
 
     attr_accessor :static_root
-    attr_accessor :css_compressor, :js_compressor
+
+    attr_reader :css_compressor, :js_compressor
+
+    def css_compressor=(compressor)
+      expire_cache
+      @css_compressor = compressor
+    end
+
+    def js_compressor=(compressor)
+      expire_cache
+      @js_compressor = compressor
+    end
 
     def use_default_compressors
       begin
@@ -82,6 +94,10 @@ module Sprockets
     alias_method :[], :find_asset
 
     protected
+      def expire_cache
+        @cache = {}
+      end
+
       def find_fresh_asset_from_cache(logical_path)
         if asset = @cache[logical_path.to_s]
           if logical_path.fingerprint

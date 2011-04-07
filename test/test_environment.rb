@@ -145,6 +145,24 @@ class TestEnvironment < Sprockets::TestCase
   def setup
     @env = new_environment
   end
+
+  class WhitespaceCompressor
+    def self.compress(source)
+      source.gsub(/\s+/, "")
+    end
+  end
+
+  test "changing css compressor expires old assets" do
+    assert_equal ".gallery {\n  color: red;\n}\n", @env["gallery.css"].to_s
+    @env.css_compressor = WhitespaceCompressor
+    assert_equal ".gallery{color:red;}", @env["gallery.css"].to_s
+  end
+
+  test "changing js compressor expires old assets" do
+    assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
+    @env.js_compressor = WhitespaceCompressor
+    assert_equal "varGallery={};", @env["gallery.js"].to_s
+  end
 end
 
 class TestEnvironmentIndex < Sprockets::TestCase
@@ -160,5 +178,13 @@ class TestEnvironmentIndex < Sprockets::TestCase
 
   def setup
     @env = new_environment
+  end
+
+  test "does not allow css compressor to be changed" do
+    assert !@env.respond_to?(:css_compressor=)
+  end
+
+  test "does not allow js compressor to be changed" do
+    assert !@env.respond_to?(:js_compressor=)
   end
 end
