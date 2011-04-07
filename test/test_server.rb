@@ -13,11 +13,15 @@ class TestServer < Sprockets::TestCase
   end
 
   def default_app
-    app = @env
+    env = @env
 
     Rack::Builder.new do
       map "/javascripts" do
-        run app
+        run env
+      end
+
+      map "/cached/javascripts" do
+        run env.index
       end
     end
   end
@@ -28,6 +32,11 @@ class TestServer < Sprockets::TestCase
 
   test "serve single source file" do
     get "/javascripts/foo.js"
+    assert_equal "var foo;\n", last_response.body
+  end
+
+  test "serve single source file from indexed environment" do
+    get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
   end
 
@@ -68,6 +77,28 @@ class TestServer < Sprockets::TestCase
     time_after_touching = last_response.headers['Last-Modified']
 
     assert_not_equal time_before_touching, time_after_touching
+  end
+
+  test "file updates do not update last modified header for indexed environments" do
+    time = Time.now
+    path = fixture_path "server/app/javascripts/foo.js"
+    File.utime(time, time, path)
+
+    get "/cached/javascripts/application.js"
+    time_before_touching = last_response.headers['Last-Modified']
+
+    get "/cached/javascripts/application.js"
+    time_after_touching = last_response.headers['Last-Modified']
+
+    assert_equal time_before_touching, time_after_touching
+
+    mtime = Time.now + 60
+    File.utime(mtime, mtime, path)
+
+    get "/cached/javascripts/application.js"
+    time_after_touching = last_response.headers['Last-Modified']
+
+    assert_equal time_before_touching, time_after_touching
   end
 
   test "not modified response when headers match" do

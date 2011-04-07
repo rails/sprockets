@@ -5,10 +5,13 @@ module Sprockets
   autoload :Context,             "sprockets/context"
   autoload :DirectiveParser,     "sprockets/directive_parser"
   autoload :Environment,         "sprockets/environment"
+  autoload :EnvironmentIndex,    "sprockets/environment_index"
   autoload :Error,               "sprockets/errors"
   autoload :FileNotFound,        "sprockets/errors"
+  autoload :PathIndex,           "sprockets/path_index"
   autoload :Pathname,            "sprockets/pathname"
   autoload :Processor,           "sprockets/processor"
   autoload :SourceFile,          "sprockets/source_file"
   autoload :StaticAsset,         "sprockets/static_asset"
+  autoload :StaticIndex,         "sprockets/static_index"
 end

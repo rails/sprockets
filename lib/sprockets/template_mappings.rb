@@ -1,3 +1,5 @@
+require 'tilt'
+
 module Sprockets
   module TemplateMappings
     extend self
