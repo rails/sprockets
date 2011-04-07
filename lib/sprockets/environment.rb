@@ -41,23 +41,6 @@ module Sprockets
       @js_compressor = compressor
     end
 
-    def use_default_compressors
-      begin
-        require 'yui/compressor'
-        self.css_compressor = YUI::CssCompressor.new
-        self.js_compressor  = YUI::JavaScriptCompressor.new(:munge => true)
-      rescue LoadError
-      end
-
-      begin
-        require 'closure-compiler'
-        self.js_compressor = Closure::Compiler.new
-      rescue LoadError
-      end
-
-      nil
-    end
-
     def root
       @trail.root
     end
