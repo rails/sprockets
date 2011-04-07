@@ -18,6 +18,10 @@ module EnvironmentTests
     assert_nil @env.js_compressor
   end
 
+  test "current static root" do
+    assert_equal fixture_path("public"), @env.static_root.to_s
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
@@ -160,6 +164,12 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
+  test "changing static root expires old assets" do
+    assert @env["compiled.js"]
+    @env.static_root = nil
+    assert_nil @env["compiled.js"]
+  end
+
   test "changing css compressor expires old assets" do
     assert_equal ".gallery {\n  color: red;\n}\n", @env["gallery.css"].to_s
     @env.css_compressor = WhitespaceCompressor
@@ -186,6 +196,10 @@ class TestEnvironmentIndex < Sprockets::TestCase
 
   def setup
     @env = new_environment
+  end
+
+  test "does not allow static root to be changed" do
+    assert !@env.respond_to?(:static_root=)
   end
 
   test "does not allow css compressor to be changed" do

@@ -27,7 +27,12 @@ module Sprockets
       expire_cache
     end
 
-    attr_accessor :static_root
+    attr_reader :static_root
+
+    def static_root=(root)
+      expire_cache
+      @static_root = root
+    end
 
     attr_reader :css_compressor, :js_compressor
 

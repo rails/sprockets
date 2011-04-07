@@ -26,6 +26,10 @@ module Sprockets
       @path_index.paths
     end
 
+    def static_root
+      @static_index.root
+    end
+
     def index
       self
     end
