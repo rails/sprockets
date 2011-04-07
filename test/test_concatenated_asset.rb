@@ -102,7 +102,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   test "asset mtime is the latest mtime of all processed sources" do
     mtime = Time.now
     path  = source_file("project.js").pathname
-    File.utime(mtime, mtime, path)
+    File.utime(mtime, mtime, path.to_s)
     assert_equal File.mtime(path), asset("application.js").mtime
   end
 
@@ -143,7 +143,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert !asset.stale?
 
     mtime = Time.now + 1
-    File.utime(mtime, mtime, source_file("project.js").pathname)
+    File.utime(mtime, mtime, source_file("project.js").pathname.to_s)
 
     assert asset.stale?
   end
