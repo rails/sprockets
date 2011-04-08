@@ -85,7 +85,7 @@ module Sprockets
           end
         end
       else
-        raise ArgumentError, "require_tree argument must be a relative path"
+        raise ArgumentError, "require_directory argument must be a relative path"
       end
     end
 

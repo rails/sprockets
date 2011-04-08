@@ -202,6 +202,50 @@ class TestEnvironment < Sprockets::TestCase
     @env.engine_extensions.clear
     assert_nil @env["gallery.css"]
   end
+
+  test "concatenated asset is stale if its mtime is updated or deleted" do
+    filename = File.join(fixture_path("default"), "tmp.js")
+
+    begin
+      assert_nil @env["tmp.js"]
+
+      File.open(filename, 'w') { |f| f.puts "foo" }
+      assert_equal "foo\n", @env["tmp.js"].to_s
+
+      File.open(filename, 'w') { |f| f.puts "bar" }
+      time = Time.now + 60
+      File.utime(time, time, filename)
+      assert_equal "bar\n", @env["tmp.js"].to_s
+
+      File.unlink(filename)
+      assert_nil @env["tmp.js"]
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
+  test "static asset is stale if its mtime is updated or deleted" do
+    filename = File.join(fixture_path("default"), "tmp.png")
+
+    begin
+      assert_nil @env["tmp.png"]
+
+      File.open(filename, 'w') { |f| f.puts "foo" }
+      assert_equal "foo\n", @env["tmp.png"].to_s
+
+      File.open(filename, 'w') { |f| f.puts "bar" }
+      time = Time.now + 60
+      File.utime(time, time, filename)
+      assert_equal "bar\n", @env["tmp.png"].to_s
+
+      File.unlink(filename)
+      assert_nil @env["tmp.png"]
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
 end
 
 class TestEnvironmentIndex < Sprockets::TestCase

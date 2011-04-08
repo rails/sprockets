@@ -148,6 +148,44 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert asset.stale?
   end
 
+  test "asset is stale if a file is added to its require directory" do
+    asset = asset("tree/all_with_require_directory.js")
+    assert !asset.stale?
+
+    dirname  = File.join(fixture_path("asset"), "tree/all")
+    filename = File.join(dirname, "z.js")
+
+    begin
+      File.open(filename, 'w') { |f| f.write "z" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, dirname)
+
+      assert asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
+  test "asset is stale if a file is added to its require tree" do
+    asset = asset("tree/all_with_require_tree.js")
+    assert !asset.stale?
+
+    dirname  = File.join(fixture_path("asset"), "tree/all/b/c")
+    filename = File.join(dirname, "z.js")
+
+    begin
+      File.open(filename, 'w') { |f| f.write "z" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, dirname)
+
+      assert asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
   test "legacy constants.yml" do
     assert_equal "var Prototype = { version: '2.0' };\n",
       asset("constants.js").to_s

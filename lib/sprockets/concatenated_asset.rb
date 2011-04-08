@@ -48,6 +48,8 @@ module Sprockets
 
     def stale?
       @source_paths.any? { |p| mtime < File.mtime(p) }
+    rescue Errno::ENOENT
+      true
     end
 
     def to_s
@@ -79,16 +81,24 @@ module Sprockets
         @source << str
       end
 
+      def add_path(pathname)
+        if pathname.mtime > mtime
+          @mtime = pathname.mtime
+        end
+
+        source_paths << pathname.to_s
+      end
+
       def requirable?(pathname)
         content_type == pathname.content_type
       end
 
       def require(environment, pathname)
         if pathname.directory?
-          source_paths << pathname.to_s
+          add_path pathname
         elsif requirable?(pathname)
           unless source_paths.include?(pathname.to_s)
-            source_paths << pathname.to_s
+            add_path pathname
             self << process(environment, pathname)
           end
         else
@@ -110,10 +120,6 @@ module Sprockets
         source_file = SourceFile.new(pathname)
         processor   = Processor.new(environment, source_file)
         result      = ""
-
-        if source_file.mtime > mtime
-          @mtime = source_file.mtime
-        end
 
         processor.required_pathnames.each { |p| require(environment, p) }
         result << source_file.header << "\n" unless source_file.header.empty?

@@ -30,6 +30,8 @@ module Sprockets
       else
         mtime < pathname.mtime
       end
+    rescue Errno::ENOENT
+      true
     end
 
     def each
