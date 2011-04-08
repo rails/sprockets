@@ -103,7 +103,7 @@ module Sprockets
     end
 
     def process_provide_directive(path)
-      @environment.paths << File.expand_path(path, base_path)
+      # ignore
     end
 
     def each_pathname_in_tree(path)
