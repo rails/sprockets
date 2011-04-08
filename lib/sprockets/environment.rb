@@ -50,12 +50,25 @@ module Sprockets
       @trail.root
     end
 
+    class ArrayProxy
+      instance_methods.each { |m| undef_method m unless m =~ /(^__|^send$|^object_id$)/ }
+
+      def initialize(target, &callback)
+        @target, @callback = target, callback
+      end
+
+      def method_missing(sym, *args, &block)
+        @callback.call()
+        @target.send(sym, *args, &block)
+      end
+    end
+
     def paths
-      @trail.paths
+      ArrayProxy.new(@trail.paths) { expire_cache }
     end
 
     def engine_extensions
-      @trail.extensions
+      ArrayProxy.new(@trail.extensions) { expire_cache }
     end
 
     def precompile(*paths)

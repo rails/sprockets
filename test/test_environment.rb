@@ -23,12 +23,12 @@ module EnvironmentTests
   end
 
   test "paths" do
-    assert_equal [fixture_path("default")], @env.paths
+    assert_equal [fixture_path("default")], @env.paths.to_a
   end
 
   test "engine extensions" do
     assert_equal [".coffee", ".erb", ".less", ".sass", ".scss", ".str", ".css", ".js"],
-      @env.engine_extensions
+      @env.engine_extensions.to_a
   end
 
   test "resolve in environment" do
@@ -189,6 +189,18 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
     @env.js_compressor = WhitespaceCompressor
     assert_equal "varGallery={};", @env["gallery.js"].to_s
+  end
+
+  test "changing paths expires old assets" do
+    assert @env["gallery.css"]
+    @env.paths.clear
+    assert_nil @env["gallery.css"]
+  end
+
+  test "changing extensions expires old assets" do
+    assert @env["gallery.css"]
+    @env.engine_extensions.clear
+    assert_nil @env["gallery.css"]
   end
 end
 
