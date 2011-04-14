@@ -1,5 +1,4 @@
 require "digest/md5"
-require "json"
 require "rack/utils"
 require "set"
 require "sprockets/context"
