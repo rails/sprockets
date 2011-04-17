@@ -186,6 +186,16 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "asset is stale if its declared dependency changes" do
+    asset = asset("sprite.css")
+    assert !asset.stale?
+
+    mtime = Time.now + 1
+    File.utime(mtime, mtime, resolve("POW.png"))
+
+    assert asset.stale?
+  end
+
   test "legacy constants.yml" do
     assert_equal "var Prototype = { version: '2.0' };\n",
       asset("constants.js").to_s

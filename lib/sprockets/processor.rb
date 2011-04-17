@@ -5,11 +5,12 @@ require 'yaml'
 module Sprockets
   class Processor
     attr_reader :environment, :source_file
-    attr_reader :included_pathnames, :required_pathnames
+    attr_reader :depended_pathnames, :included_pathnames, :required_pathnames
 
     def initialize(environment, source_file)
       @environment        = environment
       @source_file        = source_file
+      @depended_pathnames = []
       @included_pathnames = []
       @required_pathnames = []
       @compat             = false
@@ -39,6 +40,10 @@ module Sprockets
 
     def process_compat_directive
       @compat = true
+    end
+
+    def process_depend_directive(path)
+      depended_pathnames << resolve(path)
     end
 
     def process_include_directive(path)
@@ -74,10 +79,11 @@ module Sprockets
 
     def process_require_directory_directive(path = ".")
       if relative?(path)
-        root = File.expand_path(File.join(base_path, path))
-        required_pathnames << Pathname.new(root)
+        root = base_path.join(path).expand_path
 
-        Dir[root + "/*"].sort.each do |filename|
+        required_pathnames << root
+
+        Dir["#{root}/*"].sort.each do |filename|
           pathname = Pathname.new(filename)
           if pathname.file? &&
               pathname.content_type == source_file.content_type
@@ -91,8 +97,9 @@ module Sprockets
 
     def process_require_tree_directive(path = ".")
       if relative?(path)
-        root = File.expand_path(File.join(base_path, path))
-        required_pathnames << Pathname.new(root)
+        root = base_path.join(path).expand_path
+
+        required_pathnames << root
 
         each_pathname_in_tree(path) do |pathname|
           required_pathnames << pathname
@@ -107,8 +114,7 @@ module Sprockets
     end
 
     def each_pathname_in_tree(path)
-      root = File.expand_path(File.join(base_path, path))
-      Dir[root + "/**/*"].sort.each do |filename|
+      Dir["#{base_path.join(path)}/**/*"].sort.each do |filename|
         pathname = Pathname.new(filename)
 
         if pathname.directory?

@@ -124,6 +124,7 @@ module Sprockets
         result << source_file.header << "\n" unless source_file.header.empty?
         processor.included_pathnames.each { |p| result << process(environment, p) }
         result << source_file.body
+        processor.depended_pathnames.each { |p| add_path(p) }
 
         # LEGACY
         if processor.compat? && (constants = processor.constants).any?
