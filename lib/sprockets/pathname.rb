@@ -49,6 +49,12 @@ module Sprockets
         'application/octet-stream'
     end
 
+    def without_engine_extensions
+      engine_extensions.inject(self) do |pathname, ext|
+        pathname.sub(ext, '')
+      end
+    end
+
     def index
       if basename_without_extensions.to_s == 'index'
         self

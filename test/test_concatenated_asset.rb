@@ -191,7 +191,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert !asset.stale?
 
     mtime = Time.now + 1
-    File.utime(mtime, mtime, resolve("POW.png"))
+    File.utime(mtime, mtime, resolve("POW.png").to_s)
 
     assert asset.stale?
   end

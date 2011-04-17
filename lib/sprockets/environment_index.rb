@@ -42,16 +42,17 @@ module Sprockets
       raise "missing static root" unless @static_index.root
 
       paths.each do |path|
-        pathname = Pathname.new(path)
+        @path_index.files.each do |logical_path|
+          next unless logical_path.fnmatch(path.to_s)
 
-        if asset = @path_index.find_asset(pathname)
-          fingerprint_pathname = pathname.with_fingerprint(asset.digest)
-          filename = @static_index.root.join(fingerprint_pathname)
+          if asset = @path_index.find_asset(logical_path)
+            filename = @static_index.root.join(logical_path.with_fingerprint(asset.digest))
 
-          FileUtils.mkdir_p filename.dirname
+            FileUtils.mkdir_p filename.dirname
 
-          filename.open('w') do |f|
-            f.write asset.to_s
+            filename.open('w') do |f|
+              f.write asset.to_s
+            end
           end
         end
       end

@@ -2,6 +2,7 @@ require 'sprockets/concatenated_asset'
 require 'sprockets/errors'
 require 'sprockets/pathname'
 require 'sprockets/static_asset'
+require 'set'
 
 module Sprockets
   class PathIndex
@@ -24,8 +25,23 @@ module Sprockets
       @trail.paths
     end
 
+    def pathnames
+      paths.map { |path| Pathname.new(path) }
+    end
+
     def engine_extensions
       @trail.extensions
+    end
+
+    def files
+      files = Set.new
+      pathnames.each do |base_pathname|
+        Dir["#{base_pathname}/**/*"].each do |filename|
+          logical_path = Pathname.new(filename).relative_path_from(base_pathname)
+          files << Pathname.new(logical_path).without_engine_extensions
+        end
+      end
+      files
     end
 
     def resolve(logical_path, options = {})
