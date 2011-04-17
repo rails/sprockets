@@ -52,13 +52,26 @@ module EnvironmentTests
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
 
+  test "find concatenated asset with leading slash in environment" do
+    assert_equal "var Gallery = {};\n", @env["/gallery.js"].to_s
+  end
+
   test "find static asset in environment" do
     assert_equal "Hello world\n", @env["hello.txt"].to_s
+  end
+
+  test "find static asset with leading slash in environment" do
+    assert_equal "Hello world\n", @env["/hello.txt"].to_s
   end
 
   test "find compiled asset in static root" do
     assert_equal "(function() {\n  application.boot();\n})();\n",
       @env["compiled.js"].to_s
+  end
+
+  test "find compiled asset with leading slash in static root" do
+    assert_equal "(function() {\n  application.boot();\n})();\n",
+      @env["/compiled.js"].to_s
   end
 
   test "find compiled asset in static root is StaticAsset" do

@@ -14,7 +14,7 @@ module Sprockets
     def find_asset(logical_path)
       return unless @root
 
-      logical_path = logical_path.to_s
+      logical_path = logical_path.to_s.sub(/^\//, '')
 
       if @assets.key?(logical_path)
         return @assets[logical_path]
