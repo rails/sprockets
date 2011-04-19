@@ -179,6 +179,22 @@ module EnvironmentTests
       FileUtils.rm_rf(dirname)
     end
   end
+
+  test "precompile regexp" do
+    dirname = fixture_path("public/mobile")
+
+    begin
+      assert !File.exist?(dirname)
+      @env.precompile(/mobile\/.*/)
+
+      assert File.exist?(dirname)
+      assert File.exist?(File.join(dirname, "a-172ecf751b024e2c68b1da265523b202.js"))
+      assert File.exist?(File.join(dirname, "b-5e5f944f87f43e1ddec5c8dc109e5f8d.js"))
+      assert File.exist?(File.join(dirname, "c-4127d837671de30f7e9cb8e9bec82285.css"))
+    ensure
+      FileUtils.rm_rf(dirname)
+    end
+  end
 end
 
 class WhitespaceCompressor

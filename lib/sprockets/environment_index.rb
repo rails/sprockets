@@ -43,7 +43,11 @@ module Sprockets
 
       paths.each do |path|
         @path_index.files.each do |logical_path|
-          next unless logical_path.fnmatch(path.to_s)
+          if path.is_a?(Regexp)
+            next unless path.match(logical_path.to_s)
+          else
+            next unless logical_path.fnmatch(path.to_s)
+          end
 
           if asset = @path_index.find_asset(logical_path)
             filename = @static_index.root.join(logical_path.with_fingerprint(asset.digest))
