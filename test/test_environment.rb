@@ -291,6 +291,34 @@ class TestEnvironment < Sprockets::TestCase
       assert !File.exist?(filename)
     end
   end
+
+  test "extend context" do
+    @env.context.class_eval do
+      def datauri(path)
+        require 'base64'
+        Base64.encode64(File.open(path, "rb") { |f| f.read })
+      end
+    end
+
+    assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
+      @env["helpers.css"].to_s.lines.to_a[0..1].join
+    assert_equal 58240, @env["helpers.css"].length
+  end
+
+  test "seperate contexts classes for each instance" do
+    e1 = new_environment
+    e2 = new_environment
+
+    assert_raises(NameError) { e1.context.instance_method(:foo) }
+    assert_raises(NameError) { e2.context.instance_method(:foo) }
+
+    e1.context.class_eval do
+      def foo; end
+    end
+
+    assert_nothing_raised(NameError) { e1.context.instance_method(:foo) }
+    assert_raises(NameError) { e2.context.instance_method(:foo) }
+  end
 end
 
 class TestEnvironmentIndex < Sprockets::TestCase

@@ -6,10 +6,11 @@ require 'set'
 
 module Sprockets
   class PathIndex
-    attr_reader :logger, :css_compressor, :js_compressor
+    attr_reader :logger, :context, :css_compressor, :js_compressor
 
     def initialize(environment, trail)
       @logger         = environment.logger
+      @context        = environment.context
       @css_compressor = environment.css_compressor
       @js_compressor  = environment.js_compressor
 

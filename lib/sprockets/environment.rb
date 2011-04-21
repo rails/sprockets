@@ -11,7 +11,7 @@ module Sprockets
     extend TemplateMappings
     include Server
 
-    attr_accessor :logger
+    attr_accessor :logger, :context
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
@@ -21,6 +21,8 @@ module Sprockets
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
+
+      @context = Class.new(Context)
 
       @static_root = nil
 

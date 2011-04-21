@@ -1,7 +1,6 @@
 require "digest/md5"
 require "rack/utils"
 require "set"
-require "sprockets/context"
 require "sprockets/errors"
 require "sprockets/processor"
 require "sprockets/source_file"
@@ -108,7 +107,7 @@ module Sprockets
 
       def process(environment, pathname)
         result = process_source(environment, pathname)
-        scope, locals = Context.new(environment, pathname), {}
+        scope, locals = environment.context.new(environment, self, pathname), {}
         pathname.engines.reverse_each do |engine|
           result = engine.new(pathname.to_s) { result }.render(scope, locals)
         end
