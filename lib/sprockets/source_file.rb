@@ -5,9 +5,9 @@ module Sprockets
   class SourceFile
     attr_reader :pathname, :source, :mtime
 
-    def initialize(path)
+    def initialize(path, source = nil)
       @pathname = Pathname.new(path)
-      @source   = IO.read(self.pathname).gsub(/\r?\n/, "\n")
+      @source   = source || IO.read(self.pathname).gsub(/\r?\n/, "\n")
       @mtime    = pathname.mtime
     end
 

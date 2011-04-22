@@ -1,20 +1,54 @@
 require 'sprockets/errors'
 require 'sprockets/pathname'
+require 'sprockets/source_file'
+require 'tilt'
 require 'yaml'
 
 module Sprockets
-  class Processor
-    attr_reader :environment, :source_file
+  class Processor < Tilt::Template
+    attr_reader :source_file
     attr_reader :depended_pathnames, :included_pathnames, :required_pathnames
 
-    def initialize(environment, source_file)
-      @environment        = environment
-      @source_file        = source_file
+    def prepare
+      @source_file = SourceFile.new(file, data)
+
       @depended_pathnames = []
       @included_pathnames = []
       @required_pathnames = []
       @compat             = false
+    end
+
+    attr_reader :environment, :concatenation
+
+    def evaluate(scope, locals, &block)
+      @environment   = scope.environment
+      @concatenation = scope.concatenation
+
       process_directives
+      process_source
+    end
+
+    def process_directives
+      source_file.directives.each do |name, *args|
+        send("process_#{name}_directive", *args)
+      end
+    end
+
+    def process_source
+      result = ""
+
+      required_pathnames.each { |p| concatenation.require(p) }
+      result << source_file.header << "\n" unless source_file.header.empty?
+      included_pathnames.each { |p| result << concatenation.process(p) }
+      result << source_file.body
+      depended_pathnames.each { |p| concatenation.depend(p) }
+
+      # LEGACY
+      if compat? && constants.any?
+        result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
+      end
+
+      result
     end
 
     def compat?
@@ -29,12 +63,6 @@ module Sprockets
         File.exist?(path) ? YAML.load_file(path) : {}
       else
         {}
-      end
-    end
-
-    def process_directives
-      source_file.directives.each do |name, *args|
-        send("process_#{name}_directive", *args)
       end
     end
 

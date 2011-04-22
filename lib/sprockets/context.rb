@@ -1,11 +1,11 @@
 module Sprockets
   class Context
-    attr_reader :environment, :asset, :pathname
+    attr_reader :environment, :concatenation, :pathname
 
-    def initialize(environment, asset, pathname)
-      @environment = environment
-      @asset       = asset
-      @pathname    = pathname
+    def initialize(environment, concatenation, pathname)
+      @environment   = environment
+      @concatenation = concatenation
+      @pathname      = pathname
     end
 
     def basepath

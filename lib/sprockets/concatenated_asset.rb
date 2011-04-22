@@ -1,10 +1,5 @@
-require "digest/md5"
-require "rack/utils"
-require "set"
 require "sprockets/errors"
-require "sprockets/processor"
-require "sprockets/source_file"
-require "time"
+require "sprockets/concatenation"
 
 module Sprockets
   class ConcatenatedAsset
@@ -16,28 +11,21 @@ module Sprockets
     end
 
     attr_reader :content_type, :format_extension
-    attr_reader :mtime, :length
+    attr_reader :mtime, :length, :digest
 
     def initialize(environment, pathname)
       @content_type     = pathname.content_type
       @format_extension = pathname.format_extension
-      @source_paths     = Set.new
-      @source           = []
-      @mtime            = Time.at(0)
-      @length           = 0
-      @digest           = Digest::MD5.new
 
-      require(environment, pathname)
+      concatenation = Concatenation.new(environment)
+      concatenation.require(pathname)
+      concatenation.compress!
 
-      if content_type == 'application/javascript' && environment.js_compressor
-        self.source = environment.js_compressor.compress(source.join)
-      elsif content_type == 'text/css' && environment.css_compressor
-        self.source = environment.css_compressor.compress(source.join)
-      end
-    end
-
-    def digest
-      @digest.is_a?(String) ? @digest : @digest.hexdigest
+      @source_paths = concatenation.paths
+      @source       = concatenation.source
+      @mtime        = concatenation.mtime
+      @length       = concatenation.length
+      @digest       = concatenation.digest
     end
 
     def each(&block)
@@ -63,74 +51,5 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
-
-    protected
-      attr_reader :source_paths, :source
-
-      def source=(str)
-        @length = Rack::Utils.bytesize(str)
-        @digest.update(str)
-        @source = [str]
-      end
-
-      def <<(str)
-        @length += Rack::Utils.bytesize(str)
-        @digest << str
-        @source << str
-      end
-
-      def add_path(pathname)
-        if pathname.mtime > mtime
-          @mtime = pathname.mtime
-        end
-
-        source_paths << pathname.to_s
-      end
-
-      def requirable?(pathname)
-        content_type == pathname.content_type
-      end
-
-      def require(environment, pathname)
-        if pathname.directory?
-          add_path pathname
-        elsif requirable?(pathname)
-          unless source_paths.include?(pathname.to_s)
-            add_path pathname
-            self << process(environment, pathname)
-          end
-        else
-          raise ContentTypeMismatch, "#{pathname} is " +
-            "'#{pathname.format_extension}', not '#{format_extension}'"
-        end
-      end
-
-      def process(environment, pathname)
-        result = process_source(environment, pathname)
-        scope, locals = environment.context.new(environment, self, pathname), {}
-        pathname.engines.reverse_each do |engine|
-          result = engine.new(pathname.to_s) { result }.render(scope, locals)
-        end
-        result
-      end
-
-      def process_source(environment, pathname)
-        source_file = SourceFile.new(pathname)
-        processor   = Processor.new(environment, source_file)
-        result      = ""
-
-        processor.required_pathnames.each { |p| require(environment, p) }
-        result << source_file.header << "\n" unless source_file.header.empty?
-        processor.included_pathnames.each { |p| result << process(environment, p) }
-        result << source_file.body
-        processor.depended_pathnames.each { |p| add_path(p) }
-
-        # LEGACY
-        if processor.compat? && (constants = processor.constants).any?
-          result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
-        end
-
-        result
-      end
   end
 end
