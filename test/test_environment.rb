@@ -295,7 +295,8 @@ class TestEnvironment < Sprockets::TestCase
   test "extend context" do
     @env.context.class_eval do
       def datauri(path)
-        require 'base64'
+        # TODO: should not be shaddowing Kernal::require
+        Kernel.require 'base64'
         Base64.encode64(File.open(path, "rb") { |f| f.read })
       end
     end

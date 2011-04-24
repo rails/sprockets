@@ -13,7 +13,7 @@ class TestCustomProcessor < Sprockets::TestCase
 
     def evaluate(context, locals)
       @manifest['require'].each do |pathname|
-        context.concatenation.require(pathname)
+        context.require(pathname)
       end
       ""
     end
@@ -42,8 +42,8 @@ class TestCustomProcessor < Sprockets::TestCase
 
     def evaluate(context, locals)
       data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.concatenation.resolve($1)
-        context.concatenation.depend(path)
+        path = context.resolve($1)
+        context.depend(path)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"
       end
