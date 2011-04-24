@@ -2,9 +2,9 @@ module Sprockets
   class Context
     attr_reader :pathname
 
-    def initialize(environment, concatenation, pathname)
-      @_environment   = environment
+    def initialize(concatenation, pathname)
       @_concatenation = concatenation
+      @_environment   = concatenation.environment
       @pathname       = pathname
     end
 

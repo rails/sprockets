@@ -95,7 +95,7 @@ module Sprockets
 
     def process(pathname)
       engines  = pathname.engines + [Processor]
-      scope    = environment.context.new(environment, self, pathname)
+      scope    = environment.context.new(self, pathname)
       locals   = {}
 
       engines.reverse.inject(pathname.read) do |result, engine|
