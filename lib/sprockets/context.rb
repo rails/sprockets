@@ -12,8 +12,12 @@ module Sprockets
       @_environment.paths
     end
 
+    def root_path
+      paths.detect { |path| pathname.to_s[path] }
+    end
+
     def logical_path
-      if pathname && (root_path = paths.detect { |path| pathname.to_s[path] })
+      if pathname && root_path
         pathname.to_s[%r{^#{root_path}\/([^.]+)}, 1]
       end
     end

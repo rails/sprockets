@@ -68,8 +68,7 @@ module Sprockets
       # LEGACY
       def constants
         if compat?
-          root_path = context.paths.detect { |path| self.pathname.to_s[path] }
-          path = File.join(root_path, "constants.yml")
+          path = File.join(context.root_path, "constants.yml")
           File.exist?(path) ? YAML.load_file(path) : {}
         else
         {}

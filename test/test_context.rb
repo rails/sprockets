@@ -13,6 +13,7 @@ class TestContext < Sprockets::TestCase
     assert_equal({
       'pathname'     => fixture_path("context/properties.js.erb"),
       '__FILE__'     => fixture_path("context/properties.js.erb"),
+      'root_path'    => fixture_path("context"),
       'logical_path' => "properties",
       'content_type' => "application/javascript"
     }, YAML.load(json))
