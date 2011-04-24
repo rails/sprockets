@@ -31,4 +31,32 @@ class TestCustomProcessor < Sprockets::TestCase
 
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
   end
+
+  class DataUriProcessor < Tilt::Template
+    def initialize_engine
+      require 'base64'
+    end
+
+    def prepare
+    end
+
+    def evaluate(context, locals)
+      data.gsub(/url\(\"(.+?)\"\)/) do
+        path = context.concatenation.resolve($1)
+        context.concatenation.depend(path)
+        data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+        "url(data:image/png;base64,#{data})"
+      end
+    end
+  end
+
+  test "custom processor using Concatenation#resolve and #depend" do
+    # TODO: Register on @env instance
+    Sprockets::Environment.register :embed, DataUriProcessor
+    @env.engine_extensions << 'embed'
+
+    assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
+      @env["sprite.css"].to_s.lines.to_a[0..1].join
+    assert_equal 58240, @env["sprite.css"].length
+  end
 end
