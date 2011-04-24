@@ -61,7 +61,13 @@ module Sprockets
       nil
     end
 
+    def resolve(path, base_path = nil, &block)
+      environment.resolve(path, :base_path => base_path, &block)
+    end
+
     def depend(pathname)
+      pathname = expand_path(pathname)
+
       if pathname.mtime > mtime
         self.mtime = pathname.mtime
       end
@@ -72,12 +78,12 @@ module Sprockets
     end
 
     def requirable?(pathname)
-      pathname = Pathname.new(pathname)
+      pathname = expand_path(pathname)
       content_type.nil? || content_type == pathname.content_type
     end
 
     def require(pathname)
-      pathname = Pathname.new(pathname)
+      pathname = expand_path(pathname)
       @content_type ||= pathname.content_type
 
       if pathname.directory?
@@ -96,7 +102,7 @@ module Sprockets
     end
 
     def process(pathname)
-      pathname = Pathname.new(pathname)
+      pathname = expand_path(pathname)
       engines  = pathname.engines + [Processor]
       scope    = environment.context.new(environment, self, pathname)
       locals   = {}
@@ -106,5 +112,11 @@ module Sprockets
         template.render(scope, locals)
       end
     end
+
+    private
+      def expand_path(pathname)
+        pathname = Pathname.new(pathname)
+        pathname.absolute? ? pathname : resolve(pathname)
+      end
   end
 end
