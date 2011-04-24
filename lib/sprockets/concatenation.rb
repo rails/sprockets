@@ -8,13 +8,16 @@ require 'time'
 
 module Sprockets
   class Concatenation
-    attr_reader :environment, :content_type
+    attr_reader :environment
+    attr_reader :content_type, :format_extension
     attr_reader :paths, :source
     attr_accessor :length, :mtime
 
     def initialize(environment)
       @environment  = environment
-      @content_type = nil
+
+      @content_type     = nil
+      @format_extension = nil
 
       @paths  = Set.new
       @source = []
@@ -76,11 +79,10 @@ module Sprockets
     end
 
     def require(pathname)
-      @content_type ||= pathname.content_type
+      @content_type     ||= pathname.content_type
+      @format_extension ||= pathname.format_extension
 
-      if pathname.directory?
-        depend pathname
-      elsif requirable?(pathname)
+      if requirable?(pathname)
         unless paths.include?(pathname.to_s)
           depend pathname
           self << process(pathname)

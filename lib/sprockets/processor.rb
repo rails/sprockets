@@ -11,9 +11,7 @@ module Sprockets
     def prepare
       @pathname = Pathname.new(file)
 
-      @depended_pathnames = []
       @included_pathnames = []
-      @required_pathnames = []
       @compat             = false
     end
 
@@ -25,7 +23,7 @@ module Sprockets
     end
 
     protected
-      attr_reader :depended_pathnames, :included_pathnames, :required_pathnames
+      attr_reader :included_pathnames
       attr_reader :context
 
       def process_directives
@@ -39,8 +37,6 @@ module Sprockets
       def process_source
         result = ""
 
-        required_pathnames.each { |p| context.require(p) }
-
         unless @directive_parser.processed_header.empty?
           result << @directive_parser.processed_header << "\n"
         end
@@ -50,8 +46,6 @@ module Sprockets
         body = @directive_parser.body
         body += "\n" if body != "" && body !~ /\n\Z/m
         result << body
-
-        depended_pathnames.each { |p| context.depend(p) }
 
         # LEGACY
         if compat? && constants.any?
@@ -80,7 +74,7 @@ module Sprockets
       end
 
       def process_depend_directive(path)
-        depended_pathnames << context.resolve(path)
+        context.depend(context.resolve(path))
       end
 
       def process_include_directive(path)
@@ -106,7 +100,7 @@ module Sprockets
 
         context.resolve(path) do |candidate|
           if self.pathname.content_type == candidate.content_type
-            required_pathnames << candidate
+            context.require(candidate)
             return
           end
         end
@@ -118,13 +112,17 @@ module Sprockets
         if relative?(path)
           root = base_path.join(path).expand_path
 
-          required_pathnames << root
+          context.depend(root)
 
           Dir["#{root}/*"].sort.each do |filename|
             pathname = Pathname.new(filename)
             if pathname.file? &&
                 pathname.content_type == self.pathname.content_type
-              required_pathnames << pathname
+              if pathname.file?
+                context.require(pathname)
+              else
+                context.depend(pathname)
+              end
             end
           end
         else
@@ -136,10 +134,14 @@ module Sprockets
         if relative?(path)
           root = base_path.join(path).expand_path
 
-          required_pathnames << root
+          context.depend(root)
 
           each_pathname_in_tree(path) do |pathname|
-            required_pathnames << pathname
+            if pathname.file?
+              context.require(pathname)
+            else
+              context.depend(pathname)
+            end
           end
         else
           raise ArgumentError, "require_tree argument must be a relative path"
