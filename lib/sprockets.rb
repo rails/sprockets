@@ -12,7 +12,6 @@ module Sprockets
   autoload :PathIndex,           "sprockets/path_index"
   autoload :Pathname,            "sprockets/pathname"
   autoload :Processor,           "sprockets/processor"
-  autoload :SourceFile,          "sprockets/source_file"
   autoload :StaticAsset,         "sprockets/static_asset"
   autoload :StaticIndex,         "sprockets/static_index"
 end

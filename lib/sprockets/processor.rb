@@ -1,13 +1,15 @@
+require 'sprockets/directive_parser'
 require 'sprockets/errors'
 require 'sprockets/pathname'
-require 'sprockets/source_file'
 require 'tilt'
 require 'yaml'
 
 module Sprockets
   class Processor < Tilt::Template
+    attr_reader :pathname
+
     def prepare
-      @source_file = SourceFile.new(file, data)
+      @pathname = Pathname.new(file)
 
       @depended_pathnames = []
       @included_pathnames = []
@@ -23,12 +25,13 @@ module Sprockets
     end
 
     protected
-      attr_reader :source_file
       attr_reader :depended_pathnames, :included_pathnames, :required_pathnames
       attr_reader :context
 
       def process_directives
-        source_file.directives.each do |name, *args|
+        @directive_parser = DirectiveParser.new(data)
+
+        @directive_parser.directives.each do |name, *args|
           send("process_#{name}_directive", *args)
         end
       end
@@ -37,9 +40,17 @@ module Sprockets
         result = ""
 
         required_pathnames.each { |p| context.require(p) }
-        result << source_file.header << "\n" unless source_file.header.empty?
+
+        unless @directive_parser.processed_header.empty?
+          result << @directive_parser.processed_header << "\n"
+        end
+
         included_pathnames.each { |p| result << context.process(p) }
-        result << source_file.body
+
+        body = @directive_parser.body
+        body += "\n" if body != "" && body !~ /\n\Z/m
+        result << body
+
         depended_pathnames.each { |p| context.depend(p) }
 
         # LEGACY
@@ -57,7 +68,7 @@ module Sprockets
       # LEGACY
       def constants
         if compat?
-          root_path = context.paths.detect { |path| source_file.pathname.to_s[path] }
+          root_path = context.paths.detect { |path| self.pathname.to_s[path] }
           path = File.join(root_path, "constants.yml")
           File.exist?(path) ? YAML.load_file(path) : {}
         else
@@ -88,14 +99,14 @@ module Sprockets
 
         pathname = Pathname.new(path)
         if pathname.format_extension
-          if source_file.content_type != pathname.content_type
+          if self.pathname.content_type != pathname.content_type
             raise ContentTypeMismatch, "#{pathname} is " +
-              "'#{pathname.format_extension}', not '#{source_file.pathname.format_extension}'"
+              "'#{pathname.format_extension}', not '#{self.pathname.format_extension}'"
           end
         end
 
         context.resolve(path) do |candidate|
-          if source_file.content_type == candidate.content_type
+          if self.pathname.content_type == candidate.content_type
             required_pathnames << candidate
             return
           end
@@ -113,7 +124,7 @@ module Sprockets
           Dir["#{root}/*"].sort.each do |filename|
             pathname = Pathname.new(filename)
             if pathname.file? &&
-                pathname.content_type == source_file.content_type
+                pathname.content_type == self.pathname.content_type
               required_pathnames << pathname
             end
           end
@@ -148,7 +159,7 @@ module Sprockets
           if pathname.directory?
             yield pathname
           elsif pathname.file? &&
-              pathname.content_type == source_file.content_type
+              pathname.content_type == self.pathname.content_type
             yield pathname
           end
         end
@@ -159,7 +170,7 @@ module Sprockets
       end
 
       def base_path
-        source_file.pathname.dirname
+        self.pathname.dirname
       end
   end
 end
