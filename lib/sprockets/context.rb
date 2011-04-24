@@ -5,7 +5,7 @@ module Sprockets
     def initialize(environment, concatenation, pathname)
       @_environment   = environment
       @_concatenation = concatenation
-      @pathname      = pathname
+      @pathname       = pathname
     end
 
     def paths
