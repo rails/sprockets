@@ -1,10 +1,21 @@
 require 'sprockets_test'
 require 'tilt'
+require 'yaml'
 
 class TestContext < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new(".")
     @env.paths << fixture_path('context')
+  end
+
+  test "source file properties are exposed in context" do
+    json = @env["properties.js"].to_s
+    assert_equal({
+      'pathname'     => fixture_path("context/properties.js.erb"),
+      '__FILE__'     => fixture_path("context/properties.js.erb"),
+      'logical_path' => "properties",
+      'content_type' => "application/javascript"
+    }, YAML.load(json))
   end
 
   test "extend context" do

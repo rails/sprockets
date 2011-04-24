@@ -18,6 +18,10 @@ module Sprockets
       end
     end
 
+    def content_type
+      pathname.content_type
+    end
+
     def resolve(path, &block)
       @_environment.resolve(path, :base_path => pathname.dirname, &block)
     end
