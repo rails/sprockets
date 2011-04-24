@@ -24,7 +24,7 @@ class TestCustomProcessor < Sprockets::TestCase
     @env.paths << fixture_path('processor')
   end
 
-  test "custom processor using Concatenation#require" do
+  test "custom processor using Context#require" do
     # TODO: Register on @env instance
     Sprockets::Environment.register :yml, YamlProcessor
     @env.engine_extensions << 'yml'
@@ -50,7 +50,7 @@ class TestCustomProcessor < Sprockets::TestCase
     end
   end
 
-  test "custom processor using Concatenation#resolve and #depend" do
+  test "custom processor using Context#resolve and Context#depend" do
     # TODO: Register on @env instance
     Sprockets::Environment.register :embed, DataUriProcessor
     @env.engine_extensions << 'embed'
