@@ -23,20 +23,20 @@ module Sprockets
     end
 
     def depend(path)
-      @_concatenation.depend(expand_path(path))
+      @_concatenation.depend(_expand_path(path))
     end
 
     # TODO: should not be shaddowing Kernal::require
     def require(path)
-      @_concatenation.require(expand_path(path))
+      @_concatenation.require(_expand_path(path))
     end
 
     def process(path)
-      @_concatenation.process(expand_path(path))
+      @_concatenation.process(_expand_path(path))
     end
 
     private
-      def expand_path(path)
+      def _expand_path(path)
         pathname = Pathname.new(path)
         pathname.absolute? ? pathname : resolve(pathname)
       end
