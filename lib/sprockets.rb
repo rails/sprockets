@@ -5,7 +5,6 @@ module Sprockets
   autoload :Concatenation,       "sprockets/concatenation"
   autoload :ContentTypeMismatch, "sprockets/errors"
   autoload :Context,             "sprockets/context"
-  autoload :DirectiveParser,     "sprockets/directive_parser"
   autoload :Environment,         "sprockets/environment"
   autoload :EnvironmentIndex,    "sprockets/environment_index"
   autoload :Error,               "sprockets/errors"

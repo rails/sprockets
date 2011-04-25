@@ -1,6 +1,6 @@
-require 'sprockets/directive_parser'
 require 'sprockets/errors'
 require 'sprockets/pathname'
+require 'shellwords'
 require 'tilt'
 require 'yaml'
 
@@ -23,6 +23,56 @@ module Sprockets
     end
 
     protected
+      class DirectiveParser
+        HEADER_PATTERN = /
+          \A \s* (
+            (\/\* ([\s\S]*?) \*\/) |
+            (\#\#\# ([\s\S]*?) \#\#\#) |
+            (\/\/ ([^\n]*) \n?)+ |
+            (\# ([^\n]*) \n?)+
+          )
+        /mx
+
+        DIRECTIVE_PATTERN = /
+          ^ [\W]* = \s* (\w+.*?) (\*\/)? $
+        /x
+
+        attr_reader :source, :header, :body
+
+        def initialize(source)
+          @source = source
+          @header = @source[HEADER_PATTERN, 0] || ""
+          @body   = $' || @source
+          @body  += "\n" if @body != "" && @body !~ /\n\Z/m
+        end
+
+        def header_lines
+          @header_lines ||= header.split("\n")
+        end
+
+        def processed_header
+          header_lines.reject do |line|
+            extract_directive(line)
+          end.join("\n")
+        end
+
+        def processed_source
+          @processed_source ||= processed_header + body
+        end
+
+        def directives
+          @directives ||= header_lines.map do |line|
+            if directive = extract_directive(line)
+              Shellwords.shellwords(directive)
+            end
+          end.compact
+        end
+
+        def extract_directive(line)
+          line[DIRECTIVE_PATTERN, 1]
+        end
+      end
+
       attr_reader :included_pathnames
       attr_reader :context
 
@@ -43,9 +93,7 @@ module Sprockets
 
         included_pathnames.each { |p| result << context.process(p) }
 
-        body = @directive_parser.body
-        body += "\n" if body != "" && body !~ /\n\Z/m
-        result << body
+        result << @directive_parser.body
 
         # LEGACY
         if compat? && constants.any?
