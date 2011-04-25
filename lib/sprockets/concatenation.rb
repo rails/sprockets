@@ -1,6 +1,6 @@
+require 'sprockets/directive_processor'
 require 'sprockets/errors'
 require 'sprockets/pathname'
-require 'sprockets/processor'
 require 'digest/md5'
 require 'rack/utils'
 require 'set'
@@ -96,7 +96,7 @@ module Sprockets
     end
 
     def process(pathname)
-      engines  = pathname.engines + [Processor]
+      engines  = pathname.engines + [DirectiveProcessor]
       scope    = environment.context.new(self, pathname)
       locals   = {}
 

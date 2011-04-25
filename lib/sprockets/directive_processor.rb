@@ -5,7 +5,7 @@ require 'tilt'
 require 'yaml'
 
 module Sprockets
-  class Processor < Tilt::Template
+  class DirectiveProcessor < Tilt::Template
     attr_reader :pathname
 
     def prepare
@@ -23,7 +23,7 @@ module Sprockets
     end
 
     protected
-      class DirectiveParser
+      class Parser
         HEADER_PATTERN = /
           \A \s* (
             (\/\* ([\s\S]*?) \*\/) |
@@ -77,7 +77,7 @@ module Sprockets
       attr_reader :context
 
       def process_directives
-        @directive_parser = DirectiveParser.new(data)
+        @directive_parser = Parser.new(data)
 
         @directive_parser.directives.each do |name, *args|
           send("process_#{name}_directive", *args)
