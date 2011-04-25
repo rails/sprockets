@@ -7,7 +7,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "requiring the same file multiple times has no effect" do
-    assert_equal source_file("project.js").source+"\n", asset("multiple.js").to_s
+    assert_equal read("project.js")+"\n", asset("multiple.js").to_s
   end
 
   test "requiring a file of a different format raises an exception" do
@@ -25,40 +25,38 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "processing a source file with no engine extensions" do
-    assert_equal source_file("users.js").source, asset("noengine.js").to_s
+    assert_equal read("users.js"), asset("noengine.js").to_s
   end
 
   test "processing a source file with one engine extension" do
-    assert_equal source_file("users.js").source, asset("oneengine.js").to_s
+    assert_equal read("users.js"), asset("oneengine.js").to_s
   end
 
   test "processing a source file with multiple engine extensions" do
-    assert_equal source_file("users.js").source,
-      asset("multipleengine.js").to_s
+    assert_equal read("users.js"),  asset("multipleengine.js").to_s
   end
 
   test "processing a source file with unknown extensions" do
-    assert_equal source_file("users.js").source + "jQuery\n",
-      asset("unknownexts.min.js").to_s
+    assert_equal read("users.js") + "jQuery\n", asset("unknownexts.min.js").to_s
   end
 
   test "processing a source file in compat mode" do
-    assert_equal source_file("project.js").source + "\n" + source_file("users.js").source,
+    assert_equal read("project.js") + "\n" + read("users.js"),
       asset("compat.js").to_s
   end
 
   test "included dependencies are inserted after the header of the dependent file" do
-    assert_equal "# My Application\n" + source_file("project.js").source + "\n\nhello()\n",
+    assert_equal "# My Application\n" + read("project.js") + "\n\nhello()\n",
       asset("included_header.js").to_s
   end
 
   test "requiring a file with a relative path" do
-    assert_equal source_file("project.js").source + "\n",
+    assert_equal read("project.js") + "\n",
       asset("relative/require.js").to_s
   end
 
   test "including a file with a relative path" do
-    assert_equal "// Included relatively\n" + source_file("project.js").source + "\n\nhello()\n", asset("relative/include.js").to_s
+    assert_equal "// Included relatively\n" + read("project.js") + "\n\nhello()\n", asset("relative/include.js").to_s
   end
 
   test "can't require files outside the load path" do
@@ -101,7 +99,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
 
   test "asset mtime is the latest mtime of all processed sources" do
     mtime = Time.now
-    path  = source_file("project.js").pathname
+    path  = resolve("project.js")
     File.utime(mtime, mtime, path.to_s)
     assert_equal File.mtime(path), asset("application.js").mtime
   end
@@ -143,7 +141,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert !asset.stale?
 
     mtime = Time.now + 1
-    File.utime(mtime, mtime, source_file("project.js").pathname.to_s)
+    File.utime(mtime, mtime, resolve("project.js").to_s)
 
     assert asset.stale?
   end
@@ -209,7 +207,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     @env.resolve(logical_path)
   end
 
-  def source_file(logical_path)
-    Sprockets::SourceFile.new(resolve(logical_path))
+  def read(logical_path)
+    File.read(resolve(logical_path))
   end
 end
