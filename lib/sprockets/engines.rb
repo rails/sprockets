@@ -16,11 +16,13 @@ module Sprockets
       ext = ext.to_s.sub(/^\./, '').downcase
       @mappings[ext] = klass
     end
+    alias_method :[]=, :register
 
-    def lookup_engine(ext)
+    def lookup(ext)
       ext = ext.to_s.sub(/^\./, '').downcase
       @mappings[ext]
     end
+    alias_method :[], :lookup
 
     def extensions
       @mappings.keys.map { |ext| ".#{ext}" }

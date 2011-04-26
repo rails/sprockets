@@ -32,11 +32,11 @@ module Sprockets
         exts = extensions[offset+1..-1]
       end
 
-      exts.select { |ext| @engines.lookup_engine(ext) }
+      exts.select { |ext| @engines[ext] }
     end
 
     def engines
-      engine_extensions.map { |ext| @engines.lookup_engine(ext) }
+      engine_extensions.map { |ext| @engines[ext] }
     end
 
     def engine_content_type

@@ -321,13 +321,13 @@ class TestEnvironment < Sprockets::TestCase
     e1 = new_environment
     e2 = new_environment
 
-    assert_nil e1.engines.lookup_engine ".foo"
-    assert_nil e2.engines.lookup_engine ".foo"
+    assert_nil e1.engines[".foo"]
+    assert_nil e2.engines[".foo"]
 
     e1.engines.register ".foo", Tilt::StringTemplate
 
-    assert e1.engines.lookup_engine ".foo"
-    assert_nil e2.engines.lookup_engine ".foo"
+    assert e1.engines[".foo"]
+    assert_nil e2.engines[".foo"]
   end
 end
 
@@ -392,12 +392,12 @@ class TestEnvironmentIndex < Sprockets::TestCase
     env = Sprockets::Environment.new
     index = env.index
 
-    assert_nil env.engines.lookup_engine ".foo"
-    assert_nil index.engines.lookup_engine ".foo"
+    assert_nil env.engines[".foo"]
+    assert_nil index.engines[".foo"]
 
     env.engines.register ".foo", Tilt::StringTemplate
 
-    assert env.engines.lookup_engine ".foo"
-    assert_nil index.engines.lookup_engine ".foo"
+    assert env.engines[".foo"]
+    assert_nil index.engines[".foo"]
   end
 end
