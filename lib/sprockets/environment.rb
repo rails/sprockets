@@ -15,8 +15,8 @@ module Sprockets
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
-      extensions = ConcatenatedAsset::DEFAULT_ENGINE_EXTENSIONS +
-        ConcatenatedAsset::CONCATENATABLE_EXTENSIONS
+      extensions = Engines::DEFAULT_ENGINE_EXTENSIONS +
+        Engines::CONCATENATABLE_EXTENSIONS
       engine_extensions.replace(extensions)
 
       @engines = Engines.new
