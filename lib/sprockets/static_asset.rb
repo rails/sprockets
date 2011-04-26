@@ -8,7 +8,7 @@ module Sprockets
     attr_reader :pathname, :mtime, :length, :digest
 
     def initialize(pathname)
-      @pathname = EnginePathname.new(pathname)
+      @pathname = Pathname.new(pathname)
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
@@ -21,7 +21,7 @@ module Sprockets
     end
 
     def content_type
-      pathname.content_type
+       EnginePathname.new(pathname).content_type
     end
 
     def stale?

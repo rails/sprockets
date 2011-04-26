@@ -4,17 +4,29 @@ require 'sprockets/template_mappings'
 require 'sprockets/utils'
 
 module Sprockets
-  class EnginePathname < ::Pathname
+  class EnginePathname
     def self.new(path)
-      path.kind_of?(self) ? path : super(path)
+      path.is_a?(self) ? path : super(path)
+    end
+
+    def initialize(path)
+      @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
+    end
+
+    def to_s
+      @pathname.to_s
+    end
+
+    def to_str
+      @pathname.to_s
     end
 
     def basename_without_extensions
-      basename(extensions.join)
+      @pathname.basename(extensions.join)
     end
 
     def extensions
-      @extensions ||= basename.to_s.scan(/\.[^.]+/)
+      @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
     end
 
     def format_extension
@@ -51,7 +63,7 @@ module Sprockets
     end
 
     def without_engine_extensions
-      engine_extensions.inject(self) do |pathname, ext|
+      engine_extensions.inject(@pathname) do |pathname, ext|
         pathname.sub(ext, '')
       end
     end

@@ -8,18 +8,16 @@ module Sprockets
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
     def self.concatenatable?(pathname)
-      pathname = EnginePathname.new(pathname)
-      CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
+      CONCATENATABLE_EXTENSIONS.include?(EnginePathname.new(pathname).format_extension)
     end
 
     attr_reader :content_type, :format_extension
     attr_reader :mtime, :length, :digest
 
     def initialize(environment, pathname)
-      pathname = EnginePathname.new(pathname)
-
-      @content_type     = pathname.content_type
-      @format_extension = pathname.format_extension
+      engine_pathname   = EnginePathname.new(pathname)
+      @content_type     = engine_pathname.content_type
+      @format_extension = engine_pathname.format_extension
 
       concatenation = Concatenation.new(environment)
       concatenation.require(pathname)

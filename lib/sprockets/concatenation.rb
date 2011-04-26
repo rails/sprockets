@@ -2,6 +2,7 @@ require 'sprockets/directive_processor'
 require 'sprockets/errors'
 require 'sprockets/engine_pathname'
 require 'digest/md5'
+require 'pathname'
 require 'rack/utils'
 require 'set'
 require 'time'
@@ -65,6 +66,8 @@ module Sprockets
     end
 
     def depend(pathname)
+      pathname = Pathname.new(pathname)
+
       if pathname.mtime > mtime
         self.mtime = pathname.mtime
       end
@@ -75,12 +78,15 @@ module Sprockets
     end
 
     def requirable?(pathname)
-      content_type.nil? || content_type == pathname.content_type
+      content_type.nil? || content_type == EnginePathname.new(pathname).content_type
     end
 
     def require(pathname)
-      @content_type     ||= pathname.content_type
-      @format_extension ||= pathname.format_extension
+      pathname        = Pathname.new(pathname)
+      engine_pathname = EnginePathname.new(pathname)
+
+      @content_type     ||= engine_pathname.content_type
+      @format_extension ||= engine_pathname.format_extension
 
       if requirable?(pathname)
         unless paths.include?(pathname.to_s)
@@ -96,8 +102,10 @@ module Sprockets
     end
 
     def process(pathname)
-      pathname = EnginePathname.new(pathname)
-      engines  = pathname.engines + [DirectiveProcessor]
+      pathname        = Pathname.new(pathname)
+      engine_pathname = EnginePathname.new(pathname)
+
+      engines  = engine_pathname.engines + [DirectiveProcessor]
       scope    = environment.context.new(self, pathname)
       locals   = {}
 

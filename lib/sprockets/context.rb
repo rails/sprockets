@@ -31,7 +31,7 @@ module Sprockets
     end
 
     def content_type
-      pathname.content_type
+      EnginePathname.new(pathname).content_type
     end
 
     def resolve(path, &block)
@@ -44,12 +44,13 @@ module Sprockets
 
     # TODO: should not be shaddowing Kernal::require
     def require(path)
-      pathname = EnginePathname.new(path)
+      pathname        = Pathname.new(path)
+      engine_pathname = EnginePathname.new(pathname)
 
-      if pathname.format_extension
-        if self.content_type != pathname.content_type
+      if engine_pathname.format_extension
+        if self.content_type != engine_pathname.content_type
           raise ContentTypeMismatch, "#{path} is " +
-            "'#{pathname.format_extension}', not '#{self.pathname.format_extension}'"
+            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname).format_extension}'"
         end
       end
 
@@ -57,11 +58,11 @@ module Sprockets
         @_concatenation.require(pathname)
       else
         resolve(path) do |candidate|
-          candidate = EnginePathname.new(candidate)
+          engine_pathname = EnginePathname.new(candidate)
 
-          if self.content_type == candidate.content_type
+          if self.content_type == engine_pathname.content_type
             @_concatenation.require(candidate)
-            return candidate
+            return
           end
         end
 

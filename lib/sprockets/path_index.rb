@@ -61,8 +61,6 @@ module Sprockets
     end
 
     def find_asset(logical_path)
-      logical_path = EnginePathname.new(logical_path)
-
       if @assets.key?(logical_path.to_s)
         return @assets[logical_path.to_s]
       end
@@ -93,12 +91,13 @@ module Sprockets
 
     private
       def logical_index_path(logical_path)
-        pathname = EnginePathname.new(logical_path)
+        pathname = Pathname.new(logical_path)
+        engine_pathname = EnginePathname.new(logical_path)
 
-        if pathname.basename_without_extensions.to_s == 'index'
+        if engine_pathname.basename_without_extensions.to_s == 'index'
           logical_path
         else
-          basename = "#{pathname.basename_without_extensions}/index#{pathname.extensions.join}"
+          basename = "#{engine_pathname.basename_without_extensions}/index#{engine_pathname.extensions.join}"
           pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
         end
       end

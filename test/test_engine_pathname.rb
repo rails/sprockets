@@ -8,11 +8,6 @@ class TestEnginePathname < Sprockets::TestCase
     assert EnginePathname.new(path).equal?(path)
   end
 
-  test "construct from EnginePathname" do
-    pathname = EnginePathname.new("javascripts/application.js.coffee").expand_path
-    assert_equal pathname.to_s, EnginePathname.new(pathname).to_s
-  end
-
   test "basename with extensions" do
     assert_equal "empty",
       EnginePathname.new("empty").basename_without_extensions.to_s

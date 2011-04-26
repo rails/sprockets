@@ -21,7 +21,8 @@ module Sprockets
         return @assets[logical_path]
       end
 
-      pathname = EnginePathname.new(root.join(logical_path))
+      pathname = Pathname.new(root.join(logical_path))
+      engine_pathname = EnginePathname.new(pathname)
 
       entries = entries(pathname.dirname)
 
@@ -31,9 +32,9 @@ module Sprockets
       end
 
       if !Utils.path_fingerprint(pathname)
-        pattern = /^#{Regexp.escape(pathname.basename_without_extensions.to_s)}
+        pattern = /^#{Regexp.escape(engine_pathname.basename_without_extensions.to_s)}
                    -[0-9a-f]{7,40}
-                   #{Regexp.escape(pathname.extensions.join)}$/x
+                   #{Regexp.escape(engine_pathname.extensions.join)}$/x
 
         entries.each do |filename|
           if filename.to_s =~ pattern

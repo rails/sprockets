@@ -104,8 +104,6 @@ module Sprockets
       end
 
       def find_fresh_asset_from_cache(logical_path)
-        logical_path = EnginePathname.new(logical_path)
-
         if asset = @cache[logical_path.to_s]
           if Utils.path_fingerprint(logical_path)
             asset
