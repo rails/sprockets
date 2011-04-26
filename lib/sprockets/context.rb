@@ -8,20 +8,17 @@ require 'pathname'
 # TODO Fill in with better explanation
 module Sprockets
   class Context
-    attr_reader :environment, :pathname
+    attr_reader :sprockets_environment
+    attr_reader :pathname
 
     def initialize(environment, concatenation, pathname)
-      @_concatenation = concatenation
-      @environment    = environment
-      @pathname       = pathname
-    end
-
-    def paths
-      environment.paths
+      @_sprockets_concatenation = concatenation
+      @sprockets_environment    = environment
+      @pathname                 = pathname
     end
 
     def root_path
-      paths.detect { |path| pathname.to_s[path] }
+      sprockets_environment.paths.detect { |path| pathname.to_s[path] }
     end
 
     def logical_path
@@ -31,37 +28,36 @@ module Sprockets
     end
 
     def content_type
-      EnginePathname.new(pathname, environment.engines).content_type
+      EnginePathname.new(pathname, sprockets_environment.engines).content_type
     end
 
-    def resolve(path, &block)
-      environment.resolve(path, :base_path => pathname.dirname, &block)
+    def sprockets_resolve(path, &block)
+      sprockets_environment.resolve(path, :base_path => pathname.dirname, &block)
     end
 
-    def depend(path)
-      @_concatenation.depend(_expand_path(path))
+    def sprockets_depend(path)
+      @_sprockets_concatenation.depend(_expand_path(path))
     end
 
-    # TODO: should not be shaddowing Kernal::require
-    def require(path)
+    def sprockets_require(path)
       pathname        = Pathname.new(path)
-      engine_pathname = EnginePathname.new(pathname, environment.engines)
+      engine_pathname = EnginePathname.new(pathname, sprockets_environment.engines)
 
       if engine_pathname.format_extension
         if self.content_type != engine_pathname.content_type
           raise ContentTypeMismatch, "#{path} is " +
-            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname, environment.engines).format_extension}'"
+            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname, sprockets_environment.engines).format_extension}'"
         end
       end
 
       if pathname.absolute?
-        @_concatenation.require(pathname)
+        @_sprockets_concatenation.require(pathname)
       else
-        resolve(path) do |candidate|
-          engine_pathname = EnginePathname.new(candidate, environment.engines)
+        sprockets_resolve(path) do |candidate|
+          engine_pathname = EnginePathname.new(candidate, sprockets_environment.engines)
 
           if self.content_type == engine_pathname.content_type
-            @_concatenation.require(candidate)
+            @_sprockets_concatenation.require(candidate)
             return
           end
         end
@@ -70,8 +66,8 @@ module Sprockets
       end
     end
 
-    def process(path)
-      @_concatenation.process(_expand_path(path))
+    def sprockets_process(path)
+      @_sprockets_concatenation.process(_expand_path(path))
     end
 
     private

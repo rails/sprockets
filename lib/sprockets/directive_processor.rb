@@ -17,7 +17,7 @@ module Sprockets
 
     def evaluate(context, locals, &block)
       @context     = context
-      @environment = context.environment
+      @environment = context.sprockets_environment
 
       process_directives
       process_source
@@ -92,7 +92,7 @@ module Sprockets
           result << @directive_parser.processed_header << "\n"
         end
 
-        included_pathnames.each { |p| result << context.process(p) }
+        included_pathnames.each { |p| result << context.sprockets_process(p) }
 
         result << @directive_parser.body
 
@@ -123,11 +123,11 @@ module Sprockets
       end
 
       def process_depend_directive(path)
-        context.depend(context.resolve(path))
+        context.sprockets_depend(context.sprockets_resolve(path))
       end
 
       def process_include_directive(path)
-        included_pathnames << context.resolve(path)
+        included_pathnames << context.sprockets_resolve(path)
       end
 
       def process_require_directive(path)
@@ -139,23 +139,23 @@ module Sprockets
           end
         end
 
-        context.require(path)
+        context.sprockets_require(path)
       end
 
       def process_require_directory_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
 
-          context.depend(root)
+          context.sprockets_depend(root)
 
           Dir["#{root}/*"].sort.each do |filename|
             pathname = Pathname.new(filename)
             if pathname.file? &&
                 EnginePathname.new(pathname, @environment.engines).content_type == EnginePathname.new(self.pathname, @environment.engines).content_type
               if pathname.file?
-                context.require(pathname)
+                context.sprockets_require(pathname)
               else
-                context.depend(pathname)
+                context.sprockets_depend(pathname)
               end
             end
           end
@@ -168,13 +168,13 @@ module Sprockets
         if relative?(path)
           root = base_path.join(path).expand_path
 
-          context.depend(root)
+          context.sprockets_depend(root)
 
           each_pathname_in_tree(path) do |pathname|
             if pathname.file?
-              context.require(pathname)
+              context.sprockets_require(pathname)
             else
-              context.depend(pathname)
+              context.sprockets_depend(pathname)
             end
           end
         else

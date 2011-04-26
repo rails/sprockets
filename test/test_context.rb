@@ -22,8 +22,7 @@ class TestContext < Sprockets::TestCase
   test "extend context" do
     @env.context.class_eval do
       def datauri(path)
-        # TODO: should not be shaddowing Kernal::require
-        Kernel.require 'base64'
+        require 'base64'
         Base64.encode64(File.open(path, "rb") { |f| f.read })
       end
     end
@@ -51,13 +50,13 @@ class TestCustomProcessor < Sprockets::TestCase
 
     def evaluate(context, locals)
       @manifest['require'].each do |pathname|
-        context.require(pathname)
+        context.sprockets_require(pathname)
       end
       ""
     end
   end
 
-  test "custom processor using Context#require" do
+  test "custom processor using Context#sprockets_require" do
     @env.engines.register :yml, YamlProcessor
     @env.engine_extensions << 'yml'
 
@@ -74,15 +73,15 @@ class TestCustomProcessor < Sprockets::TestCase
 
     def evaluate(context, locals)
       data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.resolve($1)
-        context.depend(path)
+        path = context.sprockets_resolve($1)
+        context.sprockets_depend(path)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"
       end
     end
   end
 
-  test "custom processor using Context#resolve and Context#depend" do
+  test "custom processor using Context#sprockets_resolve and Context#sprockets_depend" do
     @env.engines.register :embed, DataUriProcessor
     @env.engine_extensions << 'embed'
 
