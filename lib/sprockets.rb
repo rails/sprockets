@@ -12,7 +12,5 @@ module Sprockets
   autoload :EnvironmentIndex,    "sprockets/environment_index"
   autoload :Error,               "sprockets/errors"
   autoload :FileNotFound,        "sprockets/errors"
-  autoload :PathIndex,           "sprockets/path_index"
   autoload :StaticAsset,         "sprockets/static_asset"
-  autoload :StaticIndex,         "sprockets/static_index"
 end
