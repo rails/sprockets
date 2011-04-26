@@ -1,7 +1,6 @@
 require 'sprockets/engine_pathname'
 require 'sprockets/environment_index'
 require 'sprockets/server'
-require 'sprockets/template_mappings'
 require 'sprockets/utils'
 require 'fileutils'
 require 'hike'
@@ -10,7 +9,6 @@ require 'pathname'
 
 module Sprockets
   class Environment
-    extend TemplateMappings
     include Server
 
     attr_accessor :logger, :context
@@ -20,6 +18,8 @@ module Sprockets
       extensions = ConcatenatedAsset::DEFAULT_ENGINE_EXTENSIONS +
         ConcatenatedAsset::CONCATENATABLE_EXTENSIONS
       engine_extensions.replace(extensions)
+
+      @engines = Engines.new
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
@@ -70,6 +70,8 @@ module Sprockets
     def paths
       ArrayProxy.new(@trail.paths) { expire_cache }
     end
+
+    attr_reader :engines
 
     def engine_extensions
       ArrayProxy.new(@trail.extensions) { expire_cache }

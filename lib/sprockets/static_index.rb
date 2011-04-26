@@ -4,10 +4,11 @@ require 'pathname'
 
 module Sprockets
   class StaticIndex
-    attr_reader :root
+    attr_reader :root, :engines
 
-    def initialize(root)
+    def initialize(root, engines)
       @root    = root ? Pathname.new(root) : nil
+      @engines = engines
       @entries = {}
       @assets  = {}
     end
@@ -22,7 +23,7 @@ module Sprockets
       end
 
       pathname = Pathname.new(root.join(logical_path))
-      engine_pathname = EnginePathname.new(pathname)
+      engine_pathname = EnginePathname.new(pathname, engines)
 
       entries = entries(pathname.dirname)
 
@@ -38,7 +39,7 @@ module Sprockets
 
         entries.each do |filename|
           if filename.to_s =~ pattern
-            asset = StaticAsset.new(pathname.dirname.join(filename))
+            asset = StaticAsset.new(pathname.dirname.join(filename), engines)
             @assets[logical_path] = asset
             return asset
           end
@@ -46,7 +47,7 @@ module Sprockets
       end
 
       if entries.include?(pathname.basename) && pathname.file?
-        asset = StaticAsset.new(pathname)
+        asset = StaticAsset.new(pathname, engines)
         @assets[logical_path] = asset
         return asset
       end

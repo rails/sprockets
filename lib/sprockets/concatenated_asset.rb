@@ -7,15 +7,11 @@ module Sprockets
     DEFAULT_ENGINE_EXTENSIONS = %w( .coffee .erb .less .sass .scss .str )
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
-    def self.concatenatable?(pathname)
-      CONCATENATABLE_EXTENSIONS.include?(EnginePathname.new(pathname).format_extension)
-    end
-
     attr_reader :content_type, :format_extension
     attr_reader :mtime, :length, :digest
 
-    def initialize(environment, pathname)
-      engine_pathname   = EnginePathname.new(pathname)
+    def initialize(environment, pathname, engines)
+      engine_pathname   = EnginePathname.new(pathname, engines)
       @content_type     = engine_pathname.content_type
       @format_extension = engine_pathname.format_extension
 

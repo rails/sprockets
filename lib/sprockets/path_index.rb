@@ -8,11 +8,12 @@ require 'set'
 
 module Sprockets
   class PathIndex
-    attr_reader :logger, :context, :css_compressor, :js_compressor
+    attr_reader :logger, :context, :engines, :css_compressor, :js_compressor
 
     def initialize(environment, trail)
       @logger         = environment.logger
       @context        = environment.context
+      @engines        = environment.engines
       @css_compressor = environment.css_compressor
       @js_compressor  = environment.js_compressor
 
@@ -41,7 +42,7 @@ module Sprockets
       pathnames.each do |base_pathname|
         Dir["#{base_pathname}/**/*"].each do |filename|
           logical_path = Pathname.new(filename).relative_path_from(base_pathname)
-          files << EnginePathname.new(logical_path).without_engine_extensions
+          files << EnginePathname.new(logical_path, engines).without_engine_extensions
         end
       end
       files
@@ -73,11 +74,11 @@ module Sprockets
     rescue FileNotFound
       nil
     else
-      if ConcatenatedAsset.concatenatable?(pathname)
+      if engines.concatenatable?(pathname)
         logger.info "[Sprockets] #{logical_path} building"
-        asset = ConcatenatedAsset.new(self, pathname)
+        asset = ConcatenatedAsset.new(self, pathname, engines)
       else
-        asset = StaticAsset.new(pathname)
+        asset = StaticAsset.new(pathname, engines)
       end
 
       if fingerprint && fingerprint != asset.digest
@@ -92,7 +93,7 @@ module Sprockets
     private
       def logical_index_path(logical_path)
         pathname = Pathname.new(logical_path)
-        engine_pathname = EnginePathname.new(logical_path)
+        engine_pathname = EnginePathname.new(logical_path, engines)
 
         if engine_pathname.basename_without_extensions.to_s == 'index'
           logical_path

@@ -58,8 +58,7 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#require" do
-    # TODO: Register on @env instance
-    Sprockets::Environment.register :yml, YamlProcessor
+    @env.engines.register :yml, YamlProcessor
     @env.engine_extensions << 'yml'
 
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
@@ -84,8 +83,7 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#resolve and Context#depend" do
-    # TODO: Register on @env instance
-    Sprockets::Environment.register :embed, DataUriProcessor
+    @env.engines.register :embed, DataUriProcessor
     @env.engine_extensions << 'embed'
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",

@@ -10,6 +10,9 @@ module Sprockets
   class Context
     attr_reader :pathname
 
+    # TODO: Exposing private api
+    attr_reader :_environment
+
     def initialize(concatenation, pathname)
       @_concatenation = concatenation
       @_environment   = concatenation.environment
@@ -31,7 +34,7 @@ module Sprockets
     end
 
     def content_type
-      EnginePathname.new(pathname).content_type
+      EnginePathname.new(pathname, _environment.engines).content_type
     end
 
     def resolve(path, &block)
@@ -45,12 +48,12 @@ module Sprockets
     # TODO: should not be shaddowing Kernal::require
     def require(path)
       pathname        = Pathname.new(path)
-      engine_pathname = EnginePathname.new(pathname)
+      engine_pathname = EnginePathname.new(pathname, _environment.engines)
 
       if engine_pathname.format_extension
         if self.content_type != engine_pathname.content_type
           raise ContentTypeMismatch, "#{path} is " +
-            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname).format_extension}'"
+            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname, _environment.engines).format_extension}'"
         end
       end
 
@@ -58,7 +61,7 @@ module Sprockets
         @_concatenation.require(pathname)
       else
         resolve(path) do |candidate|
-          engine_pathname = EnginePathname.new(candidate)
+          engine_pathname = EnginePathname.new(candidate, _environment.engines)
 
           if self.content_type == engine_pathname.content_type
             @_concatenation.require(candidate)

@@ -5,10 +5,13 @@ require 'time'
 
 module Sprockets
   class StaticAsset
-    attr_reader :pathname, :mtime, :length, :digest
+    attr_reader :pathname, :content_type, :mtime, :length, :digest
 
-    def initialize(pathname)
+    def initialize(pathname, engines)
       @pathname = Pathname.new(pathname)
+
+      engine_pathname = EnginePathname.new(pathname, engines)
+      @content_type   = engine_pathname.content_type
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
@@ -18,10 +21,6 @@ module Sprockets
       else
         @digest = Digest::MD5.hexdigest(pathname.read)
       end
-    end
-
-    def content_type
-       EnginePathname.new(pathname).content_type
     end
 
     def stale?

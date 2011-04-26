@@ -1,16 +1,16 @@
 require 'pathname'
 require 'rack/mime'
-require 'sprockets/template_mappings'
 require 'sprockets/utils'
 
 module Sprockets
   class EnginePathname
-    def self.new(path)
-      path.is_a?(self) ? path : super(path)
+    def self.new(path, engines)
+      path.is_a?(self) ? path : super(path, engines)
     end
 
-    def initialize(path)
+    def initialize(path, engines)
       @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
+      @engines  = engines
     end
 
     def to_s
@@ -40,11 +40,11 @@ module Sprockets
         exts = extensions[offset+1..-1]
       end
 
-      exts.select { |ext| TemplateMappings.lookup_engine(ext) }
+      exts.select { |ext| @engines.lookup_engine(ext) }
     end
 
     def engines
-      engine_extensions.map { |ext| TemplateMappings.lookup_engine(ext) }
+      engine_extensions.map { |ext| @engines.lookup_engine(ext) }
     end
 
     def engine_content_type

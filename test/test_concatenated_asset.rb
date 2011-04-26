@@ -200,7 +200,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    Sprockets::ConcatenatedAsset.new(@env.index, resolve(logical_path))
+    Sprockets::ConcatenatedAsset.new(@env.index, resolve(logical_path), Sprockets::Engines.new)
   end
 
   def resolve(logical_path)
