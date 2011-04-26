@@ -1,4 +1,3 @@
-require 'sprockets/errors'
 require 'sprockets/pathname'
 require 'shellwords'
 require 'tilt'
@@ -138,22 +137,7 @@ module Sprockets
           end
         end
 
-        pathname = Pathname.new(path)
-        if pathname.format_extension
-          if self.pathname.content_type != pathname.content_type
-            raise ContentTypeMismatch, "#{pathname} is " +
-              "'#{pathname.format_extension}', not '#{self.pathname.format_extension}'"
-          end
-        end
-
-        context.resolve(path) do |candidate|
-          if self.pathname.content_type == candidate.content_type
-            context.require(candidate)
-            return
-          end
-        end
-
-        raise FileNotFound, "couldn't find file '#{path}'"
+        context.require(path)
       end
 
       def process_require_directory_directive(path = ".")

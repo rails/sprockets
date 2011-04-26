@@ -1,3 +1,6 @@
+require 'sprockets/errors'
+require 'sprockets/pathname'
+
 #### Sprockets::Context
 #
 # The context class keeps track of an environment, basepath, and the logical path for a pathname
@@ -40,7 +43,27 @@ module Sprockets
 
     # TODO: should not be shaddowing Kernal::require
     def require(path)
-      @_concatenation.require(_expand_path(path))
+      pathname = Pathname.new(path)
+
+      if pathname.format_extension
+        if self.content_type != pathname.content_type
+          raise ContentTypeMismatch, "#{path} is " +
+            "'#{pathname.format_extension}', not '#{self.pathname.format_extension}'"
+        end
+      end
+
+      if pathname.absolute?
+        @_concatenation.require(pathname)
+      else
+        resolve(path) do |candidate|
+          if self.content_type == candidate.content_type
+            @_concatenation.require(candidate)
+            return candidate
+          end
+        end
+
+        raise FileNotFound, "couldn't find file '#{path}'"
+      end
     end
 
     def process(path)
