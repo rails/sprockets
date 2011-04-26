@@ -2,6 +2,7 @@ require 'sprockets/engine_pathname'
 require 'sprockets/environment_index'
 require 'sprockets/server'
 require 'sprockets/template_mappings'
+require 'sprockets/utils'
 require 'fileutils'
 require 'hike'
 require 'logger'
@@ -106,7 +107,7 @@ module Sprockets
         logical_path = EnginePathname.new(logical_path)
 
         if asset = @cache[logical_path.to_s]
-          if logical_path.fingerprint
+          if Utils.path_fingerprint(logical_path)
             asset
           elsif asset.stale?
             logger.warn "[Sprockets] #{logical_path} #{asset.digest} stale"

@@ -105,16 +105,4 @@ class TestEnginePathname < Sprockets::TestCase
         EnginePathname.new("application.coffee").content_type
     end
   end
-
-  test "fingerprint" do
-    assert_nil EnginePathname.new("print.css").fingerprint
-    assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", EnginePathname.new("print-f7531e2d0ea27233ce00b5f01c5bf335.css").fingerprint
-  end
-
-  test "with fingerprint" do
-    assert_equal "print-f7531e2d0ea27233ce00b5f01c5bf335.css",
-      EnginePathname.new("print.css").with_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").to_s
-    assert_equal "/stylesheets/print-f7531e2d0ea27233ce00b5f01c5bf335.css",
-      EnginePathname.new("/stylesheets/print-37b51d194a7513e45b56f6524f2d51f2.css").with_fingerprint("f7531e2d0ea27233ce00b5f01c5bf335").to_s
-  end
 end

@@ -1,4 +1,5 @@
 require 'sprockets/engine_pathname'
+require 'sprockets/utils'
 require 'digest/md5'
 require 'time'
 
@@ -12,7 +13,7 @@ module Sprockets
       @mtime  = @pathname.mtime
       @length = @pathname.size
 
-      if digest = @pathname.fingerprint
+      if digest = Utils.path_fingerprint(@pathname)
         @digest = digest
       else
         @digest = Digest::MD5.hexdigest(pathname.read)
@@ -24,7 +25,7 @@ module Sprockets
     end
 
     def stale?
-      if pathname.fingerprint
+      if Utils.path_fingerprint(pathname)
         false
       else
         mtime < pathname.mtime

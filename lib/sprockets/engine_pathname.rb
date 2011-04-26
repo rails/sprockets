@@ -1,6 +1,7 @@
 require 'pathname'
 require 'rack/mime'
 require 'sprockets/template_mappings'
+require 'sprockets/utils'
 
 module Sprockets
   class EnginePathname < ::Pathname
@@ -53,27 +54,6 @@ module Sprockets
       engine_extensions.inject(self) do |pathname, ext|
         pathname.sub(ext, '')
       end
-    end
-
-    def fingerprint
-      if defined? @fingerprint
-        @fingerprint
-      elsif basename_without_extensions.to_s =~ /-([0-9a-f]{7,40})$/
-        @fingerprint = $1
-      else
-        @fingerprint = nil
-      end
-    end
-
-    def with_fingerprint(digest)
-      if fingerprint
-        path = self.to_s.sub(fingerprint, digest)
-      else
-        basename = "#{basename_without_extensions}-#{digest}#{extensions.join}"
-        path = dirname.to_s == '.' ? basename : dirname.join(basename)
-      end
-
-      self.class.new(path)
     end
 
     private

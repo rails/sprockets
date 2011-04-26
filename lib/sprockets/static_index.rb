@@ -30,7 +30,7 @@ module Sprockets
         return nil
       end
 
-      if !pathname.fingerprint
+      if !Utils.path_fingerprint(pathname)
         pattern = /^#{Regexp.escape(pathname.basename_without_extensions.to_s)}
                    -[0-9a-f]{7,40}
                    #{Regexp.escape(pathname.extensions.join)}$/x

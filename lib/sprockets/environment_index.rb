@@ -51,7 +51,8 @@ module Sprockets
           end
 
           if asset = @path_index.find_asset(logical_path)
-            filename = @static_index.root.join(logical_path.with_fingerprint(asset.digest))
+            digest_path = Utils.path_with_fingerprint(logical_path, asset.digest)
+            filename = @static_index.root.join(digest_path)
 
             FileUtils.mkdir_p filename.dirname
 
