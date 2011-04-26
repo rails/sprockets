@@ -14,10 +14,10 @@ module Sprockets
     attr_accessor :logger, :context
 
     def initialize(root = ".")
-      @engines = Engines.new
-
       @trail = Hike::Trail.new(root)
-      extensions.replace @engines.extensions + Engines::CONCATENATABLE_EXTENSIONS
+      @trail.extensions.replace Engines::CONCATENATABLE_EXTENSIONS
+
+      @engines = Engines.new(@trail)
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL

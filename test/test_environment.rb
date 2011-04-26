@@ -317,6 +317,16 @@ class TestEnvironment < Sprockets::TestCase
     assert_raises(NameError) { e2.context.instance_method(:foo) }
   end
 
+  test "registering engine adds to the environments extensions" do
+    assert !@env.engines[".foo"]
+    assert !@env.extensions.include?(".foo")
+
+    @env.engines.register ".foo", Tilt::StringTemplate
+
+    assert @env.engines[".foo"]
+    assert @env.extensions.include?(".foo")
+  end
+
   test "seperate engines for each instance" do
     e1 = new_environment
     e2 = new_environment
