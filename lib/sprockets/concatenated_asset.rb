@@ -1,5 +1,6 @@
-require "sprockets/errors"
-require "sprockets/concatenation"
+require 'sprockets/concatenation'
+require 'sprockets/engine_pathname'
+require 'sprockets/errors'
 
 module Sprockets
   class ConcatenatedAsset
@@ -7,6 +8,7 @@ module Sprockets
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
     def self.concatenatable?(pathname)
+      pathname = EnginePathname.new(pathname)
       CONCATENATABLE_EXTENSIONS.include?(pathname.format_extension)
     end
 
@@ -14,6 +16,8 @@ module Sprockets
     attr_reader :mtime, :length, :digest
 
     def initialize(environment, pathname)
+      pathname = EnginePathname.new(pathname)
+
       @content_type     = pathname.content_type
       @format_extension = pathname.format_extension
 

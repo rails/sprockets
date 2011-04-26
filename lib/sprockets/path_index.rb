@@ -1,8 +1,9 @@
-require 'set'
 require 'sprockets/concatenated_asset'
 require 'sprockets/engine_pathname'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
+require 'pathname'
+require 'set'
 
 module Sprockets
   class PathIndex
@@ -27,7 +28,7 @@ module Sprockets
     end
 
     def pathnames
-      paths.map { |path| EnginePathname.new(path) }
+      paths.map { |path| Pathname.new(path) }
     end
 
     def engine_extensions
@@ -38,7 +39,7 @@ module Sprockets
       files = Set.new
       pathnames.each do |base_pathname|
         Dir["#{base_pathname}/**/*"].each do |filename|
-          logical_path = EnginePathname.new(filename).relative_path_from(base_pathname)
+          logical_path = Pathname.new(filename).relative_path_from(base_pathname)
           files << EnginePathname.new(logical_path).without_engine_extensions
         end
       end
@@ -48,7 +49,7 @@ module Sprockets
     def resolve(logical_path, options = {})
       if block_given?
         @trail.find(logical_path.to_s, logical_index_path(logical_path), options) do |path|
-          yield EnginePathname.new(path)
+          yield Pathname.new(path)
         end
       else
         resolve(logical_path, options) do |pathname|
@@ -59,6 +60,8 @@ module Sprockets
     end
 
     def find_asset(logical_path)
+      logical_path = EnginePathname.new(logical_path)
+
       if @assets.key?(logical_path.to_s)
         return @assets[logical_path.to_s]
       end

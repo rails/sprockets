@@ -57,6 +57,8 @@ module Sprockets
         @_concatenation.require(pathname)
       else
         resolve(path) do |candidate|
+          candidate = EnginePathname.new(candidate)
+
           if self.content_type == candidate.content_type
             @_concatenation.require(candidate)
             return candidate

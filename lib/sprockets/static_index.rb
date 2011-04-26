@@ -1,12 +1,13 @@
 require 'sprockets/engine_pathname'
 require 'sprockets/static_asset'
+require 'pathname'
 
 module Sprockets
   class StaticIndex
     attr_reader :root
 
     def initialize(root)
-      @root    = root ? EnginePathname.new(root) : nil
+      @root    = root ? Pathname.new(root) : nil
       @entries = {}
       @assets  = {}
     end

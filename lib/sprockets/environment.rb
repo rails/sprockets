@@ -1,10 +1,11 @@
+require 'sprockets/engine_pathname'
+require 'sprockets/environment_index'
+require 'sprockets/server'
+require 'sprockets/template_mappings'
 require 'fileutils'
 require 'hike'
 require 'logger'
-require 'sprockets/environment_index'
-require 'sprockets/engine_pathname'
-require 'sprockets/server'
-require 'sprockets/template_mappings'
+require 'pathname'
 
 module Sprockets
   class Environment
@@ -86,7 +87,7 @@ module Sprockets
     end
 
     def find_asset(logical_path)
-      logical_path = EnginePathname.new(logical_path)
+      logical_path = Pathname.new(logical_path)
 
       if asset = find_fresh_asset_from_cache(logical_path)
         asset
@@ -102,6 +103,8 @@ module Sprockets
       end
 
       def find_fresh_asset_from_cache(logical_path)
+        logical_path = EnginePathname.new(logical_path)
+
         if asset = @cache[logical_path.to_s]
           if logical_path.fingerprint
             asset
