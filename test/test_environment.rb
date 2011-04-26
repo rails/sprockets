@@ -26,9 +26,19 @@ module EnvironmentTests
     assert_equal [fixture_path("default")], @env.paths.to_a
   end
 
+  test "extensions" do
+    ["coffee", "erb", "less", "sass", "scss", "str", "css", "js"].each do |ext|
+      assert @env.extensions.to_a.include?(".#{ext}")
+    end
+  end
+
   test "engine extensions" do
-    assert_equal [".coffee", ".erb", ".less", ".sass", ".scss", ".str", ".css", ".js"],
-      @env.engine_extensions.to_a
+    ["coffee", "erb", "less", "sass", "scss", "str"].each do |ext|
+      assert @env.engines.extensions.include?(".#{ext}")
+    end
+    ["css", "js"].each do |ext|
+      assert !@env.engines.extensions.include?(".#{ext}")
+    end
   end
 
   test "resolve in environment" do
@@ -244,7 +254,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "changing extensions expires old assets" do
     assert @env["gallery.css"]
-    @env.engine_extensions.clear
+    @env.extensions.clear
     assert_nil @env["gallery.css"]
   end
 

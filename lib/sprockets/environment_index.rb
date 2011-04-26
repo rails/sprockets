@@ -38,7 +38,7 @@ module Sprockets
       @trail.paths
     end
 
-    def engine_extensions
+    def extensions
       @trail.extensions
     end
 

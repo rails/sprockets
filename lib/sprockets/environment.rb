@@ -14,12 +14,10 @@ module Sprockets
     attr_accessor :logger, :context
 
     def initialize(root = ".")
-      @trail = Hike::Trail.new(root)
-      extensions = Engines::DEFAULT_ENGINE_EXTENSIONS +
-        Engines::CONCATENATABLE_EXTENSIONS
-      engine_extensions.replace(extensions)
-
       @engines = Engines.new
+
+      @trail = Hike::Trail.new(root)
+      extensions.replace @engines.extensions + Engines::CONCATENATABLE_EXTENSIONS
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
@@ -73,7 +71,7 @@ module Sprockets
 
     attr_reader :engines
 
-    def engine_extensions
+    def extensions
       ArrayProxy.new(@trail.extensions) { expire_cache }
     end
 
