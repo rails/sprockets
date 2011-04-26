@@ -54,12 +54,6 @@ module Sprockets
         'application/octet-stream'
     end
 
-    def without_engine_extensions
-      engine_extensions.inject(@pathname) do |pathname, ext|
-        pathname.sub(ext, '')
-      end
-    end
-
     private
       def lookup_mime_type(ext)
         Rack::Mime.mime_type(ext, nil)

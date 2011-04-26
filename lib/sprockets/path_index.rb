@@ -42,7 +42,7 @@ module Sprockets
       pathnames.each do |base_pathname|
         Dir["#{base_pathname}/**/*"].each do |filename|
           logical_path = Pathname.new(filename).relative_path_from(base_pathname)
-          files << EnginePathname.new(logical_path, engines).without_engine_extensions
+          files << path_without_engine_extensions(logical_path)
         end
       end
       files
@@ -100,6 +100,14 @@ module Sprockets
         else
           basename = "#{engine_pathname.basename_without_extensions}/index#{engine_pathname.extensions.join}"
           pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+        end
+      end
+
+      def path_without_engine_extensions(pathname)
+        engine_pathname = EnginePathname.new(pathname, engines)
+
+        engine_pathname.engine_extensions.inject(pathname) do |p, ext|
+          p.sub(ext, '')
         end
       end
   end

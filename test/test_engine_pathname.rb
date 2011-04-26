@@ -64,21 +64,6 @@ class TestEnginePathname < Sprockets::TestCase
       pathname("jquery.min.coffee").engine_extensions
   end
 
-  test "without engine extensions" do
-    assert_equal "gallery.js",
-      pathname("gallery.js").without_engine_extensions.to_s
-    assert_equal "application.js",
-      pathname("application.js.coffee").without_engine_extensions.to_s
-    assert_equal "project.js",
-      pathname("project.js.coffee.erb").without_engine_extensions.to_s
-    assert_equal "gallery",
-      pathname("gallery.erb").without_engine_extensions.to_s
-    assert_equal "jquery.tmpl.min.js",
-      pathname("jquery.tmpl.min.js").without_engine_extensions.to_s
-    assert_equal "jquery.min",
-      pathname("jquery.min.coffee").without_engine_extensions.to_s
-  end
-
   test "content_type" do
     assert_equal "application/octet-stream",
       pathname("empty").content_type
