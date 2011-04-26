@@ -13,14 +13,6 @@ module Sprockets
       @engines  = engines
     end
 
-    def to_s
-      @pathname.to_s
-    end
-
-    def to_str
-      @pathname.to_s
-    end
-
     def basename_without_extensions
       @pathname.basename(extensions.join)
     end
