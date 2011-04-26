@@ -8,19 +8,16 @@ require 'pathname'
 # TODO Fill in with better explanation
 module Sprockets
   class Context
-    attr_reader :pathname
+    attr_reader :environment, :pathname
 
-    # TODO: Exposing private api
-    attr_reader :_environment
-
-    def initialize(concatenation, pathname)
+    def initialize(environment, concatenation, pathname)
       @_concatenation = concatenation
-      @_environment   = concatenation.environment
+      @environment    = environment
       @pathname       = pathname
     end
 
     def paths
-      @_environment.paths
+      environment.paths
     end
 
     def root_path
@@ -34,11 +31,11 @@ module Sprockets
     end
 
     def content_type
-      EnginePathname.new(pathname, _environment.engines).content_type
+      EnginePathname.new(pathname, environment.engines).content_type
     end
 
     def resolve(path, &block)
-      @_environment.resolve(path, :base_path => pathname.dirname, &block)
+      environment.resolve(path, :base_path => pathname.dirname, &block)
     end
 
     def depend(path)
@@ -48,12 +45,12 @@ module Sprockets
     # TODO: should not be shaddowing Kernal::require
     def require(path)
       pathname        = Pathname.new(path)
-      engine_pathname = EnginePathname.new(pathname, _environment.engines)
+      engine_pathname = EnginePathname.new(pathname, environment.engines)
 
       if engine_pathname.format_extension
         if self.content_type != engine_pathname.content_type
           raise ContentTypeMismatch, "#{path} is " +
-            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname, _environment.engines).format_extension}'"
+            "'#{engine_pathname.format_extension}', not '#{EnginePathname.new(self.pathname, environment.engines).format_extension}'"
         end
       end
 
@@ -61,7 +58,7 @@ module Sprockets
         @_concatenation.require(pathname)
       else
         resolve(path) do |candidate|
-          engine_pathname = EnginePathname.new(candidate, _environment.engines)
+          engine_pathname = EnginePathname.new(candidate, environment.engines)
 
           if self.content_type == engine_pathname.content_type
             @_concatenation.require(candidate)

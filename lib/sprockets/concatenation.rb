@@ -16,7 +16,6 @@ module Sprockets
 
     def initialize(environment)
       @environment = environment
-      @engines     = environment.engines
 
       @content_type     = nil
       @format_extension = nil
@@ -79,12 +78,12 @@ module Sprockets
     end
 
     def requirable?(pathname)
-      content_type.nil? || content_type == EnginePathname.new(pathname, @engines).content_type
+      content_type.nil? || content_type == EnginePathname.new(pathname, environment.engines).content_type
     end
 
     def require(pathname)
       pathname        = Pathname.new(pathname)
-      engine_pathname = EnginePathname.new(pathname, @engines)
+      engine_pathname = EnginePathname.new(pathname, environment.engines)
 
       @content_type     ||= engine_pathname.content_type
       @format_extension ||= engine_pathname.format_extension
@@ -104,10 +103,10 @@ module Sprockets
 
     def process(pathname)
       pathname        = Pathname.new(pathname)
-      engine_pathname = EnginePathname.new(pathname, @engines)
+      engine_pathname = EnginePathname.new(pathname, environment.engines)
 
       engines  = engine_pathname.engines + [DirectiveProcessor]
-      scope    = environment.context.new(self, pathname)
+      scope    = environment.context.new(environment, self, pathname)
       locals   = {}
 
       engines.reverse.inject(pathname.read) do |result, engine|

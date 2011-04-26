@@ -16,9 +16,8 @@ module Sprockets
     end
 
     def evaluate(context, locals, &block)
-      @context = context
-      # TODO: Using private api
-      @engines = context._environment.engines
+      @context     = context
+      @environment = context.environment
 
       process_directives
       process_source
@@ -152,7 +151,7 @@ module Sprockets
           Dir["#{root}/*"].sort.each do |filename|
             pathname = Pathname.new(filename)
             if pathname.file? &&
-                EnginePathname.new(pathname, @engines).content_type == EnginePathname.new(self.pathname, @engines).content_type
+                EnginePathname.new(pathname, @environment.engines).content_type == EnginePathname.new(self.pathname, @environment.engines).content_type
               if pathname.file?
                 context.require(pathname)
               else
@@ -195,7 +194,7 @@ module Sprockets
           if pathname.directory?
             yield pathname
           elsif pathname.file? &&
-              EnginePathname.new(pathname, @engines).content_type == EnginePathname.new(self.pathname, @engines).content_type
+              EnginePathname.new(pathname, @environment.engines).content_type == EnginePathname.new(self.pathname, @environment.engines).content_type
             yield pathname
           end
         end
