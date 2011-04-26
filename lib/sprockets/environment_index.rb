@@ -12,7 +12,7 @@ module Sprockets
     def initialize(environment, trail, static_root)
       @logger         = environment.logger
       @context        = environment.context
-      @engines        = environment.engines
+      @engines        = environment.engines.dup
       @css_compressor = environment.css_compressor
       @js_compressor  = environment.js_compressor
 

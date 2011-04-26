@@ -9,6 +9,10 @@ module Sprockets
       @mappings = Tilt.mappings.dup
     end
 
+    def initialize_copy(other)
+      @mappings = @mappings.dup
+    end
+
     def register(ext, klass)
       ext = ext.to_s.sub(/^\./, '').downcase
       @mappings[ext] = klass

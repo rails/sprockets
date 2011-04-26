@@ -306,6 +306,19 @@ class TestEnvironment < Sprockets::TestCase
     assert_nothing_raised(NameError) { e1.context.instance_method(:foo) }
     assert_raises(NameError) { e2.context.instance_method(:foo) }
   end
+
+  test "seperate engines for each instance" do
+    e1 = new_environment
+    e2 = new_environment
+
+    assert_nil e1.engines.lookup_engine ".foo"
+    assert_nil e2.engines.lookup_engine ".foo"
+
+    e1.engines.register ".foo", Tilt::StringTemplate
+
+    assert e1.engines.lookup_engine ".foo"
+    assert_nil e2.engines.lookup_engine ".foo"
+  end
 end
 
 class TestEnvironmentIndex < Sprockets::TestCase
@@ -363,5 +376,18 @@ class TestEnvironmentIndex < Sprockets::TestCase
     assert_equal WhitespaceCompressor, index.js_compressor
     env.js_compressor = nil
     assert_equal WhitespaceCompressor, index.js_compressor
+  end
+
+  test "change in environment engines does not affect index" do
+    env = Sprockets::Environment.new
+    index = env.index
+
+    assert_nil env.engines.lookup_engine ".foo"
+    assert_nil index.engines.lookup_engine ".foo"
+
+    env.engines.register ".foo", Tilt::StringTemplate
+
+    assert env.engines.lookup_engine ".foo"
+    assert_nil index.engines.lookup_engine ".foo"
   end
 end
