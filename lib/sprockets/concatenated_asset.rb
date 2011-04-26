@@ -7,8 +7,8 @@ module Sprockets
     attr_reader :content_type, :format_extension
     attr_reader :mtime, :length, :digest
 
-    def initialize(environment, pathname, engines)
-      engine_pathname   = EnginePathname.new(pathname, engines)
+    def initialize(environment, pathname)
+      engine_pathname   = EnginePathname.new(pathname, environment.engines)
       @content_type     = engine_pathname.content_type
       @format_extension = engine_pathname.format_extension
 

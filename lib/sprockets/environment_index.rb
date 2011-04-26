@@ -129,7 +129,7 @@ module Sprockets
 
           entries.each do |filename|
             if filename.to_s =~ pattern
-              asset = StaticAsset.new(pathname.dirname.join(filename), engines)
+              asset = StaticAsset.new(self, pathname.dirname.join(filename))
               @static_assets[logical_path] = asset
               return asset
             end
@@ -137,7 +137,7 @@ module Sprockets
         end
 
         if entries.include?(pathname.basename) && pathname.file?
-          asset = StaticAsset.new(pathname, engines)
+          asset = StaticAsset.new(self, pathname)
           @static_assets[logical_path] = asset
           return asset
         end
@@ -161,9 +161,9 @@ module Sprockets
       else
         if engines.concatenatable?(pathname)
           logger.info "[Sprockets] #{logical_path} building"
-          asset = ConcatenatedAsset.new(self, pathname, engines)
+          asset = ConcatenatedAsset.new(self, pathname)
         else
-          asset = StaticAsset.new(pathname, engines)
+          asset = StaticAsset.new(self, pathname)
         end
 
         if fingerprint && fingerprint != asset.digest

@@ -7,10 +7,10 @@ module Sprockets
   class StaticAsset
     attr_reader :pathname, :content_type, :mtime, :length, :digest
 
-    def initialize(pathname, engines)
+    def initialize(environment, pathname)
       @pathname = Pathname.new(pathname)
 
-      engine_pathname = EnginePathname.new(pathname, engines)
+      engine_pathname = EnginePathname.new(pathname, environment.engines)
       @content_type   = engine_pathname.content_type
 
       @mtime  = @pathname.mtime
