@@ -1,5 +1,5 @@
 require 'sprockets/path_index'
-require 'sprockets/pathname'
+require 'sprockets/engine_pathname'
 require 'sprockets/server'
 require 'sprockets/static_index'
 
@@ -68,7 +68,7 @@ module Sprockets
     end
 
     def find_asset(logical_path)
-      logical_path = Pathname.new(logical_path)
+      logical_path = EnginePathname.new(logical_path)
       @static_index.find_asset(logical_path) || @path_index.find_asset(logical_path)
     end
     alias_method :[], :find_asset

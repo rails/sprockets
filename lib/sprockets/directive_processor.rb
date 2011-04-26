@@ -1,4 +1,4 @@
-require 'sprockets/pathname'
+require 'sprockets/engine_pathname'
 require 'shellwords'
 require 'tilt'
 require 'yaml'
@@ -8,7 +8,7 @@ module Sprockets
     attr_reader :pathname
 
     def prepare
-      @pathname = Pathname.new(file)
+      @pathname = EnginePathname.new(file)
 
       @included_pathnames = []
       @compat             = false
@@ -147,7 +147,7 @@ module Sprockets
           context.depend(root)
 
           Dir["#{root}/*"].sort.each do |filename|
-            pathname = Pathname.new(filename)
+            pathname = EnginePathname.new(filename)
             if pathname.file? &&
                 pathname.content_type == self.pathname.content_type
               if pathname.file?
@@ -187,7 +187,7 @@ module Sprockets
     private
       def each_pathname_in_tree(path)
         Dir["#{base_path.join(path)}/**/*"].sort.each do |filename|
-          pathname = Pathname.new(filename)
+          pathname = EnginePathname.new(filename)
 
           if pathname.directory?
             yield pathname

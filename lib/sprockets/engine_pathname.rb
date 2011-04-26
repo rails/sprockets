@@ -3,7 +3,7 @@ require 'rack/mime'
 require 'sprockets/template_mappings'
 
 module Sprockets
-  class Pathname < ::Pathname
+  class EnginePathname < ::Pathname
     def self.new(path)
       path.kind_of?(self) ? path : super(path)
     end

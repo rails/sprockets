@@ -1,13 +1,13 @@
-require "digest/md5"
-require "sprockets/pathname"
-require "time"
+require 'sprockets/engine_pathname'
+require 'digest/md5'
+require 'time'
 
 module Sprockets
   class StaticAsset
     attr_reader :pathname, :mtime, :length, :digest
 
     def initialize(pathname)
-      @pathname = Pathname.new(pathname)
+      @pathname = EnginePathname.new(pathname)
 
       @mtime  = @pathname.mtime
       @length = @pathname.size

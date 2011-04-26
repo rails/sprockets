@@ -1,5 +1,6 @@
+require 'sprockets/engine_pathname'
 require 'sprockets/errors'
-require 'sprockets/pathname'
+require 'pathname'
 
 #### Sprockets::Context
 #
@@ -43,7 +44,7 @@ module Sprockets
 
     # TODO: should not be shaddowing Kernal::require
     def require(path)
-      pathname = Pathname.new(path)
+      pathname = EnginePathname.new(path)
 
       if pathname.format_extension
         if self.content_type != pathname.content_type

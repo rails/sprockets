@@ -1,4 +1,4 @@
-require 'sprockets/pathname'
+require 'sprockets/engine_pathname'
 require 'sprockets/static_asset'
 
 module Sprockets
@@ -6,7 +6,7 @@ module Sprockets
     attr_reader :root
 
     def initialize(root)
-      @root    = root ? Pathname.new(root) : nil
+      @root    = root ? EnginePathname.new(root) : nil
       @entries = {}
       @assets  = {}
     end
@@ -20,7 +20,7 @@ module Sprockets
         return @assets[logical_path]
       end
 
-      pathname = Pathname.new(root.join(logical_path))
+      pathname = EnginePathname.new(root.join(logical_path))
 
       entries = entries(pathname.dirname)
 
