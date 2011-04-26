@@ -106,15 +106,6 @@ class TestPathname < Sprockets::TestCase
     end
   end
 
-  test "index" do
-    assert_equal "mobile/index.js", Pathname.new("mobile.js").index.to_s
-    assert_equal "print/index.css", Pathname.new("print.css").index.to_s
-    assert_equal "mobile/index.js", Pathname.new("mobile/index.js").index.to_s
-    assert_equal "main/mobile/index.js", Pathname.new("main/mobile.js").index.to_s
-    assert_equal "mobile/index", Pathname.new("mobile").index.to_s
-    assert_equal "./mobile/index.js", Pathname.new("./mobile/index.js").index.to_s
-  end
-
   test "fingerprint" do
     assert_nil Pathname.new("print.css").fingerprint
     assert_equal "f7531e2d0ea27233ce00b5f01c5bf335", Pathname.new("print-f7531e2d0ea27233ce00b5f01c5bf335.css").fingerprint

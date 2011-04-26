@@ -47,8 +47,7 @@ module Sprockets
 
     def resolve(logical_path, options = {})
       if block_given?
-        index_path = Pathname.new(logical_path).index.to_s
-        @trail.find(logical_path.to_s, index_path, options) do |path|
+        @trail.find(logical_path.to_s, logical_index_path(logical_path), options) do |path|
           yield Pathname.new(path)
         end
       else
@@ -87,5 +86,17 @@ module Sprockets
       @assets[logical_path.to_s] = asset
       asset
     end
+
+    private
+      def logical_index_path(logical_path)
+        pathname = Pathname.new(logical_path)
+
+        if pathname.basename_without_extensions.to_s == 'index'
+          logical_path
+        else
+          basename = "#{pathname.basename_without_extensions}/index#{pathname.extensions.join}"
+          pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+        end
+      end
   end
 end
