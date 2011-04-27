@@ -10,7 +10,7 @@ module Sprockets
 
     def initialize(environment = nil)
       @environment = environment
-      @mappings = Tilt.mappings.dup
+      @mappings = {}
 
       @pre_processors           = [DirectiveProcessor]
       @post_processors          = []
@@ -35,18 +35,20 @@ module Sprockets
         @environment.extensions << ext
       end
 
-      @mappings[ext] << klass
+      @mappings[ext] = klass
     end
     alias_method :[]=, :register
 
     def lookup(ext)
       ext = ext.to_s.sub(/^\./, '').downcase
-      @mappings[ext].first
+      @mappings[ext] || Tilt[ext]
     end
     alias_method :[], :lookup
 
     def extensions
-      @mappings.keys.map { |ext| ".#{ext}" }
+      exts = (Tilt.mappings.keys + @mappings.keys)
+      exts = exts.reject { |ext| ext == "" }.uniq.compact
+      exts.map { |ext| ".#{ext}" }
     end
 
     def concatenatable?(pathname)
