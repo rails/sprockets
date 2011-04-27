@@ -12,19 +12,19 @@ module Sprockets
       @content_type     = engine_pathname.content_type
       @format_extension = engine_pathname.format_extension
 
-      concatenation = Concatenation.new(environment)
+      concatenation = Concatenation.new(environment, pathname)
       concatenation.require(pathname)
-      concatenation.compress!
+      concatenation.post_process!
 
       @source_paths = concatenation.paths
-      @source       = concatenation.source
       @mtime        = concatenation.mtime
       @length       = concatenation.length
       @digest       = concatenation.digest
+      @source       = concatenation.to_s
     end
 
-    def each(&block)
-      @source.each(&block)
+    def each
+      yield @source
     end
 
     def stale?
@@ -34,7 +34,7 @@ module Sprockets
     end
 
     def to_s
-      @source.join
+      @source
     end
 
     def eql?(other)

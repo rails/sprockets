@@ -1,4 +1,3 @@
-require 'sprockets/directive_processor'
 require 'sprockets/errors'
 require 'sprockets/engine_pathname'
 require 'digest/md5'
@@ -9,59 +8,42 @@ require 'time'
 
 module Sprockets
   class Concatenation
-    attr_reader :environment
+    attr_reader :environment, :pathname
     attr_reader :content_type, :format_extension
-    attr_reader :paths, :source
-    attr_accessor :length, :mtime
+    attr_reader :paths
+    attr_accessor :mtime
 
-    def initialize(environment)
+    def initialize(environment, pathname)
       @environment = environment
+      @pathname    = Pathname.new(pathname)
 
       @content_type     = nil
       @format_extension = nil
 
       @paths  = Set.new
-      @source = []
-      @length = 0
+      @source = ""
       @mtime  = Time.at(0)
-      @digest = Digest::MD5.new
     end
 
     def digest
-      @digest.is_a?(String) ? @digest : @digest.hexdigest
+      Digest::MD5.hexdigest(to_s)
+    end
+
+    def length
+      Rack::Utils.bytesize(to_s)
     end
 
     def to_s
-      source.join
+      @source
     end
 
     def <<(str)
-      str = str.to_s
-      @length += Rack::Utils.bytesize(str)
-      @digest << str
-      @source << str
-      str
+      @source << str.to_s
+      self
     end
 
-    def source=(str)
-      str = str.to_s
-      @length = Rack::Utils.bytesize(str)
-      @digest.update(str)
-      @source = [str]
-      str
-    end
-
-    def compress!
-      case content_type
-      when 'application/javascript'
-        if environment.js_compressor
-          self.source = environment.js_compressor.compress(to_s)
-        end
-      when 'text/css'
-        if environment.css_compressor
-          self.source = environment.css_compressor.compress(to_s)
-        end
-      end
+    def post_process!
+      @source = evaluate(environment.engines.concatenation_processors, pathname, @source)
       nil
     end
 
@@ -95,7 +77,8 @@ module Sprockets
         end
       else
         raise ContentTypeMismatch, "#{pathname} is " +
-          "'#{pathname.format_extension}', not '#{format_extension}'"
+          "'#{ EnginePathname.new(pathname, environment.engines).format_extension}', " +
+          "not '#{format_extension}'"
       end
 
       pathname
@@ -104,15 +87,22 @@ module Sprockets
     def process(pathname)
       pathname        = Pathname.new(pathname)
       engine_pathname = EnginePathname.new(pathname, environment.engines)
+      engines         = environment.engines.pre_processors +
+                          engine_pathname.engines.reverse +
+                          environment.engines.post_processors
 
-      engines  = engine_pathname.engines + [DirectiveProcessor]
-      scope    = environment.context.new(environment, self, pathname)
-      locals   = {}
-
-      engines.reverse.inject(pathname.read) do |result, engine|
-        template = engine.new(pathname.to_s) { result }
-        template.render(scope, locals)
-      end
+      evaluate(engines, pathname, pathname.read)
     end
+
+    private
+      def evaluate(engines, pathname, data)
+        scope    = environment.context.new(environment, self, pathname)
+        locals   = {}
+
+        engines.inject(data) do |result, engine|
+          template = engine.new(pathname.to_s) { result }
+          template.render(scope, locals)
+        end
+      end
   end
 end

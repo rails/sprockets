@@ -1,12 +1,20 @@
+require 'sprockets/compressor'
+require 'sprockets/directive_processor'
 require 'tilt'
 
 module Sprockets
   class Engines
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
+    attr_reader :pre_processors, :post_processors, :concatenation_processors
+
     def initialize(environment = nil)
       @environment = environment
       @mappings = Tilt.mappings.dup
+
+      @pre_processors           = [DirectiveProcessor]
+      @post_processors          = []
+      @concatenation_processors = [Compressor]
 
       if @environment
         extensions.each do |ext|
