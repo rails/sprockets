@@ -27,8 +27,12 @@ module Sprockets
       end
     end
 
-    def content_type
+    def content_type_for(pathname)
       EnginePathname.new(pathname, sprockets_environment.engines).content_type
+    end
+
+    def content_type
+      content_type_for(pathname)
     end
 
     def sprockets_resolve(path, &block)

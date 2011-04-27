@@ -1,4 +1,3 @@
-require 'sprockets/engine_pathname'
 require 'pathname'
 require 'shellwords'
 require 'tilt'
@@ -151,7 +150,7 @@ module Sprockets
           Dir["#{root}/*"].sort.each do |filename|
             pathname = Pathname.new(filename)
             if pathname.file? &&
-                EnginePathname.new(pathname, @environment.engines).content_type == EnginePathname.new(self.pathname, @environment.engines).content_type
+                context.content_type_for(pathname) == context.content_type_for(self.pathname)
               if pathname.file?
                 context.sprockets_require(pathname)
               else
@@ -194,7 +193,7 @@ module Sprockets
           if pathname.directory?
             yield pathname
           elsif pathname.file? &&
-              EnginePathname.new(pathname, @environment.engines).content_type == EnginePathname.new(self.pathname, @environment.engines).content_type
+              context.content_type_for(pathname) == context.content_type_for(self.pathname)
             yield pathname
           end
         end
