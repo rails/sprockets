@@ -35,13 +35,13 @@ module Sprockets
         @environment.extensions << ext
       end
 
-      @mappings[ext] = klass
+      @mappings[ext] << klass
     end
     alias_method :[]=, :register
 
     def lookup(ext)
       ext = ext.to_s.sub(/^\./, '').downcase
-      @mappings[ext]
+      @mappings[ext].first
     end
     alias_method :[], :lookup
 

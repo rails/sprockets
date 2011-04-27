@@ -6,9 +6,9 @@ Gem::Specification.new do |s|
 
   s.files = Dir["Rakefile", "lib/**/*"]
 
-  s.add_dependency "hike", ">= 0.7.0"
-  s.add_dependency "rack", ">= 1.0.0"
-  s.add_dependency "tilt", ">= 1.1.0"
+  s.add_dependency "hike", "~> 0.7"
+  s.add_dependency "rack", "~> 1.0"
+  s.add_dependency "tilt", "~> 1.3"
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = "sstephenson@gmail.com"
