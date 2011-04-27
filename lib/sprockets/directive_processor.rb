@@ -4,6 +4,38 @@ require 'tilt'
 require 'yaml'
 
 module Sprockets
+  # The `DirectiveProcessor` is responsible for parsing and evaluating
+  # directive comments in a source file.
+  #
+  # A directive comment starts with comment, followed by a "=", directive
+  # name, then any arguments.
+  #
+  #     // JavaScript
+  #     //= require "foo"
+  #
+  #     # CoffeeScript
+  #     #= require "bar"
+  #
+  #     /* CSS
+  #      *= require "baz"
+  #      */
+  #
+  # The Processor is implemented as a `Tilt::Template` and is loosely
+  # coupled to Sprockets. This makes it possible to disable or modify
+  # the processor to do whatever you'd like. You could add your own
+  # custom directives or invent your own directive syntax.
+  #
+  # `Environment#engines.pre_processors` includes `DirectiveProcessor` by
+  # default.
+  #
+  # To remove the processor entirely:
+  #
+  #     env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
+  #
+  # Then inject your own preprocessor:
+  #
+  #     env.engines.pre_precessors.push(MyProcessor)
+  #
   class DirectiveProcessor < Tilt::Template
     attr_reader :pathname
 
@@ -14,6 +46,11 @@ module Sprockets
       @compat             = false
     end
 
+    # Implemented for Tilt#render.
+    #
+    # `context` is a `Context` instance with special `sprockets_`
+    # prefixed methods that allow you to access the environment and
+    # append to the concatenation. See `Context` for the complete API.
     def evaluate(context, locals, &block)
       @context     = context
       @environment = context.sprockets_environment
@@ -24,6 +61,18 @@ module Sprockets
 
     protected
       class Parser
+        # Directives will only be picked up if they are in the header
+        # of the source file. C style (/* */), JavaScript (//), and
+        # Ruby (#) comments are supported.
+        #
+        # A common mistake is breaking up the header with an extra
+        # line of whitespace.
+        #
+        #     # HEADER
+        #     # HEADER
+        #
+        #     # NOT PART OF HEADER
+        #
         HEADER_PATTERN = /
           \A \s* (
             (\/\* ([\s\S]*?) \*\/) |
@@ -33,6 +82,15 @@ module Sprockets
           )
         /mx
 
+        # Directives are denoted by a `=` followed by the name, then
+        # argument list.
+        #
+        # A few different styles are allowed:
+        #
+        #     // =require foo
+        #     //= require foo
+        #     //= require "foo"
+        #
         DIRECTIVE_PATTERN = /
           ^ [\W]* = \s* (\w+.*?) (\*\/)? $
         /x
@@ -43,6 +101,8 @@ module Sprockets
           @source = source
           @header = @source[HEADER_PATTERN, 0] || ""
           @body   = $' || @source
+
+          # Ensure body ends in a new line
           @body  += "\n" if @body != "" && @body !~ /\n\Z/m
         end
 
@@ -50,16 +110,24 @@ module Sprockets
           @header_lines ||= header.split("\n")
         end
 
+        # Returns the header String with any directives stripped.
         def processed_header
           header_lines.reject do |line|
             extract_directive(line)
           end.join("\n")
         end
 
+        # Returns the source String with any directives stripped.
         def processed_source
           @processed_source ||= processed_header + body
         end
 
+        # Returns an Array of directive structures. Each structure
+        # is an Array with the directive name as the first element
+        # followed by any arguments.
+        #
+        #     [["require", "foo"], ["require", "bar"]]
+        #
         def directives
           @directives ||= header_lines.map do |line|
             if directive = extract_directive(line)
@@ -76,6 +144,28 @@ module Sprockets
       attr_reader :included_pathnames
       attr_reader :context
 
+      # Gathers comment directives in the source and processes them.
+      # Any directive method matching `process_*_directive` will
+      # automatically be available. This makes it easy to extend the
+      # processor.
+      #
+      # To implement a custom directive called `require_glob`, subclass
+      # `Sprockets::DirectiveProcessor`, then add a method called
+      # `process_require_glob_directive`.
+      #
+      #     class DirectiveProcessor < Sprockets::DirectiveProcessor
+      #       def process_require_glob_directive
+      #         Dir["#{base_path}/#{glob}"].sort.each do |filename|
+      #           context.sprockets_require(filename)
+      #         end
+      #       end
+      #     end
+      #
+      # Replace the current processor on the environment with your own:
+      #
+      #     env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
+      #     env.engines.pre_processors.push(DirectiveProcessor)
+      #
       def process_directives
         @directive_parser = Parser.new(data)
 
@@ -95,7 +185,6 @@ module Sprockets
 
         result << @directive_parser.body
 
-        # LEGACY
         if compat? && constants.any?
           result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
         end
@@ -103,32 +192,24 @@ module Sprockets
         result
       end
 
-      def compat?
-        @compat
-      end
-
-      # LEGACY
-      def constants
-        if compat?
-          path = File.join(context.root_path, "constants.yml")
-          File.exist?(path) ? YAML.load_file(path) : {}
-        else
-        {}
-        end
-      end
-
-      def process_compat_directive
-        @compat = true
-      end
-
-      def process_depend_directive(path)
-        context.sprockets_depend(context.sprockets_resolve(path))
-      end
-
-      def process_include_directive(path)
-        included_pathnames << context.sprockets_resolve(path)
-      end
-
+      # The `require` directive functions similar to Ruby's own `require`.
+      # It provides a way to declare a dependency on a file in your path
+      # and ensures its only loaded once before the source file.
+      #
+      # `require` works with files in the environment path:
+      #
+      #     //= require "foo.js"
+      #
+      # Extensions are optional. If your source file is ".js", it
+      # assumes you are requiring another ".js".
+      #
+      #     //= require "foo"
+      #
+      # Relative paths work too. Use a leading `./` to denote a relative
+      # path:
+      #
+      #     //= require "./bar"
+      #
       def process_require_directive(path)
         if @compat
           if path =~ /<([^>]+)>/
@@ -141,6 +222,22 @@ module Sprockets
         context.sprockets_require(path)
       end
 
+      # The `include` directive works similar to `require` but
+      # inserts of the contents of the dependency even if it already
+      # has been required.
+      #
+      #     //= include "header"
+      #
+      def process_include_directive(path)
+        included_pathnames << context.sprockets_resolve(path)
+      end
+
+      # `require_directory` requires all the files inside a single
+      # directory. Its similar to `path/*` since it does not follow
+      # nested directories.
+      #
+      #     //= require_directory "./javascripts"
+      #
       def process_require_directory_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
@@ -149,6 +246,8 @@ module Sprockets
 
           Dir["#{root}/*"].sort.each do |filename|
             pathname = Pathname.new(filename)
+            # Only files matching the content type of the source file
+            # are included.
             if pathname.file? &&
                 context.content_type_for(pathname) == context.content_type_for(self.pathname)
               if pathname.file?
@@ -159,10 +258,16 @@ module Sprockets
             end
           end
         else
+          # The path must be relative and start with a `./`.
           raise ArgumentError, "require_directory argument must be a relative path"
         end
       end
 
+      # `require_tree` requires all the nested files in a directory.
+      # Its glob equivalent is `path/**/*`.
+      #
+      #     //= require_tree "./public"
+      #
       def process_require_tree_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
@@ -177,12 +282,59 @@ module Sprockets
             end
           end
         else
+          # The path must be relative and start with a `./`.
           raise ArgumentError, "require_tree argument must be a relative path"
         end
       end
 
+      # Allows you to state a dependency on a file without
+      # including it.
+      #
+      # This is used for caching purposes. Any changes made to
+      # the dependency file with invalidate the cache of the
+      # source file.
+      #
+      # This is useful if you are using ERB and File.read to pull
+      # in contents from another file.
+      #
+      #     //= depend "foo.png"
+      #
+      def process_depend_directive(path)
+        context.sprockets_depend(context.sprockets_resolve(path))
+      end
+
+      # Enable Sprockets 1.x compat mode.
+      #
+      # Makes it possible to use the same javascript soruce
+      # file in both Sprockets 1 and 2.
+      #
+      #     //= compat
+      #
+      def process_compat_directive
+        @compat = true
+      end
+
+      # Checks if Sprockets 1.x compat mode enabled
+      def compat?
+        @compat
+      end
+
+      # Sprockets 1.x allowed for constant interpolation if a
+      # constants.yml was present. This is only available if
+      # compat mode is on.
+      def constants
+        if compat?
+          path = File.join(context.root_path, "constants.yml")
+          File.exist?(path) ? YAML.load_file(path) : {}
+        else
+        {}
+        end
+      end
+
+      # `provide` is stubbed out for Sprockets 1.x compat.
+      # Mutating the path when an asset is being built is
+      # not permitted.
       def process_provide_directive(path)
-        # ignore
       end
 
     private

@@ -96,3 +96,25 @@ class DirectiveParserTest < Sprockets::TestCase
     [["require", "a"], ["require", "b"], ["require", "c"]]
   end
 end
+
+class TestCustomDirectiveProcessor < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.paths << fixture_path('context')
+  end
+
+  class DirectiveProcessor < Sprockets::DirectiveProcessor
+    def process_require_glob_directive(glob)
+      Dir["#{base_path}/#{glob}"].sort.each do |filename|
+        context.sprockets_require(filename)
+      end
+    end
+  end
+
+  test "custom processor using Context#sprockets_resolve and Context#sprockets_depend" do
+    @env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
+    @env.engines.pre_processors.push(DirectiveProcessor)
+
+    assert_equal "var Foo = {};\n\n", @env["require_glob.js"].to_s
+  end
+end
