@@ -241,20 +241,11 @@ module Sprockets
       def process_require_directory_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
-
           context.sprockets_depend(root)
 
           Dir["#{root}/*"].sort.each do |filename|
-            pathname = Pathname.new(filename)
-            # Only files matching the content type of the source file
-            # are included.
-            if pathname.file? &&
-                context.content_type_for(pathname) == context.content_type_for(self.pathname)
-              if pathname.file?
-                context.sprockets_require(pathname)
-              else
-                context.sprockets_depend(pathname)
-              end
+            if context.sprockets_requirable?(filename)
+              context.sprockets_require(filename)
             end
           end
         else
@@ -271,14 +262,13 @@ module Sprockets
       def process_require_tree_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
-
           context.sprockets_depend(root)
 
-          each_pathname_in_tree(path) do |pathname|
-            if pathname.file?
-              context.sprockets_require(pathname)
-            else
-              context.sprockets_depend(pathname)
+          Dir["#{root}/**/*"].sort.each do |filename|
+            if File.directory?(filename)
+              context.sprockets_depend(filename)
+            elsif context.sprockets_requirable?(filename)
+              context.sprockets_require(filename)
             end
           end
         else
@@ -338,19 +328,6 @@ module Sprockets
       end
 
     private
-      def each_pathname_in_tree(path)
-        Dir["#{base_path.join(path)}/**/*"].sort.each do |filename|
-          pathname = Pathname.new(filename)
-
-          if pathname.directory?
-            yield pathname
-          elsif pathname.file? &&
-              context.content_type_for(pathname) == context.content_type_for(self.pathname)
-            yield pathname
-          end
-        end
-      end
-
       def relative?(path)
         path =~ /^\.($|\.?\/)/
       end

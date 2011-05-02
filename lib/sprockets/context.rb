@@ -27,12 +27,8 @@ module Sprockets
       end
     end
 
-    def content_type_for(pathname)
-      EnginePathname.new(pathname, sprockets_environment.engines).content_type
-    end
-
     def content_type
-      content_type_for(pathname)
+      EnginePathname.new(pathname, sprockets_environment.engines).content_type
     end
 
     def sprockets_resolve(path, &block)
@@ -41,6 +37,11 @@ module Sprockets
 
     def sprockets_depend(path)
       @_sprockets_concatenation.depend(_expand_path(path))
+    end
+
+    def sprockets_requirable?(filename)
+      pathname = Pathname.new(filename)
+      pathname.file? && @_sprockets_concatenation.requirable?(pathname)
     end
 
     def sprockets_require(path)
