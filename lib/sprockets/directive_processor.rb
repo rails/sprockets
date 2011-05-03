@@ -43,6 +43,7 @@ module Sprockets
       @pathname = Pathname.new(file)
 
       @included_pathnames = []
+      @has_written_body   = false
       @compat             = false
     end
 
@@ -177,13 +178,15 @@ module Sprockets
       def process_source
         result = ""
 
-        unless @directive_parser.processed_header.empty?
+        unless @has_written_body || @directive_parser.processed_header.empty?
           result << @directive_parser.processed_header << "\n"
         end
 
         included_pathnames.each { |p| result << context.sprockets_process(p) }
 
-        result << @directive_parser.body
+        unless @has_written_body
+          result << @directive_parser.body
+        end
 
         if compat? && constants.any?
           result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
@@ -220,6 +223,25 @@ module Sprockets
         end
 
         context.sprockets_require(path)
+      end
+
+      # `require_self` causes the body of the current file to be
+      # inserted before any subsequent `require` or `include`
+      # directives. Useful in CSS files, where it's common for the
+      # index file to contain global styles that need to be defined
+      # before other dependencies are loaded.
+      #
+      #     /*= require "reset"
+      #      *= require_self
+      #      *= require_tree .
+      #      */
+      #
+      def process_require_self_directive
+        unless @has_written_body
+          context << context.sprockets_process(pathname, process_source)
+          included_pathnames.clear
+          @has_written_body = true
+        end
       end
 
       # The `include` directive works similar to `require` but

@@ -92,6 +92,10 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "require_self inserts the current file's body at the specified point" do
+    assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n\n.one {}\n\n\nbody {}\n.project {}\n.two {}\n", asset("require_self.css").to_s
+  end
+
   test "__FILE__ is properly set in templates" do
     assert_equal %(var filename = "#{resolve("filename.js")}";\n),
       asset("filename.js").to_s

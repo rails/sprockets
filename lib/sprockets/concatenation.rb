@@ -84,14 +84,14 @@ module Sprockets
       pathname
     end
 
-    def process(pathname)
+    def process(pathname, data = pathname.read)
       pathname        = Pathname.new(pathname)
       engine_pathname = EnginePathname.new(pathname, environment.engines)
       engines         = environment.engines.pre_processors +
                           engine_pathname.engines.reverse +
                           environment.engines.post_processors
 
-      evaluate(engines, pathname, pathname.read)
+      evaluate(engines, pathname, data)
     end
 
     private

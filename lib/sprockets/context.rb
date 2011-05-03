@@ -31,6 +31,11 @@ module Sprockets
       EnginePathname.new(pathname, sprockets_environment.engines).content_type
     end
 
+    def <<(str)
+      @_sprockets_concatenation << str
+      self
+    end
+
     def sprockets_resolve(path, &block)
       sprockets_environment.resolve(path, :base_path => pathname.dirname, &block)
     end
@@ -71,8 +76,8 @@ module Sprockets
       end
     end
 
-    def sprockets_process(path)
-      @_sprockets_concatenation.process(_expand_path(path))
+    def sprockets_process(path, *args)
+      @_sprockets_concatenation.process(_expand_path(path), *args)
     end
 
     private
