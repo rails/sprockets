@@ -22,9 +22,8 @@ module Sprockets
       @css_compressor = environment.css_compressor
       @js_compressor  = environment.js_compressor
 
-      @trail = trail.index
-      @static_assets = {}
-      @path_assets   = {}
+      @trail   = trail.index
+      @assets  = {}
       @entries = {}
 
       @static_root = static_root ? Pathname.new(static_root) : nil
@@ -85,8 +84,15 @@ module Sprockets
     end
 
     def find_asset(logical_path)
-      logical_path = Pathname.new(logical_path)
-      find_asset_in_static(logical_path) || find_asset_in_path(logical_path)
+      logical_path     = logical_path.to_s.sub(/^\//, '')
+      logical_pathname = Pathname.new(logical_path)
+
+      if @assets.key?(logical_path)
+        @assets[logical_path]
+      else
+        @assets[logical_path] = find_asset_in_static(logical_pathname) ||
+          find_asset_in_path(logical_pathname)
+      end
     end
     alias_method :[], :find_asset
 
@@ -106,19 +112,12 @@ module Sprockets
       def find_asset_in_static(logical_path)
         return unless static_root
 
-        logical_path = logical_path.to_s.sub(/^\//, '')
-
-        if @static_assets.key?(logical_path)
-          return @static_assets[logical_path]
-        end
-
         pathname = Pathname.new(static_root.join(logical_path))
         engine_pathname = EnginePathname.new(pathname, engines)
 
         entries = entries(pathname.dirname)
 
         if entries.empty?
-          @static_assets[logical_path] = nil
           return nil
         end
 
@@ -130,7 +129,6 @@ module Sprockets
           entries.each do |filename|
             if filename.to_s =~ pattern
               asset = StaticAsset.new(self, pathname.dirname.join(filename))
-              @static_assets[logical_path] = asset
               return asset
             end
           end
@@ -138,19 +136,13 @@ module Sprockets
 
         if entries.include?(pathname.basename) && pathname.file?
           asset = StaticAsset.new(self, pathname)
-          @static_assets[logical_path] = asset
           return asset
         end
 
-        @static_assets[logical_path] = nil
         nil
       end
 
       def find_asset_in_path(logical_path)
-        if @path_assets.key?(logical_path.to_s)
-          return @path_assets[logical_path.to_s]
-        end
-
         if fingerprint = Utils.path_fingerprint(logical_path)
           pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
         else
@@ -171,7 +163,6 @@ module Sprockets
           asset = nil
         end
 
-        @path_assets[logical_path.to_s] = asset
         asset
       end
 
