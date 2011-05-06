@@ -24,11 +24,7 @@ module Sprockets
     end
 
     def stale?
-      if Utils.path_fingerprint(pathname)
-        false
-      else
-        mtime < pathname.mtime
-      end
+      mtime < pathname.mtime
     rescue Errno::ENOENT
       true
     end
