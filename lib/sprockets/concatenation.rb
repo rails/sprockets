@@ -53,7 +53,7 @@ module Sprockets
       context.evaluate(pathname, *args)
     end
 
-    def depend(pathname)
+    def depend_on(pathname)
       pathname = Pathname.new(pathname)
 
       if pathname.mtime > mtime
@@ -80,7 +80,7 @@ module Sprockets
 
       if can_require?(pathname)
         unless paths.include?(pathname.to_s)
-          depend pathname
+          depend_on(pathname)
           self << evaluate(pathname)
         end
       else

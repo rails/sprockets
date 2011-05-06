@@ -66,7 +66,7 @@ module Sprockets
     end
 
     def depend_on(path)
-      concatenation.depend(resolve(path))
+      concatenation.depend_on(resolve(path))
     end
 
     def evaluate(filename, options = {})

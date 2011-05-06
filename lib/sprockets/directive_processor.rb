@@ -311,9 +311,9 @@ module Sprockets
       # This is useful if you are using ERB and File.read to pull
       # in contents from another file.
       #
-      #     //= depend "foo.png"
+      #     //= depend_on "foo.png"
       #
-      def process_depend_directive(path)
+      def process_depend_on_directive(path)
         context.depend_on(context.resolve(path))
       end
 
