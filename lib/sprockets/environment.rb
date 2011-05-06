@@ -11,7 +11,7 @@ module Sprockets
   class Environment
     include Server
 
-    attr_accessor :logger, :context
+    attr_accessor :logger, :context_class
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
@@ -22,7 +22,7 @@ module Sprockets
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
 
-      @context = Class.new(Context)
+      @context_class = Class.new(Context)
 
       @static_root = nil
 

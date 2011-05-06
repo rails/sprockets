@@ -20,7 +20,7 @@ class TestContext < Sprockets::TestCase
   end
 
   test "extend context" do
-    @env.context.class_eval do
+    @env.context_class.class_eval do
       def datauri(path)
         require 'base64'
         Base64.encode64(File.open(path, "rb") { |f| f.read })
@@ -49,14 +49,15 @@ class TestCustomProcessor < Sprockets::TestCase
     end
 
     def evaluate(context, locals)
-      @manifest['require'].each do |pathname|
-        context.sprockets_require(pathname)
+      @manifest['require'].each do |logical_path|
+        filename = context.resolve(logical_path)
+        context.concatenation.require(filename)
       end
       ""
     end
   end
 
-  test "custom processor using Context#sprockets_require" do
+  test "custom processor using Context#require" do
     @env.engines.register :yml, YamlProcessor
 
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
@@ -72,19 +73,27 @@ class TestCustomProcessor < Sprockets::TestCase
 
     def evaluate(context, locals)
       data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.sprockets_resolve($1)
-        context.sprockets_depend(path)
+        path = context.resolve($1)
+        context.depend_on(path)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"
       end
     end
   end
 
-  test "custom processor using Context#sprockets_resolve and Context#sprockets_depend" do
+  test "custom processor using Context#resolve and Context#depend_on" do
     @env.engines.register :embed, DataUriProcessor
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
       @env["sprite.css"].to_s.lines.to_a[0..1].join
     assert_equal 58240, @env["sprite.css"].length
+  end
+
+  test "resolve with content type" do
+    assert_equal [fixture_path("context/foo.js"),
+     fixture_path("context/foo.js"),
+     fixture_path("context/foo.js"),
+     "foo.js is '.js', not '.css'"
+    ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end

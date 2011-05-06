@@ -306,15 +306,15 @@ class TestEnvironment < Sprockets::TestCase
     e1 = new_environment
     e2 = new_environment
 
-    assert_raises(NameError) { e1.context.instance_method(:foo) }
-    assert_raises(NameError) { e2.context.instance_method(:foo) }
+    assert_raises(NameError) { e1.context_class.instance_method(:foo) }
+    assert_raises(NameError) { e2.context_class.instance_method(:foo) }
 
-    e1.context.class_eval do
+    e1.context_class.class_eval do
       def foo; end
     end
 
-    assert_nothing_raised(NameError) { e1.context.instance_method(:foo) }
-    assert_raises(NameError) { e2.context.instance_method(:foo) }
+    assert_nothing_raised(NameError) { e1.context_class.instance_method(:foo) }
+    assert_raises(NameError) { e2.context_class.instance_method(:foo) }
   end
 
   test "registering engine adds to the environments extensions" do

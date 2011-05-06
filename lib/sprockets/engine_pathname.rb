@@ -4,6 +4,16 @@ require 'sprockets/utils'
 
 module Sprockets
   class EnginePathname
+    if {}.respond_to?(:key)
+      def self.extension_for(content_type)
+        Rack::Mime::MIME_TYPES.key(content_type)
+      end
+    else
+      def self.extension_for(content_type)
+        Rack::Mime::MIME_TYPES.index(content_type)
+      end
+    end
+
     def self.new(path, engines)
       path.is_a?(self) ? path : super(path, engines)
     end

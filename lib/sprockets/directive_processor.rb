@@ -49,12 +49,12 @@ module Sprockets
 
     # Implemented for Tilt#render.
     #
-    # `context` is a `Context` instance with special `sprockets_`
-    # prefixed methods that allow you to access the environment and
-    # append to the concatenation. See `Context` for the complete API.
+    # `context` is a `Context` instance with methods that allow you to
+    # access the environment and append to the concatenation. See
+    # `Context` for the complete API.
     def evaluate(context, locals, &block)
-      @context     = context
-      @environment = context.sprockets_environment
+      @context       = context
+      @concatenation = context.concatenation
 
       process_directives
       process_source
@@ -143,7 +143,7 @@ module Sprockets
       end
 
       attr_reader :included_pathnames
-      attr_reader :context
+      attr_reader :context, :concatenation
 
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
@@ -157,7 +157,7 @@ module Sprockets
       #     class DirectiveProcessor < Sprockets::DirectiveProcessor
       #       def process_require_glob_directive
       #         Dir["#{base_path}/#{glob}"].sort.each do |filename|
-      #           context.sprockets_require(filename)
+      #           require(filename)
       #         end
       #       end
       #     end
@@ -182,7 +182,9 @@ module Sprockets
           result << @directive_parser.processed_header << "\n"
         end
 
-        included_pathnames.each { |p| result << context.sprockets_process(p) }
+        included_pathnames.each do |pathname|
+          result << context.evaluate(pathname)
+        end
 
         unless @has_written_body
           result << @directive_parser.body
@@ -222,7 +224,7 @@ module Sprockets
           end
         end
 
-        context.sprockets_require(path)
+        require(path)
       end
 
       # `require_self` causes the body of the current file to be
@@ -238,7 +240,7 @@ module Sprockets
       #
       def process_require_self_directive
         unless @has_written_body
-          context << context.sprockets_process(pathname, process_source)
+          concatenation << context.evaluate(pathname, :data => process_source)
           included_pathnames.clear
           @has_written_body = true
         end
@@ -251,7 +253,7 @@ module Sprockets
       #     //= include "header"
       #
       def process_include_directive(path)
-        included_pathnames << context.sprockets_resolve(path)
+        included_pathnames << context.resolve(path)
       end
 
       # `require_directory` requires all the files inside a single
@@ -263,11 +265,11 @@ module Sprockets
       def process_require_directory_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
-          context.sprockets_depend(root)
+          context.depend_on(root)
 
           Dir["#{root}/*"].sort.each do |filename|
-            if context.sprockets_requirable?(filename)
-              context.sprockets_require(filename)
+            if concatenation.can_require?(filename)
+              require(filename)
             end
           end
         else
@@ -284,13 +286,13 @@ module Sprockets
       def process_require_tree_directive(path = ".")
         if relative?(path)
           root = base_path.join(path).expand_path
-          context.sprockets_depend(root)
+          context.depend_on(root)
 
           Dir["#{root}/**/*"].sort.each do |filename|
             if File.directory?(filename)
-              context.sprockets_depend(filename)
-            elsif context.sprockets_requirable?(filename)
-              context.sprockets_require(filename)
+              context.depend_on(filename)
+            elsif concatenation.can_require?(filename)
+              require(filename)
             end
           end
         else
@@ -312,7 +314,7 @@ module Sprockets
       #     //= depend "foo.png"
       #
       def process_depend_directive(path)
-        context.sprockets_depend(context.sprockets_resolve(path))
+        context.depend_on(context.resolve(path))
       end
 
       # Enable Sprockets 1.x compat mode.
@@ -350,6 +352,10 @@ module Sprockets
       end
 
     private
+      def require(path)
+        concatenation.require(context.resolve(path, :content_type => :self))
+      end
+
       def relative?(path)
         path =~ /^\.($|\.?\/)/
       end

@@ -6,7 +6,7 @@ module Sprockets
     end
 
     def evaluate(context, locals, &block)
-      environment = context.sprockets_environment
+      environment = context.environment
 
       case context.content_type
       when 'application/javascript'

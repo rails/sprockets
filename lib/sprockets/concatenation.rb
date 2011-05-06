@@ -43,8 +43,14 @@ module Sprockets
     end
 
     def post_process!
-      @source = evaluate(environment.engines.concatenation_processors, pathname, @source)
+      engines = environment.engines.concatenation_processors
+      @source = evaluate(pathname, :data => @source, :engines => engines)
       nil
+    end
+
+    def evaluate(pathname, *args)
+      context = environment.context_class.new(self, pathname)
+      context.evaluate(pathname, *args)
     end
 
     def depend(pathname)
@@ -59,8 +65,10 @@ module Sprockets
       pathname
     end
 
-    def requirable?(pathname)
-      content_type.nil? || content_type == EnginePathname.new(pathname, environment.engines).content_type
+    def can_require?(pathname)
+      pathname = Pathname.new(pathname)
+      content_type = EnginePathname.new(pathname, environment.engines).content_type
+      pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
 
     def require(pathname)
@@ -70,10 +78,10 @@ module Sprockets
       @content_type     ||= engine_pathname.content_type
       @format_extension ||= engine_pathname.format_extension
 
-      if requirable?(pathname)
+      if can_require?(pathname)
         unless paths.include?(pathname.to_s)
           depend pathname
-          self << process(pathname)
+          self << evaluate(pathname)
         end
       else
         raise ContentTypeMismatch, "#{pathname} is " +
@@ -83,26 +91,5 @@ module Sprockets
 
       pathname
     end
-
-    def process(pathname, data = pathname.read)
-      pathname        = Pathname.new(pathname)
-      engine_pathname = EnginePathname.new(pathname, environment.engines)
-      engines         = environment.engines.pre_processors +
-                          engine_pathname.engines.reverse +
-                          environment.engines.post_processors
-
-      evaluate(engines, pathname, data)
-    end
-
-    private
-      def evaluate(engines, pathname, data)
-        scope    = environment.context.new(environment, self, pathname)
-        locals   = {}
-
-        engines.inject(data) do |result, engine|
-          template = engine.new(pathname.to_s) { result }
-          template.render(scope, locals)
-        end
-      end
   end
 end
