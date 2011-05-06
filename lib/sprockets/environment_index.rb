@@ -90,7 +90,7 @@ module Sprockets
       if @assets.key?(logical_path)
         @assets[logical_path]
       else
-        @assets[logical_path] = find_asset_in_static(logical_pathname) ||
+        @assets[logical_path] = find_asset_in_static_root(logical_pathname) ||
           find_asset_in_path(logical_pathname)
       end
     end
@@ -109,7 +109,7 @@ module Sprockets
         files
       end
 
-      def find_asset_in_static(logical_path)
+      def find_asset_in_static_root(logical_path)
         return unless static_root
 
         pathname = Pathname.new(static_root.join(logical_path))
