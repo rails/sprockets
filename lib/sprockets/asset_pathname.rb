@@ -14,13 +14,13 @@ module Sprockets
       end
     end
 
-    def self.new(path, engines)
-      path.is_a?(self) ? path : super(path, engines)
+    def self.new(path, environment)
+      path.is_a?(self) ? path : super(path, environment)
     end
 
-    def initialize(path, engines)
+    def initialize(path, environment)
       @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
-      @engines  = engines
+      @environment = environment
     end
 
     def basename_without_extensions
@@ -42,11 +42,11 @@ module Sprockets
         exts = extensions[offset+1..-1]
       end
 
-      exts.select { |ext| @engines[ext] }
+      exts.select { |ext| @environment.engines[ext] }
     end
 
     def engines
-      engine_extensions.map { |ext| @engines[ext] }
+      engine_extensions.map { |ext| @environment.engines[ext] }
     end
 
     def engine_content_type

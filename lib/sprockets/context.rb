@@ -30,12 +30,12 @@ module Sprockets
     end
 
     def content_type
-      AssetPathname.new(pathname, environment.engines).content_type
+      AssetPathname.new(pathname, environment).content_type
     end
 
     def resolve(path, options = {}, &block)
       pathname       = Pathname.new(path)
-      asset_pathname = AssetPathname.new(pathname, environment.engines)
+      asset_pathname = AssetPathname.new(pathname, environment)
 
       if pathname.absolute?
         pathname
@@ -52,7 +52,7 @@ module Sprockets
         end
 
         resolve(path) do |candidate|
-          if self.content_type == AssetPathname.new(candidate, environment.engines).content_type
+          if self.content_type == AssetPathname.new(candidate, environment).content_type
             return candidate
           end
         end
@@ -69,7 +69,7 @@ module Sprockets
 
     def evaluate(filename, options = {})
       pathname       = resolve(filename)
-      asset_pathname = AssetPathname.new(pathname, environment.engines)
+      asset_pathname = AssetPathname.new(pathname, environment)
 
       data     = options[:data] || pathname.read
       engines  = options[:engines] || environment.engines.pre_processors +

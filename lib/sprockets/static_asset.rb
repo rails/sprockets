@@ -10,7 +10,7 @@ module Sprockets
     def initialize(environment, pathname)
       @pathname = Pathname.new(pathname)
 
-      asset_pathname = AssetPathname.new(pathname, environment.engines)
+      asset_pathname = AssetPathname.new(pathname, environment)
       @content_type  = asset_pathname.content_type
 
       @mtime  = @pathname.mtime

@@ -86,6 +86,6 @@ class TestAssetPathname < Sprockets::TestCase
 
   private
     def pathname(path)
-      Sprockets::AssetPathname.new(path, Sprockets::Engines.new)
+      Sprockets::AssetPathname.new(path, Sprockets::Environment.new)
     end
 end

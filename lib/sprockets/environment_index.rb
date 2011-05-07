@@ -113,7 +113,7 @@ module Sprockets
         return unless static_root
 
         pathname = Pathname.new(static_root.join(logical_path))
-        asset_pathname = AssetPathname.new(pathname, engines)
+        asset_pathname = AssetPathname.new(pathname, self)
 
         entries = entries(pathname.dirname)
 
@@ -169,7 +169,7 @@ module Sprockets
     private
       def logical_index_path(logical_path)
         pathname = Pathname.new(logical_path)
-        asset_pathname = AssetPathname.new(logical_path, engines)
+        asset_pathname = AssetPathname.new(logical_path, self)
 
         if asset_pathname.basename_without_extensions.to_s == 'index'
           logical_path
@@ -180,7 +180,7 @@ module Sprockets
       end
 
       def path_without_engine_extensions(pathname)
-        asset_pathname = AssetPathname.new(pathname, engines)
+        asset_pathname = AssetPathname.new(pathname, self)
         asset_pathname.engine_extensions.inject(pathname) do |p, ext|
           p.sub(ext, '')
         end

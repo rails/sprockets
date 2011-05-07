@@ -67,13 +67,13 @@ module Sprockets
 
     def can_require?(pathname)
       pathname = Pathname.new(pathname)
-      content_type = AssetPathname.new(pathname, environment.engines).content_type
+      content_type = AssetPathname.new(pathname, environment).content_type
       pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
 
     def require(pathname)
       pathname       = Pathname.new(pathname)
-      asset_pathname = AssetPathname.new(pathname, environment.engines)
+      asset_pathname = AssetPathname.new(pathname, environment)
 
       @content_type     ||= asset_pathname.content_type
       @format_extension ||= asset_pathname.format_extension
@@ -85,7 +85,7 @@ module Sprockets
         end
       else
         raise ContentTypeMismatch, "#{pathname} is " +
-          "'#{AssetPathname.new(pathname, environment.engines).format_extension}', " +
+          "'#{AssetPathname.new(pathname, environment).format_extension}', " +
           "not '#{format_extension}'"
       end
 

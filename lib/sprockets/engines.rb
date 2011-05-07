@@ -53,7 +53,7 @@ module Sprockets
     end
 
     def concatenatable?(pathname)
-      CONCATENATABLE_EXTENSIONS.include?(AssetPathname.new(pathname, self).format_extension)
+      CONCATENATABLE_EXTENSIONS.include?(AssetPathname.new(pathname, nil).format_extension)
     end
   end
 end

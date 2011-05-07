@@ -8,7 +8,7 @@ module Sprockets
     attr_reader :mtime, :length, :digest
 
     def initialize(environment, pathname)
-      asset_pathname    = AssetPathname.new(pathname, environment.engines)
+      asset_pathname    = AssetPathname.new(pathname, environment)
       @content_type     = asset_pathname.content_type
       @format_extension = asset_pathname.format_extension
 
