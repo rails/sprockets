@@ -110,14 +110,12 @@ class ConcatenatedAssetTest < Sprockets::TestCase
 
   test "asset inherits the format extension and content type of the original file" do
     asset = asset("project.js")
-    assert_equal ".js", asset.format_extension
     assert_equal "application/javascript", asset.content_type
   end
 
   if Tilt::CoffeeScriptTemplate.respond_to?(:default_mime_type)
     test "asset falls back to engines default mime type" do
       asset = asset("default_mime_type.js")
-      assert_equal ".js", asset.format_extension
       assert_equal "application/javascript", asset.content_type
     end
   end

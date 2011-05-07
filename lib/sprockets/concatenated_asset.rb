@@ -4,13 +4,11 @@ require 'sprockets/errors'
 
 module Sprockets
   class ConcatenatedAsset
-    attr_reader :content_type, :format_extension
+    attr_reader :content_type
     attr_reader :mtime, :length, :digest
 
     def initialize(environment, pathname)
-      asset_pathname    = AssetPathname.new(pathname, environment)
-      @content_type     = asset_pathname.content_type
-      @format_extension = asset_pathname.format_extension
+      @content_type = AssetPathname.new(pathname, environment).content_type
 
       concatenation = Concatenation.new(environment, pathname)
       concatenation.require(pathname)
@@ -40,7 +38,6 @@ module Sprockets
     def eql?(other)
       other.class == self.class &&
         other.content_type == self.content_type &&
-        other.format_extension == self.format_extension &&
         other.source_paths == self.source_paths &&
         other.mtime == self.mtime &&
         other.digest == self.digest
