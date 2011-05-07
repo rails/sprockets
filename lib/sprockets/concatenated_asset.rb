@@ -1,5 +1,5 @@
+require 'sprockets/asset_pathname'
 require 'sprockets/concatenation'
-require 'sprockets/engine_pathname'
 require 'sprockets/errors'
 
 module Sprockets
@@ -8,9 +8,9 @@ module Sprockets
     attr_reader :mtime, :length, :digest
 
     def initialize(environment, pathname)
-      engine_pathname   = EnginePathname.new(pathname, environment.engines)
-      @content_type     = engine_pathname.content_type
-      @format_extension = engine_pathname.format_extension
+      asset_pathname    = AssetPathname.new(pathname, environment.engines)
+      @content_type     = asset_pathname.content_type
+      @format_extension = asset_pathname.format_extension
 
       concatenation = Concatenation.new(environment, pathname)
       concatenation.require(pathname)

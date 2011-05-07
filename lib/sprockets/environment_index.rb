@@ -1,5 +1,5 @@
+require 'sprockets/asset_pathname'
 require 'sprockets/concatenated_asset'
-require 'sprockets/engine_pathname'
 require 'sprockets/errors'
 require 'sprockets/server'
 require 'sprockets/static_asset'
@@ -113,7 +113,7 @@ module Sprockets
         return unless static_root
 
         pathname = Pathname.new(static_root.join(logical_path))
-        engine_pathname = EnginePathname.new(pathname, engines)
+        asset_pathname = AssetPathname.new(pathname, engines)
 
         entries = entries(pathname.dirname)
 
@@ -122,9 +122,9 @@ module Sprockets
         end
 
         if !Utils.path_fingerprint(pathname)
-          pattern = /^#{Regexp.escape(engine_pathname.basename_without_extensions.to_s)}
+          pattern = /^#{Regexp.escape(asset_pathname.basename_without_extensions.to_s)}
                      -[0-9a-f]{7,40}
-                     #{Regexp.escape(engine_pathname.extensions.join)}$/x
+                     #{Regexp.escape(asset_pathname.extensions.join)}$/x
 
           entries.each do |filename|
             if filename.to_s =~ pattern
@@ -169,19 +169,19 @@ module Sprockets
     private
       def logical_index_path(logical_path)
         pathname = Pathname.new(logical_path)
-        engine_pathname = EnginePathname.new(logical_path, engines)
+        asset_pathname = AssetPathname.new(logical_path, engines)
 
-        if engine_pathname.basename_without_extensions.to_s == 'index'
+        if asset_pathname.basename_without_extensions.to_s == 'index'
           logical_path
         else
-          basename = "#{engine_pathname.basename_without_extensions}/index#{engine_pathname.extensions.join}"
+          basename = "#{asset_pathname.basename_without_extensions}/index#{asset_pathname.extensions.join}"
           pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
         end
       end
 
       def path_without_engine_extensions(pathname)
-        engine_pathname = EnginePathname.new(pathname, engines)
-        engine_pathname.engine_extensions.inject(pathname) do |p, ext|
+        asset_pathname = AssetPathname.new(pathname, engines)
+        asset_pathname.engine_extensions.inject(pathname) do |p, ext|
           p.sub(ext, '')
         end
       end

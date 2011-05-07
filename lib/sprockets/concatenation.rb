@@ -1,5 +1,5 @@
+require 'sprockets/asset_pathname'
 require 'sprockets/errors'
-require 'sprockets/engine_pathname'
 require 'digest/md5'
 require 'pathname'
 require 'rack/utils'
@@ -67,16 +67,16 @@ module Sprockets
 
     def can_require?(pathname)
       pathname = Pathname.new(pathname)
-      content_type = EnginePathname.new(pathname, environment.engines).content_type
+      content_type = AssetPathname.new(pathname, environment.engines).content_type
       pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
 
     def require(pathname)
-      pathname        = Pathname.new(pathname)
-      engine_pathname = EnginePathname.new(pathname, environment.engines)
+      pathname       = Pathname.new(pathname)
+      asset_pathname = AssetPathname.new(pathname, environment.engines)
 
-      @content_type     ||= engine_pathname.content_type
-      @format_extension ||= engine_pathname.format_extension
+      @content_type     ||= asset_pathname.content_type
+      @format_extension ||= asset_pathname.format_extension
 
       if can_require?(pathname)
         unless paths.include?(pathname.to_s)
@@ -85,7 +85,7 @@ module Sprockets
         end
       else
         raise ContentTypeMismatch, "#{pathname} is " +
-          "'#{ EnginePathname.new(pathname, environment.engines).format_extension}', " +
+          "'#{AssetPathname.new(pathname, environment.engines).format_extension}', " +
           "not '#{format_extension}'"
       end
 

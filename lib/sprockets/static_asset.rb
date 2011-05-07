@@ -1,4 +1,4 @@
-require 'sprockets/engine_pathname'
+require 'sprockets/asset_pathname'
 require 'sprockets/utils'
 require 'digest/md5'
 require 'time'
@@ -10,8 +10,8 @@ module Sprockets
     def initialize(environment, pathname)
       @pathname = Pathname.new(pathname)
 
-      engine_pathname = EnginePathname.new(pathname, environment.engines)
-      @content_type   = engine_pathname.content_type
+      asset_pathname = AssetPathname.new(pathname, environment.engines)
+      @content_type  = asset_pathname.content_type
 
       @mtime  = @pathname.mtime
       @length = @pathname.size

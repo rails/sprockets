@@ -1,3 +1,4 @@
+require 'sprockets/asset_pathname'
 require 'sprockets/compressor'
 require 'sprockets/directive_processor'
 require 'tilt'
@@ -52,7 +53,7 @@ module Sprockets
     end
 
     def concatenatable?(pathname)
-      CONCATENATABLE_EXTENSIONS.include?(EnginePathname.new(pathname, self).format_extension)
+      CONCATENATABLE_EXTENSIONS.include?(AssetPathname.new(pathname, self).format_extension)
     end
   end
 end

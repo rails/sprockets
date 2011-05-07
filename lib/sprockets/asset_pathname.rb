@@ -3,7 +3,7 @@ require 'rack/mime'
 require 'sprockets/utils'
 
 module Sprockets
-  class EnginePathname
+  class AssetPathname
     if {}.respond_to?(:key)
       def self.extension_for(content_type)
         Rack::Mime::MIME_TYPES.key(content_type)

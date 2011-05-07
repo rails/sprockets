@@ -1,4 +1,4 @@
-require 'sprockets/engine_pathname'
+require 'sprockets/asset_pathname'
 require 'sprockets/environment_index'
 require 'sprockets/server'
 require 'sprockets/utils'

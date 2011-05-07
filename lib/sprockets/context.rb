@@ -1,4 +1,4 @@
-require 'sprockets/engine_pathname'
+require 'sprockets/asset_pathname'
 require 'sprockets/errors'
 require 'pathname'
 
@@ -30,12 +30,12 @@ module Sprockets
     end
 
     def content_type
-      EnginePathname.new(pathname, environment.engines).content_type
+      AssetPathname.new(pathname, environment.engines).content_type
     end
 
     def resolve(path, options = {}, &block)
-      pathname        = Pathname.new(path)
-      engine_pathname = EnginePathname.new(pathname, environment.engines)
+      pathname       = Pathname.new(path)
+      asset_pathname = AssetPathname.new(pathname, environment.engines)
 
       if pathname.absolute?
         pathname
@@ -43,18 +43,16 @@ module Sprockets
       elsif content_type = options[:content_type]
         content_type = self.content_type if content_type == :self
 
-        if engine_pathname.format_extension
-          if content_type != engine_pathname.content_type
-            expected_extension = EnginePathname.extension_for(content_type)
+        if asset_pathname.format_extension
+          if content_type != asset_pathname.content_type
+            expected_extension = AssetPathname.extension_for(content_type)
             raise ContentTypeMismatch, "#{path} is " +
-              "'#{engine_pathname.format_extension}', not '#{expected_extension}'"
+              "'#{asset_pathname.format_extension}', not '#{expected_extension}'"
           end
         end
 
         resolve(path) do |candidate|
-          engine_pathname = EnginePathname.new(candidate, environment.engines)
-
-          if self.content_type == engine_pathname.content_type
+          if self.content_type == AssetPathname.new(candidate, environment.engines).content_type
             return candidate
           end
         end
@@ -70,12 +68,12 @@ module Sprockets
     end
 
     def evaluate(filename, options = {})
-      pathname        = resolve(filename)
-      engine_pathname = EnginePathname.new(pathname, environment.engines)
+      pathname       = resolve(filename)
+      asset_pathname = AssetPathname.new(pathname, environment.engines)
 
       data     = options[:data] || pathname.read
       engines  = options[:engines] || environment.engines.pre_processors +
-                          engine_pathname.engines.reverse +
+                          asset_pathname.engines.reverse +
                           environment.engines.post_processors
 
       engines.inject(data) do |result, engine|

@@ -1,6 +1,6 @@
 require 'sprockets_test'
 
-class TestEnginePathname < Sprockets::TestCase
+class TestAssetPathname < Sprockets::TestCase
   test "identity initialization" do
     path = pathname("javascripts/application.js.coffee")
     assert pathname(path).equal?(path)
@@ -86,6 +86,6 @@ class TestEnginePathname < Sprockets::TestCase
 
   private
     def pathname(path)
-      Sprockets::EnginePathname.new(path, Sprockets::Engines.new)
+      Sprockets::AssetPathname.new(path, Sprockets::Engines.new)
     end
 end
