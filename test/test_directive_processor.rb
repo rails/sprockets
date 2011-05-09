@@ -84,8 +84,7 @@ class DirectiveParserTest < Sprockets::TestCase
   end
 
   def directive_parser(fixture_name)
-    # TODO: Test DirectiveProcesser API instead of Parser directly
-    Sprockets::DirectiveProcessor::Parser.new(directive_fixture(fixture_name))
+    Sprockets::DirectiveProcessor.new(fixture_path("directives/#{fixture_name}"))
   end
 
   def directive_fixture(name)

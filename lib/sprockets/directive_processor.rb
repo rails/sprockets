@@ -42,6 +42,7 @@ module Sprockets
     def prepare
       @pathname = Pathname.new(file)
 
+      @directive_parser   = Parser.new(data)
       @included_pathnames = []
       @has_written_body   = false
       @compat             = false
@@ -58,6 +59,22 @@ module Sprockets
 
       process_directives
       process_source
+    end
+
+    def processed_header
+      @directive_parser.processed_header
+    end
+
+    def processed_body
+      @directive_parser.body
+    end
+
+    def processed_source
+      @directive_parser.processed_source
+    end
+
+    def directives
+      @directive_parser.directives
     end
 
     protected
@@ -168,9 +185,7 @@ module Sprockets
       #     env.engines.pre_processors.push(DirectiveProcessor)
       #
       def process_directives
-        @directive_parser = Parser.new(data)
-
-        @directive_parser.directives.each do |name, *args|
+        directives.each do |name, *args|
           send("process_#{name}_directive", *args)
         end
       end
@@ -178,8 +193,8 @@ module Sprockets
       def process_source
         result = ""
 
-        unless @has_written_body || @directive_parser.processed_header.empty?
-          result << @directive_parser.processed_header << "\n"
+        unless @has_written_body || processed_header.empty?
+          result << processed_header << "\n"
         end
 
         included_pathnames.each do |pathname|
@@ -187,7 +202,7 @@ module Sprockets
         end
 
         unless @has_written_body
-          result << @directive_parser.body
+          result << processed_body
         end
 
         if compat? && constants.any?
