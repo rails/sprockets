@@ -4,16 +4,6 @@ require 'sprockets/utils'
 
 module Sprockets
   class AssetPathname
-    if {}.respond_to?(:key)
-      def self.extension_for(content_type)
-        Rack::Mime::MIME_TYPES.key(content_type)
-      end
-    else
-      def self.extension_for(content_type)
-        Rack::Mime::MIME_TYPES.index(content_type)
-      end
-    end
-
     def self.new(path, environment)
       path.is_a?(self) ? path : super(path, environment)
     end
@@ -32,7 +22,7 @@ module Sprockets
     end
 
     def format_extension
-      extensions.detect { |ext| lookup_mime_type(ext) }
+      extensions.detect { |ext| @environment.lookup_mime_type(ext, nil) }
     end
 
     def engine_extensions
@@ -59,14 +49,9 @@ module Sprockets
     end
 
     def content_type
-      @content_type ||= lookup_mime_type(format_extension) ||
+      @content_type ||= @environment.lookup_mime_type(format_extension, nil) ||
         engine_content_type ||
         'application/octet-stream'
     end
-
-    private
-      def lookup_mime_type(ext)
-        Rack::Mime.mime_type(ext, nil)
-      end
   end
 end

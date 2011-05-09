@@ -45,9 +45,8 @@ module Sprockets
 
         if asset_pathname.format_extension
           if content_type != asset_pathname.content_type
-            expected_extension = AssetPathname.extension_for(content_type)
             raise ContentTypeMismatch, "#{path} is " +
-              "'#{asset_pathname.format_extension}', not '#{expected_extension}'"
+              "'#{asset_pathname.content_type}', not '#{content_type}'"
           end
         end
 

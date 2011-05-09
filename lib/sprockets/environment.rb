@@ -6,6 +6,7 @@ require 'fileutils'
 require 'hike'
 require 'logger'
 require 'pathname'
+require 'rack/mime'
 
 module Sprockets
   class Environment
@@ -17,7 +18,7 @@ module Sprockets
       @trail = Hike::Trail.new(root)
       @trail.extensions.replace Engines::CONCATENATABLE_EXTENSIONS
 
-      @engines = Engines.new(@trail)
+      @engines = Engines.new(self)
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
@@ -25,6 +26,8 @@ module Sprockets
       @context_class = Class.new(Context)
 
       @static_root = nil
+
+      @mime_types = {}
 
       expire_cache
     end
@@ -34,6 +37,15 @@ module Sprockets
     def static_root=(root)
       expire_cache
       @static_root = root
+    end
+
+    def lookup_mime_type(ext, fallback = 'application/octet-stream')
+      index.lookup_mime_type(ext, fallback)
+    end
+
+    def register_mime_type(mime_type, ext)
+      expire_cache
+      @mime_types[normalize_extension(ext)] = mime_type
     end
 
     attr_reader :css_compressor, :js_compressor
@@ -101,6 +113,15 @@ module Sprockets
     protected
       def expire_cache
         @cache = {}
+      end
+
+      def normalize_extension(extension)
+        extension = extension.to_s
+        if extension[/^\./]
+          extension
+        else
+          ".#{extension}"
+        end
       end
 
       def find_fresh_asset_from_cache(logical_path)

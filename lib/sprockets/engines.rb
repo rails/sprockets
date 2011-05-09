@@ -9,7 +9,7 @@ module Sprockets
 
     attr_reader :pre_processors, :post_processors, :concatenation_processors
 
-    def initialize(environment = nil)
+    def initialize(environment)
       @environment = environment
       @mappings = {}
 
@@ -26,7 +26,6 @@ module Sprockets
 
     def initialize_copy(other)
       @mappings = @mappings.dup
-      @trail = nil
     end
 
     def register(ext, klass)
@@ -53,7 +52,7 @@ module Sprockets
     end
 
     def concatenatable?(pathname)
-      CONCATENATABLE_EXTENSIONS.include?(AssetPathname.new(pathname, nil).format_extension)
+      CONCATENATABLE_EXTENSIONS.include?(AssetPathname.new(pathname, @environment).format_extension)
     end
   end
 end

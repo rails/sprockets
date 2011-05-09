@@ -5,6 +5,7 @@ require 'sprockets/server'
 require 'sprockets/static_asset'
 require 'sprockets/utils'
 require 'pathname'
+require 'rack/mime'
 require 'set'
 
 module Sprockets
@@ -27,6 +28,8 @@ module Sprockets
       @entries = {}
 
       @static_root = static_root ? Pathname.new(static_root) : nil
+
+      @mime_types = environment.instance_variable_get('@mime_types').dup
     end
 
     def root
@@ -39,6 +42,11 @@ module Sprockets
 
     def extensions
       @trail.extensions
+    end
+
+    def lookup_mime_type(ext, fallback = 'application/octet-stream')
+      ext = normalize_extension(ext)
+      @mime_types[ext] || Rack::Mime::MIME_TYPES[ext] || fallback
     end
 
     def index
@@ -183,6 +191,15 @@ module Sprockets
         asset_pathname = AssetPathname.new(pathname, self)
         asset_pathname.engine_extensions.inject(pathname) do |p, ext|
           p.sub(ext, '')
+        end
+      end
+
+      def normalize_extension(extension)
+        extension = extension.to_s
+        if extension[/^\./]
+          extension
+        else
+          ".#{extension}"
         end
       end
 

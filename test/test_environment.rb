@@ -41,6 +41,14 @@ module EnvironmentTests
     end
   end
 
+  test "lookup mime type" do
+    assert_equal "application/javascript", @env.lookup_mime_type(".js")
+    assert_equal "application/javascript", @env.lookup_mime_type("js")
+    assert_equal "text/css", @env.lookup_mime_type(:css)
+    assert_equal "application/octet-stream", @env.lookup_mime_type("foo")
+    assert_equal nil, @env.lookup_mime_type("foo", nil)
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
@@ -228,6 +236,12 @@ class TestEnvironment < Sprockets::TestCase
     @env = new_environment
   end
 
+  test "register mime type" do
+    assert !@env.lookup_mime_type("jst", nil)
+    @env.register_mime_type("application/javascript", "jst")
+    assert_equal "application/javascript", @env.lookup_mime_type("jst")
+  end
+
   test "changing static root expires old assets" do
     assert @env["compiled.js"]
     @env.static_root = nil
@@ -368,6 +382,20 @@ class TestEnvironmentIndex < Sprockets::TestCase
 
   test "does not allow static root to be changed" do
     assert !@env.respond_to?(:static_root=)
+  end
+
+  test "does not allow new mime types to be added" do
+    assert !@env.respond_to?(:register_mime_type)
+  end
+
+  test "change in environment mime types does not affect index" do
+    env = Sprockets::Environment.new(".")
+    env.register_mime_type "application/javascript", ".jst"
+    index = env.index
+
+    assert_equal "application/javascript", index.lookup_mime_type("jst")
+    env.register_mime_type nil, ".jst"
+    assert_equal "application/javascript", index.lookup_mime_type("jst")
   end
 
   test "change in environment static root does not affect index" do

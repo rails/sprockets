@@ -93,7 +93,7 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal [fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
-     "foo.js is '.js', not '.css'"
+     "foo.js is 'application/javascript', not 'text/css'"
     ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end
