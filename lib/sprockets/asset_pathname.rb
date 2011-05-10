@@ -22,7 +22,7 @@ module Sprockets
     end
 
     def format_extension
-      extensions.detect { |ext| @environment.lookup_mime_type(ext, nil) }
+      extensions.detect { |ext| @environment.mime_types(ext) }
     end
 
     def engine_extensions
@@ -49,9 +49,15 @@ module Sprockets
     end
 
     def content_type
-      @content_type ||= @environment.lookup_mime_type(format_extension, nil) ||
-        engine_content_type ||
-        'application/octet-stream'
+      @content_type ||= begin
+        if format_extension.nil?
+          engine_content_type || 'application/octet-stream'
+        else
+          @environment.mime_types(format_extension) ||
+            engine_content_type ||
+            'application/octet-stream'
+        end
+      end
     end
   end
 end

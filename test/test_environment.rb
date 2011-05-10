@@ -42,11 +42,11 @@ module EnvironmentTests
   end
 
   test "lookup mime type" do
-    assert_equal "application/javascript", @env.lookup_mime_type(".js")
-    assert_equal "application/javascript", @env.lookup_mime_type("js")
-    assert_equal "text/css", @env.lookup_mime_type(:css)
-    assert_equal "application/octet-stream", @env.lookup_mime_type("foo")
-    assert_equal nil, @env.lookup_mime_type("foo", nil)
+    assert_equal "application/javascript", @env.mime_types(".js")
+    assert_equal "application/javascript", @env.mime_types("js")
+    assert_equal "text/css", @env.mime_types(:css)
+    assert_equal nil, @env.mime_types("foo")
+    assert_equal nil, @env.mime_types("foo")
   end
 
   test "lookup filters" do
@@ -242,9 +242,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register mime type" do
-    assert !@env.lookup_mime_type("jst", nil)
+    assert !@env.mime_types("jst")
     @env.register_mime_type("application/javascript", "jst")
-    assert_equal "application/javascript", @env.lookup_mime_type("jst")
+    assert_equal "application/javascript", @env.mime_types("jst")
   end
 
   test "register filter" do
@@ -399,9 +399,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
     env.register_mime_type "application/javascript", ".jst"
     index = env.index
 
-    assert_equal "application/javascript", index.lookup_mime_type("jst")
+    assert_equal "application/javascript", index.mime_types("jst")
     env.register_mime_type nil, ".jst"
-    assert_equal "application/javascript", index.lookup_mime_type("jst")
+    assert_equal "application/javascript", index.mime_types("jst")
   end
 
   test "does not allow new filters to be added" do
