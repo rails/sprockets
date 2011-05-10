@@ -61,10 +61,12 @@ module Sprockets
     end
 
     def register_filter(mime_type, klass)
+      expire_cache
       @filters[mime_type].push(klass)
     end
 
     def unregister_filter(mime_type, klass)
+      expire_cache
       @filters[mime_type].delete(klass)
     end
 
