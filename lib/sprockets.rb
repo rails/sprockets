@@ -16,4 +16,5 @@ module Sprockets
   autoload :JsCompressor,        "sprockets/js_compressor"
   autoload :Processing,          "sprockets/processing"
   autoload :StaticAsset,         "sprockets/static_asset"
+  autoload :StaticCompilation,   "sprockets/static_compilation"
 end

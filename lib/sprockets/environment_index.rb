@@ -10,11 +10,9 @@ require 'set'
 
 module Sprockets
   class EnvironmentIndex
-    include Server, Processing
+    include Server, Processing, StaticCompilation
 
     attr_reader :logger, :context_class, :engines, :css_compressor, :js_compressor
-
-    attr_reader :static_root
 
     def initialize(environment, trail, static_root)
       @logger         = environment.logger
@@ -66,31 +64,6 @@ module Sprockets
       self
     end
 
-    def precompile(*paths)
-      raise "missing static root" unless @static_root
-
-      paths.each do |path|
-        files.each do |logical_path|
-          if path.is_a?(Regexp)
-            next unless path.match(logical_path.to_s)
-          else
-            next unless logical_path.fnmatch(path.to_s)
-          end
-
-          if asset = find_asset_in_path(logical_path)
-            digest_path = Utils.path_with_fingerprint(logical_path, asset.digest)
-            filename = @static_root.join(digest_path)
-
-            FileUtils.mkdir_p filename.dirname
-
-            filename.open('w') do |f|
-              f.write asset.to_s
-            end
-          end
-        end
-      end
-    end
-
     def resolve(logical_path, options = {})
       if block_given?
         @trail.find(logical_path.to_s, logical_index_path(logical_path), options) do |path|
@@ -120,51 +93,6 @@ module Sprockets
     protected
       def expire_index!
         raise TypeError, "can't modify immutable index"
-      end
-
-      def files
-        files = Set.new
-        paths.each do |base_path|
-          base_pathname = Pathname.new(base_path)
-          Dir["#{base_pathname}/**/*"].each do |filename|
-            logical_path = Pathname.new(filename).relative_path_from(base_pathname)
-            files << path_without_engine_extensions(logical_path)
-          end
-        end
-        files
-      end
-
-      def find_asset_in_static_root(logical_path)
-        return unless static_root
-
-        pathname = Pathname.new(static_root.join(logical_path))
-        asset_pathname = AssetPathname.new(pathname, self)
-
-        entries = entries(pathname.dirname)
-
-        if entries.empty?
-          return nil
-        end
-
-        if !Utils.path_fingerprint(pathname)
-          pattern = /^#{Regexp.escape(asset_pathname.basename_without_extensions.to_s)}
-                     -[0-9a-f]{7,40}
-                     #{Regexp.escape(asset_pathname.extensions.join)}$/x
-
-          entries.each do |filename|
-            if filename.to_s =~ pattern
-              asset = StaticAsset.new(self, pathname.dirname.join(filename))
-              return asset
-            end
-          end
-        end
-
-        if entries.include?(pathname.basename) && pathname.file?
-          asset = StaticAsset.new(self, pathname)
-          return asset
-        end
-
-        nil
       end
 
       def find_asset_in_path(logical_path)
@@ -204,13 +132,6 @@ module Sprockets
         end
       end
 
-      def path_without_engine_extensions(pathname)
-        asset_pathname = AssetPathname.new(pathname, self)
-        asset_pathname.engine_extensions.inject(pathname) do |p, ext|
-          p.sub(ext, '')
-        end
-      end
-
       def normalize_extension(extension)
         extension = extension.to_s
         if extension[/^\./]
@@ -218,12 +139,6 @@ module Sprockets
         else
           ".#{extension}"
         end
-      end
-
-      def entries(pathname)
-        @entries[pathname.to_s] ||= pathname.entries.reject { |entry| entry.to_s =~ /^\.\.?$/ }
-      rescue Errno::ENOENT
-        @entries[pathname.to_s] = []
       end
   end
 end

@@ -387,7 +387,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
   end
 
   test "does not allow static root to be changed" do
-    assert !@env.respond_to?(:static_root=)
+    assert_raises TypeError do
+      @env.static_root = fixture_path('public')
+    end
   end
 
   test "does not allow new mime types to be added" do

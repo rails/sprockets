@@ -10,7 +10,7 @@ require 'rack/mime'
 
 module Sprockets
   class Environment
-    include Server, Processing
+    include Server, Processing, StaticCompilation
 
     attr_accessor :logger, :context_class
 
@@ -36,13 +36,6 @@ module Sprockets
       register_filter 'text/css', CssCompressor
 
       expire_index!
-    end
-
-    attr_reader :static_root
-
-    def static_root=(root)
-      expire_index!
-      @static_root = root
     end
 
     def root
