@@ -10,7 +10,7 @@ require 'rack/mime'
 
 module Sprockets
   class Environment
-    include Server
+    include Server, Processing
 
     attr_accessor :logger, :context_class
 
@@ -30,61 +30,19 @@ module Sprockets
       @mime_types = {}
       @filters = Hash.new { |h, k| h[k] = [] }
 
+      @js_compressor = @css_compressor = nil
+
       register_filter 'application/javascript', JsCompressor
       register_filter 'text/css', CssCompressor
 
-      expire_cache
+      expire_index!
     end
 
     attr_reader :static_root
 
     def static_root=(root)
-      expire_cache
+      expire_index!
       @static_root = root
-    end
-
-    def mime_types(ext = nil)
-      if ext.nil?
-        @mime_types.dup
-      else
-        ext = normalize_extension(ext)
-        @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
-      end
-    end
-
-    def register_mime_type(mime_type, ext)
-      expire_cache
-      @mime_types[normalize_extension(ext)] = mime_type
-    end
-
-    def filters(mime_type = nil)
-      if mime_type
-        @filters[mime_type].dup
-      else
-        @filters.inject({}) { |h, (k, a)| h[k] = a.dup; h }
-      end
-    end
-
-    def register_filter(mime_type, klass)
-      expire_cache
-      @filters[mime_type].push(klass)
-    end
-
-    def unregister_filter(mime_type, klass)
-      expire_cache
-      @filters[mime_type].delete(klass)
-    end
-
-    attr_reader :css_compressor, :js_compressor
-
-    def css_compressor=(compressor)
-      expire_cache
-      @css_compressor = compressor
-    end
-
-    def js_compressor=(compressor)
-      expire_cache
-      @js_compressor = compressor
     end
 
     def root
@@ -105,13 +63,13 @@ module Sprockets
     end
 
     def paths
-      ArrayProxy.new(@trail.paths) { expire_cache }
+      ArrayProxy.new(@trail.paths) { expire_index! }
     end
 
     attr_reader :engines
 
     def extensions
-      ArrayProxy.new(@trail.extensions) { expire_cache }
+      ArrayProxy.new(@trail.extensions) { expire_index! }
     end
 
     def precompile(*paths)
@@ -138,7 +96,7 @@ module Sprockets
     alias_method :[], :find_asset
 
     protected
-      def expire_cache
+      def expire_index!
         @cache = {}
       end
 

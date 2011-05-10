@@ -391,7 +391,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
   end
 
   test "does not allow new mime types to be added" do
-    assert !@env.respond_to?(:register_mime_type)
+    assert_raises TypeError do
+      @env.register_mime_type "application/javascript", ".jst"
+    end
   end
 
   test "change in environment mime types does not affect index" do
@@ -405,8 +407,15 @@ class TestEnvironmentIndex < Sprockets::TestCase
   end
 
   test "does not allow new filters to be added" do
-    assert !@env.respond_to?(:register_filter)
-    assert !@env.respond_to?(:unregister_filter)
+    assert_raises TypeError do
+      @env.register_filter 'text/css', WhitespaceCompressor
+    end
+  end
+
+  test "does not allow filters to be removed" do
+    assert_raises TypeError do
+      @env.unregister_filter 'text/css', Sprockets::CssCompressor
+    end
   end
 
   test "change in environment filters does not affect index" do
@@ -429,7 +438,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
   end
 
   test "does not allow css compressor to be changed" do
-    assert !@env.respond_to?(:css_compressor=)
+    assert_raises TypeError do
+      @env.css_compressor = WhitespaceCompressor
+    end
   end
 
   test "change in environment css compressor does not affect index" do
@@ -443,7 +454,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
   end
 
   test "does not allow js compressor to be changed" do
-    assert !@env.respond_to?(:js_compressor=)
+    assert_raises TypeError do
+      @env.js_compressor = WhitespaceCompressor
+    end
   end
 
   test "change in environment js compressor does not affect index" do

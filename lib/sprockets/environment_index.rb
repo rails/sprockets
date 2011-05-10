@@ -10,7 +10,7 @@ require 'set'
 
 module Sprockets
   class EnvironmentIndex
-    include Server
+    include Server, Processing
 
     attr_reader :logger, :context_class, :engines, :css_compressor, :js_compressor
 
@@ -118,6 +118,10 @@ module Sprockets
     alias_method :[], :find_asset
 
     protected
+      def expire_index!
+        raise TypeError, "can't modify immutable index"
+      end
+
       def files
         files = Set.new
         paths.each do |base_path|

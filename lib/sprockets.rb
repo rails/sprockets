@@ -14,5 +14,6 @@ module Sprockets
   autoload :Error,               "sprockets/errors"
   autoload :FileNotFound,        "sprockets/errors"
   autoload :JsCompressor,        "sprockets/js_compressor"
+  autoload :Processing,          "sprockets/processing"
   autoload :StaticAsset,         "sprockets/static_asset"
 end
