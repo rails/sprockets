@@ -52,20 +52,16 @@ module Sprockets
       @mime_types[normalize_extension(ext)] = mime_type
     end
 
-    def lookup_filters(mime_type)
+    def filters_for(mime_type)
       @filter_mappings[mime_type]
     end
 
     def register_filter(mime_type, klass)
-      @filter_mappings[mime_type] << klass
+      @filter_mappings[mime_type].push(klass)
     end
 
-    def unregister_filter(mime_type, klass = nil)
-      if klass
-        @filter_mappings[mime_type].delete(klass)
-      else
-        @filter_mappings[mime_type] = []
-      end
+    def unregister_filter(mime_type, klass)
+      @filter_mappings[mime_type].delete(klass)
     end
 
     attr_reader :css_compressor, :js_compressor

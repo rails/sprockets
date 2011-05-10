@@ -53,7 +53,7 @@ module Sprockets
       @mime_types[ext] || Rack::Mime::MIME_TYPES[ext] || fallback
     end
 
-    def lookup_filters(mime_type)
+    def filters_for(mime_type)
       @filter_mappings[mime_type]
     end
 
