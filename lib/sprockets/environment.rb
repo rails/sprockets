@@ -93,15 +93,6 @@ module Sprockets
         @cache = {}
       end
 
-      def normalize_extension(extension)
-        extension = extension.to_s
-        if extension[/^\./]
-          extension
-        else
-          ".#{extension}"
-        end
-      end
-
       def find_fresh_asset_from_cache(logical_path)
         if asset = @cache[logical_path.to_s]
           if Utils.path_fingerprint(logical_path)

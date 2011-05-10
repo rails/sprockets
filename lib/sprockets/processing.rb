@@ -49,5 +49,15 @@ module Sprockets
       expire_index!
       @js_compressor = compressor
     end
+
+    private
+      def normalize_extension(extension)
+        extension = extension.to_s
+        if extension[/^\./]
+          extension
+        else
+          ".#{extension}"
+        end
+      end
   end
 end

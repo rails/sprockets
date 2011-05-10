@@ -43,23 +43,6 @@ module Sprockets
       @trail.extensions
     end
 
-    def mime_types(ext = nil)
-      if ext.nil?
-        @mime_types.dup
-      else
-        ext = normalize_extension(ext)
-        @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
-      end
-    end
-
-    def filters(mime_type = nil)
-      if mime_type
-        @filters[mime_type].dup
-      else
-        @filters.inject({}) { |h, (k, a)| h[k] = a.dup; h }
-      end
-    end
-
     def index
       self
     end
@@ -129,15 +112,6 @@ module Sprockets
         else
           basename = "#{asset_pathname.basename_without_extensions}/index#{asset_pathname.extensions.join}"
           pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
-        end
-      end
-
-      def normalize_extension(extension)
-        extension = extension.to_s
-        if extension[/^\./]
-          extension
-        else
-          ".#{extension}"
         end
       end
   end
