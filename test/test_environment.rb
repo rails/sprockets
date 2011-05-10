@@ -358,11 +358,6 @@ class TestEnvironment < Sprockets::TestCase
     @env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
-
-  test "adding ERB postprocessor to all assets" do
-    @env.engines.post_processors.push(Tilt::ERBTemplate)
-    assert_equal "var Interpolation = 2;\n", @env["interpolation.js"].to_s
-  end
 end
 
 class TestEnvironmentIndex < Sprockets::TestCase

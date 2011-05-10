@@ -72,8 +72,7 @@ module Sprockets
 
       data     = options[:data] || pathname.read
       engines  = options[:engines] || environment.engines.pre_processors +
-                          asset_pathname.engines.reverse +
-                          environment.engines.post_processors
+                          asset_pathname.engines.reverse
 
       engines.inject(data) do |result, engine|
         template = engine.new(pathname.to_s) { result }

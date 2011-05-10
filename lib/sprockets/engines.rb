@@ -7,14 +7,13 @@ module Sprockets
   class Engines
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
-    attr_reader :pre_processors, :post_processors, :concatenation_processors
+    attr_reader :pre_processors, :concatenation_processors
 
     def initialize(environment)
       @environment = environment
       @mappings = {}
 
       @pre_processors           = [DirectiveProcessor]
-      @post_processors          = []
       @concatenation_processors = [Compressor]
 
       if @environment
