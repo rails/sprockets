@@ -49,6 +49,11 @@ module EnvironmentTests
     assert_equal nil, @env.lookup_mime_type("foo", nil)
   end
 
+  test "lookup filters" do
+    assert_equal [Sprockets::JsCompressor], @env.lookup_filters('application/javascript')
+    assert_equal [Sprockets::CssCompressor], @env.lookup_filters('text/css')
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
@@ -242,6 +247,12 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "application/javascript", @env.lookup_mime_type("jst")
   end
 
+  test "register filter" do
+    assert !@env.lookup_filters('text/css').include?(WhitespaceCompressor)
+    @env.register_filter 'text/css', WhitespaceCompressor
+    assert @env.lookup_filters('text/css').include?(WhitespaceCompressor)
+  end
+
   test "changing static root expires old assets" do
     assert @env["compiled.js"]
     @env.static_root = nil
@@ -391,6 +402,20 @@ class TestEnvironmentIndex < Sprockets::TestCase
     assert_equal "application/javascript", index.lookup_mime_type("jst")
     env.register_mime_type nil, ".jst"
     assert_equal "application/javascript", index.lookup_mime_type("jst")
+  end
+
+  test "does not allow new filters to be added" do
+    assert !@env.respond_to?(:register_filter)
+    assert !@env.respond_to?(:unregister_filter)
+  end
+
+  test "change in environment filters does not affect index" do
+    env = Sprockets::Environment.new(".")
+    index = env.index
+
+    assert !index.lookup_filters('text/css').include?(WhitespaceCompressor)
+    env.register_filter 'text/css', WhitespaceCompressor
+    assert !index.lookup_filters('text/css').include?(WhitespaceCompressor)
   end
 
   test "change in environment static root does not affect index" do

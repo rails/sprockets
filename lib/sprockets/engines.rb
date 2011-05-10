@@ -1,5 +1,4 @@
 require 'sprockets/asset_pathname'
-require 'sprockets/compressor'
 require 'sprockets/directive_processor'
 require 'tilt'
 
@@ -7,14 +6,13 @@ module Sprockets
   class Engines
     CONCATENATABLE_EXTENSIONS = %w( .css .js )
 
-    attr_reader :pre_processors, :concatenation_processors
+    attr_reader :pre_processors
 
     def initialize(environment)
       @environment = environment
       @mappings = {}
 
-      @pre_processors           = [DirectiveProcessor]
-      @concatenation_processors = [Compressor]
+      @pre_processors = [DirectiveProcessor]
 
       if @environment
         extensions.each do |ext|

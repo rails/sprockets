@@ -28,6 +28,10 @@ module Sprockets
       @static_root = nil
 
       @mime_types = {}
+      @filter_mappings = Hash.new{ |h, k| h[k] = [] }
+
+      register_filter 'application/javascript', JsCompressor
+      register_filter 'text/css', CssCompressor
 
       expire_cache
     end
@@ -46,6 +50,22 @@ module Sprockets
     def register_mime_type(mime_type, ext)
       expire_cache
       @mime_types[normalize_extension(ext)] = mime_type
+    end
+
+    def lookup_filters(mime_type)
+      @filter_mappings[mime_type]
+    end
+
+    def register_filter(mime_type, klass)
+      @filter_mappings[mime_type] << klass
+    end
+
+    def unregister_filter(mime_type, klass = nil)
+      if klass
+        @filter_mappings[mime_type].delete(klass)
+      else
+        @filter_mappings[mime_type] = []
+      end
     end
 
     attr_reader :css_compressor, :js_compressor

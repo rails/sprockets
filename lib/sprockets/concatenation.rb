@@ -43,7 +43,7 @@ module Sprockets
     end
 
     def post_process!
-      engines = environment.engines.concatenation_processors
+      engines = environment.lookup_filters(content_type)
       @source = evaluate(pathname, :data => @source, :engines => engines)
       nil
     end

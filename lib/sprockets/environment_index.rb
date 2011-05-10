@@ -30,6 +30,10 @@ module Sprockets
       @static_root = static_root ? Pathname.new(static_root) : nil
 
       @mime_types = environment.instance_variable_get('@mime_types').dup
+      filter_mappings = environment.instance_variable_get('@filter_mappings')
+      @filter_mappings = filter_mappings.inject({}) { |h, (k, a)|
+        h[k] = a.dup; h
+      }
     end
 
     def root
@@ -47,6 +51,10 @@ module Sprockets
     def lookup_mime_type(ext, fallback = 'application/octet-stream')
       ext = normalize_extension(ext)
       @mime_types[ext] || Rack::Mime::MIME_TYPES[ext] || fallback
+    end
+
+    def lookup_filters(mime_type)
+      @filter_mappings[mime_type]
     end
 
     def index
