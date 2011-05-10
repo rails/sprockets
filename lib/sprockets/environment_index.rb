@@ -30,10 +30,7 @@ module Sprockets
       @static_root = static_root ? Pathname.new(static_root) : nil
 
       @mime_types = environment.instance_variable_get('@mime_types').dup
-      filter_mappings = environment.instance_variable_get('@filter_mappings')
-      @filter_mappings = filter_mappings.inject({}) { |h, (k, a)|
-        h[k] = a.dup; h
-      }
+      @filters = environment.filters
     end
 
     def root
@@ -53,8 +50,12 @@ module Sprockets
       @mime_types[ext] || Rack::Mime::MIME_TYPES[ext] || fallback
     end
 
-    def filters_for(mime_type)
-      @filter_mappings[mime_type]
+    def filters(mime_type = nil)
+      if mime_type
+        @filters[mime_type].dup
+      else
+        @filters.inject({}) { |h, (k, a)| h[k] = a.dup; h }
+      end
     end
 
     def index

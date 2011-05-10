@@ -28,7 +28,7 @@ module Sprockets
       @static_root = nil
 
       @mime_types = {}
-      @filter_mappings = Hash.new{ |h, k| h[k] = [] }
+      @filters = Hash.new { |h, k| h[k] = [] }
 
       register_filter 'application/javascript', JsCompressor
       register_filter 'text/css', CssCompressor
@@ -52,16 +52,20 @@ module Sprockets
       @mime_types[normalize_extension(ext)] = mime_type
     end
 
-    def filters_for(mime_type)
-      @filter_mappings[mime_type]
+    def filters(mime_type = nil)
+      if mime_type
+        @filters[mime_type].dup
+      else
+        @filters.inject({}) { |h, (k, a)| h[k] = a.dup; h }
+      end
     end
 
     def register_filter(mime_type, klass)
-      @filter_mappings[mime_type].push(klass)
+      @filters[mime_type].push(klass)
     end
 
     def unregister_filter(mime_type, klass)
-      @filter_mappings[mime_type].delete(klass)
+      @filters[mime_type].delete(klass)
     end
 
     attr_reader :css_compressor, :js_compressor

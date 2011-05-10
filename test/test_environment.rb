@@ -50,8 +50,8 @@ module EnvironmentTests
   end
 
   test "lookup filters" do
-    assert_equal [Sprockets::JsCompressor], @env.filters_for('application/javascript')
-    assert_equal [Sprockets::CssCompressor], @env.filters_for('text/css')
+    assert_equal [Sprockets::JsCompressor], @env.filters('application/javascript')
+    assert_equal [Sprockets::CssCompressor], @env.filters('text/css')
   end
 
   test "resolve in environment" do
@@ -248,9 +248,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register filter" do
-    assert !@env.filters_for('text/css').include?(WhitespaceCompressor)
+    assert !@env.filters('text/css').include?(WhitespaceCompressor)
     @env.register_filter 'text/css', WhitespaceCompressor
-    assert @env.filters_for('text/css').include?(WhitespaceCompressor)
+    assert @env.filters('text/css').include?(WhitespaceCompressor)
   end
 
   test "changing static root expires old assets" do
@@ -413,9 +413,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
     env = Sprockets::Environment.new(".")
     index = env.index
 
-    assert !index.filters_for('text/css').include?(WhitespaceCompressor)
+    assert !index.filters('text/css').include?(WhitespaceCompressor)
     env.register_filter 'text/css', WhitespaceCompressor
-    assert !index.filters_for('text/css').include?(WhitespaceCompressor)
+    assert !index.filters('text/css').include?(WhitespaceCompressor)
   end
 
   test "change in environment static root does not affect index" do
