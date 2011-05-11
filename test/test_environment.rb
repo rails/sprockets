@@ -286,12 +286,6 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["gallery.css"]
   end
 
-  test "changing extensions expires old assets" do
-    assert @env["gallery.css"]
-    @env.extensions.clear
-    assert_nil @env["gallery.css"]
-  end
-
   test "concatenated asset is stale if its mtime is updated or deleted" do
     filename = File.join(fixture_path("default"), "tmp.js")
 

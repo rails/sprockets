@@ -65,7 +65,7 @@ module Sprockets
     end
 
     def extensions
-      ArrayProxy.new(@trail.extensions) { expire_index! }
+      @trail.extensions.dup
     end
 
     def precompile(*paths)
