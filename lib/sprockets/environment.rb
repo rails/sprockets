@@ -38,6 +38,8 @@ module Sprockets
       register_engine '.less',   Tilt::LessTemplate
       register_engine '.coffee', Tilt::CoffeeScriptTemplate
 
+      register_filter 'text/css', CharsetNormalizer
+
       expire_index!
     end
 

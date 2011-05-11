@@ -60,7 +60,7 @@ module EnvironmentTests
 
   test "lookup filters" do
     assert_equal [], @env.filters('application/javascript')
-    assert_equal [], @env.filters('text/css')
+    assert_equal [Sprockets::CharsetNormalizer], @env.filters('text/css')
   end
 
   test "resolve in environment" do

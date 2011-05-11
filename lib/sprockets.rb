@@ -2,6 +2,7 @@
 module Sprockets
   autoload :ArgumentError,       "sprockets/errors"
   autoload :AssetPathname,       "sprockets/asset_pathname"
+  autoload :CharsetNormalizer,   "sprockets/charset_normalizer"
   autoload :Compressor,          "sprockets/compressor"
   autoload :ConcatenatedAsset,   "sprockets/concatenated_asset"
   autoload :Concatenation,       "sprockets/concatenation"

@@ -201,6 +201,10 @@ class ConcatenatedAssetTest < Sprockets::TestCase
       asset("constants.js").to_s
   end
 
+  test "multiple charset defintions are stripped from css concatenation" do
+    assert_equal "@charset \"UTF-8\";\n.foo {}\n\n.bar {}\n", asset("charset.css").to_s
+  end
+
   def asset(logical_path)
     Sprockets::ConcatenatedAsset.new(@env.index, resolve(logical_path))
   end
