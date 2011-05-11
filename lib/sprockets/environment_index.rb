@@ -12,12 +12,11 @@ module Sprockets
   class EnvironmentIndex
     include Server, Processing, StaticCompilation
 
-    attr_reader :logger, :context_class, :engines
+    attr_reader :logger, :context_class
 
     def initialize(environment, trail, static_root)
       @logger         = environment.logger
       @context_class  = environment.context_class
-      @engines        = environment.engines.dup
 
       @trail   = trail.index
       @assets  = {}
@@ -26,6 +25,7 @@ module Sprockets
       @static_root = static_root ? Pathname.new(static_root) : nil
 
       @mime_types = environment.mime_types
+      @engines    = environment.engines
       @filters    = environment.filters
       @formats    = environment.formats
     end
@@ -86,7 +86,11 @@ module Sprockets
       rescue FileNotFound
         nil
       else
-        if engines.concatenatable?(pathname)
+        asset_pathname = AssetPathname.new(pathname, self)
+        extension      = asset_pathname.format_extension ||
+                         asset_pathname.engine_format_extension
+
+        if formats(extension).any?
           logger.info "[Sprockets] #{logical_path} building"
           asset = ConcatenatedAsset.new(self, pathname)
         else

@@ -17,9 +17,6 @@ module Sprockets
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
-      @trail.extensions.replace Engines::CONCATENATABLE_EXTENSIONS
-
-      @engines = Engines.new(self)
 
       @logger = Logger.new($stderr)
       @logger.level = Logger::FATAL
@@ -29,11 +26,19 @@ module Sprockets
       @static_root = nil
 
       @mime_types = {}
-      @filters = Hash.new { |h, k| h[k] = [] }
+      @engines = {}
       @formats = Hash.new { |h, k| h[k] = [] }
+      @filters = Hash.new { |h, k| h[k] = [] }
 
       register_format '.css', DirectiveProcessor
       register_format '.js', DirectiveProcessor
+
+      register_engine '.str',    Tilt::StringTemplate
+      register_engine '.erb',    Tilt::ERBTemplate
+      register_engine '.sass',   Tilt::SassTemplate
+      register_engine '.scss',   Tilt::ScssTemplate
+      register_engine '.less',   Tilt::LessTemplate
+      register_engine '.coffee', Tilt::CoffeeScriptTemplate
 
       expire_index!
     end
@@ -58,8 +63,6 @@ module Sprockets
     def paths
       ArrayProxy.new(@trail.paths) { expire_index! }
     end
-
-    attr_reader :engines
 
     def extensions
       ArrayProxy.new(@trail.extensions) { expire_index! }

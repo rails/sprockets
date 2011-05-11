@@ -34,10 +34,19 @@ module EnvironmentTests
 
   test "engine extensions" do
     ["coffee", "erb", "less", "sass", "scss", "str"].each do |ext|
-      assert @env.engines.extensions.include?(".#{ext}")
+      assert @env.engine_extensions.include?(".#{ext}")
     end
     ["css", "js"].each do |ext|
-      assert !@env.engines.extensions.include?(".#{ext}")
+      assert !@env.engine_extensions.include?(".#{ext}")
+    end
+  end
+
+  test "format extensions" do
+    ["css", "js"].each do |ext|
+      assert @env.format_extensions.include?(".#{ext}")
+    end
+    ["coffee", "erb", "less", "sass", "scss", "str"].each do |ext|
+      assert !@env.format_extensions.include?(".#{ext}")
     end
   end
 
@@ -346,7 +355,7 @@ class TestEnvironment < Sprockets::TestCase
     assert !@env.engines[".foo"]
     assert !@env.extensions.include?(".foo")
 
-    @env.engines.register ".foo", Tilt::StringTemplate
+    @env.register_engine ".foo", Tilt::StringTemplate
 
     assert @env.engines[".foo"]
     assert @env.extensions.include?(".foo")
@@ -359,7 +368,7 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil e1.engines[".foo"]
     assert_nil e2.engines[".foo"]
 
-    e1.engines.register ".foo", Tilt::StringTemplate
+    e1.register_engine ".foo", Tilt::StringTemplate
 
     assert e1.engines[".foo"]
     assert_nil e2.engines[".foo"]
@@ -478,7 +487,7 @@ class TestEnvironmentIndex < Sprockets::TestCase
     assert_nil env.engines[".foo"]
     assert_nil index.engines[".foo"]
 
-    env.engines.register ".foo", Tilt::StringTemplate
+    env.register_engine ".foo", Tilt::StringTemplate
 
     assert env.engines[".foo"]
     assert_nil index.engines[".foo"]

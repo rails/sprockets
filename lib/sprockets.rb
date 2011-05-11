@@ -8,7 +8,6 @@ module Sprockets
   autoload :ContentTypeMismatch, "sprockets/errors"
   autoload :Context,             "sprockets/context"
   autoload :DirectiveProcessor,  "sprockets/directive_processor"
-  autoload :Engines,             "sprockets/engines"
   autoload :Environment,         "sprockets/environment"
   autoload :EnvironmentIndex,    "sprockets/environment_index"
   autoload :Error,               "sprockets/errors"

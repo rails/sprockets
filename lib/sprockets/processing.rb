@@ -22,14 +22,40 @@ module Sprockets
       end
     end
 
+    def format_extensions
+      @formats.keys
+    end
+
     def register_format(ext, klass)
       expire_index!
-      @formats[normalize_extension(ext)].push(klass)
+      ext = normalize_extension(ext)
+      @trail.extensions << ext
+      @formats[ext].push(klass)
     end
 
     def unregister_format(ext, klass)
       expire_index!
       @formats[normalize_extension(ext)].delete(klass)
+    end
+
+    def engines(ext = nil)
+      if ext
+        ext = normalize_extension(ext)
+        @engines[ext] || Tilt[ext]
+      else
+        @engines.dup
+      end
+    end
+
+    def engine_extensions
+      @engines.keys
+    end
+
+    def register_engine(ext, klass)
+      expire_index!
+      ext = normalize_extension(ext)
+      @trail.extensions << ext
+      @engines[ext] = klass
     end
 
     def filters(mime_type = nil)
