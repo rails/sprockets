@@ -27,6 +27,7 @@ module Sprockets
 
       @mime_types = environment.mime_types
       @filters    = environment.filters
+      @formats    = environment.formats
     end
 
     def root

@@ -102,7 +102,7 @@ class TestCustomDirectiveProcessor < Sprockets::TestCase
     @env.paths << fixture_path('context')
   end
 
-  class DirectiveProcessor < Sprockets::DirectiveProcessor
+  class TestDirectiveProcessor < Sprockets::DirectiveProcessor
     def process_require_glob_directive(glob)
       Dir["#{base_path}/#{glob}"].sort.each do |filename|
         context.concatenation.require(filename)
@@ -111,8 +111,8 @@ class TestCustomDirectiveProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#sprockets_resolve and Context#sprockets_depend" do
-    @env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
-    @env.engines.pre_processors.push(DirectiveProcessor)
+    @env.unregister_format('.js', Sprockets::DirectiveProcessor)
+    @env.register_format('.js', TestDirectiveProcessor)
 
     assert_equal "var Foo = {};\n\n", @env["require_glob.js"].to_s
   end

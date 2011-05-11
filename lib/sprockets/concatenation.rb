@@ -8,17 +8,14 @@ require 'time'
 
 module Sprockets
   class Concatenation
-    attr_reader :environment, :pathname
-    attr_reader :content_type, :format_extension
+    attr_reader :environment, :pathname, :content_type
     attr_reader :paths
     attr_accessor :mtime
 
     def initialize(environment, pathname)
-      @environment = environment
-      @pathname    = Pathname.new(pathname)
-
-      @content_type     = nil
-      @format_extension = nil
+      @environment  = environment
+      @pathname     = Pathname.new(pathname)
+      @content_type = nil
 
       @paths  = Set.new
       @source = ""
@@ -75,8 +72,7 @@ module Sprockets
       pathname       = Pathname.new(pathname)
       asset_pathname = AssetPathname.new(pathname, environment)
 
-      @content_type     ||= asset_pathname.content_type
-      @format_extension ||= asset_pathname.format_extension
+      @content_type ||= asset_pathname.content_type
 
       if can_require?(pathname)
         unless paths.include?(pathname.to_s)
@@ -85,8 +81,8 @@ module Sprockets
         end
       else
         raise ContentTypeMismatch, "#{pathname} is " +
-          "'#{AssetPathname.new(pathname, environment).format_extension}', " +
-          "not '#{format_extension}'"
+          "'#{AssetPathname.new(pathname, environment).content_type}', " +
+          "not '#{content_type}'"
       end
 
       pathname

@@ -25,16 +25,16 @@ module Sprockets
   # the processor to do whatever you'd like. You could add your own
   # custom directives or invent your own directive syntax.
   #
-  # `Environment#engines.pre_processors` includes `DirectiveProcessor` by
-  # default.
+  # `Environment#formats` includes `DirectiveProcessor` by default.
   #
   # To remove the processor entirely:
   #
-  #     env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
+  #     env.unregister_format('.css', Sprockets::DirectiveProcessor)
+  #     env.unregister_format('.js', Sprockets::DirectiveProcessor)
   #
   # Then inject your own preprocessor:
   #
-  #     env.engines.pre_precessors.push(MyProcessor)
+  #     env.register_format('.css', MyProcessor)
   #
   class DirectiveProcessor < Tilt::Template
     attr_reader :pathname
@@ -181,8 +181,8 @@ module Sprockets
       #
       # Replace the current processor on the environment with your own:
       #
-      #     env.engines.pre_processors.delete(Sprockets::DirectiveProcessor)
-      #     env.engines.pre_processors.push(DirectiveProcessor)
+      #     env.unregister_format('.css', Sprockets::DirectiveProcessor)
+      #     env.register_format('.css', DirectiveProcessor)
       #
       def process_directives
         directives.each do |name, *args|

@@ -1,4 +1,5 @@
 require 'sprockets/asset_pathname'
+require 'sprockets/directive_processor'
 require 'sprockets/environment_index'
 require 'sprockets/server'
 require 'sprockets/utils'
@@ -29,6 +30,10 @@ module Sprockets
 
       @mime_types = {}
       @filters = Hash.new { |h, k| h[k] = [] }
+      @formats = Hash.new { |h, k| h[k] = [] }
+
+      register_format '.css', DirectiveProcessor
+      register_format '.js', DirectiveProcessor
 
       expire_index!
     end
