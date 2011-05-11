@@ -2,7 +2,6 @@ require 'sprockets/asset_pathname'
 require 'sprockets/concatenated_asset'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
-require 'sprockets/utils'
 require 'pathname'
 
 module Sprockets
@@ -75,7 +74,7 @@ module Sprockets
       end
 
       def find_asset_in_path(logical_path)
-        if fingerprint = Utils.path_fingerprint(logical_path)
+        if fingerprint = path_fingerprint(logical_path)
           pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
         else
           pathname = resolve(logical_path)

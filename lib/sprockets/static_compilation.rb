@@ -1,5 +1,4 @@
 require 'sprockets/asset_pathname'
-require 'sprockets/utils'
 require 'fileutils'
 require 'pathname'
 
@@ -26,7 +25,7 @@ module Sprockets
           end
 
           if asset = find_asset_in_path(logical_path)
-            digest_path = Utils.path_with_fingerprint(logical_path, asset.digest)
+            digest_path = path_with_fingerprint(logical_path, asset.digest)
             filename = @static_root.join(digest_path)
 
             FileUtils.mkdir_p filename.dirname
@@ -52,14 +51,14 @@ module Sprockets
           return nil
         end
 
-        if !Utils.path_fingerprint(pathname)
+        if !path_fingerprint(pathname)
           pattern = /^#{Regexp.escape(asset_pathname.basename_without_extensions.to_s)}
-                     -[0-9a-f]{7,40}
+                     -([0-9a-f]{7,40})
                      #{Regexp.escape(asset_pathname.extensions.join)}$/x
 
           entries.each do |filename|
             if filename.to_s =~ pattern
-              asset = StaticAsset.new(self, pathname.dirname.join(filename))
+              asset = StaticAsset.new(self, pathname.dirname.join(filename), $1)
               return asset
             end
           end
@@ -74,6 +73,24 @@ module Sprockets
       end
 
     private
+      def path_fingerprint(path)
+        pathname = Pathname.new(path)
+        extensions = pathname.basename.to_s.scan(/\.[^.]+/).join
+        pathname.basename(extensions).to_s =~ /-([0-9a-f]{7,40})$/ ? $1 : nil
+      end
+
+      def path_with_fingerprint(path, digest)
+        pathname = Pathname.new(path)
+        extensions = pathname.basename.to_s.scan(/\.[^.]+/).join
+
+        if pathname.basename(extensions).to_s =~ /-([0-9a-f]{7,40})$/
+          path.sub($1, digest)
+        else
+          basename = "#{pathname.basename(extensions)}-#{digest}#{extensions}"
+          pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+        end
+      end
+
       def files
         files = Set.new
         paths.each do |base_path|

@@ -1,5 +1,4 @@
 require 'sprockets/asset_pathname'
-require 'sprockets/utils'
 require 'digest/md5'
 require 'time'
 
@@ -7,7 +6,7 @@ module Sprockets
   class StaticAsset
     attr_reader :pathname, :content_type, :mtime, :length, :digest
 
-    def initialize(environment, pathname)
+    def initialize(environment, pathname, digest = nil)
       @pathname = Pathname.new(pathname)
 
       asset_pathname = AssetPathname.new(pathname, environment)
@@ -15,12 +14,7 @@ module Sprockets
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
-
-      if digest = Utils.path_fingerprint(@pathname)
-        @digest = digest
-      else
-        @digest = Digest::MD5.hexdigest(pathname.read)
-      end
+      @digest = digest || Digest::MD5.hexdigest(pathname.read)
     end
 
     def stale?

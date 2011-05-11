@@ -2,7 +2,6 @@ require 'sprockets/asset_pathname'
 require 'sprockets/context'
 require 'sprockets/directive_processor'
 require 'sprockets/environment_index'
-require 'sprockets/utils'
 require 'hike'
 require 'logger'
 require 'pathname'
@@ -97,7 +96,7 @@ module Sprockets
 
       def find_fresh_asset_from_cache(logical_path)
         if asset = @cache[logical_path.to_s]
-          if Utils.path_fingerprint(logical_path)
+          if path_fingerprint(logical_path)
             asset
           elsif asset.stale?
             logger.warn "[Sprockets] #{logical_path} #{asset.digest} stale"

@@ -1,4 +1,3 @@
-require 'sprockets/utils'
 require 'rack/request'
 require 'time'
 
@@ -56,7 +55,7 @@ module Sprockets
     # the string.
     def path(logical_path, fingerprint = true, prefix = nil)
       if fingerprint && asset = find_asset(logical_path)
-        url = Utils.path_with_fingerprint(logical_path, asset.digest)
+        url = path_with_fingerprint(logical_path, asset.digest)
       else
         url = logical_path
       end
@@ -139,7 +138,7 @@ module Sprockets
 
           # If the request url contains a fingerprint, set a long
           # expires on the response
-          if Utils.path_fingerprint(env["PATH_INFO"])
+          if path_fingerprint(env["PATH_INFO"])
             headers["Cache-Control"] << ", max-age=31536000"
 
           # Otherwise set `must-revalidate` since the could be modified.
