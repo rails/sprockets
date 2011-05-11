@@ -1,6 +1,5 @@
 require 'sprockets/asset_pathname'
 require 'sprockets/concatenation'
-require 'sprockets/errors'
 
 module Sprockets
   class ConcatenatedAsset

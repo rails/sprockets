@@ -1,3 +1,8 @@
+require 'sprockets/asset_pathname'
+require 'sprockets/utils'
+require 'fileutils'
+require 'pathname'
+
 module Sprockets
   module StaticCompilation
     def static_root

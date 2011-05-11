@@ -1,6 +1,4 @@
 require 'pathname'
-require 'rack/mime'
-require 'sprockets/utils'
 
 module Sprockets
   class AssetPathname

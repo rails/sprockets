@@ -1,12 +1,9 @@
 require 'sprockets/asset_pathname'
 require 'sprockets/concatenated_asset'
 require 'sprockets/errors'
-require 'sprockets/server'
 require 'sprockets/static_asset'
 require 'sprockets/utils'
 require 'pathname'
-require 'rack/mime'
-require 'set'
 
 module Sprockets
   class EnvironmentIndex

@@ -1,3 +1,7 @@
+require 'sprockets/compressor'
+require 'rack/mime'
+require 'tilt'
+
 module Sprockets
   module Processing
     def mime_types(ext = nil)

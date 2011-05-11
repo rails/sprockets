@@ -1,13 +1,12 @@
 require 'sprockets/asset_pathname'
+require 'sprockets/context'
 require 'sprockets/directive_processor'
 require 'sprockets/environment_index'
-require 'sprockets/server'
 require 'sprockets/utils'
-require 'fileutils'
 require 'hike'
 require 'logger'
 require 'pathname'
-require 'rack/mime'
+require 'tilt'
 
 module Sprockets
   class Environment
