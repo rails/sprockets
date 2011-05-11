@@ -9,25 +9,17 @@ module Sprockets
       end
     end
 
+    def register_mime_type(mime_type, ext)
+      expire_index!
+      @mime_types[normalize_extension(ext)] = mime_type
+    end
+
     def filters(mime_type = nil)
       if mime_type
         @filters[mime_type].dup
       else
-        @filters.inject({}) { |h, (k, a)| h[k] = a.dup; h }
+        deep_copy_hash(@filters)
       end
-    end
-
-    def css_compressor
-      @css_compressor
-    end
-
-    def js_compressor
-      @js_compressor
-    end
-
-    def register_mime_type(mime_type, ext)
-      expire_index!
-      @mime_types[normalize_extension(ext)] = mime_type
     end
 
     def register_filter(mime_type, klass)
@@ -40,17 +32,54 @@ module Sprockets
       @filters[mime_type].delete(klass)
     end
 
+    def css_compressor
+      filters('text/css').detect { |klass|
+        klass.respond_to?(:name) &&
+          klass.name == 'Sprockets::Compressor'
+      }
+    end
+
     def css_compressor=(compressor)
       expire_index!
-      @css_compressor = compressor
+
+      if old_compressor = css_compressor
+        unregister_filter 'text/css', old_compressor
+      end
+
+      klass = Class.new(Compressor) do
+        @compressor = compressor
+      end
+
+      register_filter 'text/css', klass
+    end
+
+    def js_compressor
+      filters('application/javascript').detect { |klass|
+        klass.respond_to?(:name) &&
+          klass.name == 'Sprockets::Compressor'
+      }
     end
 
     def js_compressor=(compressor)
       expire_index!
-      @js_compressor = compressor
+
+      if old_compressor = js_compressor
+        unregister_filter 'application/javascript', old_compressor
+      end
+
+      klass = Class.new(Compressor) do
+        @compressor = compressor
+      end
+
+      register_filter 'application/javascript', klass
     end
 
     private
+      def deep_copy_hash(hash)
+        initial = Hash.new { |h, k| h[k] = [] }
+        hash.inject(initial) { |h, (k, a)| h[k] = a.dup; h }
+      end
+
       def normalize_extension(extension)
         extension = extension.to_s
         if extension[/^\./]

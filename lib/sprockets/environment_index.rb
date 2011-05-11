@@ -12,14 +12,12 @@ module Sprockets
   class EnvironmentIndex
     include Server, Processing, StaticCompilation
 
-    attr_reader :logger, :context_class, :engines, :css_compressor, :js_compressor
+    attr_reader :logger, :context_class, :engines
 
     def initialize(environment, trail, static_root)
       @logger         = environment.logger
       @context_class  = environment.context_class
       @engines        = environment.engines.dup
-      @css_compressor = environment.css_compressor
-      @js_compressor  = environment.js_compressor
 
       @trail   = trail.index
       @assets  = {}

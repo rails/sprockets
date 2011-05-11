@@ -50,8 +50,8 @@ module EnvironmentTests
   end
 
   test "lookup filters" do
-    assert_equal [Sprockets::JsCompressor], @env.filters('application/javascript')
-    assert_equal [Sprockets::CssCompressor], @env.filters('text/css')
+    assert_equal [], @env.filters('application/javascript')
+    assert_equal [], @env.filters('text/css')
   end
 
   test "resolve in environment" do
@@ -416,7 +416,7 @@ class TestEnvironmentIndex < Sprockets::TestCase
 
   test "does not allow filters to be removed" do
     assert_raises TypeError do
-      @env.unregister_filter 'text/css', Sprockets::CssCompressor
+      @env.unregister_filter 'text/css', WhitespaceCompressor
     end
   end
 
@@ -450,9 +450,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
     env.css_compressor = WhitespaceCompressor
     index = env.index
 
-    assert_equal WhitespaceCompressor, index.css_compressor
+    assert_equal WhitespaceCompressor, index.css_compressor.compressor
     env.css_compressor = nil
-    assert_equal WhitespaceCompressor, index.css_compressor
+    assert_equal WhitespaceCompressor, index.css_compressor.compressor
   end
 
   test "does not allow js compressor to be changed" do
@@ -466,9 +466,9 @@ class TestEnvironmentIndex < Sprockets::TestCase
     env.js_compressor = WhitespaceCompressor
     index = env.index
 
-    assert_equal WhitespaceCompressor, index.js_compressor
+    assert_equal WhitespaceCompressor, index.js_compressor.compressor
     env.js_compressor = nil
-    assert_equal WhitespaceCompressor, index.js_compressor
+    assert_equal WhitespaceCompressor, index.js_compressor.compressor
   end
 
   test "change in environment engines does not affect index" do

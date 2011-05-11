@@ -30,11 +30,6 @@ module Sprockets
       @mime_types = {}
       @filters = Hash.new { |h, k| h[k] = [] }
 
-      @js_compressor = @css_compressor = nil
-
-      register_filter 'application/javascript', JsCompressor
-      register_filter 'text/css', CssCompressor
-
       expire_index!
     end
 
