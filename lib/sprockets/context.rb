@@ -1,6 +1,7 @@
 require 'sprockets/asset_pathname'
 require 'sprockets/errors'
 require 'pathname'
+require 'set'
 
 #### Sprockets::Context
 #
@@ -8,15 +9,15 @@ require 'pathname'
 # TODO Fill in with better explanation
 module Sprockets
   class Context
-    attr_reader :concatenation, :pathname
+    attr_reader :environment, :pathname
+    attr_reader :required_paths, :dependency_paths
 
-    def initialize(concatenation, pathname)
-      @concatenation = concatenation
-      @pathname      = pathname
-    end
+    def initialize(environment, pathname)
+      @environment = environment
+      @pathname    = pathname
 
-    def environment
-      concatenation.environment
+      @required_paths   = []
+      @dependency_paths = Set.new
     end
 
     def root_path
@@ -63,7 +64,7 @@ module Sprockets
     end
 
     def depend_on(path)
-      concatenation.depend_on(resolve(path))
+      @dependency_paths << resolve(path).to_s
     end
 
     def evaluate(filename, options = {})
@@ -80,6 +81,29 @@ module Sprockets
         template = engine.new(pathname.to_s) { result }
         template.render(self, {})
       end
+    end
+
+    def can_require?(pathname)
+      pathname = Pathname.new(pathname)
+      content_type = AssetPathname.new(pathname, environment).content_type
+      pathname.file? && (self.content_type.nil? || self.content_type == content_type)
+    end
+
+    def require_asset(pathname)
+      pathname = Pathname.new(pathname)
+
+      if can_require?(pathname)
+        unless @required_paths.include?(pathname.to_s)
+          @dependency_paths << pathname.to_s
+          @required_paths << pathname.to_s
+        end
+      else
+        raise ContentTypeMismatch, "#{pathname} is " +
+          "'#{AssetPathname.new(pathname, environment).content_type}', " +
+          "not '#{content_type}'"
+      end
+
+      pathname
     end
   end
 end

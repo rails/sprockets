@@ -16,8 +16,23 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "asset includes self as dependency" do
+    assert_equal [resolve("project.js")], asset("project.js").dependencies.map(&:pathname)
+  end
+
+  test "asset with child dependencies" do
+    assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
+      asset("application.js").dependencies.map(&:pathname)
+  end
+
+  test "concatenated asset body is just its own contents" do
+    assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
+      asset("application.js").body
+  end
+
   test "concating joins files with blank line" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", asset("application.js").to_s
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
+      asset("application.js").to_s
   end
 
   test "dependencies appear in the source before files that required them" do
@@ -93,7 +108,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   test "require_self inserts the current file's body at the specified point" do
-    assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n\n.one {}\n\n\nbody {}\n.project {}\n.two {}\n", asset("require_self.css").to_s
+    assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n.one {}\n.two {}\n\n\nbody {}\n.project {}\n", asset("require_self.css").to_s
   end
 
   test "__FILE__ is properly set in templates" do

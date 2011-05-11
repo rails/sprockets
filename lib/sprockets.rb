@@ -5,7 +5,6 @@ module Sprockets
   autoload :CharsetNormalizer,   "sprockets/charset_normalizer"
   autoload :Compressor,          "sprockets/compressor"
   autoload :ConcatenatedAsset,   "sprockets/concatenated_asset"
-  autoload :Concatenation,       "sprockets/concatenation"
   autoload :ContentTypeMismatch, "sprockets/errors"
   autoload :Context,             "sprockets/context"
   autoload :DirectiveProcessor,  "sprockets/directive_processor"

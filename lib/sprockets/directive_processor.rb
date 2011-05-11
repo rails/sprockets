@@ -44,7 +44,6 @@ module Sprockets
 
       @directive_parser   = Parser.new(data)
       @included_pathnames = []
-      @has_written_body   = false
       @compat             = false
     end
 
@@ -55,7 +54,6 @@ module Sprockets
     # `Context` for the complete API.
     def evaluate(context, locals, &block)
       @context       = context
-      @concatenation = context.concatenation
 
       process_directives
       process_source
@@ -160,7 +158,7 @@ module Sprockets
       end
 
       attr_reader :included_pathnames
-      attr_reader :context, :concatenation
+      attr_reader :context
 
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
@@ -193,7 +191,7 @@ module Sprockets
       def process_source
         result = ""
 
-        unless @has_written_body || processed_header.empty?
+        unless processed_header.empty?
           result << processed_header << "\n"
         end
 
@@ -201,9 +199,7 @@ module Sprockets
           result << context.evaluate(pathname)
         end
 
-        unless @has_written_body
-          result << processed_body
-        end
+        result << processed_body
 
         if compat? && constants.any?
           result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
@@ -254,11 +250,7 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        unless @has_written_body
-          concatenation << context.evaluate(pathname, :data => process_source)
-          included_pathnames.clear
-          @has_written_body = true
-        end
+        context.require_asset(pathname)
       end
 
       # The `include` directive works similar to `require` but
@@ -283,7 +275,7 @@ module Sprockets
           context.depend_on(root)
 
           Dir["#{root}/*"].sort.each do |filename|
-            if concatenation.can_require?(filename)
+            if context.can_require?(filename)
               require(filename)
             end
           end
@@ -306,7 +298,7 @@ module Sprockets
           Dir["#{root}/**/*"].sort.each do |filename|
             if File.directory?(filename)
               context.depend_on(filename)
-            elsif concatenation.can_require?(filename)
+            elsif context.can_require?(filename)
               require(filename)
             end
           end
@@ -368,7 +360,7 @@ module Sprockets
 
     private
       def require(path)
-        concatenation.require(context.resolve(path, :content_type => :self))
+        context.require_asset(context.resolve(path, :content_type => :self))
       end
 
       def relative?(path)

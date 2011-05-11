@@ -68,6 +68,25 @@ module Sprockets
     end
     alias_method :[], :find_asset
 
+    def build_asset(pathname)
+      if asset = @assets[pathname.to_s]
+        return asset
+      end
+
+      pathname       = Pathname.new(pathname)
+      asset_pathname = AssetPathname.new(pathname, self)
+      extension      = asset_pathname.format_extension ||
+                         asset_pathname.engine_format_extension
+
+      if formats(extension).any?
+        asset = ConcatenatedAsset.new(self, pathname)
+      else
+        asset = StaticAsset.new(self, pathname)
+      end
+
+      @assets[pathname.to_s] = asset
+    end
+
     protected
       def expire_index!
         raise TypeError, "can't modify immutable index"
@@ -82,19 +101,9 @@ module Sprockets
       rescue FileNotFound
         nil
       else
-        asset_pathname = AssetPathname.new(pathname, self)
-        extension      = asset_pathname.format_extension ||
-                         asset_pathname.engine_format_extension
-
-        if formats(extension).any?
-          logger.info "[Sprockets] #{logical_path} building"
-          asset = ConcatenatedAsset.new(self, pathname)
-        else
-          asset = StaticAsset.new(self, pathname)
-        end
+        asset = build_asset(pathname)
 
         if fingerprint && fingerprint != asset.digest
-          logger.error "[Sprockets] #{logical_path} #{fingerprint} nonexistent"
           asset = nil
         end
 
