@@ -12,9 +12,10 @@ module Sprockets
     attr_reader :environment, :pathname
     attr_reader :required_paths, :dependency_paths
 
-    def initialize(environment, pathname)
-      @environment = environment
-      @pathname    = pathname
+    def initialize(environment, logical_path, pathname)
+      @environment  = environment
+      @logical_path = logical_path
+      @pathname     = pathname
 
       @required_paths   = []
       @dependency_paths = Set.new
@@ -25,9 +26,7 @@ module Sprockets
     end
 
     def logical_path
-      if pathname && root_path
-        pathname.to_s[%r{^#{root_path}\/([^.]+)}, 1]
-      end
+      @logical_path[/^([^.]+)/, 0]
     end
 
     def content_type

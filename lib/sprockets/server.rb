@@ -26,7 +26,7 @@ module Sprockets
       end
 
       # Lookup the asset by `PATH_INFO`
-      asset = find_asset(env['PATH_INFO'])
+      asset = find_asset(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
@@ -54,7 +54,7 @@ module Sprockets
     # A third `prefix` argument can be pass along to be prepended to
     # the string.
     def path(logical_path, fingerprint = true, prefix = nil)
-      if fingerprint && asset = find_asset(logical_path)
+      if fingerprint && asset = find_asset(logical_path.to_s.sub(/^\//, ''))
         url = path_with_fingerprint(logical_path, asset.digest)
       else
         url = logical_path

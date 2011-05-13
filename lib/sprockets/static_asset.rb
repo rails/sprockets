@@ -4,10 +4,12 @@ require 'time'
 
 module Sprockets
   class StaticAsset
-    attr_reader :pathname, :content_type, :mtime, :length, :digest
+    attr_reader :logical_path, :pathname
+    attr_reader :content_type, :mtime, :length, :digest
 
-    def initialize(environment, pathname, digest = nil)
-      @pathname = Pathname.new(pathname)
+    def initialize(environment, logical_path, pathname, digest = nil)
+      @logical_path = logical_path.to_s
+      @pathname     = Pathname.new(pathname)
 
       asset_pathname = AssetPathname.new(pathname, environment)
       @content_type  = asset_pathname.content_type

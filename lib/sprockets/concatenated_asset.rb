@@ -5,15 +5,16 @@ require 'time'
 
 module Sprockets
   class ConcatenatedAsset
-    attr_reader :pathname, :content_type
-    attr_reader :mtime, :length, :digest
+    attr_reader :logical_path, :pathname
+    attr_reader :content_type, :mtime, :length, :digest
     attr_reader :dependencies, :dependency_paths
     attr_reader :body
 
-    def initialize(environment, pathname)
+    def initialize(environment, logical_path, pathname)
       environment = environment
-      context     = environment.context_class.new(environment, pathname)
+      context     = environment.context_class.new(environment, logical_path.to_s, pathname)
 
+      @logical_path = logical_path.to_s
       @pathname     = pathname
       @content_type = AssetPathname.new(pathname, environment).content_type
 
@@ -40,8 +41,7 @@ module Sprockets
 
     def eql?(other)
       other.class == self.class &&
-        other.content_type == self.content_type &&
-        other.source_paths == self.source_paths &&
+        other.pathname == self.pathname &&
         other.mtime == self.mtime &&
         other.digest == self.digest
     end
@@ -55,7 +55,7 @@ module Sprockets
           if required_path == pathname.to_s
             add_dependency(self)
           else
-            environment.build_asset(required_path).dependencies.each do |asset|
+            environment[required_path].dependencies.each do |asset|
               add_dependency(asset)
             end
           end

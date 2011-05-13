@@ -5,9 +5,13 @@ module AssetTests
     define_method("test #{name.inspect}", &block)
   end
 
-  test "pathname" do
+  test "pathname is a Pathname that exists" do
     assert_kind_of Pathname, @asset.pathname
     assert @asset.pathname.exist?
+  end
+
+  test "logical path can find itself" do
+    assert_equal @asset, @env[@asset.logical_path]
   end
 
   test "content type" do
@@ -305,7 +309,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    Sprockets::ConcatenatedAsset.new(@env.index, resolve(logical_path))
+    Sprockets::ConcatenatedAsset.new(@env.index, logical_path, resolve(logical_path))
   end
 
   def resolve(logical_path)
