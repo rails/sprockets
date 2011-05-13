@@ -274,10 +274,24 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal ".gallery{color:red;}", @env["gallery.css"].to_s
   end
 
+  test "setting css compressor to nil clears current compressor" do
+    @env.css_compressor = WhitespaceCompressor
+    assert_equal WhitespaceCompressor, @env.css_compressor.compressor
+    @env.css_compressor = nil
+    assert_nil @env.css_compressor
+  end
+
   test "changing js compressor expires old assets" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
     @env.js_compressor = WhitespaceCompressor
     assert_equal "varGallery={};", @env["gallery.js"].to_s
+  end
+
+  test "setting js compressor to nil clears current compressor" do
+    @env.js_compressor = WhitespaceCompressor
+    assert_equal WhitespaceCompressor, @env.js_compressor.compressor
+    @env.js_compressor = nil
+    assert_nil @env.js_compressor
   end
 
   test "changing paths expires old assets" do
