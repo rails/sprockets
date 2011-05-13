@@ -1,9 +1,72 @@
 require "sprockets_test"
 
+module AssetTests
+  def self.test(name, &block)
+    define_method("test #{name.inspect}", &block)
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "mtime" do
+    assert @asset.mtime
+  end
+
+  test "length" do
+    assert_equal 157, @asset.length
+  end
+
+  test "digest" do
+    assert_equal "a64bb1a34523baef725ad44d492269e1", @asset.digest
+  end
+
+  test "each" do
+    body = ""
+    @asset.each { |part| body << part }
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+  end
+
+  test "stale?" do
+    assert !@asset.stale?
+  end
+
+  test "to_s" do
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
+  end
+end
+
+class StaticAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.static_root = fixture_path('public')
+
+    @asset = @env['compiled-application.js']
+  end
+
+  test "class" do
+    assert_kind_of Sprockets::StaticAsset, @asset
+  end
+
+  test "to path" do
+    assert_equal fixture_path('public/compiled-application.js'), @asset.to_path
+  end
+
+  include AssetTests
+end
+
 class ConcatenatedAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.paths << fixture_path('asset')
+
+    @asset = @env['application.js']
+  end
+
+  include AssetTests
+
+  test "class" do
+    assert_kind_of Sprockets::ConcatenatedAsset, @asset
   end
 
   test "requiring the same file multiple times has no effect" do
