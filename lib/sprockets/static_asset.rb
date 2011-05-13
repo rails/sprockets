@@ -18,7 +18,7 @@ module Sprockets
     end
 
     def dependencies
-      []
+      [self]
     end
 
     def body
