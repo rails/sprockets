@@ -37,7 +37,7 @@ class TestServer < Sprockets::TestCase
 
   test "serve single source file body" do
     get "/javascripts/foo.js?body=1"
-    assert_equal 206, last_response.status
+    assert_equal 200, last_response.status
     assert_equal "var foo;\n", last_response.body
   end
 

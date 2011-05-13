@@ -126,7 +126,7 @@ module Sprockets
 
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        if body_only?(env)
+        if body_only?(env) && asset.dependencies.length > 1
           body = asset.body
           [ 206, {
               "Content-Range"  => "bytes #{body.length-1}-#{asset.length-1}/#{asset.length}",
