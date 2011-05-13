@@ -34,6 +34,10 @@ module AssetTests
   test "to_s" do
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
+
+  test "dependencies" do
+    assert_kind_of Array, @asset.dependencies
+  end
 end
 
 class StaticAssetTest < Sprockets::TestCase

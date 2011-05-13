@@ -17,6 +17,10 @@ module Sprockets
       @digest = digest || Digest::MD5.hexdigest(pathname.read)
     end
 
+    def dependencies
+      []
+    end
+
     def stale?
       mtime < pathname.mtime
     rescue Errno::ENOENT
