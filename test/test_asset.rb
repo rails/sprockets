@@ -5,6 +5,11 @@ module AssetTests
     define_method("test #{name.inspect}", &block)
   end
 
+  test "pathname" do
+    assert_kind_of Pathname, @asset.pathname
+    assert @asset.pathname.exist?
+  end
+
   test "content type" do
     assert_equal "application/javascript", @asset.content_type
   end
