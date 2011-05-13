@@ -114,6 +114,11 @@ module Sprockets
         env["HTTP_IF_NONE_MATCH"] == etag(asset)
       end
 
+      # Test if `?body=1` or `body=true` query param is set
+      def body_only?(env)
+        env["QUERY_STRING"].to_s =~ /body=(1|t)/
+      end
+
       # Returns a 304 Not Modified response tuple
       def not_modified_response(asset, env)
         [ 304, {}, [] ]
@@ -121,7 +126,17 @@ module Sprockets
 
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        [ 200, headers(asset, env), asset ]
+        if body_only?(env)
+          body = asset.body
+          [ 206, {
+              "Content-Range"  => "bytes #{body.length-1}-#{asset.length-1}/#{asset.length}",
+              "Content-Type"   => asset.content_type,
+              "Content-Length" => body.length.to_s,
+              "Cache-Control"  => "no-cache"
+            }, [body] ]
+        else
+          [ 200, headers(asset, env), asset ]
+        end
       end
 
       def headers(asset, env)
