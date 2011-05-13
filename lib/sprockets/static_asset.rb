@@ -21,6 +21,10 @@ module Sprockets
       []
     end
 
+    def body
+      to_s
+    end
+
     def stale?
       mtime < pathname.mtime
     rescue Errno::ENOENT

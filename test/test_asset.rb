@@ -35,8 +35,12 @@ module AssetTests
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
 
-  test "dependencies" do
+  test "dependencies are an Array" do
     assert_kind_of Array, @asset.dependencies
+  end
+
+  test "body is a String" do
+    assert_kind_of String, @asset.body
   end
 end
 
@@ -54,6 +58,10 @@ class StaticAssetTest < Sprockets::TestCase
 
   test "to path" do
     assert_equal fixture_path('public/compiled-application.js'), @asset.to_path
+  end
+
+  test "body is entire contents" do
+    assert_equal @asset.to_s, @asset.body
   end
 
   include AssetTests
