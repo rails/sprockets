@@ -94,11 +94,13 @@ module Sprockets
         unregister_filter 'text/css', old_compressor
       end
 
-      klass = Class.new(Compressor) do
-        @compressor = compressor
-      end
+      if compressor
+        klass = Class.new(Compressor) do
+          @compressor = compressor
+        end
 
-      register_filter 'text/css', klass
+        register_filter 'text/css', klass
+      end
     end
 
     def js_compressor
@@ -115,11 +117,13 @@ module Sprockets
         unregister_filter 'application/javascript', old_compressor
       end
 
-      klass = Class.new(Compressor) do
-        @compressor = compressor
-      end
+      if compressor
+        klass = Class.new(Compressor) do
+          @compressor = compressor
+        end
 
-      register_filter 'application/javascript', klass
+        register_filter 'application/javascript', klass
+      end
     end
 
     private
