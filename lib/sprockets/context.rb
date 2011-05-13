@@ -84,7 +84,7 @@ module Sprockets
     end
 
     def asset_requirable?(path)
-      pathname = resolve(path, :content_type => :self)
+      pathname = resolve(path)
       content_type = AssetPathname.new(pathname, environment).content_type
       pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
@@ -92,15 +92,9 @@ module Sprockets
     def require_asset(path)
       pathname = resolve(path, :content_type => :self)
 
-      if asset_requirable?(pathname)
-        unless @required_paths.include?(pathname.to_s)
-          @dependency_paths << pathname.to_s
-          @required_paths << pathname.to_s
-        end
-      else
-        raise ContentTypeMismatch, "#{pathname} is " +
-          "'#{AssetPathname.new(pathname, environment).content_type}', " +
-          "not '#{content_type}'"
+      unless @required_paths.include?(pathname.to_s)
+        @dependency_paths << pathname.to_s
+        @required_paths << pathname.to_s
       end
 
       pathname
