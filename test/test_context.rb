@@ -50,8 +50,7 @@ class TestCustomProcessor < Sprockets::TestCase
 
     def evaluate(context, locals)
       @manifest['require'].each do |logical_path|
-        filename = context.resolve(logical_path)
-        context.require_asset(filename)
+        context.require_asset(logical_path)
       end
       ""
     end

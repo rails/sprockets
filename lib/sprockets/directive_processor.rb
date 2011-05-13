@@ -235,7 +235,7 @@ module Sprockets
           end
         end
 
-        require(path)
+        context.require_asset(path)
       end
 
       # `require_self` causes the body of the current file to be
@@ -275,8 +275,8 @@ module Sprockets
           context.depend_on(root)
 
           Dir["#{root}/*"].sort.each do |filename|
-            if context.can_require?(filename)
-              require(filename)
+            if context.asset_requirable?(filename)
+              context.require_asset(filename)
             end
           end
         else
@@ -298,8 +298,8 @@ module Sprockets
           Dir["#{root}/**/*"].sort.each do |filename|
             if File.directory?(filename)
               context.depend_on(filename)
-            elsif context.can_require?(filename)
-              require(filename)
+            elsif context.asset_requirable?(filename)
+              context.require_asset(filename)
             end
           end
         else
@@ -359,10 +359,6 @@ module Sprockets
       end
 
     private
-      def require(path)
-        context.require_asset(context.resolve(path, :content_type => :self))
-      end
-
       def relative?(path)
         path =~ /^\.($|\.?\/)/
       end

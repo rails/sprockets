@@ -83,16 +83,16 @@ module Sprockets
       end
     end
 
-    def can_require?(pathname)
-      pathname = Pathname.new(pathname)
+    def asset_requirable?(path)
+      pathname = resolve(path, :content_type => :self)
       content_type = AssetPathname.new(pathname, environment).content_type
       pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
 
-    def require_asset(pathname)
-      pathname = Pathname.new(pathname)
+    def require_asset(path)
+      pathname = resolve(path, :content_type => :self)
 
-      if can_require?(pathname)
+      if asset_requirable?(pathname)
         unless @required_paths.include?(pathname.to_s)
           @dependency_paths << pathname.to_s
           @required_paths << pathname.to_s
