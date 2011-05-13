@@ -81,5 +81,13 @@ module Sprockets
         template.render(self, {})
       end
     end
+
+    def asset_requirable?(path)
+      concatenation.can_require?(resolve(path, :content_type => :self))
+    end
+
+    def require_asset(path)
+      concatenation.require(resolve(path, :content_type => :self))
+    end
   end
 end
