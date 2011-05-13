@@ -52,6 +52,8 @@ class StaticAssetTest < Sprockets::TestCase
     @asset = @env['compiled-application.js']
   end
 
+  include AssetTests
+
   test "class" do
     assert_kind_of Sprockets::StaticAsset, @asset
   end
@@ -63,8 +65,6 @@ class StaticAssetTest < Sprockets::TestCase
   test "body is entire contents" do
     assert_equal @asset.to_s, @asset.body
   end
-
-  include AssetTests
 end
 
 class ConcatenatedAssetTest < Sprockets::TestCase
