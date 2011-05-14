@@ -199,6 +199,18 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n.one {}\n\n\nbody {}\n.two {}\n.project {}\n", asset("require_self.css").to_s
   end
 
+  test "multiple require_self directives raises and error" do
+    assert_raise(Sprockets::ArgumentError) do
+      asset("require_self_twice.css")
+    end
+  end
+
+  test "circular require works for now" do
+    assert_equal "var C;\nvar B;\nvar A;\n", asset("circle/a.js").to_s
+    assert_equal "var A;\nvar C;\nvar B;\n", asset("circle/b.js").to_s
+    assert_equal "var B;\nvar A;\nvar C;\n", asset("circle/c.js").to_s
+  end
+
   test "__FILE__ is properly set in templates" do
     assert_equal %(var filename = "#{resolve("filename.js")}";\n),
       asset("filename.js").to_s

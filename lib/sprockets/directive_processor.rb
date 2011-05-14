@@ -253,12 +253,14 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        unless @has_written_body
-          context.require_asset(pathname)
-          process_source
-          included_pathnames.clear
-          @has_written_body = true
+        if @has_written_body
+          raise ArgumentError, "require_self can only be called once per source file"
         end
+
+        context.require_asset(pathname)
+        process_source
+        included_pathnames.clear
+        @has_written_body = true
       end
 
       # The `include` directive works similar to `require` but
