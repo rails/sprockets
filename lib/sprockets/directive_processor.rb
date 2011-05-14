@@ -348,7 +348,7 @@ module Sprockets
           path = File.join(context.root_path, "constants.yml")
           File.exist?(path) ? YAML.load_file(path) : {}
         else
-        {}
+          {}
         end
       end
 
