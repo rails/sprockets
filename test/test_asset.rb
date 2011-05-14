@@ -159,6 +159,12 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n\n.one {}\n\n\nbody {}\n.project {}\n.two {}\n", asset("require_self.css").to_s
   end
 
+  test "multiple require_self directives raises and error" do
+    assert_raise(Sprockets::ArgumentError) do
+      asset("require_self_twice.css")
+    end
+  end
+
   test "__FILE__ is properly set in templates" do
     assert_equal %(var filename = "#{resolve("filename.js")}";\n),
       asset("filename.js").to_s
