@@ -10,15 +10,15 @@ require 'set'
 module Sprockets
   class Context
     attr_reader :environment, :pathname
-    attr_reader :required_paths, :dependency_paths
+    attr_reader :_required_paths, :_dependency_paths
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
       @logical_path = logical_path
       @pathname     = pathname
 
-      @required_paths   = []
-      @dependency_paths = Set.new
+      @_required_paths   = []
+      @_dependency_paths = Set.new
     end
 
     def root_path
@@ -63,7 +63,7 @@ module Sprockets
     end
 
     def depend_on(path)
-      @dependency_paths << resolve(path).to_s
+      @_dependency_paths << resolve(path).to_s
     end
 
     def evaluate(filename, options = {})
@@ -91,9 +91,9 @@ module Sprockets
     def require_asset(path)
       pathname = resolve(path, :content_type => :self)
 
-      unless @required_paths.include?(pathname.to_s)
-        @dependency_paths << pathname.to_s
-        @required_paths << pathname.to_s
+      unless @_required_paths.include?(pathname.to_s)
+        @_dependency_paths << pathname.to_s
+        @_required_paths << pathname.to_s
       end
 
       pathname

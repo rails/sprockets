@@ -8,7 +8,7 @@ module Sprockets
   class ConcatenatedAsset
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
-    attr_reader :dependencies, :dependency_paths
+    attr_reader :dependencies, :_dependency_paths
     attr_reader :body
 
     def initialize(environment, logical_path, pathname, _requires)
@@ -36,7 +36,7 @@ module Sprockets
     end
 
     def stale?
-      dependency_paths.any? { |p| mtime < File.mtime(p) }
+      _dependency_paths.any? { |p| mtime < File.mtime(p) }
     rescue Errno::ENOENT
       true
     end
@@ -57,7 +57,7 @@ module Sprockets
       def compute_dependencies(environment, context, _requires)
         @dependencies = []
 
-        context.required_paths.each do |required_path|
+        context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
           else
@@ -76,17 +76,17 @@ module Sprockets
       end
 
       def compute_dependency_paths(context)
-        @dependency_paths = Set.new
+        @_dependency_paths = Set.new
         @mtime = Time.at(0)
 
         depend_on(pathname)
 
-        context.dependency_paths.each do |path|
+        context._dependency_paths.each do |path|
           depend_on(path)
         end
 
         @dependencies.each do |dependency|
-          dependency.dependency_paths.each do |path|
+          dependency._dependency_paths.each do |path|
             depend_on(path)
           end
         end
@@ -96,7 +96,7 @@ module Sprockets
         if (mtime = File.mtime(path)) > @mtime
           @mtime = mtime
         end
-        @dependency_paths << path
+        @_dependency_paths << path
       end
 
       def compute_source(environment, context)
