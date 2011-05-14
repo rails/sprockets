@@ -165,6 +165,12 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "circular require works for now" do
+    assert_equal "var C;\nvar B;\nvar A;\n", asset("circle/a.js").to_s
+    assert_equal "var A;\nvar C;\nvar B;\n", asset("circle/b.js").to_s
+    assert_equal "var B;\nvar A;\nvar C;\n", asset("circle/c.js").to_s
+  end
+
   test "__FILE__ is properly set in templates" do
     assert_equal %(var filename = "#{resolve("filename.js")}";\n),
       asset("filename.js").to_s
