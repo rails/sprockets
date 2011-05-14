@@ -53,10 +53,15 @@ module Sprockets
     # access the environment and append to the concatenation. See
     # `Context` for the complete API.
     def evaluate(context, locals, &block)
-      @context       = context
+      @context = context
+
+      @result = ""
+      @has_written_body = false
 
       process_directives
       process_source
+
+      @result
     end
 
     def processed_header
@@ -189,23 +194,21 @@ module Sprockets
       end
 
       def process_source
-        result = ""
-
-        unless processed_header.empty?
-          result << processed_header << "\n"
+        unless @has_written_body || processed_header.empty?
+          @result << processed_header << "\n"
         end
 
         included_pathnames.each do |pathname|
-          result << context.evaluate(pathname)
+          @result << context.evaluate(pathname)
         end
 
-        result << processed_body
+        unless @has_written_body
+          @result << processed_body
+        end
 
         if compat? && constants.any?
-          result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
+          @result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
         end
-
-        result
       end
 
       # The `require` directive functions similar to Ruby's own `require`.
@@ -250,7 +253,12 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        context.require_asset(pathname)
+        unless @has_written_body
+          context.require_asset(pathname)
+          process_source
+          included_pathnames.clear
+          @has_written_body = true
+        end
       end
 
       # The `include` directive works similar to `require` but
