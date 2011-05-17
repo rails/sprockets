@@ -48,6 +48,10 @@ module AssetTests
     assert_kind_of Array, @asset.dependencies
   end
 
+  test "splat asset" do
+    assert_kind_of Array, @asset.to_a
+  end
+
   test "body is a String" do
     assert_kind_of String, @asset.body
   end
@@ -67,8 +71,16 @@ class StaticAssetTest < Sprockets::TestCase
     assert_kind_of Sprockets::StaticAsset, @asset
   end
 
+  test "splat" do
+    assert_equal [@asset], @asset.to_a
+  end
+
   test "dependencies" do
-    assert_equal [@asset], @asset.dependencies
+    assert_equal [], @asset.dependencies
+  end
+
+  test "dependencies?" do
+    assert !@asset.dependencies?
   end
 
   test "to path" do
@@ -104,13 +116,22 @@ class ConcatenatedAssetTest < Sprockets::TestCase
     end
   end
 
+  test "splatted asset includes itself" do
+    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname)
+  end
+
   test "asset includes self as dependency" do
-    assert_equal [resolve("project.js")], asset("project.js").dependencies.map(&:pathname)
+    assert_equal [], asset("project.js").dependencies.map(&:pathname)
   end
 
   test "asset with child dependencies" do
-    assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
+    assert_equal [resolve("project.js"), resolve("users.js")],
       asset("application.js").dependencies.map(&:pathname)
+  end
+
+  test "splatted asset with child dependencies" do
+    assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
+      asset("application.js").to_a.map(&:pathname)
   end
 
   test "concatenated asset body is just its own contents" do

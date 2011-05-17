@@ -20,6 +20,14 @@ module Sprockets
     end
 
     def dependencies
+      []
+    end
+
+    def dependencies?
+      false
+    end
+
+    def to_a
       [self]
     end
 

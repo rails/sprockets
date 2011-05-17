@@ -8,7 +8,7 @@ module Sprockets
   class ConcatenatedAsset
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
-    attr_reader :dependencies, :_dependency_paths
+    attr_reader :_dependency_paths
     attr_reader :body
 
     def initialize(environment, logical_path, pathname, _requires)
@@ -26,9 +26,23 @@ module Sprockets
       end
       _requires << pathname.to_s
 
+      @assets = []
+
       compute_dependencies(environment, context, _requires)
       compute_dependency_paths(context)
       compute_source(environment, context)
+    end
+
+    def dependencies?
+      dependencies.any?
+    end
+
+    def dependencies
+      @assets - [self]
+    end
+
+    def to_a
+      @assets
     end
 
     def each
@@ -55,13 +69,11 @@ module Sprockets
 
     private
       def compute_dependencies(environment, context, _requires)
-        @dependencies = []
-
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
           else
-            environment[required_path, _requires].dependencies.each do |asset|
+            environment[required_path, _requires].to_a.each do |asset|
               add_dependency(asset)
             end
           end
@@ -70,8 +82,8 @@ module Sprockets
       end
 
       def add_dependency(asset)
-        unless @dependencies.any? { |dep| dep.pathname == asset.pathname }
-          @dependencies << asset
+        unless to_a.any? { |dep| dep.pathname == asset.pathname }
+          @assets << asset
         end
       end
 
@@ -85,7 +97,7 @@ module Sprockets
           depend_on(path)
         end
 
-        @dependencies.each do |dependency|
+        to_a.each do |dependency|
           dependency._dependency_paths.each do |path|
             depend_on(path)
           end
@@ -101,7 +113,7 @@ module Sprockets
 
       def compute_source(environment, context)
         source = ""
-        @dependencies.each { |dependency| source << dependency.body }
+        to_a.each { |dependency| source << dependency.body }
 
         @source = context.evaluate(pathname, :data => source,
                     :engines => environment.filters(content_type))
