@@ -10,7 +10,8 @@ Gem::Specification.new do |s|
   s.add_dependency "rack", "~> 1.0"
   s.add_dependency "tilt", "~> 1.0"
 
-  s.add_development_dependency "coffee-script-source", "~> 1.0"
+  s.add_development_dependency "coffee-script", "~> 1.0"
+  s.add_development_dependency "ejs", "~> 1.0"
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = "sstephenson@gmail.com"

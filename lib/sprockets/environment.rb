@@ -31,6 +31,9 @@ module Sprockets
       register_format '.css', DirectiveProcessor
       register_format '.js', DirectiveProcessor
 
+      register_engine '.jst', JstProcessor
+      register_engine '.ejs', EjsTemplate
+
       register_engine '.str',    Tilt::StringTemplate
       register_engine '.erb',    Tilt::ERBTemplate
       register_engine '.sass',   Tilt::SassTemplate
