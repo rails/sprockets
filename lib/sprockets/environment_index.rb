@@ -56,6 +56,8 @@ module Sprockets
     end
 
     def find_asset(path, options = {})
+      options[:_index] ||= self
+
       pathname = Pathname.new(path)
 
       if pathname.absolute?

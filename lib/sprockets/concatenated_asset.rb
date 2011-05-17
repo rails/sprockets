@@ -74,7 +74,8 @@ module Sprockets
           if required_path == pathname.to_s
             add_dependency(self)
           else
-            environment[required_path, options].to_a.each do |asset|
+            index = (options[:_environment] || options[:_index] || environment)
+            index[required_path, options].to_a.each do |asset|
               add_dependency(asset)
             end
           end

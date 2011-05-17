@@ -80,12 +80,12 @@ module Sprockets
       index.resolve(logical_path, options, &block)
     end
 
-    def find_asset(logical_path)
+    def find_asset(logical_path, options = {})
       logical_path = Pathname.new(logical_path)
 
       if asset = find_fresh_asset_from_cache(logical_path)
         asset
-      elsif asset = index.find_asset(logical_path)
+      elsif asset = index.find_asset(logical_path, :_environment => self)
         asset.to_a.each { |a| @cache[a.logical_path.to_s] = a }
         asset
       end
