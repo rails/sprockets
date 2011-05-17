@@ -25,6 +25,11 @@ module Sprockets
         return forbidden_response
       end
 
+      # Mark session as "skipped" so no `Set-Cookie` header is set
+      env['rack.session.options'] ||= {}
+      env['rack.session.options'][:defer] = true
+      env['rack.session.options'][:skip] = true
+
       # Lookup the asset by `PATH_INFO`
       asset = find_asset(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
