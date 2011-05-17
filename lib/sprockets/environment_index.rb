@@ -55,11 +55,11 @@ module Sprockets
       end
     end
 
-    def find_asset(path, _requires = [])
+    def find_asset(path, options = {})
       pathname = Pathname.new(path)
 
       if pathname.absolute?
-        build_asset(detect_logical_path(path).to_s, pathname, _requires)
+        build_asset(detect_logical_path(path).to_s, pathname, options)
       else
         logical_path = path.to_s.sub(/^\//, '')
 
@@ -67,7 +67,7 @@ module Sprockets
           @assets[logical_path]
         else
           @assets[logical_path] = find_asset_in_static_root(pathname) ||
-            find_asset_in_path(pathname, _requires)
+            find_asset_in_path(pathname, options)
         end
       end
     end
@@ -78,7 +78,7 @@ module Sprockets
         raise TypeError, "can't modify immutable index"
       end
 
-      def find_asset_in_path(logical_path, _requires = [])
+      def find_asset_in_path(logical_path, options = {})
         if fingerprint = path_fingerprint(logical_path)
           pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
         else
@@ -87,7 +87,7 @@ module Sprockets
       rescue FileNotFound
         nil
       else
-        asset = build_asset(logical_path, pathname, _requires)
+        asset = build_asset(logical_path, pathname, options)
 
         if fingerprint && fingerprint != asset.digest
           logger.error "[Sprockets] #{logical_path} #{fingerprint} nonexistent"
@@ -97,7 +97,7 @@ module Sprockets
         asset
       end
 
-      def build_asset(logical_path, pathname, _requires)
+      def build_asset(logical_path, pathname, options)
         if asset = @assets[logical_path.to_s]
           return asset
         end
@@ -109,7 +109,7 @@ module Sprockets
 
         if formats(extension).any?
           logger.info "[Sprockets] #{logical_path} building"
-          asset = ConcatenatedAsset.new(self, logical_path, pathname, _requires)
+          asset = ConcatenatedAsset.new(self, logical_path, pathname, options)
         else
           asset = StaticAsset.new(self, logical_path, pathname)
         end

@@ -11,7 +11,7 @@ module Sprockets
     attr_reader :_dependency_paths
     attr_reader :body
 
-    def initialize(environment, logical_path, pathname, _requires)
+    def initialize(environment, logical_path, pathname, options)
       environment = environment
       context     = environment.context_class.new(environment, logical_path.to_s, pathname)
 
@@ -21,14 +21,15 @@ module Sprockets
 
       @body = context.evaluate(pathname)
 
-      if _requires.include?(pathname.to_s)
+      requires = options[:_requires] ||= []
+      if requires.include?(pathname.to_s)
         raise CircularDependencyError, "#{pathname} has already been required"
       end
-      _requires << pathname.to_s
+      requires << pathname.to_s
 
       @assets = []
 
-      compute_dependencies(environment, context, _requires)
+      compute_dependencies(environment, context, options)
       compute_dependency_paths(context)
       compute_source(environment, context)
     end
@@ -68,12 +69,12 @@ module Sprockets
     alias_method :==, :eql?
 
     private
-      def compute_dependencies(environment, context, _requires)
+      def compute_dependencies(environment, context, options)
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
           else
-            environment[required_path, _requires].to_a.each do |asset|
+            environment[required_path, options].to_a.each do |asset|
               add_dependency(asset)
             end
           end
