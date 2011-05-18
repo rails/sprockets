@@ -2,9 +2,9 @@
 module Sprockets
   autoload :ArgumentError,           "sprockets/errors"
   autoload :AssetPathname,           "sprockets/asset_pathname"
+  autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
   autoload :Compressor,              "sprockets/compressor"
-  autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :CircularDependencyError, "sprockets/errors"
   autoload :Context,                 "sprockets/context"
