@@ -57,8 +57,7 @@ module EnvironmentTests
 
   test "lookup mime type" do
     assert_equal "application/javascript", @env.mime_types(".js")
-    assert_equal "application/javascript", @env.mime_types("js")
-    assert_equal "text/css", @env.mime_types(:css)
+    assert_equal "text/css", @env.mime_types(".css")
     assert_equal nil, @env.mime_types("foo")
     assert_equal nil, @env.mime_types("foo")
   end
@@ -269,12 +268,6 @@ class TestEnvironment < Sprockets::TestCase
     @env = new_environment
   end
 
-  test "register mime type" do
-    assert !@env.mime_types("jst")
-    @env.register_mime_type("application/javascript", "jst")
-    assert_equal "application/javascript", @env.mime_types("jst")
-  end
-
   test "register filter" do
     assert !@env.filters('text/css').include?(WhitespaceCompressor)
     @env.register_filter 'text/css', WhitespaceCompressor
@@ -426,22 +419,6 @@ class TestEnvironmentIndex < Sprockets::TestCase
     assert_raises TypeError do
       @env.static_root = fixture_path('public')
     end
-  end
-
-  test "does not allow new mime types to be added" do
-    assert_raises TypeError do
-      @env.register_mime_type "application/javascript", ".jst"
-    end
-  end
-
-  test "change in environment mime types does not affect index" do
-    env = Sprockets::Environment.new(".")
-    env.register_mime_type "application/javascript", ".jst"
-    index = env.index
-
-    assert_equal "application/javascript", index.mime_types("jst")
-    env.register_mime_type nil, ".jst"
-    assert_equal "application/javascript", index.mime_types("jst")
   end
 
   test "does not allow new filters to be added" do

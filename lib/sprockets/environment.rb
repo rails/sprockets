@@ -23,7 +23,6 @@ module Sprockets
 
       @static_root = nil
 
-      @mime_types = {}
       @engines = {}
       @formats = Hash.new { |h, k| h[k] = [] }
       @filters = Hash.new { |h, k| h[k] = [] }
