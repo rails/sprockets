@@ -92,7 +92,7 @@ class StaticAssetTest < Sprockets::TestCase
   end
 end
 
-class ConcatenatedAssetTest < Sprockets::TestCase
+class BundledAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.paths << fixture_path('asset')
@@ -103,7 +103,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "class" do
-    assert_kind_of Sprockets::ConcatenatedAsset, @asset
+    assert_kind_of Sprockets::BundledAsset, @asset
   end
 
   test "requiring the same file multiple times has no effect" do
@@ -134,12 +134,12 @@ class ConcatenatedAssetTest < Sprockets::TestCase
       asset("application.js").to_a.map(&:pathname)
   end
 
-  test "concatenated asset body is just its own contents" do
+  test "bundled asset body is just its own contents" do
     assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
       asset("application.js").body
   end
 
-  test "concating joins files with blank line" do
+  test "bundling joins files with blank line" do
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
       asset("application.js").to_s
   end
@@ -343,7 +343,7 @@ class ConcatenatedAssetTest < Sprockets::TestCase
       asset("constants.js").to_s
   end
 
-  test "multiple charset defintions are stripped from css concatenation" do
+  test "multiple charset defintions are stripped from css bundle" do
     assert_equal "@charset \"UTF-8\";\n.foo {}\n\n.bar {}\n", asset("charset.css").to_s
   end
 

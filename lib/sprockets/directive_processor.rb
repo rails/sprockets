@@ -50,8 +50,8 @@ module Sprockets
     # Implemented for Tilt#render.
     #
     # `context` is a `Context` instance with methods that allow you to
-    # access the environment and append to the concatenation. See
-    # `Context` for the complete API.
+    # access the environment and append to the bundle. See `Context`
+    # for the complete API.
     def evaluate(context, locals, &block)
       @context = context
 

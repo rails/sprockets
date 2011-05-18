@@ -1,5 +1,5 @@
 require 'sprockets/asset_pathname'
-require 'sprockets/concatenated_asset'
+require 'sprockets/bundled_asset'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
 require 'pathname'
@@ -111,7 +111,7 @@ module Sprockets
 
         if formats(extension).any?
           logger.info "[Sprockets] #{logical_path} building"
-          asset = ConcatenatedAsset.new(self, logical_path, pathname, options)
+          asset = BundledAsset.new(self, logical_path, pathname, options)
         else
           asset = StaticAsset.new(self, logical_path, pathname)
         end

@@ -85,11 +85,11 @@ module EnvironmentTests
     end
   end
 
-  test "find concatenated asset in environment" do
+  test "find bundled asset in environment" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
 
-  test "find concatenated asset with absolute path environment" do
+  test "find bundled asset with absolute path environment" do
     assert_equal "var Gallery = {};\n", @env[fixture_path("default/gallery.js")].to_s
   end
 
@@ -314,7 +314,7 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["gallery.css"]
   end
 
-  test "concatenated asset is stale if its mtime is updated or deleted" do
+  test "bundled asset is stale if its mtime is updated or deleted" do
     filename = File.join(fixture_path("default"), "tmp.js")
 
     begin

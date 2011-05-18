@@ -4,7 +4,7 @@ module Sprockets
   autoload :AssetPathname,           "sprockets/asset_pathname"
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
   autoload :Compressor,              "sprockets/compressor"
-  autoload :ConcatenatedAsset,       "sprockets/concatenated_asset"
+  autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :CircularDependencyError, "sprockets/errors"
   autoload :Context,                 "sprockets/context"

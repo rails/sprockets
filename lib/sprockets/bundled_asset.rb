@@ -5,7 +5,7 @@ require 'set'
 require 'time'
 
 module Sprockets
-  class ConcatenatedAsset
+  class BundledAsset
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
     attr_reader :_dependency_paths
