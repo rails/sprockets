@@ -1,5 +1,6 @@
 require 'sprockets_test'
 require 'rack/mock'
+require 'execjs'
 
 module EnvironmentTests
   def self.test(name, &block)
