@@ -39,7 +39,7 @@ module Sprockets
       register_engine '.sass',   Tilt::SassTemplate
       register_engine '.scss',   Tilt::ScssTemplate
       register_engine '.less',   Tilt::LessTemplate
-      register_engine '.coffee', Tilt::CoffeeScriptTemplate
+      register_engine '.coffee', CoffeeScriptTemplate
 
       register_filter 'text/css', CharsetNormalizer
 

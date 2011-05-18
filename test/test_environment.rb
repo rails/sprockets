@@ -241,6 +241,11 @@ module EnvironmentTests
       FileUtils.rm_rf(dirname)
     end
   end
+
+  test "CoffeeScript files are compiled in a closure" do
+    script = @env["coffee"].to_s
+    assert_equal "undefined", ExecJS.exec(script)
+  end
 end
 
 class WhitespaceCompressor

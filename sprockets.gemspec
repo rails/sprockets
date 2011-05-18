@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rack", "~> 1.0"
   s.add_dependency "tilt", "~> 1.0"
 
+  s.add_development_dependency "execjs", "~> 0.4"
   s.add_development_dependency "coffee-script", "~> 1.0"
   s.add_development_dependency "ejs", "~> 1.0"
 
