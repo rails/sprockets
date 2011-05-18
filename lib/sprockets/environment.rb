@@ -84,11 +84,13 @@ module Sprockets
 
     def find_asset(logical_path, options = {})
       logical_path = Pathname.new(logical_path)
+      index = options[:_index] || self.index
 
       if asset = find_fresh_asset_from_cache(logical_path)
         asset
-      elsif asset = index.find_asset(logical_path, :_environment => self)
-        asset.to_a.each { |a| @cache[a.logical_path.to_s] = a }
+      elsif asset = index.find_asset(logical_path, options.merge(:_environment => self))
+        @cache[logical_path.to_s] = asset
+        asset.to_a.each { |a| @cache[a.pathname.to_s] = a }
         asset
       end
     end
@@ -104,10 +106,10 @@ module Sprockets
           if path_fingerprint(logical_path)
             asset
           elsif asset.stale?
-            logger.warn "[Sprockets] #{logical_path} #{asset.digest} stale"
+            logger.warn "[Sprockets] #{asset.logical_path} #{asset.digest} stale"
             nil
           else
-            logger.info "[Sprockets] #{logical_path} #{asset.digest} fresh"
+            logger.info "[Sprockets] #{asset.logical_path} #{asset.digest} fresh"
             asset
           end
         else
