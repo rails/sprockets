@@ -53,7 +53,7 @@ module EnvironmentTests
 
   test "ejs templates" do
     asset = @env["hello.jst"]
-    assert_equal "window.JST || window.JST = {};\nwindow.JST[\"hello\"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('hello: ', name ,'\\n');}return __p.join('');};\n", asset.to_s
+    assert_equal "window.JST || (window.JST = {});\nwindow.JST[\"hello\"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('hello: ', name ,'\\n');}return __p.join('');};\n", asset.to_s
   end
 
   test "lookup mime type" do
