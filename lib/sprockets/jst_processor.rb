@@ -9,7 +9,7 @@ module Sprockets
 
     def evaluate(scope, locals, &block)
       <<-JST
-window.JST || window.JST = {};
+window.JST || (window.JST = {});
 window.JST[#{scope.logical_path.inspect}] = #{data};
       JST
     end
