@@ -8,7 +8,6 @@ module Sprockets
   class BundledAsset
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
-    attr_reader :_dependency_paths
     attr_reader :body
 
     def initialize(environment, logical_path, pathname, options)
@@ -51,7 +50,7 @@ module Sprockets
     end
 
     def stale?
-      _dependency_paths.any? { |p| mtime < File.mtime(p) }
+      dependency_paths.any? { |p| mtime < File.mtime(p) }
     rescue Errno::ENOENT
       true
     end
@@ -67,6 +66,9 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
+
+    protected
+      attr_reader :dependency_paths
 
     private
       def compute_dependencies(environment, context, options)
@@ -90,7 +92,7 @@ module Sprockets
       end
 
       def compute_dependency_paths(context)
-        @_dependency_paths = Set.new
+        @dependency_paths = Set.new
         @mtime = Time.at(0)
 
         depend_on(pathname)
@@ -100,7 +102,7 @@ module Sprockets
         end
 
         to_a.each do |dependency|
-          dependency._dependency_paths.each do |path|
+          dependency.dependency_paths.each do |path|
             depend_on(path)
           end
         end
@@ -110,7 +112,7 @@ module Sprockets
         if (mtime = File.mtime(path)) > @mtime
           @mtime = mtime
         end
-        @_dependency_paths << path
+        dependency_paths << path
       end
 
       def compute_source(environment, context)
