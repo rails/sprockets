@@ -5,7 +5,7 @@ require 'yaml'
 class TestContext < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new(".")
-    @env.paths << fixture_path('context')
+    @env.append_path(fixture_path('context'))
   end
 
   test "source file properties are exposed in context" do
@@ -36,7 +36,7 @@ end
 class TestCustomProcessor < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
-    @env.paths << fixture_path('context')
+    @env.append_path(fixture_path('context'))
   end
 
   class YamlProcessor < Tilt::Template

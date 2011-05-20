@@ -259,7 +259,7 @@ class TestEnvironment < Sprockets::TestCase
 
   def new_environment
     env = Sprockets::Environment.new(".")
-    env.paths << fixture_path('default')
+    env.append_path(fixture_path('default'))
     env.static_root = fixture_path('public')
     yield env if block_given?
     env
@@ -309,7 +309,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "changing paths expires old assets" do
     assert @env["gallery.css"]
-    @env.paths.clear
+    @env.clear_paths
     assert_nil @env["gallery.css"]
   end
 
@@ -406,7 +406,7 @@ class TestEnvironmentIndex < Sprockets::TestCase
 
   def new_environment
     env = Sprockets::Environment.new(".")
-    env.paths << fixture_path('default')
+    env.append_path(fixture_path('default'))
     env.static_root = fixture_path('public')
     yield env if block_given?
     env.index

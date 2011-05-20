@@ -8,8 +8,8 @@ class TestServer < Sprockets::TestCase
 
   def setup
     @env = Sprockets::Environment.new
-    @env.paths << fixture_path("server/app/javascripts")
-    @env.paths << fixture_path("server/vendor/javascripts")
+    @env.append_path(fixture_path("server/app/javascripts"))
+    @env.append_path(fixture_path("server/vendor/javascripts"))
   end
 
   def default_app

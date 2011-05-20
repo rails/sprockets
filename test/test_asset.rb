@@ -95,7 +95,7 @@ end
 class BundledAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
-    @env.paths << fixture_path('asset')
+    @env.append_path(fixture_path('asset'))
 
     @asset = @env['application.js']
   end

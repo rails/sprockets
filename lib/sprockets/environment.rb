@@ -49,21 +49,23 @@ module Sprockets
       @trail.root
     end
 
-    class ArrayProxy
-      instance_methods.each { |m| undef_method m unless m =~ /(^__|^send$|^object_id$)/ }
-
-      def initialize(target, &callback)
-        @target, @callback = target, callback
-      end
-
-      def method_missing(sym, *args, &block)
-        @callback.call()
-        @target.send(sym, *args, &block)
-      end
+    def paths
+      @trail.paths.dup
     end
 
-    def paths
-      ArrayProxy.new(@trail.paths) { expire_index! }
+    def append_path(path)
+      expire_index!
+      @trail.paths.push(path)
+    end
+
+    def prepend_path(path)
+      expire_index!
+      @trail.paths.unshift(path)
+    end
+
+    def clear_paths
+      expire_index!
+      @trail.paths.clear
     end
 
     def extensions

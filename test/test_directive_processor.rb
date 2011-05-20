@@ -99,7 +99,7 @@ end
 class TestCustomDirectiveProcessor < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
-    @env.paths << fixture_path('context')
+    @env.append_path(fixture_path('context'))
   end
 
   class TestDirectiveProcessor < Sprockets::DirectiveProcessor
