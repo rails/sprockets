@@ -31,9 +31,6 @@ module Sprockets
       register_mime_type 'text/css', '.css'
       register_mime_type 'application/javascript', '.js'
 
-      register_processor '.css', DirectiveProcessor
-      register_processor '.js', DirectiveProcessor
-
       register_engine '.jst', JstProcessor
       register_engine '.ejs', EjsTemplate
 
@@ -43,6 +40,9 @@ module Sprockets
       register_engine '.scss',   Tilt::ScssTemplate
       register_engine '.less',   Tilt::LessTemplate
       register_engine '.coffee', CoffeeScriptTemplate
+
+      register_processor 'text/css', DirectiveProcessor
+      register_processor 'application/javascript', DirectiveProcessor
 
       register_bundle_processor 'text/css', CharsetNormalizer
 

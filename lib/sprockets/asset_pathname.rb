@@ -46,16 +46,6 @@ module Sprockets
       nil
     end
 
-    if {}.respond_to?(:key)
-      def engine_format_extension
-        @environment.mime_types.key(engine_content_type)
-      end
-    else
-      def engine_format_extension
-        @environment.mime_types.index(engine_content_type)
-      end
-    end
-
     def content_type
       @content_type ||= begin
         if format_extension.nil?

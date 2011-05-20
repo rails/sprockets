@@ -20,30 +20,6 @@ module Sprockets
       @mime_types[ext] = mime_type
     end
 
-    def processors(ext = nil)
-      if ext
-        @processors[normalize_extension(ext)].dup
-      else
-        deep_copy_hash(@processors)
-      end
-    end
-
-    def format_extensions
-      @processors.keys
-    end
-
-    def register_processor(ext, klass)
-      expire_index!
-      ext = normalize_extension(ext)
-      @trail.extensions << ext
-      @processors[ext].push(klass)
-    end
-
-    def unregister_processor(ext, klass)
-      expire_index!
-      @processors[normalize_extension(ext)].delete(klass)
-    end
-
     def engines(ext = nil)
       if ext
         ext = normalize_extension(ext)
@@ -57,11 +33,33 @@ module Sprockets
       @engines.keys
     end
 
+    def format_extensions
+      @trail.extensions - @engines.keys
+    end
+
     def register_engine(ext, klass)
       expire_index!
       ext = normalize_extension(ext)
       @trail.extensions << ext
       @engines[ext] = klass
+    end
+
+    def processors(mime_type = nil)
+      if mime_type
+        @processors[mime_type].dup
+      else
+        deep_copy_hash(@processors)
+      end
+    end
+
+    def register_processor(mime_type, klass)
+      expire_index!
+      @processors[mime_type].push(klass)
+    end
+
+    def unregister_processor(mime_type, klass)
+      expire_index!
+      @processors[mime_type].delete(klass)
     end
 
     def bundle_processors(mime_type = nil)

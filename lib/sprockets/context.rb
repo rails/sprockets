@@ -69,11 +69,9 @@ module Sprockets
     def evaluate(filename, options = {})
       pathname       = resolve(filename)
       asset_pathname = AssetPathname.new(pathname, environment)
-      extension      = asset_pathname.format_extension ||
-                         asset_pathname.engine_format_extension
 
       data     = options[:data] || pathname.read
-      engines  = options[:engines] || environment.processors(extension) +
+      engines  = options[:engines] || environment.processors(content_type) +
                           asset_pathname.engines.reverse
 
       engines.inject(data) do |result, engine|

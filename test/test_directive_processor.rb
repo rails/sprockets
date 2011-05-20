@@ -111,8 +111,8 @@ class TestCustomDirectiveProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#sprockets_resolve and Context#sprockets_depend" do
-    @env.unregister_processor('.js', Sprockets::DirectiveProcessor)
-    @env.register_processor('.js', TestDirectiveProcessor)
+    @env.unregister_processor('application/javascript', Sprockets::DirectiveProcessor)
+    @env.register_processor('application/javascript', TestDirectiveProcessor)
 
     assert_equal "var Foo = {};\n\n", @env["require_glob.js"].to_s
   end

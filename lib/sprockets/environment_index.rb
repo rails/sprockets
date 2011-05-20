@@ -106,10 +106,8 @@ module Sprockets
 
         pathname       = Pathname.new(pathname)
         asset_pathname = AssetPathname.new(pathname, self)
-        extension      = asset_pathname.format_extension ||
-                         asset_pathname.engine_format_extension
 
-        if processors(extension).any?
+        if processors(asset_pathname.content_type).any?
           logger.info "[Sprockets] #{logical_path} building"
           asset = BundledAsset.new(self, logical_path, pathname, options)
         else

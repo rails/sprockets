@@ -29,12 +29,12 @@ module Sprockets
   #
   # To remove the processor entirely:
   #
-  #     env.unregister_processor('.css', Sprockets::DirectiveProcessor)
-  #     env.unregister_processor('.js', Sprockets::DirectiveProcessor)
+  #     env.unregister_processor('text/css', Sprockets::DirectiveProcessor)
+  #     env.unregister_processor('application/css', Sprockets::DirectiveProcessor)
   #
   # Then inject your own preprocessor:
   #
-  #     env.register_processor('.css', MyProcessor)
+  #     env.register_processor('text/css', MyProcessor)
   #
   class DirectiveProcessor < Tilt::Template
     attr_reader :pathname
@@ -184,8 +184,8 @@ module Sprockets
       #
       # Replace the current processor on the environment with your own:
       #
-      #     env.unregister_processor('.css', Sprockets::DirectiveProcessor)
-      #     env.register_processor('.css', DirectiveProcessor)
+      #     env.unregister_processor('test/css', Sprockets::DirectiveProcessor)
+      #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives
         directives.each do |name, *args|
