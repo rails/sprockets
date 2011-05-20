@@ -28,6 +28,9 @@ module Sprockets
       @formats = Hash.new { |h, k| h[k] = [] }
       @filters = Hash.new { |h, k| h[k] = [] }
 
+      register_mime_type 'text/css', '.css'
+      register_mime_type 'application/javascript', '.js'
+
       register_format '.css', DirectiveProcessor
       register_format '.js', DirectiveProcessor
 

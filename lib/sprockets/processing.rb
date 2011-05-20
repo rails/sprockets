@@ -15,7 +15,9 @@ module Sprockets
 
     def register_mime_type(mime_type, ext)
       expire_index!
-      @mime_types[normalize_extension(ext)] = mime_type
+      ext = normalize_extension(ext)
+      @trail.extensions << ext
+      @mime_types[ext] = mime_type
     end
 
     def formats(ext = nil)
