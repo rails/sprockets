@@ -6,10 +6,16 @@ module Sprockets
   module Processing
     def mime_types(ext = nil)
       if ext.nil?
-        Rack::Mime::MIME_TYPES.dup
+        Rack::Mime::MIME_TYPES.merge(@mime_types)
       else
-        Rack::Mime::MIME_TYPES[ext]
+        ext = normalize_extension(ext)
+        @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
       end
+    end
+
+    def register_mime_type(mime_type, ext)
+      expire_index!
+      @mime_types[normalize_extension(ext)] = mime_type
     end
 
     def formats(ext = nil)
