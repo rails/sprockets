@@ -64,9 +64,9 @@ module EnvironmentTests
     assert_equal nil, @env.mime_types("foo")
   end
 
-  test "lookup filters" do
-    assert_equal [], @env.filters('application/javascript')
-    assert_equal [Sprockets::CharsetNormalizer], @env.filters('text/css')
+  test "lookup bundle processors" do
+    assert_equal [], @env.bundle_processors('application/javascript')
+    assert_equal [Sprockets::CharsetNormalizer], @env.bundle_processors('text/css')
   end
 
   test "resolve in environment" do
@@ -276,10 +276,10 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "application/javascript", @env.mime_types("jst")
   end
 
-  test "register filter" do
-    assert !@env.filters('text/css').include?(WhitespaceCompressor)
-    @env.register_filter 'text/css', WhitespaceCompressor
-    assert @env.filters('text/css').include?(WhitespaceCompressor)
+  test "register bundle processor" do
+    assert !@env.bundle_processors('text/css').include?(WhitespaceCompressor)
+    @env.register_bundle_processor 'text/css', WhitespaceCompressor
+    assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
   end
 
   test "changing static root expires old assets" do
@@ -445,25 +445,25 @@ class TestEnvironmentIndex < Sprockets::TestCase
     assert_equal "application/javascript", index.mime_types("jst")
   end
 
-  test "does not allow new filters to be added" do
+  test "does not allow new bundle processors to be added" do
     assert_raises TypeError do
-      @env.register_filter 'text/css', WhitespaceCompressor
+      @env.register_bundle_processor 'text/css', WhitespaceCompressor
     end
   end
 
-  test "does not allow filters to be removed" do
+  test "does not allow bundle processors to be removed" do
     assert_raises TypeError do
-      @env.unregister_filter 'text/css', WhitespaceCompressor
+      @env.unregister_bundle_processor 'text/css', WhitespaceCompressor
     end
   end
 
-  test "change in environment filters does not affect index" do
+  test "change in environment bundle_processors does not affect index" do
     env = Sprockets::Environment.new(".")
     index = env.index
 
-    assert !index.filters('text/css').include?(WhitespaceCompressor)
-    env.register_filter 'text/css', WhitespaceCompressor
-    assert !index.filters('text/css').include?(WhitespaceCompressor)
+    assert !index.bundle_processors('text/css').include?(WhitespaceCompressor)
+    env.register_bundle_processor 'text/css', WhitespaceCompressor
+    assert !index.bundle_processors('text/css').include?(WhitespaceCompressor)
   end
 
   test "change in environment static root does not affect index" do

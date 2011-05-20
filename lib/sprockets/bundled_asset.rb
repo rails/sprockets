@@ -120,7 +120,7 @@ module Sprockets
         to_a.each { |dependency| source << dependency.body }
 
         @source = context.evaluate(pathname, :data => source,
-                    :engines => environment.filters(content_type))
+                    :engines => environment.bundle_processors(content_type))
         @length = Rack::Utils.bytesize(@source)
         @digest = Digest::MD5.hexdigest(@source)
       end

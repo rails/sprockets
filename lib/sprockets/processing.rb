@@ -64,26 +64,26 @@ module Sprockets
       @engines[ext] = klass
     end
 
-    def filters(mime_type = nil)
+    def bundle_processors(mime_type = nil)
       if mime_type
-        @filters[mime_type].dup
+        @bundle_processors[mime_type].dup
       else
-        deep_copy_hash(@filters)
+        deep_copy_hash(@bundle_processors)
       end
     end
 
-    def register_filter(mime_type, klass)
+    def register_bundle_processor(mime_type, klass)
       expire_index!
-      @filters[mime_type].push(klass)
+      @bundle_processors[mime_type].push(klass)
     end
 
-    def unregister_filter(mime_type, klass)
+    def unregister_bundle_processor(mime_type, klass)
       expire_index!
-      @filters[mime_type].delete(klass)
+      @bundle_processors[mime_type].delete(klass)
     end
 
     def css_compressor
-      filters('text/css').detect { |klass|
+      bundle_processors('text/css').detect { |klass|
         klass.respond_to?(:name) &&
           klass.name == 'Sprockets::Compressor'
       }
@@ -93,7 +93,7 @@ module Sprockets
       expire_index!
 
       if old_compressor = css_compressor
-        unregister_filter 'text/css', old_compressor
+        unregister_bundle_processor 'text/css', old_compressor
       end
 
       if compressor
@@ -101,12 +101,12 @@ module Sprockets
           @compressor = compressor
         end
 
-        register_filter 'text/css', klass
+        register_bundle_processor 'text/css', klass
       end
     end
 
     def js_compressor
-      filters('application/javascript').detect { |klass|
+      bundle_processors('application/javascript').detect { |klass|
         klass.respond_to?(:name) &&
           klass.name == 'Sprockets::Compressor'
       }
@@ -116,7 +116,7 @@ module Sprockets
       expire_index!
 
       if old_compressor = js_compressor
-        unregister_filter 'application/javascript', old_compressor
+        unregister_bundle_processor 'application/javascript', old_compressor
       end
 
       if compressor
@@ -124,7 +124,7 @@ module Sprockets
           @compressor = compressor
         end
 
-        register_filter 'application/javascript', klass
+        register_bundle_processor 'application/javascript', klass
       end
     end
 

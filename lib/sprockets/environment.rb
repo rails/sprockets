@@ -26,7 +26,7 @@ module Sprockets
       @mime_types = {}
       @engines = {}
       @formats = Hash.new { |h, k| h[k] = [] }
-      @filters = Hash.new { |h, k| h[k] = [] }
+      @bundle_processors = Hash.new { |h, k| h[k] = [] }
 
       register_mime_type 'text/css', '.css'
       register_mime_type 'application/javascript', '.js'
@@ -44,7 +44,7 @@ module Sprockets
       register_engine '.less',   Tilt::LessTemplate
       register_engine '.coffee', CoffeeScriptTemplate
 
-      register_filter 'text/css', CharsetNormalizer
+      register_bundle_processor 'text/css', CharsetNormalizer
 
       expire_index!
     end
