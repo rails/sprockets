@@ -22,7 +22,7 @@ module Sprockets
 
       @mime_types = environment.mime_types
       @engines    = environment.engines
-      @formats    = environment.formats
+      @processors = environment.processors
       @bundle_processors = environment.bundle_processors
     end
 
@@ -109,7 +109,7 @@ module Sprockets
         extension      = asset_pathname.format_extension ||
                          asset_pathname.engine_format_extension
 
-        if formats(extension).any?
+        if processors(extension).any?
           logger.info "[Sprockets] #{logical_path} building"
           asset = BundledAsset.new(self, logical_path, pathname, options)
         else

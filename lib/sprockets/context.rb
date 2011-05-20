@@ -73,7 +73,7 @@ module Sprockets
                          asset_pathname.engine_format_extension
 
       data     = options[:data] || pathname.read
-      engines  = options[:engines] || environment.formats(extension) +
+      engines  = options[:engines] || environment.processors(extension) +
                           asset_pathname.engines.reverse
 
       engines.inject(data) do |result, engine|

@@ -25,14 +25,14 @@ module Sprockets
 
       @mime_types = {}
       @engines = {}
-      @formats = Hash.new { |h, k| h[k] = [] }
+      @processors = Hash.new { |h, k| h[k] = [] }
       @bundle_processors = Hash.new { |h, k| h[k] = [] }
 
       register_mime_type 'text/css', '.css'
       register_mime_type 'application/javascript', '.js'
 
-      register_format '.css', DirectiveProcessor
-      register_format '.js', DirectiveProcessor
+      register_processor '.css', DirectiveProcessor
+      register_processor '.js', DirectiveProcessor
 
       register_engine '.jst', JstProcessor
       register_engine '.ejs', EjsTemplate

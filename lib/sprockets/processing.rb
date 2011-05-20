@@ -20,28 +20,28 @@ module Sprockets
       @mime_types[ext] = mime_type
     end
 
-    def formats(ext = nil)
+    def processors(ext = nil)
       if ext
-        @formats[normalize_extension(ext)].dup
+        @processors[normalize_extension(ext)].dup
       else
-        deep_copy_hash(@formats)
+        deep_copy_hash(@processors)
       end
     end
 
     def format_extensions
-      @formats.keys
+      @processors.keys
     end
 
-    def register_format(ext, klass)
+    def register_processor(ext, klass)
       expire_index!
       ext = normalize_extension(ext)
       @trail.extensions << ext
-      @formats[ext].push(klass)
+      @processors[ext].push(klass)
     end
 
-    def unregister_format(ext, klass)
+    def unregister_processor(ext, klass)
       expire_index!
-      @formats[normalize_extension(ext)].delete(klass)
+      @processors[normalize_extension(ext)].delete(klass)
     end
 
     def engines(ext = nil)
