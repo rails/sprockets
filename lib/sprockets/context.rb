@@ -76,8 +76,12 @@ module Sprockets
                           attributes.engines.reverse
 
       engines.inject(data) do |result, engine|
-        template = engine.new(pathname.to_s) { result }
-        template.render(self, {})
+        begin
+          template = engine.new(pathname.to_s) { result }
+          template.render(self, {})
+        rescue Exception => e
+          raise e.class, annotate_error_message(e.message)
+        end
       end
     end
 
@@ -97,5 +101,12 @@ module Sprockets
 
       pathname
     end
+
+    private
+      def annotate_error_message(message)
+        annotation = "in #{@pathname.to_s}"
+        annotation << ":#{@__LINE__}" if @__LINE__
+        "#{message}\n#{annotation}"
+      end
   end
 end
