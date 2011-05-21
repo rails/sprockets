@@ -25,14 +25,14 @@ class DirectiveParserTest < Sprockets::TestCase
   test "parsing single line slash-star comments" do
     directive_parser("slash_star_single").tap do |parser|
       assert_equal "\n\n(function() {\n})();\n", parser.processed_source
-      assert_equal [["require", "a"]], parser.directives
+      assert_equal [[1, "require", "a"]], parser.directives
     end
   end
 
   test "parsing triple-hash comments" do
     directive_parser("triple_hash").tap do |parser|
       assert_equal "###\nHeader\n\n\n###\n\n(->)()\n", parser.processed_source
-      assert_equal directives, parser.directives
+      assert_equal directives(1), parser.directives
     end
   end
 
@@ -67,11 +67,11 @@ class DirectiveParserTest < Sprockets::TestCase
   test "directive word splitting" do
     directive_parser("directive_word_splitting").tap do |parser|
       assert_equal [
-        ["one"],
-        ["one", "two"],
-        ["one", "two", "three"],
-        ["one", "two three"],
-        ["six", "seven"]
+        [1, "one"],
+        [2, "one", "two"],
+        [3, "one", "two", "three"],
+        [4, "one", "two three"],
+        [6, "six", "seven"]
       ], parser.directives
     end
   end
@@ -79,7 +79,7 @@ class DirectiveParserTest < Sprockets::TestCase
   test "space between = and directive word" do
     directive_parser("space_between_directive_word").tap do |parser|
       assert_equal "var foo;\n", parser.processed_source
-      assert_equal [["require", "foo"]], parser.directives
+      assert_equal [[1, "require", "foo"]], parser.directives
     end
   end
 
@@ -91,8 +91,8 @@ class DirectiveParserTest < Sprockets::TestCase
     fixture("directives/#{name}")
   end
 
-  def directives
-    [["require", "a"], ["require", "b"], ["require", "c"]]
+  def directives(offset = 0)
+    [[3 + offset, "require", "a"], [4 + offset, "require", "b"], [6 + offset, "require", "c"]]
   end
 end
 

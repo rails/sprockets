@@ -45,6 +45,7 @@ module Sprockets
       @directive_parser   = Parser.new(data)
       @included_pathnames = []
       @compat             = false
+      @line_number        = nil
     end
 
     # Implemented for Tilt#render.
@@ -144,15 +145,16 @@ module Sprockets
         end
 
         # Returns an Array of directive structures. Each structure
-        # is an Array with the directive name as the first element
-        # followed by any arguments.
+        # is an Array with the line number as the first element, the
+        # directive name as the second element, followed by any
+        # arguments.
         #
-        #     [["require", "foo"], ["require", "bar"]]
+        #     [[1, "require", "foo"], [2, "require", "bar"]]
         #
         def directives
-          @directives ||= header_lines.map do |line|
+          @directives ||= header_lines.each_with_index.map do |line, index|
             if directive = extract_directive(line)
-              Shellwords.shellwords(directive)
+              [index + 1, *Shellwords.shellwords(directive)]
             end
           end.compact
         end
@@ -164,6 +166,7 @@ module Sprockets
 
       attr_reader :included_pathnames
       attr_reader :context
+      attr_reader :line_number
 
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
@@ -188,8 +191,10 @@ module Sprockets
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives
-        directives.each do |name, *args|
+        directives.each do |line_number, name, *args|
+          @line_number = line_number
           send("process_#{name}_directive", *args)
+          @line_number = nil
         end
       end
 
