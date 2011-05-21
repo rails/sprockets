@@ -45,7 +45,6 @@ module Sprockets
       @directive_parser   = Parser.new(data)
       @included_pathnames = []
       @compat             = false
-      @line_number        = nil
     end
 
     # Implemented for Tilt#render.
@@ -166,7 +165,6 @@ module Sprockets
 
       attr_reader :included_pathnames
       attr_reader :context
-      attr_reader :line_number
 
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
@@ -192,9 +190,9 @@ module Sprockets
       #
       def process_directives
         directives.each do |line_number, name, *args|
-          @line_number = line_number
+          context.__LINE__ = line_number
           send("process_#{name}_directive", *args)
-          @line_number = nil
+          context.__LINE__ = nil
         end
       end
 

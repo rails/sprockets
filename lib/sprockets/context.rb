@@ -10,11 +10,13 @@ module Sprockets
   class Context
     attr_reader :environment, :pathname
     attr_reader :_required_paths, :_dependency_paths
+    attr_writer :__LINE__
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
       @logical_path = logical_path
       @pathname     = pathname
+      @__LINE__     = nil
 
       @_required_paths   = []
       @_dependency_paths = Set.new
