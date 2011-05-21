@@ -5,7 +5,6 @@ module Sprockets
   autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
   autoload :CircularDependencyError, "sprockets/errors"
-  autoload :CoffeeScriptTemplate,    "sprockets/coffee_script_template"
   autoload :Compressor,              "sprockets/compressor"
   autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :Context,                 "sprockets/context"
