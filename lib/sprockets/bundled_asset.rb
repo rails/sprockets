@@ -7,30 +7,47 @@ require 'time'
 module Sprockets
   class BundledAsset
     attr_reader :logical_path, :pathname
-    attr_reader :content_type, :mtime, :length, :digest
+    attr_reader :content_type, :mtime
     attr_reader :body
 
     def initialize(environment, logical_path, pathname, options)
-      environment = environment
-      context     = environment.context_class.new(environment, logical_path.to_s, pathname)
+      @environment  = environment
+      @context      = environment.context_class.new(environment, logical_path.to_s, pathname)
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
       @content_type = AssetPathname.new(pathname, environment).content_type
 
-      @body = context.evaluate(pathname)
+      @assets       = []
+      @source       = nil
+      @body         = context.evaluate(pathname)
 
-      requires = options[:_requires] ||= []
+      index    = options[:_environment] || options[:_index] || environment
+      requires = options[:_requires] || []
       if requires.include?(pathname.to_s)
         raise CircularDependencyError, "#{pathname} has already been required"
       end
       requires << pathname.to_s
 
-      @assets = []
+      compute_dependencies!(index, requires)
+      compute_dependency_paths!
+    end
 
-      compute_dependencies(environment, context, options)
-      compute_dependency_paths(context)
-      compute_source(environment, context)
+    def source
+      @source ||= begin
+        data = ""
+        to_a.each { |dependency| data << dependency.body }
+        context.evaluate(pathname, :data => data,
+          :engines => environment.bundle_processors(content_type))
+      end
+    end
+
+    def length
+      @length ||= Rack::Utils.bytesize(source)
+    end
+
+    def digest
+      @digest ||= Digest::MD5.hexdigest(source)
     end
 
     def dependencies?
@@ -46,7 +63,7 @@ module Sprockets
     end
 
     def each
-      yield @source
+      yield source
     end
 
     def stale?
@@ -56,7 +73,7 @@ module Sprockets
     end
 
     def to_s
-      @source
+      source
     end
 
     def eql?(other)
@@ -68,15 +85,15 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
-      attr_reader :dependency_paths
+      attr_reader :environment, :context, :dependency_paths
 
     private
-      def compute_dependencies(environment, context, options)
+      def compute_dependencies!(index, requires)
+        options = { :_requires => requires }
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
           else
-            index = (options[:_environment] || options[:_index] || environment)
             index[required_path, options].to_a.each do |asset|
               add_dependency(asset)
             end
@@ -91,7 +108,7 @@ module Sprockets
         end
       end
 
-      def compute_dependency_paths(context)
+      def compute_dependency_paths!
         @dependency_paths = Set.new
         @mtime = Time.at(0)
 
@@ -113,16 +130,6 @@ module Sprockets
           @mtime = mtime
         end
         dependency_paths << path
-      end
-
-      def compute_source(environment, context)
-        source = ""
-        to_a.each { |dependency| source << dependency.body }
-
-        @source = context.evaluate(pathname, :data => source,
-                    :engines => environment.bundle_processors(content_type))
-        @length = Rack::Utils.bytesize(@source)
-        @digest = Digest::MD5.hexdigest(@source)
       end
   end
 end
