@@ -1,4 +1,3 @@
-require 'sprockets/asset_pathname'
 require 'fileutils'
 require 'pathname'
 
@@ -42,8 +41,8 @@ module Sprockets
       def find_asset_in_static_root(logical_path)
         return unless static_root
 
-        pathname = Pathname.new(static_root.join(logical_path))
-        asset_pathname = AssetPathname.new(pathname, self)
+        pathname   = Pathname.new(static_root.join(logical_path))
+        attributes = attributes_for(pathname)
 
         entries = entries(pathname.dirname)
 
@@ -52,9 +51,9 @@ module Sprockets
         end
 
         if !path_fingerprint(pathname)
-          pattern = /^#{Regexp.escape(asset_pathname.basename_without_extensions.to_s)}
+          pattern = /^#{Regexp.escape(attributes.basename_without_extensions.to_s)}
                      -([0-9a-f]{7,40})
-                     #{Regexp.escape(asset_pathname.extensions.join)}$/x
+                     #{Regexp.escape(attributes.extensions.join)}$/x
 
           entries.each do |filename|
             if filename.to_s =~ pattern

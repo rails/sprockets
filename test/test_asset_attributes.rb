@@ -1,11 +1,6 @@
 require 'sprockets_test'
 
-class TestAssetPathname < Sprockets::TestCase
-  test "identity initialization" do
-    path = pathname("javascripts/application.js.coffee")
-    assert pathname(path).equal?(path)
-  end
-
+class TestAssetAttributes < Sprockets::TestCase
   test "basename with extensions" do
     assert_equal "empty",
       pathname("empty").basename_without_extensions.to_s
@@ -86,6 +81,6 @@ class TestAssetPathname < Sprockets::TestCase
 
   private
     def pathname(path)
-      Sprockets::AssetPathname.new(path, Sprockets::Environment.new)
+      Sprockets::Environment.new.attributes_for(path)
     end
 end

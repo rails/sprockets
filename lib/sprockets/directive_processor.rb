@@ -144,15 +144,16 @@ module Sprockets
         end
 
         # Returns an Array of directive structures. Each structure
-        # is an Array with the directive name as the first element
-        # followed by any arguments.
+        # is an Array with the line number as the first element, the
+        # directive name as the second element, followed by any
+        # arguments.
         #
-        #     [["require", "foo"], ["require", "bar"]]
+        #     [[1, "require", "foo"], [2, "require", "bar"]]
         #
         def directives
-          @directives ||= header_lines.map do |line|
+          @directives ||= header_lines.each_with_index.map do |line, index|
             if directive = extract_directive(line)
-              Shellwords.shellwords(directive)
+              [index + 1, *Shellwords.shellwords(directive)]
             end
           end.compact
         end
@@ -188,8 +189,10 @@ module Sprockets
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives
-        directives.each do |name, *args|
+        directives.each do |line_number, name, *args|
+          context.__LINE__ = line_number
           send("process_#{name}_directive", *args)
+          context.__LINE__ = nil
         end
       end
 
@@ -336,7 +339,7 @@ module Sprockets
 
       # Enable Sprockets 1.x compat mode.
       #
-      # Makes it possible to use the same javascript soruce
+      # Makes it possible to use the same javascript source
       # file in both Sprockets 1 and 2.
       #
       #     //= compat

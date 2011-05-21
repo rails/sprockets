@@ -1,14 +1,12 @@
 require 'pathname'
 
 module Sprockets
-  class AssetPathname
-    def self.new(path, environment)
-      path.is_a?(self) ? path : super(path, environment)
-    end
+  class AssetAttributes
+    attr_reader :environment, :pathname
 
-    def initialize(path, environment)
-      @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
+    def initialize(environment, path)
       @environment = environment
+      @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
     end
 
     def basename_without_extensions

@@ -1,4 +1,4 @@
-require 'sprockets/asset_pathname'
+require 'sprockets/asset_attributes'
 require 'sprockets/context'
 require 'sprockets/directive_processor'
 require 'sprockets/environment_index'
@@ -101,6 +101,14 @@ module Sprockets
       end
     end
     alias_method :[], :find_asset
+
+    def attributes_for(path)
+      AssetAttributes.new(self, path)
+    end
+
+    def content_type_of(path)
+      attributes_for(path).content_type
+    end
 
     protected
       def expire_index!
