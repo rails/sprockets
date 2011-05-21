@@ -5,7 +5,7 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'coffee-script'
+      require_template_library 'coffee_script'
     end
 
     def prepare
