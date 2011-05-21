@@ -1,4 +1,4 @@
-require 'sprockets/asset_pathname'
+require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
@@ -75,6 +75,14 @@ module Sprockets
     end
     alias_method :[], :find_asset
 
+    def attributes_for(path)
+      AssetAttributes.new(self, path)
+    end
+
+    def content_type_of(path)
+      attributes_for(path).content_type
+    end
+
     protected
       def expire_index!
         raise TypeError, "can't modify immutable index"
@@ -104,10 +112,9 @@ module Sprockets
           return asset
         end
 
-        pathname       = Pathname.new(pathname)
-        asset_pathname = AssetPathname.new(pathname, self)
+        pathname = Pathname.new(pathname)
 
-        if processors(asset_pathname.content_type).any?
+        if processors(content_type_of(pathname)).any?
           logger.info "[Sprockets] #{logical_path} building"
           asset = BundledAsset.new(self, logical_path, pathname, options)
         else
@@ -119,13 +126,13 @@ module Sprockets
 
     private
       def logical_index_path(logical_path)
-        pathname = Pathname.new(logical_path)
-        asset_pathname = AssetPathname.new(logical_path, self)
+        pathname   = Pathname.new(logical_path)
+        attributes = attributes_for(logical_path)
 
-        if asset_pathname.basename_without_extensions.to_s == 'index'
+        if attributes.basename_without_extensions.to_s == 'index'
           logical_path
         else
-          basename = "#{asset_pathname.basename_without_extensions}/index#{asset_pathname.extensions.join}"
+          basename = "#{attributes.basename_without_extensions}/index#{attributes.extensions.join}"
           pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
         end
       end
@@ -139,8 +146,7 @@ module Sprockets
       end
 
       def path_without_engine_extensions(pathname)
-        asset_pathname = AssetPathname.new(pathname, self)
-        asset_pathname.engine_extensions.inject(pathname) do |p, ext|
+        attributes_for(pathname).engine_extensions.inject(pathname) do |p, ext|
           p.sub(ext, '')
         end
       end

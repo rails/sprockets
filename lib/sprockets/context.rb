@@ -1,4 +1,3 @@
-require 'sprockets/asset_pathname'
 require 'sprockets/errors'
 require 'pathname'
 require 'set'
@@ -30,12 +29,12 @@ module Sprockets
     end
 
     def content_type
-      AssetPathname.new(pathname, environment).content_type
+      environment.content_type_of(pathname)
     end
 
     def resolve(path, options = {}, &block)
-      pathname       = Pathname.new(path)
-      asset_pathname = AssetPathname.new(pathname, environment)
+      pathname   = Pathname.new(path)
+      attributes = environment.attributes_for(pathname)
 
       if pathname.absolute?
         pathname
@@ -43,15 +42,15 @@ module Sprockets
       elsif content_type = options[:content_type]
         content_type = self.content_type if content_type == :self
 
-        if asset_pathname.format_extension
-          if content_type != asset_pathname.content_type
+        if attributes.format_extension
+          if content_type != attributes.content_type
             raise ContentTypeMismatch, "#{path} is " +
-              "'#{asset_pathname.content_type}', not '#{content_type}'"
+              "'#{attributes.content_type}', not '#{content_type}'"
           end
         end
 
         resolve(path) do |candidate|
-          if self.content_type == AssetPathname.new(candidate, environment).content_type
+          if self.content_type == environment.content_type_of(candidate)
             return candidate
           end
         end
@@ -67,12 +66,12 @@ module Sprockets
     end
 
     def evaluate(filename, options = {})
-      pathname       = resolve(filename)
-      asset_pathname = AssetPathname.new(pathname, environment)
+      pathname   = resolve(filename)
+      attributes = environment.attributes_for(pathname)
 
       data     = options[:data] || pathname.read
       engines  = options[:engines] || environment.processors(content_type) +
-                          asset_pathname.engines.reverse
+                          attributes.engines.reverse
 
       engines.inject(data) do |result, engine|
         template = engine.new(pathname.to_s) { result }
@@ -82,7 +81,7 @@ module Sprockets
 
     def asset_requirable?(path)
       pathname = resolve(path)
-      content_type = AssetPathname.new(pathname, environment).content_type
+      content_type = environment.content_type_of(pathname)
       pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
 

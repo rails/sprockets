@@ -1,7 +1,7 @@
 # autoload the various classes used in Sprockets
 module Sprockets
   autoload :ArgumentError,           "sprockets/errors"
-  autoload :AssetPathname,           "sprockets/asset_pathname"
+  autoload :AssetAttributes,         "sprockets/asset_attributes"
   autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
   autoload :CircularDependencyError, "sprockets/errors"

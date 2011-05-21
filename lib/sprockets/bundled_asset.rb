@@ -1,4 +1,3 @@
-require 'sprockets/asset_pathname'
 require 'sprockets/errors'
 require 'digest/md5'
 require 'set'
@@ -16,7 +15,7 @@ module Sprockets
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
-      @content_type = AssetPathname.new(pathname, environment).content_type
+      @content_type = environment.content_type_of(pathname)
 
       @assets       = []
       @source       = nil

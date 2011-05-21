@@ -1,4 +1,3 @@
-require 'sprockets/asset_pathname'
 require 'digest/md5'
 require 'time'
 
@@ -10,9 +9,7 @@ module Sprockets
     def initialize(environment, logical_path, pathname, digest = nil)
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
-
-      asset_pathname = AssetPathname.new(pathname, environment)
-      @content_type  = asset_pathname.content_type
+      @content_type = environment.content_type_of(pathname)
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
