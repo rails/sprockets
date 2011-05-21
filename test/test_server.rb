@@ -157,10 +157,10 @@ class TestServer < Sprockets::TestCase
     assert_equal "pass", last_response.headers['X-Cascade']
   end
 
-  test "raise exception if require is missing" do
-    assert_raises Sprockets::FileNotFound do
-      get "/javascripts/missing_require.js"
-    end
+  test "re-throw exception in browser if JS require is missing" do
+    get "/javascripts/missing_require.js"
+    assert_equal 500, last_response.status
+    assert_equal "throw Error(\"Sprockets::FileNotFound: couldn't find file 'notfound'\")", last_response.body
   end
 
   test "illegal require outside load path" do

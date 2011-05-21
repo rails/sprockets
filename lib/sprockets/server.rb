@@ -30,8 +30,20 @@ module Sprockets
       env['rack.session.options'][:defer] = true
       env['rack.session.options'][:skip] = true
 
-      # Lookup the asset by `PATH_INFO`
-      asset = find_asset(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      # Extract the path from everything after the leading slash
+      path = env['PATH_INFO'].to_s.sub(/^\//, '')
+
+      # Look up the asset. If an exception is raised in a JavaScript
+      # asset, re-throw the exception for the browser.
+      begin
+        asset = find_asset(path)
+      rescue Exception => e
+        if content_type_of(path) == "application/javascript"
+          return javascript_exception_response(e)
+        else
+          raise
+        end
+      end
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
@@ -107,6 +119,15 @@ module Sprockets
       def not_found_response
         [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9", "X-Cascade" => "pass" }, [ "Not found" ] ]
       end
+
+      # Returns a JavaScript response that re-throws a Ruby exception
+      # in the browser
+      def javascript_exception_response(exception)
+        err  = "#{exception.class.name}: #{exception.message}"
+        body = "throw Error(#{err.inspect})"
+        [ 500, { "Content-Type" => "application/javascript", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
+      end
+
 
       # Compare the requests `HTTP_IF_MODIFIED_SINCE` against the
       # assets mtime
