@@ -120,10 +120,8 @@ module Sprockets
           if path_fingerprint(logical_path)
             asset
           elsif asset.stale?
-            logger.warn "[Sprockets] #{asset.logical_path} #{asset.digest} stale"
             nil
           else
-            logger.info "[Sprockets] #{asset.logical_path} #{asset.digest} fresh"
             asset
           end
         else

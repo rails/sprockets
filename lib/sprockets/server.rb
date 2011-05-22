@@ -20,6 +20,9 @@ module Sprockets
     # A request for `"/assets/foo/bar.js"` will search your
     # environment for `"foo/bar.js"`.
     def call(env)
+      start_time = Time.now.to_f
+      msg = "\nServed asset #{env['PATH_INFO']} -"
+
       # URLs containing a `".."` are rejected for security reasons.
       if forbidden_request?(env)
         return forbidden_response
@@ -38,25 +41,39 @@ module Sprockets
       begin
         asset = find_asset(path)
       rescue Exception => e
+        logger.error "Error compiling asset #{path}:"
+        logger.error "#{e.class.name}: #{e.message}"
+
         if content_type_of(path) == "application/javascript"
+          logger.info "#{msg} 500 Internal Server Error\n\n"
           return javascript_exception_response(e)
         else
           raise
         end
       end
 
+      time_elapsed = Time.now.to_f - start_time
+
+      tag = " (%0.3gs)  (pid #{Process.pid})\n\n" % time_elapsed
+
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
+        logger.info "#{msg} 404 Not Found #{tag}"
+
         # Return a 404 Not Found
         not_found_response
 
       # Check request headers `HTTP_IF_MODIFIED_SINCE` and
       # `HTTP_IF_NONE_MATCH` against the assets mtime and md5
       elsif not_modified?(asset, env) || etag_match?(asset, env)
+        logger.info "#{msg} 304 Not Modified #{tag}"
+
         # Return a 403 Not Modified
         not_modified_response(asset, env)
 
       else
+        logger.info "#{msg} 200 OK #{tag}"
+
         # Return a 200 with the asset contents
         ok_response(asset, env)
       end

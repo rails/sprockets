@@ -68,21 +68,28 @@ module Sprockets
     end
 
     def evaluate(filename, options = {})
+      start_time = Time.now.to_f
       pathname   = resolve(filename)
       attributes = environment.attributes_for(pathname)
 
-      data     = options[:data] || pathname.read
-      engines  = options[:engines] || environment.processors(content_type) +
+      data    = options[:data] || pathname.read
+      result  = data
+      engines = options[:engines] || environment.processors(content_type) +
                           attributes.engines.reverse
 
-      engines.inject(data) do |result, engine|
+      engines.each do |engine|
         begin
           template = engine.new(pathname.to_s) { result }
-          template.render(self, {})
+          result = template.render(self, {})
         rescue Exception => e
           raise e.class, annotate_error_message(e.message)
         end
       end
+
+      elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
+      logger.info "Compiled #{attributes.pretty_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
+
+      result
     end
 
     def asset_requirable?(path)
@@ -104,9 +111,13 @@ module Sprockets
 
     private
       def annotate_error_message(message)
-        annotation = "in #{@pathname.to_s}"
+        annotation = "  (in #{@pathname.to_s})"
         annotation << ":#{@__LINE__}" if @__LINE__
         "#{message}\n#{annotation}"
+      end
+
+      def logger
+        environment.logger
       end
   end
 end

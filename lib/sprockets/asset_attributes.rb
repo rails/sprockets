@@ -17,6 +17,12 @@ module Sprockets
       @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
     end
 
+    def pretty_path
+      @pretty_path ||= @pathname.
+        sub(/^#{Regexp.escape(ENV['HOME'])}/, '~').
+        sub(/^#{Regexp.escape(environment.root)}\//, '')
+    end
+
     def format_extension
       extensions.detect { |ext| @environment.mime_types(ext) }
     end

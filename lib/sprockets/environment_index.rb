@@ -100,7 +100,7 @@ module Sprockets
         asset = build_asset(logical_path, pathname, options)
 
         if fingerprint && fingerprint != asset.digest
-          logger.error "[Sprockets] #{logical_path} #{fingerprint} nonexistent"
+          logger.error "Nonexistent asset #{logical_path} @ #{fingerprint}"
           asset = nil
         end
 
@@ -115,7 +115,6 @@ module Sprockets
         pathname = Pathname.new(pathname)
 
         if processors(content_type_of(pathname)).any?
-          logger.info "[Sprockets] #{logical_path} building"
           asset = BundledAsset.new(self, logical_path, pathname, options)
         else
           asset = StaticAsset.new(self, logical_path, pathname)
