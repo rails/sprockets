@@ -160,7 +160,7 @@ class TestServer < Sprockets::TestCase
   test "re-throw exception in browser if JS require is missing" do
     get "/javascripts/missing_require.js"
     assert_equal 500, last_response.status
-    assert_equal "throw Error(\"Sprockets::FileNotFound: couldn't find file 'notfound'\\nin #{fixture_path("server/vendor/javascripts/missing_require.js")}:1\")", last_response.body
+    assert_equal "throw Error(\"Sprockets::FileNotFound: couldn't find file 'notfound'\\n  (in #{fixture_path("server/vendor/javascripts/missing_require.js")}):1\")", last_response.body
   end
 
   test "illegal require outside load path" do
