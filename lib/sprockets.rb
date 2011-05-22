@@ -23,7 +23,7 @@ module Sprockets
   autoload :StaticCompilation,       "sprockets/static_compilation"
 end
 
-if defined?(Rails) && Rails::VERSION::STRING.match(/^3/)
+if defined?(Rails::VERSION::STRING) && Rails::VERSION::STRING.match(/^3/)
   require 'sprockets/engine'
 end
 
