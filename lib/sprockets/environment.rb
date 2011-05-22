@@ -54,7 +54,7 @@ module Sprockets
     end
 
     def paths
-      @trail.paths.dup
+      @trail.paths#.dup
     end
 
     def append_path(path)
