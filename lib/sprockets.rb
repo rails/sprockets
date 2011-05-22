@@ -1,5 +1,6 @@
-# autoload the various classes used in Sprockets
 module Sprockets
+  VERSION = "2.0.0.beta.6"
+
   autoload :ArgumentError,           "sprockets/errors"
   autoload :AssetAttributes,         "sprockets/asset_attributes"
   autoload :BundledAsset,            "sprockets/bundled_asset"
