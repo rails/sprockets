@@ -288,7 +288,9 @@ module Sprockets
           context.depend_on(root)
 
           Dir["#{root}/*"].sort.each do |filename|
-            if context.asset_requirable?(filename)
+            if filename == self.file
+              next
+            elsif context.asset_requirable?(filename)
               context.require_asset(filename)
             end
           end
@@ -309,7 +311,9 @@ module Sprockets
           context.depend_on(root)
 
           Dir["#{root}/**/*"].sort.each do |filename|
-            if File.directory?(filename)
+            if filename == self.file
+              next
+            elsif File.directory?(filename)
               context.depend_on(filename)
             elsif context.asset_requirable?(filename)
               context.require_asset(filename)

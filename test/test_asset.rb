@@ -196,6 +196,13 @@ class BundledAssetTest < Sprockets::TestCase
     )
   end
 
+  test "require_directory current directory includes self last" do
+    assert_equal(
+      "var Bar;\nvar Foo;\nvar App;\n",
+      asset("tree/directory/application.js").to_s
+    )
+  end
+
   test "require_tree requires all descendant files in alphabetical order" do
     assert_equal(
       asset("tree/all_with_require.js").to_s,
@@ -207,6 +214,13 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal(
       "a()\n\nb()\n\n",
       asset("tree/without_argument/require_tree_without_argument.js").to_s
+    )
+  end
+
+  test "require_tree with current directory includes self last" do
+    assert_equal(
+      "var Bar;\nvar Foo;\nvar App;\n",
+      asset("tree/tree/application.js").to_s
     )
   end
 
