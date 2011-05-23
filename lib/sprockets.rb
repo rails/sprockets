@@ -1,5 +1,5 @@
 module Sprockets
-  VERSION = "2.0.0.beta.7"
+  VERSION = "2.0.0.beta.8"
 
   autoload :ArgumentError,           "sprockets/errors"
   autoload :AssetAttributes,         "sprockets/asset_attributes"
