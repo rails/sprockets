@@ -169,24 +169,18 @@ module Sprockets
 
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        if body_only?(env) && asset.dependencies?
-          body = asset.body
-          [ 206, {
-              "Content-Range"  => "bytes #{body.length-1}-#{asset.length-1}/#{asset.length}",
-              "Content-Type"   => asset.content_type,
-              "Content-Length" => body.length.to_s,
-              "Cache-Control"  => "no-cache"
-            }, [body] ]
+        if body_only?(env)
+          [ 200, headers(env, asset, asset.body.length), [asset.body] ]
         else
-          [ 200, headers(asset, env), asset ]
+          [ 200, headers(env, asset, asset.length), asset ]
         end
       end
 
-      def headers(asset, env)
+      def headers(env, asset, length)
         Hash.new.tap do |headers|
           # Set content type and length headers
           headers["Content-Type"]   = asset.content_type
-          headers["Content-Length"] = asset.length.to_s
+          headers["Content-Length"] = length.to_s
           headers["Content-MD5"]    = asset.digest
 
           # Set caching headers

@@ -39,6 +39,7 @@ class TestServer < Sprockets::TestCase
     get "/javascripts/foo.js?body=1"
     assert_equal 200, last_response.status
     assert_equal "var foo;\n", last_response.body
+    assert_equal "9", last_response.headers['Content-Length']
   end
 
   test "serve single source file from indexed environment" do
@@ -54,9 +55,10 @@ class TestServer < Sprockets::TestCase
 
   test "serve source file body that has dependencies" do
     get "/javascripts/application.js?body=true"
-    assert_equal 206, last_response.status
+    assert_equal 200, last_response.status
     assert_equal "\n(function() {\n  application.boot();\n})();\n",
       last_response.body
+    assert_equal "43", last_response.headers['Content-Length']
   end
 
   test "serve source with content type headers" do
@@ -125,6 +127,19 @@ class TestServer < Sprockets::TestCase
     get "/javascripts/bar.js", {},
       'HTTP_IF_MODIFIED_SINCE' =>
         File.mtime(fixture_path("server/app/javascripts/bar.js")).httpdate
+
+    assert_equal 304, last_response.status
+    assert_equal nil, last_response.headers['Content-Type']
+    assert_equal nil, last_response.headers['Content-Length']
+  end
+
+  test "not modified partial response when etags match" do
+    get "/javascripts/application.js?body=1"
+    assert_equal 200, last_response.status
+    etag = last_response.headers['ETag']
+
+    get "/javascripts/application.js?body=1", {},
+      'HTTP_IF_NONE_MATCH' => etag
 
     assert_equal 304, last_response.status
     assert_equal nil, last_response.headers['Content-Type']
