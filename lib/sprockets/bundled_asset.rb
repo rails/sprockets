@@ -1,25 +1,27 @@
 require 'sprockets/errors'
 require 'digest/md5'
-require 'set'
+require 'multi_json'
 require 'time'
 
 module Sprockets
   class BundledAsset
-    attr_reader :logical_path, :pathname
-    attr_reader :content_type, :mtime
-    attr_reader :body
+    attr_reader :logical_path, :pathname, :mtime, :body
+
+    def self.from_json(environment, json, options = {})
+      asset = allocate
+      asset.initialize_json(environment, json, options)
+      asset
+    end
 
     def initialize(environment, logical_path, pathname, options)
       @environment  = environment
-      @context      = environment.context_class.new(environment, logical_path.to_s, pathname)
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
-      @content_type = environment.content_type_of(pathname)
 
-      @assets       = []
-      @source       = nil
-      @body         = context.evaluate(pathname)
+      @assets = []
+      @source = nil
+      @body   = context.evaluate(pathname)
 
       index    = options[:_environment] || options[:_index] || environment
       requires = options[:_requires] || []
@@ -32,6 +34,28 @@ module Sprockets
       compute_dependency_paths!
     end
 
+    def initialize_json(environment, json, options)
+      @environment = environment
+
+      hash = MultiJson.decode(json)
+
+      index    = options[:_environment] || options[:_index] || environment
+      requires = options[:_requires] || []
+      if requires.include?(pathname.to_s)
+        raise CircularDependencyError, "#{pathname} has already been required"
+      end
+      requires << pathname.to_s
+
+      @logical_path = hash['logical_path'].to_s
+      @pathname     = Pathname.new(hash['pathname'])
+      @mtime        = Time.parse(hash['mtime'])
+      @assets       = []
+      @source       = nil
+      @body         = hash['body']
+      @assets       = hash['asset_paths'].map { |p| index[p, options] }
+
+    end
+
     def source
       @source ||= begin
         data = ""
@@ -39,6 +63,10 @@ module Sprockets
         context.evaluate(pathname, :data => data,
           :engines => environment.bundle_processors(content_type))
       end
+    end
+
+    def content_type
+      @content_type ||= environment.content_type_of(pathname)
     end
 
     def length
@@ -83,8 +111,27 @@ module Sprockets
     end
     alias_method :==, :eql?
 
+    def as_json
+      {
+        'logical_path'     => logical_path,
+        'pathname'         => pathname.to_s,
+        'mtime'            => mtime,
+        'body'             => body,
+        'asset_paths'      => to_a.map(&:pathname).map(&:to_s),
+        'dependency_paths' => dependency_paths
+      }
+    end
+
+    def to_json
+      MultiJson.encode(as_json)
+    end
+
     protected
-      attr_reader :environment, :context, :dependency_paths
+      attr_reader :environment, :dependency_paths
+
+      def context
+        @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
+      end
 
     private
       def compute_dependencies!(index, requires)
@@ -108,7 +155,7 @@ module Sprockets
       end
 
       def compute_dependency_paths!
-        @dependency_paths = Set.new
+        @dependency_paths = []
         @mtime = Time.at(0)
 
         depend_on(pathname)
@@ -128,7 +175,9 @@ module Sprockets
         if (mtime = File.mtime(path)) > @mtime
           @mtime = mtime
         end
-        dependency_paths << path
+        unless dependency_paths.include?(path.to_s)
+          dependency_paths << path.to_s
+        end
       end
   end
 end
