@@ -82,7 +82,8 @@ module Sprockets
           template = engine.new(pathname.to_s) { result }
           result = template.render(self, {})
         rescue Exception => e
-          raise e.class, annotate_error_message(e.message)
+          annotate_exception! e
+          raise
         end
       end
 
@@ -110,10 +111,12 @@ module Sprockets
     end
 
     private
-      def annotate_error_message(message)
-        annotation = "  (in #{@pathname.to_s})"
-        annotation << ":#{@__LINE__}" if @__LINE__
-        "#{message}\n#{annotation}"
+      def annotate_exception!(exception)
+        location = pathname.to_s
+        location << ":#{@__LINE__}" if @__LINE__
+
+        exception.extend(Sprockets::EngineError)
+        exception.sprockets_annotation = "  (in #{location})"
       end
 
       def logger

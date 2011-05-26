@@ -11,6 +11,7 @@ module Sprockets
   autoload :Context,                 "sprockets/context"
   autoload :DirectiveProcessor,      "sprockets/directive_processor"
   autoload :EjsTemplate,             "sprockets/ejs_template"
+  autoload :EngineError,             "sprockets/errors"
   autoload :Engines,                 "sprockets/engines"
   autoload :Environment,             "sprockets/environment"
   autoload :EnvironmentIndex,        "sprockets/environment_index"
