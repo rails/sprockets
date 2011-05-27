@@ -36,24 +36,17 @@ module Sprockets
 
     def initialize_json(environment, json, options)
       @environment = environment
+      index = options[:_environment] || options[:_index] || environment
 
       hash = MultiJson.decode(json)
-
-      index    = options[:_environment] || options[:_index] || environment
-      requires = options[:_requires] || []
-      if requires.include?(pathname.to_s)
-        raise CircularDependencyError, "#{pathname} has already been required"
-      end
-      requires << pathname.to_s
 
       @logical_path = hash['logical_path'].to_s
       @pathname     = Pathname.new(hash['pathname'])
       @mtime        = Time.parse(hash['mtime'])
       @assets       = []
-      @source       = nil
+      @source       = hash['source']
       @body         = hash['body']
       @assets       = hash['asset_paths'].map { |p| index[p, options] }
-
     end
 
     def source
@@ -117,6 +110,7 @@ module Sprockets
         'pathname'         => pathname.to_s,
         'mtime'            => mtime,
         'body'             => body,
+        'source'           => source,
         'asset_paths'      => to_a.map(&:pathname).map(&:to_s),
         'dependency_paths' => dependency_paths
       }

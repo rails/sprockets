@@ -362,28 +362,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal "@charset \"UTF-8\";\n.foo {}\n\n.bar {}\n", asset("charset.css").to_s
   end
 
-  test "serializing asset to json" do
-    json = asset("application.js").to_json
-    hash = MultiJson.decode(json)
-
-    assert_equal 'application.js', hash['logical_path']
-    assert_equal fixture_path('asset/application.js'), hash['pathname']
-    assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
-      hash['body']
-
-    assert_equal [
-      fixture_path('asset/project.js.erb'),
-      fixture_path('asset/users.js.erb.str'),
-      fixture_path('asset/application.js')
-    ], hash['asset_paths']
-    assert_equal [
-      fixture_path('asset/application.js'),
-      fixture_path('asset/users.js.erb.str'),
-      fixture_path('asset/project.js.erb')
-    ], hash['dependency_paths']
-  end
-
-  test "deserializing asset from json" do
+  test "serializing asset to and from json" do
     expected = asset("application.js")
     actual   = Sprockets::BundledAsset.from_json(@env, expected.to_json)
 
@@ -391,10 +370,13 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.pathname, actual.pathname
     assert_equal expected.body, actual.body
     assert_equal expected.content_type, actual.content_type
-    assert_equal expected.to_a.map(&:pathname), actual.to_a.map(&:pathname)
+    assert_equal expected.to_a, actual.to_a
     assert_equal expected.to_s, actual.to_s
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
+
+    assert actual.eql?(expected)
+    assert expected.eql?(actual)
   end
 
   def asset(logical_path)
