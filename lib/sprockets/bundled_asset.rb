@@ -7,14 +7,16 @@ module Sprockets
   class BundledAsset
     attr_reader :logical_path, :pathname, :mtime, :body
 
-    def self.from_json(environment, json, options = {})
+    def self.from_json(index, json, options = {})
       asset = allocate
-      asset.initialize_json(environment, json, options)
+      asset.initialize_json(index, json, options)
       asset
     end
 
-    def initialize(environment, logical_path, pathname, options)
-      @environment  = environment
+    def initialize(index, logical_path, pathname, options)
+      @index = index
+
+      raise "not an index" unless index.is_a?(EnvironmentIndex)
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
@@ -23,20 +25,22 @@ module Sprockets
       @source = nil
       @body   = context.evaluate(pathname)
 
-      index    = options[:_environment] || options[:_index] || environment
       requires = options[:_requires] || []
       if requires.include?(pathname.to_s)
         raise CircularDependencyError, "#{pathname} has already been required"
       end
       requires << pathname.to_s
 
-      compute_dependencies!(index, requires)
+      environment = options[:_environment] || options[:_index] || index
+      compute_dependencies!(environment, requires)
       compute_dependency_paths!
     end
 
-    def initialize_json(environment, json, options)
-      @environment = environment
-      index = options[:_environment] || options[:_index] || environment
+    def initialize_json(index, json, options)
+      @index = index
+      environment = options[:_environment] || options[:_index] || index
+
+      raise "not an index" unless index.is_a?(EnvironmentIndex)
 
       hash = MultiJson.decode(json)
 
@@ -48,7 +52,7 @@ module Sprockets
       @content_type = hash['content_type']
       @length       = hash['length']
       @digest       = hash['digest']
-      @assets       = hash['asset_paths'].map { |p| p == pathname.to_s ? self : index[p, options] }
+      @assets       = hash['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
       @dependency_paths = hash['dependency_paths']
     end
 
@@ -57,12 +61,12 @@ module Sprockets
         data = ""
         to_a.each { |dependency| data << dependency.body }
         context.evaluate(pathname, :data => data,
-          :engines => environment.bundle_processors(content_type))
+          :engines => index.bundle_processors(content_type))
       end
     end
 
     def content_type
-      @content_type ||= environment.content_type_of(pathname)
+      @content_type ||= index.content_type_of(pathname)
     end
 
     def length
@@ -127,20 +131,20 @@ module Sprockets
     end
 
     protected
-      attr_reader :environment, :dependency_paths
+      attr_reader :index, :dependency_paths
 
       def context
-        @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
+        @context ||= index.context_class.new(index, logical_path.to_s, pathname)
       end
 
     private
-      def compute_dependencies!(index, requires)
+      def compute_dependencies!(environment, requires)
         options = { :_requires => requires }
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
           else
-            index[required_path, options].to_a.each do |asset|
+            environment[required_path, options].to_a.each do |asset|
               add_dependency(asset)
             end
           end
