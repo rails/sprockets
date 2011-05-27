@@ -15,6 +15,7 @@ module Sprockets
 
     def initialize(index, logical_path, pathname, options)
       @index = index
+      options[:_index] ||= index
 
       raise "not an index" unless index.is_a?(EnvironmentIndex)
 
@@ -25,20 +26,20 @@ module Sprockets
       @source = nil
       @body   = context.evaluate(pathname)
 
-      requires = options[:_requires] || []
+      requires = options[:_requires] ||= []
       if requires.include?(pathname.to_s)
         raise CircularDependencyError, "#{pathname} has already been required"
       end
       requires << pathname.to_s
 
-      environment = options[:_environment] || options[:_index] || index
-      compute_dependencies!(environment, requires)
+      compute_dependencies!(options[:_environment] || options[:_index], options)
       compute_dependency_paths!
     end
 
     def initialize_json(index, json, options)
       @index = index
-      environment = options[:_environment] || options[:_index] || index
+      options[:_index] ||= index
+      environment = options[:_environment] || options[:_index]
 
       raise "not an index" unless index.is_a?(EnvironmentIndex)
 
@@ -138,8 +139,7 @@ module Sprockets
       end
 
     private
-      def compute_dependencies!(environment, requires)
-        options = { :_requires => requires }
+      def compute_dependencies!(environment, options)
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
