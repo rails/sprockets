@@ -2,6 +2,7 @@ require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
+require 'digest/md5'
 require 'pathname'
 
 module Sprockets
@@ -17,6 +18,8 @@ module Sprockets
       @trail   = trail.index
       @assets  = {}
       @entries = {}
+      @mtimes  = {}
+      @md5s    = {}
 
       @static_root = static_root ? Pathname.new(static_root) : nil
 
@@ -81,6 +84,32 @@ module Sprockets
 
     def content_type_of(path)
       attributes_for(path).content_type
+    end
+
+    def mtime(pathname)
+      filename = pathname.to_s
+      if @mtimes.key?(filename)
+        @mtimes[filename]
+      else
+        begin
+          @mtimes[filename] = File.mtime(filename)
+        rescue Errno::ENOENT
+          @mtimes[filename] = nil
+        end
+      end
+    end
+
+    def md5(pathname)
+      filename = pathname.to_s
+      if @md5s.key?(filename)
+        @md5s[filename]
+      else
+        begin
+          @md5s[filename] = Digest::MD5.new(filename).hexdigest
+        rescue Errno::ENOENT
+          @md5s[filename] = nil
+        end
+      end
     end
 
     protected
