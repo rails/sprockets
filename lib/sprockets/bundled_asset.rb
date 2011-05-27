@@ -43,10 +43,13 @@ module Sprockets
       @logical_path = hash['logical_path'].to_s
       @pathname     = Pathname.new(hash['pathname'])
       @mtime        = Time.parse(hash['mtime'])
-      @assets       = []
-      @source       = hash['source']
       @body         = hash['body']
-      @assets       = hash['asset_paths'].map { |p| index[p, options] }
+      @source       = hash['source']
+      @content_type = hash['content_type']
+      @length       = hash['length']
+      @digest       = hash['digest']
+      @assets       = hash['asset_paths'].map { |p| p == pathname.to_s ? self : index[p, options] }
+      @dependency_paths = hash['dependency_paths']
     end
 
     def source
@@ -108,9 +111,12 @@ module Sprockets
       {
         'logical_path'     => logical_path,
         'pathname'         => pathname.to_s,
+        'content_type'     => content_type,
         'mtime'            => mtime,
         'body'             => body,
         'source'           => source,
+        'digest'           => digest,
+        'length'           => length,
         'asset_paths'      => to_a.map(&:pathname).map(&:to_s),
         'dependency_paths' => dependency_paths
       }

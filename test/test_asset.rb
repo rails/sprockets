@@ -91,6 +91,26 @@ class StaticAssetTest < Sprockets::TestCase
   test "body is entire contents" do
     assert_equal @asset.to_s, @asset.body
   end
+
+  test "serializing asset to and from json" do
+    expected = @asset
+    actual   = Sprockets::StaticAsset.from_json(@env, expected.to_json)
+
+    assert_equal expected.logical_path, actual.logical_path
+    assert_equal expected.pathname, actual.pathname
+    assert_equal expected.content_type, actual.content_type
+    assert_equal expected.length, actual.length
+    assert_equal expected.digest, actual.digest
+
+    assert_equal expected.dependencies, actual.dependencies
+    assert_equal expected.to_a, actual.to_a
+    assert_equal expected.body, actual.body
+    assert_equal expected.to_s, actual.to_s
+
+    assert actual.eql?(expected)
+    assert expected.eql?(actual)
+  end
+
 end
 
 class BundledAssetTest < Sprockets::TestCase
@@ -363,17 +383,19 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "serializing asset to and from json" do
-    expected = asset("application.js")
+    expected = @asset
     actual   = Sprockets::BundledAsset.from_json(@env, expected.to_json)
 
     assert_equal expected.logical_path, actual.logical_path
     assert_equal expected.pathname, actual.pathname
     assert_equal expected.body, actual.body
+    assert_equal expected.source, actual.source
     assert_equal expected.content_type, actual.content_type
-    assert_equal expected.to_a, actual.to_a
-    assert_equal expected.to_s, actual.to_s
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
+    assert_equal expected.dependencies, actual.dependencies
+    assert_equal expected.to_a, actual.to_a
+    assert_equal expected.to_s, actual.to_s
 
     assert actual.eql?(expected)
     assert expected.eql?(actual)

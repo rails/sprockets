@@ -1,10 +1,17 @@
 require 'digest/md5'
+require 'multi_json'
 require 'time'
 
 module Sprockets
   class StaticAsset
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
+
+    def self.from_json(environment, json)
+      asset = allocate
+      asset.initialize_json(environment, json)
+      asset
+    end
 
     def initialize(environment, logical_path, pathname, digest = nil)
       @logical_path = logical_path.to_s
@@ -14,6 +21,19 @@ module Sprockets
       @mtime  = @pathname.mtime
       @length = @pathname.size
       @digest = digest || Digest::MD5.hexdigest(pathname.read)
+    end
+
+    def initialize_json(environment, json)
+      @environment = environment
+
+      hash = MultiJson.decode(json)
+
+      @logical_path = hash['logical_path'].to_s
+      @pathname     = Pathname.new(hash['pathname'])
+      @content_type = hash['content_type']
+      @mtime        = Time.parse(hash['mtime'])
+      @length       = hash['length']
+      @digest       = hash['digest']
     end
 
     def dependencies
@@ -57,5 +77,20 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
+
+    def as_json
+      {
+        'logical_path' => logical_path,
+        'pathname'     => pathname.to_s,
+        'content_type' => content_type,
+        'mtime'        => mtime,
+        'digest'       => digest,
+        'length'       => length
+      }
+    end
+
+    def to_json
+      MultiJson.encode(as_json)
+    end
   end
 end
