@@ -20,7 +20,7 @@ module Sprockets
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
-      @digest = digest || Digest::MD5.hexdigest(pathname.read)
+      @digest = digest || Digest::MD5.file(pathname).hexdigest
     end
 
     def initialize_json(environment, json)
