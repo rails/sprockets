@@ -4,6 +4,7 @@ module Sprockets
   class ArgumentError           < Error; end
   class CircularDependencyError < Error; end
   class ContentTypeMismatch     < Error; end
+  class EncodingError           < Error; end
   class FileNotFound            < Error; end
 
   module EngineError
