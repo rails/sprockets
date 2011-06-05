@@ -10,6 +10,7 @@ module Sprockets
   autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :Context,                 "sprockets/context"
   autoload :DirectiveProcessor,      "sprockets/directive_processor"
+  autoload :EcoTemplate,             "sprockets/eco_template"
   autoload :EjsTemplate,             "sprockets/ejs_template"
   autoload :EngineError,             "sprockets/errors"
   autoload :Engines,                 "sprockets/engines"
