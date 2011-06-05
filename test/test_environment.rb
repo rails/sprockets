@@ -54,7 +54,6 @@ module EnvironmentTests
   test "eco templates" do
     asset = @env["goodbye.jst"]
     context = ExecJS.compile(asset)
-    warn asset
     assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
   end
 
