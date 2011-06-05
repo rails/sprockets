@@ -51,9 +51,16 @@ module EnvironmentTests
     end
   end
 
+  test "eco templates" do
+    asset = @env["goodbye.jst"]
+    context = ExecJS.compile("var window = this; #{asset}")
+    assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
+  end
+
   test "ejs templates" do
     asset = @env["hello.jst"]
-    assert_equal "window.JST || (window.JST = {});\nwindow.JST[\"hello\"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('hello: ', name ,'\\n');}return __p.join('');};\n", asset.to_s
+    context = ExecJS.compile("var window = this; #{asset}")
+    assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
   test "lookup mime type" do

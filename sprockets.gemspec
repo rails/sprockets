@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.add_dependency "tilt", ["~> 1.1", "!= 1.3.0"]
 
   s.add_development_dependency "coffee-script", "~> 2.0"
+  s.add_development_dependency "eco", "~> 1.0"
   s.add_development_dependency "ejs", "~> 1.0"
   s.add_development_dependency "execjs", "~> 1.0"
   s.add_development_dependency "json"
