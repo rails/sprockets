@@ -11,9 +11,16 @@ module Sprockets
 
     def evaluate(scope, locals, &block)
       <<-JST
-window.JST || (window.JST = {});
-window.JST[#{scope.logical_path.inspect}] = #{data};
+(function() {
+  this.JST || (this.JST = {});
+  this.JST[#{scope.logical_path.inspect}] = #{indent(data)};
+}).call(this);
       JST
     end
+
+    private
+      def indent(string)
+        string.gsub(/$(.)/m, "\\1  ").strip
+      end
   end
 end
