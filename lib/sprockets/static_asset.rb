@@ -13,7 +13,7 @@ module Sprockets
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
-      @digest = digest || Digest::MD5.hexdigest(pathname.read)
+      @digest = digest || Digest::MD5.file(pathname).hexdigest
     end
 
     def dependencies
@@ -39,7 +39,7 @@ module Sprockets
     end
 
     def each
-      yield pathname.read
+      yield to_s
     end
 
     def to_path
@@ -47,7 +47,7 @@ module Sprockets
     end
 
     def to_s
-      pathname.read
+      pathname.open('rb') { |f| f.read }
     end
 
     def eql?(other)
