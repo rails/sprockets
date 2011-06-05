@@ -7,8 +7,8 @@ module Sprockets
   # The `DirectiveProcessor` is responsible for parsing and evaluating
   # directive comments in a source file.
   #
-  # A directive comment starts with comment, followed by a "=", directive
-  # name, then any arguments.
+  # A directive comment starts with a comment prefix, followed by an "=",
+  # then the directive name, then any arguments.
   #
   #     // JavaScript
   #     //= require "foo"
@@ -30,7 +30,7 @@ module Sprockets
   # To remove the processor entirely:
   #
   #     env.unregister_processor('text/css', Sprockets::DirectiveProcessor)
-  #     env.unregister_processor('application/css', Sprockets::DirectiveProcessor)
+  #     env.unregister_processor('application/javascript', Sprockets::DirectiveProcessor)
   #
   # Then inject your own preprocessor:
   #
@@ -96,12 +96,12 @@ module Sprockets
         #
         HEADER_PATTERN = /
           \A \s* (
-            (\/\* ([\s\S]*?) \*\/) |
-            (\#\#\# ([\s\S]*?) \#\#\#) |
-            (\/\/ ([^\n]*) \n?)+ |
-            (\# ([^\n]*) \n?)+
+            (\/\* (?m:.*?) \*\/) |
+            (\#\#\# (?m:.*?) \#\#\#) |
+            (\/\/ .* \n?)+ |
+            (\# .* \n?)+
           )
-        /mx
+        /x
 
         # Directives are denoted by a `=` followed by the name, then
         # argument list.
@@ -185,7 +185,7 @@ module Sprockets
       #
       # Replace the current processor on the environment with your own:
       #
-      #     env.unregister_processor('test/css', Sprockets::DirectiveProcessor)
+      #     env.unregister_processor('text/css', Sprockets::DirectiveProcessor)
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives
@@ -267,7 +267,7 @@ module Sprockets
       end
 
       # The `include` directive works similar to `require` but
-      # inserts of the contents of the dependency even if it already
+      # inserts the contents of the dependency even if it already
       # has been required.
       #
       #     //= include "header"
@@ -277,7 +277,7 @@ module Sprockets
       end
 
       # `require_directory` requires all the files inside a single
-      # directory. Its similar to `path/*` since it does not follow
+      # directory. It's similar to `path/*` since it does not follow
       # nested directories.
       #
       #     //= require_directory "./javascripts"
@@ -343,7 +343,7 @@ module Sprockets
 
       # Enable Sprockets 1.x compat mode.
       #
-      # Makes it possible to use the same javascript source
+      # Makes it possible to use the same JavaScript source
       # file in both Sprockets 1 and 2.
       #
       #     //= compat

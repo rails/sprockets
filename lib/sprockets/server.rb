@@ -21,7 +21,7 @@ module Sprockets
     # environment for `"foo/bar.js"`.
     def call(env)
       start_time = Time.now.to_f
-      msg = "\nServed asset #{env['PATH_INFO']} -"
+      msg = "Served asset #{env['PATH_INFO']} -"
 
       # URLs containing a `".."` are rejected for security reasons.
       if forbidden_request?(env)
@@ -52,9 +52,8 @@ module Sprockets
         end
       end
 
-      time_elapsed = Time.now.to_f - start_time
-
-      tag = " (%0.3gs)  (pid #{Process.pid})\n\n" % time_elapsed
+      time_elapsed = ((Time.now.to_f - start_time) * 1000).to_i
+      tag = " (#{time_elapsed}ms)  (pid #{Process.pid})"
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?

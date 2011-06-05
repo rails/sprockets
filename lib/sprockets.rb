@@ -1,5 +1,5 @@
 module Sprockets
-  VERSION = "2.0.0.beta.8"
+  VERSION = "2.0.0.beta.9"
 
   autoload :ArgumentError,           "sprockets/errors"
   autoload :AssetAttributes,         "sprockets/asset_attributes"
@@ -11,6 +11,8 @@ module Sprockets
   autoload :Context,                 "sprockets/context"
   autoload :DirectiveProcessor,      "sprockets/directive_processor"
   autoload :EjsTemplate,             "sprockets/ejs_template"
+  autoload :EngineError,             "sprockets/errors"
+  autoload :Engines,                 "sprockets/engines"
   autoload :Environment,             "sprockets/environment"
   autoload :EnvironmentIndex,        "sprockets/environment_index"
   autoload :Error,                   "sprockets/errors"
@@ -20,6 +22,7 @@ module Sprockets
   autoload :Server,                  "sprockets/server"
   autoload :StaticAsset,             "sprockets/static_asset"
   autoload :StaticCompilation,       "sprockets/static_compilation"
+  autoload :Utils,                   "sprockets/utils"
 end
 
 # TODO: Remove in 2.0.0 final

@@ -401,6 +401,19 @@ class BundledAssetTest < Sprockets::TestCase
     assert expected.eql?(actual)
   end
 
+  test "should not fail if home is not set in environment" do
+    begin
+      home, ENV["HOME"] = ENV["HOME"], nil
+      assert_nothing_raised do
+        env = Sprockets::Environment.new
+        env.append_path(fixture_path('asset'))
+        env['application.js']
+      end
+    ensure
+      ENV["HOME"] = home
+    end
+  end
+
   def asset(logical_path)
     @env.index[logical_path]
   end

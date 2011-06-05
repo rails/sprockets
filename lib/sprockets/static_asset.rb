@@ -59,7 +59,7 @@ module Sprockets
     end
 
     def each
-      yield pathname.read
+      yield to_s
     end
 
     def to_path
@@ -67,7 +67,7 @@ module Sprockets
     end
 
     def to_s
-      pathname.read
+      pathname.open('rb') { |f| f.read }
     end
 
     def eql?(other)

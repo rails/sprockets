@@ -72,7 +72,31 @@ module Sprockets
       pathname   = resolve(filename)
       attributes = environment.attributes_for(pathname)
 
-      data    = options[:data] || pathname.read
+      if options[:data]
+        data = options[:data]
+      else
+        data = pathname.read
+
+        if "".respond_to?(:valid_encoding?)
+          utf8_bom_re = Regexp.new("\\A\uFEFF".encode('utf-8'))
+
+          if !data.valid_encoding?
+            raise EncodingError, "invalid byte sequence"
+          elsif data.encoding.name == 'UTF-8' && data =~ utf8_bom_re
+            data = data.sub(utf8_bom_re, '')
+          end
+        else
+          utf8_bom_re = /\A\xEF\xBB\xBF/
+
+          if data =~ utf8_bom_re
+            data = data.gsub(utf8_bom_re, '')
+          elsif data =~ /\A(\xEF\xBB\xBF|\xFE\xFF|\xFF\xFE)/
+            raise EncodingError, "#{pathname} has a unicode BOM." +
+              "Resave the file as UTF-8 or upgrade to Ruby 1.9"
+          end
+        end
+      end
+
       result  = data
       engines = options[:engines] || environment.processors(content_type) +
                           attributes.engines.reverse
@@ -82,7 +106,8 @@ module Sprockets
           template = engine.new(pathname.to_s) { result }
           result = template.render(self, {})
         rescue Exception => e
-          raise e.class, annotate_error_message(e.message)
+          annotate_exception! e
+          raise
         end
       end
 
@@ -110,10 +135,12 @@ module Sprockets
     end
 
     private
-      def annotate_error_message(message)
-        annotation = "  (in #{@pathname.to_s})"
-        annotation << ":#{@__LINE__}" if @__LINE__
-        "#{message}\n#{annotation}"
+      def annotate_exception!(exception)
+        location = pathname.to_s
+        location << ":#{@__LINE__}" if @__LINE__
+
+        exception.extend(Sprockets::EngineError)
+        exception.sprockets_annotation = "  (in #{location})"
       end
 
       def logger
