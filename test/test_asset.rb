@@ -92,6 +92,68 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal @asset.to_s, @asset.body
   end
 
+  test "asset isnt stale if its mtime and contents are the same" do
+    assert !@asset.stale?
+  end
+
+  test "asset isnt stale if its mtime is changed but its contents is the same" do
+     filename = fixture_path('public/test.js')
+
+    begin
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env['test.js']
+
+      assert !asset.stale?
+
+      File.open(filename, 'w') { |f| f.write "a" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, filename)
+
+      assert !asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
+  test "asset is stale when its contents has changed" do
+    filename = fixture_path('public/test.js')
+
+    begin
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env['test.js']
+
+      assert !asset.stale?
+
+      File.open(filename, 'w') { |f| f.write "b" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, filename)
+
+      assert asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
+  test "asset is stale if the file is removed" do
+    filename = fixture_path('public/test.js')
+
+    begin
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env['test.js']
+
+      assert !asset.stale?
+
+      File.unlink(filename)
+
+      assert asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
   test "serializing asset to and from json" do
     expected = @asset
     actual   = Sprockets::StaticAsset.from_json(@env, expected.to_json)
@@ -110,7 +172,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert actual.eql?(expected)
     assert expected.eql?(actual)
   end
-
 end
 
 class BundledAssetTest < Sprockets::TestCase

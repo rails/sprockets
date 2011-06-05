@@ -53,7 +53,7 @@ module Sprockets
     end
 
     def stale?
-      mtime < pathname.mtime
+      !(pathname.mtime <= mtime || @digest == Digest::MD5.file(pathname).hexdigest)
     rescue Errno::ENOENT
       true
     end
