@@ -250,6 +250,17 @@ module EnvironmentTests
     end
   end
 
+  test "precompile static asset" do
+    filename = fixture_path("public/hello-f0ef7081e1539ac00ef5b761b4fb01b3.txt")
+    begin
+      assert !File.exist?(filename)
+      @env.precompile("hello.txt")
+      assert File.exist?(filename)
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+    end
+  end
+
   test "CoffeeScript files are compiled in a closure" do
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)

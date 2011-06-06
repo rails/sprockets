@@ -29,7 +29,7 @@ module Sprockets
 
             FileUtils.mkdir_p filename.dirname
 
-            filename.open('w') do |f|
+            filename.open('wb') do |f|
               f.write asset.to_s
             end
           end
