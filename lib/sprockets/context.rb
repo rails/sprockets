@@ -86,11 +86,11 @@ module Sprockets
             data = data.sub(utf8_bom_re, '')
           end
         else
-          utf8_bom_re = /\A\xEF\xBB\xBF/
+          utf8_bom_re = Regexp.new("\\A\\xEF\\xBB\\xBF")
 
           if data =~ utf8_bom_re
             data = data.gsub(utf8_bom_re, '')
-          elsif data =~ /\A(\xEF\xBB\xBF|\xFE\xFF|\xFF\xFE)/
+          elsif data =~ Regexp.new("\\A(\\xFE\\xFF|\\xFF\\xFE)")
             raise EncodingError, "#{pathname} has a unicode BOM." +
               "Resave the file as UTF-8 or upgrade to Ruby 1.9"
           end
