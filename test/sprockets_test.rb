@@ -7,10 +7,6 @@ if defined? Encoding
   Encoding.default_internal = 'utf-8'
 end
 
-def jruby?
-  defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
-end
-
 class Sprockets::TestCase < Test::Unit::TestCase
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
 

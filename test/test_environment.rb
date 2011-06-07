@@ -51,18 +51,16 @@ module EnvironmentTests
     end
   end
 
-  unless jruby?
-    test "eco templates" do
-      asset = @env["goodbye.jst"]
-      context = ExecJS.compile(asset)
-      assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
-    end
+  test "eco templates" do
+    asset = @env["goodbye.jst"]
+    context = ExecJS.compile(asset)
+    assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
+  end
 
-    test "ejs templates" do
-      asset = @env["hello.jst"]
-      context = ExecJS.compile(asset)
-      assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
-    end
+  test "ejs templates" do
+    asset = @env["hello.jst"]
+    context = ExecJS.compile(asset)
+    assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
   test "lookup mime type" do
