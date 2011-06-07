@@ -1,10 +1,8 @@
 source :rubygems
+
 gemspec
 
-if ENV['CI']
-  if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
-    gem 'therubyrhino'
-  else
-    gem 'therubyracer'
-  end
+group :test do
+  gem 'therubyrhino', :platform => :jruby
+  gem 'therubyracer', :platform => [:ruby, :mswin]
 end
