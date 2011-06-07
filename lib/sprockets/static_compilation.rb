@@ -4,8 +4,6 @@ require 'zlib'
 
 module Sprockets
   module StaticCompilation
-    EXTS_TO_GZIP = %w(.js .css)
-
     def static_root
       @static_root
     end
@@ -37,7 +35,7 @@ module Sprockets
               f.write content
             end
 
-            gzip("#{filename}.gz", content) if EXTS_TO_GZIP.include?(filename.extname)
+            gzip("#{filename}.gz", content) if processors(asset.content_type).any?
           end
         end
       end
