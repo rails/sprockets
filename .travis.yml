@@ -3,7 +3,6 @@ env: CI=1
 rvm:
   - 1.8.7
   - 1.9.2
-  - jruby
   - rbx
   - ree
   - ruby-head
