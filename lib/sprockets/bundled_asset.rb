@@ -62,7 +62,7 @@ module Sprockets
         data = ""
         to_a.each { |dependency| data << dependency.body }
         context.evaluate(pathname, :data => data,
-          :engines => index.bundle_processors(content_type))
+          :processors => index.bundle_processors(content_type))
       end
     end
 

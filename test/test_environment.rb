@@ -51,9 +51,16 @@ module EnvironmentTests
     end
   end
 
+  test "eco templates" do
+    asset = @env["goodbye.jst"]
+    context = ExecJS.compile(asset)
+    assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
+  end
+
   test "ejs templates" do
     asset = @env["hello.jst"]
-    assert_equal "window.JST || (window.JST = {});\nwindow.JST[\"hello\"] = function(obj){var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('hello: ', name ,'\\n');}return __p.join('');};\n", asset.to_s
+    context = ExecJS.compile(asset)
+    assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
   test "lookup mime type" do
@@ -202,12 +209,16 @@ module EnvironmentTests
 
   test "precompile" do
     filename = fixture_path("public/gallery-f1598cfbaf2a26f20367e4046957f6e0.js")
+    filename_gz = "#{filename}.gz"
     begin
       assert !File.exist?(filename)
       @env.precompile("gallery.js")
       assert File.exist?(filename)
+      assert File.exist?(filename_gz)
     ensure
-      File.unlink(filename) if File.exist?(filename)
+      [filename, filename_gz].each do |f|
+        File.unlink(f) if File.exist?(f)
+      end
     end
   end
 
@@ -219,9 +230,11 @@ module EnvironmentTests
       @env.precompile("mobile/*")
 
       assert File.exist?(dirname)
-      assert File.exist?(File.join(dirname, "a-172ecf751b024e2c68b1da265523b202.js"))
-      assert File.exist?(File.join(dirname, "b-5e5f944f87f43e1ddec5c8dc109e5f8d.js"))
-      assert File.exist?(File.join(dirname, "c-4127d837671de30f7e9cb8e9bec82285.css"))
+      [nil, '.gz'].each do |gzipped|
+        assert File.exist?(File.join(dirname, "a-172ecf751b024e2c68b1da265523b202.js#{gzipped}"))
+        assert File.exist?(File.join(dirname, "b-5e5f944f87f43e1ddec5c8dc109e5f8d.js#{gzipped}"))
+        assert File.exist?(File.join(dirname, "c-4127d837671de30f7e9cb8e9bec82285.css#{gzipped}"))
+      end
     ensure
       FileUtils.rm_rf(dirname)
     end
@@ -235,9 +248,11 @@ module EnvironmentTests
       @env.precompile(/mobile\/.*/)
 
       assert File.exist?(dirname)
-      assert File.exist?(File.join(dirname, "a-172ecf751b024e2c68b1da265523b202.js"))
-      assert File.exist?(File.join(dirname, "b-5e5f944f87f43e1ddec5c8dc109e5f8d.js"))
-      assert File.exist?(File.join(dirname, "c-4127d837671de30f7e9cb8e9bec82285.css"))
+      [nil, '.gz'].each do |gzipped|
+        assert File.exist?(File.join(dirname, "a-172ecf751b024e2c68b1da265523b202.js#{gzipped}"))
+        assert File.exist?(File.join(dirname, "b-5e5f944f87f43e1ddec5c8dc109e5f8d.js#{gzipped}"))
+        assert File.exist?(File.join(dirname, "c-4127d837671de30f7e9cb8e9bec82285.css#{gzipped}"))
+      end
     ensure
       FileUtils.rm_rf(dirname)
     end
@@ -249,6 +264,7 @@ module EnvironmentTests
       assert !File.exist?(filename)
       @env.precompile("hello.txt")
       assert File.exist?(filename)
+      assert !File.exist?("#{filename}.gz")
     ensure
       File.unlink(filename) if File.exist?(filename)
     end

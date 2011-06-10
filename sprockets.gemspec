@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "sprockets"
-  s.version = "2.0.0.beta.9"
+  s.version = "2.0.0.beta.10"
   s.summary = "Rack-based asset packaging system"
   s.description = "Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
 
@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.add_dependency "tilt", ["~> 1.1", "!= 1.3.0"]
 
   s.add_development_dependency "coffee-script", "~> 2.0"
+  s.add_development_dependency "eco", "~> 1.0"
   s.add_development_dependency "ejs", "~> 1.0"
   s.add_development_dependency "execjs", "~> 1.0"
   s.add_development_dependency "json"

@@ -67,7 +67,7 @@ module Sprockets
       elsif not_modified?(asset, env) || etag_match?(asset, env)
         logger.info "#{msg} 304 Not Modified #{tag}"
 
-        # Return a 403 Not Modified
+        # Return a 304 Not Modified
         not_modified_response(asset, env)
 
       else
@@ -169,7 +169,7 @@ module Sprockets
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
         if body_only?(env)
-          [ 200, headers(env, asset, asset.body.length), [asset.body] ]
+          [ 200, headers(env, asset, Rack::Utils.bytesize(asset.body)), [asset.body] ]
         else
           [ 200, headers(env, asset, asset.length), asset ]
         end
@@ -192,7 +192,7 @@ module Sprockets
           if path_fingerprint(env["PATH_INFO"])
             headers["Cache-Control"] << ", max-age=31536000"
 
-          # Otherwise set `must-revalidate` since the could be modified.
+          # Otherwise set `must-revalidate` since the asset could be modified.
           else
             headers["Cache-Control"] << ", must-revalidate"
           end

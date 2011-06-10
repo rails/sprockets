@@ -18,3 +18,5 @@ with the original version's design.
 * Serve images and other assets from anywhere in the load path.
 
 More coming soon.
+
+[![Build Status](http://travis-ci.org/sstephenson/sprockets.png)](http://travis-ci.org/sstephenson/sprockets)
