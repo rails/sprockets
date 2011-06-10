@@ -151,7 +151,7 @@ module Sprockets
         env["HTTP_IF_MODIFIED_SINCE"] == asset.mtime.httpdate
       end
 
-      # Compare the requests `HTTP_IF_NONE_MATCH` against the assets MD5
+      # Compare the requests `HTTP_IF_NONE_MATCH` against the assets digest
       def etag_match?(asset, env)
         env["HTTP_IF_NONE_MATCH"] == etag(asset)
       end
@@ -180,7 +180,6 @@ module Sprockets
           # Set content type and length headers
           headers["Content-Type"]   = asset.content_type
           headers["Content-Length"] = length.to_s
-          headers["Content-MD5"]    = asset.digest
 
           # Set caching headers
           headers["Cache-Control"]  = "public"
@@ -199,7 +198,7 @@ module Sprockets
         end
       end
 
-      # Helper to quote the assets MD5 for use as an ETag.
+      # Helper to quote the assets digest for use as an ETag.
       def etag(asset)
         %("#{asset.digest}")
       end

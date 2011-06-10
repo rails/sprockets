@@ -160,9 +160,9 @@ class TestServer < Sprockets::TestCase
 
   test "fingerprint digest sets expiration to the future" do
     get "/javascripts/application.js"
-    md5 = last_response.headers['Content-MD5']
+    digest = last_response.headers['ETag'][/"(.+)"/, 1]
 
-    get "/javascripts/application-#{md5}.js"
+    get "/javascripts/application-#{digest}.js"
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
