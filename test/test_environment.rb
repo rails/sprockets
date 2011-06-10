@@ -347,6 +347,13 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["gallery.css"]
   end
 
+  test "changing digest implementation class" do
+    require 'digest/sha1'
+    @env.digest_class = Digest::SHA1
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc",
+      @env["gallery.js"].digest
+  end
+
   test "bundled asset is stale if its mtime is updated or deleted" do
     filename = File.join(fixture_path("default"), "tmp.js")
 

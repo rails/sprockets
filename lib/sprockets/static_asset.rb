@@ -1,4 +1,3 @@
-require 'digest/md5'
 require 'time'
 
 module Sprockets
@@ -13,7 +12,7 @@ module Sprockets
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
-      @digest = digest || Digest::MD5.file(pathname).hexdigest
+      @digest = digest || environment.digest_class.file(pathname).hexdigest
     end
 
     def dependencies

@@ -11,7 +11,7 @@ module Sprockets
   class Environment
     include Server, Processing, StaticCompilation
 
-    attr_accessor :logger, :context_class
+    attr_accessor :logger, :context_class, :digest_class
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
@@ -20,6 +20,9 @@ module Sprockets
       @logger.level = Logger::FATAL
 
       @context_class = Class.new(Context)
+
+      require 'digest/md5'
+      @digest_class = Digest::MD5
 
       @static_root = nil
 

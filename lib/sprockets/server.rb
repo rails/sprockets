@@ -63,7 +63,7 @@ module Sprockets
         not_found_response
 
       # Check request headers `HTTP_IF_MODIFIED_SINCE` and
-      # `HTTP_IF_NONE_MATCH` against the assets mtime and md5
+      # `HTTP_IF_NONE_MATCH` against the assets mtime and digest
       elsif not_modified?(asset, env) || etag_match?(asset, env)
         logger.info "#{msg} 304 Not Modified #{tag}"
 
@@ -80,7 +80,7 @@ module Sprockets
 
     # `path` is a url helper that looks up an asset given a
     # `logical_path` and returns a path String. By default, the
-    # asset's md5 fingerprint is spliced into the filename.
+    # asset's digest fingerprint is spliced into the filename.
     #
     #     /assets/application-3676d55f84497cbeadfc614c1b1b62fc.js
     #
