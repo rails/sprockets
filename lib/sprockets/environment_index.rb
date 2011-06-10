@@ -1,18 +1,21 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
+require 'sprockets/digest'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
 require 'pathname'
 
 module Sprockets
   class EnvironmentIndex
-    include Server, Processing, StaticCompilation
+    include Digest, Server, Processing, StaticCompilation
 
     attr_reader :logger, :context_class
 
     def initialize(environment, trail, static_root)
-      @logger         = environment.logger
-      @context_class  = environment.context_class
+      @logger        = environment.logger
+      @context_class = environment.context_class
+      @digest_class  = environment.digest_class
+      @digest_key_prefix = environment.digest_key_prefix
 
       @trail   = trail.index
       @assets  = {}
