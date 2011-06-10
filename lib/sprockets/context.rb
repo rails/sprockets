@@ -72,20 +72,17 @@ module Sprockets
       start_time = Time.now.to_f
       pathname   = resolve(filename)
       attributes = environment.attributes_for(pathname)
+      processors = options[:processors] || attributes.processors
 
       if options[:data]
-        data = options[:data]
+        result = options[:data]
       else
-        data = Sprockets::Utils.read_unicode(pathname)
+        result = Sprockets::Utils.read_unicode(pathname)
       end
 
-      result  = data
-      engines = options[:engines] || environment.processors(content_type) +
-                          attributes.engines.reverse
-
-      engines.each do |engine|
+      processors.each do |processor|
         begin
-          template = engine.new(pathname.to_s) { result }
+          template = processor.new(pathname.to_s) { result }
           result = template.render(self, {})
         rescue Exception => e
           annotate_exception! e

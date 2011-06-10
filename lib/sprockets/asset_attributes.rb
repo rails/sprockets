@@ -41,6 +41,10 @@ module Sprockets
       engine_extensions.map { |ext| @environment.engines(ext) }
     end
 
+    def processors
+      environment.processors(content_type) + engines.reverse
+    end
+
     def engine_content_type
       engines.reverse.each do |engine|
         if engine.respond_to?(:default_mime_type) && engine.default_mime_type
