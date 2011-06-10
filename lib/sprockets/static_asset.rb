@@ -12,7 +12,7 @@ module Sprockets
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
-      @digest = digest || environment.digest_class.file(pathname).hexdigest
+      @digest = digest || environment.digest.file(pathname).hexdigest
     end
 
     def dependencies

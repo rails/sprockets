@@ -1,5 +1,6 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/context'
+require 'sprockets/digest'
 require 'sprockets/directive_processor'
 require 'sprockets/environment_index'
 require 'hike'
@@ -9,9 +10,9 @@ require 'tilt'
 
 module Sprockets
   class Environment
-    include Server, Processing, StaticCompilation
+    include Digest, Server, Processing, StaticCompilation
 
-    attr_accessor :logger, :context_class, :digest_class
+    attr_accessor :logger, :context_class
 
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
@@ -22,7 +23,8 @@ module Sprockets
       @context_class = Class.new(Context)
 
       require 'digest/md5'
-      @digest_class = Digest::MD5
+      @digest_class = ::Digest::MD5
+      @digest_key_prefix = ''
 
       @static_root = nil
 

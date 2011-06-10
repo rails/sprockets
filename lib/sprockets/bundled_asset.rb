@@ -45,7 +45,7 @@ module Sprockets
     end
 
     def digest
-      @digest ||= @environment.digest_class.hexdigest(source)
+      @digest ||= @environment.digest.update(source).hexdigest
     end
 
     def dependencies?

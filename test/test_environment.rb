@@ -354,6 +354,14 @@ class TestEnvironment < Sprockets::TestCase
       @env["gallery.js"].digest
   end
 
+  test "changing digest key prefix" do
+    assert_equal "f1598cfbaf2a26f20367e4046957f6e0",
+      @env["gallery.js"].digest
+    @env.digest_key_prefix = 'v2'
+    assert_equal "cc460290b9ac52f59c058f2d6f785686",
+      @env["gallery.js"].digest
+  end
+
   test "bundled asset is stale if its mtime is updated or deleted" do
     filename = File.join(fixture_path("default"), "tmp.js")
 
