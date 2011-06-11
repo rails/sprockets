@@ -3,6 +3,7 @@ require 'time'
 
 module Sprockets
   class StaticAsset
+    attr_reader :environment
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
 
@@ -54,7 +55,7 @@ module Sprockets
     end
 
     def stale?
-      !(pathname.mtime <= mtime || @digest == @environment.digest.file(pathname).hexdigest)
+      !(pathname.mtime <= mtime || @digest == environment.digest.file(pathname).hexdigest)
     rescue Errno::ENOENT
       true
     end

@@ -5,6 +5,7 @@ require 'time'
 
 module Sprockets
   class BundledAsset
+    attr_reader :environment
     attr_reader :logical_path, :pathname, :mtime, :body
 
     def self.from_json(index, json, options = {})
@@ -16,6 +17,8 @@ module Sprockets
     def initialize(index, logical_path, pathname, options)
       @index = index
       options[:_index] ||= index
+
+      @environment = options[:_environment] || options[:_index]
 
       raise "not an index" unless index.is_a?(EnvironmentIndex)
 
@@ -39,7 +42,8 @@ module Sprockets
     def initialize_json(index, json, options)
       @index = index
       options[:_index] ||= index
-      environment = options[:_environment] || options[:_index]
+
+      @environment = options[:_environment] || options[:_index]
 
       raise "not an index" unless index.is_a?(EnvironmentIndex)
 
