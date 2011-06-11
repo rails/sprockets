@@ -3,7 +3,6 @@ require 'sprockets/bundled_asset'
 require 'sprockets/digest'
 require 'sprockets/errors'
 require 'sprockets/static_asset'
-require 'digest/md5'
 require 'pathname'
 
 module Sprockets
@@ -22,7 +21,7 @@ module Sprockets
       @assets  = {}
       @entries = {}
       @mtimes  = {}
-      @md5s    = {}
+      @digests = {}
 
       @static_root = static_root ? Pathname.new(static_root) : nil
 
@@ -102,15 +101,15 @@ module Sprockets
       end
     end
 
-    def md5(pathname)
+    def file_hexdigest_digest(pathname)
       filename = pathname.to_s
-      if @md5s.key?(filename)
-        @md5s[filename]
+      if @digests.key?(filename)
+        @digests[filename]
       else
         begin
-          @md5s[filename] = Digest::MD5.new(filename).hexdigest
+          @digests[filename] = digest.file(filename).hexdigest
         rescue Errno::ENOENT
-          @md5s[filename] = nil
+          @digests[filename] = nil
         end
       end
     end
