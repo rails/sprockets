@@ -6,7 +6,8 @@ module Sprockets
       def self.read_unicode(pathname)
         pathname.read.tap do |data|
           if !data.valid_encoding?
-            raise EncodingError, "Invalid byte sequence"
+            raise EncodingError, "#{pathname} has a invalid " +
+              "#{data.encoding} byte sequence"
           elsif data.encoding.name == "UTF-8" && data =~ UTF8_BOM_PATTERN
             data.sub!(UTF8_BOM_PATTERN, "")
           end
