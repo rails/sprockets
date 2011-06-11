@@ -15,14 +15,11 @@ module Sprockets
   autoload :EngineError,             "sprockets/errors"
   autoload :Engines,                 "sprockets/engines"
   autoload :Environment,             "sprockets/environment"
-  autoload :EnvironmentIndex,        "sprockets/environment_index"
   autoload :Error,                   "sprockets/errors"
   autoload :FileNotFound,            "sprockets/errors"
+  autoload :Index,                   "sprockets/index"
   autoload :JstProcessor,            "sprockets/jst_processor"
-  autoload :Processing,              "sprockets/processing"
-  autoload :Server,                  "sprockets/server"
   autoload :StaticAsset,             "sprockets/static_asset"
-  autoload :StaticCompilation,       "sprockets/static_compilation"
   autoload :Utils,                   "sprockets/utils"
 end
 

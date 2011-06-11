@@ -8,19 +8,14 @@ module Sprockets
     attr_reader :environment
     attr_reader :logical_path, :pathname, :mtime, :body
 
-    def self.from_json(index, json, options = {})
+    def self.from_json(environment, json, options = {})
       asset = allocate
-      asset.initialize_json(index, json, options)
+      asset.initialize_json(environment, json, options)
       asset
     end
 
-    def initialize(index, logical_path, pathname, options)
-      @index = index
-      options[:_index] ||= index
-
-      @environment = options[:_environment] || options[:_index]
-
-      raise "not an index" unless index.is_a?(EnvironmentIndex)
+    def initialize(environment, logical_path, pathname, options)
+      @environment = environment
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
@@ -35,17 +30,12 @@ module Sprockets
       end
       requires << pathname.to_s
 
-      compute_dependencies!(options[:_environment] || options[:_index], options)
+      compute_dependencies!(environment, options)
       compute_dependency_paths!
     end
 
-    def initialize_json(index, json, options)
-      @index = index
-      options[:_index] ||= index
-
-      @environment = options[:_environment] || options[:_index]
-
-      raise "not an index" unless index.is_a?(EnvironmentIndex)
+    def initialize_json(environment, json, options)
+      @environment = environment
 
       hash = MultiJson.decode(json)
 
@@ -66,12 +56,12 @@ module Sprockets
         data = ""
         to_a.each { |dependency| data << dependency.body }
         context.evaluate(pathname, :data => data,
-          :processors => index.bundle_processors(content_type))
+          :processors => environment.bundle_processors(content_type))
       end
     end
 
     def content_type
-      @content_type ||= index.content_type_of(pathname)
+      @content_type ||= environment.content_type_of(pathname)
     end
 
     def length
@@ -79,7 +69,7 @@ module Sprockets
     end
 
     def digest
-      @digest ||= index.digest.update(source).hexdigest
+      @digest ||= environment.digest.update(source).hexdigest
     end
 
     def dependencies?
@@ -136,10 +126,10 @@ module Sprockets
     end
 
     protected
-      attr_reader :index, :dependency_paths
+      attr_reader :dependency_paths
 
       def context
-        @context ||= index.context_class.new(index, logical_path.to_s, pathname)
+        @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
       end
 
     private

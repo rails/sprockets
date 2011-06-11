@@ -3,7 +3,7 @@ require 'time'
 
 module Sprockets
   # `Server` is a concern mixed into `Environment` and
-  # `EnvironmentIndex` that provides a Rack compatible `call`
+  # `Index` that provides a Rack compatible `call`
   # interface and url generation helpers.
   module Server
     # `call` implements the Rack 1.x specification which accepts an

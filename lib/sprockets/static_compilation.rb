@@ -1,20 +1,26 @@
+require 'sprockets/static_asset'
+
 require 'fileutils'
 require 'pathname'
 require 'zlib'
 
 module Sprockets
   module StaticCompilation
-    def static_root
-      @static_root
+    def self.included(base)
+      base.instance_eval do
+        attr_reader :static_root
+      end
     end
 
     def static_root=(root)
       expire_index!
-      @static_root = root
+      @static_root = root ? Pathname.new(root) : nil
     end
 
     def precompile(*paths)
-      raise "missing static root" unless @static_root
+      raise "missing static root" unless static_root
+
+      index = self.index
 
       paths.each do |path|
         files.each do |logical_path|
@@ -24,9 +30,9 @@ module Sprockets
             next unless logical_path.fnmatch(path.to_s)
           end
 
-          if asset = find_asset_in_path(logical_path)
+          if asset = find_asset(logical_path)
             digest_path = path_with_fingerprint(logical_path, asset.digest)
-            filename = @static_root.join(digest_path)
+            filename = static_root.join(digest_path)
             content = asset.to_s
 
             FileUtils.mkdir_p filename.dirname
@@ -112,12 +118,6 @@ module Sprockets
           end
         end
         files
-      end
-
-      def entries(pathname)
-        @entries[pathname.to_s] ||= pathname.entries.reject { |entry| entry.to_s =~ /^\.\.?$/ }
-      rescue Errno::ENOENT
-        @entries[pathname.to_s] = []
       end
   end
 end

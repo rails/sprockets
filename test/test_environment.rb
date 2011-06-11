@@ -454,7 +454,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 end
 
-class TestEnvironmentIndex < Sprockets::TestCase
+class TestIndex < Sprockets::TestCase
   include EnvironmentTests
 
   def new_environment
