@@ -1,4 +1,3 @@
-require 'digest/md5'
 require 'multi_json'
 require 'time'
 
@@ -14,13 +13,15 @@ module Sprockets
     end
 
     def initialize(environment, logical_path, pathname, digest = nil)
+      @environment = environment
+
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
       @content_type = environment.content_type_of(pathname)
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
-      @digest = digest || Digest::MD5.file(pathname).hexdigest
+      @digest = digest || environment.digest.file(pathname).hexdigest
     end
 
     def initialize_json(environment, json)
@@ -53,7 +54,7 @@ module Sprockets
     end
 
     def stale?
-      !(pathname.mtime <= mtime || @digest == Digest::MD5.file(pathname).hexdigest)
+      !(pathname.mtime <= mtime || @digest == @environment.digest.file(pathname).hexdigest)
     rescue Errno::ENOENT
       true
     end

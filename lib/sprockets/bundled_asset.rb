@@ -1,6 +1,6 @@
 require 'sprockets/errors'
-require 'digest/md5'
 require 'multi_json'
+require 'set'
 require 'time'
 
 module Sprockets
@@ -75,7 +75,7 @@ module Sprockets
     end
 
     def digest
-      @digest ||= Digest::MD5.hexdigest(source)
+      @digest ||= index.digest.update(source).hexdigest
     end
 
     def dependencies?
