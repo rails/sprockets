@@ -445,7 +445,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "serializing asset to and from json" do
     expected = @asset
-    actual   = Sprockets::BundledAsset.from_json(@env.index, expected.to_json)
+    actual   = Sprockets::BundledAsset.from_json(@env, expected.to_json)
 
     assert_equal expected.logical_path, actual.logical_path
     assert_equal expected.pathname, actual.pathname

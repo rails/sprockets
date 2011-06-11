@@ -47,30 +47,11 @@ module Sprockets
     end
 
     def find_asset(logical_path, options = {})
-      if asset = find_fresh_asset_from_cache(logical_path)
-        asset
-      elsif asset = super
-        @cache[logical_path.to_s] = @cache[asset.pathname.to_s] = asset
-      end
+      cache_asset(logical_path) { super }
     end
 
     protected
-      def find_fresh_asset_from_cache(logical_path)
-        if asset = @cache[logical_path.to_s]
-          if path_fingerprint(logical_path)
-            asset
-          elsif asset.stale?
-            nil
-          else
-            asset
-          end
-        else
-          nil
-        end
-      end
-
       def expire_index!
-        @cache = {}
       end
   end
 end

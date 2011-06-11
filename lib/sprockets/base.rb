@@ -1,4 +1,5 @@
 require 'sprockets/asset_attributes'
+require 'sprockets/caching'
 require 'sprockets/digest'
 require 'sprockets/processing'
 require 'sprockets/server'
@@ -7,11 +8,18 @@ require 'sprockets/trail'
 
 module Sprockets
   class Base
-    include Digest, Processing, Server, StaticCompilation, Trail
+    include Caching, Digest, Processing, Server, StaticCompilation, Trail
 
     attr_reader :logger
 
     attr_reader :context_class
+
+    attr_reader :cache
+
+    def cache=(cache)
+      expire_index!
+      @cache = cache
+    end
 
     def index
       raise NotImplementedError

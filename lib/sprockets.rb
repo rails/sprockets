@@ -21,6 +21,10 @@ module Sprockets
   autoload :JstProcessor,            "sprockets/jst_processor"
   autoload :StaticAsset,             "sprockets/static_asset"
   autoload :Utils,                   "sprockets/utils"
+
+  module Cache
+    autoload :FileStore, "sprockets/cache/file_store"
+  end
 end
 
 # TODO: Remove in 2.0.0 final
