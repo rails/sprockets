@@ -8,9 +8,9 @@ module Sprockets
     attr_reader :environment
     attr_reader :logical_path, :pathname, :mtime, :body
 
-    def self.from_json(environment, json, options = {})
+    def self.from_json(environment, hash, options = {})
       asset = allocate
-      asset.initialize_json(environment, json, options)
+      asset.initialize_json(environment, hash, options)
       asset
     end
 
@@ -34,10 +34,8 @@ module Sprockets
       compute_dependency_paths!
     end
 
-    def initialize_json(environment, json, options)
+    def initialize_json(environment, hash, options)
       @environment = environment
-
-      hash = MultiJson.decode(json)
 
       @logical_path = hash['logical_path'].to_s
       @pathname     = Pathname.new(hash['pathname'])
@@ -108,6 +106,7 @@ module Sprockets
 
     def as_json
       {
+        'class'            => 'BundledAsset',
         'logical_path'     => logical_path,
         'pathname'         => pathname.to_s,
         'content_type'     => content_type,

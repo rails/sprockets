@@ -1,8 +1,22 @@
 require 'sprockets/bundled_asset'
 require 'sprockets/static_asset'
+require 'multi_json'
 
 module Sprockets
   module Caching
+    def asset_from_json(json)
+      hash = MultiJson.decode(json)
+
+      case hash['class']
+      when 'BundledAsset'
+        Sprockets::BundledAsset.from_json(self, hash)
+      when 'StaticAsset'
+        Sprockets::StaticAsset.from_json(self, hash)
+      else
+        nil
+      end
+    end
+
     private
       def cache_get(key)
         return unless cache
@@ -36,7 +50,7 @@ module Sprockets
         json = cache_get(logical_path)
 
         if json.is_a?(String)
-          asset = Sprockets::BundledAsset.from_json(self, json)
+          asset = asset_from_json(json)
 
           if !asset.stale?
             logger.debug "Loading #{logical_path} from cache"

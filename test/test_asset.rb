@@ -156,8 +156,9 @@ class StaticAssetTest < Sprockets::TestCase
 
   test "serializing asset to and from json" do
     expected = @asset
-    actual   = Sprockets::StaticAsset.from_json(@env, expected.to_json)
+    actual   = @env.asset_from_json(expected.to_json)
 
+    assert_kind_of Sprockets::StaticAsset, actual
     assert_equal expected.logical_path, actual.logical_path
     assert_equal expected.pathname, actual.pathname
     assert_equal expected.content_type, actual.content_type
@@ -445,8 +446,9 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "serializing asset to and from json" do
     expected = @asset
-    actual   = Sprockets::BundledAsset.from_json(@env, expected.to_json)
+    actual   = @env.asset_from_json(expected.to_json)
 
+    assert_kind_of Sprockets::BundledAsset, actual
     assert_equal expected.logical_path, actual.logical_path
     assert_equal expected.pathname, actual.pathname
     assert_equal expected.body, actual.body
