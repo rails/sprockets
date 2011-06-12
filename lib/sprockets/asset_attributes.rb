@@ -65,5 +65,9 @@ module Sprockets
         end
       end
     end
+
+    def path_fingerprint
+      pathname.basename(extensions.join).to_s =~ /-([0-9a-f]{7,40})$/ ? $1 : nil
+    end
   end
 end

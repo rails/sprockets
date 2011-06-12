@@ -69,7 +69,7 @@ module Sprockets
 
     protected
       def find_asset_in_path(logical_path, options = {})
-        if fingerprint = path_fingerprint(logical_path)
+        if fingerprint = attributes_for(logical_path).path_fingerprint
           pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
         else
           pathname = resolve(logical_path)

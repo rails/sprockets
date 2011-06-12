@@ -69,7 +69,7 @@ module Sprockets
           return nil
         end
 
-        if !path_fingerprint(pathname)
+        if !attributes_for(pathname).path_fingerprint
           pattern = /^#{Regexp.escape(attributes.basename_without_extensions.to_s)}
                      -([0-9a-f]{7,40})
                      #{Regexp.escape(attributes.extensions.join)}$/x
@@ -91,12 +91,6 @@ module Sprockets
       end
 
     private
-      def path_fingerprint(path)
-        pathname = Pathname.new(path)
-        extensions = pathname.basename.to_s.scan(/\.[^.]+/).join
-        pathname.basename(extensions).to_s =~ /-([0-9a-f]{7,40})$/ ? $1 : nil
-      end
-
       def path_with_fingerprint(path, digest)
         pathname = Pathname.new(path)
         extensions = pathname.basename.to_s.scan(/\.[^.]+/).join
