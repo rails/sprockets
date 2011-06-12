@@ -51,16 +51,16 @@ module Sprockets
     end
 
     protected
-      def cache_get_asset(logical_path)
-        if (asset = @assets[logical_path]) && !asset.stale?
+      def cache_get_asset(path)
+        if (asset = @assets[path.to_s]) && !asset.stale?
           asset
         else
           super
         end
       end
 
-      def cache_set_asset(logical_path, asset)
-        @assets[logical_path] = asset
+      def cache_set_asset(path, asset)
+        @assets[path.to_s] = asset
         super
       end
 
