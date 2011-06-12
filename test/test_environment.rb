@@ -469,6 +469,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "registering engine adds to the environments extensions" do
+    old_digest = @env.digest
     assert !@env.engines[".foo"]
     assert !@env.extensions.include?(".foo")
 
@@ -476,6 +477,7 @@ class TestEnvironment < Sprockets::TestCase
 
     assert @env.engines[".foo"]
     assert @env.extensions.include?(".foo")
+    assert_not_equal old_digest, @env.digest
   end
 
   test "seperate engines for each instance" do
