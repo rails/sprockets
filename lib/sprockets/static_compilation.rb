@@ -31,7 +31,7 @@ module Sprockets
             next unless logical_path.fnmatch(path.to_s)
           end
 
-          if asset = find_asset(logical_path)
+          if asset = find_asset_in_path(logical_path)
             attributes  = attributes_for(logical_path)
             digest_path = attributes.path_with_fingerprint(asset.digest)
             filename    = static_root.join(digest_path)
