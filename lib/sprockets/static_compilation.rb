@@ -23,8 +23,6 @@ module Sprockets
     def precompile(*paths)
       raise "missing static root" unless static_root
 
-      index = self.index
-
       paths.each do |path|
         files.each do |logical_path|
           if path.is_a?(Regexp)
