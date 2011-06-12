@@ -51,7 +51,22 @@ module Sprockets
     end
 
     protected
+      def cache_get_asset(logical_path)
+        if (asset = @assets[logical_path]) && !asset.stale?
+          asset
+        else
+          super
+        end
+      end
+
+      def cache_set_asset(logical_path, asset)
+        @assets[logical_path] = asset
+        super
+      end
+
       def expire_index!
+        @digest = compute_digest
+        @assets = {}
       end
   end
 end

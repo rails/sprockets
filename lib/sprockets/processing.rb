@@ -116,6 +116,12 @@ module Sprockets
     end
 
     private
+      def processors_hash
+        @mime_types.keys.join(',') +
+          @processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',') +
+          @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
+      end
+
       def deep_copy_hash(hash)
         initial = Hash.new { |h, k| h[k] = [] }
         hash.inject(initial) { |h, (k, a)| h[k] = a.dup; h }

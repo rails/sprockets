@@ -6,11 +6,14 @@ require 'zlib'
 
 module Sprockets
   module StaticCompilation
-    def self.included(base)
-      base.instance_eval do
-        attr_reader :static_root
-      end
+    def static_root
+      @static_root
     end
+
+    def static_root_hash
+      static_root.to_s
+    end
+    private :static_root_hash
 
     def static_root=(root)
       expire_index!

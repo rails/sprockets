@@ -7,6 +7,7 @@ module Sprockets
       @context_class     = environment.context_class
       @trail             = environment.trail.index
       @static_root       = environment.static_root
+      @digest            = environment.digest
       @digest_class      = environment.digest_class
       @digest_key_prefix = environment.digest_key_prefix
       @mime_types        = environment.mime_types

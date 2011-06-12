@@ -38,9 +38,7 @@ module Sprockets
         if json.is_a?(String)
           asset = Sprockets::BundledAsset.from_json(self, json)
 
-          if asset.stale?
-            nil
-          else
+          if !asset.stale?
             logger.debug "Loading #{logical_path} from cache"
             asset
           end

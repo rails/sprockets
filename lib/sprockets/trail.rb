@@ -20,10 +20,6 @@ module Sprockets
       trail.paths.dup
     end
 
-    def extensions
-      trail.extensions.dup
-    end
-
     def append_path(path)
       expire_index!
       @trail.paths.push(path)
@@ -37,6 +33,10 @@ module Sprockets
     def clear_paths
       expire_index!
       @trail.paths.clear
+    end
+
+    def extensions
+      trail.extensions.dup
     end
 
     def resolve(logical_path, options = {})
@@ -104,6 +104,10 @@ module Sprockets
       end
 
     private
+      def paths_hash
+        trail.paths.join(',')
+      end
+
       def detect_logical_path(filename)
         if root_path = paths.detect { |path| filename.to_s[path] }
           root_pathname = Pathname.new(root_path)
