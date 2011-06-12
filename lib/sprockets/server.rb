@@ -88,7 +88,7 @@ module Sprockets
     # the string.
     def path(logical_path, fingerprint = true, prefix = nil)
       if fingerprint && asset = find_asset(logical_path.to_s.sub(/^\//, ''))
-        url = path_with_fingerprint(logical_path, asset.digest)
+        url = attributes_for(logical_path).path_with_fingerprint(asset.digest)
       else
         url = logical_path
       end

@@ -69,5 +69,14 @@ module Sprockets
     def path_fingerprint
       pathname.basename(extensions.join).to_s =~ /-([0-9a-f]{7,40})$/ ? $1 : nil
     end
+
+    def path_with_fingerprint(digest)
+      if path_fingerprint
+        path.sub($1, digest)
+      else
+        basename = "#{pathname.basename(extensions.join)}-#{digest}#{extensions.join}"
+        pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+      end
+    end
   end
 end
