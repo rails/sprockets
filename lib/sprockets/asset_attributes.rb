@@ -23,6 +23,15 @@ module Sprockets
         sub(/^#{Regexp.escape(environment.root)}\//, '')
     end
 
+    def index_path
+      if basename_without_extensions.to_s == 'index'
+        pathname.to_s
+      else
+        basename = "#{basename_without_extensions}/index#{extensions.join}"
+        pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+      end
+    end
+
     def format_extension
       extensions.detect { |ext| @environment.mime_types(ext) }
     end

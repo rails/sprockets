@@ -41,7 +41,7 @@ module Sprockets
 
     def resolve(logical_path, options = {})
       if block_given?
-        trail.find(logical_path.to_s, logical_index_path(logical_path), options) do |path|
+        trail.find(logical_path.to_s, attributes_for(logical_path).index_path, options) do |path|
           yield Pathname.new(path)
         end
       else
@@ -113,18 +113,6 @@ module Sprockets
           root_pathname = Pathname.new(root_path)
           logical_path  = Pathname.new(filename).relative_path_from(root_pathname)
           attributes_for(logical_path).without_engine_extensions
-        end
-      end
-
-      def logical_index_path(logical_path)
-        pathname   = Pathname.new(logical_path)
-        attributes = attributes_for(logical_path)
-
-        if attributes.basename_without_extensions.to_s == 'index'
-          logical_path
-        else
-          basename = "#{attributes.basename_without_extensions}/index#{attributes.extensions.join}"
-          pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
         end
       end
   end
