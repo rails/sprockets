@@ -46,8 +46,8 @@ module Sprockets
       Index.new(self)
     end
 
-    def find_asset(logical_path, options = {})
-      cache_asset(logical_path) { super }
+    def find_asset(path, options = {})
+      cache_asset(path) { super }
     end
 
     protected

@@ -25,12 +25,25 @@ module Sprockets
     end
 
     def find_asset(path, options = {})
-      @assets[path.to_s] ||= super
+      cache_asset(path) { super }
     end
 
     protected
       def expire_index!
         raise TypeError, "can't modify immutable index"
+      end
+
+      def cache_get_asset(logical_path)
+        if asset = @assets[logical_path.to_s]
+          asset
+        else
+          super
+        end
+      end
+
+      def cache_set_asset(logical_path, asset)
+        @assets[logical_path.to_s] = asset
+        super
       end
 
       def build_asset(logical_path, pathname, options)
