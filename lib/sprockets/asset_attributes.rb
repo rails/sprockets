@@ -37,6 +37,12 @@ module Sprockets
       exts.select { |ext| @environment.engines(ext) }
     end
 
+    def without_engine_extensions
+      engine_extensions.inject(pathname) do |p, ext|
+        p.sub(ext, '')
+      end
+    end
+
     def engines
       engine_extensions.map { |ext| @environment.engines(ext) }
     end

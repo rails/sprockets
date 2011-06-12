@@ -98,7 +98,7 @@ module Sprockets
           base_pathname = Pathname.new(base_path)
           Dir["#{base_pathname}/**/*"].each do |filename|
             logical_path = Pathname.new(filename).relative_path_from(base_pathname)
-            files << path_without_engine_extensions(logical_path)
+            files << attributes_for(logical_path).without_engine_extensions
           end
         end
         files

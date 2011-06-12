@@ -112,13 +112,7 @@ module Sprockets
         if root_path = paths.detect { |path| filename.to_s[path] }
           root_pathname = Pathname.new(root_path)
           logical_path  = Pathname.new(filename).relative_path_from(root_pathname)
-          path_without_engine_extensions(logical_path)
-        end
-      end
-
-      def path_without_engine_extensions(pathname)
-        attributes_for(pathname).engine_extensions.inject(pathname) do |p, ext|
-          p.sub(ext, '')
+          attributes_for(logical_path).without_engine_extensions
         end
       end
 
