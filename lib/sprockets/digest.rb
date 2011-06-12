@@ -19,6 +19,7 @@ module Sprockets
     end
 
     def digest
+      @digest ||= compute_digest
       @digest.dup
     end
 

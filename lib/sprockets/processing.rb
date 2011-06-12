@@ -118,6 +118,7 @@ module Sprockets
     private
       def processors_hash
         @mime_types.keys.join(',') +
+          @engines.map { |e, k| "#{e}:#{k.name}" }.join(',') +
           @processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',') +
           @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
       end

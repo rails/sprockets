@@ -22,6 +22,7 @@ module Sprockets
 
       @mtime  = @pathname.mtime
       @length = @pathname.size
+      @environment_digest = environment.digest.hexdigest
       @digest = digest || environment.digest.file(pathname).hexdigest
     end
 
@@ -34,6 +35,7 @@ module Sprockets
       @mtime        = Time.parse(hash['mtime'])
       @length       = hash['length']
       @digest       = hash['digest']
+      @environment_digest = hash['environment_digest']
     end
 
     def dependencies
@@ -52,10 +54,22 @@ module Sprockets
       to_s
     end
 
-    def stale?
-      !(pathname.mtime <= mtime || @digest == environment.digest.file(pathname).hexdigest)
+    def fresh?
+      if environment.digest != @environment_digest
+        false
+      elsif mtime >= pathname.mtime
+        true
+      elsif environment.digest.file(pathname).hexdigest == digest
+        true
+      else
+        false
+      end
     rescue Errno::ENOENT
-      true
+      false
+    end
+
+    def stale?
+      !fresh?
     end
 
     def each
@@ -86,7 +100,8 @@ module Sprockets
         'content_type' => content_type,
         'mtime'        => mtime,
         'digest'       => digest,
-        'length'       => length
+        'length'       => length,
+        'environment_digest' => @environment_digest
       }
     end
 

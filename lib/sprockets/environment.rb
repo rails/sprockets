@@ -65,7 +65,7 @@ module Sprockets
       end
 
       def expire_index!
-        @digest = compute_digest
+        @digest = nil
         @assets = {}
       end
   end

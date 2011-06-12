@@ -23,6 +23,7 @@ module Sprockets
       @assets = []
       @source = nil
       @body   = context.evaluate(pathname)
+      file_digest
 
       requires = options[:_requires] ||= []
       if requires.include?(pathname.to_s)
@@ -44,6 +45,7 @@ module Sprockets
       @source       = hash['source']
       @content_type = hash['content_type']
       @length       = hash['length']
+      @file_digest  = hash['file_digest']
       @digest       = hash['digest']
       @assets       = hash['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
       @dependency_paths = hash['dependency_paths']
@@ -64,6 +66,10 @@ module Sprockets
 
     def length
       @length ||= Rack::Utils.bytesize(source)
+    end
+
+    def file_digest
+      @file_digest ||= environment.digest.file(pathname).hexdigest
     end
 
     def digest
@@ -87,7 +93,14 @@ module Sprockets
     end
 
     def stale?
-      dependency_paths.any? { |p| mtime < File.mtime(p) }
+      return true if dependency_paths.any? { |path|
+        pathname = Pathname.new(path)
+        pathname.mtime > mtime
+      }
+
+      return true if environment.digest.file(pathname).hexdigest != file_digest
+
+      false
     rescue Errno::ENOENT
       true
     end
@@ -113,6 +126,7 @@ module Sprockets
         'mtime'            => mtime,
         'body'             => body,
         'source'           => source,
+        'file_digest'      => file_digest,
         'digest'           => digest,
         'length'           => length,
         'asset_paths'      => to_a.map(&:pathname).map(&:to_s),
