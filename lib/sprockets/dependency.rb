@@ -3,10 +3,10 @@ require 'multi_json'
 module Sprockets
   class Dependency < Struct.new(:environment_hexdigest, :path, :mtime, :hexdigest)
     def self.from_path(environment, path)
-      raise ArgumentError unless File.exist?(path)
-      mtime = environment.stat(path).mtime
+      stat = environment.stat(path)
+      raise ArgumentError unless stat
       hexdigest = environment.file_digest(path).hexdigest
-      new(environment.digest.hexdigest, path.to_s, mtime, hexdigest)
+      new(environment.digest.hexdigest, path.to_s, stat.mtime, hexdigest)
     end
 
     def self.from_json(json)
