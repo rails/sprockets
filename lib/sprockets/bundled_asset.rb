@@ -69,7 +69,7 @@ module Sprockets
     end
 
     def file_digest
-      @file_digest ||= environment.digest.file(pathname).hexdigest
+      @file_digest ||= environment.file_digest(pathname).hexdigest
     end
 
     def digest
@@ -102,7 +102,7 @@ module Sprockets
         end
       }
 
-      return true if environment.digest.file(pathname).hexdigest != file_digest
+      return true if environment.file_digest(pathname).hexdigest != file_digest
 
       false
     rescue Errno::ENOENT
