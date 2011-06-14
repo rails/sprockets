@@ -26,9 +26,6 @@ module Sprockets
       @source = nil
       @body   = context.evaluate(pathname)
 
-      @body_mtime  = environment.stat(pathname).mtime
-      @body_digest = body_digest
-
       requires = options[:_requires] ||= []
       if requires.include?(pathname.to_s)
         raise CircularDependencyError, "#{pathname} has already been required"
@@ -46,8 +43,6 @@ module Sprockets
       @pathname     = Pathname.new(hash['pathname'])
       @mtime        = Time.parse(hash['mtime'])
       @body         = hash['body']
-      @body_mtime   = Time.parse(hash['body_mtime'])
-      @body_digest  = hash['body_digest']
       @source       = hash['source']
       @content_type = hash['content_type']
       @length       = hash['length']
@@ -127,8 +122,6 @@ module Sprockets
         'content_type'       => content_type,
         'mtime'              => mtime,
         'body'               => body,
-        'body_mtime'         => body_mtime,
-        'body_digest'        => body_digest,
         'source'             => source,
         'digest'             => digest,
         'length'             => length,
@@ -143,14 +136,10 @@ module Sprockets
     end
 
     protected
-      attr_reader :dependency_files, :body_mtime, :environment_digest
+      attr_reader :dependency_files, :environment_digest
 
       def context
         @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
-      end
-
-      def body_digest
-        @body_digest ||= environment.file_digest(pathname).hexdigest
       end
 
     private
