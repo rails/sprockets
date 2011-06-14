@@ -13,8 +13,8 @@ module Sprockets
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
 
-      @logger = Logger.new($stderr)
-      @logger.level = Logger::FATAL
+      self.logger = Logger.new($stderr)
+      self.logger.level = Logger::FATAL
 
       @context_class = Class.new(Context)
 

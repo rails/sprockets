@@ -14,7 +14,7 @@ module Sprockets
     include Digest
     include Caching, Processing, Server, StaticCompilation, Trail
 
-    attr_reader :logger
+    attr_accessor :logger
 
     attr_reader :context_class
 

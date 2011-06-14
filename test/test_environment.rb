@@ -11,6 +11,10 @@ module EnvironmentTests
     assert_equal Dir.pwd, @env.root
   end
 
+  test "default logger level is set to fatal" do
+    assert_equal Logger::FATAL, @env.logger.level
+  end
+
   test "active css compressor" do
     assert_nil @env.css_compressor
   end
@@ -299,6 +303,10 @@ class TestEnvironment < Sprockets::TestCase
 
   def setup
     @env = new_environment
+  end
+
+  test "changing logger" do
+    @env.logger = Logger.new($stderr)
   end
 
   test "changing paths" do
