@@ -30,15 +30,11 @@ module Sprockets
     end
 
     def entries(pathname)
-      Pathname.new(pathname).entries.reject { |entry| entry.to_s =~ /^\.\.?$/ }
-    rescue Errno::ENOENT
-      []
+      trail.entries(pathname)
     end
 
     def stat(path)
-      File.stat(path)
-    rescue Errno::ENOENT
-      nil
+      trail.stat(path)
     end
 
     def file_digest(path, data = nil)

@@ -17,21 +17,11 @@ module Sprockets
 
       # Caches
       @assets  = {}
-      @entries = {}
-      @stats   = {}
       @digests = {}
     end
 
     def index
       self
-    end
-
-    def entries(pathname)
-      memoize(@entries, pathname.to_s) { super }
-    end
-
-    def stat(pathname)
-      memoize(@stats, pathname.to_s) { super }
     end
 
     def file_digest(pathname, data = nil)
