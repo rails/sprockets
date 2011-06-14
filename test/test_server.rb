@@ -77,23 +77,32 @@ class TestServer < Sprockets::TestCase
   test "updated file updates the last modified header" do
     time = Time.now
     path = fixture_path "server/app/javascripts/foo.js"
-    File.utime(time, time, path)
 
-    get "/javascripts/application.js"
-    time_before_touching = last_response.headers['Last-Modified']
+    begin
+      FileUtils.cp(path, "#{path}.org")
 
-    get "/javascripts/application.js"
-    time_after_touching = last_response.headers['Last-Modified']
+      File.utime(time, time, path)
 
-    assert_equal time_before_touching, time_after_touching
+      get "/javascripts/application.js"
+      time_before_modifying = last_response.headers['Last-Modified']
 
-    mtime = Time.now + 60
-    File.utime(mtime, mtime, path)
+      get "/javascripts/application.js"
+      time_after_modifying = last_response.headers['Last-Modified']
 
-    get "/javascripts/application.js"
-    time_after_touching = last_response.headers['Last-Modified']
+      assert_equal time_before_modifying, time_after_modifying
 
-    assert_not_equal time_before_touching, time_after_touching
+      mtime = Time.now + 60
+      File.open(path, 'w') { |f| f.write "(change)" }
+      File.utime(mtime, mtime, path)
+
+      get "/javascripts/application.js"
+      time_after_modifying = last_response.headers['Last-Modified']
+
+      assert_not_equal time_before_modifying, time_after_modifying
+    ensure
+      FileUtils.mv("#{path}.org", path) if File.exist?("#{path}.org")
+      assert !File.exist?("#{path}.org")
+    end
   end
 
   test "file updates do not update last modified header for indexed environments" do

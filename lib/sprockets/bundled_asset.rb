@@ -1,3 +1,4 @@
+require 'sprockets/dependency'
 require 'sprockets/errors'
 require 'multi_json'
 require 'set'
@@ -16,6 +17,7 @@ module Sprockets
 
     def initialize(environment, logical_path, pathname, options)
       @environment = environment
+      @environment_digest = environment.digest.hexdigest
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
@@ -23,7 +25,9 @@ module Sprockets
       @assets = []
       @source = nil
       @body   = context.evaluate(pathname)
-      file_digest
+
+      @body_mtime  = environment.stat(pathname).mtime
+      @body_digest = body_digest
 
       requires = options[:_requires] ||= []
       if requires.include?(pathname.to_s)
@@ -32,7 +36,7 @@ module Sprockets
       requires << pathname.to_s
 
       compute_dependencies!(environment, options)
-      compute_dependency_paths!
+      compute_dependency_files!
     end
 
     def initialize_json(environment, hash, options)
@@ -42,13 +46,20 @@ module Sprockets
       @pathname     = Pathname.new(hash['pathname'])
       @mtime        = Time.parse(hash['mtime'])
       @body         = hash['body']
+      @body_mtime   = Time.parse(hash['body_mtime'])
+      @body_digest  = hash['body_digest']
       @source       = hash['source']
       @content_type = hash['content_type']
       @length       = hash['length']
-      @file_digest  = hash['file_digest']
       @digest       = hash['digest']
       @assets       = hash['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
-      @dependency_paths = hash['dependency_paths']
+
+      @dependency_files = hash['dependency_files'].inject({}) { |h, json|
+        dep = Dependency.from_json(json)
+        h[dep.path] = dep
+        h
+      }
+      @environment_digest = hash['environment_digest']
     end
 
     def source
@@ -66,10 +77,6 @@ module Sprockets
 
     def length
       @length ||= Rack::Utils.bytesize(source)
-    end
-
-    def file_digest
-      @file_digest ||= environment.file_digest(pathname).hexdigest
     end
 
     def digest
@@ -92,21 +99,12 @@ module Sprockets
       yield source
     end
 
+    def fresh?
+      dependency_files.values.all? { |dep| dep.fresh?(environment) }
+    end
+
     def stale?
-      return true if dependency_paths.any? { |path|
-        pathname = Pathname.new(path)
-        if stat = @environment.stat(pathname)
-          stat.mtime > mtime
-        else
-          true
-        end
-      }
-
-      return true if environment.file_digest(pathname).hexdigest != file_digest
-
-      false
-    rescue Errno::ENOENT
-      true
+      !fresh?
     end
 
     def to_s
@@ -123,18 +121,20 @@ module Sprockets
 
     def as_json
       {
-        'class'            => 'BundledAsset',
-        'logical_path'     => logical_path,
-        'pathname'         => pathname.to_s,
-        'content_type'     => content_type,
-        'mtime'            => mtime,
-        'body'             => body,
-        'source'           => source,
-        'file_digest'      => file_digest,
-        'digest'           => digest,
-        'length'           => length,
-        'asset_paths'      => to_a.map(&:pathname).map(&:to_s),
-        'dependency_paths' => dependency_paths
+        'class'              => 'BundledAsset',
+        'logical_path'       => logical_path,
+        'pathname'           => pathname.to_s,
+        'content_type'       => content_type,
+        'mtime'              => mtime,
+        'body'               => body,
+        'body_mtime'         => body_mtime,
+        'body_digest'        => body_digest,
+        'source'             => source,
+        'digest'             => digest,
+        'length'             => length,
+        'asset_paths'        => to_a.map(&:pathname).map(&:to_s),
+        'dependency_files'   => dependency_files.values.map(&:as_json),
+        'environment_digest' => environment_digest
       }
     end
 
@@ -143,10 +143,14 @@ module Sprockets
     end
 
     protected
-      attr_reader :dependency_paths
+      attr_reader :dependency_files, :body_mtime, :environment_digest
 
       def context
         @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
+      end
+
+      def body_digest
+        @body_digest ||= environment.file_digest(pathname).hexdigest
       end
 
     private
@@ -169,8 +173,8 @@ module Sprockets
         end
       end
 
-      def compute_dependency_paths!
-        @dependency_paths = []
+      def compute_dependency_files!
+        @dependency_files = {}
         @mtime = Time.at(0)
 
         depend_on(pathname)
@@ -180,18 +184,17 @@ module Sprockets
         end
 
         to_a.each do |dependency|
-          dependency.dependency_paths.each do |path|
-            depend_on(path)
+          dependency.dependency_files.each do |path, dep|
+            depend_on(path, dep)
           end
         end
       end
 
-      def depend_on(path)
-        if (mtime = File.mtime(path)) > @mtime
-          @mtime = mtime
-        end
-        unless dependency_paths.include?(path.to_s)
-          dependency_paths << path.to_s
+      def depend_on(path, dep = nil)
+        dep = dependency_files[path.to_s] ||= (dep || Dependency.from_path(environment, path))
+
+        if dep.mtime > @mtime
+          @mtime = dep.mtime
         end
       end
   end

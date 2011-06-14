@@ -1,3 +1,4 @@
+require 'sprockets/dependency'
 require 'multi_json'
 require 'time'
 
@@ -20,10 +21,10 @@ module Sprockets
       @pathname     = Pathname.new(pathname)
       @content_type = environment.content_type_of(pathname)
 
-      @mtime  = @environment.stat(@pathname).mtime
-      @length = @environment.stat(@pathname).size
-      @digest = digest || environment.file_digest(pathname).hexdigest
-      @environment_digest = environment.digest.hexdigest
+      @mtime      = environment.stat(@pathname).mtime
+      @length     = environment.stat(@pathname).size
+      @digest     = environment.file_digest(pathname).hexdigest
+      @dependency = Dependency.new(environment.digest.hexdigest, @pathname.to_s, @mtime, @digest)
     end
 
     def initialize_json(environment, hash)
@@ -35,7 +36,7 @@ module Sprockets
       @mtime        = Time.parse(hash['mtime'])
       @length       = hash['length']
       @digest       = hash['digest']
-      @environment_digest = hash['environment_digest']
+      @dependency   = Dependency.from_json(hash['dependency'])
     end
 
     def dependencies
@@ -55,15 +56,7 @@ module Sprockets
     end
 
     def fresh?
-      if environment.digest != @environment_digest
-        false
-      elsif (stat = @environment.stat(pathname)) && mtime >= stat.mtime
-        true
-      elsif (d = environment.file_digest(pathname)) && d.hexdigest == digest
-        true
-      else
-        false
-      end
+      @dependency.fresh?(environment)
     end
 
     def stale?
@@ -99,7 +92,7 @@ module Sprockets
         'mtime'        => mtime,
         'digest'       => digest,
         'length'       => length,
-        'environment_digest' => @environment_digest
+        'dependency'   => @dependency.as_json
       }
     end
 

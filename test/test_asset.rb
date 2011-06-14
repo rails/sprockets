@@ -41,6 +41,10 @@ module AssetTests
     assert !@asset.stale?
   end
 
+  test "fresh?" do
+    assert @asset.fresh?
+  end
+
   test "to_s" do
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
@@ -92,24 +96,30 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal @asset.to_s, @asset.body
   end
 
-  test "asset isnt stale if its mtime and contents are the same" do
-    assert !@asset.stale?
+  test "asset is fresh if its mtime and contents are the same" do
+    assert @asset.fresh?
   end
 
-  test "asset isnt stale if its mtime is changed but its contents is the same" do
-     filename = fixture_path('public/test.js')
+  test "asset is stale if its environment has changed" do
+    assert @asset.fresh?
+    @env.prepend_path fixture_path('default')
+    assert @asset.stale?
+  end
+
+  test "asset is fresh if its mtime is changed but its contents is the same" do
+    filename = fixture_path('public/test.js')
 
     begin
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test.js']
 
-      assert !asset.stale?
+      assert asset.fresh?
 
       File.open(filename, 'w') { |f| f.write "a" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert !asset.stale?
+      assert asset.fresh?
     ensure
       File.unlink(filename) if File.exist?(filename)
       assert !File.exist?(filename)
@@ -123,7 +133,7 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test.js']
 
-      assert !asset.stale?
+      assert asset.fresh?
 
       File.open(filename, 'w') { |f| f.write "b" }
       mtime = Time.now + 1
@@ -143,7 +153,7 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test.js']
 
-      assert !asset.stale?
+      assert asset.fresh?
 
       File.unlink(filename)
 
@@ -340,13 +350,6 @@ class BundledAssetTest < Sprockets::TestCase
       asset("filename.js").to_s
   end
 
-  test "asset mtime is the latest mtime of all processed sources" do
-    mtime = Time.now+10
-    path  = resolve("project.js")
-    File.utime(mtime, mtime, path.to_s)
-    assert_equal File.mtime(path), asset("application.js").mtime
-  end
-
   test "asset inherits the format extension and content type of the original file" do
     asset = asset("project.js")
     assert_equal "application/javascript", asset.content_type
@@ -377,19 +380,85 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset("project.js").digest
   end
 
-  test "asset is stale when one of its source files is modified" do
+  test "asset is fresh if its mtime and contents are the same" do
+    assert asset("application.js").fresh?
+  end
+
+  test "asset is stale if its environment has changed" do
     asset = asset("application.js")
-    assert !asset.stale?
-
-    mtime = Time.now + 1
-    File.utime(mtime, mtime, resolve("project.js").to_s)
-
+    assert asset.fresh?
+    @env.prepend_path fixture_path("default")
     assert asset.stale?
+  end
+
+  test "asset is fresh if its mtime is changed but its contents is the same" do
+  end
+
+  test "asset is stale when its contents has changed" do
+    filename = fixture_path('asset/test.js')
+
+    begin
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env['test.js']
+
+      assert asset.fresh?
+
+      File.open(filename, 'w') { |f| f.write "b" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, filename)
+
+      assert asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
+  test "asset is stale if the file is removed" do
+    filename = fixture_path('asset/test.js')
+
+    begin
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env['test.js']
+
+      assert asset.fresh?
+
+      File.unlink(filename)
+
+      assert asset.stale?
+    ensure
+      File.unlink(filename) if File.exist?(filename)
+      assert !File.exist?(filename)
+    end
+  end
+
+  test "asset is stale when one of its source files is modified" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    begin
+      File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a" }
+      asset = @env['test-main.js']
+
+      assert asset.fresh?
+
+      File.open(dep, 'w') { |f| f.write "b" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, dep)
+
+      assert asset.stale?
+    ensure
+      File.unlink(main) if File.exist?(main)
+      File.unlink(dep) if File.exist?(dep)
+      assert !File.exist?(main)
+      assert !File.exist?(dep)
+    end
   end
 
   test "asset is stale if a file is added to its require directory" do
     asset = asset("tree/all_with_require_directory.js")
-    assert !asset.stale?
+    assert asset.fresh?
 
     dirname  = File.join(fixture_path("asset"), "tree/all")
     filename = File.join(dirname, "z.js")
@@ -408,7 +477,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "asset is stale if a file is added to its require tree" do
     asset = asset("tree/all_with_require_tree.js")
-    assert !asset.stale?
+    assert asset.fresh?
 
     dirname  = File.join(fixture_path("asset"), "tree/all/b/c")
     filename = File.join(dirname, "z.js")
@@ -426,13 +495,28 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "asset is stale if its declared dependency changes" do
-    asset = asset("sprite.css")
-    assert !asset.stale?
+    sprite = fixture_path('asset/test-sprite.css')
+    image  = fixture_path('asset/test-POW.png')
 
-    mtime = Time.now + 1
-    File.utime(mtime, mtime, resolve("POW.png").to_s)
+    begin
+      File.open(sprite, 'w') { |f| f.write "/*= depend_on test-POW.png */" }
+      FileUtils.cp(fixture_path('asset/POW.png'), image)
 
-    assert asset.stale?
+      asset = @env['test-sprite.css']
+
+      assert asset.fresh?
+
+      File.open(image, 'w') { |f| f.write "(change)" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, image)
+
+      assert asset.stale?
+    ensure
+      File.unlink(sprite) if File.exist?(sprite)
+      File.unlink(image) if File.exist?(image)
+      assert !File.exist?(sprite)
+      assert !File.exist?(image)
+    end
   end
 
   test "legacy constants.yml" do
