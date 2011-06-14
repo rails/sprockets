@@ -26,6 +26,7 @@ module Sprockets
     private
       def compute_digest
         d = digest_class.new
+        d << VERSION
         d << root.to_s
         d << digest_key_prefix
         d << static_root_hash
