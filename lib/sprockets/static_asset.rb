@@ -64,8 +64,6 @@ module Sprockets
       else
         false
       end
-    rescue Errno::ENOENT
-      false
     end
 
     def stale?
