@@ -41,9 +41,11 @@ module Sprockets
       nil
     end
 
-    def file_digest(path)
+    def file_digest(path, data = nil)
       if stat = self.stat(path)
-        if stat.file?
+        if data
+          digest.update(data)
+        elsif stat.file?
           digest.file(path)
         elsif stat.directory?
           contents = self.entries(path).join(',')

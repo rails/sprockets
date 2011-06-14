@@ -34,7 +34,7 @@ module Sprockets
       memoize(@stats, pathname.to_s) { super }
     end
 
-    def file_digest(pathname)
+    def file_digest(pathname, data = nil)
       memoize(@digests, pathname.to_s) { super }
     end
 

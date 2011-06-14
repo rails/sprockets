@@ -24,7 +24,10 @@ module Sprockets
 
       @assets = []
       @source = nil
-      @body   = context.evaluate(pathname)
+
+      data  = Sprockets::Utils.read_unicode(pathname)
+      @body = context.evaluate(pathname, :data => data)
+      environment.file_digest(pathname, data)
 
       requires = options[:_requires] ||= []
       if requires.include?(pathname.to_s)
