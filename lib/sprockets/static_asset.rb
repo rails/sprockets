@@ -22,8 +22,8 @@ module Sprockets
 
       @mtime  = @environment.stat(@pathname).mtime
       @length = @environment.stat(@pathname).size
+      @digest = digest || environment.file_digest(pathname).hexdigest
       @environment_digest = environment.digest.hexdigest
-      @digest = digest || environment.digest.file(pathname).hexdigest
     end
 
     def initialize_json(environment, hash)
@@ -59,7 +59,7 @@ module Sprockets
         false
       elsif (stat = @environment.stat(pathname)) && mtime >= stat.mtime
         true
-      elsif environment.digest.file(pathname).hexdigest == digest
+      elsif (d = environment.file_digest(pathname)) && d.hexdigest == digest
         true
       else
         false

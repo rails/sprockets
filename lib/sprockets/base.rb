@@ -41,6 +41,12 @@ module Sprockets
       nil
     end
 
+    def file_digest(pathname)
+      digest.file(pathname)
+    rescue Errno::ENOENT
+      nil
+    end
+
     def attributes_for(path)
       AssetAttributes.new(self, path)
     end

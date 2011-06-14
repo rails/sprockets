@@ -19,6 +19,7 @@ module Sprockets
       @assets  = {}
       @entries = {}
       @stats   = {}
+      @digests = {}
     end
 
     def index
@@ -31,6 +32,10 @@ module Sprockets
 
     def stat(pathname)
       memoize(@stats, pathname.to_s) { super }
+    end
+
+    def file_digest(pathname)
+      memoize(@digests, pathname.to_s) { super }
     end
 
     def find_asset(path, options = {})
