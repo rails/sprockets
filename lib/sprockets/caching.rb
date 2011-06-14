@@ -53,7 +53,6 @@ module Sprockets
           asset = asset_from_json(json)
 
           if !asset.stale?
-            logger.debug "Loading #{logical_path} from cache"
             asset
           end
         else
@@ -62,7 +61,6 @@ module Sprockets
       end
 
       def cache_set_asset(logical_path, asset)
-        logger.debug "Storing #{logical_path} to cache"
         cache_set(logical_path, asset.to_json)
         asset
       end
