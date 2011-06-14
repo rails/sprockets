@@ -78,9 +78,7 @@ class TestServer < Sprockets::TestCase
     time = Time.now
     path = fixture_path "server/app/javascripts/foo.js"
 
-    begin
-      FileUtils.cp(path, "#{path}.org")
-
+    sandbox path do
       File.utime(time, time, path)
 
       get "/javascripts/application.js"
@@ -99,9 +97,6 @@ class TestServer < Sprockets::TestCase
       time_after_modifying = last_response.headers['Last-Modified']
 
       assert_not_equal time_before_modifying, time_after_modifying
-    ensure
-      FileUtils.mv("#{path}.org", path) if File.exist?("#{path}.org")
-      assert !File.exist?("#{path}.org")
     end
   end
 
@@ -195,22 +190,24 @@ class TestServer < Sprockets::TestCase
   end
 
   test "add new source to tree" do
-    get "/javascripts/tree.js"
-    assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\n", last_response.body
+    filename = fixture_path("server/app/javascripts/baz.js")
 
-    File.open(fixture_path("server/app/javascripts/baz.js"), "w") do |f|
-      f.puts "var baz;"
-    end
-
-    path = fixture_path "server/app/javascripts"
-    mtime = Time.now + 60
-    File.utime(mtime, mtime, path)
-
-    begin
+    sandbox filename do
       get "/javascripts/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\n", last_response.body
-    ensure
-      FileUtils.rm(fixture_path("server/app/javascripts/baz.js"))
+      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\n",
+        last_response.body
+
+      File.open(filename, "w") do |f|
+        f.puts "var baz;"
+      end
+
+      path = fixture_path "server/app/javascripts"
+      mtime = Time.now + 60
+      File.utime(mtime, mtime, path)
+
+      get "/javascripts/tree.js"
+      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\n",
+        last_response.body
     end
   end
 

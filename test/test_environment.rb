@@ -209,15 +209,11 @@ module EnvironmentTests
     filename    = fixture_path("public/gallery-#{digest}.js")
     filename_gz = "#{filename}.gz"
 
-    begin
+    sandbox filename, filename_gz do
       assert !File.exist?(filename)
       @env.precompile("gallery.js")
       assert File.exist?(filename)
       assert File.exist?(filename_gz)
-    ensure
-      [filename, filename_gz].each do |f|
-        File.unlink(f) if File.exist?(f)
-      end
     end
   end
 
@@ -228,7 +224,7 @@ module EnvironmentTests
     b_digest = @env["mobile/b.js"].digest
     c_digest = @env["mobile/c.css"].digest
 
-    begin
+    sandbox dirname do
       assert !File.exist?(dirname)
       @env.precompile("mobile/*")
 
@@ -238,8 +234,6 @@ module EnvironmentTests
         assert File.exist?(File.join(dirname, "b-#{b_digest}.js#{gzipped}"))
         assert File.exist?(File.join(dirname, "c-#{c_digest}.css#{gzipped}"))
       end
-    ensure
-      FileUtils.rm_rf(dirname)
     end
   end
 
@@ -250,7 +244,7 @@ module EnvironmentTests
     b_digest = @env["mobile/b.js"].digest
     c_digest = @env["mobile/c.css"].digest
 
-    begin
+    sandbox dirname do
       assert !File.exist?(dirname)
       @env.precompile(/mobile\/.*/)
 
@@ -260,8 +254,6 @@ module EnvironmentTests
         assert File.exist?(File.join(dirname, "b-#{b_digest}.js#{gzipped}"))
         assert File.exist?(File.join(dirname, "c-#{c_digest}.css#{gzipped}"))
       end
-    ensure
-      FileUtils.rm_rf(dirname)
     end
   end
 
@@ -269,13 +261,11 @@ module EnvironmentTests
     digest   = @env["hello.txt"].digest
     filename = fixture_path("public/hello-#{digest}.txt")
 
-    begin
+    sandbox filename do
       assert !File.exist?(filename)
       @env.precompile("hello.txt")
       assert File.exist?(filename)
       assert !File.exist?("#{filename}.gz")
-    ensure
-      File.unlink(filename) if File.exist?(filename)
     end
   end
 
@@ -417,7 +407,7 @@ class TestEnvironment < Sprockets::TestCase
   test "bundled asset is stale if its mtime is updated or deleted" do
     filename = File.join(fixture_path("default"), "tmp.js")
 
-    begin
+    sandbox filename do
       assert_nil @env["tmp.js"]
 
       File.open(filename, 'w') { |f| f.puts "foo" }
@@ -430,16 +420,13 @@ class TestEnvironment < Sprockets::TestCase
 
       File.unlink(filename)
       assert_nil @env["tmp.js"]
-    ensure
-      File.unlink(filename) if File.exist?(filename)
-      assert !File.exist?(filename)
     end
   end
 
   test "static asset is stale if its mtime is updated or deleted" do
     filename = File.join(fixture_path("default"), "tmp.png")
 
-    begin
+    sandbox filename do
       assert_nil @env["tmp.png"]
 
       File.open(filename, 'w') { |f| f.puts "foo" }
@@ -452,9 +439,6 @@ class TestEnvironment < Sprockets::TestCase
 
       File.unlink(filename)
       assert_nil @env["tmp.png"]
-    ensure
-      File.unlink(filename) if File.exist?(filename)
-      assert !File.exist?(filename)
     end
   end
 
