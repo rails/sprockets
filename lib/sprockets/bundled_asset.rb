@@ -95,7 +95,11 @@ module Sprockets
     def stale?
       return true if dependency_paths.any? { |path|
         pathname = Pathname.new(path)
-        pathname.mtime > mtime
+        if stat = @environment.stat(pathname)
+          stat.mtime > mtime
+        else
+          true
+        end
       }
 
       return true if environment.digest.file(pathname).hexdigest != file_digest

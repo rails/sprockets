@@ -35,6 +35,12 @@ module Sprockets
       []
     end
 
+    def stat(pathname)
+      pathname.stat
+    rescue Errno::ENOENT
+      nil
+    end
+
     def attributes_for(path)
       AssetAttributes.new(self, path)
     end
@@ -79,6 +85,11 @@ module Sprockets
           logical_path  = Pathname.new(filename).relative_path_from(root_pathname)
           attributes_for(logical_path).without_engine_extensions
         end
+      end
+
+    private
+      def memoize(hash, key)
+        hash.key?(key) ? hash[key] : hash[key] = yield
       end
   end
 end

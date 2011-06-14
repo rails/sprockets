@@ -18,10 +18,19 @@ module Sprockets
       # Caches
       @assets  = {}
       @entries = {}
+      @stats   = {}
     end
 
     def index
       self
+    end
+
+    def entries(pathname)
+      memoize(@entries, pathname.to_s) { super }
+    end
+
+    def stat(pathname)
+      memoize(@stats, pathname.to_s) { super }
     end
 
     def find_asset(path, options = {})
@@ -48,10 +57,6 @@ module Sprockets
 
       def build_asset(logical_path, pathname, options)
         @assets[logical_path.to_s] ||= super
-      end
-
-      def entries(pathname)
-        @entries[pathname.to_s] ||= super
       end
   end
 end

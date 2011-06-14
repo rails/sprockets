@@ -341,7 +341,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "asset mtime is the latest mtime of all processed sources" do
-    mtime = Time.now
+    mtime = Time.now+10
     path  = resolve("project.js")
     File.utime(mtime, mtime, path.to_s)
     assert_equal File.mtime(path), asset("application.js").mtime
@@ -478,7 +478,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    @env.index[logical_path]
+    @env[logical_path]
   end
 
   def resolve(logical_path)

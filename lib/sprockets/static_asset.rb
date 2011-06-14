@@ -20,8 +20,8 @@ module Sprockets
       @pathname     = Pathname.new(pathname)
       @content_type = environment.content_type_of(pathname)
 
-      @mtime  = @pathname.mtime
-      @length = @pathname.size
+      @mtime  = @environment.stat(@pathname).mtime
+      @length = @environment.stat(@pathname).size
       @environment_digest = environment.digest.hexdigest
       @digest = digest || environment.digest.file(pathname).hexdigest
     end
@@ -57,7 +57,7 @@ module Sprockets
     def fresh?
       if environment.digest != @environment_digest
         false
-      elsif mtime >= pathname.mtime
+      elsif (stat = @environment.stat(pathname)) && mtime >= stat.mtime
         true
       elsif environment.digest.file(pathname).hexdigest == digest
         true
