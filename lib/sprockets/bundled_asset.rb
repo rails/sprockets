@@ -162,9 +162,11 @@ module Sprockets
         end
       end
 
+      Epoch = Time.at(0)
+
       def compute_dependency_files!
         @dependency_files = {}
-        @mtime = Time.at(0)
+        @mtime = Epoch
 
         depend_on(pathname)
 
