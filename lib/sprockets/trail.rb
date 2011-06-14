@@ -51,6 +51,15 @@ module Sprockets
     end
 
     protected
+      def compute_digest
+        digest = super
+
+        digest << root.to_s
+        digest << trail.paths.join(',')
+
+        digest
+      end
+
       def find_asset_in_path(logical_path, options = {})
         if fingerprint = attributes_for(logical_path).path_fingerprint
           pathname = resolve(logical_path.to_s.sub("-#{fingerprint}", ''))
@@ -68,11 +77,6 @@ module Sprockets
         end
 
         asset
-      end
-
-    private
-      def paths_hash
-        trail.paths.join(',')
       end
   end
 end

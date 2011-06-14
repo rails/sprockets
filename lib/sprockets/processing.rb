@@ -115,14 +115,19 @@ module Sprockets
       end
     end
 
-    private
-      def processors_hash
-        @mime_types.keys.join(',') +
-          @engines.map { |e, k| "#{e}:#{k.name}" }.join(',') +
-          @processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',') +
-          @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
+    protected
+      def compute_digest
+        digest = super
+
+        digest << @mime_types.keys.join(',')
+        digest << @engines.map { |e, k| "#{e}:#{k.name}" }.join(',')
+        digest << @processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
+        digest << @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
+
+        digest
       end
 
+    private
       def deep_copy_hash(hash)
         initial = Hash.new { |h, k| h[k] = [] }
         hash.inject(initial) { |h, (k, a)| h[k] = a.dup; h }

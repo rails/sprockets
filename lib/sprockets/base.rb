@@ -11,7 +11,8 @@ require 'pathname'
 
 module Sprockets
   class Base
-    include Caching, Digest, Processing, Server, StaticCompilation, Trail
+    include Digest
+    include Caching, Processing, Server, StaticCompilation, Trail
 
     attr_reader :logger
 

@@ -10,11 +10,6 @@ module Sprockets
       @static_root
     end
 
-    def static_root_hash
-      static_root.to_s
-    end
-    private :static_root_hash
-
     def static_root=(root)
       expire_index!
       @static_root = root ? Pathname.new(root) : nil
@@ -50,6 +45,10 @@ module Sprockets
     end
 
     protected
+      def compute_digest
+        super.update(static_root.to_s)
+      end
+
       def gzip(filename, content)
         File.open(filename, 'wb') do |f|
           gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)

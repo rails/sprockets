@@ -23,16 +23,9 @@ module Sprockets
       @digest.dup
     end
 
-    private
+    protected
       def compute_digest
-        d = digest_class.new
-        d << VERSION
-        d << root.to_s
-        d << digest_key_prefix
-        d << static_root_hash
-        d << paths_hash
-        d << processors_hash
-        d
+        digest_class.new.update(VERSION).update(digest_key_prefix.to_s)
       end
   end
 end

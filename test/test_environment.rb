@@ -502,6 +502,12 @@ class TestEnvironment < Sprockets::TestCase
     @env.unregister_processor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
+
+  test "changing directive preprocessor changes digest" do
+    old_digest = @env.digest
+    @env.unregister_processor('application/javascript', Sprockets::DirectiveProcessor)
+    assert_not_equal old_digest, @env.digest
+  end
 end
 
 class TestIndex < Sprockets::TestCase
