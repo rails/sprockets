@@ -293,12 +293,12 @@ class TestEnvironment < Sprockets::TestCase
   include EnvironmentTests
 
   def new_environment
-    env = Sprockets::Environment.new(".")
-    env.append_path(fixture_path('default'))
-    env.static_root = fixture_path('public')
-    env.cache = {}
-    yield env if block_given?
-    env
+    Sprockets::Environment.new(".") do |env|
+      env.append_path(fixture_path('default'))
+      env.static_root = fixture_path('public')
+      env.cache = {}
+      yield env if block_given?
+    end
   end
 
   def setup
@@ -506,12 +506,12 @@ class TestIndex < Sprockets::TestCase
   include EnvironmentTests
 
   def new_environment
-    env = Sprockets::Environment.new(".")
-    env.append_path(fixture_path('default'))
-    env.static_root = fixture_path('public')
-    env.cache = {}
-    yield env if block_given?
-    env.index
+    Sprockets::Environment.new(".") do |env|
+      env.append_path(fixture_path('default'))
+      env.static_root = fixture_path('public')
+      env.cache = {}
+      yield env if block_given?
+    end.index
   end
 
   def setup
