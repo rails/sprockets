@@ -34,7 +34,7 @@ module Sprockets
 
             FileUtils.mkdir_p filename.dirname
 
-            filename.open('wb') do |f|
+            atomic_write(filename) do |f|
               f.write content
             end
 
@@ -49,8 +49,13 @@ module Sprockets
         super.update(static_root.to_s)
       end
 
+      def atomic_write(filename, &block)
+        File.open("#{filename}+", 'wb', &block)
+        FileUtils.mv("#{filename}+", filename)
+      end
+
       def gzip(filename, content)
-        File.open(filename, 'wb') do |f|
+        atomic_write(filename) do |f|
           gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
           gz.write content
           gz.close
