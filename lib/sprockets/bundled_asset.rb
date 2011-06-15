@@ -1,6 +1,5 @@
 require 'sprockets/dependency'
 require 'sprockets/errors'
-require 'multi_json'
 require 'set'
 require 'time'
 
@@ -9,9 +8,9 @@ module Sprockets
     attr_reader :environment
     attr_reader :logical_path, :pathname, :mtime, :body
 
-    def self.from_json(environment, hash, options = {})
+    def self.from_hash(environment, hash)
       asset = allocate
-      asset.initialize_json(environment, hash, options)
+      asset.init_with(environment, hash)
       asset
     end
 
@@ -39,25 +38,41 @@ module Sprockets
       compute_dependency_files!
     end
 
-    def initialize_json(environment, hash, options)
+    def init_with(environment, coder)
       @environment = environment
+      options = {}
 
-      @logical_path = hash['logical_path'].to_s
-      @pathname     = Pathname.new(hash['pathname'])
-      @mtime        = Time.parse(hash['mtime'])
-      @body         = hash['body']
-      @source       = hash['source']
-      @content_type = hash['content_type']
-      @length       = hash['length']
-      @digest       = hash['digest']
-      @assets       = hash['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
+      @logical_path = coder['logical_path'].to_s
+      @pathname     = Pathname.new(coder['pathname'])
+      @mtime        = coder['mtime'].is_a?(String) ? Time.parse(coder['mtime']) : coder['mtime']
+      @body         = coder['body']
+      @source       = coder['source']
+      @content_type = coder['content_type']
+      @length       = coder['length']
+      @digest       = coder['digest']
+      @assets       = coder['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
 
-      @dependency_files = hash['dependency_files'].inject({}) { |h, json|
-        dep = Dependency.from_json(json)
+      @dependency_files = coder['dependency_files'].inject({}) { |h, hash|
+        dep = Dependency.from_hash(hash)
         h[dep.path] = dep
         h
       }
-      @environment_digest = hash['environment_digest']
+      @environment_digest = coder['environment_digest']
+    end
+
+    def encode_with(coder)
+      coder['class']              = 'BundledAsset'
+      coder['logical_path']       = logical_path
+      coder['pathname']           = pathname.to_s
+      coder['content_type']       = content_type
+      coder['mtime']              = mtime
+      coder['body']               = body
+      coder['source']             = source
+      coder['digest']             = digest
+      coder['length']             = length
+      coder['asset_paths']        = to_a.map(&:pathname).map(&:to_s)
+      coder['dependency_files']   = dependency_files.values.map { |dep| h = {}; dep.encode_with(h); h }
+      coder['environment_digest'] = environment_digest
     end
 
     def source
@@ -116,27 +131,6 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
-
-    def as_json
-      {
-        'class'              => 'BundledAsset',
-        'logical_path'       => logical_path,
-        'pathname'           => pathname.to_s,
-        'content_type'       => content_type,
-        'mtime'              => mtime,
-        'body'               => body,
-        'source'             => source,
-        'digest'             => digest,
-        'length'             => length,
-        'asset_paths'        => to_a.map(&:pathname).map(&:to_s),
-        'dependency_files'   => dependency_files.values.map(&:as_json),
-        'environment_digest' => environment_digest
-      }
-    end
-
-    def to_json
-      MultiJson.encode(as_json)
-    end
 
     protected
       attr_reader :dependency_files, :environment_digest

@@ -1,5 +1,4 @@
 require 'sprockets/dependency'
-require 'multi_json'
 require 'time'
 
 module Sprockets
@@ -8,9 +7,9 @@ module Sprockets
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
 
-    def self.from_json(environment, hash)
+    def self.from_hash(environment, hash)
       asset = allocate
-      asset.initialize_json(environment, hash)
+      asset.init_with(environment, hash)
       asset
     end
 
@@ -27,16 +26,28 @@ module Sprockets
       @dependency = Dependency.new(environment.digest.hexdigest, @pathname.to_s, @mtime, @digest)
     end
 
-    def initialize_json(environment, hash)
+    def init_with(environment, coder)
       @environment = environment
 
-      @logical_path = hash['logical_path'].to_s
-      @pathname     = Pathname.new(hash['pathname'])
-      @content_type = hash['content_type']
-      @mtime        = Time.parse(hash['mtime'])
-      @length       = hash['length']
-      @digest       = hash['digest']
-      @dependency   = Dependency.from_json(hash['dependency'])
+      @logical_path = coder['logical_path'].to_s
+      @pathname     = Pathname.new(coder['pathname'])
+      @content_type = coder['content_type']
+      @mtime        = coder['mtime'].is_a?(String) ? Time.parse(coder['mtime']) : coder['mtime']
+      @length       = coder['length']
+      @digest       = coder['digest']
+      @dependency   = Dependency.from_hash(coder['dependency'])
+    end
+
+    def encode_with(coder)
+      coder['class']        = 'StaticAsset'
+      coder['logical_path'] = logical_path
+      coder['pathname']     = pathname.to_s
+      coder['content_type'] = content_type
+      coder['mtime']        = mtime
+      coder['digest']       = digest
+      coder['length']       = length
+      coder['dependency']   = {}
+      @dependency.encode_with(coder['dependency'])
     end
 
     def dependencies
@@ -82,22 +93,5 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
-
-    def as_json
-      {
-        'class'        => 'StaticAsset',
-        'logical_path' => logical_path,
-        'pathname'     => pathname.to_s,
-        'content_type' => content_type,
-        'mtime'        => mtime,
-        'digest'       => digest,
-        'length'       => length,
-        'dependency'   => @dependency.as_json
-      }
-    end
-
-    def to_json
-      MultiJson.encode(as_json)
-    end
   end
 end

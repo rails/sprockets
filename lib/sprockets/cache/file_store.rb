@@ -12,11 +12,11 @@ module Sprockets
 
       def [](key)
         pathname = path_for(key)
-        pathname.exist? ? pathname.read : nil
+        pathname.exist? ? pathname.open('rb') { |f| Marshal.load(f) } : nil
       end
 
       def []=(key, value)
-        path_for(key).open('w') { |f| f.write(value) }
+        path_for(key).open('w') { |f| Marshal.dump(value, f)}
         value
       end
 

@@ -1,5 +1,4 @@
 require "sprockets_test"
-require "multi_json"
 
 module AssetTests
   def self.test(name, &block)
@@ -155,9 +154,11 @@ class StaticAssetTest < Sprockets::TestCase
     end
   end
 
-  test "serializing asset to and from json" do
+  test "serializing asset to and from hash" do
     expected = @asset
-    actual   = @env.asset_from_json(expected.to_json)
+    hash     = {}
+    @asset.encode_with(hash)
+    actual   = @env.asset_from_hash(hash)
 
     assert_kind_of Sprockets::StaticAsset, actual
     assert_equal expected.logical_path, actual.logical_path
@@ -494,9 +495,11 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal "@charset \"UTF-8\";\n.foo {}\n\n.bar {}\n", asset("charset.css").to_s
   end
 
-  test "serializing asset to and from json" do
+  test "serializing asset to and from hash" do
     expected = @asset
-    actual   = @env.asset_from_json(expected.to_json)
+    hash     = {}
+    @asset.encode_with(hash)
+    actual   = @env.asset_from_hash(hash)
 
     assert_kind_of Sprockets::BundledAsset, actual
     assert_equal expected.logical_path, actual.logical_path

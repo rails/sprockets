@@ -1,18 +1,67 @@
-require 'multi_json'
-
 module Sprockets
-  class Dependency < Struct.new(:environment_hexdigest, :path, :mtime, :hexdigest)
+  class Dependency
+    attr_reader :environment_hexdigest
+    attr_reader :path, :mtime, :hexdigest
+
     def self.from_path(environment, path)
       stat = environment.stat(path)
       raise ArgumentError unless stat
-      hexdigest = environment.file_digest(path).hexdigest
-      new(environment.digest.hexdigest, path.to_s, stat.mtime, hexdigest)
+      new(environment.digest, path, stat.mtime, environment.file_digest(path))
     end
 
-    def self.from_json(json)
-      json = MultiJson.decode(json) if json.is_a?(String)
-      raise TypeError unless json['class'] == 'Dependency'
-      new(json['env_hexdigest'], json['path'], Time.parse(json['mtime']), json['hexdigest'])
+    def self.from_hash(hash)
+      raise TypeError unless hash['class'] == 'Dependency'
+      new(hash['environment_hexdigest'], hash['path'], hash['mtime'], hash['hexdigest'])
+    end
+
+    def initialize(environment_hexdigest, path, mtime, hexdigest)
+      self.environment_hexdigest = environment_hexdigest
+      self.path                  = path
+      self.mtime                 = mtime
+      self.hexdigest             = hexdigest
+    end
+
+    def init_with(coder)
+      self.environment_hexdigest = coder['environment_hexdigest']
+      self.path                  = coder['path']
+      self.mtime                 = coder['mtime']
+      self.hexdigest             = coder['hexdigest']
+    end
+
+    def encode_with(coder)
+      coder['class']                 = 'Dependency'
+      coder['environment_hexdigest'] = environment_hexdigest
+      coder['path']                  = path
+      coder['mtime']                 = mtime
+      coder['hexdigest']             = hexdigest
+    end
+
+    def environment_hexdigest=(digest)
+      if digest.respond_to?(:hexdigest)
+        @environment_hexdigest = digest.hexdigest
+      else
+        @environment_hexdigest = digest
+      end
+    end
+
+    def path=(path)
+      @path = path.to_s
+    end
+
+    def mtime=(time)
+      if time.is_a?(String)
+        @mtime = Time.parse(time)
+      else
+        @mtime = time
+      end
+    end
+
+    def hexdigest=(digest)
+      if digest.respond_to?(:hexdigest)
+        @hexdigest = digest.hexdigest
+      else
+        @hexdigest = digest
+      end
     end
 
     def fresh?(environment)
@@ -41,18 +90,6 @@ module Sprockets
 
     def stale?(environment)
       !fresh?(environment)
-    end
-
-    def as_json
-      { 'class'         => 'Dependency',
-        'env_hexdigest' => environment_hexdigest,
-        'path'          => path,
-        'mtime'         => mtime,
-        'hexdigest'     => hexdigest }
-    end
-
-    def to_json
-      MultiJson.encode(as_json)
     end
   end
 end
