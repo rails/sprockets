@@ -44,6 +44,8 @@ module Sprockets
       register_bundle_processor 'text/css', CharsetNormalizer
 
       expire_index!
+
+      yield self if block_given?
     end
 
     def root
