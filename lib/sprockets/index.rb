@@ -5,6 +5,7 @@ module Sprockets
     def initialize(environment)
       @logger            = environment.logger
       @context_class     = environment.context_class
+      @cache             = environment.cache
       @trail             = environment.trail.index
       @static_root       = environment.static_root
       @digest            = environment.digest
