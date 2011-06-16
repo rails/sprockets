@@ -14,6 +14,7 @@ module Sprockets
       @mime_types        = environment.mime_types
       @engines           = environment.engines
       @preprocessors     = environment.preprocessors
+      @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
 
       # Caches

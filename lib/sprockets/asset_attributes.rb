@@ -57,7 +57,9 @@ module Sprockets
     end
 
     def processors
-      environment.preprocessors(content_type) + engines.reverse
+      environment.preprocessors(content_type) +
+        engines.reverse +
+        environment.postprocessors(content_type)
     end
 
     def engine_content_type

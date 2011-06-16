@@ -45,6 +45,18 @@ module Sprockets
       end
     end
 
+    def postprocessors(mime_type = nil)
+      if mime_type
+        @postprocessors[mime_type].dup
+      else
+        deep_copy_hash(@postprocessors)
+      end
+    end
+
+    def register_processor(*args, &block)
+      register_preprocessor(*args, &block)
+    end
+
     def register_preprocessor(mime_type, klass, &block)
       expire_index!
 
@@ -59,8 +71,22 @@ module Sprockets
       @preprocessors[mime_type].push(klass)
     end
 
-    def register_processor(*args, &block)
-      register_preprocessor(*args, &block)
+    def register_postprocessor(mime_type, klass, &block)
+      expire_index!
+
+      if block_given?
+        name  = klass.to_s
+        klass = Class.new(Processor) do
+          @name      = name
+          @processor = block
+        end
+      end
+
+      @postprocessors[mime_type].push(klass)
+    end
+
+    def unregister_processor(*args)
+      unregister_preprocessor(*args)
     end
 
     def unregister_preprocessor(mime_type, klass)
@@ -76,8 +102,17 @@ module Sprockets
       @preprocessors[mime_type].delete(klass)
     end
 
-    def unregister_processor(*args)
-      unregister_preprocessor(*args)
+    def unregister_postprocessor(mime_type, klass)
+      expire_index!
+
+      if klass.is_a?(String) || klass.is_a?(Symbol)
+        klass = @postprocessors[mime_type].detect { |cls|
+          cls.respond_to?(:name) &&
+            cls.name == "Sprockets::Processor (#{klass})"
+        }
+      end
+
+      @postprocessors[mime_type].delete(klass)
     end
 
     def bundle_processors(mime_type = nil)

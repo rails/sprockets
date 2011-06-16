@@ -348,12 +348,20 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["compiled.js"]
   end
 
-  test "unregister custom block processor" do
+  test "unregister custom block preprocessor" do
     old_size = @env.preprocessors('text/css').size
     @env.register_preprocessor('text/css', :foo) { |context, data| data }
     assert_equal old_size+1, @env.preprocessors('text/css').size
     @env.unregister_preprocessor('text/css', :foo)
     assert_equal old_size, @env.preprocessors('text/css').size
+  end
+
+  test "unregister custom block postprocessor" do
+    old_size = @env.postprocessors('text/css').size
+    @env.register_postprocessor('text/css', :foo) { |context, data| data }
+    assert_equal old_size+1, @env.postprocessors('text/css').size
+    @env.unregister_postprocessor('text/css', :foo)
+    assert_equal old_size, @env.postprocessors('text/css').size
   end
 
   test "unregister custom block bundle processor" do

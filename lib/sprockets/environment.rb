@@ -28,7 +28,8 @@ module Sprockets
       @trail.extensions.replace(engine_extensions)
 
       @mime_types = {}
-      @preprocessors = Hash.new { |h, k| h[k] = [] }
+      @preprocessors     = Hash.new { |h, k| h[k] = [] }
+      @postprocessors    = Hash.new { |h, k| h[k] = [] }
       @bundle_processors = Hash.new { |h, k| h[k] = [] }
 
       register_mime_type 'text/css', '.css'
