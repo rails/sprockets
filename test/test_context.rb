@@ -9,7 +9,7 @@ class TestContext < Sprockets::TestCase
   end
 
   test "source file properties are exposed in context" do
-    json = @env["properties.js"].to_s
+    json = @env["properties.js"].to_s.chomp.chop
     assert_equal({
       'pathname'     => fixture_path("context/properties.js.erb"),
       '__FILE__'     => fixture_path("context/properties.js.erb"),
@@ -109,7 +109,7 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal [fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
-     "foo.js is 'application/javascript', not 'text/css'"
+     "foo.js is 'application/javascript', not 'text/css';"
     ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end

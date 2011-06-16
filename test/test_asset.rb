@@ -270,7 +270,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "processing a source file with unknown extensions" do
-    assert_equal read("users.js") + "jQuery\n", asset("unknownexts.min.js").to_s
+    assert_equal read("users.js") + "var jQuery;\n", asset("unknownexts.min.js").to_s
   end
 
   test "processing a source file in compat mode" do
@@ -279,7 +279,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "included dependencies are inserted after the header of the dependent file" do
-    assert_equal "# My Application\n" + read("project.js") + "\n\nhello()\n",
+    assert_equal "# My Application\n" + read("project.js") + "\n\nhello();\n",
       asset("included_header.js").to_s
   end
 
@@ -289,7 +289,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "including a file with a relative path" do
-    assert_equal "// Included relatively\n" + read("project.js") + "\n\nhello()\n", asset("relative/include.js").to_s
+    assert_equal "// Included relatively\n" + read("project.js") + "\n\nhello();\n", asset("relative/include.js").to_s
   end
 
   test "can't require files outside the load path" do
@@ -300,7 +300,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_directory requires all child files in alphabetical order" do
     assert_equal(
-      "ok(\"b.js.erb\")\n",
+      "ok(\"b.js.erb\");\n",
       asset("tree/all_with_require_directory.js").to_s
     )
   end
@@ -321,7 +321,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_tree without an argument defaults to the current directory" do
     assert_equal(
-      "a()\n\nb()\n\n",
+      "a();\nb();\n",
       asset("tree/without_argument/require_tree_without_argument.js").to_s
     )
   end
@@ -414,12 +414,12 @@ class BundledAssetTest < Sprockets::TestCase
     filename = fixture_path('asset/test.js')
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.write "a" }
+      File.open(filename, 'w') { |f| f.write "a;" }
       asset = @env['test.js']
 
       assert asset.fresh?
 
-      File.open(filename, 'w') { |f| f.write "b" }
+      File.open(filename, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
@@ -431,7 +431,7 @@ class BundledAssetTest < Sprockets::TestCase
     filename = fixture_path('asset/test.js')
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.write "a" }
+      File.open(filename, 'w') { |f| f.write "a;" }
       asset = @env['test.js']
 
       assert asset.fresh?
@@ -448,12 +448,12 @@ class BundledAssetTest < Sprockets::TestCase
 
     sandbox main, dep do
       File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
-      File.open(dep, 'w') { |f| f.write "a" }
+      File.open(dep, 'w') { |f| f.write "a;" }
       asset = @env['test-main.js']
 
       assert asset.fresh?
 
-      File.open(dep, 'w') { |f| f.write "b" }
+      File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 

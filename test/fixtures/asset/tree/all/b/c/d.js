@@ -1,2 +1,2 @@
 // =require ../c
-ok("b/c/d.js")
+ok("b/c/d.js");

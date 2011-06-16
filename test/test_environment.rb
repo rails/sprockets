@@ -444,13 +444,13 @@ class TestEnvironment < Sprockets::TestCase
     sandbox filename do
       assert_nil @env["tmp.js"]
 
-      File.open(filename, 'w') { |f| f.puts "foo" }
-      assert_equal "foo\n", @env["tmp.js"].to_s
+      File.open(filename, 'w') { |f| f.puts "foo;" }
+      assert_equal "foo;\n", @env["tmp.js"].to_s
 
-      File.open(filename, 'w') { |f| f.puts "bar" }
+      File.open(filename, 'w') { |f| f.puts "bar;" }
       time = Time.now + 60
       File.utime(time, time, filename)
-      assert_equal "bar\n", @env["tmp.js"].to_s
+      assert_equal "bar;\n", @env["tmp.js"].to_s
 
       File.unlink(filename)
       assert_nil @env["tmp.js"]
