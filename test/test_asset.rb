@@ -389,7 +389,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "asset length is source length with unicode characters" do
-    assert_equal 4, asset("unicode.js").length
+    assert_equal 8, asset("unicode.js").length
   end
 
   test "asset digest" do
