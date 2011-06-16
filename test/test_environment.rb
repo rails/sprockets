@@ -428,11 +428,11 @@ class TestEnvironment < Sprockets::TestCase
     assert_not_equal old_asset_digest, @env["gallery.js"].digest
   end
 
-  test "changing digest key prefix" do
+  test "changing digest version" do
     old_digest = @env.digest
     old_asset_digest = @env["gallery.js"].digest
 
-    @env.digest_key_prefix = 'v2'
+    @env.version = 'v2'
 
     assert_not_equal old_digest, @env.digest
     assert_not_equal old_asset_digest, @env["gallery.js"].digest

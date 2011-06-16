@@ -21,7 +21,7 @@ module Sprockets
 
       require 'digest/md5'
       @digest_class = ::Digest::MD5
-      @digest_key_prefix = ''
+      @version = ''
 
       @static_root = nil
 

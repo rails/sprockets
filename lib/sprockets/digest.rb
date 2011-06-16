@@ -9,13 +9,13 @@ module Sprockets
       @digest_class = klass
     end
 
-    def digest_key_prefix
-      @digest_key_prefix
+    def version
+      @version
     end
 
-    def digest_key_prefix=(prefix)
+    def version=(prefix)
       expire_index!
-      @digest_key_prefix = prefix
+      @version = prefix
     end
 
     def digest
@@ -25,7 +25,7 @@ module Sprockets
 
     protected
       def compute_digest
-        digest_class.new.update(VERSION).update(digest_key_prefix.to_s)
+        digest_class.new.update(VERSION).update(version.to_s)
       end
   end
 end

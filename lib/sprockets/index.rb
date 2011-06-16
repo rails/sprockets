@@ -10,7 +10,7 @@ module Sprockets
       @static_root       = environment.static_root
       @digest            = environment.digest
       @digest_class      = environment.digest_class
-      @digest_key_prefix = environment.digest_key_prefix
+      @version           = environment.version
       @mime_types        = environment.mime_types
       @engines           = environment.engines
       @preprocessors     = environment.preprocessors
