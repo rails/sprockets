@@ -126,7 +126,7 @@ module EnvironmentTests
   end
 
   test "find compiled asset in static root is StaticAsset" do
-    assert_equal Sprockets::StaticAsset, @env["compiled.js"].class
+    assert_kind_of Sprockets::StaticAsset, @env["compiled.js"]
   end
 
   test "find asset with digest" do
@@ -518,7 +518,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
-    assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
+    assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
   end
 
   test "changing directive preprocessor changes digest" do

@@ -76,7 +76,7 @@ module Sprockets
     def build_asset(logical_path, pathname, options)
       pathname = Pathname.new(pathname)
 
-      if preprocessors(content_type_of(pathname)).any?
+      if attributes_for(pathname).processors.any?
         BundledAsset.new(self, logical_path, pathname, options)
       else
         StaticAsset.new(self, logical_path, pathname)

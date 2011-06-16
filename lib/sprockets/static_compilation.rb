@@ -32,9 +32,7 @@ module Sprockets
 
             FileUtils.mkdir_p filename.dirname
             asset.write_to(filename)
-            if preprocessors(asset.content_type).any?
-              asset.write_to("#{filename}.gz")
-            end
+            asset.write_to("#{filename}.gz") if asset.is_a?(BundledAsset)
           end
         end
       end
