@@ -9,7 +9,7 @@ module Sprockets
       if data =~ /\A\s*\Z/m || data =~ /;\s*\Z/m
         data
       else
-        "#{data};"
+        "#{data};\n"
       end
     end
   end
