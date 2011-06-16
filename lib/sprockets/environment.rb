@@ -2,6 +2,7 @@ require 'sprockets/base'
 require 'sprockets/context'
 require 'sprockets/directive_processor'
 require 'sprockets/index'
+require 'sprockets/safety_colons'
 
 require 'hike'
 require 'logger'
@@ -38,6 +39,7 @@ module Sprockets
       register_preprocessor 'text/css', DirectiveProcessor
       register_preprocessor 'application/javascript', DirectiveProcessor
 
+      register_postprocessor 'application/javascript', SafetyColons
       register_bundle_processor 'text/css', CharsetNormalizer
 
       expire_index!

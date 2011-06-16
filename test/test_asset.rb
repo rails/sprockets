@@ -519,6 +519,11 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal "@charset \"UTF-8\";\n.foo {}\n\n.bar {}\n", asset("charset.css").to_s
   end
 
+  test "appends missing semicolons" do
+    assert_equal "var Bar\n;\n(function() {\n  var Foo\n})\n;",
+      asset("semicolons.js").to_s
+  end
+
   test "serializing asset to and from hash" do
     expected = @asset
     hash     = {}
