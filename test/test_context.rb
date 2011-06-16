@@ -91,7 +91,7 @@ class TestCustomProcessor < Sprockets::TestCase
   test "block custom processor" do
     require 'base64'
 
-    @env.register_processor 'text/css', :data_uris do |context, data|
+    @env.register_preprocessor 'text/css', :data_uris do |context, data|
       data.gsub(/url\(\"(.+?)\"\)/) do
         path = context.resolve($1)
         context.depend_on(path)

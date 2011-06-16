@@ -33,15 +33,19 @@ module Sprockets
       super
     end
 
-    def processors(mime_type = nil)
+    def processors(*args)
+      preprocessors(*args)
+    end
+
+    def preprocessors(mime_type = nil)
       if mime_type
-        @processors[mime_type].dup
+        @preprocessors[mime_type].dup
       else
-        deep_copy_hash(@processors)
+        deep_copy_hash(@preprocessors)
       end
     end
 
-    def register_processor(mime_type, klass, &block)
+    def register_preprocessor(mime_type, klass, &block)
       expire_index!
 
       if block_given?
@@ -52,20 +56,28 @@ module Sprockets
         end
       end
 
-      @processors[mime_type].push(klass)
+      @preprocessors[mime_type].push(klass)
     end
 
-    def unregister_processor(mime_type, klass)
+    def register_processor(*args, &block)
+      register_preprocessor(*args, &block)
+    end
+
+    def unregister_preprocessor(mime_type, klass)
       expire_index!
 
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @processors[mime_type].detect { |cls|
+        klass = @preprocessors[mime_type].detect { |cls|
           cls.respond_to?(:name) &&
             cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 
-      @processors[mime_type].delete(klass)
+      @preprocessors[mime_type].delete(klass)
+    end
+
+    def unregister_processor(*args)
+      unregister_preprocessor(*args)
     end
 
     def bundle_processors(mime_type = nil)
@@ -145,7 +157,7 @@ module Sprockets
 
         digest << @mime_types.keys.join(',')
         digest << @engines.map { |e, k| "#{e}:#{k.name}" }.join(',')
-        digest << @processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
+        digest << @preprocessors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
         digest << @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
 
         digest

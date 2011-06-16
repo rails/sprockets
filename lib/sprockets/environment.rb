@@ -28,14 +28,14 @@ module Sprockets
       @trail.extensions.replace(engine_extensions)
 
       @mime_types = {}
-      @processors = Hash.new { |h, k| h[k] = [] }
+      @preprocessors = Hash.new { |h, k| h[k] = [] }
       @bundle_processors = Hash.new { |h, k| h[k] = [] }
 
       register_mime_type 'text/css', '.css'
       register_mime_type 'application/javascript', '.js'
 
-      register_processor 'text/css', DirectiveProcessor
-      register_processor 'application/javascript', DirectiveProcessor
+      register_preprocessor 'text/css', DirectiveProcessor
+      register_preprocessor 'application/javascript', DirectiveProcessor
 
       register_bundle_processor 'text/css', CharsetNormalizer
 

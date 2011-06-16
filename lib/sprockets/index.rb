@@ -13,7 +13,7 @@ module Sprockets
       @digest_key_prefix = environment.digest_key_prefix
       @mime_types        = environment.mime_types
       @engines           = environment.engines
-      @processors        = environment.processors
+      @preprocessors     = environment.preprocessors
       @bundle_processors = environment.bundle_processors
 
       # Caches

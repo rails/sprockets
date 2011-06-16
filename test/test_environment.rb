@@ -349,11 +349,11 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "unregister custom block processor" do
-    old_size = @env.processors('text/css').size
-    @env.register_processor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.processors('text/css').size
-    @env.unregister_processor('text/css', :foo)
-    assert_equal old_size, @env.processors('text/css').size
+    old_size = @env.preprocessors('text/css').size
+    @env.register_preprocessor('text/css', :foo) { |context, data| data }
+    assert_equal old_size+1, @env.preprocessors('text/css').size
+    @env.unregister_preprocessor('text/css', :foo)
+    assert_equal old_size, @env.preprocessors('text/css').size
   end
 
   test "unregister custom block bundle processor" do
@@ -509,13 +509,13 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "disabling default directive preprocessor" do
-    @env.unregister_processor('application/javascript', Sprockets::DirectiveProcessor)
+    @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
 
   test "changing directive preprocessor changes digest" do
     old_digest = @env.digest
-    @env.unregister_processor('application/javascript', Sprockets::DirectiveProcessor)
+    @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_not_equal old_digest, @env.digest
   end
 end
