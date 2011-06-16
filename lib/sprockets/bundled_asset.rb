@@ -126,6 +126,14 @@ module Sprockets
       source
     end
 
+    def inspect
+      "#<#{self.class}:0x#{object_id.to_s(16)} " +
+        "pathname=#{pathname.to_s.inspect}, " +
+        "mtime=#{mtime.inspect}, " +
+        "digest=#{digest.inspect}" +
+        ">"
+    end
+
     def write_to(filename, options = {})
       options[:compress] ||= File.extname(filename) == '.gz'
 
