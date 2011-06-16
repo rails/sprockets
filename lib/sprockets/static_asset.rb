@@ -1,5 +1,7 @@
 require 'sprockets/dependency'
+require 'fileutils'
 require 'time'
+require 'zlib'
 
 module Sprockets
   class StaticAsset
@@ -84,6 +86,32 @@ module Sprockets
 
     def to_s
       pathname.open('rb') { |f| f.read }
+    end
+
+    def write_to(filename, options = {})
+      options[:compress] ||= File.extname(filename) == '.gz'
+
+      if options[:compress]
+        pathname.open('rb') do |rd|
+          File.open("#{filename}+", 'wb') do |wr|
+            gz = Zlib::GzipWriter.new(wr, Zlib::BEST_COMPRESSION)
+            buf = ""
+            while rd.read(16384, buf)
+              gz.write(buf)
+            end
+            gz.close
+          end
+        end
+      else
+        FileUtils.cp(pathname, "#{filename}+")
+      end
+
+      FileUtils.mv("#{filename}+", filename)
+      File.utime(mtime, mtime, filename)
+
+      nil
+    ensure
+      FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
     def eql?(other)
