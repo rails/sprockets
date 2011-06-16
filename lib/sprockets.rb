@@ -6,7 +6,6 @@ module Sprockets
   autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
   autoload :CircularDependencyError, "sprockets/errors"
-  autoload :Compressor,              "sprockets/compressor"
   autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :Context,                 "sprockets/context"
   autoload :DirectiveProcessor,      "sprockets/directive_processor"
@@ -19,6 +18,9 @@ module Sprockets
   autoload :FileNotFound,            "sprockets/errors"
   autoload :Index,                   "sprockets/index"
   autoload :JstProcessor,            "sprockets/jst_processor"
+  autoload :Processing,              "sprockets/processing"
+  autoload :Processor,               "sprockets/processor"
+  autoload :Server,                  "sprockets/server"
   autoload :StaticAsset,             "sprockets/static_asset"
   autoload :Utils,                   "sprockets/utils"
 

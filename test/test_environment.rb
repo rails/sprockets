@@ -348,6 +348,22 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env["compiled.js"]
   end
 
+  test "unregister custom block processor" do
+    old_size = @env.processors('text/css').size
+    @env.register_processor('text/css', :foo) { |context, data| data }
+    assert_equal old_size+1, @env.processors('text/css').size
+    @env.unregister_processor('text/css', :foo)
+    assert_equal old_size, @env.processors('text/css').size
+  end
+
+  test "unregister custom block bundle processor" do
+    old_size = @env.bundle_processors('text/css').size
+    @env.register_bundle_processor('text/css', :foo) { |context, data| data }
+    assert_equal old_size+1, @env.bundle_processors('text/css').size
+    @env.unregister_bundle_processor('text/css', :foo)
+    assert_equal old_size, @env.bundle_processors('text/css').size
+  end
+
   test "changing css compressor expires old assets" do
     old_digest = @env.digest
     assert_equal ".gallery {\n  color: red;\n}\n", @env["gallery.css"].to_s
@@ -361,7 +377,7 @@ class TestEnvironment < Sprockets::TestCase
   test "setting css compressor to nil clears current compressor" do
     old_digest = @env.digest
     @env.css_compressor = WhitespaceCompressor
-    assert_equal WhitespaceCompressor, @env.css_compressor.compressor
+    assert @env.css_compressor
     @env.css_compressor = nil
     assert_nil @env.css_compressor
   end
@@ -378,7 +394,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "setting js compressor to nil clears current compressor" do
     @env.js_compressor = WhitespaceCompressor
-    assert_equal WhitespaceCompressor, @env.js_compressor.compressor
+    assert @env.js_compressor
     @env.js_compressor = nil
     assert_nil @env.js_compressor
   end
@@ -584,9 +600,9 @@ class TestIndex < Sprockets::TestCase
     env.css_compressor = WhitespaceCompressor
     index = env.index
 
-    assert_equal WhitespaceCompressor, index.css_compressor.compressor
+    assert index.css_compressor
     env.css_compressor = nil
-    assert_equal WhitespaceCompressor, index.css_compressor.compressor
+    assert index.css_compressor
   end
 
   test "does not allow js compressor to be changed" do
@@ -600,9 +616,9 @@ class TestIndex < Sprockets::TestCase
     env.js_compressor = WhitespaceCompressor
     index = env.index
 
-    assert_equal WhitespaceCompressor, index.js_compressor.compressor
+    assert index.js_compressor
     env.js_compressor = nil
-    assert_equal WhitespaceCompressor, index.js_compressor.compressor
+    assert index.js_compressor
   end
 
   test "change in environment engines does not affect index" do
