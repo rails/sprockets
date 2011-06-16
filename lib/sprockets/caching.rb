@@ -44,7 +44,7 @@ module Sprockets
       end
 
       def cache_get_asset(logical_path)
-        hash = cache_get(logical_path)
+        hash = cache_get(strip_root(logical_path))
 
         if hash.is_a?(Hash)
           asset = asset_from_hash(hash)
@@ -60,7 +60,7 @@ module Sprockets
       def cache_set_asset(logical_path, asset)
         hash = {}
         asset.encode_with(hash)
-        cache_set(logical_path, hash)
+        cache_set(strip_root(logical_path), hash)
         asset
       end
 
@@ -74,6 +74,10 @@ module Sprockets
           end
           asset
         end
+      end
+
+      def strip_root(path)
+        path.sub(/^#{Regexp.escape(root)}\//, '')
       end
   end
 end
