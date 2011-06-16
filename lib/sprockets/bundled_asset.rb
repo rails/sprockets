@@ -1,6 +1,8 @@
 require 'sprockets/errors'
+require 'fileutils'
 require 'set'
 require 'time'
+require 'zlib'
 
 module Sprockets
   class BundledAsset
@@ -72,6 +74,28 @@ module Sprockets
 
     def to_s
       source
+    end
+
+    def write_to(filename, options = {})
+      options[:compress] ||= File.extname(filename) == '.gz'
+
+      File.open("#{filename}+", 'wb') do |f|
+        if options[:compress]
+          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
+          gz.write source
+          gz.close
+        else
+          f.write(source)
+          f.close
+        end
+      end
+
+      FileUtils.mv("#{filename}+", filename)
+      File.utime(mtime, mtime, filename)
+
+      nil
+    ensure
+      FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
     def eql?(other)

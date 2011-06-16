@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'pathname'
-require 'zlib'
 
 module Sprockets
   module StaticCompilation
@@ -27,34 +26,18 @@ module Sprockets
           if asset = find_asset_in_path(logical_path)
             digest_path = path_with_fingerprint(logical_path, asset.digest)
             filename = @static_root.join(digest_path)
-            content = asset.to_s
 
             FileUtils.mkdir_p filename.dirname
-
-            atomic_write(filename) do |f|
-              f.write content
+            asset.write_to(filename)
+            if processors(asset.content_type).any?
+              asset.write_to("#{filename}.gz")
             end
-
-            gzip("#{filename}.gz", content) if processors(asset.content_type).any?
           end
         end
       end
     end
 
     protected
-      def atomic_write(filename, &block)
-        File.open("#{filename}+", 'wb', &block)
-        FileUtils.mv("#{filename}+", filename)
-      end
-
-      def gzip(filename, content)
-        atomic_write(filename) do |f|
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.write content
-          gz.close
-        end
-      end
-
       def find_asset_in_static_root(logical_path)
         return unless static_root
 

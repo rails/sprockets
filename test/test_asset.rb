@@ -55,6 +55,30 @@ module AssetTests
   test "body is a String" do
     assert_kind_of String, @asset.body
   end
+
+  test "write to file" do
+    target = fixture_path('public/tmp.js')
+    begin
+      @asset.write_to(target)
+      assert File.exist?(target)
+      assert_equal @asset.mtime, File.mtime(target)
+    ensure
+      FileUtils.rm(target) if File.exist?(target)
+      assert !File.exist?(target)
+    end
+  end
+
+  test "write to gzipped file" do
+    target = fixture_path('public/tmp.js.gz')
+    begin
+      @asset.write_to(target)
+      assert File.exist?(target)
+      assert_equal @asset.mtime, File.mtime(target)
+    ensure
+      FileUtils.rm(target) if File.exist?(target)
+      assert !File.exist?(target)
+    end
+  end
 end
 
 class StaticAssetTest < Sprockets::TestCase
