@@ -88,6 +88,23 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal 58240, @env["sprite.css"].length
   end
 
+  test "block custom processor" do
+    require 'base64'
+
+    @env.register_processor 'text/css', :data_uris do |context, data|
+      data.gsub(/url\(\"(.+?)\"\)/) do
+        path = context.resolve($1)
+        context.depend_on(path)
+        data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+        "url(data:image/png;base64,#{data})"
+      end
+    end
+
+    assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
+      @env["sprite.css.embed"].to_s.lines.to_a[0..1].join
+    assert_equal 58240, @env["sprite.css.embed"].length
+  end
+
   test "resolve with content type" do
     assert_equal [fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),

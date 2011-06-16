@@ -1,5 +1,5 @@
-require 'sprockets/compressor'
 require 'sprockets/engines'
+require 'sprockets/processor'
 require 'sprockets/utils'
 require 'rack/mime'
 
@@ -41,13 +41,30 @@ module Sprockets
       end
     end
 
-    def register_processor(mime_type, klass)
+    def register_processor(mime_type, klass, &block)
       expire_index!
+
+      if block_given?
+        name  = klass.to_s
+        klass = Class.new(Processor) do
+          @name      = name
+          @processor = block
+        end
+      end
+
       @processors[mime_type].push(klass)
     end
 
     def unregister_processor(mime_type, klass)
       expire_index!
+
+      if klass.is_a?(String) || klass.is_a?(Symbol)
+        klass = @processors[mime_type].detect { |cls|
+          cls.respond_to?(:name) &&
+            cls.name == "Sprockets::Processor (#{klass})"
+        }
+      end
+
       @processors[mime_type].delete(klass)
     end
 
@@ -59,59 +76,66 @@ module Sprockets
       end
     end
 
-    def register_bundle_processor(mime_type, klass)
+    def register_bundle_processor(mime_type, klass, &block)
       expire_index!
+
+      if block_given?
+        name  = klass.to_s
+        klass = Class.new(Processor) do
+          @name      = name
+          @processor = block
+        end
+      end
+
       @bundle_processors[mime_type].push(klass)
     end
 
     def unregister_bundle_processor(mime_type, klass)
       expire_index!
+
+      if klass.is_a?(String) || klass.is_a?(Symbol)
+        klass = @bundle_processors[mime_type].detect { |cls|
+          cls.respond_to?(:name) &&
+            cls.name == "Sprockets::Processor (#{klass})"
+        }
+      end
+
       @bundle_processors[mime_type].delete(klass)
     end
 
     def css_compressor
       bundle_processors('text/css').detect { |klass|
         klass.respond_to?(:name) &&
-          klass.name == 'Sprockets::Compressor'
+          klass.name == 'Sprockets::Processor (css_compressor)'
       }
     end
 
     def css_compressor=(compressor)
       expire_index!
 
-      if old_compressor = css_compressor
-        unregister_bundle_processor 'text/css', old_compressor
-      end
+      unregister_bundle_processor 'text/css', :css_compressor
+      return unless compressor
 
-      if compressor
-        klass = Class.new(Compressor) do
-          @compressor = compressor
-        end
-
-        register_bundle_processor 'text/css', klass
+      register_bundle_processor 'text/css', :css_compressor do |context, data|
+        compressor.compress(data)
       end
     end
 
     def js_compressor
       bundle_processors('application/javascript').detect { |klass|
         klass.respond_to?(:name) &&
-          klass.name == 'Sprockets::Compressor'
+          klass.name == 'Sprockets::Processor (js_compressor)'
       }
     end
 
     def js_compressor=(compressor)
       expire_index!
 
-      if old_compressor = js_compressor
-        unregister_bundle_processor 'application/javascript', old_compressor
-      end
+      unregister_bundle_processor 'application/javascript', :js_compressor
+      return unless compressor
 
-      if compressor
-        klass = Class.new(Compressor) do
-          @compressor = compressor
-        end
-
-        register_bundle_processor 'application/javascript', klass
+      register_bundle_processor 'application/javascript', :js_compressor do |context, data|
+        compressor.compress(data)
       end
     end
 
