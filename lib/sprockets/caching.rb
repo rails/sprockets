@@ -16,7 +16,9 @@ module Sprockets
 
     protected
       def cache_asset(path)
-        if asset = cache_get_asset(path)
+        if cache.nil?
+          yield
+        elsif asset = cache_get_asset(path)
           asset
         elsif asset = yield
           cache_set_asset(path.to_s, asset)
@@ -29,8 +31,6 @@ module Sprockets
 
     private
       def cache_get(key)
-        return unless cache
-
         if cache.respond_to?(:get)
           cache.get(key)
         elsif cache.respond_to?(:[])
@@ -43,8 +43,6 @@ module Sprockets
       end
 
       def cache_set(key, value)
-        return unless cache
-
         if cache.respond_to?(:set)
           cache.set(key, value)
         elsif cache.respond_to?(:[]=)
