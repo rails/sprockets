@@ -82,7 +82,7 @@ module Sprockets
     end
 
     def dependencies
-      @assets - [self]
+      to_a - [self]
     end
 
     def to_a
