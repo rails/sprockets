@@ -82,7 +82,11 @@ module Sprockets
     end
 
     def fresh?
-      Dependency.new(environment_hexdigest, pathname, mtime, digest).fresh?(environment)
+      if environment.digest.hexdigest != environment_hexdigest
+        return false
+      end
+
+      Dependency.new(pathname, mtime, digest).fresh?(environment)
     end
 
     def stale?

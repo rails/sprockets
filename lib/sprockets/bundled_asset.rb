@@ -18,7 +18,6 @@ module Sprockets
 
     def initialize(environment, logical_path, pathname, options)
       @environment = environment
-      @environment_digest = environment.digest.hexdigest
 
       @logical_path = logical_path.to_s
       @pathname     = pathname
@@ -40,41 +39,46 @@ module Sprockets
       compute_dependency_files!
     end
 
+    def self.serialized_attributes
+      %w( environment_hexdigest
+          logical_path pathname
+          content_type mtime length digest )
+    end
+
     def init_with(environment, coder)
       @environment = environment
       options = {}
 
-      @logical_path = coder['logical_path'].to_s
-      @pathname     = Pathname.new(coder['pathname'])
-      @mtime        = coder['mtime'].is_a?(String) ? Time.parse(coder['mtime']) : coder['mtime']
-      @body         = coder['body']
-      @source       = coder['source']
-      @content_type = coder['content_type']
-      @length       = coder['length']
-      @digest       = coder['digest']
-      @assets       = coder['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
+      self.class.serialized_attributes.each do |attr|
+        instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
+      end
+
+      @pathname = Pathname.new(@pathname) if @pathname.is_a?(String)
+      @mtime    = Time.parse(@mtime)      if @mtime.is_a?(String)
+      @length   = Integer(@length)        if @length.is_a?(String)
+
+      @body   = coder['body']
+      @source = coder['source']
+      @assets = coder['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
 
       @dependency_files = coder['dependency_files'].inject({}) { |h, hash|
         dep = Dependency.from_hash(hash)
         h[dep.path] = dep
         h
       }
-      @environment_digest = coder['environment_digest']
     end
 
     def encode_with(coder)
-      coder['class']              = 'BundledAsset'
-      coder['logical_path']       = logical_path
-      coder['pathname']           = pathname.to_s
-      coder['content_type']       = content_type
-      coder['mtime']              = mtime
-      coder['body']               = body
-      coder['source']             = source
-      coder['digest']             = digest
-      coder['length']             = length
-      coder['asset_paths']        = to_a.map(&:pathname).map(&:to_s)
-      coder['dependency_files']   = dependency_files.values.map { |dep| h = {}; dep.encode_with(h); h }
-      coder['environment_digest'] = environment_digest
+      coder['class'] = 'BundledAsset'
+
+      self.class.serialized_attributes.each do |attr|
+        coder[attr] = send(attr).to_s
+      end
+
+      coder['body']        = body
+      coder['source']      = source
+      coder['asset_paths'] = to_a.map(&:pathname).map(&:to_s)
+      coder['dependency_files'] = dependency_files.values.map { |dep| h = {}; dep.encode_with(h); h }
     end
 
     def source
@@ -115,6 +119,10 @@ module Sprockets
     end
 
     def fresh?
+      if environment.digest.hexdigest != environment_hexdigest
+        return false
+      end
+
       dependency_files.values.all? { |dep| dep.fresh?(environment) }
     end
 
@@ -165,7 +173,11 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
-      attr_reader :dependency_files, :environment_digest
+      attr_reader :dependency_files
+
+      def environment_hexdigest
+        @environment_hexdigest ||= environment.digest.hexdigest
+      end
 
       def context
         @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
