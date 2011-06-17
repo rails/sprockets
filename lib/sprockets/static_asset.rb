@@ -7,7 +7,6 @@ module Sprockets
   class StaticAsset
     attr_reader :environment
     attr_reader :logical_path, :pathname
-    attr_reader :content_type, :mtime, :length, :digest
 
     def self.from_hash(environment, hash)
       asset = allocate
@@ -16,40 +15,54 @@ module Sprockets
     end
 
     def initialize(environment, logical_path, pathname, digest = nil)
-      @environment = environment
-
+      @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
-      @content_type = environment.content_type_of(pathname)
+      @digest       = digest
 
-      @mtime      = environment.stat(@pathname).mtime
-      @length     = environment.stat(@pathname).size
-      @digest     = environment.file_digest(pathname).hexdigest
-      @dependency = Dependency.new(environment.digest.hexdigest, @pathname.to_s, @mtime, @digest)
+      load!
+    end
+
+    def self.serialized_attributes
+      %w( environment_hexdigest
+          logical_path pathname
+          content_type mtime length digest )
     end
 
     def init_with(environment, coder)
       @environment = environment
 
-      @logical_path = coder['logical_path'].to_s
-      @pathname     = Pathname.new(coder['pathname'])
-      @content_type = coder['content_type']
-      @mtime        = coder['mtime'].is_a?(String) ? Time.parse(coder['mtime']) : coder['mtime']
-      @length       = coder['length']
-      @digest       = coder['digest']
-      @dependency   = Dependency.from_hash(coder['dependency'])
+      self.class.serialized_attributes.each do |attr|
+        instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
+      end
+
+      @pathname = Pathname.new(@pathname) if @pathname.is_a?(String)
+      @mtime    = Time.parse(@mtime)      if @mtime.is_a?(String)
+      @length   = Integer(@length)        if @length.is_a?(String)
     end
 
     def encode_with(coder)
-      coder['class']        = 'StaticAsset'
-      coder['logical_path'] = logical_path
-      coder['pathname']     = pathname.to_s
-      coder['content_type'] = content_type
-      coder['mtime']        = mtime
-      coder['digest']       = digest
-      coder['length']       = length
-      coder['dependency']   = {}
-      @dependency.encode_with(coder['dependency'])
+      coder['class'] = 'StaticAsset'
+
+      self.class.serialized_attributes.each do |attr|
+        coder[attr] = send(attr).to_s
+      end
+    end
+
+    def content_type
+      @content_type ||= environment.content_type_of(pathname)
+    end
+
+    def mtime
+      @mtime ||= environment.stat(pathname).mtime
+    end
+
+    def length
+      @length ||= environment.stat(pathname).size
+    end
+
+    def digest
+      @digest ||= environment.file_digest(pathname).hexdigest
     end
 
     def dependencies
@@ -69,7 +82,7 @@ module Sprockets
     end
 
     def fresh?
-      @dependency.fresh?(environment)
+      Dependency.new(environment_hexdigest, pathname, mtime, digest).fresh?(environment)
     end
 
     def stale?
@@ -129,5 +142,18 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
+
+    protected
+      def load!
+        content_type
+        mtime
+        length
+        digest
+        environment_hexdigest
+      end
+
+      def environment_hexdigest
+        @environment_hexdigest ||= environment.digest.hexdigest
+      end
   end
 end

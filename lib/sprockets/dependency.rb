@@ -6,7 +6,7 @@ module Sprockets
     def self.from_path(environment, path)
       stat = environment.stat(path)
       raise ArgumentError unless stat
-      new(environment.digest, path, stat.mtime, environment.file_digest(path))
+      new(environment.digest, path.to_s, stat.mtime, environment.file_digest(path))
     end
 
     def self.from_hash(hash)
