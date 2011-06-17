@@ -89,6 +89,7 @@ class StaticAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.static_root = fixture_path('public')
+    @env.cache = {}
 
     @asset = @env['compiled-application.js']
   end
@@ -205,6 +206,7 @@ class BundledAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.append_path(fixture_path('asset'))
+    @env.cache = {}
 
     @asset = @env['application.js']
   end
