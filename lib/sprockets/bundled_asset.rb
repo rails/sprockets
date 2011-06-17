@@ -16,18 +16,16 @@ module Sprockets
     end
 
     def initialize(environment, logical_path, pathname, options)
-      @environment = environment
-
+      @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = pathname
 
       @assets = []
-      @source = nil
 
-      data  = Sprockets::Utils.read_unicode(pathname)
-      @body = context.evaluate(pathname, :data => data)
+      data = Sprockets::Utils.read_unicode(pathname)
       environment.file_digest(pathname, data)
 
+      @body = context.evaluate(pathname, :data => data)
       context._dependency_paths << pathname.to_s
 
       requires = options[:_requires] ||= []
@@ -36,7 +34,7 @@ module Sprockets
       end
       requires << pathname.to_s
 
-      compute_dependencies!(environment, options)
+      compute_dependencies!(options)
     end
 
     def self.serialized_attributes
@@ -165,7 +163,7 @@ module Sprockets
       end
 
     private
-      def compute_dependencies!(environment, options)
+      def compute_dependencies!(options)
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
             add_dependency(self)
