@@ -93,12 +93,6 @@ module EnvironmentTests
     end
   end
 
-  test "file outside of root raises and exception" do
-    assert_raises(Sprockets::ArgumentError) do
-      @env.resolve("/etc/passwd")
-    end
-  end
-
   test "resolve ignores static root" do
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("compiled.js")
@@ -172,12 +166,6 @@ module EnvironmentTests
 
   test "missing asset returns nil" do
     assert_equal nil, @env["missing.js"]
-  end
-
-  test "asset outside of root raises and exception" do
-    assert_raises(Sprockets::ArgumentError) do
-      @env["/etc/passwd"]
-    end
   end
 
   test "asset with missing requires raises an exception" do
@@ -330,16 +318,6 @@ class TestEnvironment < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
 
     assert_not_equal old_digest, @env.digest
-  end
-
-  test "paths must be relative to root" do
-    assert_raises(Sprockets::ArgumentError) do
-      @env.append_path("/usr")
-    end
-
-    assert_raises(Sprockets::ArgumentError) do
-      @env.prepend_path("/usr")
-    end
   end
 
   test "register mime type" do
