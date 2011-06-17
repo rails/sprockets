@@ -76,7 +76,7 @@ module Sprockets
       end
 
       def strip_root(path)
-        path.sub(/^#{Regexp.escape(root)}\//i, '')
+        path.sub(root, '')
       end
   end
 end
