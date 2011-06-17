@@ -52,17 +52,17 @@ module Sprockets
     end
 
     def find_asset(path, options = {})
-      cache_asset(path) { super }
+      if (asset = @assets[path.to_s]) && asset.fresh?
+        asset
+      elsif asset = super
+        @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
+        asset
+      end
     end
 
     protected
-      def cache_asset(path)
-        if (asset = @assets[path.to_s]) && asset.fresh?
-          asset
-        elsif asset = super
-          @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
-          asset
-        end
+      def build_asset(path, pathname, options)
+        cache_asset(pathname.to_s) { super }
       end
 
       def expire_index!
