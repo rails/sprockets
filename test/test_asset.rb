@@ -553,7 +553,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.logical_path, actual.logical_path
     assert_equal expected.pathname, actual.pathname
     assert_equal expected.body, actual.body
-    assert_equal expected.source, actual.source
+    assert_equal expected.to_s, actual.to_s
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest

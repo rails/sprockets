@@ -20,7 +20,7 @@ module Sprockets
       @__LINE__     = nil
 
       @_required_paths   = []
-      @_dependency_paths = Set.new
+      @_dependency_paths = Set.new([pathname.to_s])
     end
 
     def root_path
