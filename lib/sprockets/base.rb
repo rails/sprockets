@@ -62,6 +62,7 @@ module Sprockets
       pathname = Pathname.new(path)
 
       if pathname.absolute?
+        ensure_path_is_relative_to_root! pathname
         build_asset(detect_logical_path(path).to_s, pathname, options)
       else
         find_asset_in_static_root(pathname) ||
@@ -99,6 +100,16 @@ module Sprockets
     private
       def memoize(hash, key)
         hash.key?(key) ? hash[key] : hash[key] = yield
+      end
+
+      def ensure_path_is_relative_to_root!(path)
+        path = Pathname.new(path)
+        if path.absolute?
+          path = path.expand_path.to_s
+          unless path[root]
+            raise ArgumentError, "#{path} is not in #{root}"
+          end
+        end
       end
   end
 end

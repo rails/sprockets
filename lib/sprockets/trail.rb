@@ -20,11 +20,13 @@ module Sprockets
 
     def append_path(path)
       expire_index!
+      ensure_path_is_relative_to_root! path
       @trail.paths.push(path)
     end
 
     def prepend_path(path)
       expire_index!
+      ensure_path_is_relative_to_root! path
       @trail.paths.unshift(path)
     end
 
@@ -38,6 +40,8 @@ module Sprockets
     end
 
     def resolve(logical_path, options = {})
+      ensure_path_is_relative_to_root! logical_path
+
       if block_given?
         trail.find(logical_path.to_s, attributes_for(logical_path).index_path, options) do |path|
           yield Pathname.new(path)
