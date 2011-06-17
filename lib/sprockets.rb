@@ -2,6 +2,7 @@ module Sprockets
   VERSION = "2.0.0.beta.10"
 
   autoload :ArgumentError,           "sprockets/errors"
+  autoload :Asset,                   "sprockets/asset"
   autoload :AssetAttributes,         "sprockets/asset_attributes"
   autoload :BundledAsset,            "sprockets/bundled_asset"
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"

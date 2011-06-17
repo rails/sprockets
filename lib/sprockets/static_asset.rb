@@ -1,13 +1,10 @@
-require 'sprockets/dependency'
+require 'sprockets/asset'
 require 'fileutils'
 require 'time'
 require 'zlib'
 
 module Sprockets
-  class StaticAsset
-    attr_reader :environment
-    attr_reader :logical_path, :pathname
-
+  class StaticAsset < Asset
     def self.from_hash(environment, hash)
       asset = allocate
       asset.init_with(environment, hash)
@@ -49,10 +46,6 @@ module Sprockets
       end
     end
 
-    def content_type
-      @content_type ||= environment.content_type_of(pathname)
-    end
-
     def mtime
       @mtime ||= environment.stat(pathname).mtime
     end
@@ -86,11 +79,7 @@ module Sprockets
         return false
       end
 
-      Dependency.new(pathname, mtime, digest).fresh?(environment)
-    end
-
-    def stale?
-      !fresh?
+      dependency_fresh?('path' => pathname, 'mtime' => mtime, 'hexdigest' => digest)
     end
 
     def each
@@ -103,14 +92,6 @@ module Sprockets
 
     def to_s
       pathname.open('rb') { |f| f.read }
-    end
-
-    def inspect
-      "#<#{self.class}:0x#{object_id.to_s(16)} " +
-        "pathname=#{pathname.to_s.inspect}, " +
-        "mtime=#{mtime.inspect}, " +
-        "digest=#{digest.inspect}" +
-        ">"
     end
 
     def write_to(filename, options = {})
@@ -139,14 +120,6 @@ module Sprockets
       FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
-    def eql?(other)
-      other.class == self.class &&
-        other.pathname == self.pathname &&
-        other.mtime == self.mtime &&
-        other.digest == self.digest
-    end
-    alias_method :==, :eql?
-
     protected
       def load!
         content_type
@@ -154,10 +127,6 @@ module Sprockets
         length
         digest
         environment_hexdigest
-      end
-
-      def environment_hexdigest
-        @environment_hexdigest ||= environment.digest.hexdigest
       end
   end
 end

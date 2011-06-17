@@ -1,4 +1,4 @@
-require 'sprockets/dependency'
+require 'sprockets/asset'
 require 'sprockets/errors'
 require 'fileutils'
 require 'set'
@@ -6,9 +6,8 @@ require 'time'
 require 'zlib'
 
 module Sprockets
-  class BundledAsset
-    attr_reader :environment
-    attr_reader :logical_path, :pathname, :mtime, :body
+  class BundledAsset < Asset
+    attr_reader :body
 
     def self.from_hash(environment, hash)
       asset = allocate
@@ -29,6 +28,8 @@ module Sprockets
       @body = context.evaluate(pathname, :data => data)
       environment.file_digest(pathname, data)
 
+      context._dependency_paths << pathname.to_s
+
       requires = options[:_requires] ||= []
       if requires.include?(pathname.to_s)
         raise CircularDependencyError, "#{pathname} has already been required"
@@ -36,7 +37,6 @@ module Sprockets
       requires << pathname.to_s
 
       compute_dependencies!(environment, options)
-      compute_dependency_files!
     end
 
     def self.serialized_attributes
@@ -61,11 +61,10 @@ module Sprockets
       @source = coder['source']
       @assets = coder['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, options] }
 
-      @dependency_files = coder['dependency_files'].inject({}) { |h, hash|
-        dep = Dependency.from_hash(hash)
-        h[dep.path] = dep
-        h
-      }
+      @dependency_files = coder['dependency_files']
+      @dependency_files.each do |dep|
+        dep['mtime'] = Time.parse(dep['mtime']) if dep['mtime'].is_a?(String)
+      end
     end
 
     def encode_with(coder)
@@ -78,7 +77,7 @@ module Sprockets
       coder['body']        = body
       coder['source']      = source
       coder['asset_paths'] = to_a.map(&:pathname).map(&:to_s)
-      coder['dependency_files'] = dependency_files.values.map { |dep| h = {}; dep.encode_with(h); h }
+      coder['dependency_files'] = dependency_files
     end
 
     def source
@@ -90,8 +89,8 @@ module Sprockets
       end
     end
 
-    def content_type
-      @content_type ||= environment.content_type_of(pathname)
+    def mtime
+      @mtime ||= dependency_files.map { |h| h['mtime'] }.max
     end
 
     def length
@@ -123,23 +122,11 @@ module Sprockets
         return false
       end
 
-      dependency_files.values.all? { |dep| dep.fresh?(environment) }
-    end
-
-    def stale?
-      !fresh?
+      dependency_files.all? { |h| dependency_fresh?(h) }
     end
 
     def to_s
       source
-    end
-
-    def inspect
-      "#<#{self.class}:0x#{object_id.to_s(16)} " +
-        "pathname=#{pathname.to_s.inspect}, " +
-        "mtime=#{mtime.inspect}, " +
-        "digest=#{digest.inspect}" +
-        ">"
     end
 
     def write_to(filename, options = {})
@@ -164,23 +151,17 @@ module Sprockets
       FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
-    def eql?(other)
-      other.class == self.class &&
-        other.pathname == self.pathname &&
-        other.mtime == self.mtime &&
-        other.digest == self.digest
-    end
-    alias_method :==, :eql?
-
     protected
-      attr_reader :dependency_files
-
-      def environment_hexdigest
-        @environment_hexdigest ||= environment.digest.hexdigest
-      end
-
       def context
         @context ||= environment.context_class.new(environment, logical_path.to_s, pathname)
+      end
+
+      def dependency_files
+        @dependency_files ||= context._dependency_paths.to_a.map do |path|
+          { 'path'      => path,
+            'mtime'     => environment.stat(path).mtime,
+            'hexdigest' => environment.file_digest(path).hexdigest }
+        end
       end
 
     private
@@ -200,33 +181,6 @@ module Sprockets
       def add_dependency(asset)
         unless to_a.any? { |dep| dep.pathname == asset.pathname }
           @assets << asset
-        end
-      end
-
-      Epoch = Time.at(0)
-
-      def compute_dependency_files!
-        @dependency_files = {}
-        @mtime = Epoch
-
-        depend_on(pathname)
-
-        context._dependency_paths.each do |path|
-          depend_on(path)
-        end
-
-        to_a.each do |dependency|
-          dependency.dependency_files.each do |path, dep|
-            depend_on(path, dep)
-          end
-        end
-      end
-
-      def depend_on(path, dep = nil)
-        dep = dependency_files[path.to_s] ||= (dep || Dependency.from_path(environment, path))
-
-        if dep.mtime > @mtime
-          @mtime = dep.mtime
         end
       end
   end
