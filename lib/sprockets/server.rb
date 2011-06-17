@@ -21,6 +21,8 @@ module Sprockets
     # environment for `"foo/bar.js"`.
     def call(env)
       start_time = Time.now.to_f
+      time_elapsed = lambda { ((Time.now.to_f - start_time) * 1000).to_i }
+
       msg = "Served asset #{env['PATH_INFO']} -"
 
       # URLs containing a `".."` are rejected for security reasons.
@@ -36,28 +38,13 @@ module Sprockets
       # Extract the path from everything after the leading slash
       path = env['PATH_INFO'].to_s.sub(/^\//, '')
 
-      # Look up the asset. If an exception is raised in a JavaScript
-      # asset, re-throw the exception for the browser.
-      begin
-        asset = find_asset(path)
-      rescue Exception => e
-        logger.error "Error compiling asset #{path}:"
-        logger.error "#{e.class.name}: #{e.message}"
-
-        if content_type_of(path) == "application/javascript"
-          logger.info "#{msg} 500 Internal Server Error\n\n"
-          return javascript_exception_response(e)
-        else
-          raise
-        end
-      end
-
-      time_elapsed = ((Time.now.to_f - start_time) * 1000).to_i
-      tag = " (#{time_elapsed}ms)  (pid #{Process.pid})"
+      # Look up the asset.
+      asset = find_asset(path)
+      asset.to_a if asset
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
-        logger.info "#{msg} 404 Not Found #{tag}"
+        logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
 
         # Return a 404 Not Found
         not_found_response
@@ -65,16 +52,28 @@ module Sprockets
       # Check request headers `HTTP_IF_MODIFIED_SINCE` and
       # `HTTP_IF_NONE_MATCH` against the assets mtime and digest
       elsif not_modified?(asset, env) || etag_match?(asset, env)
-        logger.info "#{msg} 304 Not Modified #{tag}"
+        logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
 
         # Return a 304 Not Modified
         not_modified_response(asset, env)
 
       else
-        logger.info "#{msg} 200 OK #{tag}"
+        logger.info "#{msg} 200 OK (#{time_elapsed.call}ms)"
 
         # Return a 200 with the asset contents
         ok_response(asset, env)
+      end
+    rescue Exception => e
+      logger.error "Error compiling asset #{path}:"
+      logger.error "#{e.class.name}: #{e.message}"
+
+      # If an exception is raised in a JavaScript asset, re-throw the
+      # exception for the browser.
+      if content_type_of(path) == "application/javascript"
+        logger.info "#{msg} 500 Internal Server Error\n\n"
+        return javascript_exception_response(e)
+      else
+        raise
       end
     end
 
