@@ -57,10 +57,7 @@ module Sprockets
     protected
       def compute_digest
         digest = super
-
-        digest << root.to_s
-        digest << trail.paths.join(',')
-
+        digest << trail.paths.map { |p| attributes_for(p).relativize_root }.join(',')
         digest
       end
 

@@ -34,15 +34,28 @@ module Sprockets
         instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
       end
 
-      @pathname = Pathname.new(@pathname) if @pathname.is_a?(String)
-      @mtime    = Time.parse(@mtime)      if @mtime.is_a?(String)
-      @length   = Integer(@length)        if @length.is_a?(String)
+      if @pathname
+        @pathname = Pathname.new(expand_root_path(@pathname))
+      end
+
+      if @mtime
+        @mtime = Time.parse(@mtime)
+      end
+
+      if @length
+        @length = Integer(@length)
+      end
 
       @body   = coder['body']
       @source = coder['source']
-      @assets = coder['asset_paths'].map { |p| p == pathname.to_s ? self : environment[p, @options] }
+      @assets = coder['asset_paths'].map { |p|
+        p = expand_root_path(p)
+        p == pathname.to_s ? self : environment[p, @options]
+      }
 
-      @dependency_files = coder['dependency_files']
+      @dependency_files = coder['dependency_files'].map { |h|
+        h.merge('path' => expand_root_path(h['path']))
+      }
       @dependency_files.each do |dep|
         dep['mtime'] = Time.parse(dep['mtime']) if dep['mtime'].is_a?(String)
       end
@@ -57,8 +70,12 @@ module Sprockets
 
       coder['body']        = body
       coder['source']      = to_s
-      coder['asset_paths'] = to_a.map(&:pathname).map(&:to_s)
-      coder['dependency_files'] = dependency_files
+      coder['asset_paths'] = to_a.map { |a| relativize_root_path(a.pathname) }
+      coder['dependency_files'] = dependency_files.map { |h|
+        h.merge('path' => relativize_root_path(h['path']))
+      }
+
+      coder['pathname'] = relativize_root_path(coder['pathname'])
     end
 
     def body

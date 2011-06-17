@@ -17,6 +17,14 @@ module Sprockets
       @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
     end
 
+    def expand_root
+      pathname.to_s.sub(/^\$root/, environment.root)
+    end
+
+    def relativize_root
+      pathname.to_s.sub(/^#{Regexp.escape(environment.root)}/, '$root')
+    end
+
     def pretty_path
       @pretty_path ||= @pathname.
         sub(/^#{Regexp.escape(ENV['HOME'] || '')}/, '~').

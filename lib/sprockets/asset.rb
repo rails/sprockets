@@ -25,7 +25,7 @@ module Sprockets
 
     def eql?(other)
       other.class == self.class &&
-        other.pathname == self.pathname &&
+        other.relative_pathname == self.relative_pathname &&
         other.mtime == self.mtime &&
         other.digest == self.digest
     end
@@ -34,6 +34,18 @@ module Sprockets
     protected
       def environment_hexdigest
         @environment_hexdigest ||= environment.digest.hexdigest
+      end
+
+      def relative_pathname
+        Pathname.new(relativize_root_path(pathname))
+      end
+
+      def expand_root_path(path)
+        environment.attributes_for(path).expand_root
+      end
+
+      def relativize_root_path(path)
+        environment.attributes_for(path).relativize_root
       end
 
       def dependency_fresh?(dep = {})

@@ -33,9 +33,17 @@ module Sprockets
         instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
       end
 
-      @pathname = Pathname.new(@pathname) if @pathname.is_a?(String)
-      @mtime    = Time.parse(@mtime)      if @mtime.is_a?(String)
-      @length   = Integer(@length)        if @length.is_a?(String)
+      if @pathname
+        @pathname = Pathname.new(expand_root_path(@pathname))
+      end
+
+      if @mtime
+        @mtime = Time.parse(@mtime)
+      end
+
+      if @length
+        @length = Integer(@length)
+      end
     end
 
     def encode_with(coder)
@@ -44,6 +52,8 @@ module Sprockets
       self.class.serialized_attributes.each do |attr|
         coder[attr] = send(attr).to_s
       end
+
+      coder['pathname'] = relativize_root_path(coder['pathname'])
     end
 
     def mtime
