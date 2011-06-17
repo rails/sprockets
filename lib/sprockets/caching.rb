@@ -14,6 +14,19 @@ module Sprockets
       end
     end
 
+    protected
+      def cache_asset(path)
+        if asset = cache_get_asset(path)
+          asset
+        elsif asset = yield
+          cache_set_asset(path.to_s, asset)
+          if path.to_s != asset.pathname.to_s
+            cache_set_asset(asset.pathname.to_s, asset)
+          end
+          asset
+        end
+      end
+
     private
       def cache_get(key)
         return unless cache
@@ -43,13 +56,13 @@ module Sprockets
         value
       end
 
-      def cache_get_asset(logical_path)
-        hash = cache_get(strip_root(logical_path))
+      def cache_get_asset(path)
+        hash = cache_get(strip_root(path))
 
         if hash.is_a?(Hash)
           asset = asset_from_hash(hash)
 
-          if !asset.stale?
+          if asset.fresh?
             asset
           end
         else
@@ -57,23 +70,11 @@ module Sprockets
         end
       end
 
-      def cache_set_asset(logical_path, asset)
+      def cache_set_asset(path, asset)
         hash = {}
         asset.encode_with(hash)
-        cache_set(strip_root(logical_path), hash)
+        cache_set(strip_root(path), hash)
         asset
-      end
-
-      def cache_asset(logical_path)
-        if asset = cache_get_asset(logical_path)
-          asset
-        elsif asset = yield
-          cache_set_asset(logical_path.to_s, asset)
-          if logical_path.to_s != asset.pathname.to_s
-            cache_set_asset(asset.pathname.to_s, asset)
-          end
-          asset
-        end
       end
 
       def strip_root(path)

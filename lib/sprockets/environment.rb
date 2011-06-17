@@ -56,17 +56,13 @@ module Sprockets
     end
 
     protected
-      def cache_get_asset(path)
-        if (asset = @assets[path.to_s]) && !asset.stale?
+      def cache_asset(path)
+        if (asset = @assets[path.to_s]) && asset.fresh?
           asset
-        else
-          super
+        elsif asset = super
+          @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
+          asset
         end
-      end
-
-      def cache_set_asset(path, asset)
-        @assets[path.to_s] = asset
-        super
       end
 
       def expire_index!

@@ -39,21 +39,17 @@ module Sprockets
         raise TypeError, "can't modify immutable index"
       end
 
-      def cache_get_asset(logical_path)
-        if asset = @assets[logical_path.to_s]
+      def cache_asset(path)
+        if asset = @assets[path.to_s]
           asset
-        else
-          super
+        elsif asset = super
+          @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
+          asset
         end
       end
 
-      def cache_set_asset(logical_path, asset)
-        @assets[logical_path.to_s] = asset
-        super
-      end
-
-      def build_asset(logical_path, pathname, options)
-        @assets[logical_path.to_s] ||= super
+      def build_asset(path, pathname, options)
+        @assets[pathname.to_s] ||= super
       end
   end
 end
