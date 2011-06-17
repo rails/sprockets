@@ -461,6 +461,23 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "asset if stale if once of its source files is removed" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a;" }
+      asset = @env['test-main.js']
+
+      assert asset.fresh?
+
+      File.unlink(dep)
+
+      assert asset.stale?
+    end
+  end
+
   test "asset is stale if a file is added to its require directory" do
     asset = asset("tree/all_with_require_directory.js")
     assert asset.fresh?
