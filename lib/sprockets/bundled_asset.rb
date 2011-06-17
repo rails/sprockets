@@ -19,22 +19,13 @@ module Sprockets
       @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = pathname
-
-      @assets = []
+      @options      = options || {}
 
       data = Sprockets::Utils.read_unicode(pathname)
       environment.file_digest(pathname, data)
 
       @body = context.evaluate(pathname, :data => data)
       context._dependency_paths << pathname.to_s
-
-      requires = options[:_requires] ||= []
-      if requires.include?(pathname.to_s)
-        raise CircularDependencyError, "#{pathname} has already been required"
-      end
-      requires << pathname.to_s
-
-      compute_dependencies!(options)
     end
 
     def self.serialized_attributes
@@ -108,7 +99,7 @@ module Sprockets
     end
 
     def to_a
-      @assets
+      @assets ||= compute_assets
     end
 
     def each
@@ -163,23 +154,38 @@ module Sprockets
       end
 
     private
-      def compute_dependencies!(options)
+      def check_circular_dependency!
+        requires = @options[:_requires] ||= []
+        if requires.include?(pathname.to_s)
+          raise CircularDependencyError, "#{pathname} has already been required"
+        end
+        requires << pathname.to_s
+      end
+
+      def compute_assets
+        check_circular_dependency!
+
+        assets = []
+
+        add_dependency = lambda do |asset|
+          unless assets.any? { |a| a.pathname == asset.pathname }
+            assets << asset
+          end
+        end
+
         context._required_paths.each do |required_path|
           if required_path == pathname.to_s
-            add_dependency(self)
+            add_dependency.call(self)
           else
-            environment[required_path, options].to_a.each do |asset|
-              add_dependency(asset)
+            environment[required_path, @options].to_a.each do |asset|
+              add_dependency.call(asset)
             end
           end
         end
-        add_dependency(self)
-      end
 
-      def add_dependency(asset)
-        unless to_a.any? { |dep| dep.pathname == asset.pathname }
-          @assets << asset
-        end
+        add_dependency.call(self)
+
+        assets
       end
   end
 end
