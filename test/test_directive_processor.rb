@@ -1,6 +1,6 @@
 require "sprockets_test"
 
-class DirectiveParserTest < Sprockets::TestCase
+class DirectiveProcessorTest < Sprockets::TestCase
   test "parsing double-slash comments" do
     directive_parser("double_slash").tap do |parser|
       assert_equal "// Header\n//\n//\n(function() {\n})();\n", parser.processed_source
@@ -45,8 +45,13 @@ class DirectiveParserTest < Sprockets::TestCase
 
   test "directives in comment after header are not parsed" do
     directive_parser("directives_after_header").tap do |parser|
-      assert_equal "/*\n * Header\n */\n\n// =require \"x\"\n\n(function() {\n})();\n", parser.processed_source
-      assert_equal [], parser.directives
+      assert_equal "/*\n * Header\n */\n\n\n\n/* Not a directive */\n\n(function() {\n})();\n\n/*= require e */\n", parser.processed_source
+      assert_equal [
+        [3, "require", "a"],
+        [6, "require", "b"],
+        [7, "require", "c"],
+        [9, "require", "d"]
+      ], parser.directives
     end
   end
 

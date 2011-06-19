@@ -1,8 +1,16 @@
 /*
  * Header
+ *= require a
  */
 
-// =require "x"
+// =require b
+// =require c
+
+/*= require d */
+
+/* Not a directive */
 
 (function() {
 })();
+
+/*= require e */

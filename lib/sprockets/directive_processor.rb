@@ -86,21 +86,18 @@ module Sprockets
         # of the source file. C style (/* */), JavaScript (//), and
         # Ruby (#) comments are supported.
         #
-        # A common mistake is breaking up the header with an extra
-        # line of whitespace.
-        #
-        #     # HEADER
-        #     # HEADER
-        #
-        #     # NOT PART OF HEADER
+        # Directives in comments after the first non-whitespace line
+        # of code will not be processed.
         #
         HEADER_PATTERN = /
-          \A \s* (
-            (\/\* (?m:.*?) \*\/) |
-            (\#\#\# (?m:.*?) \#\#\#) |
-            (\/\/ .* \n?)+ |
-            (\# .* \n?)+
-          )
+          \A (
+            (?m:\s*) (
+              (\/\* (?m:.*?) \*\/) |
+              (\#\#\# (?m:.*?) \#\#\#) |
+              (\/\/ .* \n?)+ |
+              (\# .* \n?)+
+            )
+          )+
         /x
 
         # Directives are denoted by a `=` followed by the name, then
