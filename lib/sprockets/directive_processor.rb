@@ -174,7 +174,7 @@ module Sprockets
       #
       #     class DirectiveProcessor < Sprockets::DirectiveProcessor
       #       def process_require_glob_directive
-      #         Dir["#{base_path}/#{glob}"].sort.each do |filename|
+      #         Dir["#{pathname.dirname}/#{glob}"].sort.each do |filename|
       #           require(filename)
       #         end
       #       end
@@ -281,7 +281,7 @@ module Sprockets
       #
       def process_require_directory_directive(path = ".")
         if relative?(path)
-          root = base_path.join(path).expand_path
+          root = pathname.dirname.join(path).expand_path
           context.depend_on(root)
 
           Dir["#{root}/*"].sort.each do |filename|
@@ -304,7 +304,7 @@ module Sprockets
       #
       def process_require_tree_directive(path = ".")
         if relative?(path)
-          root = base_path.join(path).expand_path
+          root = pathname.dirname.join(path).expand_path
           context.depend_on(root)
 
           Dir["#{root}/**/*"].sort.each do |filename|
@@ -376,9 +376,5 @@ module Sprockets
       def relative?(path)
         path =~ /^\.($|\.?\/)/
       end
-
-      def base_path
-        self.pathname.dirname
-      end
-  end
+    end
 end

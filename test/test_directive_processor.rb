@@ -109,7 +109,7 @@ class TestCustomDirectiveProcessor < Sprockets::TestCase
 
   class TestDirectiveProcessor < Sprockets::DirectiveProcessor
     def process_require_glob_directive(glob)
-      Dir["#{base_path}/#{glob}"].sort.each do |filename|
+      Dir["#{pathname.dirname}/#{glob}"].sort.each do |filename|
         context.require_asset(filename)
       end
     end
