@@ -6,9 +6,9 @@ module Sprockets
     def asset_from_hash(hash)
       case hash['class']
       when 'BundledAsset'
-        Sprockets::BundledAsset.from_hash(self, hash)
+        BundledAsset.from_hash(self, hash)
       when 'StaticAsset'
-        Sprockets::StaticAsset.from_hash(self, hash)
+        StaticAsset.from_hash(self, hash)
       else
         nil
       end
