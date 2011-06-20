@@ -1,4 +1,6 @@
 module Sprockets
+  # `Digest` is an internal mixin whose public methods are exposed on
+  # the `Environment` and `Index` classes.
   module Digest
     # Returns a `Digest` implementation class.
     #
