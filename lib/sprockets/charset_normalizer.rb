@@ -13,6 +13,11 @@ module Sprockets
   # it sees and strips the others. This works for most people because
   # the other definitions are usually `UTF-8`. A more sophisticated
   # approach would be to re-encode stylesheets with mixed encodings.
+  #
+  # This behavior can be disabled with:
+  #
+  #     environment.unregister_bundle_processor 'text/css', Sprockets::CharsetNormalizer
+  #
   class CharsetNormalizer < Tilt::Template
     def prepare
     end

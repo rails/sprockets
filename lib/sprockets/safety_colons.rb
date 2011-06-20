@@ -6,6 +6,11 @@ module Sprockets
   #
   # The `SafetyColons` processor will insert missing semicolons to the
   # end of the file.
+  #
+  # This behavior can be disabled with:
+  #
+  #     environment.unregister_postprocessor 'application/javascript', Sprockets::SafetyColons
+  #
   class SafetyColons < Tilt::Template
     def prepare
     end
