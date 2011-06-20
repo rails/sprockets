@@ -108,10 +108,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal [], @asset.dependencies
   end
 
-  test "dependencies?" do
-    assert !@asset.dependencies?
-  end
-
   test "to path" do
     assert_equal fixture_path('public/compiled-application.js'), @asset.to_path
   end

@@ -1,113 +1,53 @@
 require 'sprockets/asset'
 require 'fileutils'
-require 'time'
 require 'zlib'
 
 module Sprockets
+  # `StaticAsset`s are used for files that are served verbatim without
+  # any processing or concatenation. These are typical images and
+  # other binary files.
   class StaticAsset < Asset
-    def self.from_hash(environment, hash)
-      asset = allocate
-      asset.init_with(environment, hash)
-      asset
-    end
-
     def initialize(environment, logical_path, pathname, digest = nil)
-      @environment  = environment
-      @logical_path = logical_path.to_s
-      @pathname     = Pathname.new(pathname)
-      @digest       = digest
-
+      super(environment, logical_path, pathname)
+      @digest = digest
       load!
     end
 
-    def self.serialized_attributes
-      %w( environment_hexdigest
-          logical_path pathname
-          content_type mtime length digest )
-    end
-
-    def init_with(environment, coder)
-      @environment = environment
-
-      self.class.serialized_attributes.each do |attr|
-        instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
-      end
-
-      if @pathname
-        @pathname = Pathname.new(expand_root_path(@pathname))
-      end
-
-      if @mtime
-        @mtime = Time.parse(@mtime)
-      end
-
-      if @length
-        @length = Integer(@length)
-      end
-    end
-
-    def encode_with(coder)
-      coder['class'] = 'StaticAsset'
-
-      self.class.serialized_attributes.each do |attr|
-        coder[attr] = send(attr).to_s
-      end
-
-      coder['pathname'] = relativize_root_path(coder['pathname'])
-    end
-
-    def mtime
-      @mtime ||= environment.stat(pathname).mtime
-    end
-
-    def length
-      @length ||= environment.stat(pathname).size
-    end
-
-    def digest
-      @digest ||= environment.file_digest(pathname).hexdigest
-    end
-
-    def dependencies
-      []
-    end
-
-    def dependencies?
-      false
-    end
-
-    def to_a
-      [self]
-    end
-
+    # Returns file contents as its `body`.
     def body
-      to_s
+      # File is read everytime to avoid memory bloat of large binary files
+      pathname.open('rb') { |f| f.read }
     end
 
+    # Checks if Asset is fresh by comparing the actual mtime and
+    # digest to the inmemory model.
     def fresh?
+      # Check if environment has changed first
       if environment.digest.hexdigest != environment_hexdigest
         return false
       end
 
+      # Check current mtime and digest
       dependency_fresh?('path' => pathname, 'mtime' => mtime, 'hexdigest' => digest)
     end
 
-    def each
-      yield to_s
-    end
-
+    # Implemented for Rack SendFile support.
     def to_path
       pathname.to_s
     end
 
+    # `to_s` is aliased to body since static assets can't have any dependencies.
     def to_s
-      pathname.open('rb') { |f| f.read }
+      body
     end
 
+    # Save asset to disk.
     def write_to(filename, options = {})
+      # Gzip contents if filename has '.gz'
       options[:compress] ||= File.extname(filename) == '.gz'
 
       if options[:compress]
+        # Open file and run it through `Zlib`
         pathname.open('rb') do |rd|
           File.open("#{filename}+", 'wb') do |wr|
             gz = Zlib::GzipWriter.new(wr, Zlib::BEST_COMPRESSION)
@@ -119,18 +59,23 @@ module Sprockets
           end
         end
       else
+        # If no compression needs to be done, we can just copy it into place.
         FileUtils.cp(pathname, "#{filename}+")
       end
 
+      # Atomic write
       FileUtils.mv("#{filename}+", filename)
+
+      # Set mtime correctly
       File.utime(mtime, mtime, filename)
 
       nil
     ensure
+      # Ensure tmp file gets cleaned up
       FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
-    protected
+    private
       def load!
         content_type
         mtime
