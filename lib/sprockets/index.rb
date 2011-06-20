@@ -47,5 +47,10 @@ module Sprockets
       def build_asset(path, pathname, options)
         @assets[pathname.to_s] ||= cache_asset(pathname.to_s) { super }
       end
+
+    private
+      def memoize(hash, key)
+        hash.key?(key) ? hash[key] : hash[key] = yield
+      end
   end
 end

@@ -95,10 +95,5 @@ module Sprockets
           attributes_for(logical_path).without_engine_extensions
         end
       end
-
-    private
-      def memoize(hash, key)
-        hash.key?(key) ? hash[key] : hash[key] = yield
-      end
   end
 end
