@@ -1,4 +1,5 @@
 require 'sprockets/base'
+require 'sprockets/charset_normalizer'
 require 'sprockets/context'
 require 'sprockets/directive_processor'
 require 'sprockets/index'
@@ -11,14 +12,21 @@ require 'tilt'
 
 module Sprockets
   class Environment < Base
+    # `Environment` should initialized with your application's root
+    # directory. This should be the same as your Rails or Rack root.
+    #
+    #     env = Environment.new(Rails.root)
+    #
     def initialize(root = ".")
       @trail = Hike::Trail.new(root)
 
       self.logger = Logger.new($stderr)
       self.logger.level = Logger::FATAL
 
+      # Create a safe `Context` subclass to mutate
       @context_class = Class.new(Context)
 
+      # Set MD5 as the default digest
       require 'digest/md5'
       @digest_class = ::Digest::MD5
       @version = ''
@@ -47,11 +55,18 @@ module Sprockets
       yield self if block_given?
     end
 
+    # Returns a cached version of the environment.
+    #
+    # All its file system calls are cached which makes `index` much
+    # faster. This behavior is ideal in production since the file
+    # system only changes between deploys.
     def index
       Index.new(self)
     end
 
+    # Cache `find_asset` calls
     def find_asset(path, options = {})
+      # Ensure inmemory cached assets are still fresh on every lookup
       if (asset = @assets[path.to_s]) && asset.fresh?
         asset
       elsif asset = super
@@ -61,11 +76,16 @@ module Sprockets
     end
 
     protected
+      # Cache asset building in persisted cache.
       def build_asset(path, pathname, options)
-        cache_asset(pathname.to_s) { super }
+        # Persisted cache
+        cache_asset(pathname.to_s) do
+          super
+        end
       end
 
       def expire_index!
+        # Clear digest to be recomputed
         @digest = nil
         @assets = {}
       end
