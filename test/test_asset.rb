@@ -14,26 +14,12 @@ module AssetTests
     assert_equal @asset, @env[@asset.logical_path]
   end
 
-  test "content type" do
-    assert_equal "application/javascript", @asset.content_type
-  end
-
   test "mtime" do
     assert @asset.mtime
   end
 
-  test "length" do
-    assert_equal 157, @asset.length
-  end
-
   test "digest" do
     assert @asset.digest
-  end
-
-  test "each" do
-    body = ""
-    @asset.each { |part| body << part }
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
   test "stale?" do
@@ -42,10 +28,6 @@ module AssetTests
 
   test "fresh?" do
     assert @asset.fresh?
-  end
-
-  test "to_s" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
 
   test "dependencies are an Array" do
@@ -88,16 +70,24 @@ end
 class StaticAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
-    @env.static_root = fixture_path('public')
+    @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
-    @asset = @env['compiled-application.js']
+    @asset = @env['POW.png']
   end
 
   include AssetTests
 
   test "class" do
     assert_kind_of Sprockets::StaticAsset, @asset
+  end
+
+  test "content type" do
+    assert_equal "image/png", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 42917, @asset.length
   end
 
   test "splat" do
@@ -109,7 +99,7 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "to path" do
-    assert_equal fixture_path('public/compiled-application.js'), @asset.to_path
+    assert_equal fixture_path('asset/POW.png'), @asset.to_path
   end
 
   test "body is entire contents" do
@@ -127,11 +117,11 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
-    filename = fixture_path('public/test.js')
+    filename = fixture_path('asset/POW.png')
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.write "a" }
-      asset = @env['test.js']
+      asset = @env['POW.png']
 
       assert asset.fresh?
 
@@ -144,11 +134,11 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "asset is stale when its contents has changed" do
-    filename = fixture_path('public/test.js')
+    filename = fixture_path('asset/POW.png')
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.write "a" }
-      asset = @env['test.js']
+      asset = @env['POW.png']
 
       assert asset.fresh?
 
@@ -161,11 +151,11 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "asset is stale if the file is removed" do
-    filename = fixture_path('public/test.js')
+    filename = fixture_path('asset/POW.png')
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.write "a" }
-      asset = @env['test.js']
+      asset = @env['POW.png']
 
       assert asset.fresh?
 
@@ -211,6 +201,24 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "class" do
     assert_kind_of Sprockets::BundledAsset, @asset
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 157, @asset.length
+  end
+
+  test "to_s" do
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
+  end
+
+  test "each" do
+    body = ""
+    @asset.each { |part| body << part }
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
   test "requiring the same file multiple times has no effect" do
