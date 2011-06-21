@@ -405,9 +405,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset.stale?
   end
 
-  test "asset is fresh if its mtime is changed but its contents is the same" do
-  end
-
   test "asset is stale when its contents has changed" do
     filename = fixture_path('asset/test.js')
 
