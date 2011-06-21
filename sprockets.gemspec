@@ -1,6 +1,8 @@
+require File.expand_path("../lib/sprockets/version.rb", __FILE__)
+
 Gem::Specification.new do |s|
   s.name = "sprockets"
-  s.version = "2.0.0.beta.10"
+  s.version = Sprockets::VERSION
   s.summary = "Rack-based asset packaging system"
   s.description = "Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
 
