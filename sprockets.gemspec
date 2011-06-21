@@ -1,4 +1,7 @@
-require File.expand_path("../lib/sprockets/version.rb", __FILE__)
+unless defined? Sprockets::VERSION
+  $:.unshift File.expand_path("../lib", __FILE__)
+  require "sprockets/version"
+end
 
 Gem::Specification.new do |s|
   s.name = "sprockets"
