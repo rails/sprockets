@@ -29,13 +29,3 @@ module Sprockets
     autoload :FileStore, "sprockets/cache/file_store"
   end
 end
-
-# TODO: Remove in 2.0.0 final
-if defined?(Rails::VERSION::STRING) && Rails::VERSION::STRING.match(/^3\.1\.0\.beta/)
-  message = "WARNING: Sprockets #{Sprockets::VERSION} is incompatible with Rails #{Rails::VERSION::STRING}. Please upgrade to Rails 3.1.0.rc1 or higher."
-  if defined?(Rails.logger) && Rails.logger
-    Rails.logger.warn(message)
-  else
-    warn(message)
-  end
-end
