@@ -38,9 +38,9 @@ module Sprockets
     #
     #     environment.version = '2.0'
     #
-    def version=(prefix)
+    def version=(version)
       expire_index!
-      @version = prefix
+      @version = version
     end
 
     # Returns a `Digest` instance for the `Environment`.
