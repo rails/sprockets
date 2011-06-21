@@ -46,9 +46,19 @@ module Sprockets
       end
 
     private
+      def cache_key_namespace
+        'sprockets'
+      end
+
+      # Removes `Environment#root` from key and prepends
+      # `Environment#cache_key_namespace`.
+      def cache_key_for(path)
+        File.join(cache_key_namespace, path.sub(root, ''))
+      end
+
       # Gets asset from cache and unserializes it
       def cache_get_asset(path)
-        hash = cache_get(strip_root(path))
+        hash = cache_get(cache_key_for(path))
 
         if hash.is_a?(Hash)
           asset = asset_from_hash(hash)
@@ -65,13 +75,8 @@ module Sprockets
       def cache_set_asset(path, asset)
         hash = {}
         asset.encode_with(hash)
-        cache_set(strip_root(path), hash)
+        cache_set(cache_key_for(path), hash)
         asset
-      end
-
-      # Removes `Environment#root` from key
-      def strip_root(path)
-        path.sub(root, '')
       end
 
       # Low level cache getter for `key`. Checks a number of supported
