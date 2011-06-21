@@ -43,7 +43,7 @@ module AssetTests
   end
 
   test "write to file" do
-    target = fixture_path('public/tmp.js')
+    target = fixture_path('asset/tmp.js')
     begin
       @asset.write_to(target)
       assert File.exist?(target)
@@ -55,7 +55,7 @@ module AssetTests
   end
 
   test "write to gzipped file" do
-    target = fixture_path('public/tmp.js.gz')
+    target = fixture_path('asset/tmp.js.gz')
     begin
       @asset.write_to(target)
       assert File.exist?(target)
