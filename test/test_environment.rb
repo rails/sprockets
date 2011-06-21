@@ -93,12 +93,6 @@ module EnvironmentTests
     end
   end
 
-  test "resolve ignores static root" do
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("compiled.js")
-    end
-  end
-
   test "find bundled asset in environment" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
@@ -113,20 +107,6 @@ module EnvironmentTests
 
   test "find static asset with leading slash in environment" do
     assert_equal "Hello world\n", @env[fixture_path("default/hello.txt")].to_s
-  end
-
-  test "find compiled asset in static root" do
-    assert_equal "(function() {\n  application.boot();\n})();\n",
-      @env["compiled.js"].to_s
-  end
-
-  test "find compiled asset with leading slash in static root" do
-    assert_equal "(function() {\n  application.boot();\n})();\n",
-      @env[fixture_path("public/compiled-digest-0aa2105d29558f3eb790d411d7d8fb66.js")].to_s
-  end
-
-  test "find compiled asset in static root is StaticAsset" do
-    assert_kind_of Sprockets::StaticAsset, @env["compiled.js"]
   end
 
   test "find asset with digest" do
@@ -148,20 +128,6 @@ module EnvironmentTests
 
   test "find static directory returns nil" do
     assert_nil @env["images"]
-  end
-
-  test "find compiled asset with filename digest in static root" do
-    assert_equal "(function() {\n  application.boot();\n})();\n",
-      @env["compiled-digest.js"].to_s
-    assert_equal "(function() {\n  application.boot();\n})();\n",
-      @env["compiled-digest-0aa2105d29558f3eb790d411d7d8fb66.js"].to_s
-    assert_equal "(function() {})();\n",
-      @env["compiled-digest-1c41eb0cf934a0c76babe875f982f9d1.js"].to_s
-  end
-
-  test "find asset when static root doesn't exist" do
-    env = new_environment { |e| e.static_root = fixture_path('missing') }
-    assert_equal "var Gallery = {};\n", env["gallery.js"].to_s
   end
 
   test "missing asset returns nil" do
@@ -338,14 +304,6 @@ class TestEnvironment < Sprockets::TestCase
 
     assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
     assert_not_equal old_digest, @env.digest
-  end
-
-  test "changing static root expires old assets" do
-    old_digest = @env.digest
-    assert @env["compiled.js"]
-    @env.static_root = fixture_path('static')
-    assert_not_equal old_digest, @env.digest
-    assert_nil @env["compiled.js"]
   end
 
   test "unregister custom block preprocessor" do

@@ -41,9 +41,7 @@ module Sprockets
             next unless logical_path.fnmatch(path.to_s)
           end
 
-          # Only find asset in load path
-          # Bit of a smell to be calling this method directly
-          if asset = find_asset_in_path(logical_path)
+          if asset = find_asset(logical_path)
             attributes  = attributes_for(logical_path)
             digest_path = attributes.path_with_fingerprint(asset.digest)
             filename    = static_root.join(digest_path)
@@ -65,40 +63,6 @@ module Sprockets
       def compute_digest
         # Add static root to environment digest
         super.update(static_root.to_s)
-      end
-
-      def find_asset_in_static_root(logical_path)
-        return unless static_root
-
-        pathname   = Pathname.new(static_root.join(logical_path))
-        attributes = attributes_for(pathname)
-
-        entries = entries(pathname.dirname)
-
-        # Return if directory is empty
-        if entries.empty?
-          return nil
-        end
-
-        if !attributes.path_fingerprint
-          pattern = /^#{Regexp.escape(attributes.basename_without_extensions.to_s)}
-                     -([0-9a-f]{7,40})
-                     #{Regexp.escape(attributes.extensions.join)}$/x
-
-          entries.each do |filename|
-            if filename.to_s =~ pattern
-              asset = StaticAsset.new(self, logical_path, pathname.dirname.join(filename), $1)
-              return asset
-            end
-          end
-        end
-
-        if entries.include?(pathname.basename) && pathname.file?
-          asset = StaticAsset.new(self, logical_path, pathname)
-          return asset
-        end
-
-        nil
       end
 
     private

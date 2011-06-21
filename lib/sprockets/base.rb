@@ -99,8 +99,7 @@ module Sprockets
       if pathname.absolute?
         build_asset(detect_logical_path(path).to_s, pathname, options)
       else
-        find_asset_in_static_root(pathname) ||
-          find_asset_in_path(pathname, options)
+        find_asset_in_path(pathname, options)
       end
     end
 
