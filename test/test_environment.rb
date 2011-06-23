@@ -126,12 +126,20 @@ module EnvironmentTests
     assert_equal ".c {}\n.d {}\n/*\n */\n\n", @env["mobile.css"].to_s
   end
 
+  test "missing static path returns nil" do
+    assert_nil @env[fixture_path("default/missing.png")]
+  end
+
   test "find static directory returns nil" do
     assert_nil @env["images"]
   end
 
   test "missing asset returns nil" do
     assert_equal nil, @env["missing.js"]
+  end
+
+  test "missing asset path returns nil" do
+    assert_nil @env[fixture_path("default/missing.js")]
   end
 
   test "asset with missing requires raises an exception" do
