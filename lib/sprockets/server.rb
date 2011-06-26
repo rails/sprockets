@@ -158,6 +158,10 @@ module Sprockets
             padding: 18px 36px;
           }
 
+          head {
+            display: block;
+          }
+
           body {
             margin: 0;
             padding: 0;
@@ -167,11 +171,11 @@ module Sprockets
             display: none !important;
           }
 
-          html:before, body:before, body:after {
-            display: block;
+          head:after, body:before, body:after {
+            display: block !important;
           }
 
-          html:before {
+          head:after {
             font-family: sans-serif;
             font-size: large;
             font-weight: bold;
