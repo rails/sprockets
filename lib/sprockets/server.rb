@@ -144,7 +144,7 @@ module Sprockets
       def javascript_exception_response(exception)
         err  = "#{exception.class.name}: #{exception.message}"
         body = "throw Error(#{err.inspect})"
-        [ 500, { "Content-Type" => "application/javascript", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
+        [ 200, { "Content-Type" => "application/javascript", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
       end
 
       # Returns a CSS response that hides all elements on the page and
@@ -193,7 +193,7 @@ module Sprockets
           }
         CSS
 
-        [ 500, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
+        [ 200, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string
