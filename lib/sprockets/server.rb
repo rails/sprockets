@@ -67,11 +67,15 @@ module Sprockets
       logger.error "Error compiling asset #{path}:"
       logger.error "#{e.class.name}: #{e.message}"
 
-      # If an exception is raised in a JavaScript asset, re-throw the
-      # exception for the browser.
-      if content_type_of(path) == "application/javascript"
+      case content_type_of(path)
+      when "application/javascript"
+        # Re-throw JavaScript asset exceptions to the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
         return javascript_exception_response(e)
+      when "text/css"
+        # Display CSS asset exceptions in the browser
+        logger.info "#{msg} 500 Internal Server Error\n\n"
+        return css_exception_response(e)
       else
         raise
       end
@@ -143,6 +147,63 @@ module Sprockets
         [ 500, { "Content-Type" => "application/javascript", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
       end
 
+      # Returns a CSS response that hides all elements on the page and
+      # displays the exception
+      def css_exception_response(exception)
+        message   = "\n#{exception.class.name}: #{exception.message}"
+        backtrace = "\n  #{exception.backtrace.first}"
+
+        body = <<-CSS
+          html {
+            padding: 18px 36px;
+          }
+
+          body {
+            margin: 0;
+            padding: 0;
+          }
+
+          body > * {
+            display: none !important;
+          }
+
+          html:before, body:before, body:after {
+            display: block;
+          }
+
+          html:before {
+            font-family: sans-serif;
+            font-size: large;
+            font-weight: bold;
+            content: "Error compiling CSS asset";
+          }
+
+          body:before, body:after {
+            font-family: monospace;
+            white-space: pre-wrap;
+          }
+
+          body:before {
+            font-weight: bold;
+            content: "#{escape_css_content(message)}";
+          }
+
+          body:after {
+            content: "#{escape_css_content(backtrace)}";
+          }
+        CSS
+
+        [ 500, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
+      end
+
+      # Escape special characters for use inside a CSS content("...") string
+      def escape_css_content(content)
+        content.
+          gsub('\\', '\\\\005c ').
+          gsub("\n", '\\\\000a ').
+          gsub('"',  '\\\\0022 ').
+          gsub('/',  '\\\\002f ')
+      end
 
       # Compare the requests `HTTP_IF_MODIFIED_SINCE` against the
       # assets mtime
