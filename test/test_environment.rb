@@ -67,6 +67,12 @@ module EnvironmentTests
     assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
+  test "asset_data_uri helper" do
+    asset = @env["with_data_uri.css"]
+    assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
+    assert asset.send(:dependency_files).find { |dependency| dependency["path"] == fixture_path("default/blank.gif") }
+  end
+
   test "lookup mime type" do
     assert_equal "application/javascript", @env.mime_types(".js")
     assert_equal "application/javascript", @env.mime_types("js")

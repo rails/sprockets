@@ -1,3 +1,5 @@
+require 'base64'
+require 'rack/utils'
 require 'sprockets/errors'
 require 'sprockets/utils'
 require 'pathname'
@@ -171,6 +173,23 @@ module Sprockets
       end
 
       pathname
+    end
+
+    # Returns a Base64-encoded `data:` URI with the contents of the
+    # asset at the specified path, and marks that path as a dependency
+    # of the current file.
+    #
+    # Use `asset_data_uri` from ERB with CSS or JavaScript assets:
+    #
+    #     #logo { background: url(<%= asset_data_uri 'logo.png' %>) }
+    #
+    #     $('<img>').attr('src', '<%= asset_data_uri 'avatar.jpg' %>')
+    #
+    def asset_data_uri(path)
+      depend_on(path)
+      asset  = environment.find_asset(path)
+      base64 = Base64.encode64(asset.to_s).gsub(/\s+/, "")
+      "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
     end
 
     private
