@@ -30,15 +30,6 @@ module Sprockets
         sub(/^#{Regexp.escape(environment.root)}\//, '')
     end
 
-    # Returns `Array` of extension `String`s.
-    #
-    #     "foo.js.coffee"
-    #     # => [".js", ".coffee"]
-    #
-    def extensions
-      @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
-    end
-
     # Returns the index location.
     #
     #     "foo/bar.js"
@@ -51,6 +42,15 @@ module Sprockets
         basename = "#{basename_without_extensions}/index#{extensions.join}"
         pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
       end
+    end
+
+    # Returns `Array` of extension `String`s.
+    #
+    #     "foo.js.coffee"
+    #     # => [".js", ".coffee"]
+    #
+    def extensions
+      @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
     end
 
     # Returns the format extension.

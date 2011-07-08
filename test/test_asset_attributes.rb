@@ -6,6 +6,12 @@ class TestAssetAttributes < Sprockets::TestCase
       pathname(pathname(__FILE__).relativize_root).expand_root
   end
 
+  test "index path" do
+    assert_equal "index.js", pathname("index.js").index_path
+    assert_equal "foo/index.js", pathname("foo.js").index_path
+    assert_equal "foo/bar/index.js", pathname("foo/bar.js").index_path
+  end
+
   test "extensions" do
     assert_equal [],
       pathname("empty").extensions
