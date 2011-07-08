@@ -107,19 +107,6 @@ module Sprockets
         environment.postprocessors(content_type)
     end
 
-    # Returns implicit engine content type.
-    #
-    # `.coffee` files carry an implicit `application/javascript`
-    # content type.
-    def engine_content_type
-      engines.reverse.each do |engine|
-        if engine.respond_to?(:default_mime_type) && engine.default_mime_type
-          return engine.default_mime_type
-        end
-      end
-      nil
-    end
-
     # Returns the content type for the pathname. Falls back to `application/octet-stream`.
     def content_type
       @content_type ||= begin
@@ -164,6 +151,19 @@ module Sprockets
       #
       def basename_without_extensions
         @pathname.basename(extensions.join)
+      end
+
+      # Returns implicit engine content type.
+      #
+      # `.coffee` files carry an implicit `application/javascript`
+      # content type.
+      def engine_content_type
+        engines.reverse.each do |engine|
+          if engine.respond_to?(:default_mime_type) && engine.default_mime_type
+          return engine.default_mime_type
+          end
+        end
+        nil
       end
   end
 end
