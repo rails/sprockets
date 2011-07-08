@@ -1,19 +1,6 @@
 require 'sprockets_test'
 
 class TestAssetAttributes < Sprockets::TestCase
-  test "basename with extensions" do
-    assert_equal "empty",
-      pathname("empty").basename_without_extensions.to_s
-    assert_equal "gallery",
-      pathname("gallery.js").basename_without_extensions.to_s
-    assert_equal "application",
-      pathname("application.js.coffee").basename_without_extensions.to_s
-    assert_equal "project",
-      pathname("project.js.coffee.erb").basename_without_extensions.to_s
-    assert_equal "gallery",
-      pathname("gallery.css.erb").basename_without_extensions.to_s
-  end
-
   test "extensions" do
     assert_equal [],
       pathname("empty").extensions
@@ -27,7 +14,7 @@ class TestAssetAttributes < Sprockets::TestCase
       pathname("gallery.css.erb").extensions
   end
 
-  test "format_extension" do
+  test "format extension" do
     assert_equal nil, pathname("empty").format_extension
     assert_equal ".js", pathname("gallery.js").format_extension
     assert_equal ".js", pathname("application.js.coffee").format_extension

@@ -22,15 +22,6 @@ module Sprockets
       @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
     end
 
-    # Returns basename alone.
-    #
-    #     "foo/bar.js"
-    #     # => "bar"
-    #
-    def basename_without_extensions
-      @pathname.basename(extensions.join)
-    end
-
     # Replaces `$root` placeholder with actual environment root.
     def expand_root
       pathname.to_s.sub(/^\$root/, environment.root)
@@ -157,5 +148,15 @@ module Sprockets
         pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
       end
     end
+
+    private
+      # Returns basename alone.
+      #
+      #     "foo/bar.js"
+      #     # => "bar"
+      #
+      def basename_without_extensions
+        @pathname.basename(extensions.join)
+      end
   end
 end
