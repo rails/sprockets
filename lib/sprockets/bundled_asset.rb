@@ -92,11 +92,6 @@ module Sprockets
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?
-      # Check if environment has changed first
-      if environment.digest.hexdigest != environment_hexdigest
-        return false
-      end
-
       # Check freshness of all declared dependencies
       dependency_files.all? { |h| dependency_fresh?(h) }
     end

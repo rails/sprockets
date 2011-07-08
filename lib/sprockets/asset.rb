@@ -12,8 +12,7 @@ module Sprockets
 
     # Define base set of attributes to be serialized.
     def self.serialized_attributes
-      %w( environment_hexdigest
-          logical_path pathname )
+      %w( logical_path pathname )
     end
 
     attr_reader :environment
@@ -139,11 +138,6 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
-      # Stores the environment digest from when the asset was first created.
-      def environment_hexdigest
-        @environment_hexdigest ||= environment.digest.hexdigest
-      end
-
       # Get pathname with its root stripped.
       def relative_pathname
         Pathname.new(relativize_root_path(pathname))

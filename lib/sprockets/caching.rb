@@ -61,19 +61,19 @@ module Sprockets
         hash = cache_get(cache_key_for(path))
 
         if hash.is_a?(Hash)
-          asset = asset_from_hash(hash)
-
-          if asset.fresh?
-            asset
+          if digest.hexdigest == hash['_version']
+            if (asset = asset_from_hash(hash)) && asset.fresh?
+              return asset
+            end
           end
-        else
-          nil
         end
+
+        nil
       end
 
       # Serializes and saves asset to cache
       def cache_set_asset(path, asset)
-        hash = {}
+        hash = {'_version' => digest.hexdigest}
         asset.encode_with(hash)
         cache_set(cache_key_for(path), hash)
         asset

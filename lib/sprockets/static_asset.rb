@@ -27,11 +27,6 @@ module Sprockets
     # Checks if Asset is fresh by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?
-      # Check if environment has changed first
-      if environment.digest.hexdigest != environment_hexdigest
-        return false
-      end
-
       # Check current mtime and digest
       dependency_fresh?('path' => pathname, 'mtime' => mtime, 'hexdigest' => digest)
     end
@@ -86,7 +81,6 @@ module Sprockets
         mtime
         length
         digest
-        environment_hexdigest
       end
   end
 end

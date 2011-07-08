@@ -110,12 +110,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert @asset.fresh?
   end
 
-  test "asset is stale if its environment has changed" do
-    assert @asset.fresh?
-    @env.prepend_path fixture_path('default')
-    assert @asset.stale?
-  end
-
   test "asset is fresh if its mtime is changed but its contents is the same" do
     filename = fixture_path('asset/POW.png')
 
@@ -404,13 +398,6 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "asset is fresh if its mtime and contents are the same" do
     assert asset("application.js").fresh?
-  end
-
-  test "asset is stale if its environment has changed" do
-    asset = asset("application.js")
-    assert asset.fresh?
-    @env.prepend_path fixture_path("default")
-    assert asset.stale?
   end
 
   test "asset is stale when its contents has changed" do
