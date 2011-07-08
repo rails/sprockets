@@ -1,6 +1,11 @@
 require 'sprockets_test'
 
 class TestAssetAttributes < Sprockets::TestCase
+  test "expand and relativize root" do
+    assert_equal __FILE__,
+      pathname(pathname(__FILE__).relativize_root).expand_root
+  end
+
   test "extensions" do
     assert_equal [],
       pathname("empty").extensions

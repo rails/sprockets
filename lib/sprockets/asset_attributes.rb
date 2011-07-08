@@ -13,15 +13,6 @@ module Sprockets
       @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
     end
 
-    # Returns `Array` of extension `String`s.
-    #
-    #     "foo.js.coffee"
-    #     # => [".js", ".coffee"]
-    #
-    def extensions
-      @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
-    end
-
     # Replaces `$root` placeholder with actual environment root.
     def expand_root
       pathname.to_s.sub(/^\$root/, environment.root)
@@ -37,6 +28,15 @@ module Sprockets
       @pretty_path ||= @pathname.
         sub(/^#{Regexp.escape(ENV['HOME'] || '')}/, '~').
         sub(/^#{Regexp.escape(environment.root)}\//, '')
+    end
+
+    # Returns `Array` of extension `String`s.
+    #
+    #     "foo.js.coffee"
+    #     # => [".js", ".coffee"]
+    #
+    def extensions
+      @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
     end
 
     # Returns the index location.
