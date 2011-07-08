@@ -1,6 +1,7 @@
 require 'sprockets/eco_template'
 require 'sprockets/ejs_template'
 require 'sprockets/jst_processor'
+require 'sprockets/mime'
 require 'sprockets/utils'
 require 'tilt'
 
@@ -62,13 +63,19 @@ module Sprockets
     #
     def register_engine(ext, klass)
       ext = Sprockets::Utils.normalize_extension(ext)
-      @engines ||= {}
       @engines[ext] = klass
     end
+
+    private
+      def deep_copy_hash(hash)
+        initial = Hash.new { |h, k| h[k] = [] }
+        hash.inject(initial) { |h, (k, a)| h[k] = a.dup; h }
+      end
   end
 
   # Extend Sprockets module to provide global registry
   extend Engines
+  @engines = {}
 
   # Cherry pick the default Tilt engines that make sense for
   # Sprockets. We don't need ones that only generate html like HAML.

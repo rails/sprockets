@@ -160,7 +160,7 @@ module Sprockets
       def engine_content_type
         engines.reverse.each do |engine|
           if engine.respond_to?(:default_mime_type) && engine.default_mime_type
-          return engine.default_mime_type
+            return engine.default_mime_type
           end
         end
         nil
@@ -168,17 +168,7 @@ module Sprockets
 
       def engine_format_extension
         if content_type = engine_content_type
-          extension_for_mime_type(content_type)
-        end
-      end
-
-      if {}.respond_to?(:key)
-        def extension_for_mime_type(type)
-          environment.mime_types.key(type)
-        end
-      else
-        def extension_for_mime_type(type)
-          environment.mime_types.index(type)
+          environment.extension_for_mime_type(content_type)
         end
       end
   end

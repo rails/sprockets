@@ -1,33 +1,20 @@
 require 'sprockets/engines'
+require 'sprockets/mime'
 require 'sprockets/processor'
 require 'sprockets/utils'
-require 'rack/mime'
 
 module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `Index` classes.
   module Processing
-    include Engines
-
-    # Returns a `Hash` of registered mime types registered on the
-    # environment and those part of `Rack::Mime`.
-    #
-    # If an `ext` is given, it will lookup the mime type for that extension.
-    def mime_types(ext = nil)
-      if ext.nil?
-        Rack::Mime::MIME_TYPES.merge(@mime_types)
-      else
-        ext = Sprockets::Utils.normalize_extension(ext)
-        @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
-      end
-    end
+    include Engines, Mime
 
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
+      # Overrides the global behavior to expire the index
       expire_index!
-      ext = Sprockets::Utils.normalize_extension(ext)
       @trail.extensions << ext
-      @mime_types[ext] = mime_type
+      super
     end
 
     # Returns an `Array` of format extension `String`s.
@@ -299,12 +286,6 @@ module Sprockets
         digest << @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
 
         digest
-      end
-
-    private
-      def deep_copy_hash(hash)
-        initial = Hash.new { |h, k| h[k] = [] }
-        hash.inject(initial) { |h, (k, a)| h[k] = a.dup; h }
       end
   end
 end
