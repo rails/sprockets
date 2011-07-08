@@ -29,6 +29,17 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal "jquery/index.foo.js", pathname("jquery.foo.js").index_path
   end
 
+  test "logical path" do
+    assert_equal "application.js", pathname(fixture_path("default/application.js")).logical_path
+    assert_equal nil, pathname(fixture_path("missing/application.js")).logical_path
+    assert_equal "application.js", pathname(fixture_path("default/application.js.coffee")).logical_path
+    assert_equal "jquery.foo.min.js", pathname(fixture_path("default/jquery.foo.min.js")).logical_path
+
+    # Kind of broken
+    assert_equal "application", pathname(fixture_path("default/application.coffee")).logical_path
+    assert_equal "hello", pathname(fixture_path("default/hello.jst.ejs")).logical_path
+  end
+
   test "extensions" do
     assert_equal [],
       pathname("empty").extensions
@@ -101,6 +112,8 @@ class TestAssetAttributes < Sprockets::TestCase
 
   private
     def pathname(path)
-      Sprockets::Environment.new.attributes_for(path)
+      env = Sprockets::Environment.new
+      env.append_path fixture_path("default")
+      env.attributes_for(path)
     end
 end

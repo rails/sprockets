@@ -44,6 +44,22 @@ module Sprockets
       end
     end
 
+    # Reverse guess logical path for fully expanded path.
+    #
+    # This has some known issues. For an example if a file is
+    # shaddowed in the path, but is required relatively, its logical
+    # path will be incorrect.
+    def logical_path
+      raise ArgumentError unless pathname.absolute?
+
+      if root_path = environment.paths.detect { |path| pathname.to_s[path] }
+        logical_path = pathname.relative_path_from(Pathname.new(root_path))
+        engine_extensions.inject(logical_path.to_s) do |p, ext|
+          p.sub(ext, '')
+        end
+      end
+    end
+
     # Returns `Array` of extension `String`s.
     #
     #     "foo.js.coffee"
@@ -77,17 +93,6 @@ module Sprockets
       end
 
       exts.select { |ext| @environment.engines(ext) }
-    end
-
-    # Returns path without any engine extensions.
-    #
-    #     "foo.js.coffee.erb"
-    #     # => "foo.js"
-    #
-    def without_engine_extensions
-      engine_extensions.inject(pathname) do |p, ext|
-        p.sub(ext, '')
-      end
     end
 
     # Returns engine classes.

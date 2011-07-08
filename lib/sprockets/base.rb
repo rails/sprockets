@@ -97,7 +97,7 @@ module Sprockets
       pathname = Pathname.new(path)
 
       if pathname.absolute?
-        build_asset(detect_logical_path(path).to_s, pathname, options)
+        build_asset(attributes_for(pathname).logical_path, pathname, options)
       else
         find_asset_in_path(pathname, options)
       end
@@ -128,19 +128,6 @@ module Sprockets
           BundledAsset.new(self, logical_path, pathname, options)
         else
           StaticAsset.new(self, logical_path, pathname)
-        end
-      end
-
-      # Reverse guess logical path for fully expanded path.#
-      #
-      # This has some known issues. For an example if a file is
-      # shaddowed in the path, but is required relatively, its logical
-      # path will be incorrect.
-      def detect_logical_path(filename)
-        if root_path = paths.detect { |path| filename.to_s[path] }
-          root_pathname = Pathname.new(root_path)
-          logical_path  = Pathname.new(filename).relative_path_from(root_pathname)
-          attributes_for(logical_path).without_engine_extensions
         end
       end
   end

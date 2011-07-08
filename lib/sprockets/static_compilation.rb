@@ -35,10 +35,10 @@ module Sprockets
         files.each do |logical_path|
           if path.is_a?(Regexp)
             # Match path against `Regexp`
-            next unless path.match(logical_path.to_s)
+            next unless path.match(logical_path)
           else
             # Otherwise use fnmatch glob syntax
-            next unless logical_path.fnmatch(path.to_s)
+            next unless File.fnmatch(path.to_s, logical_path)
           end
 
           if asset = find_asset(logical_path)
@@ -70,10 +70,8 @@ module Sprockets
       def files
         files = Set.new
         paths.each do |base_path|
-          base_pathname = Pathname.new(base_path)
-          Dir["#{base_pathname}/**/*"].each do |filename|
-            logical_path = Pathname.new(filename).relative_path_from(base_pathname)
-            files << attributes_for(logical_path).without_engine_extensions
+          Dir["#{base_path}/**/*"].each do |filename|
+            files << attributes_for(filename).logical_path
           end
         end
         files
