@@ -7,9 +7,26 @@ class TestAssetAttributes < Sprockets::TestCase
   end
 
   test "index path" do
+    assert_equal "index", pathname("index").index_path
+    assert_equal "index.html", pathname("index.html").index_path
+    assert_equal "index.css", pathname("index.css").index_path
     assert_equal "index.js", pathname("index.js").index_path
+    assert_equal "index.coffee", pathname("index.coffee").index_path
+    assert_equal "index.js.coffee", pathname("index.js.coffee").index_path
+
+    assert_equal "foo/index", pathname("foo").index_path
+    assert_equal "foo/index.html", pathname("foo.html").index_path
     assert_equal "foo/index.js", pathname("foo.js").index_path
+    assert_equal "foo/index.coffee", pathname("foo.coffee").index_path
+    assert_equal "foo/index.js.coffee", pathname("foo.js.coffee").index_path
+
+    assert_equal "foo/bar/index", pathname("foo/bar").index_path
     assert_equal "foo/bar/index.js", pathname("foo/bar.js").index_path
+    assert_equal "foo/bar/index.coffee", pathname("foo/bar.coffee").index_path
+    assert_equal "foo/bar/index.js.coffee", pathname("foo/bar.js.coffee").index_path
+
+    # Doesn't make much sense, but we need to return something
+    assert_equal "jquery/index.foo.js", pathname("jquery.foo.js").index_path
   end
 
   test "extensions" do
