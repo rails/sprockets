@@ -376,5 +376,5 @@ module Sprockets
       def relative?(path)
         path =~ /^\.($|\.?\/)/
       end
-    end
+  end
 end
