@@ -90,7 +90,7 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal [".jst", ".ms"], env.attributes_for("foo.jst.ms").engine_extensions
   end
 
-  test "content_type" do
+  test "content type" do
     assert_equal "application/octet-stream",
       pathname("empty").content_type
     assert_equal "application/javascript",
@@ -108,6 +108,17 @@ class TestAssetAttributes < Sprockets::TestCase
       assert_equal "application/javascript",
         pathname("application.coffee").content_type
     end
+  end
+
+  test "get path fingerprint" do
+    assert_equal nil, pathname("foo.js").path_fingerprint
+    assert_equal "0aa2105d29558f3eb790d411d7d8fb66",
+      pathname("foo-0aa2105d29558f3eb790d411d7d8fb66.js").path_fingerprint
+  end
+
+  test "inject path fingerprint" do
+    assert_equal "foo-0aa2105d29558f3eb790d411d7d8fb66.js",
+      pathname("foo.js").path_with_fingerprint("0aa2105d29558f3eb790d411d7d8fb66")
   end
 
   private
