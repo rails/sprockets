@@ -13,8 +13,7 @@ module Sprockets
     # Define base set of attributes to be serialized.
     def self.serialized_attributes
       %w( environment_hexdigest
-          logical_path pathname
-          content_type mtime length digest )
+          logical_path pathname )
     end
 
     attr_reader :environment
@@ -34,17 +33,17 @@ module Sprockets
         instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
       end
 
-      if @pathname
+      if @pathname && @pathname.is_a?(String)
         # Expand `$root` placeholder and wrapper string in a `Pathname`
         @pathname = Pathname.new(expand_root_path(@pathname))
       end
 
-      if @mtime
+      if @mtime && @mtime.is_a?(String)
         # Parse time string
         @mtime = Time.parse(@mtime)
       end
 
-      if @length
+      if @length && @length.is_a?(String)
         # Convert length to an `Integer`
         @length = Integer(@length)
       end

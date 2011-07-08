@@ -8,6 +8,11 @@ module Sprockets
   # `BundledAsset`s are used for files that need to be processed and
   # concatenated with other assets. Use for `.js` and `.css` files.
   class BundledAsset < Asset
+    # Define extra attributes to be serialized.
+    def self.serialized_attributes
+      super + %w( content_type mtime )
+    end
+
     def initialize(environment, logical_path, pathname, options)
       super(environment, logical_path, pathname)
       @options = options || {}
@@ -15,12 +20,15 @@ module Sprockets
 
     # Initialize `BundledAsset` from serialized `Hash`.
     def init_with(environment, coder)
-      super
-
       @options = {}
 
-      @body   = coder['body']
+      @length = coder['length']
+      @digest = coder['digest']
       @source = coder['source']
+
+      super
+
+      @body   = coder['body']
       @assets = coder['asset_paths'].map { |p|
         p = expand_root_path(p)
         p == pathname.to_s ? self : environment[p, @options]
@@ -36,10 +44,13 @@ module Sprockets
 
     # Serialize custom attributes in `BundledAsset`.
     def encode_with(coder)
+      coder['length'] = length
+      coder['digest'] = digest
+      coder['source'] = to_s
+
       super
 
       coder['body']        = body
-      coder['source']      = to_s
       coder['asset_paths'] = to_a.map { |a| relativize_root_path(a.pathname) }
       coder['dependency_files'] = dependency_files.map { |h|
         h.merge('path' => relativize_root_path(h['path']))

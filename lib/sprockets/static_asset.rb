@@ -7,6 +7,11 @@ module Sprockets
   # any processing or concatenation. These are typical images and
   # other binary files.
   class StaticAsset < Asset
+    # Define extra attributes to be serialized.
+    def self.serialized_attributes
+      super + %w( content_type mtime length digest )
+    end
+
     def initialize(environment, logical_path, pathname, digest = nil)
       super(environment, logical_path, pathname)
       @digest = digest
