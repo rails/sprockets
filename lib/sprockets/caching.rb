@@ -7,6 +7,7 @@ module Sprockets
   module Caching
     # Return `Asset` instance for serialized `Hash`.
     def asset_from_hash(hash)
+      return unless hash.is_a?(Hash)
       case hash['class']
       when 'BundledAsset'
         BundledAsset.from_hash(self, hash)
@@ -14,6 +15,17 @@ module Sprockets
         StaticAsset.from_hash(self, hash)
       else
         nil
+      end
+    end
+
+    def cache_hash(key, version)
+      if cache.nil?
+        yield
+      elsif hash = cache_get_hash(key, version)
+        hash
+      elsif hash = yield
+        cache_set_hash(key, version, hash)
+        hash
       end
     end
 
@@ -27,18 +39,21 @@ module Sprockets
           yield
 
         # Check cache for `path`
-        elsif asset = cache_get_asset(path)
+        elsif (asset = asset_from_hash(cache_get_hash(path.to_s, digest.hexdigest))) && asset.fresh?
           asset
 
          # Otherwise yield block that slowly finds and builds the asset
         elsif asset = yield
+          hash = {}
+          asset.encode_with(hash)
+
           # Save the asset to at its path
-          cache_set_asset(path.to_s, asset)
+          cache_set_hash(path.to_s, digest.hexdigest, hash)
 
           # Since path maybe a logical or full pathname, save the
           # asset its its full path too
           if path.to_s != asset.pathname.to_s
-            cache_set_asset(asset.pathname.to_s, asset)
+            cache_set_hash(asset.pathname.to_s, digest.hexdigest, hash)
           end
 
           asset
@@ -52,31 +67,21 @@ module Sprockets
 
       # Removes `Environment#root` from key and prepends
       # `Environment#cache_key_namespace`.
-      def cache_key_for(path)
-        File.join(cache_key_namespace, path.sub(root, ''))
+      def cache_key_for(key)
+        File.join(cache_key_namespace, key.sub(root, ''))
       end
 
-      # Gets asset from cache and unserializes it
-      def cache_get_asset(path)
-        hash = cache_get(cache_key_for(path))
-
-        if hash.is_a?(Hash)
-          if digest.hexdigest == hash['_version']
-            if (asset = asset_from_hash(hash)) && asset.fresh?
-              return asset
-            end
-          end
+      def cache_get_hash(key, version)
+        hash = cache_get(cache_key_for(key))
+        if hash.is_a?(Hash) && version == hash['_version']
+          hash
         end
-
-        nil
       end
 
-      # Serializes and saves asset to cache
-      def cache_set_asset(path, asset)
-        hash = {'_version' => digest.hexdigest}
-        asset.encode_with(hash)
-        cache_set(cache_key_for(path), hash)
-        asset
+      def cache_set_hash(key, version, hash)
+        hash['_version'] = version
+        cache_set(cache_key_for(key), hash)
+        hash
       end
 
       # Low level cache getter for `key`. Checks a number of supported

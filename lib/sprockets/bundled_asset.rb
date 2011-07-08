@@ -22,10 +22,6 @@ module Sprockets
     def init_with(environment, coder)
       @options = {}
 
-      @length = coder['length']
-      @digest = coder['digest']
-      @source = coder['source']
-
       super
 
       @body   = coder['body']
@@ -44,10 +40,6 @@ module Sprockets
 
     # Serialize custom attributes in `BundledAsset`.
     def encode_with(coder)
-      coder['length'] = length
-      coder['digest'] = digest
-      coder['source'] = to_s
-
       super
 
       coder['body']        = body
@@ -71,12 +63,12 @@ module Sprockets
 
     # Get size of concatenated source.
     def length
-      @length ||= Rack::Utils.bytesize(to_s)
+      @length ||= compute_source['length']
     end
 
     # Compute digest of concatenated source.
     def digest
-      @digest ||= environment.digest.update(to_s).hexdigest
+      @digest ||= compute_source['digest']
     end
 
     # Return an `Array` of `Asset` files that are declared dependencies.
@@ -98,7 +90,7 @@ module Sprockets
 
     # Return `String` of concatenated source.
     def to_s
-      @source ||= build_source
+      @source ||= compute_source['source']
     end
 
     # Save asset to disk.
@@ -132,6 +124,22 @@ module Sprockets
     end
 
     protected
+      def compute_source
+        hash = environment.cache_hash("#{pathname}:source", id) do
+          source = build_source
+          { 'length' => Rack::Utils.bytesize(source),
+            'digest' => environment.digest.update(source).hexdigest,
+            'source' => source }
+        end
+        hash['length'] = Integer(hash['length']) if hash['length'].is_a?(String)
+
+        @length = hash['length']
+        @digest = hash['digest']
+        @source = hash['source']
+
+        hash
+      end
+
       # Return new blank `Context` to evaluate processors in.
       def blank_context
         environment.context_class.new(environment, logical_path.to_s, pathname)

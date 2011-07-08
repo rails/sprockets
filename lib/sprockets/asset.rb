@@ -12,21 +12,23 @@ module Sprockets
 
     # Define base set of attributes to be serialized.
     def self.serialized_attributes
-      %w( logical_path pathname )
+      %w( id logical_path pathname )
     end
 
     attr_reader :environment
-    attr_reader :logical_path, :pathname
+    attr_reader :id, :logical_path, :pathname
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
+      @id           = environment.digest.update(object_id.to_s)
     end
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @environment = environment
+      @pathname = @mtime = @length = nil
 
       self.class.serialized_attributes.each do |attr|
         instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
