@@ -33,7 +33,8 @@ module Sprockets
 
       @static_root = nil
 
-      @engines = Sprockets.engines
+      @engines        = Sprockets.engines
+      @engine_formats = Sprockets.engine_formats
       @trail.extensions.replace(engine_extensions)
 
       @mime_types = {}

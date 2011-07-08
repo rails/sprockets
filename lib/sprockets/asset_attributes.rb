@@ -30,18 +30,30 @@ module Sprockets
         sub(/^#{Regexp.escape(environment.root)}\//, '')
     end
 
-    # Returns the index location.
-    #
-    #     "foo/bar.js"
-    #     # => "foo/bar/index.js"
-    #
-    def index_path
-      if basename_without_extensions.to_s == 'index'
-        pathname.to_s
-      else
-        basename = "#{basename_without_extensions}/index#{extensions.join}"
-        pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+    # Returns paths search the load path for.
+    def search_paths
+      paths = [pathname.to_s]
+
+      if format_extension && engine_extensions.empty?
+        environment.engine_formats(format_extension).each do |ext, engine|
+          paths << pathname.sub(format_extension, ext).to_s
+        end
       end
+
+      if pathname.basename(extensions.join).to_s != 'index'
+        path_without_extensions = extensions.inject(pathname) { |p, ext| p.sub(ext, '') }
+        index_path = path_without_extensions.join("index#{extensions.join}").to_s
+
+        paths << index_path
+
+        if format_extension && engine_extensions.empty?
+          environment.engine_formats(format_extension).each do |ext, engine|
+            paths << index_path.sub(format_extension, ext).to_s
+          end
+        end
+      end
+
+      paths
     end
 
     # Reverse guess logical path for fully expanded path.
@@ -144,15 +156,6 @@ module Sprockets
     end
 
     private
-      # Returns basename alone.
-      #
-      #     "foo/bar.js"
-      #     # => "bar"
-      #
-      def basename_without_extensions
-        @pathname.basename(extensions.join)
-      end
-
       # Returns implicit engine content type.
       #
       # `.coffee` files carry an implicit `application/javascript`

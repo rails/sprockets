@@ -70,7 +70,8 @@ module Sprockets
     def resolve(logical_path, options = {})
       # If a block is given, preform an iterable search
       if block_given?
-        trail.find(logical_path.to_s, attributes_for(logical_path).index_path, options) do |path|
+        args = attributes_for(logical_path).search_paths + [options]
+        trail.find(*args) do |path|
           yield Pathname.new(path)
         end
       else

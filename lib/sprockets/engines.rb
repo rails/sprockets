@@ -48,6 +48,15 @@ module Sprockets
       end
     end
 
+    def engine_formats(ext = nil)
+      if ext
+        ext = Sprockets::Utils.normalize_extension(ext)
+        @engine_formats[ext]
+      else
+        deep_copy_hash(@engine_formats)
+      end
+    end
+
     # Returns an `Array` of engine extension `String`s.
     #
     #     environment.engine_extensions
@@ -64,6 +73,14 @@ module Sprockets
     def register_engine(ext, klass)
       ext = Sprockets::Utils.normalize_extension(ext)
       @engines[ext] = klass
+
+      if klass.respond_to?(:default_mime_type) && klass.default_mime_type
+        if format_ext = extension_for_mime_type(klass.default_mime_type)
+          @engine_formats[format_ext] << ext
+        end
+      end
+
+      klass
     end
 
     private
@@ -76,6 +93,7 @@ module Sprockets
   # Extend Sprockets module to provide global registry
   extend Engines
   @engines = {}
+  @engine_formats = Hash.new { |h, k| h[k] = [] }
 
   # Cherry pick the default Tilt engines that make sense for
   # Sprockets. We don't need ones that only generate html like HAML.

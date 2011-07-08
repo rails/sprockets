@@ -91,6 +91,8 @@ module EnvironmentTests
       @env.resolve("gallery.js").to_s
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve(Pathname.new("gallery.js")).to_s
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve("coffee/foo.js").to_s
   end
 
   test "missing file raises an exception" do
@@ -105,6 +107,11 @@ module EnvironmentTests
 
   test "find bundled asset with absolute path environment" do
     assert_equal "var Gallery = {};\n", @env[fixture_path("default/gallery.js")].to_s
+  end
+
+  test "find bundled asset with implicit format" do
+    assert_equal "(function() {\n  var foo;\n  foo = 'hello';\n}).call(this);\n",
+      @env["coffee/foo.js"].to_s
   end
 
   test "find static asset in environment" do
