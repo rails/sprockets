@@ -53,10 +53,10 @@ module Sprockets
       raise ArgumentError unless pathname.absolute?
 
       if root_path = environment.paths.detect { |path| pathname.to_s[path] }
-        logical_path = pathname.relative_path_from(Pathname.new(root_path))
-        engine_extensions.inject(logical_path.to_s) do |p, ext|
-          p.sub(ext, '')
-        end
+        path = pathname.relative_path_from(Pathname.new(root_path)).to_s
+        path = engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
+        path = "#{path}#{engine_format_extension}" unless format_extension
+        path
       end
     end
 
@@ -164,6 +164,22 @@ module Sprockets
           end
         end
         nil
+      end
+
+      def engine_format_extension
+        if content_type = engine_content_type
+          extension_for_mime_type(content_type)
+        end
+      end
+
+      if {}.respond_to?(:key)
+        def extension_for_mime_type(type)
+          environment.mime_types.key(type)
+        end
+      else
+        def extension_for_mime_type(type)
+          environment.mime_types.index(type)
+        end
       end
   end
 end

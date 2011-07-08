@@ -30,14 +30,19 @@ class TestAssetAttributes < Sprockets::TestCase
   end
 
   test "logical path" do
-    assert_equal "application.js", pathname(fixture_path("default/application.js")).logical_path
     assert_equal nil, pathname(fixture_path("missing/application.js")).logical_path
-    assert_equal "application.js", pathname(fixture_path("default/application.js.coffee")).logical_path
+
+    assert_equal "application.js", pathname(fixture_path("default/application.js")).logical_path
+    assert_equal "application.css", pathname(fixture_path("default/application.css")).logical_path
     assert_equal "jquery.foo.min.js", pathname(fixture_path("default/jquery.foo.min.js")).logical_path
 
-    # Kind of broken
-    assert_equal "application", pathname(fixture_path("default/application.coffee")).logical_path
-    assert_equal "hello", pathname(fixture_path("default/hello.jst.ejs")).logical_path
+    assert_equal "application.js", pathname(fixture_path("default/application.js.erb")).logical_path
+    assert_equal "application.js", pathname(fixture_path("default/application.js.coffee")).logical_path
+    assert_equal "application.css", pathname(fixture_path("default/application.css.scss")).logical_path
+
+    assert_equal "application.js", pathname(fixture_path("default/application.coffee")).logical_path
+    assert_equal "application.css", pathname(fixture_path("default/application.scss")).logical_path
+    assert_equal "hello.js", pathname(fixture_path("default/hello.jst.ejs")).logical_path
   end
 
   test "extensions" do
