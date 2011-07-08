@@ -54,15 +54,17 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal ".js", pathname("jquery.min.js").format_extension
     assert_equal ".js", pathname("jquery.tmpl.js").format_extension
     assert_equal ".js", pathname("jquery.tmpl.min.js").format_extension
+
+    env = Sprockets::Environment.new
+    env.register_engine '.ms', Class.new
+    assert_equal nil, env.attributes_for("foo.jst.ms").format_extension
   end
 
-  test "engine_extensions" do
+  test "engine extensions" do
     assert_equal [], pathname("empty").engine_extensions
     assert_equal [], pathname("gallery.js").engine_extensions
-    assert_equal [".coffee"],
-      pathname("application.js.coffee").engine_extensions
-    assert_equal [".coffee", ".erb"],
-      pathname("project.js.coffee.erb").engine_extensions
+    assert_equal [".coffee"], pathname("application.js.coffee").engine_extensions
+    assert_equal [".coffee", ".erb"], pathname("project.js.coffee.erb").engine_extensions
     assert_equal [".erb"], pathname("gallery.css.erb").engine_extensions
     assert_equal [".erb"], pathname("gallery.erb").engine_extensions
     assert_equal [], pathname("jquery.js").engine_extensions
@@ -70,8 +72,11 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal [], pathname("jquery.tmpl.min.js").engine_extensions
     assert_equal [".erb"], pathname("jquery.js.erb").engine_extensions
     assert_equal [".erb"], pathname("jquery.min.js.erb").engine_extensions
-    assert_equal [".coffee"],
-      pathname("jquery.min.coffee").engine_extensions
+    assert_equal [".coffee"], pathname("jquery.min.coffee").engine_extensions
+
+    env = Sprockets::Environment.new
+    env.register_engine '.ms', Class.new
+    assert_equal [".jst", ".ms"], env.attributes_for("foo.jst.ms").engine_extensions
   end
 
   test "content_type" do

@@ -59,7 +59,9 @@ module Sprockets
     #     # => ".js"
     #
     def format_extension
-      extensions.detect { |ext| @environment.mime_types(ext) }
+      extensions.detect { |ext|
+        @environment.mime_types(ext) && !@environment.engines(ext)
+      }
     end
 
     # Returns an `Array` of engine extensions.
