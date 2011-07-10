@@ -30,10 +30,10 @@ module Sprockets
         p == pathname.to_s ? self : environment[p, @options]
       }
 
-      @dependency_files = coder['dependency_files'].map { |h|
+      @dependency_paths = coder['dependency_paths'].map { |h|
         h.merge('path' => expand_root_path(h['path']))
       }
-      @dependency_files.each do |dep|
+      @dependency_paths.each do |dep|
         dep['mtime'] = Time.parse(dep['mtime']) if dep['mtime'].is_a?(String)
       end
     end
@@ -44,7 +44,7 @@ module Sprockets
 
       coder['body']        = body
       coder['asset_paths'] = to_a.map { |a| relativize_root_path(a.pathname) }
-      coder['dependency_files'] = dependency_files.map { |h|
+      coder['dependency_paths'] = dependency_paths.map { |h|
         h.merge('path' => relativize_root_path(h['path']))
       }
     end
@@ -53,12 +53,12 @@ module Sprockets
     # dependencies but does run any processors or engines on the
     # original file.
     def body
-      @body ||= dependency_context_and_body[1]
+      @body ||= build_dependency_context_and_body[1]
     end
 
     # Get latest mtime of all its dependencies.
     def mtime
-      @mtime ||= dependency_files.map { |h| h['mtime'] }.max
+      @mtime ||= dependency_paths.map { |h| h['mtime'] }.max
     end
 
     # Get size of concatenated source.
@@ -78,14 +78,14 @@ module Sprockets
 
     # Expand asset into an `Array` of parts.
     def to_a
-      @assets ||= compute_assets
+      @assets ||= build_dependencies_paths_and_assets[1]
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?
       # Check freshness of all declared dependencies
-      dependency_files.all? { |h| dependency_fresh?(h) }
+      dependency_paths.all? { |h| dependency_fresh?(h) }
     end
 
     # Return `String` of concatenated source.
@@ -145,24 +145,16 @@ module Sprockets
         environment.context_class.new(environment, logical_path.to_s, pathname)
       end
 
-      def dependency_context_and_body
-        @dependency_context_and_body ||= build_dependency_context_and_body
-      end
-
       # Get `Context` after processors have been ran on it. This
       # trackes any dependencies that processors have added to it.
       def dependency_context
-        dependency_context_and_body[0]
+        @dependency_context ||= build_dependency_context_and_body[0]
       end
 
-      # All files that this asset depends on. This list may include
+      # All paths that this asset depends on. This list may include
       # non-assets like directories.
-      def dependency_files
-        @dependency_files ||= dependency_context._dependency_paths.to_a.map do |path|
-          { 'path'      => path,
-            'mtime'     => environment.stat(path).mtime,
-            'hexdigest' => environment.file_digest(path).hexdigest }
-        end
+      def dependency_paths
+        @dependency_paths ||= build_dependencies_paths_and_assets[0]
       end
 
     private
@@ -188,30 +180,29 @@ module Sprockets
         # Runs all processors on `Context`
         body = context.evaluate(pathname, :data => data)
 
+        @dependency_context, @body = context, body
+
         return context, body
       end
 
-      def build_source
-        data = ""
-
-        # Explode Asset into parts and gather the dependency bodies
-        to_a.each { |dependency| data << dependency.body }
-
-        # Run bundle processors on concatenated source
-        blank_context.evaluate(pathname, :data => data,
-          :processors => environment.bundle_processors(content_type))
-      end
-
-      def compute_assets
+      def build_dependencies_paths_and_assets
         check_circular_dependency!
 
-        assets = []
+        paths, assets = {}, []
 
         # Define an `add_dependency` helper
         add_dependency = lambda do |asset|
           unless assets.any? { |a| a.pathname == asset.pathname }
             assets << asset
           end
+        end
+
+        dependency_context._dependency_paths.each do |path|
+          paths[path] ||= {
+            'path'      => path,
+            'mtime'     => environment.stat(path).mtime,
+            'hexdigest' => environment.file_digest(path).hexdigest
+          }
         end
 
         # Iterate over all the declared require paths from the `Context`
@@ -223,6 +214,10 @@ module Sprockets
             # Recursively lookup required asset
             environment[required_path, @options].to_a.each do |asset|
               add_dependency.call(asset)
+
+              asset.dependency_paths.each do |dep|
+                paths[dep['path']] ||= dep
+              end
             end
           end
         end
@@ -230,7 +225,20 @@ module Sprockets
         # Ensure self is added to the dependency list
         add_dependency.call(self)
 
-        assets
+        @dependency_paths, @assets = paths.values, assets
+
+        return @dependency_paths, @assets
+      end
+
+      def build_source
+        data = ""
+
+        # Explode Asset into parts and gather the dependency bodies
+        to_a.each { |dependency| data << dependency.body }
+
+        # Run bundle processors on concatenated source
+        blank_context.evaluate(pathname, :data => data,
+          :processors => environment.bundle_processors(content_type))
       end
   end
 end
