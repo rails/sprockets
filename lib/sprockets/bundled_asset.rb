@@ -216,7 +216,6 @@ module Sprockets
 
       def build_source
         hash = environment.cache_hash("#{pathname}:source", id) do
-          warn "#{pathname}:#{id}: building source"
           data = ""
 
           # Explode Asset into parts and gather the dependency bodies
