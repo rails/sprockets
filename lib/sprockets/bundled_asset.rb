@@ -63,12 +63,12 @@ module Sprockets
 
     # Get size of concatenated source.
     def length
-      @length ||= compute_source['length']
+      @length ||= build_source['length']
     end
 
     # Compute digest of concatenated source.
     def digest
-      @digest ||= compute_source['digest']
+      @digest ||= build_source['digest']
     end
 
     # Return an `Array` of `Asset` files that are declared dependencies.
@@ -90,7 +90,7 @@ module Sprockets
 
     # Return `String` of concatenated source.
     def to_s
-      @source ||= compute_source['source']
+      @source ||= build_source['source']
     end
 
     # Save asset to disk.
@@ -124,22 +124,6 @@ module Sprockets
     end
 
     protected
-      def compute_source
-        hash = environment.cache_hash("#{pathname}:source", id) do
-          source = build_source
-          { 'length' => Rack::Utils.bytesize(source),
-            'digest' => environment.digest.update(source).hexdigest,
-            'source' => source }
-        end
-        hash['length'] = Integer(hash['length']) if hash['length'].is_a?(String)
-
-        @length = hash['length']
-        @digest = hash['digest']
-        @source = hash['source']
-
-        hash
-      end
-
       # Return new blank `Context` to evaluate processors in.
       def blank_context
         environment.context_class.new(environment, logical_path.to_s, pathname)
@@ -231,14 +215,28 @@ module Sprockets
       end
 
       def build_source
-        data = ""
+        hash = environment.cache_hash("#{pathname}:source", id) do
+          warn "#{pathname}:#{id}: building source"
+          data = ""
 
-        # Explode Asset into parts and gather the dependency bodies
-        to_a.each { |dependency| data << dependency.body }
+          # Explode Asset into parts and gather the dependency bodies
+          to_a.each { |dependency| data << dependency.body }
 
-        # Run bundle processors on concatenated source
-        blank_context.evaluate(pathname, :data => data,
-          :processors => environment.bundle_processors(content_type))
+          # Run bundle processors on concatenated source
+          blank_context.evaluate(pathname, :data => data,
+            :processors => environment.bundle_processors(content_type))
+
+          { 'length' => Rack::Utils.bytesize(data),
+            'digest' => environment.digest.update(data).hexdigest,
+            'source' => data }
+        end
+        hash['length'] = Integer(hash['length']) if hash['length'].is_a?(String)
+
+        @length = hash['length']
+        @digest = hash['digest']
+        @source = hash['source']
+
+        hash
       end
   end
 end
