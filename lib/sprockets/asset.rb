@@ -22,7 +22,7 @@ module Sprockets
       @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
-      @id           = environment.digest.update(object_id.to_s)
+      @id           = environment.digest.update(object_id.to_s).to_s
     end
 
     # Initialize `Asset` from serialized `Hash`.
