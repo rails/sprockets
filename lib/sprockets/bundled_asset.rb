@@ -222,7 +222,7 @@ module Sprockets
           to_a.each { |dependency| data << dependency.body }
 
           # Run bundle processors on concatenated source
-          blank_context.evaluate(pathname, :data => data,
+          data = blank_context.evaluate(pathname, :data => data,
             :processors => environment.bundle_processors(content_type))
 
           { 'length' => Rack::Utils.bytesize(data),
