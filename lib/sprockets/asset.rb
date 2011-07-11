@@ -12,39 +12,39 @@ module Sprockets
 
     # Define base set of attributes to be serialized.
     def self.serialized_attributes
-      %w( environment_hexdigest
-          logical_path pathname
-          content_type mtime length digest )
+      %w( id logical_path pathname )
     end
 
     attr_reader :environment
-    attr_reader :logical_path, :pathname
+    attr_reader :id, :logical_path, :pathname
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
+      @id           = environment.digest.update(object_id.to_s).to_s
     end
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @environment = environment
+      @pathname = @mtime = @length = nil
 
       self.class.serialized_attributes.each do |attr|
         instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
       end
 
-      if @pathname
+      if @pathname && @pathname.is_a?(String)
         # Expand `$root` placeholder and wrapper string in a `Pathname`
         @pathname = Pathname.new(expand_root_path(@pathname))
       end
 
-      if @mtime
+      if @mtime && @mtime.is_a?(String)
         # Parse time string
         @mtime = Time.parse(@mtime)
       end
 
-      if @length
+      if @length && @length.is_a?(String)
         # Convert length to an `Integer`
         @length = Integer(@length)
       end
@@ -140,11 +140,6 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
-      # Stores the environment digest from when the asset was first created.
-      def environment_hexdigest
-        @environment_hexdigest ||= environment.digest.hexdigest
-      end
-
       # Get pathname with its root stripped.
       def relative_pathname
         Pathname.new(relativize_root_path(pathname))

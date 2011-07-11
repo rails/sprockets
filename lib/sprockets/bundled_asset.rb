@@ -8,6 +8,11 @@ module Sprockets
   # `BundledAsset`s are used for files that need to be processed and
   # concatenated with other assets. Use for `.js` and `.css` files.
   class BundledAsset < Asset
+    # Define extra attributes to be serialized.
+    def self.serialized_attributes
+      super + %w( content_type mtime )
+    end
+
     def initialize(environment, logical_path, pathname, options)
       super(environment, logical_path, pathname)
       @options = options || {}
@@ -15,12 +20,11 @@ module Sprockets
 
     # Initialize `BundledAsset` from serialized `Hash`.
     def init_with(environment, coder)
-      super
-
       @options = {}
 
+      super
+
       @body   = coder['body']
-      @source = coder['source']
       @assets = coder['asset_paths'].map { |p|
         p = expand_root_path(p)
         p == pathname.to_s ? self : environment[p, @options]
@@ -39,7 +43,6 @@ module Sprockets
       super
 
       coder['body']        = body
-      coder['source']      = to_s
       coder['asset_paths'] = to_a.map { |a| relativize_root_path(a.pathname) }
       coder['dependency_paths'] = dependency_paths.map { |h|
         h.merge('path' => relativize_root_path(h['path']))
@@ -60,12 +63,12 @@ module Sprockets
 
     # Get size of concatenated source.
     def length
-      @length ||= Rack::Utils.bytesize(to_s)
+      @length ||= build_source['length']
     end
 
     # Compute digest of concatenated source.
     def digest
-      @digest ||= environment.digest.update(to_s).hexdigest
+      @digest ||= build_source['digest']
     end
 
     # Return an `Array` of `Asset` files that are declared dependencies.
@@ -81,18 +84,13 @@ module Sprockets
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?
-      # Check if environment has changed first
-      if environment.digest.hexdigest != environment_hexdigest
-        return false
-      end
-
       # Check freshness of all declared dependencies
       dependency_paths.all? { |h| dependency_fresh?(h) }
     end
 
     # Return `String` of concatenated source.
     def to_s
-      @source ||= build_source
+      @source ||= build_source['source']
     end
 
     # Save asset to disk.
@@ -217,14 +215,27 @@ module Sprockets
       end
 
       def build_source
-        data = ""
+        hash = environment.cache_hash("#{pathname}:source", id) do
+          data = ""
 
-        # Explode Asset into parts and gather the dependency bodies
-        to_a.each { |dependency| data << dependency.body }
+          # Explode Asset into parts and gather the dependency bodies
+          to_a.each { |dependency| data << dependency.body }
 
-        # Run bundle processors on concatenated source
-        blank_context.evaluate(pathname, :data => data,
-          :processors => environment.bundle_processors(content_type))
+          # Run bundle processors on concatenated source
+          data = blank_context.evaluate(pathname, :data => data,
+            :processors => environment.bundle_processors(content_type))
+
+          { 'length' => Rack::Utils.bytesize(data),
+            'digest' => environment.digest.update(data).hexdigest,
+            'source' => data }
+        end
+        hash['length'] = Integer(hash['length']) if hash['length'].is_a?(String)
+
+        @length = hash['length']
+        @digest = hash['digest']
+        @source = hash['source']
+
+        hash
       end
   end
 end
