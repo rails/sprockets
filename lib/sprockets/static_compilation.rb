@@ -59,12 +59,6 @@ module Sprockets
       end
     end
 
-    protected
-      def compute_digest
-        # Add static root to environment digest
-        super.update(static_root.to_s)
-      end
-
     private
       # Get all reachable files in environment path
       def files
