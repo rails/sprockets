@@ -9,7 +9,7 @@ module Sprockets
   #   https://github.com/sstephenson/eco
   #
   class EcoTemplate < Tilt::Template
-    # Check to see if EJS is loaded
+    # Check to see if Eco is loaded
     def self.engine_initialized?
       defined? ::Eco
     end
