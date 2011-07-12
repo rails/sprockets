@@ -181,14 +181,6 @@ module Sprockets
           end
         end
 
-        dependency_context._dependency_paths.each do |path|
-          paths[path] ||= {
-            'path'      => path,
-            'mtime'     => environment.stat(path).mtime,
-            'hexdigest' => environment.file_digest(path).hexdigest
-          }
-        end
-
         # Iterate over all the declared require paths from the `Context`
         dependency_context._required_paths.each do |required_path|
           # Catch `require_self`
@@ -198,16 +190,32 @@ module Sprockets
             # Recursively lookup required asset
             environment[required_path, @options].to_a.each do |asset|
               add_dependency.call(asset)
-
-              asset.dependency_paths.each do |dep|
-                paths[dep['path']] ||= dep
-              end
             end
           end
         end
 
         # Ensure self is added to the dependency list
         add_dependency.call(self)
+
+        dependency_context._dependency_paths.each do |path|
+          paths[path] ||= {
+            'path'      => path,
+            'mtime'     => environment.stat(path).mtime,
+            'hexdigest' => environment.file_digest(path).hexdigest
+          }
+        end
+
+        dependency_context._dependency_assets.each do |path|
+          # Skip if depending on self
+          next if path == pathname.to_s
+
+          # Recursively lookup required asset
+          environment[path, @options].to_a.each do |asset|
+            asset.dependency_paths.each do |dep|
+              paths[dep['path']] ||= dep
+            end
+          end
+        end
 
         @dependency_paths, @assets = paths.values, assets
 

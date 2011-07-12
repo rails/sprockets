@@ -270,7 +270,9 @@ module Sprockets
       #     //= include "header"
       #
       def process_include_directive(path)
-        included_pathnames << context.resolve(path)
+        pathname = context.resolve(path)
+        context.depend_on_asset(pathname)
+        included_pathnames << pathname
       end
 
       # `require_directory` requires all the files inside a single
@@ -326,7 +328,7 @@ module Sprockets
       # including it.
       #
       # This is used for caching purposes. Any changes made to
-      # the dependency file with invalidate the cache of the
+      # the dependency file will invalidate the cache of the
       # source file.
       #
       # This is useful if you are using ERB and File.read to pull
@@ -335,7 +337,22 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        context.depend_on(context.resolve(path))
+        context.depend_on(path)
+      end
+
+      # Allows you to state a dependency on an asset without including
+      # it.
+      #
+      # This is used for caching purposes. Any changes that would
+      # invalid the asset dependency will invalidate the cache our the
+      # source file.
+      #
+      # Unlike `depend_on`, the path must be a requirable asset.
+      #
+      #     //= depend_on_asset "bar.js"
+      #
+      def process_depend_on_asset_directive(path)
+        context.depend_on_asset(path)
       end
 
       # Enable Sprockets 1.x compat mode.

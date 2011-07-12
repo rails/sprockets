@@ -22,7 +22,7 @@ module Sprockets
   # assets. See `DirectiveProcessor` for an example of this.
   class Context
     attr_reader :environment, :pathname
-    attr_reader :_required_paths, :_dependency_paths
+    attr_reader :_required_paths, :_dependency_paths, :_dependency_assets
     attr_writer :__LINE__
 
     def initialize(environment, logical_path, pathname)
@@ -31,8 +31,9 @@ module Sprockets
       @pathname     = pathname
       @__LINE__     = nil
 
-      @_required_paths   = []
-      @_dependency_paths = Set.new([pathname.to_s])
+      @_required_paths    = []
+      @_dependency_paths  = Set.new([pathname.to_s])
+      @_dependency_assets = Set.new
     end
 
     # Returns the environment path that contains the file.
@@ -110,6 +111,44 @@ module Sprockets
     # source file.
     def depend_on(path)
       @_dependency_paths << resolve(path).to_s
+      nil
+    end
+
+    # `depend_on_asset` allows you to state an asset dependency
+    # without including it.
+    #
+    # This is used for caching purposes. Any changes that would
+    # invalidate the dependency asset will invalidate the source
+    # file. Unlike `depend_on`, this will include recursively include
+    # the target asset's dependencies.
+    def depend_on_asset(path)
+      filename = resolve(path).to_s
+      @_dependency_assets << filename
+      nil
+    end
+
+    # `require_asset` declares `path` as a dependency of the file. The
+    # dependency will be inserted before the file and will only be
+    # included once.
+    #
+    # If ERB processing is enabled, you can use it to dynamically
+    # require assets.
+    #
+    #     <%= require_asset "#{framework}.js" %>
+    #
+    def require_asset(path)
+      pathname = resolve(path, :content_type => :self)
+      depend_on_asset(pathname)
+      @_required_paths << pathname.to_s
+      nil
+    end
+
+    # Tests if target path is able to be safely required into the
+    # current concatenation.
+    def asset_requirable?(path)
+      pathname = resolve(path)
+      content_type = environment.content_type_of(pathname)
+      pathname.file? && (self.content_type.nil? || self.content_type == content_type)
     end
 
     # Reads `path` and runs processors on the file.
@@ -145,34 +184,6 @@ module Sprockets
       logger.info "Compiled #{attributes.pretty_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
 
       result
-    end
-
-    # Tests if target path is able to be safely required into the
-    # current concatenation.
-    def asset_requirable?(path)
-      pathname = resolve(path)
-      content_type = environment.content_type_of(pathname)
-      pathname.file? && (self.content_type.nil? || self.content_type == content_type)
-    end
-
-    # `require_asset` declares `path` as a dependency of the file. The
-    # dependency will be inserted before the file and will only be
-    # included once.
-    #
-    # If ERB processing is enabled, you can use it to dynamically
-    # require assets.
-    #
-    #     <%= require_asset "#{framework}.js" %>
-    #
-    def require_asset(path)
-      pathname = resolve(path, :content_type => :self)
-
-      unless @_required_paths.include?(pathname.to_s)
-        @_dependency_paths << pathname.to_s
-        @_required_paths << pathname.to_s
-      end
-
-      pathname
     end
 
     # Returns a Base64-encoded `data:` URI with the contents of the
