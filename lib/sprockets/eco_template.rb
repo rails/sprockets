@@ -9,6 +9,11 @@ module Sprockets
   #   https://github.com/sstephenson/eco
   #
   class EcoTemplate < Tilt::Template
+    # Check to see if EJS is loaded
+    def self.engine_initialized?
+      defined? ::Eco
+    end
+
     # Autoload eco library. If the library isn't loaded, Tilt will produce
     # a thread safetly warning. If you intend to use `.eco` files, you
     # should explicitly require it.
