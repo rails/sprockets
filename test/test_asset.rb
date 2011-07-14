@@ -111,11 +111,11 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
-    filename = fixture_path('asset/POW.png')
+    filename = fixture_path('asset/test-POW.png')
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.write "a" }
-      asset = @env['POW.png']
+      asset = @env['test-POW.png']
 
       assert asset.fresh?
 
