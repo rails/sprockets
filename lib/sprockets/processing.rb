@@ -265,27 +265,5 @@ module Sprockets
         compressor.compress(data)
       end
     end
-
-    protected
-      def compute_digest
-        digest = super
-
-        # Add mime types to environment digest
-        digest << @mime_types.keys.join(',')
-
-        # Add engines to environment digest
-        digest << @engines.map { |e, k| "#{e}:#{k.name}" }.join(',')
-
-        # Add preprocessors to environment digest
-        digest << @preprocessors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
-
-        # Add postprocessors to environment digest
-        digest << @postprocessors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
-
-        # Add bundle processors to environment digest
-        digest << @bundle_processors.map { |m, a| "#{m}:#{a.map(&:name)}" }.join(',')
-
-        digest
-      end
   end
 end

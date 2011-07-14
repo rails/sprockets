@@ -308,23 +308,15 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register mime type" do
-    old_digest = @env.digest
     assert !@env.mime_types("jst")
-
     @env.register_mime_type("application/javascript", "jst")
-
     assert_equal "application/javascript", @env.mime_types("jst")
-    assert_not_equal old_digest, @env.digest
   end
 
   test "register bundle processor" do
-    old_digest = @env.digest
     assert !@env.bundle_processors('text/css').include?(WhitespaceCompressor)
-
     @env.register_bundle_processor 'text/css', WhitespaceCompressor
-
     assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
-    assert_not_equal old_digest, @env.digest
   end
 
   test "unregister custom block preprocessor" do
@@ -351,32 +343,12 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal old_size, @env.bundle_processors('text/css').size
   end
 
-  test "changing css compressor expires old assets" do
-    old_digest = @env.digest
-    assert_equal ".gallery {\n  color: red;\n}\n", @env["gallery.css"].to_s
-
-    @env.css_compressor = WhitespaceCompressor
-
-    assert_equal ".gallery{color:red;}", @env["gallery.css"].to_s
-    assert_not_equal old_digest, @env.digest
-  end
-
   test "setting css compressor to nil clears current compressor" do
     old_digest = @env.digest
     @env.css_compressor = WhitespaceCompressor
     assert @env.css_compressor
     @env.css_compressor = nil
     assert_nil @env.css_compressor
-  end
-
-  test "changing js compressor expires old assets" do
-    old_digest = @env.digest
-    assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
-
-    @env.js_compressor = WhitespaceCompressor
-
-    assert_equal "varGallery={};", @env["gallery.js"].to_s
-    assert_not_equal old_digest, @env.digest
   end
 
   test "setting js compressor to nil clears current compressor" do
@@ -471,7 +443,6 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "registering engine adds to the environments extensions" do
-    old_digest = @env.digest
     assert !@env.engines[".foo"]
     assert !@env.extensions.include?(".foo")
 
@@ -479,7 +450,6 @@ class TestEnvironment < Sprockets::TestCase
 
     assert @env.engines[".foo"]
     assert @env.extensions.include?(".foo")
-    assert_not_equal old_digest, @env.digest
   end
 
   test "seperate engines for each instance" do
@@ -498,12 +468,6 @@ class TestEnvironment < Sprockets::TestCase
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
-  end
-
-  test "changing directive preprocessor changes digest" do
-    old_digest = @env.digest
-    @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
-    assert_not_equal old_digest, @env.digest
   end
 end
 
