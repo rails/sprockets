@@ -61,14 +61,11 @@ module Sprockets
       end
 
     private
-      def cache_key_namespace
-        'sprockets'
-      end
-
-      # Removes `Environment#root` from key and prepends
-      # `Environment#cache_key_namespace`.
+      # Strips `Environment#root` from key to make the key work
+      # consisently across different servers. The key is also hashed
+      # so it does not exceed 250 characters.
       def cache_key_for(key)
-        File.join(cache_key_namespace, key.sub(root, ''))
+        File.join('sprockets', digest.hexdigest(key.sub(root, '')))
       end
 
       def cache_get_hash(key, version)
