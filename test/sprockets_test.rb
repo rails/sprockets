@@ -4,8 +4,10 @@ require "tilt"
 require "fileutils"
 
 if defined? Encoding
+  old_verbose, $VERBOSE = $VERBOSE, false
   Encoding.default_external = 'utf-8'
   Encoding.default_internal = 'utf-8'
+  $VERBOSE = old_verbose
 end
 
 class Sprockets::TestCase < Test::Unit::TestCase
