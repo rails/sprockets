@@ -284,6 +284,11 @@ module Sprockets
       def process_require_directory_directive(path = ".")
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
+
+          unless root.directory?
+            raise ArgumentError, "require_tree argument must be a directory"
+          end
+
           context.depend_on(root)
 
           Dir["#{root}/*"].sort.each do |filename|
@@ -307,6 +312,11 @@ module Sprockets
       def process_require_tree_directive(path = ".")
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
+
+          unless root.directory?
+            raise ArgumentError, "require_tree argument must be a directory"
+          end
+
           context.depend_on(root)
 
           Dir["#{root}/**/*"].sort.each do |filename|

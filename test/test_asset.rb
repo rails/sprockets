@@ -339,6 +339,12 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "require_tree with a nonexistent path raises an exception" do
+    assert_raise(Sprockets::ArgumentError) do
+      asset("tree/with_logical_path/require_tree_with_nonexistent_path.js").to_s
+    end
+  end
+
   test "require_self inserts the current file's body at the specified point" do
     assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n.one {}\n\n\nbody {}\n.two {}\n.project {}\n", asset("require_self.css").to_s
   end
