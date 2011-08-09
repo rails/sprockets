@@ -344,7 +344,6 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "setting css compressor to nil clears current compressor" do
-    old_digest = @env.digest
     @env.css_compressor = WhitespaceCompressor
     assert @env.css_compressor
     @env.css_compressor = nil
