@@ -55,7 +55,13 @@ module Sprockets
       coder['class'] = self.class.name.sub(/Sprockets::/, '')
 
       self.class.serialized_attributes.each do |attr|
-        coder[attr] = send(attr).to_s
+        value = send(attr)
+        coder[attr] = case value
+          when Date
+            value.iso8601
+          else
+            value.to_s
+          end
       end
 
       coder['pathname'] = relativize_root_path(coder['pathname'])
