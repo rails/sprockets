@@ -57,7 +57,7 @@ module Sprockets
       self.class.serialized_attributes.each do |attr|
         value = send(attr)
         coder[attr] = case value
-          when Date
+          when Time
             value.iso8601
           else
             value.to_s
