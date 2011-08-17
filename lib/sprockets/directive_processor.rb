@@ -37,12 +37,48 @@ module Sprockets
   #     env.register_processor('text/css', MyProcessor)
   #
   class DirectiveProcessor < Tilt::Template
+    # Directives will only be picked up if they are in the header
+    # of the source file. C style (/* */), JavaScript (//), and
+    # Ruby (#) comments are supported.
+    #
+    # Directives in comments after the first non-whitespace line
+    # of code will not be processed.
+    #
+    HEADER_PATTERN = /
+      \A (
+        (?m:\s*) (
+          (\/\* (?m:.*?) \*\/) |
+          (\#\#\# (?m:.*?) \#\#\#) |
+          (\/\/ .* \n?)+ |
+          (\# .* \n?)+
+        )
+      )+
+    /x
+
+    # Directives are denoted by a `=` followed by the name, then
+    # argument list.
+    #
+    # A few different styles are allowed:
+    #
+    #     // =require foo
+    #     //= require foo
+    #     //= require "foo"
+    #
+    DIRECTIVE_PATTERN = /
+      ^ [\W]* = \s* (\w+.*?) (\*\/)? $
+    /x
+
     attr_reader :pathname
+    attr_reader :header, :body
 
     def prepare
       @pathname = Pathname.new(file)
 
-      @directive_parser   = Parser.new(data)
+      @header = data[HEADER_PATTERN, 0] || ""
+      @body   = $' || data
+      # Ensure body ends in a new line
+      @body  += "\n" if @body != "" && @body !~ /\n\Z/m
+
       @included_pathnames = []
       @compat             = false
     end
@@ -64,102 +100,39 @@ module Sprockets
       @result
     end
 
+    # Returns the header String with any directives stripped.
     def processed_header
-      @directive_parser.processed_header
+      lineno = 0
+      @processed_header ||= header.lines.reject { |line|
+        lineno += 1
+        directives.assoc(lineno)
+      }.join.chomp
     end
 
-    def processed_body
-      @directive_parser.body
-    end
-
+    # Returns the source String with any directives stripped.
     def processed_source
-      @directive_parser.processed_source
+      @processed_source ||= processed_header + body
     end
 
+    # Returns an Array of directive structures. Each structure
+    # is an Array with the line number as the first element, the
+    # directive name as the second element, followed by any
+    # arguments.
+    #
+    #     [[1, "require", "foo"], [2, "require", "bar"]]
+    #
     def directives
-      @directive_parser.directives
+      @directives ||= header.lines.each_with_index.map { |line, index|
+        if directive = line[DIRECTIVE_PATTERN, 1]
+          name, *args = Shellwords.shellwords(directive)
+          if respond_to?("process_#{name}_directive")
+            [index + 1, name, *args]
+          end
+        end
+      }.compact
     end
 
     protected
-      class Parser
-        # Directives will only be picked up if they are in the header
-        # of the source file. C style (/* */), JavaScript (//), and
-        # Ruby (#) comments are supported.
-        #
-        # Directives in comments after the first non-whitespace line
-        # of code will not be processed.
-        #
-        HEADER_PATTERN = /
-          \A (
-            (?m:\s*) (
-              (\/\* (?m:.*?) \*\/) |
-              (\#\#\# (?m:.*?) \#\#\#) |
-              (\/\/ .* \n?)+ |
-              (\# .* \n?)+
-            )
-          )+
-        /x
-
-        # Directives are denoted by a `=` followed by the name, then
-        # argument list.
-        #
-        # A few different styles are allowed:
-        #
-        #     // =require foo
-        #     //= require foo
-        #     //= require "foo"
-        #
-        DIRECTIVE_PATTERN = /
-          ^ [\W]* = \s* (\w+.*?) (\*\/)? $
-        /x
-
-        attr_reader :source, :header, :body
-
-        def initialize(source)
-          @source = source
-          @header = @source[HEADER_PATTERN, 0] || ""
-          @body   = $' || @source
-
-          # Ensure body ends in a new line
-          @body  += "\n" if @body != "" && @body !~ /\n\Z/m
-        end
-
-        def header_lines
-          @header_lines ||= header.split("\n")
-        end
-
-        # Returns the header String with any directives stripped.
-        def processed_header
-          header_lines.reject do |line|
-            extract_directive(line)
-          end.join("\n")
-        end
-
-        # Returns the source String with any directives stripped.
-        def processed_source
-          @processed_source ||= processed_header + body
-        end
-
-        # Returns an Array of directive structures. Each structure
-        # is an Array with the line number as the first element, the
-        # directive name as the second element, followed by any
-        # arguments.
-        #
-        #     [[1, "require", "foo"], [2, "require", "bar"]]
-        #
-        def directives
-          @directives ||= header_lines.each_with_index.map do |line, index|
-            if directive = extract_directive(line)
-              [index + 1, *Shellwords.shellwords(directive)]
-            end
-          end.compact
-        end
-
-        def extract_directive(line)
-          line[DIRECTIVE_PATTERN, 1]
-        end
-      end
-
       attr_reader :included_pathnames
       attr_reader :context
 
@@ -203,7 +176,7 @@ module Sprockets
         end
 
         unless @has_written_body
-          @result << processed_body
+          @result << body
         end
 
         if compat? && constants.any?

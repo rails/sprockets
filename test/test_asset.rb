@@ -367,6 +367,11 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "unknown directives are ignored" do
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n//\n// = Foo\n//\n// == Examples\n//\n// Foo.bar()\n// => \"baz\"\nvar Foo;\n",
+      asset("documentation.js").to_s
+  end
+
   test "__FILE__ is properly set in templates" do
     assert_equal %(var filename = "#{resolve("filename.js")}";\n),
       asset("filename.js").to_s

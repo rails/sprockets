@@ -1,6 +1,6 @@
-// =one
-// =one "two"
-// =one two three
-// =one "two three"
-// ="four" five
-// =six 'seven'
+// =require
+// =require "two"
+// =require two three
+// =require "two three"
+// ="require" five
+// =require 'seven'

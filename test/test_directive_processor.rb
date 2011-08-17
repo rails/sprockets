@@ -72,11 +72,11 @@ class DirectiveProcessorTest < Sprockets::TestCase
   test "directive word splitting" do
     directive_parser("directive_word_splitting").tap do |parser|
       assert_equal [
-        [1, "one"],
-        [2, "one", "two"],
-        [3, "one", "two", "three"],
-        [4, "one", "two three"],
-        [6, "six", "seven"]
+        [1, "require"],
+        [2, "require", "two"],
+        [3, "require", "two", "three"],
+        [4, "require", "two three"],
+        [6, "require", "seven"]
       ], parser.directives
     end
   end
@@ -85,6 +85,13 @@ class DirectiveProcessorTest < Sprockets::TestCase
     directive_parser("space_between_directive_word").tap do |parser|
       assert_equal "var foo;\n", parser.processed_source
       assert_equal [[1, "require", "foo"]], parser.directives
+    end
+  end
+
+  test "documentation headers" do
+    directive_parser("documentation").tap do |parser|
+      assert_equal "//\n// = Foo\n//\n// == Examples\n//\n// Foo.bar()\n// => \"baz\"var Foo;\n", parser.processed_source
+      assert_equal [[1, "require", "project"]], parser.directives
     end
   end
 
