@@ -345,6 +345,14 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "require_tree respects order of child dependencies" do
+    assert_equal(
+      "var c;\nvar b;\nvar a;\n\n",
+      asset("tree/require_tree_alpha.js").to_s
+    )
+  end
+
+
   test "require_self inserts the current file's body at the specified point" do
     assert_equal "/* b.css */\n\nb { display: none }\n/*\n */\n.one {}\n\n\nbody {}\n.two {}\n.project {}\n", asset("require_self.css").to_s
   end
