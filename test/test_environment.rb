@@ -170,33 +170,6 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  test "path for asset" do
-    digest = @env["gallery.js"].digest
-    assert_equal "/gallery-#{digest}.js", @env.path("gallery.js")
-    assert_equal "/gallery.js", @env.path("gallery.js", false)
-    assert_equal "/gallery-#{digest}.js", @env.path("/gallery.js")
-    assert_equal "/assets/gallery-#{digest}.js",
-      @env.path("gallery.js", true, "/assets")
-  end
-
-  test "url for asset" do
-    env = Rack::MockRequest.env_for("/")
-    digest = @env["gallery.js"].digest
-
-    assert_equal "http://example.org/gallery-#{digest}.js",
-      @env.url(env, "gallery.js")
-    assert_equal "http://example.org/gallery.js",
-      @env.url(env, "gallery.js", false)
-    assert_equal "http://example.org/gallery-#{digest}.js",
-      @env.url(env, "/gallery.js")
-    assert_equal "http://example.org/assets/gallery-#{digest}.js",
-      @env.url(env, "gallery.js", true, "assets")
-  end
-
-  test "missing path for asset" do
-    assert_equal "/missing.js", @env.path("missing.js")
-  end
-
   test "precompile" do
     digest      = @env["gallery.js"].digest
     filename    = fixture_path("public/gallery-#{digest}.js")

@@ -81,7 +81,7 @@ module Sprockets
       end
     end
 
-    # `path` is a url helper that looks up an asset given a
+    # Deprecated: `path` is a url helper that looks up an asset given a
     # `logical_path` and returns a path String. By default, the
     # asset's digest fingerprint is spliced into the filename.
     #
@@ -90,6 +90,7 @@ module Sprockets
     # A third `prefix` argument can be pass along to be prepended to
     # the string.
     def path(logical_path, fingerprint = true, prefix = nil)
+      warn "Sprockets::Environment#path is deprecated\n#{caller.join("\n")}"
       if fingerprint && asset = find_asset(logical_path.to_s.sub(/^\//, ''))
         url = attributes_for(logical_path).path_with_fingerprint(asset.digest)
       else
@@ -102,9 +103,10 @@ module Sprockets
       url
     end
 
-    # Similar to `path`, `url` returns a full url given a Rack `env`
+    # Deprecated: Similar to `path`, `url` returns a full url given a Rack `env`
     # Hash and a `logical_path`.
     def url(env, logical_path, fingerprint = true, prefix = nil)
+      warn "Sprockets::Environment#url is deprecated\n#{caller.join("\n")}"
       req = Rack::Request.new(env)
 
       url = req.scheme + "://"
