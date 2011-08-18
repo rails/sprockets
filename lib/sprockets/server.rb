@@ -92,7 +92,7 @@ module Sprockets
     def path(logical_path, fingerprint = true, prefix = nil)
       warn "Sprockets::Environment#path is deprecated\n#{caller.join("\n")}"
       if fingerprint && asset = find_asset(logical_path.to_s.sub(/^\//, ''))
-        url = attributes_for(logical_path).path_with_fingerprint(asset.digest)
+        url = asset.digest_path
       else
         url = logical_path
       end

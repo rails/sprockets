@@ -43,11 +43,9 @@ module Sprockets
           end
 
           if asset = find_asset(logical_path)
-            attributes  = attributes_for(logical_path)
-            digest_path = attributes.path_with_fingerprint(asset.digest)
-            filename    = static_root.join(digest_path)
+            manifest[logical_path] = asset.digest_path
 
-            manifest[logical_path] = digest_path
+            filename = static_root.join(asset.digest_path)
 
             # Ensure directory exists
             FileUtils.mkdir_p filename.dirname

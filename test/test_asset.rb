@@ -407,6 +407,10 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset("project.js").digest
   end
 
+  test "asset digest path" do
+    assert_match(/project-\w+\.js/, asset("project.js").digest_path)
+  end
+
   test "asset is fresh if its mtime and contents are the same" do
     assert asset("application.js").fresh?
   end
