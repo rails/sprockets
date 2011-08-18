@@ -23,10 +23,6 @@ module EnvironmentTests
     assert_nil @env.js_compressor
   end
 
-  test "current static root" do
-    assert_equal fixture_path("public"), @env.static_root.to_s
-  end
-
   test "paths" do
     assert_equal [fixture_path("default")], @env.paths.to_a
   end
@@ -177,7 +173,7 @@ module EnvironmentTests
 
     sandbox filename, filename_gz do
       assert !File.exist?(filename)
-      manifest = @env.precompile("gallery.js")
+      manifest = @env.precompile("gallery.js", :to => fixture_path("public"))
       assert File.exist?(filename)
       assert File.exist?(filename_gz)
       assert_equal "gallery-#{digest}.js", manifest["gallery.js"]
@@ -193,7 +189,7 @@ module EnvironmentTests
 
     sandbox dirname do
       assert !File.exist?(dirname)
-      manifest = @env.precompile("mobile/*")
+      manifest = @env.precompile("mobile/*", :to => fixture_path("public"))
 
       assert File.exist?(dirname)
       [nil, '.gz'].each do |gzipped|
@@ -216,7 +212,7 @@ module EnvironmentTests
 
     sandbox dirname do
       assert !File.exist?(dirname)
-      manifest = @env.precompile(/mobile\/.*/)
+      manifest = @env.precompile(/mobile\/.*/, :to => fixture_path("public"))
 
       assert File.exist?(dirname)
       [nil, '.gz'].each do |gzipped|
@@ -236,7 +232,7 @@ module EnvironmentTests
 
     sandbox filename do
       assert !File.exist?(filename)
-      manifest = @env.precompile("hello.txt")
+      manifest = @env.precompile("hello.txt", :to => fixture_path("public"))
       assert File.exist?(filename)
       assert !File.exist?("#{filename}.gz")
       assert_equal "hello-#{digest}.txt", manifest["hello.txt"]
@@ -265,7 +261,6 @@ class TestEnvironment < Sprockets::TestCase
   def new_environment
     Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
-      env.static_root = fixture_path('public')
       env.cache = {}
       yield env if block_given?
     end
@@ -457,7 +452,6 @@ class TestIndex < Sprockets::TestCase
   def new_environment
     Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
-      env.static_root = fixture_path('public')
       env.cache = {}
       yield env if block_given?
     end.index
@@ -465,12 +459,6 @@ class TestIndex < Sprockets::TestCase
 
   def setup
     @env = new_environment
-  end
-
-  test "does not allow static root to be changed" do
-    assert_raises TypeError do
-      @env.static_root = fixture_path('public')
-    end
   end
 
   test "does not allow new mime types to be added" do
@@ -508,16 +496,6 @@ class TestIndex < Sprockets::TestCase
     assert !index.bundle_processors('text/css').include?(WhitespaceCompressor)
     env.register_bundle_processor 'text/css', WhitespaceCompressor
     assert !index.bundle_processors('text/css').include?(WhitespaceCompressor)
-  end
-
-  test "change in environment static root does not affect index" do
-    env = Sprockets::Environment.new(".")
-    env.static_root = fixture_path('public')
-    index = env.index
-
-    assert_equal fixture_path('public'), index.static_root.to_s
-    env.static_root = fixture_path('static')
-    assert_equal fixture_path('public'), index.static_root.to_s
   end
 
   test "does not allow css compressor to be changed" do

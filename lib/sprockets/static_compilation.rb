@@ -13,12 +13,13 @@ module Sprockets
     # In a production environment, Apache or nginx should be
     # configured to serve assets from the directory.
     def static_root
-      @static_root
+      @static_root ||= nil
     end
 
     # Assign a static root directory.
     def static_root=(root)
       expire_index!
+      warn "Sprockets::Environment#static_root is deprecated"
       @static_root = root ? Pathname.new(root) : nil
     end
 
@@ -29,7 +30,18 @@ module Sprockets
     #
     # This usually ran via a rake task.
     def precompile(*paths)
-      raise "missing static root" unless static_root
+      options = paths.last.is_a?(Hash) ? paths.pop : {}
+
+      if options[:to]
+        target = options[:to]
+      elsif static_root
+        warn "Sprockets::Environment#static_root is deprecated"
+        target = static_root
+      else
+        raise ArgumentError, "missing target"
+      end
+
+      target = Pathname.new(target)
 
       manifest = {}
       paths.each do |path|
@@ -45,7 +57,7 @@ module Sprockets
           if asset = find_asset(logical_path)
             manifest[logical_path] = asset.digest_path
 
-            filename = static_root.join(asset.digest_path)
+            filename = target.join(asset.digest_path)
 
             # Ensure directory exists
             FileUtils.mkdir_p filename.dirname

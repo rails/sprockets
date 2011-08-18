@@ -31,8 +31,6 @@ module Sprockets
       @digest_class = ::Digest::MD5
       @version = ''
 
-      @static_root = nil
-
       @mime_types        = {}
       @engines           = Sprockets.engines
       @preprocessors     = Hash.new { |h, k| h[k] = [] }
