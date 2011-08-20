@@ -87,15 +87,6 @@ module Sprockets
         @trail
       end
 
-      def compute_digest
-        digest = super
-
-        # Add paths to environment digest.
-        digest << trail.paths.map { |p| attributes_for(p).relativize_root }.join(',')
-
-        digest
-      end
-
       def find_asset_in_path(logical_path, options = {})
         # Strip fingerprint on logical path if there is one.
         # Not sure how valuable this feature is...

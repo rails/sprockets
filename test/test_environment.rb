@@ -275,12 +275,8 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "changing paths" do
-    old_digest = @env.digest
-
     @env.clear_paths
     @env.append_path(fixture_path('asset'))
-
-    assert_not_equal old_digest, @env.digest
   end
 
   test "register mime type" do
@@ -331,16 +327,6 @@ class TestEnvironment < Sprockets::TestCase
     assert @env.js_compressor
     @env.js_compressor = nil
     assert_nil @env.js_compressor
-  end
-
-  test "changing paths expires old assets" do
-    old_digest = @env.digest
-    assert @env["gallery.css"]
-
-    @env.clear_paths
-
-    assert_not_equal old_digest, @env.digest
-    assert_nil @env["gallery.css"]
   end
 
   test "changing digest implementation class" do
