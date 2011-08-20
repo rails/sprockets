@@ -55,19 +55,13 @@ module Sprockets
     # digests. Any change in the environment digest will affect all of
     # its assets.
     def digest
-      # Recompute digest for the first time or again after its been cleared
-      @digest ||= compute_digest
+      # Compute the initial digest using the implementation class. The
+      # Sprockets release version and custom environment version are
+      # mixed in. So any new releases will affect all your assets.
+      @digest ||= digest_class.new.update(VERSION).update(version.to_s)
 
       # Returned a dupped copy so the caller can safely mutate it with `.update`
       @digest.dup
     end
-
-    protected
-      def compute_digest
-        # Compute the initial digest using the implementation
-        # class. The Sprockets release version and custom environment
-        # version are mixed in.
-        digest_class.new.update(VERSION).update(version.to_s)
-      end
   end
 end
