@@ -32,6 +32,8 @@ module Sprockets
     def precompile(*paths)
       options = paths.last.is_a?(Hash) ? paths.pop : {}
 
+      warn "Sprockets::Environment#precompile is deprecated"
+
       if options[:to]
         target = options[:to]
       elsif static_root
