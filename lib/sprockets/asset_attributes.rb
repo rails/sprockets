@@ -134,8 +134,8 @@ module Sprockets
     #     # => "foo-0aa2105d29558f3eb790d411d7d8fb66.js"
     #
     def path_with_fingerprint(digest)
-      if path_fingerprint
-        path.sub($1, digest)
+      if old_digest = path_fingerprint
+        pathname.sub(old_digest, digest).to_s
       else
         basename = "#{pathname.basename(extensions.join)}-#{digest}#{extensions.join}"
         pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
