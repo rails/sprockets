@@ -111,6 +111,27 @@ module Sprockets
       find_asset(*args)
     end
 
+    def each_file
+      return to_enum(__method__) unless block_given?
+      paths.each do |base_path|
+        Dir["#{base_path}/**/*"].each do |filename|
+          yield filename
+        end
+      end
+      nil
+    end
+
+    def each_logical_path
+      return to_enum(__method__) unless block_given?
+      files = {}
+      each_file do |filename|
+        logical_path = attributes_for(filename).logical_path
+        yield logical_path unless files[logical_path]
+        files[logical_path] = true
+      end
+      nil
+    end
+
     # Pretty inspect
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +

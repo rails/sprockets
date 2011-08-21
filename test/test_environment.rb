@@ -166,77 +166,37 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  test "precompile" do
-    digest      = @env["gallery.js"].digest
-    filename    = fixture_path("public/gallery-#{digest}.js")
-    filename_gz = "#{filename}.gz"
-
-    sandbox filename, filename_gz do
-      assert !File.exist?(filename)
-      manifest = @env.precompile("gallery.js", :to => fixture_path("public"))
-      assert File.exist?(filename)
-      assert File.exist?(filename_gz)
-      assert_equal "gallery-#{digest}.js", manifest["gallery.js"]
+  test "iterate over each file" do
+    files = []
+    @env.each_file do |filename|
+      files << filename
     end
+    assert_equal 23, files.length
   end
 
-  test "precompile glob" do
-    dirname = fixture_path("public/mobile")
-
-    a_digest = @env["mobile/a.js"].digest
-    b_digest = @env["mobile/b.js"].digest
-    c_digest = @env["mobile/c.css"].digest
-
-    sandbox dirname do
-      assert !File.exist?(dirname)
-      manifest = @env.precompile("mobile/*", :to => fixture_path("public"))
-
-      assert File.exist?(dirname)
-      [nil, '.gz'].each do |gzipped|
-        assert File.exist?(File.join(dirname, "a-#{a_digest}.js#{gzipped}"))
-        assert File.exist?(File.join(dirname, "b-#{b_digest}.js#{gzipped}"))
-        assert File.exist?(File.join(dirname, "c-#{c_digest}.css#{gzipped}"))
-      end
-      assert_equal "mobile/a-#{a_digest}.js", manifest["mobile/a.js"]
-      assert_equal "mobile/b-#{b_digest}.js", manifest["mobile/b.js"]
-      assert_equal "mobile/c-#{c_digest}.css", manifest["mobile/c.css"]
-    end
+  test "each file enumerator" do
+    files = []
+    enum = @env.each_file
+    assert_equal 23, enum.to_a.length
   end
 
-  test "precompile regexp" do
-    dirname = fixture_path("public/mobile")
-
-    a_digest = @env["mobile/a.js"].digest
-    b_digest = @env["mobile/b.js"].digest
-    c_digest = @env["mobile/c.css"].digest
-
-    sandbox dirname do
-      assert !File.exist?(dirname)
-      manifest = @env.precompile(/mobile\/.*/, :to => fixture_path("public"))
-
-      assert File.exist?(dirname)
-      [nil, '.gz'].each do |gzipped|
-        assert File.exist?(File.join(dirname, "a-#{a_digest}.js#{gzipped}"))
-        assert File.exist?(File.join(dirname, "b-#{b_digest}.js#{gzipped}"))
-        assert File.exist?(File.join(dirname, "c-#{c_digest}.css#{gzipped}"))
-      end
-      assert_equal "mobile/a-#{a_digest}.js", manifest["mobile/a.js"]
-      assert_equal "mobile/b-#{b_digest}.js", manifest["mobile/b.js"]
-      assert_equal "mobile/c-#{c_digest}.css", manifest["mobile/c.css"]
+  test "iterate over each logical path" do
+    paths = []
+    @env.each_logical_path do |logical_path|
+      paths << logical_path
     end
+    assert_equal 23, paths.length
+    assert_equal paths.size, paths.uniq.size, "has duplicates"
+
+    assert paths.include?("application.js")
+    assert paths.include?("coffee/foo.js")
+    assert paths.include?("coffee/index.js")
   end
 
-  test "precompile static asset" do
-    digest   = @env["hello.txt"].digest
-    filename = fixture_path("public/hello-#{digest}.txt")
-
-    sandbox filename do
-      assert !File.exist?(filename)
-      manifest = @env.precompile("hello.txt", :to => fixture_path("public"))
-      assert File.exist?(filename)
-      assert !File.exist?("#{filename}.gz")
-      assert_equal "hello-#{digest}.txt", manifest["hello.txt"]
-    end
+  test "each logical path enumerator" do
+    files = []
+    enum = @env.each_logical_path
+    assert_equal 23, enum.to_a.length
   end
 
   test "CoffeeScript files are compiled in a closure" do

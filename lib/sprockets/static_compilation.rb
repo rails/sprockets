@@ -47,7 +47,7 @@ module Sprockets
 
       manifest = {}
       paths.each do |path|
-        files.each do |logical_path|
+        each_logical_path do |logical_path|
           if path.is_a?(Regexp)
             # Match path against `Regexp`
             next unless path.match(logical_path)
@@ -74,17 +74,5 @@ module Sprockets
       end
       manifest
     end
-
-    private
-      # Get all reachable files in environment path
-      def files
-        files = Set.new
-        paths.each do |base_path|
-          Dir["#{base_path}/**/*"].each do |filename|
-            files << attributes_for(filename).logical_path
-          end
-        end
-        files
-      end
   end
 end
