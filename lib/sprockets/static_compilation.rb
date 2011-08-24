@@ -19,7 +19,7 @@ module Sprockets
     # Assign a static root directory.
     def static_root=(root)
       expire_index!
-      warn "Sprockets::Environment#static_root is deprecated"
+      logger.warn "Sprockets::Environment#static_root is deprecated\n#{caller[0..2].join("\n")}"
       @static_root = root ? Pathname.new(root) : nil
     end
 
@@ -32,7 +32,7 @@ module Sprockets
     def precompile(*paths)
       options = paths.last.is_a?(Hash) ? paths.pop : {}
 
-      warn "Sprockets::Environment#precompile is deprecated"
+      logger.warn "Sprockets::Environment#precompile is deprecated\n#{caller[0..2].join("\n")}"
 
       if options[:to]
         target = options[:to]

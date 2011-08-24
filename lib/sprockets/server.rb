@@ -90,7 +90,7 @@ module Sprockets
     # A third `prefix` argument can be pass along to be prepended to
     # the string.
     def path(logical_path, fingerprint = true, prefix = nil)
-      warn "Sprockets::Environment#path is deprecated\n#{caller.join("\n")}"
+      logger.warn "Sprockets::Environment#path is deprecated\n#{caller[0..2].join("\n")}"
       if fingerprint && asset = find_asset(logical_path.to_s.sub(/^\//, ''))
         url = asset.digest_path
       else
@@ -106,7 +106,7 @@ module Sprockets
     # Deprecated: Similar to `path`, `url` returns a full url given a Rack `env`
     # Hash and a `logical_path`.
     def url(env, logical_path, fingerprint = true, prefix = nil)
-      warn "Sprockets::Environment#url is deprecated\n#{caller.join("\n")}"
+      logger.warn "Sprockets::Environment#url is deprecated\n#{caller[0..2].join("\n")}"
       req = Rack::Request.new(env)
 
       url = req.scheme + "://"
