@@ -148,7 +148,7 @@ module Sprockets
     def eql?(other)
       other.class == self.class &&
         other.relative_pathname == self.relative_pathname &&
-        other.mtime == self.mtime &&
+        other.mtime.to_i == self.mtime.to_i &&
         other.digest == self.digest
     end
     alias_method :==, :eql?
