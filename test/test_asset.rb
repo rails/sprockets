@@ -172,10 +172,12 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
 
+    warn expected.to_a.map { |a| a.send(:mtime).to_a }.inspect
+    warn expected.to_a.map { |a| a.send(:mtime).inspect }.inspect
+    warn actual.to_a.map { |a| a.send(:mtime).to_a }.inspect
+    warn actual.to_a.map { |a| a.send(:mtime).inspect }.inspect
+
     assert_equal expected.dependencies, actual.dependencies
-    assert_equal expected.to_a.map { |a| a.send(:relative_pathname) }, actual.to_a.map { |a| a.send(:relative_pathname) }
-    assert_equal expected.to_a.map { |a| a.send(:mtime) }, actual.to_a.map { |a| a.send(:mtime) }
-    assert_equal expected.to_a.map { |a| a.send(:digest) }, actual.to_a.map { |a| a.send(:digest) }
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
