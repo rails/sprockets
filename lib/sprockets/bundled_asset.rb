@@ -142,6 +142,10 @@ module Sprockets
       end
 
     private
+      def logger
+        environment.logger
+      end
+
       # Check if self has already been required and raise a fast
       # error. Otherwise you end up with a StackOverflow error.
       def check_circular_dependency!
@@ -153,6 +157,8 @@ module Sprockets
       end
 
       def build_dependency_context_and_body
+        start_time = Time.now.to_f
+
         context = blank_context
 
         # Read original data once and pass it along to `Context`
@@ -165,6 +171,9 @@ module Sprockets
         body = context.evaluate(pathname, :data => data)
 
         @dependency_context, @body = context, body
+
+        elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
+        logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
 
         return context, body
       end

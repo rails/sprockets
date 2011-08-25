@@ -23,13 +23,6 @@ module Sprockets
       pathname.to_s.sub(/^#{Regexp.escape(environment.root)}/, '$root')
     end
 
-    # Strips `$HOME` and environment root for a nicer output.
-    def pretty_path
-      @pretty_path ||= @pathname.
-        sub(/^#{Regexp.escape(ENV['HOME'] || '')}/, '~').
-        sub(/^#{Regexp.escape(environment.root)}\//, '')
-    end
-
     # Returns paths search the load path for.
     def search_paths
       paths = [pathname.to_s]

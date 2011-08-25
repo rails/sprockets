@@ -159,7 +159,6 @@ module Sprockets
     #     <%= evaluate "bar.js" %>
     #
     def evaluate(path, options = {})
-      start_time = Time.now.to_f
       pathname   = resolve(path)
       attributes = environment.attributes_for(pathname)
       processors = options[:processors] || attributes.processors
@@ -179,9 +178,6 @@ module Sprockets
           raise
         end
       end
-
-      elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
-      logger.info "Compiled #{attributes.pretty_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
 
       result
     end
