@@ -173,6 +173,7 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.digest, actual.digest
 
     assert_equal expected.dependencies, actual.dependencies
+    assert_equal expected.to_a.map { |a| a.send(:relative_pathname) }, actual.to_a.map { |a| a.send(:relative_pathname) }
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
