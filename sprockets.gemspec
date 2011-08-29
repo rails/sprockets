@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake"
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
-  s.email = "sstephenson@gmail.com"
+  s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
   s.homepage = "http://getsprockets.org/"
   s.rubyforge_project = "sprockets"
 end
