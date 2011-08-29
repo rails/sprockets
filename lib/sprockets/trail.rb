@@ -47,7 +47,7 @@ module Sprockets
     # you want.
     def clear_paths
       expire_index!
-      @trail.paths.each { |path| @trail.remove_path(path) }
+      @trail.paths.dup.each { |path| @trail.remove_path(path) }
     end
 
     # Returns an `Array` of extensions.
