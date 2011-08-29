@@ -329,9 +329,11 @@ asset's cache in response to a change in another file.
 
 # Contributing #
 
-The Sprockets source code is hosted on GitHub:
+The Sprockets source code is [hosted on
+GitHub](https://github.com/sstephenson/sprockets). You can check out a
+copy of the latest code using Git:
 
-    https://github.com/sstephenson/sprockets
+    $ git clone https://github.com/sstephenson/sprockets.git
 
 If you've found a bug or have a question, please open an issue on the
 [Sprockets issue
