@@ -56,7 +56,7 @@ of the load path have precedence over subsequent directories.
     environment.append_path 'vendor/assets/jquery'
 
 In general, you should append to the path by default and reserve
-prepending for cases where you need to override exisiting assets.
+prepending for cases where you need to override existing assets.
 
 ## Accessing Assets ##
 
