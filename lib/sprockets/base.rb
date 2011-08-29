@@ -5,7 +5,6 @@ require 'sprockets/digest'
 require 'sprockets/processing'
 require 'sprockets/server'
 require 'sprockets/static_asset'
-require 'sprockets/static_compilation'
 require 'sprockets/trail'
 require 'pathname'
 
@@ -13,7 +12,7 @@ module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
     include Digest
-    include Caching, Processing, Server, StaticCompilation, Trail
+    include Caching, Processing, Server, Trail
 
     # Get and set `Logger` instance.
     attr_accessor :logger

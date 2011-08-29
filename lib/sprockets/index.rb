@@ -17,7 +17,6 @@ module Sprockets
       @context_class     = environment.context_class
       @cache             = environment.cache
       @trail             = environment.trail.index
-      @static_root       = environment.static_root
       @digest            = environment.digest
       @digest_class      = environment.digest_class
       @version           = environment.version
