@@ -188,7 +188,12 @@ logical path as a property on the global `JST` object. Invoke a
 template function to render the template as a string. The resulting
 string can then be inserted into the DOM.
 
-[example]
+    <!-- templates/hello.jst.ejs -->
+    <div>Hello, <span><%= name %></span>!</div>
+
+    // application.js
+    //= require templates/hello
+    $("#hello").html(JST["templates/hello"]({ name: "Sam" }));
 
 Sprockets supports two JavaScript template languages:
 [EJS](https://github.com/sstephenson/ruby-ejs), for embedded
