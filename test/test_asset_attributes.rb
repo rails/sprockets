@@ -16,7 +16,9 @@ class TestAssetAttributes < Sprockets::TestCase
   end
 
   test "logical path" do
-    assert_equal nil, pathname(fixture_path("missing/application.js")).logical_path
+    assert_raise Sprockets::Error do
+      pathname(fixture_path("missing/application.js")).logical_path
+    end
 
     assert_equal "application.js", pathname(fixture_path("default/application.js")).logical_path
     assert_equal "application.css", pathname(fixture_path("default/application.css")).logical_path
