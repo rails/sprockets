@@ -130,8 +130,7 @@ module Sprockets
       if old_digest = path_fingerprint
         pathname.sub(old_digest, digest).to_s
       else
-        basename = "#{pathname.basename(extensions.join)}-#{digest}#{extensions.join}"
-        pathname.dirname.to_s == '.' ? basename : pathname.dirname.join(basename).to_s
+        pathname.to_s.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
       end
     end
 
