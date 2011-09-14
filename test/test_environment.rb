@@ -166,6 +166,19 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
+  test "iterate over each entry" do
+    entries = []
+    @env.each_entry(fixture_path("default")) do |path|
+      entries << path
+    end
+    assert_equal 30, entries.length
+  end
+
+  test "each entry enumerator" do
+    enum = @env.each_entry(fixture_path("default"))
+    assert_equal 30, enum.to_a.length
+  end
+
   test "iterate over each file" do
     files = []
     @env.each_file do |filename|
@@ -175,7 +188,6 @@ module EnvironmentTests
   end
 
   test "each file enumerator" do
-    files = []
     enum = @env.each_file
     assert_equal 27, enum.to_a.length
   end
@@ -195,7 +207,6 @@ module EnvironmentTests
   end
 
   test "each logical path enumerator" do
-    files = []
     enum = @env.each_logical_path
     assert_equal 27, enum.to_a.length
   end

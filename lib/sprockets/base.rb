@@ -110,11 +110,34 @@ module Sprockets
       find_asset(*args)
     end
 
+    def each_entry(root, &block)
+      return to_enum(__method__, root) unless block_given?
+      root = Pathname.new(root) unless root.is_a?(Pathname)
+
+      paths = []
+      entries(root).sort.each do |filename|
+        path = root.join(filename)
+        paths << path
+
+        if stat(path).directory?
+          each_entry(path) do |subpath|
+            paths << subpath
+          end
+        end
+      end
+
+      paths.sort_by(&:to_s).each(&block)
+
+      nil
+    end
+
     def each_file
       return to_enum(__method__) unless block_given?
-      paths.each do |base_path|
-        each_file_in_directory(base_path) do |path|
-          yield path
+      paths.each do |root|
+        each_entry(root) do |path|
+          if !stat(path).directory?
+            yield path
+          end
         end
       end
       nil
@@ -157,19 +180,6 @@ module Sprockets
           BundledAsset.new(self, logical_path, pathname, options)
         else
           StaticAsset.new(self, logical_path, pathname)
-        end
-      end
-
-      def each_file_in_directory(base, &block)
-        base = Pathname.new(base) unless base.is_a?(Pathname)
-        entries(base).each do |filename|
-          path = base.join(filename)
-          stats = stat(path)
-          if stats.directory?
-            each_file_in_directory(path, &block)
-          else
-            yield path
-          end
         end
       end
   end
