@@ -298,6 +298,12 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "can't require absolute files outside the load path" do
+    assert_raise Sprockets::FileOutsidePaths do
+      warn asset("absolute/require_outside_path.js").to_s
+    end
+  end
+
   test "require_directory requires all child files in alphabetical order" do
     assert_equal(
       "ok(\"b.js.erb\");\n",
@@ -342,6 +348,12 @@ class BundledAssetTest < Sprockets::TestCase
   test "require_tree with a nonexistent path raises an exception" do
     assert_raise(Sprockets::ArgumentError) do
       asset("tree/with_logical_path/require_tree_with_nonexistent_path.js").to_s
+    end
+  end
+
+  test "require_tree with a nonexistent absolute path raises an exception" do
+    assert_raise(Sprockets::ArgumentError) do
+      asset("absolute/require_nonexistent_path.js").to_s
     end
   end
 

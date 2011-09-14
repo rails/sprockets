@@ -50,7 +50,7 @@ module Sprockets
         path = "#{path}#{engine_format_extension}" unless format_extension
         path
       else
-        raise Error, "#{pathname} isn't in paths: #{environment.paths.join(', ')}"
+        raise FileOutsidePaths, "#{pathname} isn't in paths: #{environment.paths.join(', ')}"
       end
     end
 
