@@ -113,8 +113,8 @@ module Sprockets
     def each_file
       return to_enum(__method__) unless block_given?
       paths.each do |base_path|
-        Dir["#{base_path}/**/*"].each do |filename|
-          yield filename unless File.directory?(filename)
+        each_file_in_directory(base_path) do |path|
+          yield path
         end
       end
       nil
@@ -157,6 +157,19 @@ module Sprockets
           BundledAsset.new(self, logical_path, pathname, options)
         else
           StaticAsset.new(self, logical_path, pathname)
+        end
+      end
+
+      def each_file_in_directory(base, &block)
+        base = Pathname.new(base) unless base.is_a?(Pathname)
+        entries(base).each do |filename|
+          path = base.join(filename)
+          stats = stat(path)
+          if stats.directory?
+            each_file_in_directory(path, &block)
+          else
+            yield path
+          end
         end
       end
   end
