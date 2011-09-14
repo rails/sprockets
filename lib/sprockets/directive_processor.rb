@@ -258,17 +258,18 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless root.directory?
+          unless (stats = stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
           context.depend_on(root)
 
-          Dir["#{root}/*"].sort.each do |filename|
-            if filename == self.file
+          entries(root).each do |pathname|
+            pathname = root.join(pathname)
+            if pathname.to_s == self.file
               next
-            elsif context.asset_requirable?(filename)
-              context.require_asset(filename)
+            elsif context.asset_requirable?(pathname)
+              context.require_asset(pathname)
             end
           end
         else
@@ -286,19 +287,19 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless root.directory?
+          unless (stats = stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
           context.depend_on(root)
 
-          Dir["#{root}/**/*"].sort.each do |filename|
-            if filename == self.file
+          each_entry(root) do |pathname|
+            if pathname.to_s == self.file
               next
-            elsif File.directory?(filename)
-              context.depend_on(filename)
-            elsif context.asset_requirable?(filename)
-              context.require_asset(filename)
+            elsif stat(pathname).directory?
+              context.depend_on(pathname)
+            elsif context.asset_requirable?(pathname)
+              context.require_asset(pathname)
             end
           end
         else
@@ -359,8 +360,8 @@ module Sprockets
       # compat mode is on.
       def constants
         if compat?
-          path = File.join(context.root_path, "constants.yml")
-          File.exist?(path) ? YAML.load_file(path) : {}
+          pathname = Pathname.new(context.root_path).join("constants.yml")
+          stat(pathname) ? YAML.load_file(pathname) : {}
         else
           {}
         end
@@ -375,6 +376,18 @@ module Sprockets
     private
       def relative?(path)
         path =~ /^\.($|\.?\/)/
+      end
+
+      def stat(path)
+        context.environment.stat(path)
+      end
+
+      def entries(path)
+        context.environment.entries(path)
+      end
+
+      def each_entry(root, &block)
+        context.environment.each_entry(root, &block)
       end
   end
 end
