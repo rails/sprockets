@@ -185,11 +185,6 @@ module Sprockets
         environment.attributes_for(path).relativize_root
       end
 
-      # Return new blank `Context` to evaluate processors in.
-      def blank_context
-        environment.context_class.new(environment.index, logical_path.to_s, pathname)
-      end
-
       # Check if dependency is fresh.
       #
       # `dep` is a `Hash` with `path`, `mtime` and `hexdigest` keys.

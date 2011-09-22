@@ -9,8 +9,8 @@ module Sprockets
       super
 
       start_time = Time.now.to_f
-      context = blank_context
 
+      context = environment.context_class.new(environment, logical_path, pathname)
       @source = context.evaluate(pathname)
 
       @required_assets  = []

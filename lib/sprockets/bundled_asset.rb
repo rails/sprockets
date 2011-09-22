@@ -15,8 +15,17 @@ module Sprockets
 
       @self_asset = @environment.find_asset(pathname, :bundle => false)
 
-      @source = build_source
-      @mtime  = to_a.map { |asset| asset.mtime }.max
+      @source = ""
+
+      # Explode Asset into parts and gather the dependency bodies
+      to_a.each { |dependency| @source << dependency.to_s }
+
+      # Run bundle processors on concatenated source
+      context = environment.context_class.new(environment, logical_path, pathname)
+      @source = context.evaluate(pathname, :data => @source,
+                  :processors => environment.bundle_processors(content_type))
+
+      @mtime  = to_a.map(&:mtime).max
       @length = Rack::Utils.bytesize(source)
       @digest = environment.digest.update(source).hexdigest
     end
@@ -66,17 +75,5 @@ module Sprockets
     def fresh?
       @self_asset && @self_asset.fresh?
     end
-
-    private
-      def build_source
-        data = ""
-
-        # Explode Asset into parts and gather the dependency bodies
-        to_a.each { |dependency| data << dependency.to_s }
-
-        # Run bundle processors on concatenated source
-        blank_context.evaluate(pathname, :data => data,
-          :processors => environment.bundle_processors(content_type))
-      end
   end
 end
