@@ -3,6 +3,8 @@ require 'sprockets/utils'
 
 module Sprockets
   class ProcessedAsset < Asset
+    attr_reader :required_assets
+
     def initialize(environment, logical_path, pathname)
       super
 
@@ -11,9 +13,15 @@ module Sprockets
 
       @source         = context.evaluate(pathname)
       @required_paths = context._required_paths
+      @required_assets = []
 
       unless @required_paths.include?(pathname.to_s)
         @required_paths << pathname.to_s
+      end
+
+      each_required_asset do |asset|
+        raise ArgumentError unless asset.is_a?(ProcessedAsset)
+        @required_assets << asset
       end
 
       @dependency_paths = Set.new
@@ -38,8 +46,12 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      @source           = coder['source']
-      @required_paths   = coder['required_paths'].map { |p| expand_root_path(p) }
+      @source          = coder['source']
+      @required_paths  = coder['required_paths'].map { |p| expand_root_path(p) }
+      @required_assets = coder['required_paths'].map { |p|
+        p = expand_root_path(p)
+        p == pathname.to_s ? self : environment[p, :bundle => false]
+      }
       @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
         # TODO: expand_root_path
         DependencyFile.new(h['path'], h['mtime'], h['digest'])

@@ -39,16 +39,6 @@ module Sprockets
 
       @self_asset = @environment.find_asset(pathname, :bundle => false)
 
-      @body = @self_asset.source
-
-      @assets = []
-      @dependency_paths = Set.new
-      @self_asset.each_required_asset do |asset|
-        raise ArgumentError unless asset.is_a?(ProcessedAsset)
-        @assets << asset
-        @dependency_paths.merge(asset.send(:dependency_paths))
-      end
-
       @source = build_source
       @mtime  = to_a.map { |asset| asset.mtime }.max
       @length = Rack::Utils.bytesize(source)
@@ -61,36 +51,30 @@ module Sprockets
 
       @self_asset = @environment.find_asset(pathname, :bundle => false)
 
-      @body   = coder['body']
+      if @self_asset.digest != coder['self_digest']
+        @self_asset = nil
+      end
+
       @source = coder['source']
-
-      @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
-        # TODO: expand_root_path
-        DependencyFile.new(h['path'], h['mtime'], h['digest'])
-      })
-
-      @assets = coder['asset_paths'].map { |p|
-        p = expand_root_path(p)
-        p == pathname.to_s ? @self_asset : environment[p, :bundle => false]
-      }
     end
 
     # Serialize custom attributes in `BundledAsset`.
     def encode_with(coder)
       super
 
-      coder['body']   = body
       coder['source'] = source
-      coder['asset_paths'] = to_a.map { |a| relativize_root_path(a.pathname) }
-      # TODO: relativize_root_path
-      coder['dependency_paths'] = @dependency_paths.map(&:to_hash)
+      coder['self_digest'] = @self_asset.digest
+    end
+
+    def required_assets
+      @self_asset.required_assets
     end
 
     # Get asset's own processed contents. Excludes any of its required
     # dependencies but does run any processors or engines on the
     # original file.
     def body
-      @body
+      @self_asset.source
     end
 
     # Return an `Array` of `Asset` files that are declared dependencies.
@@ -99,20 +83,13 @@ module Sprockets
     end
 
     # Expand asset into an `Array` of parts.
-    def to_a
-      @assets
-    end
+    alias_method :to_a, :required_assets
 
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?
-      # Check freshness of all dependencies
-      @dependency_paths.all? { |dep| dependency_fresh?(dep) }
+      @self_asset && @self_asset.fresh?
     end
-
-    protected
-      # TODO: Get rid of this
-      attr_reader :dependency_paths
 
     private
       def build_source

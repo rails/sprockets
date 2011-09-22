@@ -72,6 +72,11 @@ module Sprockets
       []
     end
 
+    # TODO: Document this method
+    def required_assets
+      []
+    end
+
     # Expand asset into an `Array` of parts.
     #
     # Appending all of an assets body parts together should give you
