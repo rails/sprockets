@@ -20,7 +20,6 @@ module Sprockets
       end
 
       each_required_asset do |asset|
-        raise ArgumentError unless asset.is_a?(ProcessedAsset)
         @required_assets << asset
       end
 
@@ -53,8 +52,7 @@ module Sprockets
         p == pathname.to_s ? self : environment[p, :bundle => false]
       }
       @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
-        # TODO: expand_root_path
-        DependencyFile.new(h['path'], h['mtime'], h['digest'])
+        DependencyFile.new(expand_root_path(h['path']), h['mtime'], h['digest'])
       })
     end
 
@@ -64,8 +62,11 @@ module Sprockets
 
       coder['source']           = source
       coder['required_paths']   = @required_paths.map { |p| relativize_root_path(p) }
-      # TODO: relativize_root_path
-      coder['dependency_paths'] = @dependency_paths.map(&:to_hash)
+      coder['dependency_paths'] = @dependency_paths.map { |d|
+        { 'path' => relativize_root_path(d.pathname).to_s,
+          'mtime' => d.mtime.iso8601,
+          'digest' => d.digest }
+      }
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
@@ -97,6 +98,25 @@ module Sprockets
     end
 
     protected
+      class DependencyFile < Struct.new(:pathname, :mtime, :digest)
+        def initialize(pathname, mtime, digest)
+          pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)
+          mtime    = Time.parse(mtime) if mtime.is_a?(String)
+          super
+        end
+
+        def eql?(other)
+          other.is_a?(DependencyFile) &&
+            pathname.eql?(other.pathname) &&
+            mtime.eql?(other.mtime) &&
+            digest.eql?(other.digest)
+        end
+
+        def hash
+          pathname.to_s.hash
+        end
+      end
+
       # TODO: Get rid of this
       attr_reader :dependency_paths
   end

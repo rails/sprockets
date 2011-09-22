@@ -5,30 +5,6 @@ require 'set'
 require 'zlib'
 
 module Sprockets
-  # TODO: Move this into its own file
-  class DependencyFile < Struct.new(:pathname, :mtime, :digest)
-    def initialize(pathname, mtime, digest)
-      pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)
-      mtime    = Time.parse(mtime) if mtime.is_a?(String)
-      super
-    end
-
-    def to_hash
-      { 'path' => pathname.to_s, 'mtime' => mtime.iso8601, 'digest' => digest }
-    end
-
-    def eql?(other)
-      other.is_a?(DependencyFile) &&
-        pathname.eql?(other.pathname) &&
-        mtime.eql?(other.mtime) &&
-        digest.eql?(other.digest)
-    end
-
-    def hash
-      pathname.to_s.hash
-    end
-  end
-
   # `BundledAsset`s are used for files that need to be processed and
   # concatenated with other assets. Use for `.js` and `.css` files.
   class BundledAsset < Asset
