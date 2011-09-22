@@ -6,6 +6,7 @@ module Sprockets
   class ContentTypeMismatch     < Error; end
   class EncodingError           < Error; end
   class FileNotFound            < Error; end
+  class FileOutsidePaths        < Error; end
 
   module EngineError
     attr_accessor :sprockets_annotation

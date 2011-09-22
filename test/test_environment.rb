@@ -165,18 +165,30 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
+  test "iterate over each entry" do
+    entries = []
+    @env.each_entry(fixture_path("default")) do |path|
+      entries << path
+    end
+    assert_equal 30, entries.length
+  end
+
+  test "each entry enumerator" do
+    enum = @env.each_entry(fixture_path("default"))
+    assert_equal 30, enum.to_a.length
+  end
+
   test "iterate over each file" do
     files = []
     @env.each_file do |filename|
       files << filename
     end
-    assert_equal 21, files.length
+    assert_equal 27, files.length
   end
 
   test "each file enumerator" do
-    files = []
     enum = @env.each_file
-    assert_equal 21, enum.to_a.length
+    assert_equal 27, enum.to_a.length
   end
 
   test "iterate over each logical path" do
@@ -184,7 +196,7 @@ module EnvironmentTests
     @env.each_logical_path do |logical_path|
       paths << logical_path
     end
-    assert_equal 21, paths.length
+    assert_equal 27, paths.length
     assert_equal paths.size, paths.uniq.size, "has duplicates"
 
     assert paths.include?("application.js")
@@ -194,9 +206,8 @@ module EnvironmentTests
   end
 
   test "each logical path enumerator" do
-    files = []
     enum = @env.each_logical_path
-    assert_equal 21, enum.to_a.length
+    assert_equal 27, enum.to_a.length
   end
 
   test "CoffeeScript files are compiled in a closure" do
