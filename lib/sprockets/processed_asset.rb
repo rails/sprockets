@@ -11,27 +11,30 @@ module Sprockets
       start_time = Time.now.to_f
       context = blank_context
 
-      @source         = context.evaluate(pathname)
-      @required_paths = context._required_paths
-      @required_assets = []
+      @source = context.evaluate(pathname)
 
-      unless @required_paths.include?(pathname.to_s)
-        @required_paths << pathname.to_s
-      end
-
-      each_required_asset do |asset|
-        @required_assets << asset
-      end
-
+      @required_assets  = []
       @dependency_paths = Set.new
+
+      (context._required_paths + [pathname.to_s]).each do |path|
+        if path == self.pathname.to_s
+          @required_assets << self unless @required_assets.include?(self)
+        elsif asset = environment.find_asset(path, :bundle => false)
+          asset.required_assets.each do |asset_dependency|
+            @required_assets << asset_dependency unless @required_assets.include?(asset_dependency)
+          end
+        end
+      end
+
       context._dependency_paths.each do |path|
         @dependency_paths << DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
       end
+
       context._dependency_assets.each do |path|
         if path == self.pathname.to_s
           @dependency_paths << DependencyFile.new(pathname, mtime, digest)
-        elsif required_asset = environment.find_asset(path, :bundle => false)
-          @dependency_paths.merge(required_asset.dependency_paths)
+        elsif asset = environment.find_asset(path, :bundle => false)
+          @dependency_paths.merge(asset.dependency_paths)
         end
       end
 
@@ -46,7 +49,6 @@ module Sprockets
       super
 
       @source          = coder['source']
-      @required_paths  = coder['required_paths'].map { |p| expand_root_path(p) }
       @required_assets = coder['required_paths'].map { |p|
         p = expand_root_path(p)
         p == pathname.to_s ? self : environment[p, :bundle => false]
@@ -61,7 +63,9 @@ module Sprockets
       super
 
       coder['source']           = source
-      coder['required_paths']   = @required_paths.map { |p| relativize_root_path(p) }
+      coder['required_paths']   = required_assets.map { |a|
+        relativize_root_path(a.pathname).to_s
+      }
       coder['dependency_paths'] = @dependency_paths.map { |d|
         { 'path' => relativize_root_path(d.pathname).to_s,
           'mtime' => d.mtime.iso8601,
@@ -76,28 +80,9 @@ module Sprockets
       @dependency_paths.all? { |dep| dependency_fresh?(dep) }
     end
 
-    # TODO: Hide this
-    def each_required_asset(requires = Set.new, &block)
-      return if requires.include?(self.pathname.to_s)
-      requires << self.pathname.to_s
-
-      paths = Set.new
-      @required_paths.each do |path|
-        next if paths.include?(path)
-
-        if path == self.pathname.to_s
-          paths << path
-          yield self
-        elsif required_asset = environment.find_asset(path, :bundle => false)
-          required_asset.each_required_asset(requires) do |asset_dependency|
-            paths << asset_dependency.pathname.to_s
-            yield asset_dependency
-          end
-        end
-      end
-    end
-
     protected
+      attr_reader :dependency_paths
+
       class DependencyFile < Struct.new(:pathname, :mtime, :digest)
         def initialize(pathname, mtime, digest)
           pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)
@@ -116,8 +101,5 @@ module Sprockets
           pathname.to_s.hash
         end
       end
-
-      # TODO: Get rid of this
-      attr_reader :dependency_paths
   end
 end
