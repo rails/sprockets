@@ -13,16 +13,6 @@ module Sprockets
       @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
     end
 
-    # Replaces `$root` placeholder with actual environment root.
-    def expand_root
-      pathname.to_s.sub(/^\$root/, environment.root)
-    end
-
-    # Replaces environment root with `$root` placeholder.
-    def relativize_root
-      pathname.to_s.sub(/^#{Regexp.escape(environment.root)}/, '$root')
-    end
-
     # Returns paths search the load path for.
     def search_paths
       paths = [pathname.to_s]

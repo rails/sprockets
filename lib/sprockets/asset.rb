@@ -16,6 +16,7 @@ module Sprockets
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
+      @root         = environment.root
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
       @content_type = environment.content_type_of(pathname)
@@ -27,6 +28,7 @@ module Sprockets
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @environment = environment
+      @root        = environment.root
 
       @logical_path = coder['logical_path']
       @content_type = coder['content_type']
@@ -177,12 +179,12 @@ module Sprockets
 
       # Replace `$root` placeholder with actual environment root.
       def expand_root_path(path)
-        environment.attributes_for(path).expand_root
+        path.to_s.sub(/^\$root/, @root)
       end
 
       # Replace actual environment root with `$root` placeholder.
       def relativize_root_path(path)
-        environment.attributes_for(path).relativize_root
+        path.to_s.sub(/^#{Regexp.escape(@root)}/, '$root')
       end
 
       # Check if dependency is fresh.
