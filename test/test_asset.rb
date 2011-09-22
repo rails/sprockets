@@ -38,6 +38,14 @@ module AssetTests
     assert_kind_of String, @asset.body
   end
 
+  test "to_a body parts equals to_s" do
+    source = ""
+    @asset.to_a.each do |asset|
+      source << asset.body
+    end
+    assert_equal @asset.to_s, source
+  end
+
   test "write to file" do
     target = fixture_path('asset/tmp.js')
     begin
