@@ -214,10 +214,6 @@ module EnvironmentTests
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)
   end
-
-  test "assets environment reference is its caller" do
-    assert_equal @env, @env["gallery.js"].environment
-  end
 end
 
 class WhitespaceCompressor

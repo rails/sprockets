@@ -10,12 +10,11 @@ module Sprockets
       asset
     end
 
-    attr_reader :environment
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
 
     def initialize(environment, logical_path, pathname)
-      @environment  = environment
+      @environment  = environment # TODO: Don't hold reference to environment
       @root         = environment.root
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
@@ -27,7 +26,7 @@ module Sprockets
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
-      @environment = environment
+      @environment = environment # TODO: Don't hold reference to environment
       @root        = environment.root
 
       @logical_path = coder['logical_path']
@@ -112,7 +111,7 @@ module Sprockets
     # Used to test if cached models need to be rebuilt.
     def fresh?
       # Check current mtime and digest
-      dependency_fresh?(self)
+      dependency_fresh?(@environment, self) # TODO: Don't hold reference to environment
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
@@ -193,7 +192,7 @@ module Sprockets
       #
       # A `Hash` is used rather than other `Asset` object because we
       # want to test non-asset files and directories.
-      def dependency_fresh?(dep = {})
+      def dependency_fresh?(environment, dep)
         path, mtime, hexdigest = dep.pathname.to_s, dep.mtime, dep.digest
 
         stat = environment.stat(path)
@@ -225,11 +224,6 @@ module Sprockets
 
         # Otherwise, its stale.
         false
-      end
-
-    private
-      def logger
-        environment.logger
       end
   end
 end

@@ -13,7 +13,7 @@ module Sprockets
     def initialize(environment, logical_path, pathname)
       super(environment, logical_path, pathname)
 
-      @self_asset = @environment.find_asset(pathname, :bundle => false)
+      @self_asset = environment.find_asset(pathname, :bundle => false)
 
       @source = ""
 
@@ -34,7 +34,7 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      @self_asset = @environment.find_asset(pathname, :bundle => false)
+      @self_asset = environment.find_asset(pathname, :bundle => false)
 
       if @self_asset.digest != coder['self_digest']
         @self_asset = nil

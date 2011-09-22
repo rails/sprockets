@@ -39,7 +39,7 @@ module Sprockets
       end
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
-      logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
+      environment.logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
     end
 
     attr_reader :source
@@ -77,7 +77,7 @@ module Sprockets
     # digest to the inmemory model.
     def fresh?
       # Check freshness of all declared dependencies
-      @dependency_paths.all? { |dep| dependency_fresh?(dep) }
+      @dependency_paths.all? { |dep| dependency_fresh?(@environment, dep) } # TODO: Don't hold reference to environment
     end
 
     protected
