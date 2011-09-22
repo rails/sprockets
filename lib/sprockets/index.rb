@@ -43,11 +43,12 @@ module Sprockets
 
     # Cache `find_asset` calls
     def find_asset(path, options = {})
-      if asset = @assets[path.to_s]
+      options[:bundle] = true unless options.key?(:bundle)
+      if asset = @assets[cache_key_for(path, options)]
         asset
       elsif asset = super
         # Cache at logical path and expanded path
-        @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
+        @assets[cache_key_for(path, options)] = @assets[cache_key_for(asset.pathname, options)] = asset
         asset
       end
     end
@@ -62,9 +63,9 @@ module Sprockets
       # Cache asset building in memory and in persisted cache.
       def build_asset(path, pathname, options)
         # Memory cache
-        memoize(@assets, pathname.to_s) do
+        memoize(@assets, cache_key_for(pathname, options)) do
           # Persisted cache
-          cache_asset(pathname.to_s) do
+          cache_asset(cache_key_for(pathname, options)) do
             super
           end
         end

@@ -19,6 +19,32 @@ class TestCaching < Sprockets::TestCase
     assert_equal @env1.digest, @env2.digest
   end
 
+  test "same environment instance cache objects are equal" do
+    env = @env1
+
+    asset1 = env['gallery.js']
+    asset2 = env['gallery.js']
+
+    assert asset1
+    assert asset2
+
+    assert asset1.equal?(asset2)
+    assert asset2.equal?(asset1)
+  end
+
+  test "same index instance cache objects are equal" do
+    index = @env1.index
+
+    asset1 = index['gallery.js']
+    asset2 = index['gallery.js']
+
+    assert asset1
+    assert asset2
+
+    assert asset1.equal?(asset2)
+    assert asset2.equal?(asset1)
+  end
+
   test "shared cache objects are eql" do
     asset1 = @env1['gallery.js']
     asset2 = @env2['gallery.js']
@@ -29,6 +55,22 @@ class TestCaching < Sprockets::TestCase
     assert asset1.eql?(asset2)
     assert asset2.eql?(asset1)
     assert !asset1.equal?(asset2)
+  end
+
+  test "proccessed and bundled assets are cached separately" do
+    env = @env1
+    assert_kind_of Sprockets::ProcessedAsset, env['gallery.js', :bundle => false]
+    assert_kind_of Sprockets::BundledAsset,   env['gallery.js', :bundle => true]
+    assert_kind_of Sprockets::ProcessedAsset, env['gallery.js', :bundle => false]
+    assert_kind_of Sprockets::BundledAsset,   env['gallery.js', :bundle => true]
+  end
+
+  test "proccessed and bundled assets are cached separately on index" do
+    index = @env1.index
+    assert_kind_of Sprockets::ProcessedAsset, index['gallery.js', :bundle => false]
+    assert_kind_of Sprockets::BundledAsset,   index['gallery.js', :bundle => true]
+    assert_kind_of Sprockets::ProcessedAsset, index['gallery.js', :bundle => false]
+    assert_kind_of Sprockets::BundledAsset,   index['gallery.js', :bundle => true]
   end
 
   test "stale cached asset isn't loaded if file is remove" do

@@ -10,10 +10,6 @@ module AssetTests
     assert @asset.pathname.exist?
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
-  end
-
   test "mtime" do
     assert @asset.mtime
   end
@@ -77,6 +73,10 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   include AssetTests
+
+  test "logical path can find itself" do
+    assert_equal @asset, @env[@asset.logical_path]
+  end
 
   test "class" do
     assert_kind_of Sprockets::StaticAsset, @asset
@@ -171,11 +171,210 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
+    assert_equal expected.fresh?, actual.fresh?
 
     assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
+
+    assert actual.eql?(expected)
+    assert expected.eql?(actual)
+  end
+end
+
+class ProcessedAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @asset = @env.find_asset('application.js', :bundle => false)
+  end
+
+  include AssetTests
+
+  test "logical path can find itself" do
+    assert_equal @asset, @env[@asset.logical_path, :bundle => false]
+  end
+
+  test "class" do
+    assert_kind_of Sprockets::ProcessedAsset, @asset
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 109, @asset.length
+  end
+
+  test "splat" do
+    assert_equal [@asset], @asset.to_a
+  end
+
+  test "dependencies" do
+    assert_equal [], @asset.dependencies
+  end
+
+  test "to_s" do
+    assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
+  end
+
+  test "each" do
+    body = ""
+    @asset.each { |part| body << part }
+    assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+  end
+
+  test "to_a" do
+    body = ""
+    @asset.to_a.each do |asset|
+      body << asset.body
+    end
+    assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+  end
+
+  test "asset is fresh if its mtime and contents are the same" do
+    assert @asset.fresh?
+  end
+
+  test "asset is fresh if its mtime is changed but its contents is the same" do
+    filename = fixture_path('asset/test-fixture.js')
+
+    sandbox filename do
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env.find_asset('test-fixture.js', :bundle => false)
+
+      assert asset.fresh?
+
+      File.open(filename, 'w') { |f| f.write "a" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, filename)
+
+      assert asset.fresh?
+    end
+  end
+
+  test "asset is stale when its contents has changed" do
+    filename = fixture_path('asset/test-fixture.js')
+
+    sandbox filename do
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env.find_asset('test-fixture.js', :bundle => false)
+
+      assert asset.fresh?
+
+      File.open(filename, 'w') { |f| f.write "b" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, filename)
+
+      assert asset.stale?
+    end
+  end
+
+  test "asset is stale if the file is removed" do
+    filename = fixture_path('asset/test-fixture.js')
+
+    sandbox filename do
+      File.open(filename, 'w') { |f| f.write "a" }
+      asset = @env.find_asset('test-fixture.js', :bundle => false)
+
+      assert asset.fresh?
+
+      File.unlink(filename)
+
+      assert asset.stale?
+    end
+  end
+
+  test "asset is stale when one of its dependencies is modified" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      File.open(main, 'w') { |f| f.write "//= depend_on test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a;" }
+      asset = @env.find_asset('test-main.js', :bundle => false)
+
+      assert asset.fresh?
+
+      File.open(dep, 'w') { |f| f.write "b;" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, dep)
+
+      assert asset.stale?
+    end
+  end
+
+  test "fuck asset is stale when one of its asset dependencies is modified" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      File.open(main, 'w') { |f| f.write "//= depend_on_asset test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a;" }
+      asset = @env.find_asset('test-main.js', :bundle => false)
+
+      assert asset.fresh?
+
+      File.open(dep, 'w') { |f| f.write "b;" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, dep)
+
+      assert asset.stale?
+    end
+  end
+
+  test "asset is stale when one of its asset dependency dependencies is modified" do
+    a = fixture_path('asset/test-a.js')
+    b = fixture_path('asset/test-b.js')
+    c = fixture_path('asset/test-c.js')
+
+    sandbox a, b, c do
+      File.open(a, 'w') { |f| f.write "//= depend_on_asset test-b\n" }
+      File.open(b, 'w') { |f| f.write "//= depend_on_asset test-c\n" }
+      File.open(c, 'w') { |f| f.write "c;" }
+      asset_a = @env.find_asset('test-a.js', :bundle => false)
+      asset_b = @env.find_asset('test-b.js', :bundle => false)
+      asset_c = @env.find_asset('test-c.js', :bundle => false)
+
+      assert asset_a.fresh?
+      assert asset_b.fresh?
+      assert asset_c.fresh?
+
+      File.open(c, 'w') { |f| f.write "x;" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, c)
+
+      assert asset_a.stale?
+      assert asset_b.stale?
+      assert asset_c.stale?
+    end
+  end
+
+  test "serializing asset to and from hash" do
+    expected = @asset
+    hash     = {}
+    @asset.encode_with(hash)
+    actual   = @env.asset_from_hash(hash)
+
+    assert_kind_of Sprockets::ProcessedAsset, actual
+    assert_equal expected.logical_path, actual.logical_path
+    assert_equal expected.pathname, actual.pathname
+    assert_equal expected.content_type, actual.content_type
+    assert_equal expected.length, actual.length
+    assert_equal expected.digest, actual.digest
+    assert_equal expected.fresh?, actual.fresh?
+
+    assert_equal expected.dependencies, actual.dependencies
+    assert_equal expected.to_a, actual.to_a
+    assert_equal expected.body, actual.body
+    assert_equal expected.to_s, actual.to_s
+
+    # Internal
+    assert_equal expected.send(:dependency_paths), actual.send(:dependency_paths)
 
     assert actual.eql?(expected)
     assert expected.eql?(actual)
@@ -192,6 +391,10 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   include AssetTests
+
+  test "logical path can find itself" do
+    assert_equal @asset, @env[@asset.logical_path]
+  end
 
   test "class" do
     assert_kind_of Sprockets::BundledAsset, @asset
@@ -229,7 +432,11 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname)
   end
 
-  test "asset includes self as dependency" do
+  test "splatted assets are processed assets" do
+    assert asset("project.js").to_a.all? { |a| a.is_a?(Sprockets::ProcessedAsset) }
+  end
+
+  test "asset doesn't include self as dependency" do
     assert_equal [], asset("project.js").dependencies.map(&:pathname)
   end
 
@@ -686,9 +893,14 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
+    assert_equal expected.fresh?, actual.fresh?
+
     assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.to_s, actual.to_s
+
+    # Internal
+    assert_equal expected.send(:dependency_paths), actual.send(:dependency_paths)
 
     assert actual.eql?(expected)
     assert expected.eql?(actual)

@@ -66,7 +66,6 @@ module EnvironmentTests
   test "asset_data_uri helper" do
     asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
-    assert asset.send(:dependency_paths).find { |dependency| dependency["path"] == fixture_path("default/blank.gif") }
   end
 
   test "lookup mime type" do

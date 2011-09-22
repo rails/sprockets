@@ -11,6 +11,8 @@ module Sprockets
       case hash['class']
       when 'BundledAsset'
         BundledAsset.from_hash(self, hash)
+      when 'ProcessedAsset'
+        ProcessedAsset.from_hash(self, hash)
       when 'StaticAsset'
         StaticAsset.from_hash(self, hash)
       else
@@ -64,12 +66,12 @@ module Sprockets
       # Strips `Environment#root` from key to make the key work
       # consisently across different servers. The key is also hashed
       # so it does not exceed 250 characters.
-      def cache_key_for(key)
+      def expand_cache_key(key)
         File.join('sprockets', digest.hexdigest(key.sub(root, '')))
       end
 
       def cache_get_hash(key, version)
-        hash = cache_get(cache_key_for(key))
+        hash = cache_get(expand_cache_key(key))
         if hash.is_a?(Hash) && version == hash['_version']
           hash
         end
@@ -77,7 +79,7 @@ module Sprockets
 
       def cache_set_hash(key, version, hash)
         hash['_version'] = version
-        cache_set(cache_key_for(key), hash)
+        cache_set(expand_cache_key(key), hash)
         hash
       end
 

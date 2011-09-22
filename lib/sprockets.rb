@@ -19,6 +19,7 @@ module Sprockets
   autoload :FileNotFound,            "sprockets/errors"
   autoload :Index,                   "sprockets/index"
   autoload :JstProcessor,            "sprockets/jst_processor"
+  autoload :ProcessedAsset,          "sprockets/processed_asset"
   autoload :Processing,              "sprockets/processing"
   autoload :Processor,               "sprockets/processor"
   autoload :Server,                  "sprockets/server"

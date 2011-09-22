@@ -154,10 +154,32 @@ module Sprockets
         # If there are any processors to run on the pathname, use
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if attributes_for(pathname).processors.any?
-          BundledAsset.new(self, logical_path, pathname, options)
+          if options[:bundle] == false
+            circular_call_protection(pathname.to_s) do
+              ProcessedAsset.new(self, logical_path, pathname)
+            end
+          else
+            BundledAsset.new(self, logical_path, pathname)
+          end
         else
           StaticAsset.new(self, logical_path, pathname)
         end
+      end
+
+      def cache_key_for(path, options)
+        "#{path}:#{options[:bundle] ? '1' : '0'}"
+      end
+
+      def circular_call_protection(path)
+        reset = Thread.current[:sprockets_circular_calls].nil?
+        calls = Thread.current[:sprockets_circular_calls] ||= Set.new
+        if calls.include?(path)
+          raise CircularDependencyError, "#{path} has already been required"
+        end
+        calls << path
+        yield
+      ensure
+        Thread.current[:sprockets_circular_calls] = nil if reset
       end
   end
 end

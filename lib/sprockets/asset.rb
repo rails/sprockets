@@ -10,81 +10,53 @@ module Sprockets
       asset
     end
 
-    # Define base set of attributes to be serialized.
-    def self.serialized_attributes
-      %w( id logical_path pathname )
-    end
-
     attr_reader :environment
-    attr_reader :id, :logical_path, :pathname
+    attr_reader :logical_path, :pathname
+    attr_reader :content_type, :mtime, :length, :digest
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
-      @id           = environment.digest.update(object_id.to_s).to_s
+      @content_type = environment.content_type_of(pathname)
+      @mtime        = environment.stat(pathname).mtime
+      @length       = environment.stat(pathname).size
+      @digest       = environment.file_digest(pathname).hexdigest
     end
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @environment = environment
-      @pathname = @mtime = @length = nil
 
-      self.class.serialized_attributes.each do |attr|
-        instance_variable_set("@#{attr}", coder[attr].to_s) if coder[attr]
-      end
+      @logical_path = coder['logical_path']
+      @content_type = coder['content_type']
+      @digest       = coder['digest']
 
-      if @pathname && @pathname.is_a?(String)
+      if pathname = coder['pathname']
         # Expand `$root` placeholder and wrapper string in a `Pathname`
-        @pathname = Pathname.new(expand_root_path(@pathname))
+        @pathname = Pathname.new(expand_root_path(pathname))
       end
 
-      if @mtime && @mtime.is_a?(String)
+      if mtime = coder['mtime']
         # Parse time string
-        @mtime = Time.parse(@mtime)
+        @mtime = Time.parse(mtime)
       end
 
-      if @length && @length.is_a?(String)
+      if length = coder['length']
         # Convert length to an `Integer`
-        @length = Integer(@length)
+        @length = Integer(length)
       end
     end
 
     # Copy serialized attributes to the coder object
     def encode_with(coder)
-      coder['class'] = self.class.name.sub(/Sprockets::/, '')
-
-      self.class.serialized_attributes.each do |attr|
-        value = send(attr)
-        coder[attr] = case value
-          when Time
-            value.iso8601
-          else
-            value.to_s
-          end
-      end
-
-      coder['pathname'] = relativize_root_path(coder['pathname'])
-    end
-
-    # Returns `Content-Type` from pathname.
-    def content_type
-      @content_type ||= environment.content_type_of(pathname)
-    end
-
-    # Get mtime at the time the `Asset` is built.
-    def mtime
-      @mtime ||= environment.stat(pathname).mtime
-    end
-
-    # Get length at the time the `Asset` is built.
-    def length
-      @length ||= environment.stat(pathname).size
-    end
-
-    # Get content digest at the time the `Asset` is built.
-    def digest
-      @digest ||= environment.file_digest(pathname).hexdigest
+      coder['class']        = self.class.name.sub(/Sprockets::/, '')
+      coder['logical_path'] = logical_path
+      coder['pathname']     = relativize_root_path(pathname).to_s
+      coder['content_type'] = content_type
+      coder['mtime']        = mtime.iso8601
+      coder['length']       = length
+      coder['digest']       = digest
     end
 
     # Return logical path with digest spliced in.
@@ -111,6 +83,16 @@ module Sprockets
       [self]
     end
 
+    # `body` is aliased to source by default if it can't have any dependencies.
+    def body
+      source
+    end
+
+    # Return `String` of concatenated source.
+    def to_s
+      source
+    end
+
     # Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.
     def each
@@ -121,10 +103,9 @@ module Sprockets
     # digest to the inmemory model.
     #
     # Used to test if cached models need to be rebuilt.
-    #
-    # Subclass must override `fresh?` or `stale?`.
     def fresh?
-      !stale?
+      # Check current mtime and digest
+      dependency_fresh?(self)
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
@@ -133,6 +114,36 @@ module Sprockets
     # Subclass must override `fresh?` or `stale?`.
     def stale?
       !fresh?
+    end
+
+    # Save asset to disk.
+    def write_to(filename, options = {})
+      # Gzip contents if filename has '.gz'
+      options[:compress] ||= File.extname(filename) == '.gz'
+
+      File.open("#{filename}+", 'wb') do |f|
+        if options[:compress]
+          # Run contents through `Zlib`
+          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
+          gz.write to_s
+          gz.close
+        else
+          # Write out as is
+          f.write to_s
+          f.close
+        end
+      end
+
+      # Atomic write
+      FileUtils.mv("#{filename}+", filename)
+
+      # Set mtime correctly
+      File.utime(mtime, mtime, filename)
+
+      nil
+    ensure
+      # Ensure tmp file gets cleaned up
+      FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
     # Pretty inspect
@@ -169,6 +180,11 @@ module Sprockets
         environment.attributes_for(path).relativize_root
       end
 
+      # Return new blank `Context` to evaluate processors in.
+      def blank_context
+        environment.context_class.new(environment.index, logical_path.to_s, pathname)
+      end
+
       # Check if dependency is fresh.
       #
       # `dep` is a `Hash` with `path`, `mtime` and `hexdigest` keys.
@@ -176,7 +192,7 @@ module Sprockets
       # A `Hash` is used rather than other `Asset` object because we
       # want to test non-asset files and directories.
       def dependency_fresh?(dep = {})
-        path, mtime, hexdigest = dep.values_at('path', 'mtime', 'hexdigest')
+        path, mtime, hexdigest = dep.pathname.to_s, dep.mtime, dep.digest
 
         stat = environment.stat(path)
 
@@ -207,6 +223,11 @@ module Sprockets
 
         # Otherwise, its stale.
         false
+      end
+
+    private
+      def logger
+        environment.logger
       end
   end
 end
