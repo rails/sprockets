@@ -5,6 +5,7 @@ require 'set'
 require 'zlib'
 
 module Sprockets
+  # TODO: Move this into its own file
   class DependencyFile < Struct.new(:pathname, :mtime, :digest)
     def initialize(pathname, mtime, digest)
       pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)
@@ -64,6 +65,7 @@ module Sprockets
       @source = coder['source']
 
       @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
+        # TODO: expand_root_path
         DependencyFile.new(h['path'], h['mtime'], h['digest'])
       })
 
@@ -80,6 +82,7 @@ module Sprockets
       coder['body']   = body
       coder['source'] = source
       coder['asset_paths'] = to_a.map { |a| relativize_root_path(a.pathname) }
+      # TODO: relativize_root_path
       coder['dependency_paths'] = @dependency_paths.map(&:to_hash)
     end
 
@@ -108,6 +111,7 @@ module Sprockets
     end
 
     protected
+      # TODO: Get rid of this
       attr_reader :dependency_paths
 
     private

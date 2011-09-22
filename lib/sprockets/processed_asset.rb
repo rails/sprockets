@@ -41,6 +41,7 @@ module Sprockets
       @source           = coder['source']
       @required_paths   = coder['required_paths'].map { |p| expand_root_path(p) }
       @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
+        # TODO: expand_root_path
         DependencyFile.new(h['path'], h['mtime'], h['digest'])
       })
     end
@@ -51,7 +52,7 @@ module Sprockets
 
       coder['source']           = source
       coder['required_paths']   = @required_paths.map { |p| relativize_root_path(p) }
-      # TODO relativize_root_path
+      # TODO: relativize_root_path
       coder['dependency_paths'] = @dependency_paths.map(&:to_hash)
     end
 
@@ -62,7 +63,7 @@ module Sprockets
       @dependency_paths.all? { |dep| dependency_fresh?(dep) }
     end
 
-    # INTERNAL
+    # TODO: Hide this
     def each_required_asset(requires = Set.new, &block)
       return if requires.include?(self.pathname.to_s)
       requires << self.pathname.to_s
@@ -84,6 +85,7 @@ module Sprockets
     end
 
     protected
+      # TODO: Get rid of this
       attr_reader :dependency_paths
   end
 end
