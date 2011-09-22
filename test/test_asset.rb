@@ -73,7 +73,7 @@ module FreshnessTests
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.write "a;" }
-      asset = @env['test.js', :bundle => @bundle]
+      asset = asset('test.js')
 
       assert asset.fresh?
 
@@ -90,7 +90,7 @@ module FreshnessTests
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.write "a;" }
-      asset = @env['test.js', :bundle => @bundle]
+      asset = asset('test.js')
 
       assert asset.fresh?
 
@@ -107,7 +107,7 @@ module FreshnessTests
     sandbox main, dep do
       File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
-      asset = @env['test-main.js', :bundle => @bundle]
+      asset = asset('test-main.js')
 
       assert asset.fresh?
 
@@ -126,7 +126,7 @@ module FreshnessTests
     sandbox main, dep do
       File.open(main, 'w') { |f| f.write "//= depend_on test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
-      asset = @env['test-main.js', :bundle => @bundle]
+      asset = asset('test-main.js')
 
       assert asset.fresh?
 
@@ -145,7 +145,7 @@ module FreshnessTests
     sandbox main, dep do
       File.open(main, 'w') { |f| f.write "//= depend_on_asset test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
-      asset = @env['test-main.js', :bundle => @bundle]
+      asset = asset('test-main.js')
 
       assert asset.fresh?
 
@@ -166,9 +166,9 @@ module FreshnessTests
       File.open(a, 'w') { |f| f.write "//= require test-b\n" }
       File.open(b, 'w') { |f| f.write "//= require test-c\n" }
       File.open(c, 'w') { |f| f.write "c;" }
-      asset_a = @env['test-a.js', :bundle => @bundle]
-      asset_b = @env['test-b.js', :bundle => @bundle]
-      asset_c = @env['test-c.js', :bundle => @bundle]
+      asset_a = asset('test-a.js')
+      asset_b = asset('test-b.js')
+      asset_c = asset('test-c.js')
 
       assert asset_a.fresh?
       assert asset_b.fresh?
@@ -193,9 +193,9 @@ module FreshnessTests
       File.open(a, 'w') { |f| f.write "//= require test-b\n" }
       File.open(b, 'w') { |f| f.write "//= depend_on test-c\n" }
       File.open(c, 'w') { |f| f.write "c;" }
-      asset_a = @env['test-a.js', :bundle => @bundle]
-      asset_b = @env['test-b.js', :bundle => @bundle]
-      asset_c = @env['test-c.js', :bundle => @bundle]
+      asset_a = asset('test-a.js')
+      asset_b = asset('test-b.js')
+      asset_c = asset('test-c.js')
 
       assert asset_a.fresh?
       assert asset_b.fresh?
@@ -220,9 +220,9 @@ module FreshnessTests
       File.open(a, 'w') { |f| f.write "//= depend_on_asset test-b\n" }
       File.open(b, 'w') { |f| f.write "//= depend_on_asset test-c\n" }
       File.open(c, 'w') { |f| f.write "c;" }
-      asset_a = @env['test-a.js', :bundle => @bundle]
-      asset_b = @env['test-b.js', :bundle => @bundle]
-      asset_c = @env['test-c.js', :bundle => @bundle]
+      asset_a = asset('test-a.js')
+      asset_b = asset('test-b.js')
+      asset_c = asset('test-c.js')
 
       assert asset_a.fresh?
       assert asset_b.fresh?
@@ -245,7 +245,7 @@ module FreshnessTests
     sandbox main, dep do
       File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
-      asset = @env['test-main.js', :bundle => @bundle]
+      asset = asset('test-main.js')
 
       assert asset.fresh?
 
@@ -292,7 +292,7 @@ module FreshnessTests
     image  = fixture_path('asset/POW.png')
 
     sandbox sprite, image do
-      asset = @env['sprite.css', :bundle => @bundle]
+      asset = asset('sprite.css')
 
       assert asset.fresh?
 
