@@ -123,19 +123,6 @@ module Sprockets
       pathname.basename(extensions.join).to_s =~ /-([0-9a-f]{7,40})$/ ? $1 : nil
     end
 
-    # Injects digest fingerprint into path.
-    #
-    #     "foo.js"
-    #     # => "foo-0aa2105d29558f3eb790d411d7d8fb66.js"
-    #
-    def path_with_fingerprint(digest)
-      if old_digest = path_fingerprint
-        pathname.sub(old_digest, digest).to_s
-      else
-        pathname.to_s.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
-      end
-    end
-
     private
       # Returns implicit engine content type.
       #

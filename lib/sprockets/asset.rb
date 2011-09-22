@@ -64,7 +64,7 @@ module Sprockets
     #   "foo/bar-37b51d194a7513e45b56f6524f2d51f2.js"
     #
     def digest_path
-      environment.attributes_for(logical_path).path_with_fingerprint(digest)
+      logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
     end
 
     # Return an `Array` of `Asset` files that are declared dependencies.
