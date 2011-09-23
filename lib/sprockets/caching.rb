@@ -30,7 +30,7 @@ module Sprockets
           yield
 
         # Check cache for `path`
-        elsif (asset = asset_from_hash(cache_get_hash(path.to_s, digest.hexdigest))) && asset.fresh?
+        elsif (asset = asset_from_hash(cache_get_hash(path.to_s))) && asset.fresh?
           asset
 
          # Otherwise yield block that slowly finds and builds the asset
@@ -39,12 +39,12 @@ module Sprockets
           asset.encode_with(hash)
 
           # Save the asset to at its path
-          cache_set_hash(path.to_s, digest.hexdigest, hash)
+          cache_set_hash(path.to_s, hash)
 
           # Since path maybe a logical or full pathname, save the
           # asset its its full path too
           if path.to_s != asset.pathname.to_s
-            cache_set_hash(asset.pathname.to_s, digest.hexdigest, hash)
+            cache_set_hash(asset.pathname.to_s, hash)
           end
 
           asset
@@ -59,15 +59,15 @@ module Sprockets
         File.join('sprockets', digest.hexdigest(key.sub(root, '')))
       end
 
-      def cache_get_hash(key, version)
+      def cache_get_hash(key)
         hash = cache_get(expand_cache_key(key))
-        if hash.is_a?(Hash) && version == hash['_version']
+        if hash.is_a?(Hash) && digest.hexdigest == hash['_version']
           hash
         end
       end
 
-      def cache_set_hash(key, version, hash)
-        hash['_version'] = version
+      def cache_set_hash(key, hash)
+        hash['_version'] = digest.hexdigest
         cache_set(expand_cache_key(key), hash)
         hash
       end
