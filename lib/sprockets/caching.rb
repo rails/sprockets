@@ -20,17 +20,6 @@ module Sprockets
       end
     end
 
-    def cache_hash(key, version)
-      if cache.nil?
-        yield
-      elsif hash = cache_get_hash(key, version)
-        hash
-      elsif hash = yield
-        cache_set_hash(key, version, hash)
-        hash
-      end
-    end
-
     protected
       # Cache helper method. Takes a `path` argument which maybe a
       # logical path or fully expanded path. The `&block` is passed
