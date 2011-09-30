@@ -47,8 +47,8 @@ module Sprockets
       if asset = @assets[cache_key_for(path, options)]
         asset
       elsif asset = super
-        # Cache at logical path and expanded path
-        @assets[cache_key_for(path, options)] = @assets[cache_key_for(asset.pathname, options)] = asset
+        # Cache at logical path
+        @assets[cache_key_for(path, options)] = asset
         asset
       end
     end
