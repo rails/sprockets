@@ -9,37 +9,6 @@ require 'sprockets/trail'
 require 'pathname'
 
 module Sprockets
-  class AssetWrapper
-    instance_methods.each { |m| undef_method m unless m =~ /^__|object_id/ }
-
-    attr_reader :_asset
-
-    def initialize(environment, asset)
-      @_environment, @_asset = environment, asset
-
-      if @_asset.is_a?(AssetWrapper)
-        warn "double wrapping"
-        @_asset = @_asset._asset
-      end
-    end
-
-    def is_a?(klass)
-      klass == AssetWrapper || super
-    end
-
-    def equal?(other)
-      if other.is_a?(AssetWrapper)
-        @_asset.equal?(other._asset)
-      else
-        super
-      end
-    end
-
-    def method_missing(*args, &block)
-      @_asset.send(*args, &block)
-    end
-  end
-
   # `Base` class for `Environment` and `Index`.
   class Base
     include Digest
@@ -210,16 +179,13 @@ module Sprockets
         if attributes_for(pathname).processors.any?
           if options[:bundle] == false
             circular_call_protection(pathname.to_s) do
-              asset = ProcessedAsset.new(self, logical_path, pathname)
-              AssetWrapper.new(self, asset)
+              ProcessedAsset.new(self, logical_path, pathname)
             end
           else
-            asset = BundledAsset.new(self, logical_path, pathname)
-            AssetWrapper.new(self, asset)
+            BundledAsset.new(self, logical_path, pathname)
           end
         else
-          asset = StaticAsset.new(self, logical_path, pathname)
-          AssetWrapper.new(self, asset)
+          StaticAsset.new(self, logical_path, pathname)
         end
       end
 
