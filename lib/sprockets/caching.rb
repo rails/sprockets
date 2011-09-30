@@ -38,7 +38,7 @@ module Sprockets
       # consisently across different servers. The key is also hashed
       # so it does not exceed 250 characters.
       def expand_cache_key(key)
-        File.join('sprockets', digest.hexdigest(key.sub(root, '')))
+        File.join('sprockets', digest_class.hexdigest(key.sub(root, '')))
       end
 
       def cache_get_hash(key)

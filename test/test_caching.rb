@@ -73,6 +73,19 @@ class TestCaching < Sprockets::TestCase
     assert_kind_of Sprockets::BundledAsset,   index['gallery.js', :bundle => true]
   end
 
+  test "keys are consistent even if environment digest changes" do
+    @env1['gallery.js']
+    old_keys = @cache.keys.sort
+
+    @cache.clear
+    @env2.version = '2.0'
+
+    @env2['gallery.js']
+    new_keys = @cache.keys.sort
+
+    assert_equal old_keys, new_keys
+  end
+
   test "stale cached asset isn't loaded if file is remove" do
     filename = fixture_path("default/tmp.js")
 
