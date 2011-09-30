@@ -14,7 +14,6 @@ module Sprockets
     attr_reader :content_type, :mtime, :length, :digest
 
     def initialize(environment, logical_path, pathname)
-      @environment  = environment # TODO: Don't hold reference to environment
       @root         = environment.root
       @logical_path = logical_path.to_s
       @pathname     = Pathname.new(pathname)
@@ -26,8 +25,7 @@ module Sprockets
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
-      @environment = environment # TODO: Don't hold reference to environment
-      @root        = environment.root
+      @root = environment.root
 
       @logical_path = coder['logical_path']
       @content_type = coder['content_type']
@@ -109,17 +107,17 @@ module Sprockets
     # digest to the inmemory model.
     #
     # Used to test if cached models need to be rebuilt.
-    def fresh?
+    def fresh?(environment)
       # Check current mtime and digest
-      dependency_fresh?(@environment, self) # TODO: Don't hold reference to environment
+      dependency_fresh?(environment, self)
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     #
     # Subclass must override `fresh?` or `stale?`.
-    def stale?
-      !fresh?
+    def stale?(environment)
+      !fresh?(environment)
     end
 
     # Save asset to disk.

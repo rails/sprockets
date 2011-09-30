@@ -10,11 +10,14 @@ module Sprockets
       return unless hash.is_a?(Hash)
       case hash['class']
       when 'BundledAsset'
-        BundledAsset.from_hash(self, hash)
+        asset = BundledAsset.from_hash(self, hash)
+        AssetWrapper.new(self, asset)
       when 'ProcessedAsset'
-        ProcessedAsset.from_hash(self, hash)
+        asset = ProcessedAsset.from_hash(self, hash)
+        AssetWrapper.new(self, asset)
       when 'StaticAsset'
-        StaticAsset.from_hash(self, hash)
+        asset = StaticAsset.from_hash(self, hash)
+        AssetWrapper.new(self, asset)
       else
         nil
       end

@@ -75,9 +75,9 @@ module Sprockets
 
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
-    def fresh?
+    def fresh?(environment)
       # Check freshness of all declared dependencies
-      @dependency_paths.all? { |dep| dependency_fresh?(@environment, dep) } # TODO: Don't hold reference to environment
+      @dependency_paths.all? { |dep| dependency_fresh?(environment, dep) }
     end
 
     protected

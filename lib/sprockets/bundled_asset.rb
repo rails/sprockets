@@ -72,8 +72,8 @@ module Sprockets
 
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
-    def fresh?
-      @self_asset && @self_asset.fresh?
+    def fresh?(environment)
+      @self_asset && @self_asset.fresh?(environment)
     end
   end
 end
