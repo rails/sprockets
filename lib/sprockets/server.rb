@@ -40,7 +40,6 @@ module Sprockets
 
       # Look up the asset.
       asset = find_asset(path)
-      asset.to_a if asset
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
