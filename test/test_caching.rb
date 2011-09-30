@@ -45,6 +45,32 @@ class TestCaching < Sprockets::TestCase
     assert asset2.equal?(asset1)
   end
 
+  test "same environment instance is cached at logical and expanded path" do
+    env = @env1
+
+    asset1 = env['gallery.js']
+    asset2 = env[asset1.pathname]
+
+    assert asset1
+    assert asset2
+
+    assert asset1.equal?(asset2)
+    assert asset2.equal?(asset1)
+  end
+
+  test "same index instance is cached at logical and expanded path" do
+    index = @env1.index
+
+    asset1 = index['gallery.js']
+    asset2 = index[asset1.pathname]
+
+    assert asset1
+    assert asset2
+
+    assert asset1.equal?(asset2)
+    assert asset2.equal?(asset1)
+  end
+
   test "shared cache objects are eql" do
     asset1 = @env1['gallery.js']
     asset2 = @env2['gallery.js']
