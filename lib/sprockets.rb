@@ -1,29 +1,36 @@
 require 'sprockets/version'
 
 module Sprockets
-  autoload :ArgumentError,           "sprockets/errors"
+  # Environment
+  autoload :Base,                    "sprockets/base"
+  autoload :Engines,                 "sprockets/engines"
+  autoload :Environment,             "sprockets/environment"
+  autoload :Index,                   "sprockets/index"
+
+  # Assets
   autoload :Asset,                   "sprockets/asset"
-  autoload :AssetAttributes,         "sprockets/asset_attributes"
   autoload :BundledAsset,            "sprockets/bundled_asset"
+  autoload :ProcessedAsset,          "sprockets/processed_asset"
+  autoload :StaticAsset,             "sprockets/static_asset"
+
+  # Processing
   autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
-  autoload :CircularDependencyError, "sprockets/errors"
-  autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :Context,                 "sprockets/context"
   autoload :DirectiveProcessor,      "sprockets/directive_processor"
   autoload :EcoTemplate,             "sprockets/eco_template"
   autoload :EjsTemplate,             "sprockets/ejs_template"
+  autoload :JstProcessor,            "sprockets/jst_processor"
+  autoload :Processor,               "sprockets/processor"
+  autoload :SafetyColons,            "sprockets/safety_colons"
+
+  # Internal utilities
+  autoload :ArgumentError,           "sprockets/errors"
+  autoload :AssetAttributes,         "sprockets/asset_attributes"
+  autoload :CircularDependencyError, "sprockets/errors"
+  autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :EngineError,             "sprockets/errors"
-  autoload :Engines,                 "sprockets/engines"
-  autoload :Environment,             "sprockets/environment"
   autoload :Error,                   "sprockets/errors"
   autoload :FileNotFound,            "sprockets/errors"
-  autoload :Index,                   "sprockets/index"
-  autoload :JstProcessor,            "sprockets/jst_processor"
-  autoload :ProcessedAsset,          "sprockets/processed_asset"
-  autoload :Processing,              "sprockets/processing"
-  autoload :Processor,               "sprockets/processor"
-  autoload :Server,                  "sprockets/server"
-  autoload :StaticAsset,             "sprockets/static_asset"
   autoload :Utils,                   "sprockets/utils"
 
   module Cache
