@@ -146,13 +146,20 @@ module Sprockets
 
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
-      pathname = Pathname.new(path)
+      logical_path = path
+      pathname     = Pathname.new(path)
 
       if pathname.absolute?
-        build_asset(attributes_for(pathname).logical_path, pathname, options)
+        logical_path = attributes_for(pathname).logical_path
       else
-        find_asset_in_path(pathname, options)
+        begin
+          pathname = resolve(logical_path)
+        rescue FileNotFound
+          return nil
+        end
       end
+
+      build_asset(logical_path, pathname, options)
     end
 
     # Preferred `find_asset` shorthand.

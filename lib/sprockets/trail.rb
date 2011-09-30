@@ -86,14 +86,5 @@ module Sprockets
       def trail
         @trail
       end
-
-      def find_asset_in_path(logical_path, options = {})
-        pathname = resolve(logical_path)
-      rescue FileNotFound
-        nil
-      else
-        # Build the asset for the actual pathname
-        build_asset(logical_path, pathname, options)
-      end
   end
 end
