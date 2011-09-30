@@ -98,12 +98,6 @@ class TestAssetAttributes < Sprockets::TestCase
     end
   end
 
-  test "get path fingerprint" do
-    assert_equal nil, pathname("foo.js").path_fingerprint
-    assert_equal "0aa2105d29558f3eb790d411d7d8fb66",
-      pathname("foo-0aa2105d29558f3eb790d411d7d8fb66.js").path_fingerprint
-  end
-
   private
     def pathname(path)
       env = Sprockets::Environment.new

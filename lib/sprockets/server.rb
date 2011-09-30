@@ -38,6 +38,11 @@ module Sprockets
       # Extract the path from everything after the leading slash
       path = unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
+      # Strip fingerprint
+      if fingerprint = path_fingerprint(path)
+        path = path.sub("-#{fingerprint}", '')
+      end
+
       # Look up the asset.
       asset = find_asset(path)
 
@@ -212,7 +217,7 @@ module Sprockets
 
           # If the request url contains a fingerprint, set a long
           # expires on the response
-          if attributes_for(env["PATH_INFO"]).path_fingerprint
+          if path_fingerprint(env["PATH_INFO"])
             headers["Cache-Control"] << ", max-age=31536000"
 
           # Otherwise set `must-revalidate` since the asset could be modified.
@@ -220,6 +225,15 @@ module Sprockets
             headers["Cache-Control"] << ", must-revalidate"
           end
         end
+      end
+
+      # Gets digest fingerprint.
+      #
+      #     "foo-0aa2105d29558f3eb790d411d7d8fb66.js"
+      #     # => "0aa2105d29558f3eb790d411d7d8fb66"
+      #
+      def path_fingerprint(path)
+        path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
       end
 
       # URI.unescape is deprecated on 1.9. We need to use URI::Parser

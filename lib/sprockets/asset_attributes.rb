@@ -104,15 +104,6 @@ module Sprockets
       end
     end
 
-    # Gets digest fingerprint.
-    #
-    #     "foo-0aa2105d29558f3eb790d411d7d8fb66.js"
-    #     # => "0aa2105d29558f3eb790d411d7d8fb66"
-    #
-    def path_fingerprint
-      pathname.basename(extensions.join).to_s =~ /-([0-9a-f]{7,40})$/ ? $1 : nil
-    end
-
     private
       # Returns implicit engine content type.
       #

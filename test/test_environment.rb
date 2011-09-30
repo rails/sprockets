@@ -117,15 +117,6 @@ module EnvironmentTests
     assert_equal "Hello world\n", @env[fixture_path("default/hello.txt")].to_s
   end
 
-  test "find asset with digest" do
-    digest = @env["hello.txt"].digest
-    assert_equal "Hello world\n", @env["hello-#{digest}.txt"].to_s
-  end
-
-  test "find asset with invalid digest" do
-    assert_nil @env["hello-ffffffff.txt"]
-  end
-
   test "find index.js in directory" do
     assert_equal "var A;\nvar B;\n", @env["mobile.js"].to_s
   end
