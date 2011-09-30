@@ -13,6 +13,8 @@ module Sprockets
       context = environment.context_class.new(environment, logical_path, pathname)
       @source = context.evaluate(pathname)
 
+      # TODO: Move these into there own method
+
       @required_assets  = []
 
       (context._required_paths + [pathname.to_s]).each do |path|
@@ -80,6 +82,7 @@ module Sprockets
     end
 
     protected
+      # TODO: Consider moving this into its own file
       class DependencyFile < Struct.new(:pathname, :mtime, :digest)
         def initialize(pathname, mtime, digest)
           pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)

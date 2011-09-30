@@ -51,6 +51,7 @@ module Sprockets
       coder['self_digest'] = @processed_asset.digest
     end
 
+    # TODO: Document this method
     def required_assets
       @processed_asset.required_assets
     end

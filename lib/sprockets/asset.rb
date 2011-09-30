@@ -189,6 +189,7 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
+      # TODO: Document this method
       attr_reader :dependency_paths
 
       # Get pathname with its root stripped.
