@@ -37,7 +37,7 @@ module Sprockets
     end
 
     # Cache calls to `file_digest`
-    def file_digest(pathname, data = nil)
+    def file_digest(pathname)
       memoize(@digests, pathname.to_s) { super }
     end
 

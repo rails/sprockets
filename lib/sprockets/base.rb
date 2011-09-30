@@ -120,14 +120,10 @@ module Sprockets
     # Read and compute digest of filename.
     #
     # Subclasses may cache this method.
-    def file_digest(path, data = nil)
+    def file_digest(path)
       if stat = self.stat(path)
-        # `data` maybe provided
-        if data
-          digest.update(data)
-
         # If its a file, digest the contents
-        elsif stat.file?
+        if stat.file?
           digest.file(path.to_s)
 
         # If its a directive, digest the list of filenames
