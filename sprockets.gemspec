@@ -1,7 +1,5 @@
-unless defined? Sprockets::VERSION
-  $:.unshift File.expand_path("../lib", __FILE__)
-  require "sprockets/version"
-end
+$:.unshift File.expand_path("../lib", __FILE__)
+require "sprockets/version"
 
 Gem::Specification.new do |s|
   s.name = "sprockets"
