@@ -13,7 +13,7 @@ module Sprockets
     def initialize(environment, logical_path, pathname)
       super(environment, logical_path, pathname)
 
-      @self_asset = environment.find_asset(pathname, :bundle => false)
+      @processed_asset = environment.find_asset(pathname, :bundle => false)
 
       @source = ""
 
@@ -34,10 +34,10 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      @self_asset = environment.find_asset(pathname, :bundle => false)
+      @processed_asset = environment.find_asset(pathname, :bundle => false)
 
-      if @self_asset.digest != coder['self_digest']
-        @self_asset = nil
+      if @processed_asset.digest != coder['self_digest']
+        @processed_asset = nil
       end
 
       @source = coder['source']
@@ -48,23 +48,23 @@ module Sprockets
       super
 
       coder['source'] = source
-      coder['self_digest'] = @self_asset.digest
+      coder['self_digest'] = @processed_asset.digest
     end
 
     def required_assets
-      @self_asset.required_assets
+      @processed_asset.required_assets
     end
 
     # Get asset's own processed contents. Excludes any of its required
     # dependencies but does run any processors or engines on the
     # original file.
     def body
-      @self_asset.source
+      @processed_asset.source
     end
 
     # Return an `Array` of `Asset` files that are declared dependencies.
     def dependencies
-      to_a.reject { |a| a.eql?(@self_asset) }
+      to_a.reject { |a| a.eql?(@processed_asset) }
     end
 
     # Expand asset into an `Array` of parts.
@@ -73,7 +73,7 @@ module Sprockets
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?(environment)
-      @self_asset && @self_asset.fresh?(environment)
+      @processed_asset && @processed_asset.fresh?(environment)
     end
   end
 end
