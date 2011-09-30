@@ -1,26 +1,7 @@
-require 'sprockets/bundled_asset'
-require 'sprockets/processed_asset'
-require 'sprockets/static_asset'
-
 module Sprockets
   # `Caching` is an internal mixin whose public methods are exposed on
   # the `Environment` and `Index` classes.
   module Caching
-    # Return `Asset` instance for serialized `Hash`.
-    def asset_from_hash(hash)
-      return unless hash.is_a?(Hash)
-      case hash['class']
-      when 'BundledAsset'
-        BundledAsset.from_hash(index, hash)
-      when 'ProcessedAsset'
-        ProcessedAsset.from_hash(index, hash)
-      when 'StaticAsset'
-        StaticAsset.from_hash(index, hash)
-      else
-        nil
-      end
-    end
-
     protected
       # Cache helper method. Takes a `path` argument which maybe a
       # logical path or fully expanded path. The `&block` is passed
@@ -31,7 +12,7 @@ module Sprockets
           yield
 
         # Check cache for `path`
-        elsif (asset = asset_from_hash(cache_get_hash(path.to_s))) && asset.fresh?(self)
+        elsif (asset = Asset.from_hash(self, cache_get_hash(path.to_s))) && asset.fresh?(self)
           asset
 
          # Otherwise yield block that slowly finds and builds the asset

@@ -421,7 +421,7 @@ class StaticAssetTest < Sprockets::TestCase
     expected = @asset
     hash     = {}
     @asset.encode_with(hash)
-    actual   = @env.asset_from_hash(hash)
+    actual   = Sprockets::Asset.from_hash(@env, hash)
 
     assert_kind_of Sprockets::StaticAsset, actual
     assert_equal expected.logical_path, actual.logical_path
@@ -510,7 +510,7 @@ class ProcessedAssetTest < Sprockets::TestCase
     expected = @asset
     hash     = {}
     @asset.encode_with(hash)
-    actual   = @env.asset_from_hash(hash)
+    actual   = Sprockets::Asset.from_hash(@env, hash)
 
     assert_kind_of Sprockets::ProcessedAsset, actual
     assert_equal expected.logical_path, actual.logical_path
@@ -827,7 +827,7 @@ class BundledAssetTest < Sprockets::TestCase
     expected = @asset
     hash     = {}
     @asset.encode_with(hash)
-    actual   = @env.asset_from_hash(hash)
+    actual   = Sprockets::Asset.from_hash(@env, hash)
 
     assert_kind_of Sprockets::BundledAsset, actual
     assert_equal expected.logical_path, actual.logical_path

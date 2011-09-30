@@ -6,9 +6,24 @@ module Sprockets
   class Asset
     # Internal initializer to load `Asset` from serialized `Hash`.
     def self.from_hash(environment, hash)
-      asset = allocate
-      asset.init_with(environment, hash)
-      asset
+      return unless hash.is_a?(Hash)
+
+      klass = case hash['class']
+        when 'BundledAsset'
+          BundledAsset
+        when 'ProcessedAsset'
+          ProcessedAsset
+        when 'StaticAsset'
+          StaticAsset
+        else
+          nil
+        end
+
+      if klass
+        asset = klass.allocate
+        asset.init_with(environment, hash)
+        asset
+      end
     end
 
     attr_reader :logical_path, :pathname
