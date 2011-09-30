@@ -39,9 +39,7 @@ module Sprockets
     #
     # It would be wise to increment this value anytime you make a
     # configuration change to the `Environment` object.
-    def version
-      @version
-    end
+    attr_reader :version
 
     # Assign an environment version.
     #
