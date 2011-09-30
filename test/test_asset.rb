@@ -19,11 +19,11 @@ module AssetTests
   end
 
   test "stale?" do
-    assert !@asset.stale?
+    assert !@asset.stale?(@env)
   end
 
   test "fresh?" do
-    assert @asset.fresh?
+    assert @asset.fresh?(@env)
   end
 
   test "dependencies are an Array" do
@@ -87,13 +87,13 @@ module FreshnessTests
       File.open(filename, 'w') { |f| f.write "a;" }
       asset = asset('test.js')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(filename, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -104,11 +104,11 @@ module FreshnessTests
       File.open(filename, 'w') { |f| f.write "a;" }
       asset = asset('test.js')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.unlink(filename)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -121,13 +121,13 @@ module FreshnessTests
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -140,13 +140,13 @@ module FreshnessTests
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -159,13 +159,13 @@ module FreshnessTests
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -182,17 +182,17 @@ module FreshnessTests
       asset_b = asset('test-b.js')
       asset_c = asset('test-c.js')
 
-      assert asset_a.fresh?
-      assert asset_b.fresh?
-      assert asset_c.fresh?
+      assert asset_a.fresh?(@env)
+      assert asset_b.fresh?(@env)
+      assert asset_c.fresh?(@env)
 
       File.open(c, 'w') { |f| f.write "x;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      assert asset_a.stale?
-      assert asset_b.stale?
-      assert asset_c.stale?
+      assert asset_a.stale?(@env)
+      assert asset_b.stale?(@env)
+      assert asset_c.stale?(@env)
     end
   end
 
@@ -209,17 +209,17 @@ module FreshnessTests
       asset_b = asset('test-b.js')
       asset_c = asset('test-c.js')
 
-      assert asset_a.fresh?
-      assert asset_b.fresh?
-      assert asset_c.fresh?
+      assert asset_a.fresh?(@env)
+      assert asset_b.fresh?(@env)
+      assert asset_c.fresh?(@env)
 
       File.open(c, 'w') { |f| f.write "x;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      assert asset_a.stale?
-      assert asset_b.stale?
-      assert asset_c.stale?
+      assert asset_a.stale?(@env)
+      assert asset_b.stale?(@env)
+      assert asset_c.stale?(@env)
     end
   end
 
@@ -236,17 +236,17 @@ module FreshnessTests
       asset_b = asset('test-b.js')
       asset_c = asset('test-c.js')
 
-      assert asset_a.fresh?
-      assert asset_b.fresh?
-      assert asset_c.fresh?
+      assert asset_a.fresh?(@env)
+      assert asset_b.fresh?(@env)
+      assert asset_c.fresh?(@env)
 
       File.open(c, 'w') { |f| f.write "x;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      assert asset_a.stale?
-      assert asset_b.stale?
-      assert asset_c.stale?
+      assert asset_a.stale?(@env)
+      assert asset_b.stale?(@env)
+      assert asset_c.stale?(@env)
     end
   end
 
@@ -259,17 +259,17 @@ module FreshnessTests
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.unlink(dep)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
   test "asset is stale if a file is added to its require directory" do
     asset = asset("tree/all_with_require_directory.js")
-    assert asset.fresh?
+    assert asset.fresh?(@env)
 
     dirname  = File.join(fixture_path("asset"), "tree/all")
     filename = File.join(dirname, "z.js")
@@ -279,13 +279,13 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dirname)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
   test "asset is stale if a file is added to its require tree" do
     asset = asset("tree/all_with_require_tree.js")
-    assert asset.fresh?
+    assert asset.fresh?(@env)
 
     dirname  = File.join(fixture_path("asset"), "tree/all/b/c")
     filename = File.join(dirname, "z.js")
@@ -295,7 +295,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dirname)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -306,13 +306,13 @@ module FreshnessTests
     sandbox sprite, image do
       asset = asset('sprite.css')
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(image, 'w') { |f| f.write "(change)" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, image)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 end
@@ -365,7 +365,7 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "asset is fresh if its mtime and contents are the same" do
-    assert @asset.fresh?
+    assert @asset.fresh?(@env)
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
@@ -375,13 +375,13 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test-POW.png']
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(filename, 'w') { |f| f.write "a" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
     end
   end
 
@@ -392,13 +392,13 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['POW.png']
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.open(filename, 'w') { |f| f.write "b" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -409,11 +409,11 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['POW.png']
 
-      assert asset.fresh?
+      assert asset.fresh?(@env)
 
       File.unlink(filename)
 
-      assert asset.stale?
+      assert asset.stale?(@env)
     end
   end
 
@@ -429,7 +429,7 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
-    assert_equal expected.fresh?, actual.fresh?
+    assert_equal expected.fresh?(@env), actual.fresh?(@env)
 
     assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
@@ -503,7 +503,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "asset is fresh if its mtime and contents are the same" do
-    assert @asset.fresh?
+    assert @asset.fresh?(@env)
   end
 
   test "serializing asset to and from hash" do
@@ -518,7 +518,7 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
-    assert_equal expected.fresh?, actual.fresh?
+    assert_equal expected.fresh?(@env), actual.fresh?(@env)
 
     assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
@@ -806,7 +806,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "asset is fresh if its mtime and contents are the same" do
-    assert asset("application.js").fresh?
+    assert asset("application.js").fresh?(@env)
   end
 
   test "legacy constants.yml" do
@@ -837,7 +837,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
-    assert_equal expected.fresh?, actual.fresh?
+    assert_equal expected.fresh?(@env), actual.fresh?(@env)
 
     assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a

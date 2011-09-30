@@ -33,7 +33,7 @@ module Sprockets
           yield
 
         # Check cache for `path`
-        elsif (asset = asset_from_hash(cache_get_hash(path.to_s))) && asset.fresh?
+        elsif (asset = asset_from_hash(cache_get_hash(path.to_s))) && asset.fresh?(self)
           asset
 
          # Otherwise yield block that slowly finds and builds the asset

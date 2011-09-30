@@ -69,7 +69,7 @@ module Sprockets
       options[:bundle] = true unless options.key?(:bundle)
 
       # Ensure inmemory cached assets are still fresh on every lookup
-      if (asset = @assets[cache_key_for(path, options)]) && asset.fresh?
+      if (asset = @assets[cache_key_for(path, options)]) && asset.fresh?(self)
         asset
       elsif asset = super
         @assets[cache_key_for(path, options)] = @assets[cache_key_for(asset.pathname, options)] = asset

@@ -23,14 +23,6 @@ module Sprockets
       end
     end
 
-    def fresh?(environment = @_environment)
-      @_asset.fresh?(environment)
-    end
-
-    def stale?(environment = @_environment)
-      @_asset.stale?(environment)
-    end
-
     def is_a?(klass)
       klass == AssetWrapper || super
     end
