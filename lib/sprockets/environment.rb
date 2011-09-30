@@ -71,7 +71,7 @@ module Sprockets
       # Ensure inmemory cached assets are still fresh on every lookup
       if (asset = @assets[cache_key_for(path, options)]) && asset.fresh?(self)
         asset
-      elsif asset = super
+      elsif asset = index.find_asset(path, options)
         @assets[cache_key_for(path, options)] = @assets[cache_key_for(asset.pathname, options)] = asset
         asset
       end

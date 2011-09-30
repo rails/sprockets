@@ -10,8 +10,7 @@ class TestContext < Sprockets::TestCase
 
   test "context environment is indexed" do
     instances = @env["environment.js"].to_s.split("\n")
-    # TODO: Fix this fail
-    # assert_match "Sprockets::Index", instances[0]
+    assert_match "Sprockets::Index", instances[0]
     assert_equal instances[0], instances[1]
   end
 

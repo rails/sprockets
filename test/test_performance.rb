@@ -50,8 +50,7 @@ class TestPerformance < Sprockets::TestCase
 
   test "simple file" do
     @env["gallery.js"].to_s
-    # TODO: Fix this fail
-    # assert_no_redundant_stat_calls
+    assert_no_redundant_stat_calls
   end
 
   test "indexed simple file" do
@@ -61,8 +60,7 @@ class TestPerformance < Sprockets::TestCase
 
   test "file with deps" do
     @env["mobile.js"].to_s
-    # TODO: Fix this fail
-    # assert_no_redundant_stat_calls
+    assert_no_redundant_stat_calls
   end
 
   test "indexed file with deps" do
