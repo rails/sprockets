@@ -44,7 +44,7 @@ module Sprockets
       end
 
       # Look up the asset.
-      asset = find_asset(path)
+      asset = find_asset(path, :bundle => !body_only?(env))
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
@@ -197,11 +197,7 @@ module Sprockets
 
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        if body_only?(env)
-          [ 200, headers(env, asset, Rack::Utils.bytesize(asset.body)), [asset.body] ]
-        else
-          [ 200, headers(env, asset, asset.length), asset ]
-        end
+        [ 200, headers(env, asset, asset.length), asset ]
       end
 
       def headers(env, asset, length)
