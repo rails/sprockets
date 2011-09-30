@@ -36,8 +36,7 @@ end
 
 class TestPerformance < Sprockets::TestCase
   def setup
-    @env = Sprockets::Environment.new(".")
-    @env.append_path(fixture_path('default'))
+    @env = new_environment
     reset_stats!
   end
 
@@ -81,6 +80,36 @@ class TestPerformance < Sprockets::TestCase
 
     assert asset.fresh?(index)
     assert_no_stat_calls
+  end
+
+  test "loading from cache" do
+    env1, env2 = new_environment, new_environment
+    env1.cache = {}
+    env2.cache = {}
+
+    env1["mobile.js"]
+    reset_stats!
+
+    env2["mobile.js"]
+    assert_no_redundant_stat_calls
+  end
+
+  test "loading from indexed cache" do
+    env1, env2 = new_environment, new_environment
+    env1.cache = {}
+    env2.cache = {}
+
+    env1.index["mobile.js"]
+    reset_stats!
+
+    env2.index["mobile.js"]
+    assert_no_redundant_stat_calls
+  end
+
+  def new_environment
+    Sprockets::Environment.new(".") do |env|
+      env.append_path(fixture_path('default'))
+    end
   end
 
   def reset_stats!
