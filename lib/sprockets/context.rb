@@ -193,7 +193,7 @@ module Sprockets
     #     $('<img>').attr('src', '<%= asset_data_uri 'avatar.jpg' %>')
     #
     def asset_data_uri(path)
-      depend_on(path)
+      depend_on_asset(path)
       asset  = environment.find_asset(path)
       base64 = Base64.encode64(asset.to_s).gsub(/\s+/, "")
       "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"

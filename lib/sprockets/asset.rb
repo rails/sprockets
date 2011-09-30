@@ -1,4 +1,5 @@
 require 'time'
+require 'set'
 
 module Sprockets
   # `Asset` is the base class for `BundledAsset` and `StaticAsset`.
@@ -21,11 +22,15 @@ module Sprockets
       @mtime        = environment.stat(pathname).mtime
       @length       = environment.stat(pathname).size
       @digest       = environment.file_digest(pathname).hexdigest
+
+      @dependency_paths = Set.new
     end
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @root = environment.root
+
+      @dependency_paths = Set.new
 
       @logical_path = coder['logical_path']
       @content_type = coder['content_type']
@@ -169,6 +174,8 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
+      attr_reader :dependency_paths
+
       # Get pathname with its root stripped.
       def relative_pathname
         Pathname.new(relativize_root_path(pathname))

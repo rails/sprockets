@@ -14,7 +14,6 @@ module Sprockets
       @source = context.evaluate(pathname)
 
       @required_assets  = []
-      @dependency_paths = Set.new
 
       (context._required_paths + [pathname.to_s]).each do |path|
         if path == self.pathname.to_s
@@ -81,8 +80,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :dependency_paths
-
       class DependencyFile < Struct.new(:pathname, :mtime, :digest)
         def initialize(pathname, mtime, digest)
           pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)
