@@ -38,9 +38,7 @@ class TestPerformance < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new(".")
     @env.append_path(fixture_path('default'))
-
-    $file_stat_calls = {}
-    $dir_entires_calls = {}
+    reset_stats!
   end
 
   def teardown
@@ -66,6 +64,38 @@ class TestPerformance < Sprockets::TestCase
   test "indexed file with deps" do
     @env.index["mobile.js"].to_s
     assert_no_redundant_stat_calls
+  end
+
+  test "checking freshness" do
+    asset = @env["mobile.js"]
+    reset_stats!
+
+    assert asset.fresh?(@env)
+    assert_no_redundant_stat_calls
+  end
+
+  test "checking freshness of from index" do
+    index = @env.index
+    asset = index["mobile.js"]
+    reset_stats!
+
+    assert asset.fresh?(index)
+    assert_no_stat_calls
+  end
+
+  def reset_stats!
+    $file_stat_calls = {}
+    $dir_entires_calls = {}
+  end
+
+  def assert_no_stat_calls
+    $file_stat_calls.each do |path, count|
+      assert_equal 0, count, "File.stat(#{path.inspect}) called #{count} times"
+    end
+
+    $dir_entires_calls.each do |path, count|
+      assert_equal 0, count, "Dir.entries(#{path.inspect}) called #{count} times"
+    end
   end
 
   def assert_no_redundant_stat_calls
