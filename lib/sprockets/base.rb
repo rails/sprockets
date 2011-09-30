@@ -1,6 +1,7 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
 require 'sprockets/caching'
+require 'sprockets/processed_asset'
 require 'sprockets/processing'
 require 'sprockets/server'
 require 'sprockets/static_asset'

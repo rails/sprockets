@@ -1,4 +1,5 @@
 require 'sprockets/bundled_asset'
+require 'sprockets/processed_asset'
 require 'sprockets/static_asset'
 
 module Sprockets
