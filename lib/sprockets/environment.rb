@@ -78,6 +78,7 @@ module Sprockets
     end
 
     protected
+      # TODO: Review Environment caching. This method doesn't seem to be called.
       # Cache asset building in persisted cache.
       def build_asset(path, pathname, options)
         # Persisted cache
