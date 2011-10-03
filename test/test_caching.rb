@@ -85,18 +85,18 @@ class TestCaching < Sprockets::TestCase
 
   test "proccessed and bundled assets are cached separately" do
     env = @env1
-    assert_kind_of Sprockets::ProcessedAsset, env['gallery.js', :bundle => false]
-    assert_kind_of Sprockets::BundledAsset,   env['gallery.js', :bundle => true]
-    assert_kind_of Sprockets::ProcessedAsset, env['gallery.js', :bundle => false]
-    assert_kind_of Sprockets::BundledAsset,   env['gallery.js', :bundle => true]
+    assert_kind_of Sprockets::ProcessedAsset, env.find_asset('gallery.js', :bundle => false)
+    assert_kind_of Sprockets::BundledAsset,   env.find_asset('gallery.js', :bundle => true)
+    assert_kind_of Sprockets::ProcessedAsset, env.find_asset('gallery.js', :bundle => false)
+    assert_kind_of Sprockets::BundledAsset,   env.find_asset('gallery.js', :bundle => true)
   end
 
   test "proccessed and bundled assets are cached separately on index" do
     index = @env1.index
-    assert_kind_of Sprockets::ProcessedAsset, index['gallery.js', :bundle => false]
-    assert_kind_of Sprockets::BundledAsset,   index['gallery.js', :bundle => true]
-    assert_kind_of Sprockets::ProcessedAsset, index['gallery.js', :bundle => false]
-    assert_kind_of Sprockets::BundledAsset,   index['gallery.js', :bundle => true]
+    assert_kind_of Sprockets::ProcessedAsset, index.find_asset('gallery.js', :bundle => false)
+    assert_kind_of Sprockets::BundledAsset,   index.find_asset('gallery.js', :bundle => true)
+    assert_kind_of Sprockets::ProcessedAsset, index.find_asset('gallery.js', :bundle => false)
+    assert_kind_of Sprockets::BundledAsset,   index.find_asset('gallery.js', :bundle => true)
   end
 
   test "keys are consistent even if environment digest changes" do

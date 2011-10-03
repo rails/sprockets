@@ -457,7 +457,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path, :bundle => false]
+    assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
   end
 
   test "class" do
@@ -534,7 +534,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    @env[logical_path, :bundle => @bundle]
+    @env.find_asset(logical_path, :bundle => @bundle)
   end
 
   def resolve(logical_path)
@@ -862,7 +862,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path)
-    @env[logical_path, :bundle => @bundle]
+    @env.find_asset(logical_path, :bundle => @bundle)
   end
 
   def resolve(logical_path)

@@ -52,7 +52,7 @@ module Sprockets
       @source          = coder['source']
       @required_assets = coder['required_paths'].map { |p|
         p = expand_root_path(p)
-        p == pathname.to_s ? self : environment[p, :bundle => false]
+        p == pathname.to_s ? self : environment.find_asset(p, :bundle => false)
       }
       @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
         DependencyFile.new(expand_root_path(h['path']), h['mtime'], h['digest'])
