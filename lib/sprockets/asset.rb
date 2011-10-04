@@ -24,6 +24,10 @@ module Sprockets
         asset.init_with(environment, hash)
         asset
       end
+
+    # TODO: Think long and hard about this
+    rescue Exception
+      nil
     end
 
     attr_reader :logical_path, :pathname

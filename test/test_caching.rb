@@ -140,4 +140,25 @@ class TestCaching < Sprockets::TestCase
       assert_nil @env2["bar-tmp.js"]
     end
   end
+
+  test "stale cached asset isn't loaded if removed from path" do
+    env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor")
+      env.cache = @cache
+    end
+
+    env2 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.cache = @cache
+    end
+
+    assert_equal "jQuery;\n", env1["main.js"].to_s
+    assert_equal "jQuery;\n", env1["jquery.js"].to_s
+    assert env1["main.js"].fresh?(env1)
+
+    assert_raises Sprockets::FileNotFound do
+      env2["main.js"].to_s
+    end
+  end
 end
