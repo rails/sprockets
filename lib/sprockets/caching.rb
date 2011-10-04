@@ -16,6 +16,10 @@ module Sprockets
       else
         nil
       end
+    rescue Exception => e
+      logger.debug "Cache for Asset (#{hash['logical_path']}) is stale"
+      logger.debug e
+      nil
     end
 
     def cache_hash(key, version)
