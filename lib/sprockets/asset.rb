@@ -186,7 +186,7 @@ module Sprockets
     # Assets are equal if they share the same path, mtime and digest.
     def eql?(other)
       other.class == self.class &&
-        other.relative_pathname == self.relative_pathname &&
+        other.logical_path == self.logical_path &&
         other.mtime.to_i == self.mtime.to_i &&
         other.digest == self.digest
     end
