@@ -42,14 +42,14 @@ module Sprockets
       @length       = environment.stat(pathname).size
       @digest       = environment.file_digest(pathname).hexdigest
 
-      @dependency_paths = Set.new
+      @dependency_paths = []
     end
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @root = environment.root
 
-      @dependency_paths = Set.new
+      @dependency_paths = []
 
       @logical_path = coder['logical_path']
       @content_type = coder['content_type']

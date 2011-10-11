@@ -35,17 +35,23 @@ module Sprockets
       required_assets_cache.clear
       required_assets_cache = nil
 
+      dependency_paths = {}
       context._dependency_paths.each do |path|
-        @dependency_paths << DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
+        dep = DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
+        dependency_paths[dep] = true
       end
 
       context._dependency_assets.each do |path|
         if path == self.pathname.to_s
-          @dependency_paths << DependencyFile.new(pathname, mtime, digest)
+          dep = DependencyFile.new(pathname, mtime, digest)
+          dependency_paths[dep] = true
         elsif asset = environment.find_asset(path, :bundle => false)
-          @dependency_paths.merge(asset.dependency_paths)
+          asset.dependency_paths.each do |d|
+            dependency_paths[d] = true
+          end
         end
       end
+      @dependency_paths = dependency_paths.keys
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
       environment.logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
@@ -62,9 +68,9 @@ module Sprockets
         p = expand_root_path(p)
         p == pathname.to_s ? self : environment.find_asset(p, :bundle => false)
       }
-      @dependency_paths = Set.new(coder['dependency_paths'].map { |h|
+      @dependency_paths = coder['dependency_paths'].map { |h|
         DependencyFile.new(expand_root_path(h['path']), h['mtime'], h['digest'])
-      })
+      }
     end
 
     # Serialize custom attributes in `BundledAsset`.
@@ -75,7 +81,7 @@ module Sprockets
       coder['required_paths']   = required_assets.map { |a|
         relativize_root_path(a.pathname).to_s
       }
-      coder['dependency_paths'] = @dependency_paths.map { |d|
+      coder['dependency_paths'] = dependency_paths.map { |d|
         { 'path' => relativize_root_path(d.pathname).to_s,
           'mtime' => d.mtime.iso8601,
           'digest' => d.digest }
