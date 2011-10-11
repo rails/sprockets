@@ -15,17 +15,25 @@ module Sprockets
 
       # TODO: Move these into there own method
 
-      @required_assets  = []
-
+      @required_assets = []
+      required_assets_cache = {}
       (context._required_paths + [pathname.to_s]).each do |path|
         if path == self.pathname.to_s
-          @required_assets << self unless @required_assets.include?(self)
+          unless required_assets_cache[self]
+            required_assets_cache[self] = true
+            @required_assets << self
+          end
         elsif asset = environment.find_asset(path, :bundle => false)
           asset.required_assets.each do |asset_dependency|
-            @required_assets << asset_dependency unless @required_assets.include?(asset_dependency)
+            unless required_assets_cache[asset_dependency]
+              required_assets_cache[asset_dependency] = true
+              @required_assets << asset_dependency
+            end
           end
         end
       end
+      required_assets_cache.clear
+      required_assets_cache = nil
 
       context._dependency_paths.each do |path|
         @dependency_paths << DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)

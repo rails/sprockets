@@ -183,6 +183,10 @@ module Sprockets
         ">"
     end
 
+    def hash
+      digest.hash
+    end
+
     # Assets are equal if they share the same path, mtime and digest.
     def eql?(other)
       other.class == self.class &&
