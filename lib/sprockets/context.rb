@@ -78,7 +78,7 @@ module Sprockets
       pathname   = Pathname.new(path)
       attributes = environment.attributes_for(pathname)
 
-      if pathname.absolute?
+      if pathname.to_s =~ /^\//
         pathname
 
       elsif content_type = options[:content_type]
