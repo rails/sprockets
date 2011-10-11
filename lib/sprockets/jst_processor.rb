@@ -6,14 +6,21 @@ module Sprockets
       'application/javascript'
     end
 
-    def prepare
+    def self.default_namespace
+      'this.JST'
     end
+
+    def prepare
+      @namespace = self.class.default_namespace
+    end
+
+    attr_reader :namespace
 
     def evaluate(scope, locals, &block)
       <<-JST
 (function() {
-  this.JST || (this.JST = {});
-  this.JST[#{scope.logical_path.inspect}] = #{indent(data)};
+  #{namespace} || (#{namespace} = {});
+  #{namespace}[#{scope.logical_path.inspect}] = #{indent(data)};
 }).call(this);
       JST
     end
