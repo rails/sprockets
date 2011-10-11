@@ -198,7 +198,7 @@ module Sprockets
 
       # Get pathname with its root stripped.
       def relative_pathname
-        Pathname.new(relativize_root_path(pathname))
+        @relative_pathname ||= Pathname.new(relativize_root_path(pathname))
       end
 
       # Replace `$root` placeholder with actual environment root.
