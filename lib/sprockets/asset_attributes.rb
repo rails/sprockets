@@ -32,10 +32,9 @@ module Sprockets
     # shaddowed in the path, but is required relatively, its logical
     # path will be incorrect.
     def logical_path
-      raise ArgumentError unless pathname.absolute?
-
       if root_path = environment.paths.detect { |path| pathname.to_s[path] }
-        path = pathname.relative_path_from(Pathname.new(root_path)).to_s
+        path = pathname.to_s.sub("#{root_path}/", '')
+        # path = pathname.relative_path_from(Pathname.new(root_path)).to_s
         path = engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
         path = "#{path}#{engine_format_extension}" unless format_extension
         path
