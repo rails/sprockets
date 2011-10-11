@@ -38,7 +38,12 @@ module Sprockets
 
     # Cache calls to `file_digest`
     def file_digest(pathname)
-      memoize(@digests, pathname.to_s) { super }
+      key = pathname.to_s
+      if @digests.key?(key)
+        @digests[key]
+      else
+        @digests[key] = super
+      end
     end
 
     # Cache `find_asset` calls
@@ -63,18 +68,17 @@ module Sprockets
       # Cache asset building in memory and in persisted cache.
       def build_asset(path, pathname, options)
         # Memory cache
-        memoize(@assets, cache_key_for(pathname, options)) do
-          # Persisted cache
-          cache_asset(cache_key_for(pathname, options)) do
-            super
+        key = cache_key_for(pathname, options)
+        if @assets.key?(key)
+          @assets[key]
+        else
+          @assets[key] = begin
+            # Persisted cache
+            cache_asset(key) do
+              super
+            end
           end
         end
-      end
-
-    private
-      # Simple memoize helper that stores `nil` values
-      def memoize(hash, key)
-        hash.key?(key) ? hash[key] : hash[key] = yield
       end
   end
 end
