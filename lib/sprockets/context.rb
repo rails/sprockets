@@ -148,7 +148,9 @@ module Sprockets
     def asset_requirable?(path)
       pathname = resolve(path)
       content_type = environment.content_type_of(pathname)
-      pathname.file? && (self.content_type.nil? || self.content_type == content_type)
+      stat = environment.stat(path)
+      return false unless stat && stat.file?
+      self.content_type.nil? || self.content_type == content_type
     end
 
     # Reads `path` and runs processors on the file.
