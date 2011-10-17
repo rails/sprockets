@@ -53,6 +53,8 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal ".js", pathname("jquery.min.js").format_extension
     assert_equal ".js", pathname("jquery.tmpl.js").format_extension
     assert_equal ".js", pathname("jquery.tmpl.min.js").format_extension
+    assert_equal ".js", pathname("jquery.csv.js").format_extension
+    assert_equal ".js", pathname("jquery.csv.min.js").format_extension
 
     env = Sprockets::Environment.new
     env.register_engine '.ms', Class.new
@@ -72,6 +74,8 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal [".erb"], pathname("jquery.js.erb").engine_extensions
     assert_equal [".erb"], pathname("jquery.min.js.erb").engine_extensions
     assert_equal [".coffee"], pathname("jquery.min.coffee").engine_extensions
+    assert_equal [".erb"], pathname("jquery.csv.min.js.erb").engine_extensions
+    assert_equal [".coffee", ".erb"], pathname("jquery.csv.min.js.coffee.erb").engine_extensions
 
     env = Sprockets::Environment.new
     env.register_engine '.ms', Class.new
