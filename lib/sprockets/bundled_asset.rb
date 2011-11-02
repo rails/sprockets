@@ -39,7 +39,7 @@ module Sprockets
       @required_assets = @processed_asset.required_assets
 
       if @processed_asset.digest != coder['self_digest']
-        @processed_asset = nil
+        raise UnserializeError, "processed asset belongs to a stale environment"
       end
 
       @source = coder['source']
@@ -73,7 +73,7 @@ module Sprockets
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?(environment)
-      @processed_asset && @processed_asset.fresh?(environment)
+      @processed_asset.fresh?(environment)
     end
   end
 end

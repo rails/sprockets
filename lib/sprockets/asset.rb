@@ -24,9 +24,7 @@ module Sprockets
         asset.init_with(environment, hash)
         asset
       end
-
-    # TODO: Think long and hard about this
-    rescue Exception
+    rescue UnserializeError
       nil
     end
 

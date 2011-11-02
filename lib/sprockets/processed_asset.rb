@@ -27,6 +27,11 @@ module Sprockets
       @source          = coder['source']
       @required_assets = coder['required_paths'].map { |p|
         p = expand_root_path(p)
+
+        unless environment.paths.detect { |path| p[path] }
+          raise UnserializeError, "#{p} isn't in paths"
+        end
+
         p == pathname.to_s ? self : environment.find_asset(p, :bundle => false)
       }
       @dependency_paths = coder['dependency_paths'].map { |h|
