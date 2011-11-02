@@ -38,10 +38,6 @@ module AssetTests
     assert_kind_of String, @asset.body
   end
 
-  test "required assets is an Array" do
-    assert_kind_of Array, @asset.required_assets
-  end
-
   test "to_a body parts equals to_s" do
     source = ""
     @asset.to_a.each do |asset|
@@ -352,10 +348,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal [], @asset.dependencies
   end
 
-  test "required assets" do
-    assert_equal [], @asset.required_assets
-  end
-
   test "to path" do
     assert_equal fixture_path('asset/POW.png'), @asset.to_path
   end
@@ -435,7 +427,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
-    assert_equal expected.required_assets, actual.required_assets
 
     assert actual.eql?(expected)
     assert expected.eql?(actual)
@@ -480,10 +471,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal [], @asset.dependencies
   end
 
-  test "required assets" do
-    assert_equal [resolve("project.js")], asset("project.js").required_assets.map(&:pathname)
-  end
-
   test "to_s" do
     assert_equal "\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
@@ -524,10 +511,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
-    assert_equal expected.required_assets, actual.required_assets
-
-    # Internal
-    assert_equal expected.send(:dependency_paths), actual.send(:dependency_paths)
 
     assert actual.eql?(expected)
     assert expected.eql?(actual)
@@ -594,10 +577,6 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "splatted asset includes itself" do
     assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname)
-  end
-
-  test "required assets" do
-    assert_equal [resolve("project.js")], asset("project.js").required_assets.map(&:pathname)
   end
 
   test "splatted assets are processed assets" do
@@ -842,7 +821,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.to_s, actual.to_s
-    assert_equal expected.required_assets, actual.required_assets
 
     assert actual.eql?(expected)
     assert expected.eql?(actual)

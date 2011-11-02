@@ -3,8 +3,6 @@ require 'sprockets/utils'
 
 module Sprockets
   class ProcessedAsset < Asset
-    attr_reader :required_assets
-
     def initialize(environment, logical_path, pathname)
       super
 

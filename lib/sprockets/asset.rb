@@ -41,15 +41,11 @@ module Sprockets
       @mtime        = environment.stat(pathname).mtime
       @length       = environment.stat(pathname).size
       @digest       = environment.file_digest(pathname).hexdigest
-
-      @dependency_paths = []
     end
 
     # Initialize `Asset` from serialized `Hash`.
     def init_with(environment, coder)
       @root = environment.root
-
-      @dependency_paths = []
 
       @logical_path = coder['logical_path']
       @content_type = coder['content_type']
@@ -92,11 +88,6 @@ module Sprockets
 
     # Return an `Array` of `Asset` files that are declared dependencies.
     def dependencies
-      []
-    end
-
-    # TODO: Document this method
-    def required_assets
       []
     end
 
@@ -197,8 +188,19 @@ module Sprockets
     alias_method :==, :eql?
 
     protected
-      # TODO: Document this method
-      attr_reader :dependency_paths
+      # Internal: String paths that are marked as dependencies after processing.
+      #
+      # Default to an empty `Array`.
+      def dependency_paths
+        @dependency_paths ||= []
+      end
+
+      # Internal: `ProccessedAsset`s that are required after processing.
+      #
+      # Default to an empty `Array`.
+      def required_assets
+        @required_assets ||= []
+      end
 
       # Get pathname with its root stripped.
       def relative_pathname

@@ -14,6 +14,7 @@ module Sprockets
       super(environment, logical_path, pathname)
 
       @processed_asset = environment.find_asset(pathname, :bundle => false)
+      @required_assets = @processed_asset.required_assets
 
       @source = ""
 
@@ -35,6 +36,7 @@ module Sprockets
       super
 
       @processed_asset = environment.find_asset(pathname, :bundle => false)
+      @required_assets = @processed_asset.required_assets
 
       if @processed_asset.digest != coder['self_digest']
         @processed_asset = nil
@@ -51,11 +53,6 @@ module Sprockets
       coder['self_digest'] = @processed_asset.digest
     end
 
-    # TODO: Document this method
-    def required_assets
-      @processed_asset.required_assets
-    end
-
     # Get asset's own processed contents. Excludes any of its required
     # dependencies but does run any processors or engines on the
     # original file.
@@ -69,7 +66,9 @@ module Sprockets
     end
 
     # Expand asset into an `Array` of parts.
-    alias_method :to_a, :required_assets
+    def to_a
+      required_assets
+    end
 
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
