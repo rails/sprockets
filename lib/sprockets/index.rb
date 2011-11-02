@@ -46,6 +46,9 @@ module Sprockets
       if asset = @assets[path.to_s]
         asset
       elsif asset = super
+        # Eager load asset to catch build errors
+        asset.to_s
+
         # Cache at logical path and expanded path
         @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
         asset

@@ -70,6 +70,9 @@ module Sprockets
       if (asset = @assets[path.to_s]) && asset.fresh?
         asset
       elsif asset = super
+        # Eager load asset to catch build errors
+        asset.to_s
+
         @assets[path.to_s] = @assets[asset.pathname.to_s] = asset
         asset
       end
