@@ -7,6 +7,12 @@ module Sprockets
   # any processing or concatenation. These are typical images and
   # other binary files.
   class StaticAsset < Asset
+    def initialize(environment, logical_path, pathname)
+      super
+
+      @length = environment.stat(pathname).size
+    end
+
     # Returns file contents as its `source`.
     def source
       # File is read everytime to avoid memory bloat of large binary files
