@@ -346,6 +346,24 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
+  test "bundled asset cached if theres an error building it" do
+    @env.cache = nil
+
+    filename = File.join(fixture_path("default"), "tmp.coffee")
+
+    sandbox filename do
+      File.open(filename, 'w') { |f| f.puts "-->" }
+      assert_raises(ExecJS::ProgramError) do
+        @env["tmp.js"].to_s
+      end
+
+      File.open(filename, 'w') { |f| f.puts "->" }
+      time = Time.now + 60
+      File.utime(time, time, filename)
+      assert_equal "(function() {\n  (function() {});\n}).call(this);\n", @env["tmp.js"].to_s
+    end
+  end
+
   test "seperate contexts classes for each instance" do
     e1 = new_environment
     e2 = new_environment
