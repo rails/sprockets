@@ -11,45 +11,8 @@ module Sprockets
       context = environment.context_class.new(environment, logical_path, pathname)
       @source = context.evaluate(pathname)
 
-      # TODO: Move these into there own method
-
-      @required_assets = []
-      required_assets_cache = {}
-      (context._required_paths + [pathname.to_s]).each do |path|
-        if path == self.pathname.to_s
-          unless required_assets_cache[self]
-            required_assets_cache[self] = true
-            @required_assets << self
-          end
-        elsif asset = environment.find_asset(path, :bundle => false)
-          asset.required_assets.each do |asset_dependency|
-            unless required_assets_cache[asset_dependency]
-              required_assets_cache[asset_dependency] = true
-              @required_assets << asset_dependency
-            end
-          end
-        end
-      end
-      required_assets_cache.clear
-      required_assets_cache = nil
-
-      dependency_paths = {}
-      context._dependency_paths.each do |path|
-        dep = DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
-        dependency_paths[dep] = true
-      end
-
-      context._dependency_assets.each do |path|
-        if path == self.pathname.to_s
-          dep = DependencyFile.new(pathname, mtime, digest)
-          dependency_paths[dep] = true
-        elsif asset = environment.find_asset(path, :bundle => false)
-          asset.dependency_paths.each do |d|
-            dependency_paths[d] = true
-          end
-        end
-      end
-      @dependency_paths = dependency_paths.keys
+      build_required_assets(environment, context)
+      build_dependency_paths(environment, context)
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
       environment.logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
@@ -94,7 +57,6 @@ module Sprockets
     end
 
     protected
-      # TODO: Consider moving this into its own file
       class DependencyFile < Struct.new(:pathname, :mtime, :digest)
         def initialize(pathname, mtime, digest)
           pathname = Pathname.new(pathname) unless pathname.is_a?(Pathname)
@@ -112,6 +74,53 @@ module Sprockets
         def hash
           pathname.to_s.hash
         end
+      end
+
+    private
+      def build_required_assets(environment, context)
+        @required_assets = []
+        required_assets_cache = {}
+
+        (context._required_paths + [pathname.to_s]).each do |path|
+          if path == self.pathname.to_s
+            unless required_assets_cache[self]
+              required_assets_cache[self] = true
+              @required_assets << self
+            end
+          elsif asset = environment.find_asset(path, :bundle => false)
+            asset.required_assets.each do |asset_dependency|
+              unless required_assets_cache[asset_dependency]
+                required_assets_cache[asset_dependency] = true
+                @required_assets << asset_dependency
+              end
+            end
+          end
+        end
+
+        required_assets_cache.clear
+        required_assets_cache = nil
+      end
+
+      def build_dependency_paths(environment, context)
+        dependency_paths = {}
+
+        context._dependency_paths.each do |path|
+          dep = DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
+          dependency_paths[dep] = true
+        end
+
+        context._dependency_assets.each do |path|
+          if path == self.pathname.to_s
+            dep = DependencyFile.new(pathname, mtime, digest)
+            dependency_paths[dep] = true
+          elsif asset = environment.find_asset(path, :bundle => false)
+            asset.dependency_paths.each do |d|
+              dependency_paths[d] = true
+            end
+          end
+        end
+
+        @dependency_paths = dependency_paths.keys
       end
   end
 end
