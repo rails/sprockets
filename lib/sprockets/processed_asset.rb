@@ -10,6 +10,7 @@ module Sprockets
 
       context = environment.context_class.new(environment, logical_path, pathname)
       @source = context.evaluate(pathname)
+      @length = Rack::Utils.bytesize(source)
 
       build_required_assets(environment, context)
       build_dependency_paths(environment, context)
@@ -116,7 +117,7 @@ module Sprockets
 
         context._dependency_assets.each do |path|
           if path == self.pathname.to_s
-            dep = DependencyFile.new(pathname, mtime, digest)
+            dep = DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
             dependency_paths[dep] = true
           elsif asset = environment.find_asset(path, :bundle => false)
             asset.dependency_paths.each do |d|

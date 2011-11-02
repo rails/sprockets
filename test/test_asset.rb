@@ -460,7 +460,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "length" do
-    assert_equal 109, @asset.length
+    assert_equal 67, @asset.length
   end
 
   test "splat" do
