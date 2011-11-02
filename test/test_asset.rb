@@ -654,7 +654,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "can't require absolute files outside the load path" do
     assert_raise Sprockets::FileOutsidePaths do
-      warn asset("absolute/require_outside_path.js").to_s
+      asset("absolute/require_outside_path.js").to_s
     end
   end
 

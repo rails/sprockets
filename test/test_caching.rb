@@ -83,6 +83,24 @@ class TestCaching < Sprockets::TestCase
     assert !asset1.equal?(asset2)
   end
 
+  test "depedencies are cached" do
+    env = @env1
+
+    parent = env['application.js']
+    assert parent
+
+    child1 = parent.to_a[0]
+
+    assert child1
+    assert_equal 'project.js', child1.logical_path
+
+    child2 = env.find_asset(child1.pathname, :bundle => false)
+    assert child2
+
+    assert child1.equal?(child2)
+    assert child2.equal?(child1)
+  end
+
   test "proccessed and bundled assets are cached separately" do
     env = @env1
     assert_kind_of Sprockets::ProcessedAsset, env.find_asset('gallery.js', :bundle => false)

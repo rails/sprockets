@@ -72,21 +72,12 @@ module Sprockets
       if (asset = @assets[cache_key_for(path, options)]) && asset.fresh?(self)
         asset
       elsif asset = index.find_asset(path, options)
-        @assets[cache_key_for(path, options)] = @assets[cache_key_for(asset.pathname, options)] = asset
+        # Cache is pushed upstream by Index#find_asset
         asset
       end
     end
 
     protected
-      # TODO: Review Environment caching. This method doesn't seem to be called.
-      # Cache asset building in persisted cache.
-      def build_asset(path, pathname, options)
-        # Persisted cache
-        cache_asset(cache_key_for(pathname, options)) do
-          super
-        end
-      end
-
       def expire_index!
         # Clear digest to be recomputed
         @digest = nil

@@ -12,6 +12,8 @@ module Sprockets
   # `Environment#index`.
   class Index < Base
     def initialize(environment)
+      @environment = environment
+
       # Copy environment attributes
       @logger            = environment.logger
       @context_class     = environment.context_class
@@ -52,8 +54,17 @@ module Sprockets
       if asset = @assets[cache_key_for(path, options)]
         asset
       elsif asset = super
-        # Cache at logical path
-        @assets[cache_key_for(path, options)] = asset
+        logical_path_cache_key = cache_key_for(path, options)
+        full_path_cache_key    = cache_key_for(asset.pathname, options)
+
+        # Cache on Index
+        @assets[logical_path_cache_key] = @assets[full_path_cache_key] = asset
+
+        # Push cache upstream to Environment
+        @environment.instance_eval do
+          @assets[logical_path_cache_key] = @assets[full_path_cache_key] = asset
+        end
+
         asset
       end
     end
