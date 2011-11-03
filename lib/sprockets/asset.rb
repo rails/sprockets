@@ -37,6 +37,7 @@ module Sprockets
       @pathname     = Pathname.new(pathname)
       @content_type = environment.content_type_of(pathname)
       @mtime        = environment.stat(pathname).mtime
+      @length       = environment.stat(pathname).size
       @digest       = environment.file_digest(pathname).hexdigest
     end
 
