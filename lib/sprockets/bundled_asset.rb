@@ -38,7 +38,7 @@ module Sprockets
       @processed_asset = environment.find_asset(pathname, :bundle => false)
       @required_assets = @processed_asset.required_assets
 
-      if @processed_asset.digest != coder['self_digest']
+      if @processed_asset.dependency_digest != coder['required_assets_digest']
         raise UnserializeError, "processed asset belongs to a stale environment"
       end
 
@@ -50,7 +50,7 @@ module Sprockets
       super
 
       coder['source'] = source
-      coder['self_digest'] = @processed_asset.digest
+      coder['required_assets_digest'] = @processed_asset.dependency_digest
     end
 
     # Get asset's own processed contents. Excludes any of its required

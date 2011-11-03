@@ -14,8 +14,12 @@ module AssetTests
     assert @asset.mtime
   end
 
-  test "digest" do
-    assert @asset.digest
+  test "digest is source digest" do
+    assert_equal @env.digest.update(@asset.to_s).hexdigest, @asset.digest
+  end
+
+  test "length is source length" do
+    assert_equal @asset.to_s.length, @asset.length
   end
 
   test "stale?" do

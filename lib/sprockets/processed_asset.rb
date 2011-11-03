@@ -11,13 +11,19 @@ module Sprockets
       context = environment.context_class.new(environment, logical_path, pathname)
       @source = context.evaluate(pathname)
       @length = Rack::Utils.bytesize(source)
+      @digest = environment.digest.update(source).hexdigest
 
       build_required_assets(environment, context)
       build_dependency_paths(environment, context)
 
+      @dependency_digest = compute_dependency_digest(environment)
+
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
       environment.logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
     end
+
+    # Interal: Used to check equality
+    attr_reader :dependency_digest
 
     attr_reader :source
 
@@ -25,7 +31,9 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      @source          = coder['source']
+      @source = coder['source']
+      @dependency_digest = coder['dependency_digest']
+
       @required_assets = coder['required_paths'].map { |p|
         p = expand_root_path(p)
 
@@ -44,8 +52,10 @@ module Sprockets
     def encode_with(coder)
       super
 
-      coder['source']           = source
-      coder['required_paths']   = required_assets.map { |a|
+      coder['source'] = source
+      coder['dependency_digest'] = dependency_digest
+
+      coder['required_paths'] = required_assets.map { |a|
         relativize_root_path(a.pathname).to_s
       }
       coder['dependency_paths'] = dependency_paths.map { |d|
@@ -127,6 +137,12 @@ module Sprockets
         end
 
         @dependency_paths = dependency_paths.keys
+      end
+
+      def compute_dependency_digest(environment)
+        required_assets.inject(environment.digest) { |digest, asset|
+          digest.update asset.digest
+        }.hexdigest
       end
   end
 end
