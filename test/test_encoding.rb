@@ -58,7 +58,7 @@ class EncodingTest < Sprockets::TestCase
     end
 
     test "read ASCII + UTF-8 concatation asset" do
-      assert_equal "var foo = \"bar\";\nvar snowman = \"\342\230\203\";\n",
+      assert_equal "var foo = \"bar\";\nvar snowman = \"\342\230\203\";\n\n\n",
         @env['ascii_utf8.js'].to_s
     end
   end
