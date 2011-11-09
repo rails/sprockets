@@ -105,7 +105,7 @@ module EnvironmentTests
   end
 
   test "find bundled asset with implicit format" do
-    assert_equal "(function() {\n  var foo;\n  foo = 'hello';\n}).call(this);\n",
+    assert_equal "(function() {\n  var foo;\n\n  foo = 'hello';\n\n}).call(this);\n",
       @env["coffee/foo.js"].to_s
   end
 
@@ -360,7 +360,7 @@ class TestEnvironment < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.puts "->" }
       time = Time.now + 60
       File.utime(time, time, filename)
-      assert_equal "(function() {\n  (function() {});\n}).call(this);\n", @env["tmp.js"].to_s
+      assert_equal "\n  (function() {});\n", @env["tmp.js"].to_s
     end
   end
 
