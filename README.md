@@ -356,7 +356,8 @@ submit a pull request.
 
 **2.1.0** (November 11, 2011)
 
-* Preserve directive whitespace.
+* Directive comment lines are now turned into empty lines instead of removed. This way line numbers in
+  CoffeeScript syntax errors are correct.
 * Performance and caching bug fixes.
 
 **2.0.3** (October 17, 2011)
