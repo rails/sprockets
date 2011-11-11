@@ -356,23 +356,23 @@ submit a pull request.
 
 **2.1.0** (November 11, 2011)
 
-* Preserve directive whitespace
-* Performance and caching bug fixes
+* Preserve directive whitespace.
+* Performance and caching bug fixes.
 
 **2.0.3** (October 17, 2011)
 
-* Detect format extensions from right to left
-* Make JST namespace configurable
+* Detect format extensions from right to left.
+* Make JST namespace configurable.
 
 **2.0.2** (October 4, 2011)
 
-* Fixed loading stale cache from bundler gems
+* Fixed loading stale cache from bundler gems.
 
 **2.0.1** (September 30, 2011)
 
 * Fixed bug with fingerprinting file names with multiple dots.
-* Decode URIs as default internal
-* Fix symlinked directories
+* Decode URIs as default internal.
+* Fix symlinked asset directories.
 
 **2.0.0** (August 29, 2011)
 
