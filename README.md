@@ -110,7 +110,7 @@ way to do this is with the `map` method in `config.ru`:
       environment.append_path 'app/assets/stylesheets'
       run environment
     end
-    
+
     map '/' do
       run YourRackApp
     end
@@ -336,7 +336,9 @@ source file before any subsequent `require` or `include` directives.
 including it in the bundle. This is useful when you need to expire an
 asset's cache in response to a change in another file.
 
-# Contributing #
+# Development #
+
+## Contributing ##
 
 The Sprockets source code is [hosted on
 GitHub](https://github.com/sstephenson/sprockets). You can check out a
@@ -349,6 +351,32 @@ If you've found a bug or have a question, please open an issue on the
 tracker](https://github.com/sstephenson/sprockets/issues). Or, clone
 the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
+
+## Version History ##
+
+**2.1.0** (November 11, 2011)
+
+* Preserve directive whitespace
+* Performance and caching bug fixes
+
+**2.0.3** (October 17, 2011)
+
+* Detect format extensions from right to left
+* Make JST namespace configurable
+
+**2.0.2** (October 4, 2011)
+
+* Fixed loading stale cache from bundler gems
+
+**2.0.1** (September 30, 2011)
+
+* Fixed bug with fingerprinting file names with multiple dots.
+* Decode URIs as default internal
+* Fix symlinked directories
+
+**2.0.0** (August 29, 2011)
+
+* Initial public release.
 
 # License #
 
