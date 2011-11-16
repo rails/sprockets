@@ -6,14 +6,11 @@ module Sprockets
   module Cache
     # A simple file system cache store.
     #
-    #     environment.cache = Sprockets::Cache::FileStore.new("tmp/sprockets")
+    #     environment.cache = Sprockets::Cache::FileStore.new("/tmp")
     #
     class FileStore
       def initialize(root)
         @root = Pathname.new(root)
-
-        # Ensure directory exists
-        FileUtils.mkdir_p @root
       end
 
       # Lookup value in cache
@@ -24,6 +21,9 @@ module Sprockets
 
       # Save value to cache
       def []=(key, value)
+        # Ensure directory exists
+        FileUtils.mkdir_p @root.join(key).dirname
+
         @root.join(key).open('w') { |f| Marshal.dump(value, f)}
         value
       end

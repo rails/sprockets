@@ -180,3 +180,33 @@ class TestCaching < Sprockets::TestCase
     end
   end
 end
+
+require 'tmpdir'
+
+class TestFileStore < Sprockets::TestCase
+  def setup
+    @cache = Sprockets::Cache::FileStore.new(Dir::tmpdir)
+
+    @env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path(".")
+      env.cache = @cache
+    end
+
+    @env2 = Sprockets::Environment.new(fixture_path('symlink')) do |env|
+      env.append_path(".")
+      env.cache = @cache
+    end
+  end
+
+  test "shared cache objects are eql" do
+    asset1 = @env1['gallery.js']
+    asset2 = @env2['gallery.js']
+
+    assert asset1
+    assert asset2
+
+    assert asset1.eql?(asset2)
+    assert asset2.eql?(asset1)
+    assert !asset1.equal?(asset2)
+  end
+end
