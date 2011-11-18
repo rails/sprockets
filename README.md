@@ -354,6 +354,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.1.1** (November 18, 2011)
+
+* Fix windows absolute path check bug.
+
 **2.1.0** (November 11, 2011)
 
 * Directive comment lines are now turned into empty lines instead of removed. This way line numbers in
