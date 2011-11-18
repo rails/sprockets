@@ -149,7 +149,7 @@ module Sprockets
       logical_path = path
       pathname     = Pathname.new(path)
 
-      if pathname.to_s =~ /^\//
+      if pathname.absolute?
         return unless stat(pathname)
         logical_path = attributes_for(pathname).logical_path
       else
