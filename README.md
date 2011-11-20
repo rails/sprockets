@@ -354,6 +354,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.1.2** (November 20, 2011)
+
+* Disabled If-Modified-Since server checks. Fixes some browser caching issues when serving the asset body only. If-None-Match caching is sufficent.
+
 **2.1.1** (November 18, 2011)
 
 * Fix windows absolute path check bug.
