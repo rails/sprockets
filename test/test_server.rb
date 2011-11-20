@@ -124,23 +124,6 @@ class TestServer < Sprockets::TestCase
     assert_equal time_before_touching, time_after_touching
   end
 
-  test "not modified response when headers match" do
-    get "/assets/application.js"
-    assert_equal 200, last_response.status
-
-    path = fixture_path "server/app/javascripts/bar.js"
-    mtime = Time.now + 1
-    File.utime(mtime, mtime, path)
-
-    get "/assets/bar.js", {},
-      'HTTP_IF_MODIFIED_SINCE' =>
-        File.mtime(fixture_path("server/app/javascripts/bar.js")).httpdate
-
-    assert_equal 304, last_response.status
-    assert_equal nil, last_response.headers['Content-Type']
-    assert_equal nil, last_response.headers['Content-Length']
-  end
-
   test "not modified partial response when etags match" do
     get "/assets/application.js?body=1"
     assert_equal 200, last_response.status

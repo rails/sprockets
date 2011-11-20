@@ -53,9 +53,8 @@ module Sprockets
         # Return a 404 Not Found
         not_found_response
 
-      # Check request headers `HTTP_IF_MODIFIED_SINCE` and
-      # `HTTP_IF_NONE_MATCH` against the assets mtime and digest
-      elsif not_modified?(asset, env) || etag_match?(asset, env)
+      # Check request headers `HTTP_IF_NONE_MATCH` against the asset digest
+      elsif etag_match?(asset, env)
         logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
 
         # Return a 304 Not Modified
@@ -172,12 +171,6 @@ module Sprockets
           gsub("\n", '\\\\000a ').
           gsub('"',  '\\\\0022 ').
           gsub('/',  '\\\\002f ')
-      end
-
-      # Compare the requests `HTTP_IF_MODIFIED_SINCE` against the
-      # assets mtime
-      def not_modified?(asset, env)
-        env["HTTP_IF_MODIFIED_SINCE"] == asset.mtime.httpdate
       end
 
       # Compare the requests `HTTP_IF_NONE_MATCH` against the assets digest
