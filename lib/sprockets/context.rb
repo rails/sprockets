@@ -168,7 +168,11 @@ module Sprockets
       if options[:data]
         result = options[:data]
       else
-        result = Sprockets::Utils.read_unicode(pathname)
+        if environment.respond_to?(:default_external)
+          result = Sprockets::Utils.read_unicode(pathname, environment.default_external)
+        else
+          result = Sprockets::Utils.read_unicode(pathname)
+        end
       end
 
       processors.each do |processor|

@@ -16,6 +16,7 @@ module Sprockets
 
       # Copy environment attributes
       @logger            = environment.logger
+      @default_external  = environment.default_external if environment.respond_to?(:default_external)
       @context_class     = environment.context_class
       @cache             = environment.cache
       @trail             = environment.trail.index
