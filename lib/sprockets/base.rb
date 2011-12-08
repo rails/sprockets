@@ -104,9 +104,9 @@ module Sprockets
     end
 
     if defined? Encoding.default_external
-      # Define `default_external` accessor on 1.9.
+      # Define `default_external_encoding` accessor on 1.9.
       # Defaults to UTF-8.
-      attr_accessor :default_encoding
+      attr_accessor :default_external_encoding
     end
 
     # Works like `Dir.entries`.

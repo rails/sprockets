@@ -14,9 +14,12 @@ module Sprockets
     def initialize(environment)
       @environment = environment
 
+      if environment.respond_to?(:default_external_encoding)
+        @default_external_encoding = environment.default_external_encoding
+      end
+
       # Copy environment attributes
       @logger            = environment.logger
-      @default_external  = environment.default_external if environment.respond_to?(:default_external)
       @context_class     = environment.context_class
       @cache             = environment.cache
       @trail             = environment.trail.index
