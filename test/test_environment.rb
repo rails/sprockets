@@ -196,6 +196,21 @@ module EnvironmentTests
     assert !paths.include?("coffee")
   end
 
+  test "iterate over each logical path and filename" do
+    paths, filenames = [], []
+    @env.each_logical_path do |logical_path, filename|
+      paths << logical_path
+      filenames << filename
+    end
+    assert_equal 29, paths.length
+    assert_equal 29, filenames.length
+    assert_equal paths.size, paths.uniq.size, "has duplicates"
+    assert_equal filenames.size, filenames.uniq.size, "has duplicates"
+
+    assert paths.include?("application.js")
+    assert filenames.any? { |p| p =~ /application.js.coffee/ }
+  end
+
   test "each logical path enumerator" do
     enum = @env.each_logical_path
     assert_equal 29, enum.to_a.length
