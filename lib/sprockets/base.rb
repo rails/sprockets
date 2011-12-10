@@ -334,7 +334,7 @@ module Sprockets
       files = {}
       each_file do |filename|
         if logical_path = logical_path_for_filename(filename, filters)
-          yield logical_path unless files[logical_path]
+          yield logical_path, filename.to_s unless files[logical_path]
           files[logical_path] = true
         end
       end
