@@ -8,13 +8,25 @@ module Rake
   class SprocketsTask < Rake::TaskLib
     attr_accessor :name
 
-    attr_accessor :environment
-
     attr_accessor :bundle_dir
 
     attr_accessor :bundles
 
     attr_accessor :logger
+
+    def environment
+      if !@environment.is_a?(Sprockets::Base) && @environment.respond_to?(:call)
+        @environment = @environment.call
+      else
+        @environment
+      end
+    end
+
+    attr_writer :environment
+
+    def index
+      @index ||= environment.index
+    end
 
     def log_level
       @logger.level
@@ -31,23 +43,22 @@ module Rake
     def initialize(name = :bundle)
       init(name)
       yield self if block_given?
-      @environment = @environment.index
       define
     end
 
     def init(name)
       @name         = name
-      @environment  = Sprockets::Environment.new(Dir.pwd)
+      @environment = Sprockets::Environment.new(Dir.pwd)
       @logger       = Logger.new($stderr)
       @logger.level = Logger::WARN
     end
 
     def with_logger
-      old_logger = @environment.logger
-      @environment.logger = @logger
+      old_logger = index.logger
+      index.logger = @logger
       yield
     ensure
-      @environment.logger = old_logger
+      index.logger = old_logger
     end
 
     def benchmark
@@ -60,9 +71,9 @@ module Rake
       asset = nil
       with_logger do
         ms = benchmark do
-          asset = environment.find_asset(logical_path)
+          asset = index.find_asset(logical_path)
         end
-        environment.logger.warn "Compiled #{logical_path}  (#{ms}ms)"
+        index.logger.warn "Compiled #{logical_path}  (#{ms}ms)"
       end
       asset
     end
