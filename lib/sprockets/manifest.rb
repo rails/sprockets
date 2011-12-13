@@ -25,15 +25,6 @@ module Sprockets
       @data['bundles'] ||= {}
     end
 
-    def backups_for(logical_path)
-      files.select { |filename, attrs|
-        attrs['logical_path'] == logical_path &&
-          bundles[logical_path] != filename
-      }.sort_by { |filename, attrs|
-        Time.parse(attrs['mtime'])
-      }.reverse
-    end
-
     def compile(logical_path)
       if asset = find_asset(logical_path)
         files[asset.digest_path] = {
@@ -60,19 +51,26 @@ module Sprockets
     def remove(filename)
       logger.warn "Remove #{filename}"
       path = File.join(dir, filename)
+      logical_path = files[filename]['logical_path']
+
+      if bundles[logical_path] == filename
+        bundles.delete(logical_path)
+      end
+
       files.delete(filename)
       FileUtils.rm(path) if File.exist?(path)
+
       save
       nil
     end
 
-    def clean
+    def clean(keep = 2)
       self.bundles.keys.each do |logical_path|
         # Get bundles sorted by ctime, newest first
         bundles = backups_for(logical_path)
 
-        # Keep the last 2
-        bundles = bundles[2..-1] || []
+        # Keep the last N backups
+        bundles = bundles[keep..-1] || []
 
         # Remove old bundles
         bundles.each { |path, _| remove(path) }
@@ -80,6 +78,15 @@ module Sprockets
     end
 
     protected
+      def backups_for(logical_path)
+        files.select { |filename, attrs|
+          attrs['logical_path'] == logical_path &&
+            bundles[logical_path] != filename
+        }.sort_by { |filename, attrs|
+          Time.parse(attrs['mtime'])
+        }.reverse
+      end
+
       def find_asset(logical_path)
         asset = nil
         ms = benchmark do
@@ -104,7 +111,7 @@ module Sprockets
       def benchmark
         start_time = Time.now.to_f
         yield
-        elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
+        ((Time.now.to_f - start_time) * 1000).to_i
       end
   end
 end
