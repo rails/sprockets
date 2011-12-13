@@ -53,44 +53,15 @@ module Rake
       @logger.level = Logger::WARN
     end
 
-    def with_logger
-      old_logger = index.logger
-      index.logger = @logger
-      yield
-    ensure
-      index.logger = old_logger
-    end
-
-    def benchmark
-      start_time = Time.now.to_f
-      yield
-      elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
-    end
-
-    def compile(logical_path)
-      asset = nil
-      with_logger do
-        ms = benchmark do
-          asset = index.find_asset(logical_path)
-        end
-        index.logger.warn "Compiled #{logical_path}  (#{ms}ms)"
-      end
-      asset
+    def manifest
+      @manifest ||= Sprockets::Manifest.new(index, "#{bundle_dir}/manifest.json")
     end
 
     def define
-      directory bundle_dir
-
       bundles.each do |logical_path|
-        task "#{name}:#{logical_path}" => bundle_dir do
-          if asset = compile(logical_path)
-            target = File.join(bundle_dir, asset.digest_path)
-            if File.exist?(target)
-              logger.debug "Skipping #{target}, already exists"
-            else
-              logger.info "Writing #{target}"
-              asset.write_to target
-            end
+        task "#{name}:#{logical_path}" do
+          with_logger do
+            manifest.compile logical_path
           end
         end
       end
@@ -107,37 +78,21 @@ module Rake
 
       desc name == :bundle ? "Clean old asset bundles" : "Clean old #{name} bundles"
       task "clean_#{name}" do
-        files = Dir["#{bundle_dir}/*"]
-
-        bundles.each do |logical_path|
-          if asset = compile(logical_path)
-            target = File.join(bundle_dir, asset.digest_path)
-            files.delete target
-          end
-        end
-
-        groups = {}
-
-        files.each do |filename|
-          group = filename.sub(/-[0-9a-f]{7,40}(\.[^.]+)$/, '\1')
-          groups[group] ||= []
-          groups[group] << filename
-        end
-
-        groups.each do |group, bundles|
-          # Get bundles sorted by ctime, newest first
-          bundles = bundles.sort_by { |fn| File.ctime(fn) }.reverse
-
-          # Keep the last 3
-          bundles = bundles[3..-1] || []
-
-          # Remove old assets
-          bundles.each { |fn| rm fn }
+        with_logger do
+          manifest.clean
         end
       end
 
       task :clean => ["clean_#{name}"]
-
     end
+
+    private
+      def with_logger
+        old_logger = index.logger
+        index.logger = @logger
+        yield
+      ensure
+        index.logger = old_logger
+      end
   end
 end
