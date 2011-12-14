@@ -18,6 +18,26 @@ class TestManifest < Sprockets::TestCase
     assert Dir["#{@dir}/*"].empty?
   end
 
+  test "specify full manifest path" do
+    dir  = Dir::tmpdir
+    path = File.join(dir, 'manifest.json')
+
+    manifest = Sprockets::Manifest.new(@env, path)
+
+    assert_equal dir, manifest.dir
+    assert_equal path, manifest.path
+  end
+
+  test "specify full manifest directory" do
+    dir  = Dir::tmpdir
+    path = File.join(dir, 'manifest.json')
+
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    assert_equal dir, manifest.dir
+    assert_equal path, manifest.path
+  end
+
   test "compile asset" do
     assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
 

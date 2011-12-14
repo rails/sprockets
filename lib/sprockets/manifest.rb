@@ -17,17 +17,24 @@ module Sprockets
     # Create new Manifest associated with an `environment`. `path` is
     # a full path to the manifest json file. The file may or may not
     # already exist. The dirname of the `path` will be used to write
-    # compiled assets to.
+    # compiled assets to. Otherwise, if the path is a directory, the
+    # filename will default to "manifest.json" in that directory.
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
     def initialize(environment, path)
       @environment = environment
-      @path = File.expand_path(path)
-      @dir  = File.dirname(path)
 
-      if File.exist?(path)
-        @data = JSON.parse(File.read(path))
+      if File.extname(path) == ""
+        @dir  = File.expand_path(path)
+        @path = File.join(@dir, 'manifest.json')
+      else
+        @path = File.expand_path(path)
+        @dir  = File.dirname(path)
+      end
+
+      if File.exist?(@path)
+        @data = JSON.parse(File.read(@path))
       else
         @data = {}
       end
