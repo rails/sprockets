@@ -98,7 +98,6 @@ module Sprockets
     #   manifest.remove("application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
     #
     def remove(filename)
-      logger.warn "Remove #{filename}"
       path = File.join(dir, filename)
       logical_path = files[filename]['logical_path']
 
@@ -110,6 +109,9 @@ module Sprockets
       FileUtils.rm(path) if File.exist?(path)
 
       save
+
+      logger.warn "Removed #{filename}"
+
       nil
     end
 
@@ -126,6 +128,13 @@ module Sprockets
         # Remove old assets
         assets.each { |path, _| remove(path) }
       end
+    end
+
+    # Wipe directive
+    def clobber
+      FileUtils.rm_r(@dir) if File.exist?(@dir)
+      logger.warn "Removed #{@dir}"
+      nil
     end
 
     protected

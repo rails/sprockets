@@ -48,7 +48,7 @@ module Rake
 
     def init(name)
       @name         = name
-      @environment = Sprockets::Environment.new(Dir.pwd)
+      @environment  = Sprockets::Environment.new(Dir.pwd)
       @logger       = Logger.new($stderr)
       @logger.level = Logger::WARN
     end
@@ -71,7 +71,9 @@ module Rake
 
       desc name == :bundle ? "Remove all asset bundles" : "Remove all #{name} bundles"
       task "clobber_#{name}" do
-        rm_r bundle_dir if File.exist?(bundle_dir)
+        with_logger do
+          manifest.clobber
+        end
       end
 
       task :clobber => ["clobber_#{name}"]
