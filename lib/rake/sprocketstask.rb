@@ -5,15 +5,29 @@ require 'sprockets'
 require 'logger'
 
 module Rake
+  # Simple Sprockets compilation Rake task macro.
+  #
+  #   Rake::SprocketsTask.new do |t|
+  #     t.environment = Sprockets::Environment.new
+  #     t.bundle_dir  = "./public/assets"
+  #     t.bundles     = %w( application.js application.css )
+  #   end
+  #
   class SprocketsTask < Rake::TaskLib
+    # Name of the task. Defaults to "bundle".
+    #
+    # The name will also be used to suffix the clean and clobber
+    # tasks, "clean_bundle" and "clobber_bundle".
     attr_accessor :name
 
-    attr_accessor :bundle_dir
-
-    attr_accessor :bundles
-
-    attr_accessor :logger
-
+    # `Environment` instance used for finding assets.
+    #
+    # You'll most likely want to reassign `environment` to your own.
+    #
+    #   Rake::SprocketsTask.new do |t|
+    #     t.environment = Foo::Assets
+    #   end
+    #
     def environment
       if !@environment.is_a?(Sprockets::Base) && @environment.respond_to?(:call)
         @environment = @environment.call
@@ -21,17 +35,36 @@ module Rake
         @environment
       end
     end
-
     attr_writer :environment
 
-    def index
-      @index ||= environment.index
-    end
+    # Directory to write compiled assets too. As well as the manifest file.
+    #
+    #   t.bundle_dir = "./public/assets"
+    #
+    attr_accessor :bundle_dir
 
+    # Array of logical paths to compile.
+    #
+    #   t.bundles = %w( application.js jquery.js application.css )
+    #
+    attr_accessor :bundles
+
+    # Logger to use during rake tasks. Defaults to using stderr.
+    #
+    #   t.logger = Logger.new($stdout)
+    #
+    attr_accessor :logger
+
+    # Returns logger level Integer.
     def log_level
       @logger.level
     end
 
+    # Set logger level with constant or symbol.
+    #
+    #   t.log_level = Logger::INFO
+    #   t.log_level = :debug
+    #
     def log_level=(level)
       if level.is_a?(Integer)
         @logger.level = level
@@ -41,22 +74,17 @@ module Rake
     end
 
     def initialize(name = :bundle)
-      init(name)
+      @name         = name
+      @environment  = lambda { Sprockets::Environment.new(Dir.pwd) }
+      @logger       = Logger.new($stderr)
+      @logger.level = Logger::WARN
+
       yield self if block_given?
+
       define
     end
 
-    def init(name)
-      @name         = name
-      @environment  = Sprockets::Environment.new(Dir.pwd)
-      @logger       = Logger.new($stderr)
-      @logger.level = Logger::WARN
-    end
-
-    def manifest
-      @manifest ||= Sprockets::Manifest.new(index, "#{bundle_dir}/manifest.json")
-    end
-
+    # Define tasks
     def define
       bundles.each do |logical_path|
         task "#{name}:#{logical_path}" do
@@ -89,6 +117,18 @@ module Rake
     end
 
     private
+      # Returns cached indexed environment
+      def index
+        @index ||= environment.index
+      end
+
+      # Returns manifest for tasks
+      def manifest
+        @manifest ||= Sprockets::Manifest.new(index, "#{bundle_dir}/manifest.json")
+      end
+
+      # Sub out environment logger with our rake task logger that
+      # writes to stderr.
       def with_logger
         old_logger = index.logger
         index.logger = @logger
