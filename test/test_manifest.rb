@@ -29,7 +29,7 @@ class TestManifest < Sprockets::TestCase
     data = JSON.parse(File.read(@manifest.path))
     assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
     assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
-      data['bundles']['application.js']
+      data['assets']['application.js']
   end
 
   test "recompile asset" do
@@ -46,7 +46,7 @@ class TestManifest < Sprockets::TestCase
       data = JSON.parse(File.read(@manifest.path))
       assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
       assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
-        data['bundles']['application.js']
+        data['assets']['application.js']
 
       File.open(filename, 'w') { |f| f.write "change;" }
       mtime = Time.now + 1
@@ -62,7 +62,7 @@ class TestManifest < Sprockets::TestCase
       assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
       assert data['files']['application-fd3c12c6a14c82fc6d487f25c5f54f91.js']
       assert_equal 'application-fd3c12c6a14c82fc6d487f25c5f54f91.js',
-        data['bundles']['application.js']
+        data['assets']['application.js']
     end
   end
 
@@ -72,7 +72,7 @@ class TestManifest < Sprockets::TestCase
 
     data = JSON.parse(File.read(@manifest.path))
     assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-    assert data['bundles']['application.js']
+    assert data['assets']['application.js']
 
     @manifest.remove('application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js')
 
@@ -80,7 +80,7 @@ class TestManifest < Sprockets::TestCase
 
     data = JSON.parse(File.read(@manifest.path))
     assert !data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-    assert !data['bundles']['application.js']
+    assert !data['assets']['application.js']
   end
 
   test "remove old asset" do
@@ -104,7 +104,7 @@ class TestManifest < Sprockets::TestCase
       assert !data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
       assert data['files']['application-fd3c12c6a14c82fc6d487f25c5f54f91.js']
       assert_equal 'application-fd3c12c6a14c82fc6d487f25c5f54f91.js',
-        data['bundles']['application.js']
+        data['assets']['application.js']
     end
   end
 
@@ -149,7 +149,7 @@ class TestManifest < Sprockets::TestCase
       assert data['files']['application-226d144e6d700f802aafe2cbcc16f8dc.js']
       assert data['files']['application-019a310ae5bf296ee17beda7886a27b3.js']
       assert_equal 'application-019a310ae5bf296ee17beda7886a27b3.js',
-        data['bundles']['application.js']
+        data['assets']['application.js']
     end
   end
 end
