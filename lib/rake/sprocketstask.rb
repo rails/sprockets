@@ -9,7 +9,7 @@ module Rake
   #
   #   Rake::SprocketsTask.new do |t|
   #     t.environment = Sprockets::Environment.new
-  #     t.bundle_dir  = "./public/assets"
+  #     t.output      = "./public/assets"
   #     t.assets      = %w( application.js application.css )
   #   end
   #
@@ -39,9 +39,9 @@ module Rake
 
     # Directory to write compiled assets too. As well as the manifest file.
     #
-    #   t.bundle_dir = "./public/assets"
+    #   t.output = "./public/assets"
     #
-    attr_accessor :bundle_dir
+    attr_accessor :output
 
     # Array of asset logical paths to compile.
     #
@@ -120,7 +120,7 @@ module Rake
 
       # Returns manifest for tasks
       def manifest
-        @manifest ||= Sprockets::Manifest.new(index, "#{bundle_dir}/manifest.json")
+        @manifest ||= Sprockets::Manifest.new(index, output)
       end
 
       # Sub out environment logger with our rake task logger that
