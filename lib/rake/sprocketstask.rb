@@ -86,16 +86,12 @@ module Rake
 
     # Define tasks
     def define
-      bundles.each do |logical_path|
-        task "#{name}:#{logical_path}" do
-          with_logger do
-            manifest.compile logical_path
-          end
+      desc name == :bundle ? "Compile asset bundles" : "Compile #{name} bundles"
+      task name do
+        with_logger do
+          manifest.compile(bundles)
         end
       end
-
-      desc name == :bundle ? "Compile asset bundles" : "Compile #{name} bundles"
-      task name => bundles.map { |path| "#{name}:#{path}" }
 
       desc name == :bundle ? "Remove all asset bundles" : "Remove all #{name} bundles"
       task "clobber_#{name}" do

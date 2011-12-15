@@ -76,26 +76,28 @@ module Sprockets
     #
     #   compile("application.js")
     #
-    def compile(logical_path)
-      if asset = find_asset(logical_path)
-        files[asset.digest_path] = {
-          'logical_path' => asset.logical_path,
-          'mtime'        => asset.mtime.iso8601,
-          'digest'       => asset.digest
-        }
-        assets[asset.logical_path] = asset.digest_path
+    def compile(*args)
+      environment.each_logical_path(*args) do |logical_path|
+        if asset = find_asset(logical_path)
+          files[asset.digest_path] = {
+            'logical_path' => asset.logical_path,
+            'mtime'        => asset.mtime.iso8601,
+            'digest'       => asset.digest
+          }
+          assets[asset.logical_path] = asset.digest_path
 
-        target = File.join(dir, asset.digest_path)
+          target = File.join(dir, asset.digest_path)
 
-        if File.exist?(target)
-          logger.debug "Skipping #{target}, already exists"
-        else
-          logger.info "Writing #{target}"
-          asset.write_to target
+          if File.exist?(target)
+            logger.debug "Skipping #{target}, already exists"
+          else
+            logger.info "Writing #{target}"
+            asset.write_to target
+          end
+
+          save
+          asset
         end
-
-        save
-        asset
       end
     end
 

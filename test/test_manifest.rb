@@ -52,6 +52,25 @@ class TestManifest < Sprockets::TestCase
       data['assets']['application.js']
   end
 
+  test "compile multiple assets" do
+    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert !File.exist?("#{@dir}/gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css")
+
+    @manifest.compile('application.js', 'gallery.css')
+
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert File.exist?("#{@dir}/gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css")
+
+    data = JSON.parse(File.read(@manifest.path))
+    assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
+    assert data['files']['gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css']
+    assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
+      data['assets']['application.js']
+    assert_equal 'gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css',
+      data['assets']['gallery.css']
+  end
+
   test "recompile asset" do
     filename = fixture_path('default/application.js.coffee')
 
