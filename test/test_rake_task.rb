@@ -31,20 +31,20 @@ class TestRakeTask < Sprockets::TestCase
     assert Dir["#{@dir}/*"].empty?
   end
 
-  test "bundle" do
+  test "assets" do
     assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
 
-    @rake[:bundle].invoke
+    @rake[:assets].invoke
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
   end
 
   test "clobber" do
-    @rake[:bundle].invoke
+    @rake[:assets].invoke
     assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
 
-    @rake[:clobber_bundle].invoke
+    @rake[:clobber_assets].invoke
     assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
   end
 end

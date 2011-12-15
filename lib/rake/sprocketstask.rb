@@ -14,10 +14,10 @@ module Rake
   #   end
   #
   class SprocketsTask < Rake::TaskLib
-    # Name of the task. Defaults to "bundle".
+    # Name of the task. Defaults to "assets".
     #
     # The name will also be used to suffix the clean and clobber
-    # tasks, "clean_bundle" and "clobber_bundle".
+    # tasks, "clean_assets" and "clobber_assets".
     attr_accessor :name
 
     # `Environment` instance used for finding assets.
@@ -73,7 +73,7 @@ module Rake
       end
     end
 
-    def initialize(name = :bundle)
+    def initialize(name = :assets)
       @name         = name
       @environment  = lambda { Sprockets::Environment.new(Dir.pwd) }
       @logger       = Logger.new($stderr)
@@ -86,14 +86,14 @@ module Rake
 
     # Define tasks
     def define
-      desc name == :bundle ? "Compile asset bundles" : "Compile #{name} bundles"
+      desc name == :assets ? "Compile assets" : "Compile #{name} assets"
       task name do
         with_logger do
           manifest.compile(assets)
         end
       end
 
-      desc name == :bundle ? "Remove all asset bundles" : "Remove all #{name} bundles"
+      desc name == :assets ? "Remove all assets" : "Remove all #{name} assets"
       task "clobber_#{name}" do
         with_logger do
           manifest.clobber
@@ -102,7 +102,7 @@ module Rake
 
       task :clobber => ["clobber_#{name}"]
 
-      desc name == :bundle ? "Clean old asset bundles" : "Clean old #{name} bundles"
+      desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
       task "clean_#{name}" do
         with_logger do
           manifest.clean
