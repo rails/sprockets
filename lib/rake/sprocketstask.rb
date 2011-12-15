@@ -10,7 +10,7 @@ module Rake
   #   Rake::SprocketsTask.new do |t|
   #     t.environment = Sprockets::Environment.new
   #     t.bundle_dir  = "./public/assets"
-  #     t.bundles     = %w( application.js application.css )
+  #     t.assets      = %w( application.js application.css )
   #   end
   #
   class SprocketsTask < Rake::TaskLib
@@ -43,11 +43,11 @@ module Rake
     #
     attr_accessor :bundle_dir
 
-    # Array of logical paths to compile.
+    # Array of asset logical paths to compile.
     #
-    #   t.bundles = %w( application.js jquery.js application.css )
+    #   t.assets = %w( application.js jquery.js application.css )
     #
-    attr_accessor :bundles
+    attr_accessor :assets
 
     # Logger to use during rake tasks. Defaults to using stderr.
     #
@@ -89,7 +89,7 @@ module Rake
       desc name == :bundle ? "Compile asset bundles" : "Compile #{name} bundles"
       task name do
         with_logger do
-          manifest.compile(bundles)
+          manifest.compile(assets)
         end
       end
 

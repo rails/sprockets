@@ -17,7 +17,7 @@ class TestRakeTask < Sprockets::TestCase
     Rake::SprocketsTask.new do |t|
       t.environment = @env
       t.bundle_dir  = @dir
-      t.bundles     = ['application.js']
+      t.assets      = ['application.js']
       t.log_level   = :fatal
     end
   end
