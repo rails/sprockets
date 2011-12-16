@@ -215,10 +215,10 @@ module Sprockets
       filters = args.flatten
       files = {}
       each_file do |filename|
-        logical_path = attributes_for(filename).logical_path
-        next unless matches_filter(filters, logical_path.to_s)
-        yield logical_path unless files[logical_path]
-        files[logical_path] = true
+        if logical_path = logical_path_for_filename(filename, filters)
+          yield logical_path unless files[logical_path]
+          files[logical_path] = true
+        end
       end
       nil
     end
@@ -272,15 +272,26 @@ module Sprockets
         Thread.current[:sprockets_circular_calls] = nil if reset
       end
 
-      def matches_filter(filters, filename)
-        return true if filters.empty?
+      def logical_path_for_filename(filename, filters)
+        logical_path = attributes_for(filename).logical_path.to_s
+
+        if matches_filter(filters, logical_path)
+          return logical_path
+        end
 
         # If filename is an index file, retest with alias
-        if File.basename(filename)[/[^\.]+/, 0] == 'index'
-          if matches_filter(filters, filename.sub(/\/index\./, '.'))
-            return true
+        if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
+          path = logical_path.sub(/\/index\./, '.')
+          if matches_filter(filters, path)
+            return path
           end
         end
+
+        nil
+      end
+
+      def matches_filter(filters, filename)
+        return true if filters.empty?
 
         filters.any? do |filter|
           if filter.is_a?(Regexp)

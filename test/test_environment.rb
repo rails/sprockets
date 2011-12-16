@@ -217,7 +217,8 @@ module EnvironmentTests
     @env.each_logical_path("coffee.js") do |logical_path|
       paths << logical_path
     end
-    assert paths.include?("coffee/index.js")
+    assert paths.include?("coffee.js")
+    assert !paths.include?("coffee/index.js")
   end
 
   test "each logical path enumerator matching fnmatch filters" do
