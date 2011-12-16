@@ -4,9 +4,11 @@ require 'sprockets'
 require 'optparse'
 require 'shellwords'
 
-if File.exist?(path = "./.sprocketsrc")
-  rcflags = Shellwords.split(File.read(path))
-  ARGV.unshift(*rcflags)
+unless ARGV.delete("--noenv")
+  if File.exist?(path = "./.sprocketsrc")
+    rcflags = Shellwords.split(File.read(path))
+    ARGV.unshift(*rcflags)
+  end
 end
 
 filenames = []
@@ -32,6 +34,9 @@ OptionParser.new do |opts|
 
   opts.on("-o DIRECTORY", "--output=DIRECTORY", "Copy provided assets into DIRECTORY") do |directory|
     manifest = Sprockets::Manifest.new(environment, directory)
+  end
+
+  opts.on("--noenv", "Disables .sprocketsrc file") do
   end
 
   opts.on_tail("-h", "--help", "Shows this help message") do
