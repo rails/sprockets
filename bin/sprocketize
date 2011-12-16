@@ -22,10 +22,6 @@ OptionParser.new do |opts|
     exit 1
   end
 
-  opts.on("-C DIRECTORY", "--directory=DIRECTORY", "Change to DIRECTORY before doing anything") do |directory|
-    Dir.chdir(directory)
-  end
-
   opts.on("-r", "--require LIBRARY", "Require the LIBRARY before doing anything") do |lib|
     require lib
   end
