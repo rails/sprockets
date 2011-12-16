@@ -2,9 +2,14 @@
 
 require 'sprockets'
 require 'optparse'
+require 'shellwords'
+
+if File.exist?(path = "./.sprocketsrc")
+  rcflags = Shellwords.split(File.read(path))
+  ARGV.unshift(*rcflags)
+end
 
 filenames = []
-
 environment = Sprockets::Environment.new(Dir.pwd)
 manifest = nil
 
