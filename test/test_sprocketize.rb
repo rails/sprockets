@@ -47,7 +47,7 @@ class TestSprocketize < Sprockets::TestCase
   end
 
   def sprocketize(*args)
-    script = File.expand_path("../../bin/sprocketize", __FILE__)
+    script = File.expand_path("../../bin/sprockets", __FILE__)
     lib    = File.expand_path("../../lib", __FILE__)
     `ruby -I#{lib} #{script} #{Shellwords.join(args)}`
   end
