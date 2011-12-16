@@ -83,8 +83,11 @@ module Sprockets
     #   compile("application.js")
     #
     def compile(*args)
-      environment.each_logical_path(*args) do |logical_path|
-        if asset = find_asset(logical_path)
+      paths = environment.each_logical_path(*args).to_a +
+        args.flatten.select { |fn| Pathname.new(fn).absolute? }
+
+      paths.each do |path|
+        if asset = find_asset(path)
           files[asset.digest_path] = {
             'logical_path' => asset.logical_path,
             'mtime'        => asset.mtime.iso8601,
