@@ -191,4 +191,45 @@ class TestManifest < Sprockets::TestCase
         data['assets']['application.js']
     end
   end
+
+  test "test manifest does not exist" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    @manifest.compile('application.js')
+
+    assert File.exist?("#{@dir}/manifest.json")
+    data = JSON.parse(File.read(@manifest.path))
+    assert data['assets']['application.js']
+  end
+
+  test "test blank manifest" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    FileUtils.mkdir_p(@dir)
+    File.open("#{@dir}/manifest.json", 'w') { |f| f.write "" }
+    assert_equal "", File.read("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    @manifest.compile('application.js')
+
+    assert File.exist?("#{@dir}/manifest.json")
+    data = JSON.parse(File.read(@manifest.path))
+    assert data['assets']['application.js']
+  end
+
+  test "test skip invalid manifest" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    FileUtils.mkdir_p(@dir)
+    File.open("#{@dir}/manifest.json", 'w') { |f| f.write "not valid json;" }
+    assert_equal "not valid json;", File.read("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    @manifest.compile('application.js')
+
+    assert File.exist?("#{@dir}/manifest.json")
+    data = JSON.parse(File.read(@manifest.path))
+    assert data['assets']['application.js']
+  end
 end

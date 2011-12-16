@@ -33,11 +33,17 @@ module Sprockets
         @dir  = File.dirname(path)
       end
 
-      if File.exist?(@path)
-        @data = JSON.parse(File.read(@path))
-      else
-        @data = {}
+      data = nil
+
+      begin
+        if File.exist?(@path)
+          data = JSON.parse(File.read(@path))
+        end
+      rescue JSON::ParserError => e
+        logger.error "#{@path} is invalid: #{e.class} #{e.message}"
       end
+
+      @data = data.is_a?(Hash) ? data : {}
     end
 
     # Returns internal assets mapping. Keys are logical paths which
