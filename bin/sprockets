@@ -15,6 +15,10 @@ filenames = []
 environment = Sprockets::Environment.new(Dir.pwd)
 manifest = nil
 
+(ENV['SPROCKETS_PATH'] || "").split(File::PATH_SEPARATOR).each do |path|
+  environment.append_path path
+end
+
 OptionParser.new do |opts|
   opts.summary_width = 28
   opts.banner = "Usage: sprocketize [options] filename [filename ...]"
