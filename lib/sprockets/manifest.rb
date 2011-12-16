@@ -182,7 +182,7 @@ module Sprockets
       def save
         FileUtils.mkdir_p dir
         File.open(path, 'w') do |f|
-          f.write JSON.generate(@data)
+          f.write @data.to_json
         end
       end
 
