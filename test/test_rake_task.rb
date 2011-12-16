@@ -32,19 +32,22 @@ class TestRakeTask < Sprockets::TestCase
   end
 
   test "assets" do
-    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    digest_path = @env['application.js'].digest_path
+    assert !File.exist?("#{@dir}/#{digest_path}")
 
     @rake[:assets].invoke
 
     assert File.exist?("#{@dir}/manifest.json")
-    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert File.exist?("#{@dir}/#{digest_path}")
   end
 
   test "clobber" do
+    digest_path = @env['application.js'].digest_path
+
     @rake[:assets].invoke
-    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert File.exist?("#{@dir}/#{digest_path}")
 
     @rake[:clobber_assets].invoke
-    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert !File.exist?("#{@dir}/#{digest_path}")
   end
 end

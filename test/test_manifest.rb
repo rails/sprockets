@@ -39,170 +39,179 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile asset" do
-    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    digest_path = @env['application.js'].digest_path
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
 
     @manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert File.exist?("#{@dir}/#{digest_path}")
 
     data = JSON.parse(File.read(@manifest.path))
-    assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-    assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
-      data['assets']['application.js']
+    assert data['files'][digest_path]
+    assert_equal digest_path, data['assets']['application.js']
   end
 
   test "compile asset with absolute path" do
-    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    digest_path = @env['application.js'].digest_path
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
 
     @manifest.compile(fixture_path('default/application.js.coffee'))
 
     assert File.exist?("#{@dir}/manifest.json")
-    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert File.exist?("#{@dir}/#{digest_path}")
 
     data = JSON.parse(File.read(@manifest.path))
-    assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-    assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
-      data['assets']['application.js']
+    assert data['files'][digest_path]
+    assert_equal digest_path, data['assets']['application.js']
   end
 
   test "compile multiple assets" do
-    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
-    assert !File.exist?("#{@dir}/gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css")
+    app_digest_path = @env['application.js'].digest_path
+    gallery_digest_path = @env['gallery.css'].digest_path
+
+    assert !File.exist?("#{@dir}/#{app_digest_path}")
+    assert !File.exist?("#{@dir}/#{gallery_digest_path}")
 
     @manifest.compile('application.js', 'gallery.css')
 
     assert File.exist?("#{@dir}/manifest.json")
-    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
-    assert File.exist?("#{@dir}/gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css")
+    assert File.exist?("#{@dir}/#{app_digest_path}")
+    assert File.exist?("#{@dir}/#{gallery_digest_path}")
 
     data = JSON.parse(File.read(@manifest.path))
-    assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-    assert data['files']['gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css']
-    assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
-      data['assets']['application.js']
-    assert_equal 'gallery-5d6e8915d9fd22fbb04afd4a99a57ce4.css',
-      data['assets']['gallery.css']
+    assert data['files'][app_digest_path]
+    assert data['files'][gallery_digest_path]
+    assert_equal app_digest_path, data['assets']['application.js']
+    assert_equal gallery_digest_path, data['assets']['gallery.css']
   end
 
   test "recompile asset" do
+    digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
 
     sandbox filename do
-      assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js"), Dir["#{@dir}/*"].inspect
+      assert !File.exist?("#{@dir}/#{digest_path}"), Dir["#{@dir}/*"].inspect
 
       @manifest.compile('application.js')
 
       assert File.exist?("#{@dir}/manifest.json")
-      assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+      assert File.exist?("#{@dir}/#{digest_path}")
 
       data = JSON.parse(File.read(@manifest.path))
-      assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-      assert_equal 'application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js',
-        data['assets']['application.js']
+      assert data['files'][digest_path]
+      assert_equal digest_path, data['assets']['application.js']
 
       File.open(filename, 'w') { |f| f.write "change;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
+      new_digest_path = @env['application.js'].digest_path
 
       @manifest.compile('application.js')
 
       assert File.exist?("#{@dir}/manifest.json")
-      assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
-      assert File.exist?("#{@dir}/application-fd3c12c6a14c82fc6d487f25c5f54f91.js")
+      assert File.exist?("#{@dir}/#{digest_path}")
+      assert File.exist?("#{@dir}/#{new_digest_path}")
 
       data = JSON.parse(File.read(@manifest.path))
-      assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-      assert data['files']['application-fd3c12c6a14c82fc6d487f25c5f54f91.js']
-      assert_equal 'application-fd3c12c6a14c82fc6d487f25c5f54f91.js',
-        data['assets']['application.js']
+      assert data['files'][digest_path]
+      assert data['files'][new_digest_path]
+      assert_equal new_digest_path, data['assets']['application.js']
     end
   end
 
   test "remove asset" do
+    digest_path = @env['application.js'].digest_path
+
     @manifest.compile('application.js')
-    assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert File.exist?("#{@dir}/#{digest_path}")
 
     data = JSON.parse(File.read(@manifest.path))
-    assert data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
+    assert data['files'][digest_path]
     assert data['assets']['application.js']
 
-    @manifest.remove('application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js')
+    @manifest.remove(digest_path)
 
-    assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+    assert !File.exist?("#{@dir}/#{digest_path}")
 
     data = JSON.parse(File.read(@manifest.path))
-    assert !data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
+    assert !data['files'][digest_path]
     assert !data['assets']['application.js']
   end
 
   test "remove old asset" do
+    digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
 
     sandbox filename do
       @manifest.compile('application.js')
-      assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+      assert File.exist?("#{@dir}/#{digest_path}")
 
       File.open(filename, 'w') { |f| f.write "change;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
+      new_digest_path = @env['application.js'].digest_path
 
       @manifest.compile('application.js')
-      assert File.exist?("#{@dir}/application-fd3c12c6a14c82fc6d487f25c5f54f91.js")
+      assert File.exist?("#{@dir}/#{new_digest_path}")
 
-      @manifest.remove('application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js')
-      assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+      @manifest.remove(digest_path)
+      assert !File.exist?("#{@dir}/#{digest_path}")
 
       data = JSON.parse(File.read(@manifest.path))
-      assert !data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-      assert data['files']['application-fd3c12c6a14c82fc6d487f25c5f54f91.js']
-      assert_equal 'application-fd3c12c6a14c82fc6d487f25c5f54f91.js',
-        data['assets']['application.js']
+      assert !data['files'][digest_path]
+      assert data['files'][new_digest_path]
+      assert_equal new_digest_path, data['assets']['application.js']
     end
   end
 
   test "remove old backups" do
+    digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
 
     sandbox filename do
       @manifest.compile('application.js')
-      assert File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
+      assert File.exist?("#{@dir}/#{digest_path}")
 
       File.open(filename, 'w') { |f| f.write "a;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
+      new_digest_path1 = @env['application.js'].digest_path
 
       @manifest.compile('application.js')
-      assert File.exist?("#{@dir}/application-ae0908555a245f8266f77df5a8edca2e.js")
+      assert File.exist?("#{@dir}/#{new_digest_path1}")
 
       File.open(filename, 'w') { |f| f.write "b;" }
       mtime = Time.now + 2
       File.utime(mtime, mtime, filename)
+      new_digest_path2 = @env['application.js'].digest_path
 
       @manifest.compile('application.js')
-      assert File.exist?("#{@dir}/application-226d144e6d700f802aafe2cbcc16f8dc.js")
+      assert File.exist?("#{@dir}/#{new_digest_path2}")
 
       File.open(filename, 'w') { |f| f.write "c;" }
       mtime = Time.now + 3
       File.utime(mtime, mtime, filename)
+      new_digest_path3 = @env['application.js'].digest_path
 
       @manifest.compile('application.js')
-      assert File.exist?("#{@dir}/application-019a310ae5bf296ee17beda7886a27b3.js")
+      assert File.exist?("#{@dir}/#{new_digest_path3}")
 
       @manifest.clean(1)
 
-      assert !File.exist?("#{@dir}/application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js")
-      assert !File.exist?("#{@dir}/application-ae0908555a245f8266f77df5a8edca2e.js")
-      assert File.exist?("#{@dir}/application-226d144e6d700f802aafe2cbcc16f8dc.js")
-      assert File.exist?("#{@dir}/application-019a310ae5bf296ee17beda7886a27b3.js")
+      assert !File.exist?("#{@dir}/#{digest_path}")
+      assert !File.exist?("#{@dir}/#{new_digest_path1}")
+      assert File.exist?("#{@dir}/#{new_digest_path2}")
+      assert File.exist?("#{@dir}/#{new_digest_path3}")
 
       data = JSON.parse(File.read(@manifest.path))
-      assert !data['files']['application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js']
-      assert !data['files']['application-ae0908555a245f8266f77df5a8edca2e.js']
-      assert data['files']['application-226d144e6d700f802aafe2cbcc16f8dc.js']
-      assert data['files']['application-019a310ae5bf296ee17beda7886a27b3.js']
-      assert_equal 'application-019a310ae5bf296ee17beda7886a27b3.js',
-        data['assets']['application.js']
+      assert !data['files'][digest_path]
+      assert !data['files'][new_digest_path1]
+      assert data['files'][new_digest_path2]
+      assert data['files'][new_digest_path3]
+      assert_equal new_digest_path3, data['assets']['application.js']
     end
   end
 

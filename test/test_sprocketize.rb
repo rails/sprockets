@@ -4,6 +4,10 @@ require 'tmpdir'
 
 class TestSprockets < Sprockets::TestCase
   def setup
+    @env = Sprockets::Environment.new(".") do |env|
+      env.append_path(fixture_path('default'))
+    end
+
     @dir = File.join(Dir::tmpdir, 'sprockets')
   end
 
@@ -40,10 +44,11 @@ class TestSprockets < Sprockets::TestCase
   end
 
   test "compile asset to output directory" do
+    digest_path = @env['gallery.js'].digest_path
     output = sprockets "-I", fixture_path("default"), "-o", @dir, fixture_path("default/gallery.js")
     assert_equal "", output
     assert File.exist?("#{@dir}/manifest.json")
-    assert File.exist?("#{@dir}/gallery-14c3b648520bac7a78379b54161c8a9e.js")
+    assert File.exist?("#{@dir}/#{digest_path}")
   end
 
   def sprockets(*args)
