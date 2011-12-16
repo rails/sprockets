@@ -21,6 +21,10 @@ OptionParser.new do |opts|
     Dir.chdir(directory)
   end
 
+  opts.on("-r", "--require LIBRARY", "Require the LIBRARY before doing anything") do |lib|
+    require lib
+  end
+
   opts.on("-I DIRECTORY", "--include=DIRECTORY", "Adds the directory to the Sprockets load path") do |directory|
     environment.append_path directory
   end
