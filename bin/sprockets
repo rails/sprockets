@@ -21,7 +21,7 @@ end
 
 OptionParser.new do |opts|
   opts.summary_width = 28
-  opts.banner = "Usage: sprocketize [options] filename [filename ...]"
+  opts.banner = "Usage: sprockets [options] filename [filename ...]"
 
   def opts.show_usage
     puts self
