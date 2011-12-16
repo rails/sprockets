@@ -1,4 +1,4 @@
-require 'json'
+require 'multi_json'
 require 'time'
 
 module Sprockets
@@ -37,9 +37,9 @@ module Sprockets
 
       begin
         if File.exist?(@path)
-          data = JSON.parse(File.read(@path))
+          data = MultiJson.decode(File.read(@path))
         end
-      rescue JSON::ParserError => e
+      rescue MultiJson::DecodeError => e
         logger.error "#{@path} is invalid: #{e.class} #{e.message}"
       end
 
@@ -182,7 +182,7 @@ module Sprockets
       def save
         FileUtils.mkdir_p dir
         File.open(path, 'w') do |f|
-          f.write @data.to_json
+          f.write MultiJson.encode(@data)
         end
       end
 
