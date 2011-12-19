@@ -162,6 +162,13 @@ footer, header, hgroup, menu, nav, section {
     EOS
   end
 
+  test "@import relative nested file" do
+    assert_equal <<-EOS, render('sass/relative.scss')
+body {
+  background: #666666; }
+    EOS
+  end
+
   test "modify file causes it to recompile" do
     filename = fixture_path('sass/test.scss')
 
@@ -206,7 +213,7 @@ class TestSprocketsSass < TestTiltSass
     super
 
     @env = Sprockets::Environment.new(".") do |env|
-      env.append_path(fixture_path('sass'))
+      env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
     end
   end

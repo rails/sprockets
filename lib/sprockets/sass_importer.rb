@@ -23,8 +23,13 @@ module Sprockets
     def resolve_relative(path, basepath)
       dirname, basename = File.split(path)
 
-      resolve("#{dirname}/_#{basename}", :base_path => basepath) ||
-        resolve("#{dirname}/#{basename}", :base_path => basepath)
+      if dirname == '.'
+        resolve("./_#{basename}", :base_path => basepath) ||
+          resolve("./#{basename}", :base_path => basepath)
+      else
+        resolve("./#{dirname}/_#{basename}", :base_path => basepath) ||
+          resolve("./#{dirname}/#{basename}", :base_path => basepath)
+      end
     end
 
     def resolve_loadpath(path)
