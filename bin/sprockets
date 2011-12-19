@@ -68,8 +68,9 @@ environment.append_path(".")
 
 if manifest
   manifest.compile(filenames)
+elsif filenames.length == 1
+  puts environment.find_asset(filenames.first).to_s
 else
-  filenames.each do |filename|
-    puts environment.find_asset(filename).to_s
-  end
+  warn "Only one file can be compiled to stdout at a time"
+  exit 1
 end

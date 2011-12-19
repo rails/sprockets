@@ -38,6 +38,11 @@ class TestSprockets < Sprockets::TestCase
     assert_equal "var Gallery = {};\n", output
   end
 
+  test "show error if multiple files are given" do
+    output = sprockets fixture_path("default/gallery.js"), fixture_path("default/application.js")
+    assert_equal 1, $?.exitstatus
+  end
+
   test "compile file with dependencies" do
     output = sprockets "-I", fixture_path("asset"), fixture_path("asset/application.js")
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", output
@@ -51,9 +56,18 @@ class TestSprockets < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
+  test "compile multiple assets to output directory" do
+    digest_path1, digest_path2 = @env['gallery.js'].digest_path, @env['gallery.css'].digest_path
+    output = sprockets "-I", fixture_path("default"), "-o", @dir, fixture_path("default/gallery.js"), fixture_path("default/gallery.css.erb")
+    assert_equal "", output
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/#{digest_path1}")
+    assert File.exist?("#{@dir}/#{digest_path2}")
+  end
+
   def sprockets(*args)
     script = File.expand_path("../../bin/sprockets", __FILE__)
     lib    = File.expand_path("../../lib", __FILE__)
-    `ruby -I#{lib} #{script} #{Shellwords.join(args)}`
+    `ruby -I#{lib} #{script} #{Shellwords.join(args)} 2>&1`
   end
 end
