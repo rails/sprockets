@@ -33,8 +33,13 @@ class TestSprockets < Sprockets::TestCase
     assert_match "Usage: sprockets", output
   end
 
-  test "compile simple file" do
+  test "error if load path is missing" do
     output = sprockets fixture_path("default/gallery.js")
+    assert_equal 1, $?.exitstatus
+  end
+
+  test "compile simple file" do
+    output = sprockets "-I", fixture_path("default"), fixture_path("default/gallery.js")
     assert_equal "var Gallery = {};\n", output
   end
 

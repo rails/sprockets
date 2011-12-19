@@ -64,7 +64,11 @@ OptionParser.new do |opts|
   end
 end
 
-environment.append_path(".")
+if environment.paths.empty?
+  warn "No load paths given"
+  warn "Usage: sprockets -Ijavascripts/ filename"
+  exit 1
+end
 
 if manifest
   manifest.compile(filenames)
