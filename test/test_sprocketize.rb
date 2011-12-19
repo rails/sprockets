@@ -34,7 +34,7 @@ class TestSprockets < Sprockets::TestCase
   end
 
   test "error if load path is missing" do
-    output = sprockets fixture_path("default/gallery.js")
+    sprockets fixture_path("default/gallery.js")
     assert_equal 1, $?.exitstatus
   end
 
@@ -44,7 +44,7 @@ class TestSprockets < Sprockets::TestCase
   end
 
   test "show error if multiple files are given" do
-    output = sprockets fixture_path("default/gallery.js"), fixture_path("default/application.js")
+    sprockets fixture_path("default/gallery.js"), fixture_path("default/application.js")
     assert_equal 1, $?.exitstatus
   end
 
