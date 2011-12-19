@@ -414,7 +414,7 @@ class TestEnvironment < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.puts "->" }
       time = Time.now + 60
       File.utime(time, time, filename)
-      assert_equal "\n  (function() {});\n", @env["tmp.js"].to_s
+      assert_equal "(function() {\n\n  (function() {});\n\n}).call(this);\n", @env["tmp.js"].to_s
     end
   end
 
