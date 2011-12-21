@@ -2,6 +2,11 @@ require 'tilt'
 require 'sprockets/sass_importer'
 
 module Sprockets
+  # This custom Tilt handler replaces the one built into Tilt. The
+  # main difference is that it uses a custom importer that plays nice
+  # with sprocket's caching system.
+  #
+  # See `SassImporter` for more infomation.
   class SassTemplate < Tilt::Template
     self.default_mime_type = 'text/css'
 
@@ -21,6 +26,7 @@ module Sprockets
     end
 
     def evaluate(context, locals, &block)
+      # Use custom importer that knows about Sprockets Caching
       importer = SassImporter.new(context)
 
       options = {
@@ -35,6 +41,7 @@ module Sprockets
 
       ::Sass::Engine.new(data, options).render
     rescue ::Sass::SyntaxError => e
+      # Annotates exception message with parse line number
       context.__LINE__ = e.sass_backtrace.first[:line]
       raise e
     end

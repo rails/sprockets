@@ -17,7 +17,6 @@ class TestTiltSass < Sprockets::TestCase
   end
 
   def setup
-    # Sass is a whiny little bitch
     silence_warnings do
       require 'sass'
     end
