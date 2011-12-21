@@ -212,6 +212,7 @@ class TestSprocketsSass < TestTiltSass
     super
 
     @env = Sprockets::Environment.new(".") do |env|
+      env.cache = {}
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
     end

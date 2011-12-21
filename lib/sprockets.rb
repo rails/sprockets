@@ -23,6 +23,7 @@ module Sprockets
   autoload :JstProcessor,            "sprockets/jst_processor"
   autoload :Processor,               "sprockets/processor"
   autoload :SafetyColons,            "sprockets/safety_colons"
+  autoload :SassCacheStore,          "sprockets/sass_cache_store"
   autoload :SassImporter,            "sprockets/sass_importer"
   autoload :SassTemplate,            "sprockets/sass_template"
   autoload :ScssTemplate,            "sprockets/scss_template"
