@@ -1,5 +1,4 @@
 require 'tilt'
-require 'sprockets/sass_importer'
 
 module Sprockets
   # This custom Tilt handler replaces the one built into Tilt. The
