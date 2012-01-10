@@ -228,12 +228,4 @@ class TestSprocketsSass < TestTiltSass
       @env[path].to_s
     end
   end
-
-  # For some reason Sass doesn't like importing other css files
-  test "@import css from scss" do
-    assert_equal <<-EOS, render('sass/import_css.scss')
-article, aside, details, figcaption, figure,\nfooter, header, hgroup, menu, nav, section {
-  display: block; }
-    EOS
-  end
 end

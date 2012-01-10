@@ -27,7 +27,6 @@ module Sprockets
 
     def evaluate(context, locals, &block)
       # Use custom importer that knows about Sprockets Caching
-      importer = SassImporter.new(context)
       cache_store = SassCacheStore.new(context.environment)
 
       options = {
@@ -35,8 +34,8 @@ module Sprockets
         :line => line,
         :syntax => syntax,
         :cache_store => cache_store,
-        :importer => importer,
-        :load_paths => [importer]
+        :importer => SassImporter.new(context, context.pathname),
+        :load_paths => context.environment.paths.map { |path| SassImporter.new(context, path) }
       }
 
       ::Sass::Engine.new(data, options).render
