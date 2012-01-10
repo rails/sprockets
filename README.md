@@ -356,6 +356,8 @@ submit a pull request.
 
 **2.3.0** (Unreleased)
 
+* Added special Sass importer that automatically tracks any `@import`ed files.
+
 **2.2.0** (January 10, 2012)
 
 * Added `sprockets` command line utility.
