@@ -354,7 +354,9 @@ submit a pull request.
 
 ## Version History ##
 
-**2.2.0** (Unreleased)
+**2.3.0** (Unreleased)
+
+**2.2.0** (January 10, 2012)
 
 * Added `sprockets` command line utility.
 * Added rake/sprocketstask.
