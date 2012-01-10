@@ -49,6 +49,9 @@ module Rake
     #
     attr_accessor :assets
 
+    # Number of old assets to keep.
+    attr_accessor :keep
+
     # Logger to use during rake tasks. Defaults to using stderr.
     #
     #   t.logger = Logger.new($stdout)
@@ -78,6 +81,7 @@ module Rake
       @environment  = lambda { Sprockets::Environment.new(Dir.pwd) }
       @logger       = Logger.new($stderr)
       @logger.level = Logger::INFO
+      @keep         = 2
 
       yield self if block_given?
 
@@ -105,7 +109,7 @@ module Rake
       desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
       task "clean_#{name}" do
         with_logger do
-          manifest.clean
+          manifest.clean(keep)
         end
       end
 
