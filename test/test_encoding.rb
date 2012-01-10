@@ -42,7 +42,7 @@ class EncodingTest < Sprockets::TestCase
     test "read static BINARY asset" do
       data = @env['binary.png'].to_s
       assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00".force_encoding("BINARY"),
-        @env['binary.png'].to_s[0..10]
+        data[0..10]
       assert_equal Encoding.find('BINARY'), data.encoding
     end
 
@@ -50,7 +50,7 @@ class EncodingTest < Sprockets::TestCase
       @env.register_postprocessor('image/png', :noop_processor) { |context, data| data }
       data = @env['binary.png'].to_s
       assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00".force_encoding("BINARY"),
-        @env['binary.png'].to_s[0..10]
+        data[0..10]
       assert_equal Encoding.find('BINARY'), data.encoding
     end
   else
@@ -79,13 +79,13 @@ class EncodingTest < Sprockets::TestCase
 
     test "read static BINARY asset" do
       data = @env['binary.png'].to_s
-      assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00", @env['binary.png'].to_s[0..10]
+      assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00", data[0..10]
     end
 
     test "read processed BINARY asset" do
       @env.register_postprocessor('image/png', :noop_processor) { |context, data| data }
       data = @env['binary.png'].to_s
-      assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00", @env['binary.png'].to_s[0..10]
+      assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00", data[0..10]
     end
   end
 end
