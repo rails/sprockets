@@ -22,6 +22,10 @@ module AssetTests
     assert_equal @asset.to_s.length, @asset.length
   end
 
+  test "bytesize is source bytesize" do
+    assert_equal @asset.to_s.bytesize, @asset.bytesize
+  end
+
   test "stale?" do
     assert !@asset.stale?(@env)
   end
@@ -342,6 +346,10 @@ class StaticAssetTest < Sprockets::TestCase
 
   test "length" do
     assert_equal 42917, @asset.length
+  end
+
+  test "bytesize" do
+    assert_equal 42917, @asset.bytesize
   end
 
   test "splat" do
@@ -780,12 +788,12 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal asset("project.js").to_s, body
   end
 
-  test "asset length is source length" do
-    assert_equal 46, asset("project.js").length
-  end
-
   test "asset length is source length with unicode characters" do
     assert_equal 8, asset("unicode.js").length
+  end
+
+  test "asset length is source bytesize with unicode characters" do
+    assert_equal 8, asset("unicode.js").bytesize
   end
 
   test "asset digest" do
@@ -827,6 +835,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.to_s, actual.to_s
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length
+    assert_equal expected.bytesize, actual.bytesize
     assert_equal expected.digest, actual.digest
     assert_equal expected.fresh?(@env), actual.fresh?(@env)
 

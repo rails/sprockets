@@ -30,6 +30,7 @@ module Sprockets
 
     attr_reader :logical_path, :pathname
     attr_reader :content_type, :mtime, :length, :digest
+    alias_method :bytesize, :length
 
     def initialize(environment, logical_path, pathname)
       @root         = environment.root
