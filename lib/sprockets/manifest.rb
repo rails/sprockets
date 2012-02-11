@@ -91,6 +91,7 @@ module Sprockets
           files[asset.digest_path] = {
             'logical_path' => asset.logical_path,
             'mtime'        => asset.mtime.iso8601,
+            'size'         => asset.bytesize,
             'digest'       => asset.digest
           }
           assets[asset.logical_path] = asset.digest_path

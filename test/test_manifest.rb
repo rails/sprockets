@@ -50,6 +50,8 @@ class TestManifest < Sprockets::TestCase
 
     data = JSON.parse(File.read(@manifest.path))
     assert data['files'][digest_path]
+    assert_equal "application.js", data['files'][digest_path]['logical_path']
+    assert_equal 226, data['files'][digest_path]['size']
     assert_equal digest_path, data['assets']['application.js']
   end
 
