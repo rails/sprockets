@@ -340,7 +340,7 @@ asset's cache in response to a change in another file.
 
 `stub` *path* allows dependency to be excluded from the asset bundle.
 The *path* must be a valid asset and may or may not already be part 
-of the bundle. Once stubbed, it is blacklisted andcan't be brought 
+of the bundle. Once stubbed, it is blacklisted and can't be brought 
 back by any other `require`.
 
 # Development #
