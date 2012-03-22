@@ -117,6 +117,24 @@ module Sprockets
       yield to_s
     end
 
+    def mappings
+      if content_type == 'application/javascript'
+        mapping = []
+        lineno = 1
+        to_s.lines.each do |line|
+          mapping << {
+            :generated_line => lineno,
+            :generated_col  => 0,
+            :source         => "#{logical_path}?source=1",
+            :source_line    => lineno,
+            :source_col     => 0
+          }
+          lineno += 1
+        end
+        mapping
+      end
+    end
+
     # Checks if Asset is fresh by comparing the actual mtime and
     # digest to the inmemory model.
     #

@@ -70,6 +70,21 @@ module Sprockets
       required_assets
     end
 
+    def mappings
+      bundle_mappings = []
+      offset = 0
+      required_assets.each do |asset|
+        mappings = asset.mappings
+        mappings.each do |mapping|
+          bundle_mappings << mapping.merge({
+            :generated_line => mapping[:generated_line] + offset
+          })
+        end
+        offset += mappings.last[:source_line]
+      end
+      bundle_mappings
+    end
+
     # Checks if Asset is stale by comparing the actual mtime and
     # digest to the inmemory model.
     def fresh?(environment)
