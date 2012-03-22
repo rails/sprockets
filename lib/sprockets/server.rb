@@ -44,7 +44,7 @@ module Sprockets
       end
 
       # Look up the asset.
-      asset = find_asset(path, :bundle => !body_only?(env))
+      asset = find_asset(path, :bundle => !body_only?(env), :source => source_only?(env))
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
@@ -181,6 +181,11 @@ module Sprockets
       # Test if `?body=1` or `body=true` query param is set
       def body_only?(env)
         env["QUERY_STRING"].to_s =~ /body=(1|t)/
+      end
+
+      # Test if `?source=1` or `source=true` query param is set
+      def source_only?(env)
+        env["QUERY_STRING"].to_s =~ /source=(1|t)/
       end
 
       # Returns a 304 Not Modified response tuple

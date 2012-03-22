@@ -244,7 +244,9 @@ module Sprockets
         # If there are any processors to run on the pathname, use
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if attributes_for(pathname).processors.any?
-          if options[:bundle] == false
+          if options[:source]
+            StaticAsset.new(index, logical_path, pathname)
+          elsif options[:bundle] == false
             circular_call_protection(pathname.to_s) do
               ProcessedAsset.new(index, logical_path, pathname)
             end
@@ -257,7 +259,13 @@ module Sprockets
       end
 
       def cache_key_for(path, options)
-        "#{path}:#{options[:bundle] ? '1' : '0'}"
+        if options[:source]
+          "#{path}:source"
+        elsif options[:bundle]
+          "#{path}:bundle"
+        else
+          "#{path}:processed"
+        end
       end
 
       def circular_call_protection(path)

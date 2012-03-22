@@ -44,6 +44,13 @@ class TestServer < Sprockets::TestCase
     assert_equal "9", last_response.headers['Content-Length']
   end
 
+  test "serve single source file original source" do
+    get "/assets/foo.js?source=1"
+    assert_equal 200, last_response.status
+    assert_equal "var foo;\n", last_response.body
+    assert_equal "9", last_response.headers['Content-Length']
+  end
+
   test "serve single source file from indexed environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
@@ -61,6 +68,14 @@ class TestServer < Sprockets::TestCase
     assert_equal "\n(function() {\n  application.boot();\n})();\n",
       last_response.body
     assert_equal "43", last_response.headers['Content-Length']
+  end
+
+  test "serve source file source that has dependencies" do
+    get "/assets/application.js?source=true"
+    assert_equal 200, last_response.status
+    assert_equal "// =require \"foo\"\n\n(function() {\n  application.boot();\n})();\n",
+      last_response.body
+    assert_equal "61", last_response.headers['Content-Length']
   end
 
   test "serve source with content type headers" do
