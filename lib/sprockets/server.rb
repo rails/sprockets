@@ -204,6 +204,11 @@ module Sprockets
           headers["Content-Type"]   = asset.content_type
           headers["Content-Length"] = length.to_s
 
+          # Source Map
+          if asset.is_a?(BundledAsset)
+            headers["X-SourceMap"] = "#{env["SCRIPT_NAME"]}#{env["PATH_INFO"]}.map"
+          end
+
           # Set caching headers
           headers["Cache-Control"]  = "public"
           headers["Last-Modified"]  = asset.mtime.httpdate
