@@ -361,6 +361,11 @@ submit a pull request.
 
 ## Version History ##
 
+(Unreleased)
+
+* Added global path registry
+* Added global processor registry
+
 **2.3.2** (March 26, 2012)
 
 * Fix Context#logical_path with dots
