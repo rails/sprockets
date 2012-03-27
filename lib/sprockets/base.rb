@@ -1,17 +1,16 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
 require 'sprockets/caching'
+require 'sprockets/errors'
 require 'sprockets/processed_asset'
-require 'sprockets/processing'
 require 'sprockets/server'
 require 'sprockets/static_asset'
-require 'sprockets/trail'
 require 'pathname'
 
 module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
-    include Caching, Mime, Processing, Engines, Server, Trail
+    include Caching, Paths, Mime, Processing, Engines, Server
 
     # Returns a `Digest` implementation class.
     #
@@ -98,6 +97,46 @@ module Sprockets
       @cache = cache
     end
 
+    def prepend_path(path)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def append_path(path)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def clear_paths
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    # Finds the expanded real path for a given logical path by
+    # searching the environment's paths.
+    #
+    #     resolve("application.js")
+    #     # => "/path/to/app/javascripts/application.js.coffee"
+    #
+    # A `FileNotFound` exception is raised if the file does not exist.
+    def resolve(logical_path, options = {})
+      # If a block is given, preform an iterable search
+      if block_given?
+        args = attributes_for(logical_path).search_paths + [options]
+        @trail.find(*args) do |path|
+          yield Pathname.new(path)
+        end
+      else
+        resolve(logical_path, options) do |pathname|
+          return pathname
+        end
+        raise FileNotFound, "couldn't find file '#{logical_path}'"
+      end
+    end
+
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
       # Overrides the global behavior to expire the index
@@ -165,14 +204,14 @@ module Sprockets
     #
     # Subclasses may cache this method.
     def entries(pathname)
-      trail.entries(pathname)
+      @trail.entries(pathname)
     end
 
     # Works like `File.stat`.
     #
     # Subclasses may cache this method.
     def stat(path)
-      trail.stat(path)
+      @trail.stat(path)
     end
 
     # Read and compute digest of filename.

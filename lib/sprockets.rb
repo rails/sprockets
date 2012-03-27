@@ -39,11 +39,14 @@ module Sprockets
   end
 
   # Extend Sprockets module to provide global registry
+  require 'hike'
   require 'sprockets/engines'
   require 'sprockets/mime'
   require 'sprockets/processing'
-  extend Engines, Mime, Processing
+  require 'sprockets/paths'
+  extend Engines, Mime, Processing, Paths
 
+  @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
   @mime_types        = {}
   @engines           = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }

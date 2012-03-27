@@ -27,6 +27,13 @@ module EnvironmentTests
     assert_equal [fixture_path("default")], @env.paths.to_a
   end
 
+  test "register global path" do
+    assert_equal [fixture_path("default")], new_environment.paths.to_a
+    Sprockets.append_path(fixture_path("asset"))
+    assert_equal [fixture_path("asset"), fixture_path("default")], new_environment.paths.to_a
+    Sprockets.clear_paths
+  end
+
   test "extensions" do
     ["coffee", "erb", "less", "sass", "scss", "str", "css", "js"].each do |ext|
       assert @env.extensions.to_a.include?(".#{ext}"), "'.#{ext}' not in #{@env.extensions.inspect}"

@@ -38,6 +38,10 @@ module Sprockets
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors
 
+      Sprockets.paths.each do |path|
+        append_path(path)
+      end
+
       @engines.each do |ext, klass|
         add_engine_to_trail(ext, klass)
       end
