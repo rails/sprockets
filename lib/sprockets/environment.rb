@@ -1,9 +1,6 @@
 require 'sprockets/base'
-require 'sprockets/charset_normalizer'
 require 'sprockets/context'
-require 'sprockets/directive_processor'
 require 'sprockets/index'
-require 'sprockets/safety_colons'
 
 require 'hike'
 require 'logger'
@@ -35,24 +32,19 @@ module Sprockets
       @digest_class = ::Digest::MD5
       @version = ''
 
-      @mime_types        = {}
+      @mime_types        = Sprockets.registered_mime_types
       @engines           = Sprockets.engines
-      @preprocessors     = Hash.new { |h, k| h[k] = [] }
-      @postprocessors    = Hash.new { |h, k| h[k] = [] }
-      @bundle_processors = Hash.new { |h, k| h[k] = [] }
+      @preprocessors     = Sprockets.preprocessors
+      @postprocessors    = Sprockets.postprocessors
+      @bundle_processors = Sprockets.bundle_processors
 
       @engines.each do |ext, klass|
         add_engine_to_trail(ext, klass)
       end
 
-      register_mime_type 'text/css', '.css'
-      register_mime_type 'application/javascript', '.js'
-
-      register_preprocessor 'text/css', DirectiveProcessor
-      register_preprocessor 'application/javascript', DirectiveProcessor
-
-      register_postprocessor 'application/javascript', SafetyColons
-      register_bundle_processor 'text/css', CharsetNormalizer
+      @mime_types.each do |ext, type|
+        @trail.append_extension(ext)
+      end
 
       expire_index!
 

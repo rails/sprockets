@@ -11,7 +11,7 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
-    include Caching, Processing, Server, Trail
+    include Caching, Mime, Processing, Engines, Server, Trail
 
     # Returns a `Digest` implementation class.
     #
@@ -96,6 +96,58 @@ module Sprockets
     def cache=(cache)
       expire_index!
       @cache = cache
+    end
+
+    # Register a new mime type.
+    def register_mime_type(mime_type, ext)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      @trail.append_extension(ext)
+      super
+    end
+
+    # Registers a new Engine `klass` for `ext`.
+    def register_engine(ext, klass)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      add_engine_to_trail(ext, klass)
+      super
+    end
+
+    def register_preprocessor(mime_type, klass, &block)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def unregister_preprocessor(mime_type, klass)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def register_postprocessor(mime_type, klass, &block)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def unregister_postprocessor(mime_type, klass)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def register_bundle_processor(mime_type, klass, &block)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
+    end
+
+    def unregister_bundle_processor(mime_type, klass)
+      # Overrides the global behavior to expire the index
+      expire_index!
+      super
     end
 
     # Return an `Index`. Must be implemented by the subclass.

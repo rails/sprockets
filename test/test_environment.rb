@@ -29,7 +29,7 @@ module EnvironmentTests
 
   test "extensions" do
     ["coffee", "erb", "less", "sass", "scss", "str", "css", "js"].each do |ext|
-      assert @env.extensions.to_a.include?(".#{ext}")
+      assert @env.extensions.to_a.include?(".#{ext}"), "'.#{ext}' not in #{@env.extensions.inspect}"
     end
   end
 
@@ -303,6 +303,14 @@ class TestEnvironment < Sprockets::TestCase
     assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
   end
 
+  test "register global block preprocessor" do
+    old_size = new_environment.preprocessors('text/css').size
+    Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
+    assert_equal old_size+1, new_environment.preprocessors('text/css').size
+    Sprockets.unregister_preprocessor('text/css', :foo)
+    assert_equal old_size, new_environment.preprocessors('text/css').size
+  end
+
   test "unregister custom block preprocessor" do
     old_size = @env.preprocessors('text/css').size
     @env.register_preprocessor('text/css', :foo) { |context, data| data }
@@ -319,12 +327,28 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal old_size, @env.postprocessors('text/css').size
   end
 
+  test "register global block postprocessor" do
+    old_size = new_environment.postprocessors('text/css').size
+    Sprockets.register_postprocessor('text/css', :foo) { |context, data| data }
+    assert_equal old_size+1, new_environment.postprocessors('text/css').size
+    Sprockets.unregister_postprocessor('text/css', :foo)
+    assert_equal old_size, new_environment.postprocessors('text/css').size
+  end
+
   test "unregister custom block bundle processor" do
     old_size = @env.bundle_processors('text/css').size
     @env.register_bundle_processor('text/css', :foo) { |context, data| data }
     assert_equal old_size+1, @env.bundle_processors('text/css').size
     @env.unregister_bundle_processor('text/css', :foo)
     assert_equal old_size, @env.bundle_processors('text/css').size
+  end
+
+  test "register global bundle processor" do
+    assert !@env.bundle_processors('text/css').include?(WhitespaceCompressor)
+    Sprockets.register_bundle_processor 'text/css', WhitespaceCompressor
+    env = new_environment
+    assert env.bundle_processors('text/css').include?(WhitespaceCompressor)
+    Sprockets.unregister_bundle_processor 'text/css', WhitespaceCompressor
   end
 
   test "setting css compressor to nil clears current compressor" do
