@@ -361,7 +361,7 @@ submit a pull request.
 
 ## Version History ##
 
-(Unreleased)
+**2.4.0** (March 27, 2012)
 
 * Added global path registry
 * Added global processor registry
