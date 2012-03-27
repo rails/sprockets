@@ -339,8 +339,8 @@ asset's cache in response to a change in another file.
 ### The `stub` Directive ###
 
 `stub` *path* allows dependency to be excluded from the asset bundle.
-The *path* must be a valid asset and may or may not already be part 
-of the bundle. Once stubbed, it is blacklisted and can't be brought 
+The *path* must be a valid asset and may or may not already be part
+of the bundle. Once stubbed, it is blacklisted and can't be brought
 back by any other `require`.
 
 # Development #
@@ -360,6 +360,10 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**2.3.2** (March 26, 2012)
+
+* Fix Context#logical_path with dots
 
 **2.3.1** (February 11, 2012)
 
