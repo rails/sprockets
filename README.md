@@ -361,6 +361,11 @@ submit a pull request.
 
 ## Version History ##
 
+**2.4.1** (April 26, 2012)
+
+* Fixed MultiJson API change
+* Fixed gzip mtime
+
 **2.4.0** (March 27, 2012)
 
 * Added global path registry
