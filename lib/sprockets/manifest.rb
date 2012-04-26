@@ -37,7 +37,7 @@ module Sprockets
 
       begin
         if File.exist?(@path)
-          data = MultiJson.decode(File.read(@path))
+          data = json_decode(File.read(@path))
         end
       rescue MultiJson::DecodeError => e
         logger.error "#{@path} is invalid: #{e.class} #{e.message}"
@@ -186,11 +186,32 @@ module Sprockets
       def save
         FileUtils.mkdir_p dir
         File.open(path, 'w') do |f|
-          f.write MultiJson.encode(@data)
+          f.write json_encode(@data)
         end
       end
 
     private
+      # Feature detect newer MultiJson API
+      if MultiJson.respond_to?(:load)
+        def json_decode(obj)
+          MultiJson.load(obj)
+        end
+      else
+        def json_decode(obj)
+          MultiJson.decode(obj)
+        end
+      end
+
+      if MultiJson.respond_to?(:dump)
+        def json_encode(obj)
+          MultiJson.dump(obj)
+        end
+      else
+        def json_encode(obj)
+          MultiJson.encode(obj)
+        end
+      end
+
       def logger
         environment.logger
       end
