@@ -3,7 +3,6 @@ require 'sprockets/version'
 module Sprockets
   # Environment
   autoload :Base,                    "sprockets/base"
-  autoload :Engines,                 "sprockets/engines"
   autoload :Environment,             "sprockets/environment"
   autoload :Index,                   "sprockets/index"
   autoload :Manifest,                "sprockets/manifest"
@@ -15,14 +14,11 @@ module Sprockets
   autoload :StaticAsset,             "sprockets/static_asset"
 
   # Processing
-  autoload :CharsetNormalizer,       "sprockets/charset_normalizer"
   autoload :Context,                 "sprockets/context"
-  autoload :DirectiveProcessor,      "sprockets/directive_processor"
   autoload :EcoTemplate,             "sprockets/eco_template"
   autoload :EjsTemplate,             "sprockets/ejs_template"
   autoload :JstProcessor,            "sprockets/jst_processor"
   autoload :Processor,               "sprockets/processor"
-  autoload :SafetyColons,            "sprockets/safety_colons"
   autoload :SassCacheStore,          "sprockets/sass_cache_store"
   autoload :SassImporter,            "sprockets/sass_importer"
   autoload :SassTemplate,            "sprockets/sass_template"
@@ -43,8 +39,32 @@ module Sprockets
   end
 
   # Extend Sprockets module to provide global registry
-  extend Engines
-  @engines = {}
+  require 'hike'
+  require 'sprockets/engines'
+  require 'sprockets/mime'
+  require 'sprockets/processing'
+  require 'sprockets/paths'
+  extend Engines, Mime, Processing, Paths
+
+  @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
+  @mime_types        = {}
+  @engines           = {}
+  @preprocessors     = Hash.new { |h, k| h[k] = [] }
+  @postprocessors    = Hash.new { |h, k| h[k] = [] }
+  @bundle_processors = Hash.new { |h, k| h[k] = [] }
+
+  register_mime_type 'text/css', '.css'
+  register_mime_type 'application/javascript', '.js'
+
+  require 'sprockets/directive_processor'
+  register_preprocessor 'text/css',               DirectiveProcessor
+  register_preprocessor 'application/javascript', DirectiveProcessor
+
+  require 'sprockets/safety_colons'
+  register_postprocessor 'application/javascript', SafetyColons
+
+  require 'sprockets/charset_normalizer'
+  register_bundle_processor 'text/css', CharsetNormalizer
 
   # Cherry pick the default Tilt engines that make sense for
   # Sprockets. We don't need ones that only generate html like HAML.

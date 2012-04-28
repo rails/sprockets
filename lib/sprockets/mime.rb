@@ -15,6 +15,11 @@ module Sprockets
       end
     end
 
+    # Returns a `Hash` of explicitly registered mime types.
+    def registered_mime_types
+      @mime_types.dup
+    end
+
     if {}.respond_to?(:key)
       def extension_for_mime_type(type)
         mime_types.key(type)
@@ -41,8 +46,4 @@ module Sprockets
       end
     end
   end
-
-  # Extend Sprockets module to provide global registry
-  extend Mime
-  @mime_types = {}
 end

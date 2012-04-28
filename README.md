@@ -336,6 +336,13 @@ source file before any subsequent `require` or `include` directives.
 including it in the bundle. This is useful when you need to expire an
 asset's cache in response to a change in another file.
 
+### The `stub` Directive ###
+
+`stub` *path* allows dependency to be excluded from the asset bundle.
+The *path* must be a valid asset and may or may not already be part
+of the bundle. Once stubbed, it is blacklisted and can't be brought
+back by any other `require`.
+
 # Development #
 
 ## Contributing ##
@@ -353,6 +360,20 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**2.4.1** (April 26, 2012)
+
+* Fixed MultiJson API change
+* Fixed gzip mtime
+
+**2.4.0** (March 27, 2012)
+
+* Added global path registry
+* Added global processor registry
+
+**2.3.2** (March 26, 2012)
+
+* Fix Context#logical_path with dots
 
 **2.3.1** (February 11, 2012)
 
