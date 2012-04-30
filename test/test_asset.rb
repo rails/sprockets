@@ -528,6 +528,19 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert expected.eql?(actual)
   end
 
+  test "source mappings" do
+    mappings = @asset.mappings
+    assert_equal 6, mappings.size
+
+    assert mapping = mappings[0]
+    assert_equal 0, mapping.generated.line
+    assert_equal 0, mapping.generated.column
+    assert_equal 0, mapping.original.line
+    assert_equal 0, mapping.original.column
+    assert_equal 'application.js?source=1', mapping.source
+    assert_equal nil, mapping.name
+  end
+
   def asset(logical_path)
     @env.find_asset(logical_path, :bundle => @bundle)
   end
@@ -858,6 +871,35 @@ class BundledAssetTest < Sprockets::TestCase
     ensure
       ENV["HOME"] = home
     end
+  end
+
+  test "source mappings" do
+    mappings = @asset.mappings
+    assert_equal 14, mappings.size
+
+    assert mapping = mappings[0]
+    assert_equal 1, mapping.generated.line
+    assert_equal 0, mapping.generated.column
+    assert_equal 0, mapping.original.line
+    assert_equal 0, mapping.original.column
+    assert_equal 'project.js?source=1', mapping.source
+    assert_equal nil, mapping.name
+
+    assert mapping = mappings[4]
+    assert_equal 5, mapping.generated.line
+    assert_equal 0, mapping.generated.column
+    assert_equal 0, mapping.original.line
+    assert_equal 0, mapping.original.column
+    assert_equal 'users.js?source=1', mapping.source
+    assert_equal nil, mapping.name
+
+    assert mapping = mappings[8]
+    assert_equal 9, mapping.generated.line
+    assert_equal 0, mapping.generated.column
+    assert_equal 0, mapping.original.line
+    assert_equal 0, mapping.original.column
+    assert_equal 'application.js?source=1', mapping.source
+    assert_equal nil, mapping.name
   end
 
   def asset(logical_path)

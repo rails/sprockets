@@ -43,6 +43,11 @@ module Sprockets
         path = path.sub("-#{fingerprint}", '')
       end
 
+      if File.extname(path) == '.map'
+        source_map = true
+        path = path.chomp('.map')
+      end
+
       # Look up the asset.
       asset = find_asset(path, :bundle => !body_only?(env), :source => source_only?(env))
 
@@ -52,6 +57,10 @@ module Sprockets
 
         # Return a 404 Not Found
         not_found_response
+
+      # Serve Source Map for asset
+      elsif source_map
+        source_map_response(asset, env)
 
       # Check request headers `HTTP_IF_NONE_MATCH` against the asset digest
       elsif etag_match?(asset, env)
@@ -196,6 +205,14 @@ module Sprockets
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
         [ 200, headers(env, asset, asset.length), asset ]
+      end
+
+      def source_map_response(asset, env)
+        map = SourceMap.new({
+          :filename => asset.logical_path,
+          :mappings => asset.mappings
+        })
+        [ 200, {'Content-Type' => 'application/json'}, [map.to_json] ]
       end
 
       def headers(env, asset, length)

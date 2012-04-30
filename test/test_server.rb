@@ -51,6 +51,13 @@ class TestServer < Sprockets::TestCase
     assert_equal "9", last_response.headers['Content-Length']
   end
 
+  test "serve source map file" do
+    get "/assets/foo.js.map"
+    assert_equal 200, last_response.status
+    assert_match /version/, last_response.body
+    assert_equal "application/json", last_response.headers['Content-Type']
+  end
+
   test "serve single source file from indexed environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body

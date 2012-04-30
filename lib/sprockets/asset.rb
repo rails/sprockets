@@ -1,5 +1,6 @@
 require 'time'
 require 'set'
+require 'sprockets/source_map'
 
 module Sprockets
   # `Asset` is the base class for `BundledAsset` and `StaticAsset`.
@@ -119,19 +120,12 @@ module Sprockets
 
     def mappings
       if content_type == 'application/javascript'
-        mapping = []
-        lineno = 1
-        to_s.lines.each do |line|
-          mapping << {
-            :generated_line => lineno,
-            :generated_col  => 0,
-            :source         => "#{logical_path}?source=1",
-            :source_line    => lineno,
-            :source_col     => 0
-          }
-          lineno += 1
+        mappings = []
+        to_s.lines.each_with_index do |line, index|
+          offset = SourceMap::Offset.new(index, 0)
+          mappings << SourceMap::Mapping.new("#{logical_path}?source=1", offset, offset)
         end
-        mapping
+        SourceMap::Mappings.new(mappings)
       end
     end
 

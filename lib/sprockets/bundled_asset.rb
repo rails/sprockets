@@ -1,5 +1,6 @@
 require 'sprockets/asset'
 require 'sprockets/errors'
+require 'sprockets/source_map'
 require 'fileutils'
 require 'set'
 require 'zlib'
@@ -71,18 +72,11 @@ module Sprockets
     end
 
     def mappings
-      bundle_mappings = []
-      offset = 0
+      mappings = SourceMap::Mappings.new
       required_assets.each do |asset|
-        mappings = asset.mappings
-        mappings.each do |mapping|
-          bundle_mappings << mapping.merge({
-            :generated_line => mapping[:generated_line] + offset
-          })
-        end
-        offset += mappings.last[:source_line]
+        mappings += asset.mappings
       end
-      bundle_mappings
+      mappings
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
