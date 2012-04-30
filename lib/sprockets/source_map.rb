@@ -104,7 +104,7 @@ module Sprockets
       end
 
       def line_count
-        @line_count ||= @mappings.any? ? @mappings.max { |m| m.generated.line }.generated.line : 0
+        @line_count ||= @mappings.any? ? @mappings.last.generated.line : 0
       end
 
       def size

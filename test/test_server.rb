@@ -54,7 +54,7 @@ class TestServer < Sprockets::TestCase
   test "serve source map file" do
     get "/assets/foo.js.map"
     assert_equal 200, last_response.status
-    assert_match /version/, last_response.body
+    assert_match %r{version}, last_response.body
     assert_equal "application/json", last_response.headers['Content-Type']
   end
 
