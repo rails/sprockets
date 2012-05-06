@@ -4,6 +4,8 @@ require 'sprockets/vlq'
 module Sprockets
   class SourceMap
     class Offset
+      include Comparable
+
       def initialize(line, column)
         @line, @column = line, column
       end
@@ -17,7 +19,17 @@ module Sprockets
         when Integer
           Offset.new(self.line + other, self.column)
         else
-          raise ArgumentError, "can't convert #{other} into Offset"
+          raise ArgumentError, "can't convert #{other} into #{self.class}"
+        end
+      end
+
+      def <=>(other)
+        case other
+        when Offset
+          diff = self.line - other.line
+          diff.zero? ? self.column - other.column : diff
+        else
+          raise ArgumentError, "can't convert #{other.class} into #{self.class}"
         end
       end
 
@@ -31,12 +43,25 @@ module Sprockets
     end
 
     class Mapping
+      include Comparable
+
       def initialize(source, generated, original, name = nil)
         @source, @generated, @original = source, generated, original
         @name = name
       end
 
       attr_reader :generated, :original, :source, :name
+
+      def <=>(other)
+        case other
+        when Mapping
+          self.generated <=> other.generated
+        when Offset
+          self.generated <=> other
+        else
+          raise ArgumentError, "can't convert #{other.class} into #{self.class}"
+        end
+      end
 
       def inspect
         "#<#{self.class} generated=#{generated}, original=#{original}, source=#{source}, name=#{name}>"
@@ -73,6 +98,9 @@ module Sprockets
 
               source   = sources[source_id]
               original = Offset.new(original_line, original_column)
+            else
+              # TODO: Research this case
+              next
             end
 
             if segment[4]
@@ -139,6 +167,18 @@ module Sprockets
           mappings << Mapping.new(m.source, m.generated + offset, m.original, m.name)
         end
         self.class.new(mappings)
+      end
+
+      def bsearch(offset, low = 0, high = size - 1)
+        return self[low-1] if low > high
+        mid = (low + high) / 2
+        return self[mid] if self[mid] == offset
+        if self[mid] > offset
+          high = mid - 1
+        else
+          low = mid + 1
+        end
+        bsearch(offset, low, high)
       end
 
       protected

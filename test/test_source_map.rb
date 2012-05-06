@@ -116,8 +116,8 @@ class TestMappings < Test::Unit::TestCase
   def setup
     @mappings = Mappings.new([
       Mapping.new('a.js', Offset.new(0, 0), Offset.new(0, 0)),
-      Mapping.new('b.js', Offset.new(1, 0), Offset.new(0, 0)),
-      Mapping.new('c.js', Offset.new(2, 0), Offset.new(0, 0))
+      Mapping.new('b.js', Offset.new(1, 0), Offset.new(20, 0)),
+      Mapping.new('c.js', Offset.new(2, 0), Offset.new(30, 0))
     ])
   end
 
@@ -126,7 +126,7 @@ class TestMappings < Test::Unit::TestCase
   end
 
   def test_to_s
-    assert_equal "ACAA;ACAA;", @mappings.to_s
+    assert_equal "ACoBA;ACUA;", @mappings.to_s
   end
 
   def test_sources
@@ -146,6 +146,14 @@ class TestMappings < Test::Unit::TestCase
     assert_equal 1, mappings3[1].generated.line
     assert_equal 2, mappings3[2].generated.line
     assert_equal 3, mappings3[3].generated.line
+  end
+
+  def test_bsearch
+    assert_equal Offset.new(0, 0), @mappings.bsearch(Offset.new(0, 0)).original
+    assert_equal Offset.new(0, 0), @mappings.bsearch(Offset.new(0, 5)).original
+    assert_equal Offset.new(20, 0), @mappings.bsearch(Offset.new(1, 0)).original
+    assert_equal Offset.new(20, 0), @mappings.bsearch(Offset.new(1, 0)).original
+    assert_equal Offset.new(30, 0), @mappings.bsearch(Offset.new(2, 0)).original
   end
 end
 
@@ -173,6 +181,34 @@ class TestMapping < Test::Unit::TestCase
 
   def test_name
     assert_equal 'hello', @mapping.name
+  end
+
+  def test_compare
+    assert @mapping == @mapping
+    assert @mapping <= @mapping
+    assert @mapping >= @mapping
+
+    other = Mapping.new('script.js', Offset.new(2, 0), Offset.new(3, 0), 'goodbye')
+    assert @mapping < other
+    assert other > @mapping
+
+    other = Mapping.new('script.js', Offset.new(1, 9), Offset.new(3, 0), 'goodbye')
+    assert @mapping < other
+    assert other > @mapping
+  end
+
+  def test_compare_offset
+    other = Offset.new(1, 8)
+
+    assert @mapping == other
+    assert @mapping <= other
+    assert @mapping >= other
+
+    other = Offset.new(2, 0)
+    assert @mapping < other
+
+    other = Offset.new(1, 9)
+    assert @mapping < other
   end
 
   def test_inspect
@@ -213,5 +249,13 @@ class TestOffset < Test::Unit::TestCase
     offset = @offset + 5
     assert_equal 6, offset.line
     assert_equal 5, offset.column
+  end
+
+  def test_compare
+    assert @offset < Offset.new(2, 0)
+    assert @offset < Offset.new(1, 6)
+    assert @offset > Offset.new(1, 4)
+    assert @offset >= Offset.new(1, 5)
+    assert @offset <= Offset.new(1, 5)
   end
 end
