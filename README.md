@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.4.2** (May 7, 2012)
+
+* Fixed MultiJson feature detect
+
 **2.4.1** (April 26, 2012)
 
 * Fixed MultiJson API change
