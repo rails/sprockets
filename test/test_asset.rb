@@ -582,9 +582,8 @@ class BundledAssetTest < Sprockets::TestCase
 
     sandbox required_asset do
       mtime = Time.now + 1
-      mtime = mtime.round if mtime.respond_to?(:round)
       File.utime mtime, mtime, required_asset
-      assert_equal mtime, asset('required_assets.js').mtime
+      assert_equal mtime.to_i, asset('required_assets.js').mtime.to_i
     end
   end
 
@@ -593,9 +592,8 @@ class BundledAssetTest < Sprockets::TestCase
 
     sandbox asset_dependency do
       mtime = Time.now + 1
-      mtime = mtime.round if mtime.respond_to?(:round)
       File.utime mtime, mtime, asset_dependency
-      assert_equal mtime, asset('dependency_paths.js').mtime
+      assert_equal mtime.to_i, asset('dependency_paths.js').mtime.to_i
     end
   end
 
