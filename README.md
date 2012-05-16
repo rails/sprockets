@@ -361,6 +361,11 @@ submit a pull request.
 
 ## Version History ##
 
+**2.4.3** (May 16, 2012)
+
+* Exposed :sprockets in sass options
+* Include dependency paths in asset mtime
+
 **2.4.2** (May 7, 2012)
 
 * Fixed MultiJson feature detect
