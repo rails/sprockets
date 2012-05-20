@@ -154,6 +154,18 @@ module EnvironmentTests
     end
   end
 
+  test "asset with missing depend_on raises an exception" do
+    assert_raises Sprockets::FileNotFound do
+      @env["missing_depend_on.js"]
+    end
+  end
+
+  test "asset with missing absolute depend_on raises an exception" do
+    assert_raises Sprockets::FileNotFound do
+      @env["missing_absolute_depend_on.js"]
+    end
+  end
+
   test "asset logical path for absolute path" do
     assert_equal "gallery.js",
       @env[fixture_path("default/gallery.js")].logical_path
@@ -163,30 +175,34 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
+  ENTRIES_IN_PATH = 36
+
   test "iterate over each entry" do
     entries = []
     @env.each_entry(fixture_path("default")) do |path|
       entries << path
     end
-    assert_equal 34, entries.length
+    assert_equal ENTRIES_IN_PATH, entries.length
   end
 
   test "each entry enumerator" do
     enum = @env.each_entry(fixture_path("default"))
-    assert_equal 34, enum.to_a.length
+    assert_equal ENTRIES_IN_PATH, enum.to_a.length
   end
+
+  FILES_IN_PATH = 31
 
   test "iterate over each file" do
     files = []
     @env.each_file do |filename|
       files << filename
     end
-    assert_equal 29, files.length
+    assert_equal FILES_IN_PATH, files.length
   end
 
   test "each file enumerator" do
     enum = @env.each_file
-    assert_equal 29, enum.to_a.length
+    assert_equal FILES_IN_PATH, enum.to_a.length
   end
 
   test "iterate over each logical path" do
@@ -194,7 +210,7 @@ module EnvironmentTests
     @env.each_logical_path do |logical_path|
       paths << logical_path
     end
-    assert_equal 29, paths.length
+    assert_equal FILES_IN_PATH, paths.length
     assert_equal paths.size, paths.uniq.size, "has duplicates"
 
     assert paths.include?("application.js")
@@ -205,7 +221,7 @@ module EnvironmentTests
 
   test "each logical path enumerator" do
     enum = @env.each_logical_path
-    assert_equal 29, enum.to_a.length
+    assert_equal FILES_IN_PATH, enum.to_a.length
   end
 
   test "iterate over each logical path matching fnmatch filters" do
