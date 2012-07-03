@@ -154,6 +154,23 @@ module FreshnessTests
     end
   end
 
+  test "asset is stale when one of its dependencies is removed" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      File.open(main, 'w') { |f| f.write "//= depend_on test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a;" }
+      asset = asset('test-main.js')
+
+      assert asset.fresh?(@env)
+
+      File.unlink(dep)
+
+      assert asset.stale?(@env)
+    end
+  end
+
   test "asset is stale when one of its asset dependencies is modified" do
     main = fixture_path('asset/test-main.js')
     dep  = fixture_path('asset/test-dep.js')

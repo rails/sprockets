@@ -81,7 +81,11 @@ module Sprockets
       attributes = environment.attributes_for(pathname)
 
       if pathname.absolute?
-        pathname
+        if environment.stat(pathname)
+          pathname
+        else
+          raise FileNotFound, "couldn't find file '#{pathname}'"
+        end
 
       elsif content_type = options[:content_type]
         content_type = self.content_type if content_type == :self
