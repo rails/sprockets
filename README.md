@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.4.5** (July 10, 2012)
+
+* Tweaked some logger levels
+
 **2.4.4** (July 2, 2012)
 
 * Canonicalize logical path extensions
