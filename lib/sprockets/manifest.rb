@@ -129,7 +129,7 @@ module Sprockets
 
       save
 
-      logger.warn "Removed #{filename}"
+      logger.info "Removed #{filename}"
 
       nil
     end
@@ -152,7 +152,7 @@ module Sprockets
     # Wipe directive
     def clobber
       FileUtils.rm_r(@dir) if File.exist?(@dir)
-      logger.warn "Removed #{@dir}"
+      logger.info "Removed #{@dir}"
       nil
     end
 
@@ -178,7 +178,7 @@ module Sprockets
         ms = benchmark do
           asset = environment.find_asset(logical_path)
         end
-        logger.warn "Compiled #{logical_path}  (#{ms}ms)"
+        logger.debug "Compiled #{logical_path}  (#{ms}ms)"
         asset
       end
 
