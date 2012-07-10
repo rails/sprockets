@@ -19,7 +19,7 @@ module Sprockets
       @dependency_digest = compute_dependency_digest(environment)
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
-      environment.logger.info "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
+      environment.logger.debug "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
     end
 
     # Interal: Used to check equality
