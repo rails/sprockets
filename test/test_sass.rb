@@ -23,7 +23,7 @@ class TestTiltSass < Sprockets::TestCase
   end
 
   def teardown
-    FileUtils.rm_r(CACHE_PATH)
+    FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
 
@@ -227,5 +227,13 @@ class TestSprocketsSass < TestTiltSass
     silence_warnings do
       @env[path].to_s
     end
+  end
+end
+
+class TestSassCompressor < TestTiltSass
+  test "compress css" do
+    uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
+    compressed   = "p{margin:0;padding:0}\n"
+    assert_equal compressed, Sprockets::SassCompressor.compress(uncompressed)
   end
 end

@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.5.0**
+
+* Add SassCompressor
+
 **2.4.5** (July 10, 2012)
 
 * Tweaked some logger levels
