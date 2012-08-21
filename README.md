@@ -363,6 +363,7 @@ submit a pull request.
 
 **2.5.0**
 
+* Provide stubbed implementation of context *_path helpers
 * Add SassCompressor
 
 **2.4.5** (July 10, 2012)

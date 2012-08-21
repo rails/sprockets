@@ -21,6 +21,7 @@ module Sprockets
   autoload :Processor,               "sprockets/processor"
   autoload :SassCacheStore,          "sprockets/sass_cache_store"
   autoload :SassCompressor,          "sprockets/sass_compressor"
+  autoload :SassFunctions,           "sprockets/sass_functions"
   autoload :SassImporter,            "sprockets/sass_importer"
   autoload :SassTemplate,            "sprockets/sass_template"
   autoload :ScssTemplate,            "sprockets/scss_template"

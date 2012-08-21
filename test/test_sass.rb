@@ -239,3 +239,41 @@ class TestSassCompressor < TestTiltSass
     end
   end
 end
+
+class TestSassFunctions < TestSprocketsSass
+  def setup
+    super
+
+    @env.context_class.class_eval do
+      def asset_path(path, options = {})
+        "/#{path}"
+      end
+    end
+  end
+
+  test "path functions" do
+    assert_equal <<-EOS, render('sass/paths.scss')
+div {
+  url: url("/foo.svg");
+  url: url("/foo.png");
+  url: url("/foo.mov");
+  url: url("/foo.mp3");
+  url: url("/foo.woff");
+  url: url("/foo.js");
+  url: url("/foo.css"); }
+    EOS
+  end
+
+  test "url functions" do
+    assert_equal <<-EOS, render('sass/urls.scss')
+div {
+  url: url(/foo.svg);
+  url: url(/foo.png);
+  url: url(/foo.mov);
+  url: url(/foo.mp3);
+  url: url(/foo.woff);
+  url: url(/foo.js);
+  url: url(/foo.css); }
+    EOS
+  end
+end

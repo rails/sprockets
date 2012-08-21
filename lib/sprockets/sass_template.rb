@@ -10,11 +10,17 @@ module Sprockets
     self.default_mime_type = 'text/css'
 
     def self.engine_initialized?
-      defined? ::Sass::Engine
+      defined?(::Sass::Engine) && defined?(::Sass::Script::Functions) &&
+        Sass::Script::Functions < Sprockets::SassFunctions
     end
 
     def initialize_engine
       require_template_library 'sass'
+
+      # Install custom functions. It'd be great if this didn't need to
+      # be installed globally, but could be passed into Engine as an
+      # option.
+      Sass::Script::Functions.send :include, Sprockets::SassFunctions
     end
 
     def prepare
