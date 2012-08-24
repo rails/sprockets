@@ -15,7 +15,10 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'sass'
+      # Double check constant to avoid tilt warning
+      unless defined? ::Sass
+        require_template_library 'sass'
+      end
 
       # Install custom functions. It'd be great if this didn't need to
       # be installed globally, but could be passed into Engine as an
