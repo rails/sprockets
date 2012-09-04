@@ -361,7 +361,7 @@ submit a pull request.
 
 ## Version History ##
 
-**2.5.0**
+**2.5.0** (September 4, 2012)
 
 * Fixed Ruby 2.0 RegExp warning
 * Provide stubbed implementation of context *_path helpers
