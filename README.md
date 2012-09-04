@@ -363,6 +363,7 @@ submit a pull request.
 
 **2.5.0**
 
+* Fixed Ruby 2.0 RegExp warning
 * Provide stubbed implementation of context *_path helpers
 * Add SassCompressor
 
