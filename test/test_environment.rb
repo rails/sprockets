@@ -132,6 +132,10 @@ module EnvironmentTests
     assert_equal ".c {}\n.d {}\n/*\n\n */\n\n", @env["mobile.css"].to_s
   end
 
+  test "find component.json in directory" do
+    assert_equal "var bower;\n", @env["bower.js"].to_s
+  end
+
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end
@@ -175,7 +179,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  ENTRIES_IN_PATH = 36
+  ENTRIES_IN_PATH = 39
 
   test "iterate over each entry" do
     entries = []
@@ -190,7 +194,7 @@ module EnvironmentTests
     assert_equal ENTRIES_IN_PATH, enum.to_a.length
   end
 
-  FILES_IN_PATH = 31
+  FILES_IN_PATH = 33
 
   test "iterate over each file" do
     files = []

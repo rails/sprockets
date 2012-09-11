@@ -5,6 +5,7 @@ require 'sprockets/errors'
 require 'sprockets/processed_asset'
 require 'sprockets/server'
 require 'sprockets/static_asset'
+require 'multi_json'
 require 'pathname'
 
 module Sprockets
@@ -127,7 +128,15 @@ module Sprockets
       if block_given?
         args = attributes_for(logical_path).search_paths + [options]
         @trail.find(*args) do |path|
-          yield Pathname.new(path)
+          pathname = Pathname.new(path)
+          if pathname.basename.to_s == 'component.json'
+            component = json_decode(pathname.read)
+            if component['main'].is_a?(String)
+              yield pathname.dirname.join(component['main'])
+            end
+          else
+            yield pathname
+          end
         end
       else
         resolve(logical_path, options) do |pathname|
@@ -402,6 +411,17 @@ module Sprockets
           else
             File.fnmatch(filter.to_s, filename)
           end
+        end
+      end
+
+      # Feature detect newer MultiJson API
+      if MultiJson.respond_to?(:dump)
+        def json_decode(obj)
+          MultiJson.load(obj)
+        end
+      else
+        def json_decode(obj)
+          MultiJson.decode(obj)
         end
       end
   end
