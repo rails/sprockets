@@ -19,7 +19,10 @@ module Sprockets
 
       path_without_extensions = extensions.inject(pathname) { |p, ext| p.sub(ext, '') }
 
-      paths << path_without_extensions.join("component.json").to_s
+      # optimization: component.json can only be nested one level deep
+      if !path_without_extensions.to_s.index('/')
+        paths << path_without_extensions.join("component.json").to_s
+      end
 
       if pathname.basename(extensions.join).to_s != 'index'
         paths << path_without_extensions.join("index#{extensions.join}").to_s
