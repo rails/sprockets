@@ -136,8 +136,10 @@ module Sprockets
               yield pathname.dirname.join(component['main'])
             when Array
               extname = File.extname(logical_path)
-              if main = component['main'].detect { |fn| File.extname(fn) == extname }
-                yield pathname.dirname.join(main)
+              component['main'].each do |fn|
+                if extname == "" || extname == File.extname(fn)
+                  yield pathname.dirname.join(fn)
+                end
               end
             end
           else
