@@ -131,8 +131,14 @@ module Sprockets
           pathname = Pathname.new(path)
           if pathname.basename.to_s == 'component.json'
             component = json_decode(pathname.read)
-            if component['main'].is_a?(String)
+            case component['main']
+            when String
               yield pathname.dirname.join(component['main'])
+            when Array
+              extname = File.extname(logical_path)
+              if main = component['main'].detect { |fn| File.extname(fn) == extname }
+                yield pathname.dirname.join(main)
+              end
             end
           else
             yield pathname
