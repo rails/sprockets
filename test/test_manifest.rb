@@ -28,10 +28,40 @@ class TestManifest < Sprockets::TestCase
     assert_equal path, manifest.path
   end
 
-  test "specify full manifest directory" do
+  test "specify manifest directory yields random manifest-*.json" do
+    dir = Dir::tmpdir
+
+    system "rm -rf #{dir}/manifest*.json"
+    assert !File.exist?("#{dir}/manifest.json")
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    assert_equal dir, manifest.dir
+    assert_match %r{manifest-[a-f0-9]+\.json}, manifest.path
+  end
+
+  test "specify manifest directory with existing manifest.json" do
     dir  = Dir::tmpdir
     path = File.join(dir, 'manifest.json')
 
+    system "rm -rf #{dir}/manifest*.json"
+    FileUtils.mkdir_p(dir)
+    File.open(path, 'w') { |f| f.write "{}" }
+
+    assert File.exist?(path)
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    assert_equal dir, manifest.dir
+    assert_equal path, manifest.path
+  end
+
+  test "specify manifest directory with existing manifest-123.json" do
+    dir  = Dir::tmpdir
+    path = File.join(dir, 'manifest-123.json')
+
+    system "rm -rf #{dir}/manifest*.json"
+    File.open(path, 'w') { |f| f.write "{}" }
+
+    assert File.exist?(path)
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.dir

@@ -39,7 +39,7 @@ class TestRakeTask < Sprockets::TestCase
 
     @rake[:assets].invoke
 
-    assert File.exist?("#{@dir}/manifest.json")
+    assert Dir["#{@dir}/manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
@@ -66,7 +66,7 @@ class TestRakeTask < Sprockets::TestCase
 
     @rake[:assets].invoke
 
-    assert File.exist?("#{@dir}/manifest.json")
+    assert Dir["#{@dir}/manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 end

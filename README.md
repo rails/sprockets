@@ -363,6 +363,7 @@ submit a pull request.
 
 **2.7.0**
 
+* Change default manifest.json filename to be a randomized manifest-16HEXBYTES.json
 * Allow nil environment to be passed to manifest
 * Allow manifest instance to be set on rake task
 

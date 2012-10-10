@@ -1,4 +1,5 @@
 require 'multi_json'
+require 'securerandom'
 require 'time'
 
 module Sprockets
@@ -18,7 +19,8 @@ module Sprockets
     # a full path to the manifest json file. The file may or may not
     # already exist. The dirname of the `path` will be used to write
     # compiled assets to. Otherwise, if the path is a directory, the
-    # filename will default to "manifest.json" in that directory.
+    # filename will default a random "manifest-123.json" file in that
+    # directory.
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
@@ -32,8 +34,15 @@ module Sprockets
       end
 
       if File.extname(path) == ""
-        @dir  = File.expand_path(path)
-        @path = File.join(@dir, 'manifest.json')
+        @dir = File.expand_path(path)
+
+        # Find the first manifest.json in the directory
+        paths = Dir[File.join(@dir, "manifest*.json")]
+        if paths.any?
+          @path = paths.first
+        else
+          @path = File.join(@dir, "manifest-#{SecureRandom.hex(16)}.json")
+        end
       else
         @path = File.expand_path(path)
         @dir  = File.dirname(path)
