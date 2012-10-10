@@ -21,5 +21,9 @@ module Sprockets
         nil
       end
     end
+
+    def path_to(key)
+      key
+    end
   end
 end
