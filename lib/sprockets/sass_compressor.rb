@@ -1,13 +1,22 @@
-require 'sass'
+require 'tilt'
 
 module Sprockets
-  class SassCompressor
-    def self.compress(css)
-      new.compress(css)
+  class SassCompressor < Tilt::Template
+    self.default_mime_type = 'text/css'
+
+    def self.engine_initialized?
+      defined?(::Sass::Engine)
     end
 
-    def compress(css)
-      Sass::Engine.new(css, {
+    def initialize_engine
+      require_template_library 'sass'
+    end
+
+    def prepare
+    end
+
+    def evaluate(context, locals, &block)
+      Sass::Engine.new(data, {
         :syntax => :scss,
         :cache => false,
         :read_cache => false,

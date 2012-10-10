@@ -235,7 +235,7 @@ class TestSassCompressor < TestTiltSass
     silence_warnings do
       uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
       compressed   = "p{margin:0;padding:0}\n"
-      assert_equal compressed, Sprockets::SassCompressor.compress(uncompressed)
+      assert_equal compressed, Sprockets::SassCompressor.new { uncompressed }.render
     end
   end
 end

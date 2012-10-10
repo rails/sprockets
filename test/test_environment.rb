@@ -88,6 +88,11 @@ module EnvironmentTests
     assert_equal [Sprockets::CharsetNormalizer], @env.bundle_processors('text/css')
   end
 
+  test "lookup compressors" do
+    assert_equal Sprockets::SassCompressor, @env.compressors['text/css'][:sass]
+    assert_equal Sprockets::UglifierCompressor, @env.compressors['application/javascript'][:uglifier]
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
@@ -335,6 +340,12 @@ class TestEnvironment < Sprockets::TestCase
     assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
   end
 
+  test "register compressor" do
+    assert !@env.compressors['text/css'][:whitespace]
+    @env.register_compressor 'text/css', :whitespace, WhitespaceCompressor
+    assert @env.compressors['text/css'][:whitespace]
+  end
+
   test "register global block preprocessor" do
     old_size = new_environment.preprocessors('text/css').size
     Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
@@ -395,6 +406,38 @@ class TestEnvironment < Sprockets::TestCase
     assert @env.js_compressor
     @env.js_compressor = nil
     assert_nil @env.js_compressor
+  end
+
+  test "setting js compressor to tilt handler" do
+    assert_nil @env.js_compressor
+    @env.js_compressor = Sprockets::UglifierCompressor
+    assert_equal Sprockets::UglifierCompressor, @env.js_compressor
+    @env.js_compressor = nil
+    assert_nil @env.js_compressor
+  end
+
+  test "setting css compressor to tilt handler" do
+    assert_nil @env.css_compressor
+    @env.css_compressor = Sprockets::SassCompressor
+    assert_equal Sprockets::SassCompressor, @env.css_compressor
+    @env.css_compressor = nil
+    assert_nil @env.css_compressor
+  end
+
+  test "setting js compressor to sym" do
+    assert_nil @env.js_compressor
+    @env.js_compressor = :uglifier
+    assert_equal Sprockets::UglifierCompressor, @env.js_compressor
+    @env.js_compressor = nil
+    assert_nil @env.js_compressor
+  end
+
+  test "setting css compressor to sym" do
+    assert_nil @env.css_compressor
+    @env.css_compressor = :sass
+    assert_equal Sprockets::SassCompressor, @env.css_compressor
+    @env.css_compressor = nil
+    assert_nil @env.css_compressor
   end
 
   test "changing digest implementation class" do
@@ -576,30 +619,10 @@ class TestIndex < Sprockets::TestCase
     end
   end
 
-  test "change in environment css compressor does not affect index" do
-    env = Sprockets::Environment.new(".")
-    env.css_compressor = WhitespaceCompressor
-    index = env.index
-
-    assert index.css_compressor
-    env.css_compressor = nil
-    assert index.css_compressor
-  end
-
   test "does not allow js compressor to be changed" do
     assert_raises TypeError do
       @env.js_compressor = WhitespaceCompressor
     end
-  end
-
-  test "change in environment js compressor does not affect index" do
-    env = Sprockets::Environment.new(".")
-    env.js_compressor = WhitespaceCompressor
-    index = env.index
-
-    assert index.js_compressor
-    env.js_compressor = nil
-    assert index.js_compressor
   end
 
   test "change in environment engines does not affect index" do
