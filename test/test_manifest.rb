@@ -277,4 +277,22 @@ class TestManifest < Sprockets::TestCase
     data = JSON.parse(File.read(@manifest.path))
     assert data['assets']['application.js']
   end
+
+  test "nil environment raises compilation error" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(nil, File.join(@dir, 'manifest.json'))
+    assert_raises Sprockets::Error do
+      @manifest.compile('application.js')
+    end
+  end
+
+  test "no environment raises compilation error" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(File.join(@dir, 'manifest.json'))
+    assert_raises Sprockets::Error do
+      @manifest.compile('application.js')
+    end
+  end
 end

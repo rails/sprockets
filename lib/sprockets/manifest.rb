@@ -22,10 +22,12 @@ module Sprockets
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
-    def initialize(environment, path)
-      @environment = environment
+    def initialize(*args)
+      if args.first.is_a?(Base) || args.first.nil?
+        @environment = args.shift
+      end
 
-      unless path
+      unless path = args.shift
         raise ArgumentError, "manifest requires output path"
       end
 
@@ -87,6 +89,10 @@ module Sprockets
     #   compile("application.js")
     #
     def compile(*args)
+      unless environment
+        raise Error, "manifest requires environment for compilation"
+      end
+
       paths = environment.each_logical_path(*args).to_a +
         args.flatten.select { |fn| Pathname.new(fn).absolute? if fn.is_a?(String)}
 

@@ -363,6 +363,7 @@ submit a pull request.
 
 **2.7.0**
 
+* Allow nil environment to be passed to manifest
 * Allow manifest instance to be set on rake task
 
 **2.6.0** (September 19, 2012)
