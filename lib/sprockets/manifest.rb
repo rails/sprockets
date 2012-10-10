@@ -25,6 +25,10 @@ module Sprockets
     def initialize(environment, path)
       @environment = environment
 
+      unless path
+        raise ArgumentError, "manifest requires output path"
+      end
+
       if File.extname(path) == ""
         @dir  = File.expand_path(path)
         @path = File.join(@dir, 'manifest.json')

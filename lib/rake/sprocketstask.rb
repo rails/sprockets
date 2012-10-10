@@ -37,6 +37,20 @@ module Rake
     end
     attr_writer :environment
 
+    # Returns cached indexed environment
+    def index
+      @index ||= environment.index if environment
+    end
+
+    # `Manifest` instance used for already compiled assets.
+    #
+    # Will be created by default if an environment and output
+    # directory are given
+    def manifest
+      @manifest ||= Sprockets::Manifest.new(index, output)
+    end
+    attr_writer :manifest
+
     # Directory to write compiled assets too. As well as the manifest file.
     #
     #   t.output = "./public/assets"
@@ -117,24 +131,16 @@ module Rake
     end
 
     private
-      # Returns cached indexed environment
-      def index
-        @index ||= environment.index
-      end
-
-      # Returns manifest for tasks
-      def manifest
-        @manifest ||= Sprockets::Manifest.new(index, output)
-      end
-
       # Sub out environment logger with our rake task logger that
       # writes to stderr.
       def with_logger
-        old_logger = index.logger
-        index.logger = @logger
+        if env = manifest.environment
+          old_logger = env.logger
+          env.logger = @logger
+        end
         yield
       ensure
-        index.logger = old_logger
+        env.logger = old_logger if env
       end
   end
 end

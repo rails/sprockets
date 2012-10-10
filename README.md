@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.7.0**
+
+* Allow manifest instance to be set on rake task
+
 **2.6.0** (September 19, 2012)
 
 * Added bower component.json require support
