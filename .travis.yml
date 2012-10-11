@@ -5,3 +5,6 @@ rvm:
   - jruby
   - ree
   - ruby-head
+
+notifications:
+  email: false
