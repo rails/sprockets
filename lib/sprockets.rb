@@ -73,9 +73,15 @@ module Sprockets
   register_compressor 'text/css', :sass, SassCompressor
   register_compressor 'text/css', :scss, SassCompressor
 
+  require 'sprockets/yui_compressor'
+  register_compressor 'text/css', :yui, YUICompressor
+
   require 'sprockets/uglifier_compressor'
   register_compressor 'application/javascript', :uglifier, UglifierCompressor
   register_compressor 'application/javascript', :uglify, UglifierCompressor
+
+  require 'sprockets/yui_compressor'
+  register_compressor 'application/javascript', :yui, YUICompressor
 
   # Cherry pick the default Tilt engines that make sense for
   # Sprockets. We don't need ones that only generate html like HAML.
