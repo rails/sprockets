@@ -24,7 +24,7 @@ module Sprockets
       return unless compressor
 
       if compressor.is_a?(Symbol)
-        compressor = compressors['text/css'][compressor]
+        compressor = compressors['text/css'][compressor] || raise(Error, "unknown compressor: #{compressor}")
       end
 
       if compressor.respond_to?(:compress)
@@ -54,7 +54,7 @@ module Sprockets
       return unless compressor
 
       if compressor.is_a?(Symbol)
-        compressor = compressors['application/javascript'][compressor]
+        compressor = compressors['application/javascript'][compressor] || raise(Error, "unknown compressor: #{compressor}")
       end
 
       if compressor.respond_to?(:compress)
