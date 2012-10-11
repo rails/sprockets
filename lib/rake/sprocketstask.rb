@@ -47,7 +47,11 @@ module Rake
     # Will be created by default if an environment and output
     # directory are given
     def manifest
-      @manifest ||= Sprockets::Manifest.new(index, output)
+      if !@manifest.is_a?(Sprockets::Manifest) && @manifest.respond_to?(:call)
+        @manifest = @manifest.call
+      else
+        @manifest
+      end
     end
     attr_writer :manifest
 
@@ -93,6 +97,7 @@ module Rake
     def initialize(name = :assets)
       @name         = name
       @environment  = lambda { Sprockets::Environment.new(Dir.pwd) }
+      @manifest     = lambda { Sprockets::Manifest.new(index, output) }
       @logger       = Logger.new($stderr)
       @logger.level = Logger::INFO
       @keep         = 2

@@ -69,4 +69,21 @@ class TestRakeTask < Sprockets::TestCase
     assert Dir["#{@dir}/manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
+
+  test "lazy custom manifest" do
+    Rake::SprocketsTask.new do |t|
+      t.environment = nil
+      t.manifest    = lambda { @manifest }
+      t.assets      = ['application.js']
+      t.log_level   = :fatal
+    end
+
+    digest_path = @env['application.js'].digest_path
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    @rake[:assets].invoke
+
+    assert Dir["#{@dir}/manifest-*.json"].first
+    assert File.exist?("#{@dir}/#{digest_path}")
+  end
 end
