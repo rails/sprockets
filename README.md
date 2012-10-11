@@ -361,7 +361,7 @@ submit a pull request.
 
 ## Version History ##
 
-**2.7.0**
+**2.7.0** (October 10, 2012)
 
 * Added --css-compressor and --js-compressor command line flags
 * Added css/js compressor shorthand
