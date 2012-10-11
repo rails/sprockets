@@ -363,6 +363,7 @@ submit a pull request.
 
 **2.7.0**
 
+* Added --css-compressor and --js-compressor command line flags
 * Added css/js compressor shorthand
 * Change default manifest.json filename to be a randomized manifest-16HEXBYTES.json
 * Allow nil environment to be passed to manifest

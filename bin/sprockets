@@ -40,6 +40,14 @@ OptionParser.new do |opts|
     manifest = Sprockets::Manifest.new(environment, directory)
   end
 
+  opts.on("--css-compressor=COMPRESSOR", "Use CSS compressor") do |compressor|
+    environment.css_compressor = compressor.to_sym
+  end
+
+  opts.on("--js-compressor=COMPRESSOR", "Use JavaScript compressor") do |compressor|
+    environment.js_compressor = compressor.to_sym
+  end
+
   opts.on("--noenv", "Disables .sprocketsrc file") do
   end
 

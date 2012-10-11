@@ -70,6 +70,16 @@ class TestSprockets < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path2}")
   end
 
+  test "minify js with uglify" do
+    output = sprockets "-I", fixture_path("default"), "--js-compressor", "uglify", fixture_path("default/gallery.js")
+    assert_equal "var Gallery={};\n", output
+  end
+
+  test "compress css with sass" do
+    output = sprockets "-I", fixture_path("default"), "--css-compressor", "sass", fixture_path("default/gallery.css.erb")
+    assert_equal ".gallery{color:red}\n", output
+  end
+
   def sprockets(*args)
     script = File.expand_path("../../bin/sprockets", __FILE__)
     lib    = File.expand_path("../../lib", __FILE__)
