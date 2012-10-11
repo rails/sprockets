@@ -76,6 +76,9 @@ module Sprockets
   require 'sprockets/yui_compressor'
   register_compressor 'text/css', :yui, YUICompressor
 
+  require 'sprockets/closure_compressor'
+  register_compressor 'application/javascript', :closure, ClosureCompressor
+
   require 'sprockets/uglifier_compressor'
   register_compressor 'application/javascript', :uglifier, UglifierCompressor
   register_compressor 'application/javascript', :uglify, UglifierCompressor
