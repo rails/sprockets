@@ -233,8 +233,27 @@ module EnvironmentTests
     assert !paths.include?("coffee")
   end
 
+  test "iterate over each logical path and filename" do
+    paths = []
+    filenames = []
+    @env.each_logical_path do |logical_path, filename|
+      paths << logical_path
+      filenames << filename
+    end
+    assert_equal FILES_IN_PATH, paths.length
+    assert_equal paths.size, paths.uniq.size, "has duplicates"
+
+    assert paths.include?("application.js")
+    assert paths.include?("coffee/foo.js")
+    assert paths.include?("coffee/index.js")
+    assert !paths.include?("coffee")
+
+    assert filenames.any? { |p| p =~ /application.js.coffee/ }
+  end
+
   test "each logical path enumerator" do
     enum = @env.each_logical_path
+    assert_kind_of String, enum.first
     assert_equal FILES_IN_PATH, enum.to_a.length
   end
 
@@ -290,6 +309,17 @@ module EnvironmentTests
     assert paths.include?("application.js")
     assert paths.include?("coffee/foo.js")
     assert !paths.include?("gallery.css")
+  end
+
+  test "iterate over each logical path matching proc filters with full path arg" do
+    paths = []
+    @env.each_logical_path(proc { |_, fn| fn.match(fixture_path('default/mobile')) }) do |logical_path|
+      paths << logical_path
+    end
+
+    assert paths.include?("mobile/a.js")
+    assert paths.include?("mobile/b.js")
+    assert !paths.include?("application.js")
   end
 
   test "CoffeeScript files are compiled in a closure" do
