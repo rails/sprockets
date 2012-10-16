@@ -363,6 +363,7 @@ submit a pull request.
 
 **2.8.0** (October 16, 2012)
 
+* Allow manifest location to be seperated from output directory
 * Pass logical path and absolute path to each_logical_path iterator
 
 **2.7.0** (October 10, 2012)

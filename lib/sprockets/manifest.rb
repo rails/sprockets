@@ -29,13 +29,22 @@ module Sprockets
         @environment = args.shift
       end
 
-      unless path = args.shift
-        raise ArgumentError, "manifest requires output path"
+      @dir, @path = args[0], args[1]
+
+      # Expand paths
+      @dir  = File.expand_path(@dir) if @dir
+      @path = File.expand_path(@path) if @path
+
+      # If path is given as the second arg
+      if @dir && File.extname(@dir) != ""
+        @dir, @path = nil, @dir
       end
 
-      if File.extname(path) == ""
-        @dir = File.expand_path(path)
+      # Default dir to the directory of the path
+      @dir ||= File.dirname(@path) if @path
 
+      # If directory is given w/o path, pick a random manifest.json location
+      if @dir && @path.nil?
         # Find the first manifest.json in the directory
         paths = Dir[File.join(@dir, "manifest*.json")]
         if paths.any?
@@ -43,9 +52,10 @@ module Sprockets
         else
           @path = File.join(@dir, "manifest-#{SecureRandom.hex(16)}.json")
         end
-      else
-        @path = File.expand_path(path)
-        @dir  = File.dirname(path)
+      end
+
+      unless @dir && @path
+        raise ArgumentError, "manifest requires output path"
       end
 
       data = nil

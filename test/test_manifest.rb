@@ -68,6 +68,20 @@ class TestManifest < Sprockets::TestCase
     assert_equal path, manifest.path
   end
 
+  test "specify manifest directory and seperate location" do
+    root  = File.join(Dir::tmpdir, 'public')
+    dir   = File.join(root, 'assets')
+    path  = File.join(root, 'manifest-123.json')
+
+    system "rm -rf #{root}"
+    assert !File.exist?(root)
+
+    manifest = Sprockets::Manifest.new(@env, dir, path)
+
+    assert_equal dir, manifest.dir
+    assert_equal path, manifest.path
+  end
+
   test "compile asset" do
     digest_path = @env['application.js'].digest_path
 
