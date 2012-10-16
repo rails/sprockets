@@ -328,13 +328,20 @@ module Sprockets
       nil
     end
 
-    def each_logical_path(*args)
+    def each_logical_path(*args, &block)
       return to_enum(__method__, *args) unless block_given?
       filters = args.flatten
       files = {}
       each_file do |filename|
         if logical_path = logical_path_for_filename(filename, filters)
-          yield logical_path, filename.to_s unless files[logical_path]
+          unless files[logical_path]
+            if block.arity == 2
+              yield logical_path, filename.to_s
+            else
+              yield logical_path
+            end
+          end
+
           files[logical_path] = true
         end
       end
