@@ -311,6 +311,17 @@ module EnvironmentTests
     assert !paths.include?("gallery.css")
   end
 
+  test "iterate over each logical path matching proc filters with full path arg" do
+    paths = []
+    @env.each_logical_path(proc { |_, fn| fn.match(fixture_path('default/mobile')) }) do |logical_path|
+      paths << logical_path
+    end
+
+    assert paths.include?("mobile/a.js")
+    assert paths.include?("mobile/b.js")
+    assert !paths.include?("application.js")
+  end
+
   test "CoffeeScript files are compiled in a closure" do
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)

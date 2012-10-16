@@ -400,14 +400,14 @@ module Sprockets
       def logical_path_for_filename(filename, filters)
         logical_path = attributes_for(filename).logical_path.to_s
 
-        if matches_filter(filters, logical_path)
+        if matches_filter(filters, logical_path, filename)
           return logical_path
         end
 
         # If filename is an index file, retest with alias
         if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
           path = logical_path.sub(/\/index\./, '.')
-          if matches_filter(filters, path)
+          if matches_filter(filters, path, filename)
             return path
           end
         end
@@ -415,16 +415,20 @@ module Sprockets
         nil
       end
 
-      def matches_filter(filters, filename)
+      def matches_filter(filters, logical_path, filename)
         return true if filters.empty?
 
         filters.any? do |filter|
           if filter.is_a?(Regexp)
-            filter.match(filename)
+            filter.match(logical_path)
           elsif filter.respond_to?(:call)
-            filter.call(filename)
+            if filter.arity == 1
+              filter.call(logical_path)
+            else
+              filter.call(logical_path, filename.to_s)
+            end
           else
-            File.fnmatch(filter.to_s, filename)
+            File.fnmatch(filter.to_s, logical_path)
           end
         end
       end
