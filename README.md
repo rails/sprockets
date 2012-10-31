@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.8.1** (October 31, 2012)
+
+* Fixed Sass importer bug
+
 **2.8.0** (October 16, 2012)
 
 * Allow manifest location to be seperated from output directory
