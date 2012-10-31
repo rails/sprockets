@@ -13,7 +13,7 @@ module Sprockets
     def find_relative(*args)
       engine = super
       if engine && (filename = engine.options[:filename])
-        @context.depend_on_asset(filename)
+        @context.depend_on(filename)
       end
       engine
     end
@@ -21,7 +21,7 @@ module Sprockets
     def find(*args)
       engine = super
       if engine && (filename = engine.options[:filename])
-        @context.depend_on_asset(filename)
+        @context.depend_on(filename)
       end
       engine
     end
