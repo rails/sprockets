@@ -199,6 +199,20 @@ body {
     end
   end
 
+  test "reference @import'd variable" do
+    assert_equal <<-EOS, render('sass/links.scss')
+a:link {
+  color: "red"; }
+    EOS
+  end
+
+  test "@import reference variable" do
+    assert_equal <<-EOS, render('sass/main.scss')
+#header {
+  color: "blue"; }
+    EOS
+  end
+
   def silence_warnings
     old_verbose, $VERBOSE = $VERBOSE, false
     yield
