@@ -240,7 +240,13 @@ module Sprockets
       end
 
       def logger
-        environment.logger
+        if environment
+          environment.logger
+        else
+          logger = Logger.new($stderr)
+          logger.level = Logger::FATAL
+          logger
+        end
       end
 
       def benchmark
