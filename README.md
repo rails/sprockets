@@ -159,7 +159,7 @@ variables, mixins, operations and functions.
 
 If the `less` gem is available to your application, you can use LESS
 to write CSS assets in Sprockets. Note that the LESS compiler is
-written in JavaScript and the `less` gem (on MRI) uses `therubyracer` 
+written in JavaScript and the `less` gem (on MRI) uses `therubyracer`
 which embeds the V8 JavaScript runtime in Ruby, while on JRuby you're
 going to need `therubyrhino` gem installed.
 
@@ -360,6 +360,11 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**2.8.2** (December 10, 2012)
+
+* Fixed top level Sass constant references
+* Fixed manifest logger when environment is disabled
 
 **2.8.1** (October 31, 2012)
 
