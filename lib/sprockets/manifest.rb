@@ -132,7 +132,7 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
-            asset.write_to "#{target}.gz" if target =~ /\.(js|css)$/
+            asset.write_to "#{target}.gz" if asset.is_a?(BundledAsset)
           end
 
           save
