@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.9.0** (February 25, 2013)
+
+* Write out gzipped variants of bundled assets.
+
 **2.8.2** (December 10, 2012)
 
 * Fixed top level Sass constant references
