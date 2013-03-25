@@ -135,10 +135,10 @@ module Sprockets
             asset.write_to "#{target}.gz" if asset.is_a?(BundledAsset)
           end
 
-          save
-          asset
         end
       end
+      save
+      paths
     end
 
     # Removes file from directory and from manifest. `filename` must
