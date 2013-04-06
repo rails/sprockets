@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.9.1** (April 6, 2013)
+
+* Support for Uglifier 2.x
+
 **2.9.0** (February 25, 2013)
 
 * Write out gzipped variants of bundled assets.
