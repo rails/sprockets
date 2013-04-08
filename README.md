@@ -361,6 +361,8 @@ submit a pull request.
 
 ## Version History ##
 
+* Directive processor encoding fixes
+
 **2.9.1** (April 6, 2013)
 
 * Support for Uglifier 2.x
