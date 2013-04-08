@@ -536,7 +536,7 @@ class TestEnvironment < Sprockets::TestCase
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.puts "-->" }
-      assert_raises(ExecJS::Error) do
+      assert_raises(ExecJS::RuntimeError) do
         @env["tmp.js"].to_s
       end
 
