@@ -361,6 +361,9 @@ submit a pull request.
 
 ## Version History ##
 
+**2.9.2** (April 8, 2013)
+
+* Improve file freshness check performance
 * Directive processor encoding fixes
 
 **2.9.1** (April 6, 2013)
