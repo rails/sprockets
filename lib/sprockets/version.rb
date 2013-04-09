@@ -1,3 +1,3 @@
 module Sprockets
-  VERSION = "2.9.1"
+  VERSION = "2.9.2"
 end
