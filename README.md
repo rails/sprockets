@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.9.3** (April 20, 2013)
+
+* Fixed sass caching bug
+
 **2.9.2** (April 8, 2013)
 
 * Improve file freshness check performance
