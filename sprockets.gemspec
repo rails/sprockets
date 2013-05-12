@@ -29,6 +29,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "uglifier"
   s.add_development_dependency "yui-compressor"
 
+  s.required_ruby_version = '>= 1.9.2'
+
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
   s.homepage = "http://getsprockets.org/"
