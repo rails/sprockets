@@ -129,14 +129,14 @@ module Sprockets
         args = attributes_for(logical_path).search_paths + [options]
         @trail.find(*args) do |path|
           pathname = Pathname.new(path)
-          if pathname.basename.to_s == 'component.json'
-            component = json_decode(pathname.read)
-            case component['main']
+          if %w( bower.json component.json ).include?(pathname.basename.to_s)
+            bower = json_decode(pathname.read)
+            case bower['main']
             when String
-              yield pathname.dirname.join(component['main'])
+              yield pathname.dirname.join(bower['main'])
             when Array
               extname = File.extname(logical_path)
-              component['main'].each do |fn|
+              bower['main'].each do |fn|
                 if extname == "" || extname == File.extname(fn)
                   yield pathname.dirname.join(fn)
                 end

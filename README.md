@@ -361,6 +361,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.10.0**
+
+* Support for `bower.json`
+
 **2.9.3** (April 20, 2013)
 
 * Fixed sass caching bug
