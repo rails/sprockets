@@ -20,6 +20,7 @@ module Sprockets
   autoload :JstProcessor,            "sprockets/jst_processor"
   autoload :Processor,               "sprockets/processor"
   autoload :SassCacheStore,          "sprockets/sass_cache_store"
+  autoload :SassFunctions,           "sprockets/sass_functions"
   autoload :SassImporter,            "sprockets/sass_importer"
   autoload :SassTemplate,            "sprockets/sass_template"
   autoload :ScssTemplate,            "sprockets/scss_template"
@@ -43,8 +44,9 @@ module Sprockets
   require 'sprockets/engines'
   require 'sprockets/mime'
   require 'sprockets/processing'
+  require 'sprockets/compressing'
   require 'sprockets/paths'
-  extend Engines, Mime, Processing, Paths
+  extend Engines, Mime, Processing, Compressing, Paths
 
   @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
   @mime_types        = {}
@@ -52,6 +54,7 @@ module Sprockets
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
   @bundle_processors = Hash.new { |h, k| h[k] = [] }
+  @compressors       = Hash.new { |h, k| h[k] = {} }
 
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'
@@ -65,6 +68,23 @@ module Sprockets
 
   require 'sprockets/charset_normalizer'
   register_bundle_processor 'text/css', CharsetNormalizer
+
+  require 'sprockets/sass_compressor'
+  register_compressor 'text/css', :sass, SassCompressor
+  register_compressor 'text/css', :scss, SassCompressor
+
+  require 'sprockets/yui_compressor'
+  register_compressor 'text/css', :yui, YUICompressor
+
+  require 'sprockets/closure_compressor'
+  register_compressor 'application/javascript', :closure, ClosureCompressor
+
+  require 'sprockets/uglifier_compressor'
+  register_compressor 'application/javascript', :uglifier, UglifierCompressor
+  register_compressor 'application/javascript', :uglify, UglifierCompressor
+
+  require 'sprockets/yui_compressor'
+  register_compressor 'application/javascript', :yui, YUICompressor
 
   # Cherry pick the default Tilt engines that make sense for
   # Sprockets. We don't need ones that only generate html like HAML.

@@ -159,9 +159,9 @@ variables, mixins, operations and functions.
 
 If the `less` gem is available to your application, you can use LESS
 to write CSS assets in Sprockets. Note that the LESS compiler is
-written in JavaScript, and at the time of this writing, the `less` gem
-depends on `therubyracer` which embeds the V8 JavaScript runtime in
-Ruby.
+written in JavaScript and the `less` gem (on MRI) uses `therubyracer`
+which embeds the V8 JavaScript runtime in Ruby, while on JRuby you're
+going to need `therubyrhino` gem installed.
 
 To write CSS assets with LESS, use the extension `.css.less`.
 
@@ -360,6 +360,77 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**2.10.0** (May 24, 2013)
+
+* Support for `bower.json`
+
+**2.9.3** (April 20, 2013)
+
+* Fixed sass caching bug
+
+**2.9.2** (April 8, 2013)
+
+* Improve file freshness check performance
+* Directive processor encoding fixes
+
+**2.9.1** (April 6, 2013)
+
+* Support for Uglifier 2.x
+
+**2.9.0** (February 25, 2013)
+
+* Write out gzipped variants of bundled assets.
+
+**2.8.2** (December 10, 2012)
+
+* Fixed top level Sass constant references
+* Fixed manifest logger when environment is disabled
+
+**2.8.1** (October 31, 2012)
+
+* Fixed Sass importer bug
+
+**2.8.0** (October 16, 2012)
+
+* Allow manifest location to be seperated from output directory
+* Pass logical path and absolute path to each_logical_path iterator
+
+**2.7.0** (October 10, 2012)
+
+* Added --css-compressor and --js-compressor command line flags
+* Added css/js compressor shorthand
+* Change default manifest.json filename to be a randomized manifest-16HEXBYTES.json
+* Allow nil environment to be passed to manifest
+* Allow manifest instance to be set on rake task
+
+**2.6.0** (September 19, 2012)
+
+* Added bower component.json require support
+
+**2.5.0** (September 4, 2012)
+
+* Fixed Ruby 2.0 RegExp warning
+* Provide stubbed implementation of context *_path helpers
+* Add SassCompressor
+
+**2.4.5** (July 10, 2012)
+
+* Tweaked some logger levels
+
+**2.4.4** (July 2, 2012)
+
+* Canonicalize logical path extensions
+* Check absolute paths passed to depend_on
+
+**2.4.3** (May 16, 2012)
+
+* Exposed :sprockets in sass options
+* Include dependency paths in asset mtime
+
+**2.4.2** (May 7, 2012)
+
+* Fixed MultiJson feature detect
 
 **2.4.1** (April 26, 2012)
 

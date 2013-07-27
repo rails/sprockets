@@ -7,6 +7,7 @@ module Sprockets
   class EncodingError           < Error; end
   class FileNotFound            < Error; end
   class FileOutsidePaths        < Error; end
+  class NotImplementedError     < Error; end
   class UnserializeError        < Error; end
 
   module EngineError

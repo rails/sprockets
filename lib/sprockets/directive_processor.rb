@@ -65,7 +65,7 @@ module Sprockets
     #     //= require "foo"
     #
     DIRECTIVE_PATTERN = /
-      ^ [\W]* = \s* (\w+.*?) (\*\/)? $
+      ^ \W* = \s* (\w+.*?) (\*\/)? $
     /x
 
     attr_reader :pathname
@@ -92,6 +92,8 @@ module Sprockets
       @context = context
 
       @result = ""
+      @result.force_encoding(body.encoding) if body.respond_to?(:encoding)
+
       @has_written_body = false
 
       process_directives

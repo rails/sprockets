@@ -10,11 +10,20 @@ module Sprockets
     self.default_mime_type = 'text/css'
 
     def self.engine_initialized?
-      defined? ::Sass::Engine
+      defined?(::Sass::Engine) && defined?(::Sass::Script::Functions) &&
+        ::Sass::Script::Functions < Sprockets::SassFunctions
     end
 
     def initialize_engine
-      require_template_library 'sass'
+      # Double check constant to avoid tilt warning
+      unless defined? ::Sass
+        require_template_library 'sass'
+      end
+
+      # Install custom functions. It'd be great if this didn't need to
+      # be installed globally, but could be passed into Engine as an
+      # option.
+      ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
     end
 
     def prepare
@@ -34,7 +43,11 @@ module Sprockets
         :syntax => syntax,
         :cache_store => cache_store,
         :importer => SassImporter.new(context, context.pathname),
-        :load_paths => context.environment.paths.map { |path| SassImporter.new(context, path) }
+        :load_paths => context.environment.paths.map { |path| SassImporter.new(context, path) },
+        :sprockets => {
+          :context => context,
+          :environment => context.environment
+        }
       }
 
       ::Sass::Engine.new(data, options).render

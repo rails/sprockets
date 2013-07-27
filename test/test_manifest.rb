@@ -28,11 +28,55 @@ class TestManifest < Sprockets::TestCase
     assert_equal path, manifest.path
   end
 
-  test "specify full manifest directory" do
+  test "specify manifest directory yields random manifest-*.json" do
+    dir = Dir::tmpdir
+
+    system "rm -rf #{dir}/manifest*.json"
+    assert !File.exist?("#{dir}/manifest.json")
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    assert_equal dir, manifest.dir
+    assert_match %r{manifest-[a-f0-9]+\.json}, manifest.path
+  end
+
+  test "specify manifest directory with existing manifest.json" do
     dir  = Dir::tmpdir
     path = File.join(dir, 'manifest.json')
 
+    system "rm -rf #{dir}/manifest*.json"
+    FileUtils.mkdir_p(dir)
+    File.open(path, 'w') { |f| f.write "{}" }
+
+    assert File.exist?(path)
     manifest = Sprockets::Manifest.new(@env, dir)
+
+    assert_equal dir, manifest.dir
+    assert_equal path, manifest.path
+  end
+
+  test "specify manifest directory with existing manifest-123.json" do
+    dir  = Dir::tmpdir
+    path = File.join(dir, 'manifest-123.json')
+
+    system "rm -rf #{dir}/manifest*.json"
+    File.open(path, 'w') { |f| f.write "{}" }
+
+    assert File.exist?(path)
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    assert_equal dir, manifest.dir
+    assert_equal path, manifest.path
+  end
+
+  test "specify manifest directory and seperate location" do
+    root  = File.join(Dir::tmpdir, 'public')
+    dir   = File.join(root, 'assets')
+    path  = File.join(root, 'manifest-123.json')
+
+    system "rm -rf #{root}"
+    assert !File.exist?(root)
+
+    manifest = Sprockets::Manifest.new(@env, dir, path)
 
     assert_equal dir, manifest.dir
     assert_equal path, manifest.path
@@ -51,7 +95,7 @@ class TestManifest < Sprockets::TestCase
     data = JSON.parse(File.read(@manifest.path))
     assert data['files'][digest_path]
     assert_equal "application.js", data['files'][digest_path]['logical_path']
-    assert_equal 226, data['files'][digest_path]['size']
+    assert data['files'][digest_path]['size'] > 230
     assert_equal digest_path, data['assets']['application.js']
   end
 
@@ -93,7 +137,7 @@ class TestManifest < Sprockets::TestCase
   test "compile with regex" do
     app_digest_path = @env['application.js'].digest_path
     gallery_digest_path = @env['gallery.css'].digest_path
-    
+
     assert !File.exist?("#{@dir}/#{app_digest_path}")
     assert !File.exist?("#{@dir}/#{gallery_digest_path}")
 
@@ -108,6 +152,18 @@ class TestManifest < Sprockets::TestCase
     assert data['files'][gallery_digest_path]
     assert_equal app_digest_path, data['assets']['application.js']
     assert_equal gallery_digest_path, data['assets']['gallery.css']
+  end
+
+  test "compress assets" do
+    gallery_digest_path = @env['gallery.css'].digest_path
+    app_digest_path = @env['application.js'].digest_path
+    img_digest_path = @env['blank.gif'].digest_path
+
+    @manifest.compile('gallery.css', 'application.js', 'blank.gif')
+
+    assert File.exist?("#{@dir}/#{gallery_digest_path}.gz")
+    assert File.exist?("#{@dir}/#{app_digest_path}.gz")
+    assert !File.exist?("#{@dir}/#{img_digest_path}.gz")
   end
 
   test "recompile asset" do
@@ -149,6 +205,7 @@ class TestManifest < Sprockets::TestCase
 
     @manifest.compile('application.js')
     assert File.exist?("#{@dir}/#{digest_path}")
+    assert File.exist?("#{@dir}/#{digest_path}.gz")
 
     data = JSON.parse(File.read(@manifest.path))
     assert data['files'][digest_path]
@@ -157,6 +214,7 @@ class TestManifest < Sprockets::TestCase
     @manifest.remove(digest_path)
 
     assert !File.exist?("#{@dir}/#{digest_path}")
+    assert !File.exist?("#{@dir}/#{digest_path}.gz")
 
     data = JSON.parse(File.read(@manifest.path))
     assert !data['files'][digest_path]
@@ -276,5 +334,23 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?("#{@dir}/manifest.json")
     data = JSON.parse(File.read(@manifest.path))
     assert data['assets']['application.js']
+  end
+
+  test "nil environment raises compilation error" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(nil, File.join(@dir, 'manifest.json'))
+    assert_raises Sprockets::Error do
+      @manifest.compile('application.js')
+    end
+  end
+
+  test "no environment raises compilation error" do
+    assert !File.exist?("#{@dir}/manifest.json")
+
+    @manifest = Sprockets::Manifest.new(File.join(@dir, 'manifest.json'))
+    assert_raises Sprockets::Error do
+      @manifest.compile('application.js')
+    end
   end
 end

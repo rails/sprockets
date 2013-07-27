@@ -154,6 +154,23 @@ module FreshnessTests
     end
   end
 
+  test "asset is stale when one of its dependencies is removed" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      File.open(main, 'w') { |f| f.write "//= depend_on test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a;" }
+      asset = asset('test-main.js')
+
+      assert asset.fresh?(@env)
+
+      File.unlink(dep)
+
+      assert asset.stale?(@env)
+    end
+  end
+
   test "asset is stale when one of its asset dependencies is modified" do
     main = fixture_path('asset/test-main.js')
     dep  = fixture_path('asset/test-dep.js')
@@ -588,6 +605,26 @@ class BundledAssetTest < Sprockets::TestCase
     body = ""
     @asset.each { |part| body << part }
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+  end
+
+  test "mtime is based on required assets" do
+    required_asset = fixture_path('asset/dependencies/b.js')
+
+    sandbox required_asset do
+      mtime = Time.now + 1
+      File.utime mtime, mtime, required_asset
+      assert_equal mtime.to_i, asset('required_assets.js').mtime.to_i
+    end
+  end
+
+  test "mtime is based on dependency paths" do
+    asset_dependency = fixture_path('asset/dependencies/b.js')
+
+    sandbox asset_dependency do
+      mtime = Time.now + 1
+      File.utime mtime, mtime, asset_dependency
+      assert_equal mtime.to_i, asset('dependency_paths.js').mtime.to_i
+    end
   end
 
   test "requiring the same file multiple times has no effect" do

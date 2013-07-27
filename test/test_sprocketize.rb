@@ -57,7 +57,7 @@ class TestSprockets < Sprockets::TestCase
     digest_path = @env['gallery.js'].digest_path
     output = sprockets "-I", fixture_path("default"), "-o", @dir, fixture_path("default/gallery.js")
     assert_equal "", output
-    assert File.exist?("#{@dir}/manifest.json")
+    assert Dir["#{@dir}/manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
@@ -65,9 +65,19 @@ class TestSprockets < Sprockets::TestCase
     digest_path1, digest_path2 = @env['gallery.js'].digest_path, @env['gallery.css'].digest_path
     output = sprockets "-I", fixture_path("default"), "-o", @dir, fixture_path("default/gallery.js"), fixture_path("default/gallery.css.erb")
     assert_equal "", output
-    assert File.exist?("#{@dir}/manifest.json")
+    assert Dir["#{@dir}/manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path1}")
     assert File.exist?("#{@dir}/#{digest_path2}")
+  end
+
+  test "minify js with uglify" do
+    output = sprockets "-I", fixture_path("default"), "--js-compressor", "uglify", fixture_path("default/gallery.js")
+    assert_equal "var Gallery={};\n", output
+  end
+
+  test "compress css with sass" do
+    output = sprockets "-I", fixture_path("default"), "--css-compressor", "sass", fixture_path("default/gallery.css.erb")
+    assert_equal ".gallery{color:red}\n", output
   end
 
   def sprockets(*args)

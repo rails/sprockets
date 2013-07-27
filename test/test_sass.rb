@@ -23,7 +23,7 @@ class TestTiltSass < Sprockets::TestCase
   end
 
   def teardown
-    FileUtils.rm_r(CACHE_PATH)
+    FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
 
@@ -102,18 +102,6 @@ li {
   -moz-border-radius-left: 8px;
   -webkit-border-left-radius: 8px; }
     EOS
-  end
-
-  test "@import prefers partial over fullname" do
-    filename = fixture_path('sass/test.scss')
-    partial, other = fixture_path('sass/_partial.scss'), fixture_path('sass/partial.scss')
-
-    sandbox filename, partial, other do
-      File.open(filename, 'w') { |f| f.write "@import 'partial';" }
-      File.open(partial, 'w')  { |f| f.write ".partial { background: red; };" }
-      File.open(other, 'w')    { |f| f.write ".partial { background: blue; };" }
-      assert_equal ".partial {\n  background: red; }\n", render(filename)
-    end
   end
 
   test "@import sass non-partial from scss" do
@@ -199,6 +187,20 @@ body {
     end
   end
 
+  test "reference @import'd variable" do
+    assert_equal <<-EOS, render('sass/links.scss')
+a:link {
+  color: "red"; }
+    EOS
+  end
+
+  test "@import reference variable" do
+    assert_equal <<-EOS, render('sass/main.scss')
+#header {
+  color: "blue"; }
+    EOS
+  end
+
   def silence_warnings
     old_verbose, $VERBOSE = $VERBOSE, false
     yield
@@ -227,5 +229,53 @@ class TestSprocketsSass < TestTiltSass
     silence_warnings do
       @env[path].to_s
     end
+  end
+end
+
+class TestSassCompressor < TestTiltSass
+  test "compress css" do
+    silence_warnings do
+      uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
+      compressed   = "p{margin:0;padding:0}\n"
+      assert_equal compressed, Sprockets::SassCompressor.new { uncompressed }.render
+    end
+  end
+end
+
+class TestSassFunctions < TestSprocketsSass
+  def setup
+    super
+
+    @env.context_class.class_eval do
+      def asset_path(path, options = {})
+        "/#{path}"
+      end
+    end
+  end
+
+  test "path functions" do
+    assert_equal <<-EOS, render('sass/paths.scss')
+div {
+  url: url("/foo.svg");
+  url: url("/foo.png");
+  url: url("/foo.mov");
+  url: url("/foo.mp3");
+  url: url("/foo.woff");
+  url: url("/foo.js");
+  url: url("/foo.css"); }
+    EOS
+  end
+
+  test "url functions" do
+    assert_equal <<-EOS, render('sass/urls.scss')
+div {
+  url: url(/foo.svg);
+  url: url(/foo.png);
+  url: url(/foo.mov);
+  url: url(/foo.mp3);
+  url: url(/foo.woff);
+  url: url(/foo.js);
+  url: url(/foo.css); }
+    EOS
   end
 end

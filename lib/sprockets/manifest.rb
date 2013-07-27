@@ -1,4 +1,5 @@
 require 'multi_json'
+require 'securerandom'
 require 'time'
 
 module Sprockets
@@ -18,19 +19,43 @@ module Sprockets
     # a full path to the manifest json file. The file may or may not
     # already exist. The dirname of the `path` will be used to write
     # compiled assets to. Otherwise, if the path is a directory, the
-    # filename will default to "manifest.json" in that directory.
+    # filename will default a random "manifest-123.json" file in that
+    # directory.
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
-    def initialize(environment, path)
-      @environment = environment
+    def initialize(*args)
+      if args.first.is_a?(Base) || args.first.nil?
+        @environment = args.shift
+      end
 
-      if File.extname(path) == ""
-        @dir  = File.expand_path(path)
-        @path = File.join(@dir, 'manifest.json')
-      else
-        @path = File.expand_path(path)
-        @dir  = File.dirname(path)
+      @dir, @path = args[0], args[1]
+
+      # Expand paths
+      @dir  = File.expand_path(@dir) if @dir
+      @path = File.expand_path(@path) if @path
+
+      # If path is given as the second arg
+      if @dir && File.extname(@dir) != ""
+        @dir, @path = nil, @dir
+      end
+
+      # Default dir to the directory of the path
+      @dir ||= File.dirname(@path) if @path
+
+      # If directory is given w/o path, pick a random manifest.json location
+      if @dir && @path.nil?
+        # Find the first manifest.json in the directory
+        paths = Dir[File.join(@dir, "manifest*.json")]
+        if paths.any?
+          @path = paths.first
+        else
+          @path = File.join(@dir, "manifest-#{SecureRandom.hex(16)}.json")
+        end
+      end
+
+      unless @dir && @path
+        raise ArgumentError, "manifest requires output path"
       end
 
       data = nil
@@ -83,6 +108,10 @@ module Sprockets
     #   compile("application.js")
     #
     def compile(*args)
+      unless environment
+        raise Error, "manifest requires environment for compilation"
+      end
+
       paths = environment.each_logical_path(*args).to_a +
         args.flatten.select { |fn| Pathname.new(fn).absolute? if fn.is_a?(String)}
 
@@ -103,6 +132,7 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
+            asset.write_to "#{target}.gz" if asset.is_a?(BundledAsset)
           end
 
           save
@@ -118,6 +148,7 @@ module Sprockets
     #
     def remove(filename)
       path = File.join(dir, filename)
+      gzip = "#{path}.gz"
       logical_path = files[filename]['logical_path']
 
       if assets[logical_path] == filename
@@ -126,10 +157,11 @@ module Sprockets
 
       files.delete(filename)
       FileUtils.rm(path) if File.exist?(path)
+      FileUtils.rm(gzip) if File.exist?(gzip)
 
       save
 
-      logger.warn "Removed #{filename}"
+      logger.info "Removed #{filename}"
 
       nil
     end
@@ -152,7 +184,7 @@ module Sprockets
     # Wipe directive
     def clobber
       FileUtils.rm_r(@dir) if File.exist?(@dir)
-      logger.warn "Removed #{@dir}"
+      logger.info "Removed #{@dir}"
       nil
     end
 
@@ -178,7 +210,7 @@ module Sprockets
         ms = benchmark do
           asset = environment.find_asset(logical_path)
         end
-        logger.warn "Compiled #{logical_path}  (#{ms}ms)"
+        logger.debug "Compiled #{logical_path}  (#{ms}ms)"
         asset
       end
 
@@ -192,28 +224,32 @@ module Sprockets
 
     private
       # Feature detect newer MultiJson API
-      if MultiJson.respond_to?(:load)
+      if MultiJson.respond_to?(:dump)
         def json_decode(obj)
           MultiJson.load(obj)
+        end
+
+        def json_encode(obj)
+          MultiJson.dump(obj)
         end
       else
         def json_decode(obj)
           MultiJson.decode(obj)
         end
-      end
 
-      if MultiJson.respond_to?(:dump)
-        def json_encode(obj)
-          MultiJson.dump(obj)
-        end
-      else
         def json_encode(obj)
           MultiJson.encode(obj)
         end
       end
 
       def logger
-        environment.logger
+        if environment
+          environment.logger
+        else
+          logger = Logger.new($stderr)
+          logger.level = Logger::FATAL
+          logger
+        end
       end
 
       def benchmark

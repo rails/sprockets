@@ -60,13 +60,13 @@ module EnvironmentTests
 
   test "eco templates" do
     asset = @env["goodbye.jst"]
-    context = ExecJS.compile(asset)
+    context = ExecJS.compile(asset.to_s)
     assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
   end
 
   test "ejs templates" do
     asset = @env["hello.jst"]
-    context = ExecJS.compile(asset)
+    context = ExecJS.compile(asset.to_s)
     assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
@@ -86,6 +86,11 @@ module EnvironmentTests
   test "lookup bundle processors" do
     assert_equal [], @env.bundle_processors('application/javascript')
     assert_equal [Sprockets::CharsetNormalizer], @env.bundle_processors('text/css')
+  end
+
+  test "lookup compressors" do
+    assert_equal Sprockets::SassCompressor, @env.compressors['text/css'][:sass]
+    assert_equal Sprockets::UglifierCompressor, @env.compressors['application/javascript'][:uglifier]
   end
 
   test "resolve in environment" do
@@ -132,6 +137,15 @@ module EnvironmentTests
     assert_equal ".c {}\n.d {}\n/*\n\n */\n\n", @env["mobile.css"].to_s
   end
 
+  test "find component.json in directory" do
+    assert_equal "var bower;\n", @env["bower.js"].to_s
+  end
+
+  test "find multiple component.json in directory" do
+    assert_equal "var qunit;\n", @env["qunit.js"].to_s
+    assert_equal ".qunit {}\n", @env["qunit.css"].to_s
+  end
+
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end
@@ -154,6 +168,18 @@ module EnvironmentTests
     end
   end
 
+  test "asset with missing depend_on raises an exception" do
+    assert_raises Sprockets::FileNotFound do
+      @env["missing_depend_on.js"]
+    end
+  end
+
+  test "asset with missing absolute depend_on raises an exception" do
+    assert_raises Sprockets::FileNotFound do
+      @env["missing_absolute_depend_on.js"]
+    end
+  end
+
   test "asset logical path for absolute path" do
     assert_equal "gallery.js",
       @env[fixture_path("default/gallery.js")].logical_path
@@ -163,30 +189,34 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
+  ENTRIES_IN_PATH = 43
+
   test "iterate over each entry" do
     entries = []
     @env.each_entry(fixture_path("default")) do |path|
       entries << path
     end
-    assert_equal 34, entries.length
+    assert_equal ENTRIES_IN_PATH, entries.length
   end
 
   test "each entry enumerator" do
     enum = @env.each_entry(fixture_path("default"))
-    assert_equal 34, enum.to_a.length
+    assert_equal ENTRIES_IN_PATH, enum.to_a.length
   end
+
+  FILES_IN_PATH = 36
 
   test "iterate over each file" do
     files = []
     @env.each_file do |filename|
       files << filename
     end
-    assert_equal 29, files.length
+    assert_equal FILES_IN_PATH, files.length
   end
 
   test "each file enumerator" do
     enum = @env.each_file
-    assert_equal 29, enum.to_a.length
+    assert_equal FILES_IN_PATH, enum.to_a.length
   end
 
   test "iterate over each logical path" do
@@ -194,7 +224,7 @@ module EnvironmentTests
     @env.each_logical_path do |logical_path|
       paths << logical_path
     end
-    assert_equal 29, paths.length
+    assert_equal FILES_IN_PATH, paths.length
     assert_equal paths.size, paths.uniq.size, "has duplicates"
 
     assert paths.include?("application.js")
@@ -203,9 +233,28 @@ module EnvironmentTests
     assert !paths.include?("coffee")
   end
 
+  test "iterate over each logical path and filename" do
+    paths = []
+    filenames = []
+    @env.each_logical_path do |logical_path, filename|
+      paths << logical_path
+      filenames << filename
+    end
+    assert_equal FILES_IN_PATH, paths.length
+    assert_equal paths.size, paths.uniq.size, "has duplicates"
+
+    assert paths.include?("application.js")
+    assert paths.include?("coffee/foo.js")
+    assert paths.include?("coffee/index.js")
+    assert !paths.include?("coffee")
+
+    assert filenames.any? { |p| p =~ /application.js.coffee/ }
+  end
+
   test "each logical path enumerator" do
     enum = @env.each_logical_path
-    assert_equal 29, enum.to_a.length
+    assert_kind_of String, enum.first
+    assert_equal FILES_IN_PATH, enum.to_a.length
   end
 
   test "iterate over each logical path matching fnmatch filters" do
@@ -262,6 +311,17 @@ module EnvironmentTests
     assert !paths.include?("gallery.css")
   end
 
+  test "iterate over each logical path matching proc filters with full path arg" do
+    paths = []
+    @env.each_logical_path(proc { |_, fn| fn.match(fixture_path('default/mobile')) }) do |logical_path|
+      paths << logical_path
+    end
+
+    assert paths.include?("mobile/a.js")
+    assert paths.include?("mobile/b.js")
+    assert !paths.include?("application.js")
+  end
+
   test "CoffeeScript files are compiled in a closure" do
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)
@@ -308,6 +368,12 @@ class TestEnvironment < Sprockets::TestCase
     assert !@env.bundle_processors('text/css').include?(WhitespaceCompressor)
     @env.register_bundle_processor 'text/css', WhitespaceCompressor
     assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
+  end
+
+  test "register compressor" do
+    assert !@env.compressors['text/css'][:whitespace]
+    @env.register_compressor 'text/css', :whitespace, WhitespaceCompressor
+    assert @env.compressors['text/css'][:whitespace]
   end
 
   test "register global block preprocessor" do
@@ -370,6 +436,38 @@ class TestEnvironment < Sprockets::TestCase
     assert @env.js_compressor
     @env.js_compressor = nil
     assert_nil @env.js_compressor
+  end
+
+  test "setting js compressor to tilt handler" do
+    assert_nil @env.js_compressor
+    @env.js_compressor = Sprockets::UglifierCompressor
+    assert_equal Sprockets::UglifierCompressor, @env.js_compressor
+    @env.js_compressor = nil
+    assert_nil @env.js_compressor
+  end
+
+  test "setting css compressor to tilt handler" do
+    assert_nil @env.css_compressor
+    @env.css_compressor = Sprockets::SassCompressor
+    assert_equal Sprockets::SassCompressor, @env.css_compressor
+    @env.css_compressor = nil
+    assert_nil @env.css_compressor
+  end
+
+  test "setting js compressor to sym" do
+    assert_nil @env.js_compressor
+    @env.js_compressor = :uglifier
+    assert_equal Sprockets::UglifierCompressor, @env.js_compressor
+    @env.js_compressor = nil
+    assert_nil @env.js_compressor
+  end
+
+  test "setting css compressor to sym" do
+    assert_nil @env.css_compressor
+    @env.css_compressor = :sass
+    assert_equal Sprockets::SassCompressor, @env.css_compressor
+    @env.css_compressor = nil
+    assert_nil @env.css_compressor
   end
 
   test "changing digest implementation class" do
@@ -438,14 +536,14 @@ class TestEnvironment < Sprockets::TestCase
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.puts "-->" }
-      assert_raises(ExecJS::ProgramError) do
+      assert_raises(ExecJS::RuntimeError) do
         @env["tmp.js"].to_s
       end
 
       File.open(filename, 'w') { |f| f.puts "->" }
       time = Time.now + 60
       File.utime(time, time, filename)
-      assert_equal "(function() {\n\n  (function() {});\n\n}).call(this);\n", @env["tmp.js"].to_s
+      assert_equal "(function() {\n  (function() {});\n\n}).call(this);\n", @env["tmp.js"].to_s
     end
   end
 
@@ -551,30 +649,10 @@ class TestIndex < Sprockets::TestCase
     end
   end
 
-  test "change in environment css compressor does not affect index" do
-    env = Sprockets::Environment.new(".")
-    env.css_compressor = WhitespaceCompressor
-    index = env.index
-
-    assert index.css_compressor
-    env.css_compressor = nil
-    assert index.css_compressor
-  end
-
   test "does not allow js compressor to be changed" do
     assert_raises TypeError do
       @env.js_compressor = WhitespaceCompressor
     end
-  end
-
-  test "change in environment js compressor does not affect index" do
-    env = Sprockets::Environment.new(".")
-    env.js_compressor = WhitespaceCompressor
-    index = env.index
-
-    assert index.js_compressor
-    env.js_compressor = nil
-    assert index.js_compressor
   end
 
   test "change in environment engines does not affect index" do

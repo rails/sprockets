@@ -37,6 +37,7 @@ module Sprockets
       @preprocessors     = Sprockets.preprocessors
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors
+      @compressors       = Sprockets.compressors
 
       Sprockets.paths.each do |path|
         append_path(path)
