@@ -558,7 +558,7 @@ class TestEnvironment < Sprockets::TestCase
       def foo; end
     end
 
-    assert_nothing_raised(NameError) { e1.context_class.instance_method(:foo) }
+    e1.context_class.instance_method(:foo)
     assert_raises(NameError) { e2.context_class.instance_method(:foo) }
   end
 
