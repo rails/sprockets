@@ -1,6 +1,6 @@
 require 'time'
 require 'set'
-require 'sprockets/source_map'
+require 'source_map'
 
 module Sprockets
   # `Asset` is the base class for `BundledAsset` and `StaticAsset`.
@@ -127,7 +127,7 @@ module Sprockets
           offset = SourceMap::Offset.new(index, 0)
           mappings << SourceMap::Mapping.new("#{logical_path}?source=1", offset, offset)
         end
-        SourceMap::Mappings.new(mappings)
+        SourceMap::Map.new(mappings)
       end
     end
 

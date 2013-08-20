@@ -208,10 +208,7 @@ module Sprockets
       end
 
       def source_map_response(asset, env)
-        map = SourceMap.new({
-          :filename => asset.logical_path,
-          :mappings => asset.mappings
-        })
+        map = SourceMap::Map.new(asset.mappings, asset.logical_path)
         [ 200, {'Content-Type' => 'application/json'}, [map.to_json] ]
       end
 

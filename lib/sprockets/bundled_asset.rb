@@ -1,6 +1,6 @@
 require 'sprockets/asset'
 require 'sprockets/errors'
-require 'sprockets/source_map'
+require 'source_map'
 require 'fileutils'
 require 'set'
 require 'zlib'
@@ -71,7 +71,7 @@ module Sprockets
     end
 
     def mappings
-      mappings = SourceMap::Mappings.new
+      mappings = SourceMap::Map.new
       required_assets.each do |asset|
         mappings += asset.mappings
       end
