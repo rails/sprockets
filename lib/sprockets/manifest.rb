@@ -1,4 +1,4 @@
-require 'multi_json'
+require 'json'
 require 'securerandom'
 require 'time'
 
@@ -6,7 +6,7 @@ module Sprockets
   # The Manifest logs the contents of assets compiled to a single
   # directory. It records basic attributes about the asset for fast
   # lookup without having to compile. A pointer from each logical path
-  # indicates with fingerprinted asset is the current one.
+  # indicates which fingerprinted asset is the current one.
   #
   # The JSON is part of the public API and should be considered
   # stable. This should make it easy to read from other programming
@@ -64,7 +64,7 @@ module Sprockets
         if File.exist?(@path)
           data = json_decode(File.read(@path))
         end
-      rescue MultiJson::DecodeError => e
+      rescue JSON::ParserError => e
         logger.error "#{@path} is invalid: #{e.class} #{e.message}"
       end
 
@@ -223,23 +223,13 @@ module Sprockets
       end
 
     private
-      # Feature detect newer MultiJson API
-      if MultiJson.respond_to?(:dump)
-        def json_decode(obj)
-          MultiJson.load(obj)
-        end
 
-        def json_encode(obj)
-          MultiJson.dump(obj)
-        end
-      else
-        def json_decode(obj)
-          MultiJson.decode(obj)
-        end
+      def json_decode(obj)
+        JSON.parse(obj, create_additions: false)
+      end
 
-        def json_encode(obj)
-          MultiJson.encode(obj)
-        end
+      def json_encode(obj)
+        JSON.generate(obj)
       end
 
       def logger
