@@ -10,7 +10,7 @@ module Sprockets
 
       context = environment.context_class.new(environment, logical_path, pathname)
       @source = context.evaluate(pathname)
-      @length = Rack::Utils.bytesize(source)
+      @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
 
       build_required_assets(environment, context)
