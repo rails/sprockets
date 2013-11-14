@@ -115,8 +115,7 @@ module Sprockets
     def unregister_preprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @preprocessors[mime_type].detect { |cls|
-          cls.respond_to?(:name) &&
-            cls.name == "Sprockets::Processor (#{klass})"
+          cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 
@@ -130,8 +129,7 @@ module Sprockets
     def unregister_postprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @postprocessors[mime_type].detect { |cls|
-          cls.respond_to?(:name) &&
-            cls.name == "Sprockets::Processor (#{klass})"
+          cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 
@@ -184,8 +182,7 @@ module Sprockets
     def unregister_bundle_processor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @bundle_processors[mime_type].detect { |cls|
-          cls.respond_to?(:name) &&
-            cls.name == "Sprockets::Processor (#{klass})"
+          cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 
