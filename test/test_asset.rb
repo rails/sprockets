@@ -915,7 +915,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal 14, mappings.size
 
     assert mapping = mappings[0]
-    assert_equal 1, mapping.generated.line
+    assert_equal 0, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
     assert_equal 0, mapping.original.column
@@ -923,7 +923,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal nil, mapping.name
 
     assert mapping = mappings[4]
-    assert_equal 5, mapping.generated.line
+    assert_equal 4, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
     assert_equal 0, mapping.original.column
@@ -931,7 +931,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal nil, mapping.name
 
     assert mapping = mappings[8]
-    assert_equal 9, mapping.generated.line
+    assert_equal 8, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
     assert_equal 0, mapping.original.column
