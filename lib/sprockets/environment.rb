@@ -51,6 +51,7 @@ module Sprockets
         @trail.append_extension(ext)
       end
 
+      self.cache = nil
       expire_index!
 
       yield self if block_given?

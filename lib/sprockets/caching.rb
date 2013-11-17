@@ -2,43 +2,18 @@ module Sprockets
   # `Caching` is an internal mixin whose public methods are exposed on
   # the `Environment` and `Index` classes.
   module Caching
+    attr_reader :cache_adapter
+
     # Low level cache getter for `key`. Checks a number of supported
     # cache interfaces.
     def cache_get(key)
-      # `Cache#get(key)` for Memcache
-      if cache.respond_to?(:get)
-        cache.get(key)
-
-      # `Cache#[key]` so `Hash` can be used
-      elsif cache.respond_to?(:[])
-        cache[key]
-
-      # `Cache#read(key)` for `ActiveSupport::Cache` support
-      elsif cache.respond_to?(:read)
-        cache.read(key)
-
-      else
-        nil
-      end
+      cache_adapter.get(key)
     end
 
     # Low level cache setter for `key`. Checks a number of supported
     # cache interfaces.
     def cache_set(key, value)
-      # `Cache#set(key, value)` for Memcache
-      if cache.respond_to?(:set)
-        cache.set(key, value)
-
-      # `Cache#[key]=value` so `Hash` can be used
-      elsif cache.respond_to?(:[]=)
-        cache[key] = value
-
-      # `Cache#write(key, value)` for `ActiveSupport::Cache` support
-      elsif cache.respond_to?(:write)
-        cache.write(key, value)
-      end
-
-      value
+      cache_adapter.set(key, value)
     end
 
     protected
@@ -92,5 +67,37 @@ module Sprockets
         cache_set(expand_cache_key(key), hash)
         hash
       end
+
+      def make_cache_adapter(cache)
+        # `Cache#get(key)` for Memcache
+        if cache.respond_to?(:get)
+          cache
+
+        # `Cache#[key]` so `Hash` can be used
+        elsif cache.respond_to?(:[])
+          HashAdapter.new cache
+
+        # `Cache#read(key)` for `ActiveSupport::Cache` support
+        elsif cache.respond_to?(:read)
+          ReadWriteAdapter.new cache
+        else
+          NullAdapter.new
+        end
+      end
+
+    class HashAdapter < Struct.new(:cache)
+      def get(key); cache[key]; end
+      def set(key, value); cache[key] = value; end
+    end
+
+    class ReadWriteAdapter < Struct.new(:cache)
+      def get(key); cache.read(key); end
+      def set(key, value); cache.write(key, value); end
+    end
+
+    class NullAdapter
+      def get(key); nil; end
+      def set(key, value); value; end
+    end
   end
 end
