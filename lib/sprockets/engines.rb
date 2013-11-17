@@ -68,7 +68,7 @@ module Sprockets
     private
       def deep_copy_hash(hash)
         initial = Hash.new { |h, k| h[k] = [] }
-        hash.inject(initial) { |h, (k, a)| h[k] = a.dup; h }
+        hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }
       end
   end
 end
