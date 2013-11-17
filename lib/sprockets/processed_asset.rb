@@ -14,7 +14,7 @@ module Sprockets
       @digest = environment.digest.update(source).hexdigest
 
       build_required_assets(environment, context)
-      build_dependency_paths(environment, context)
+      @dependency_paths = build_dependency_paths(environment, context)
 
       @dependency_digest = compute_dependency_digest(environment)
 
@@ -122,25 +122,19 @@ module Sprockets
       end
 
       def build_dependency_paths(environment, context)
-        dependency_paths = {}
-
-        context._dependency_paths.each do |path|
-          dep = DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
-          dependency_paths[dep] = true
+        paths = context._dependency_paths.map do |path|
+          DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
         end
 
-        context._dependency_assets.each do |path|
+        assets = context._dependency_assets.flat_map do |path|
           if path == self.pathname.to_s
-            dep = DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
-            dependency_paths[dep] = true
+            DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
           elsif asset = environment.find_asset(path, :bundle => false)
-            asset.dependency_paths.each do |d|
-              dependency_paths[d] = true
-            end
+            asset.dependency_paths
           end
         end
 
-        @dependency_paths = dependency_paths.keys
+        paths.concat(assets).uniq
       end
 
       def compute_dependency_digest(environment)
