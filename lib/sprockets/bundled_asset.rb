@@ -71,11 +71,9 @@ module Sprockets
     end
 
     def mappings
-      mappings = SourceMap::Map.new
-      required_assets.each do |asset|
-        mappings += asset.mappings
+      required_assets.inject(SourceMap::Map.new) do |mappings, asset|
+        mappings + asset.mappings
       end
-      mappings
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
