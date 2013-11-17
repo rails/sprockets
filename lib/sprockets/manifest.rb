@@ -6,7 +6,7 @@ module Sprockets
   # The Manifest logs the contents of assets compiled to a single
   # directory. It records basic attributes about the asset for fast
   # lookup without having to compile. A pointer from each logical path
-  # indicates with fingerprinted asset is the current one.
+  # indicates which fingerprinted asset is the current one.
   #
   # The JSON is part of the public API and should be considered
   # stable. This should make it easy to read from other programming
@@ -135,10 +135,10 @@ module Sprockets
             asset.write_to "#{target}.gz" if asset.is_a?(BundledAsset)
           end
 
-          save
-          asset
         end
       end
+      save
+      paths
     end
 
     # Removes file from directory and from manifest. `filename` must
@@ -225,11 +225,11 @@ module Sprockets
     private
 
       def json_decode(obj)
-        JSON.load(obj)
+        JSON.parse(obj, create_additions: false)
       end
 
       def json_encode(obj)
-        JSON.dump(obj)
+        JSON.generate(obj)
       end
 
       def logger
