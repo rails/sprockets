@@ -208,9 +208,8 @@ module Sprockets
       end
 
       def source_map_response(asset, env)
-        map = SourceMap::Map.new(asset.mappings, asset.logical_path)
         # TODO: Fix SourceMap::Map#to_json
-        [ 200, {'Content-Type' => 'application/json'}, [map.as_json.to_json] ]
+        [ 200, {'Content-Type' => 'application/json'}, [asset.map.as_json.to_json] ]
       end
 
       def headers(env, asset, length)

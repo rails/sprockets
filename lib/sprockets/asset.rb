@@ -120,15 +120,13 @@ module Sprockets
       yield to_s
     end
 
-    def mappings
-      if content_type == 'application/javascript'
-        mappings = []
-        to_s.lines.each_with_index do |line, index|
-          offset = SourceMap::Offset.new(index, 0)
-          mappings << SourceMap::Mapping.new("#{logical_path}?source=1", offset, offset)
-        end
-        SourceMap::Map.new(mappings)
+    def map
+      mappings = []
+      to_s.lines.each_with_index do |line, index|
+        offset = SourceMap::Offset.new(index, 0)
+        mappings << SourceMap::Mapping.new("#{logical_path}?source=1", offset, offset)
       end
+      SourceMap::Map.new(mappings, logical_path)
     end
 
     # Checks if Asset is fresh by comparing the actual mtime and

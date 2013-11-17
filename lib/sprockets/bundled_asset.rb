@@ -9,7 +9,7 @@ module Sprockets
   # `BundledAsset`s are used for files that need to be processed and
   # concatenated with other assets. Use for `.js` and `.css` files.
   class BundledAsset < Asset
-    attr_reader :source
+    attr_reader :source, :map
 
     def initialize(environment, logical_path, pathname)
       super(environment, logical_path, pathname)
@@ -20,11 +20,17 @@ module Sprockets
 
       # Explode Asset into parts and gather the dependency bodies
       @source = to_a.map { |dependency| dependency.to_s }.join
+      @map = to_a.inject(SourceMap::Map.new) do |map, asset|
+        map + asset.map
+      end
 
       # Run bundle processors on concatenated source
       context = environment.context_class.new(environment, logical_path, pathname)
-      @source = context.evaluate(pathname, :data => @source,
-                  :processors => environment.bundle_processors(content_type))
+      options = { :data => @source,
+                  :map => @map,
+                  :processors => environment.bundle_processors(content_type) }
+      @source = context.evaluate(pathname, options)
+      @map    = options[:map]
 
       @mtime  = (to_a + @dependency_paths).map(&:mtime).max
       @length = Rack::Utils.bytesize(source)
@@ -68,12 +74,6 @@ module Sprockets
     # Expand asset into an `Array` of parts.
     def to_a
       required_assets
-    end
-
-    def mappings
-      required_assets.inject(SourceMap::Map.new) do |mappings, asset|
-        mappings + asset.mappings
-      end
     end
 
     # Checks if Asset is stale by comparing the actual mtime and

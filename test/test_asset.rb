@@ -545,11 +545,11 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert expected.eql?(actual)
   end
 
-  test "source mappings" do
-    mappings = @asset.mappings
-    assert_equal 6, mappings.size
+  test "source map" do
+    map = @asset.map
+    assert_equal 6, map.size
 
-    assert mapping = mappings[0]
+    assert mapping = map[0]
     assert_equal 0, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
@@ -910,11 +910,11 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
-  test "source mappings" do
-    mappings = @asset.mappings
-    assert_equal 14, mappings.size
+  test "source map" do
+    map = @asset.map
+    assert_equal 14, map.size
 
-    assert mapping = mappings[0]
+    assert mapping = map[0]
     assert_equal 0, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
@@ -922,7 +922,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal 'project.js?source=1', mapping.source
     assert_equal nil, mapping.name
 
-    assert mapping = mappings[4]
+    assert mapping = map[4]
     assert_equal 4, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
@@ -930,7 +930,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal 'users.js?source=1', mapping.source
     assert_equal nil, mapping.name
 
-    assert mapping = mappings[8]
+    assert mapping = map[8]
     assert_equal 8, mapping.generated.line
     assert_equal 0, mapping.generated.column
     assert_equal 0, mapping.original.line
