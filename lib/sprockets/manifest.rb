@@ -58,7 +58,7 @@ module Sprockets
         raise ArgumentError, "manifest requires output path"
       end
 
-      data = nil
+      data = {}
 
       begin
         if File.exist?(@path)
@@ -68,7 +68,7 @@ module Sprockets
         logger.error "#{@path} is invalid: #{e.class} #{e.message}"
       end
 
-      @data = data.is_a?(Hash) ? data : {}
+      @data = data
     end
 
     # Returns internal assets mapping. Keys are logical paths which

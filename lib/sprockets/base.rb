@@ -96,6 +96,7 @@ module Sprockets
     def cache=(cache)
       expire_index!
       @cache = cache
+      @cache_adapter = make_cache_adapter(cache)
     end
 
     def prepend_path(path)

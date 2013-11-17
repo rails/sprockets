@@ -70,15 +70,7 @@ module Sprockets
     #     end
     #
     def register_preprocessor(mime_type, klass, &block)
-      if block_given?
-        name  = klass.to_s
-        klass = Class.new(Processor) do
-          @name      = name
-          @processor = block
-        end
-      end
-
-      @preprocessors[mime_type].push(klass)
+      @preprocessors[mime_type].push(Processor.make_processor(klass, &block))
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
@@ -92,15 +84,7 @@ module Sprockets
     #     end
     #
     def register_postprocessor(mime_type, klass, &block)
-      if block_given?
-        name  = klass.to_s
-        klass = Class.new(Processor) do
-          @name      = name
-          @processor = block
-        end
-      end
-
-      @postprocessors[mime_type].push(klass)
+      @postprocessors[mime_type].push(Processor.make_processor(klass, &block))
     end
 
     # Deprecated alias for `unregister_preprocessor`.
@@ -115,8 +99,7 @@ module Sprockets
     def unregister_preprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @preprocessors[mime_type].detect { |cls|
-          cls.respond_to?(:name) &&
-            cls.name == "Sprockets::Processor (#{klass})"
+          cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 
@@ -130,8 +113,7 @@ module Sprockets
     def unregister_postprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @postprocessors[mime_type].detect { |cls|
-          cls.respond_to?(:name) &&
-            cls.name == "Sprockets::Processor (#{klass})"
+          cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 
@@ -166,15 +148,7 @@ module Sprockets
     #     end
     #
     def register_bundle_processor(mime_type, klass, &block)
-      if block_given?
-        name  = klass.to_s
-        klass = Class.new(Processor) do
-          @name      = name
-          @processor = block
-        end
-      end
-
-      @bundle_processors[mime_type].push(klass)
+      @bundle_processors[mime_type].push(Processor.make_processor(klass, &block))
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
@@ -184,8 +158,7 @@ module Sprockets
     def unregister_bundle_processor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @bundle_processors[mime_type].detect { |cls|
-          cls.respond_to?(:name) &&
-            cls.name == "Sprockets::Processor (#{klass})"
+          cls.name == "Sprockets::Processor (#{klass})"
         }
       end
 

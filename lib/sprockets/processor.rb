@@ -8,6 +8,16 @@ module Sprockets
   #     end
   #
   class Processor < Tilt::Template
+    def self.make_processor(klass, &block) # :nodoc:
+      return klass unless block_given?
+
+      name  = klass.to_s
+      Class.new(Processor) do
+        @name      = name
+        @processor = block
+      end
+    end
+
     # `processor` is a lambda or block
     def self.processor
       @processor
