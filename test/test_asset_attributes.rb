@@ -6,8 +6,14 @@ class TestAssetAttributes < Sprockets::TestCase
       pathname("index.js").search_paths
     assert_equal ["foo.js", "foo/bower.json", "foo/component.json", "foo/index.js"],
       pathname("foo.js").search_paths
+    assert_equal ["foo", "foo/bower.json", "foo/component.json", "foo/index"],
+      pathname("foo").search_paths
     assert_equal ["foo/bar.js", "foo/bar/index.js"],
       pathname("foo/bar.js").search_paths
+    assert_equal ["jquery.foo.js", "jquery.foo/bower.json", "jquery.foo/component.json", "jquery.foo/index.js"],
+      pathname("jquery.foo.js").search_paths
+    assert_equal ["jquery.foo", "jquery.foo/bower.json", "jquery.foo/component.json", "jquery.foo/index"],
+      pathname("jquery.foo").search_paths
   end
 
   test "logical path" do
