@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
-  s.homepage = "http://getsprockets.org/"
+  s.homepage = "https://github.com/sstephenson/sprockets"
   s.rubyforge_project = "sprockets"
 
   s.required_ruby_version = '>= 1.9.3'
