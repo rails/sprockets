@@ -41,7 +41,7 @@ module Sprockets
           raise UnserializeError, "#{p} isn't in paths"
         end
 
-        p == pathname.to_s ? self : environment.find_asset(p, :bundle => false)
+        p == pathname.to_s ? self : environment.find_asset(p, bundle: false)
       }
       @dependency_paths = coder['dependency_paths'].map { |h|
         DependencyFile.new(expand_root_path(h['path']), h['mtime'], h['digest'])
@@ -108,7 +108,7 @@ module Sprockets
               cache[self] = true
               assets << self
             end
-          elsif asset = environment.find_asset(path, :bundle => false)
+          elsif asset = environment.find_asset(path, bundle: false)
             asset.required_assets.each do |asset_dependency|
               unless cache[asset_dependency]
                 cache[asset_dependency] = true
@@ -129,7 +129,7 @@ module Sprockets
         assets = context._dependency_assets.flat_map do |path|
           if path == self.pathname.to_s
             DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
-          elsif asset = environment.find_asset(path, :bundle => false)
+          elsif asset = environment.find_asset(path, bundle: false)
             asset.dependency_paths
           end
         end

@@ -105,7 +105,7 @@ module Sprockets
 
         raise FileNotFound, "couldn't find file '#{path}'"
       else
-        environment.resolve(path, {:base_path => self.pathname.dirname}.merge(options), &block)
+        environment.resolve(path, {base_path: self.pathname.dirname}.merge(options), &block)
       end
     end
 
@@ -143,7 +143,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      pathname = resolve(path, :content_type => :self)
+      pathname = resolve(path, content_type: :self)
       depend_on_asset(pathname)
       @_required_paths << pathname.to_s
       nil
@@ -153,7 +153,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @_stubbed_assets << resolve(path, :content_type => :self).to_s
+      @_stubbed_assets << resolve(path, content_type: :self).to_s
       nil
     end
 
@@ -243,32 +243,32 @@ Extend your environment context with a custom method.
 
     # Expand logical image asset path.
     def image_path(path)
-      asset_path(path, :type => :image)
+      asset_path(path, type: :image)
     end
 
     # Expand logical video asset path.
     def video_path(path)
-      asset_path(path, :type => :video)
+      asset_path(path, type: :video)
     end
 
     # Expand logical audio asset path.
     def audio_path(path)
-      asset_path(path, :type => :audio)
+      asset_path(path, type: :audio)
     end
 
     # Expand logical font asset path.
     def font_path(path)
-      asset_path(path, :type => :font)
+      asset_path(path, type: :font)
     end
 
     # Expand logical javascript asset path.
     def javascript_path(path)
-      asset_path(path, :type => :javascript)
+      asset_path(path, type: :javascript)
     end
 
     # Expand logical stylesheet asset path.
     def stylesheet_path(path)
-      asset_path(path, :type => :stylesheet)
+      asset_path(path, type: :stylesheet)
     end
 
     private
