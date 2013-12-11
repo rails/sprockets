@@ -204,6 +204,14 @@ module EnvironmentTests
     assert_equal ENTRIES_IN_PATH, enum.to_a.length
   end
 
+  test "each entry guards against nil fs stat" do
+    env = Sprockets::Environment.new(fixture_path("default"))
+
+    assert_raises Sprockets::FileNotFound do
+      env.each_entry(fixture_path("errors")) { |_| nil }
+    end
+  end
+
   FILES_IN_PATH = 36
 
   test "iterate over each file" do
