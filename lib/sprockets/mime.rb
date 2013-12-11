@@ -20,14 +20,8 @@ module Sprockets
       @mime_types.dup
     end
 
-    if {}.respond_to?(:key)
-      def extension_for_mime_type(type)
-        mime_types.key(type)
-      end
-    else
-      def extension_for_mime_type(type)
-        mime_types.index(type)
-      end
+    def extension_for_mime_type(type)
+      mime_types.key(type)
     end
 
     # Register a new mime type.
