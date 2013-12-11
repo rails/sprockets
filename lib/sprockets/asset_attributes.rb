@@ -25,8 +25,6 @@ module Sprockets
       # optimization: bower.json can only be nested one level deep
       if !path_without_extension.to_s.index('/')
         paths << path_without_extension.join("bower.json").to_s
-        # DEPRECATED bower configuration file
-        paths << path_without_extension.join("component.json").to_s
       end
 
       if pathname.basename(extension.to_s).to_s != 'index'

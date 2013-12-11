@@ -137,11 +137,11 @@ module EnvironmentTests
     assert_equal ".c {}\n.d {}\n/*\n\n */\n\n", @env["mobile.css"].to_s
   end
 
-  test "find component.json in directory" do
+  test "find bower.json in directory" do
     assert_equal "var bower;\n", @env["bower.js"].to_s
   end
 
-  test "find multiple component.json in directory" do
+  test "find multiple bower.json in directory" do
     assert_equal "var qunit;\n", @env["qunit.js"].to_s
     assert_equal ".qunit {}\n", @env["qunit.css"].to_s
   end
