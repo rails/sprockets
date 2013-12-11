@@ -18,6 +18,7 @@ module Sprockets
   autoload :CoffeeScriptTemplate,    "sprockets/coffee_script_template"
   autoload :EcoTemplate,             "sprockets/eco_template"
   autoload :EjsTemplate,             "sprockets/ejs_template"
+  autoload :ERBTemplate,             "sprockets/erb_template"
   autoload :JstProcessor,            "sprockets/jst_processor"
   autoload :LessTemplate,            "sprockets/less_template"
   autoload :Processor,               "sprockets/processor"
@@ -106,6 +107,6 @@ module Sprockets
   register_engine '.scss',   ScssTemplate
 
   # Other
-  register_engine '.erb',    Tilt::ERBTemplate
+  register_engine '.erb',    ERBTemplate
   register_engine '.str',    StringTemplate
 end
