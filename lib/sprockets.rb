@@ -15,6 +15,7 @@ module Sprockets
 
   # Processing
   autoload :Context,                 "sprockets/context"
+  autoload :CoffeeScriptTemplate,    "sprockets/coffee_script_template"
   autoload :EcoTemplate,             "sprockets/eco_template"
   autoload :EjsTemplate,             "sprockets/ejs_template"
   autoload :JstProcessor,            "sprockets/jst_processor"
@@ -90,7 +91,7 @@ module Sprockets
   # Sprockets. We don't need ones that only generate html like HAML.
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', Tilt::CoffeeScriptTemplate
+  register_engine '.coffee', CoffeeScriptTemplate
 
   # JST engines
   register_engine '.jst',    JstProcessor

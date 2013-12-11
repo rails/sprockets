@@ -3,7 +3,7 @@ require "sprockets"
 require "tilt"
 require "fileutils"
 
-require "coffee-script"
+require "coffee_script"
 require "eco"
 require "ejs"
 require "erb"
