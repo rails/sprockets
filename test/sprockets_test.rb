@@ -3,6 +3,11 @@ require "sprockets"
 require "tilt"
 require "fileutils"
 
+require "coffee-script"
+require "eco"
+require "ejs"
+require "erb"
+
 if defined? Encoding
   old_verbose, $VERBOSE = $VERBOSE, false
   Encoding.default_external = 'UTF-8'
