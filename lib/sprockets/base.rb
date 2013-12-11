@@ -282,35 +282,11 @@ module Sprockets
       find_asset(*args)
     end
 
-    def each_entry(root, &block)
-      return to_enum(__method__, root) unless block_given?
-      root = Pathname.new(root) unless root.is_a?(Pathname)
-
-      paths = []
-      entries(root).sort.each do |filename|
-        path = root.join(filename)
-        paths << path
-
-        stat = stat(path)
-        if stat && stat.directory?
-          each_entry(path) do |subpath|
-            paths << subpath
-          end
-        end
-      end
-
-      paths.sort_by(&:to_s).each(&block)
-
-      nil
-    end
-
     def each_file
       return to_enum(__method__) unless block_given?
       paths.each do |root|
-        each_entry(root) do |path|
-          if !stat(path).directory?
-            yield path
-          end
+        recursive_stat(root) do |path, stat|
+          yield path if stat.file?
         end
       end
       nil

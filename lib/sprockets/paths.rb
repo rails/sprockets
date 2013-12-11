@@ -66,6 +66,30 @@ module Sprockets
       @trail.stat(path)
     end
 
+    # Recursive stat all the files under a directory.
+    #
+    # root  - A String or Pathname directory
+    # block - Block called for each entry
+    #   path - Pathname
+    #   stat - File::Stat
+    #
+    # Returns nothing.
+    def recursive_stat(root, &block)
+      root = Pathname.new(root) unless root.is_a?(Pathname)
+
+      entries(root).sort.each do |filename|
+        path = root.join(filename)
+        stat = self.stat(path)
+        yield path, stat
+
+        if stat && stat.directory?
+          recursive_stat(path, &block)
+        end
+      end
+
+      nil
+    end
+
     protected
       attr_reader :trail
   end

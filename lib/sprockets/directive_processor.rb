@@ -283,14 +283,18 @@ module Sprockets
 
           context.depend_on(root)
 
-          each_entry(root) do |pathname|
+          required_paths = []
+          context.environment.recursive_stat(root) do |pathname, stat|
             if pathname.to_s == self.file
               next
-            elsif stat(pathname).directory?
+            elsif stat.directory?
               context.depend_on(pathname)
             elsif context.asset_requirable?(pathname)
-              context.require_asset(pathname)
+              required_paths << pathname
             end
+          end
+          required_paths.sort_by(&:to_s).each do |pathname|
+            context.require_asset(pathname)
           end
         else
           # The path must be relative and start with a `./`.
@@ -352,10 +356,6 @@ module Sprockets
 
       def entries(path)
         context.environment.entries(path)
-      end
-
-      def each_entry(root, &block)
-        context.environment.each_entry(root, &block)
       end
   end
 end

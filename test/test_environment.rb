@@ -193,20 +193,13 @@ module EnvironmentTests
 
   test "iterate over each entry" do
     entries = []
-    @env.each_entry(fixture_path("default")) do |path|
+    @env.recursive_stat(fixture_path("default")) do |path, stat|
       entries << path
     end
     assert_equal ENTRIES_IN_PATH, entries.length
-  end
 
-  test "each entry enumerator" do
-    enum = @env.each_entry(fixture_path("default"))
-    assert_equal ENTRIES_IN_PATH, enum.to_a.length
-  end
-
-  test "ignores broken symlinks" do
-    env = Sprockets::Environment.new(fixture_path("default"))
-    env.each_entry(fixture_path("errors")).to_a
+    @env.recursive_stat(fixture_path("errors")) do |path, stat|
+    end
   end
 
   FILES_IN_PATH = 36
