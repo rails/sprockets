@@ -80,7 +80,6 @@ module Sprockets
       @body  += "\n" if @body != "" && @body !~ /\n\Z/m
 
       @included_pathnames = []
-      @compat             = false
     end
 
     # Implemented for Tilt#render.
@@ -181,10 +180,6 @@ module Sprockets
         unless @has_written_body
           @result << body
         end
-
-        if compat? && constants.any?
-          @result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
-        end
       end
 
       # The `require` directive functions similar to Ruby's own `require`.
@@ -206,14 +201,6 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        if @compat
-          if path =~ /<([^>]+)>/
-            path = $1
-          else
-            path = "./#{path}" unless relative?(path)
-          end
-        end
-
         context.require_asset(path)
       end
 
@@ -352,40 +339,6 @@ module Sprockets
       #
       def process_stub_directive(path)
         context.stub_asset(path)
-      end
-
-      # Enable Sprockets 1.x compat mode.
-      #
-      # Makes it possible to use the same JavaScript source
-      # file in both Sprockets 1 and 2.
-      #
-      #     //= compat
-      #
-      def process_compat_directive
-        @compat = true
-      end
-
-      # Checks if Sprockets 1.x compat mode enabled
-      def compat?
-        @compat
-      end
-
-      # Sprockets 1.x allowed for constant interpolation if a
-      # constants.yml was present. This is only available if
-      # compat mode is on.
-      def constants
-        if compat?
-          pathname = Pathname.new(context.root_path).join("constants.yml")
-          stat(pathname) ? YAML.load_file(pathname) : {}
-        else
-          {}
-        end
-      end
-
-      # `provide` is stubbed out for Sprockets 1.x compat.
-      # Mutating the path when an asset is being built is
-      # not permitted.
-      def process_provide_directive(path)
       end
 
     private
