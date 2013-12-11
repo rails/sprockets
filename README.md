@@ -339,7 +339,7 @@ asset's cache in response to a change in another file.
 ### The `depend_on_asset` Directive ###
 
 `depend_on_asset` *path* works like `depend_on`, but operates
-recursively reading the the file and following the directives found.
+recursively reading the file and following the directives found.
 
 ### The `stub` Directive ###
 
@@ -398,7 +398,7 @@ submit a pull request.
 
 **2.8.0** (October 16, 2012)
 
-* Allow manifest location to be seperated from output directory
+* Allow manifest location to be separated from output directory
 * Pass logical path and absolute path to each_logical_path iterator
 
 **2.7.0** (October 10, 2012)
@@ -471,7 +471,7 @@ submit a pull request.
 
 **2.1.2** (November 20, 2011)
 
-* Disabled If-Modified-Since server checks. Fixes some browser caching issues when serving the asset body only. If-None-Match caching is sufficent.
+* Disabled If-Modified-Since server checks. Fixes some browser caching issues when serving the asset body only. If-None-Match caching is sufficient.
 
 **2.1.1** (November 18, 2011)
 
