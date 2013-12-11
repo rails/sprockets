@@ -204,22 +204,9 @@ module EnvironmentTests
 
   FILES_IN_PATH = 36
 
-  test "iterate over each file" do
-    files = []
-    @env.each_file do |filename|
-      files << filename
-    end
-    assert_equal FILES_IN_PATH, files.length
-  end
-
-  test "each file enumerator" do
-    enum = @env.each_file
-    assert_equal FILES_IN_PATH, enum.to_a.length
-  end
-
   test "iterate over each logical path" do
     paths = []
-    @env.each_logical_path do |logical_path|
+    @env.find_logical_paths do |logical_path|
       paths << logical_path
     end
     assert_equal FILES_IN_PATH, paths.length
@@ -234,7 +221,7 @@ module EnvironmentTests
   test "iterate over each logical path and filename" do
     paths = []
     filenames = []
-    @env.each_logical_path do |logical_path, filename|
+    @env.find_logical_paths do |logical_path, filename|
       paths << logical_path
       filenames << filename
     end
@@ -249,15 +236,15 @@ module EnvironmentTests
     assert filenames.any? { |p| p =~ /application.js.coffee/ }
   end
 
-  test "each logical path enumerator" do
-    enum = @env.each_logical_path
+  test "find logical path enumerator" do
+    enum = @env.find_logical_paths
     assert_kind_of String, enum.first
     assert_equal FILES_IN_PATH, enum.to_a.length
   end
 
   test "iterate over each logical path matching fnmatch filters" do
     paths = []
-    @env.each_logical_path("*.js") do |logical_path|
+    @env.find_logical_paths("*.js") do |logical_path|
       paths << logical_path
     end
 
@@ -268,7 +255,7 @@ module EnvironmentTests
 
   test "iterate over each logical path matches index files" do
     paths = []
-    @env.each_logical_path("coffee.js") do |logical_path|
+    @env.find_logical_paths("coffee.js") do |logical_path|
       paths << logical_path
     end
     assert paths.include?("coffee.js")
@@ -277,7 +264,7 @@ module EnvironmentTests
 
   test "each logical path enumerator matching fnmatch filters" do
     paths = []
-    enum = @env.each_logical_path("*.js")
+    enum = @env.find_logical_paths("*.js")
     enum.to_a.each do |logical_path|
       paths << logical_path
     end
@@ -289,7 +276,7 @@ module EnvironmentTests
 
   test "iterate over each logical path matching regexp filters" do
     paths = []
-    @env.each_logical_path(/.*\.js/) do |logical_path|
+    @env.find_logical_paths(/.*\.js/) do |logical_path|
       paths << logical_path
     end
 
@@ -300,7 +287,7 @@ module EnvironmentTests
 
   test "iterate over each logical path matching proc filters" do
     paths = []
-    @env.each_logical_path(proc { |fn| File.extname(fn) == '.js' }) do |logical_path|
+    @env.find_logical_paths(proc { |fn| File.extname(fn) == '.js' }) do |logical_path|
       paths << logical_path
     end
 
@@ -311,7 +298,7 @@ module EnvironmentTests
 
   test "iterate over each logical path matching proc filters with full path arg" do
     paths = []
-    @env.each_logical_path(proc { |_, fn| fn.match(fixture_path('default/mobile')) }) do |logical_path|
+    @env.find_logical_paths(proc { |_, fn| fn.match(fixture_path('default/mobile')) }) do |logical_path|
       paths << logical_path
     end
 

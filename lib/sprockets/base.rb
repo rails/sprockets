@@ -282,36 +282,6 @@ module Sprockets
       find_asset(*args)
     end
 
-    def each_file
-      return to_enum(__method__) unless block_given?
-      paths.each do |root|
-        recursive_stat(root) do |path, stat|
-          yield path if stat.file?
-        end
-      end
-      nil
-    end
-
-    def each_logical_path(*args, &block)
-      return to_enum(__method__, *args) unless block_given?
-      filters = args.flatten
-      files = {}
-      each_file do |filename|
-        if logical_path = logical_path_for_filename(filename, filters)
-          unless files[logical_path]
-            if block.arity == 2
-              yield logical_path, filename.to_s
-            else
-              yield logical_path
-            end
-          end
-
-          files[logical_path] = true
-        end
-      end
-      nil
-    end
-
     # Pretty inspect
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
@@ -359,42 +329,6 @@ module Sprockets
         yield
       ensure
         Thread.current[:sprockets_circular_calls] = nil if reset
-      end
-
-      def logical_path_for_filename(filename, filters)
-        logical_path = attributes_for(filename).logical_path.to_s
-
-        if matches_filter(filters, logical_path, filename)
-          return logical_path
-        end
-
-        # If filename is an index file, retest with alias
-        if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
-          path = logical_path.sub(/\/index\./, '.')
-          if matches_filter(filters, path, filename)
-            return path
-          end
-        end
-
-        nil
-      end
-
-      def matches_filter(filters, logical_path, filename)
-        return true if filters.empty?
-
-        filters.any? do |filter|
-          if filter.is_a?(Regexp)
-            filter.match(logical_path)
-          elsif filter.respond_to?(:call)
-            if filter.arity == 1
-              filter.call(logical_path)
-            else
-              filter.call(logical_path, filename.to_s)
-            end
-          else
-            File.fnmatch(filter.to_s, logical_path)
-          end
-        end
       end
 
       def json_decode(obj)
