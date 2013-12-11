@@ -305,13 +305,8 @@ module Sprockets
         path = root.join(filename)
         paths << path
 
-        fs_stat = stat(path)
-
-        if fs_stat.nil?
-          raise FileNotFound, "couldn't stat file '#{path}'"
-        end
-
-        if fs_stat.directory?
+        stat = stat(path)
+        if stat && stat.directory?
           each_entry(path) do |subpath|
             paths << subpath
           end

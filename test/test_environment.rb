@@ -204,12 +204,9 @@ module EnvironmentTests
     assert_equal ENTRIES_IN_PATH, enum.to_a.length
   end
 
-  test "each entry guards against nil fs stat" do
+  test "ignores broken symlinks" do
     env = Sprockets::Environment.new(fixture_path("default"))
-
-    assert_raises Sprockets::FileNotFound do
-      env.each_entry(fixture_path("errors")) { |_| nil }
-    end
+    env.each_entry(fixture_path("errors")).to_a
   end
 
   FILES_IN_PATH = 36
