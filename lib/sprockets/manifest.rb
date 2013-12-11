@@ -223,7 +223,6 @@ module Sprockets
       end
 
     private
-
       def json_decode(obj)
         JSON.parse(obj, create_additions: false)
       end
