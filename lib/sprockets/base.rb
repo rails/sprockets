@@ -218,20 +218,6 @@ module Sprockets
       attr_accessor :default_external_encoding
     end
 
-    # Works like `Dir.entries`.
-    #
-    # Subclasses may cache this method.
-    def entries(pathname)
-      @trail.entries(pathname)
-    end
-
-    # Works like `File.stat`.
-    #
-    # Subclasses may cache this method.
-    def stat(path)
-      @trail.stat(path)
-    end
-
     # Read and compute digest of filename.
     #
     # Subclasses may cache this method.
