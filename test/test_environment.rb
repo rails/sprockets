@@ -205,10 +205,10 @@ module EnvironmentTests
   end
 
   test "each entry guards against nil fs stat" do
-    @env.stub(:stat, nil) do
-      assert_raises Sprockets::FileNotFound do
-        @env.each_entry(fixture_path("default")) { |_| nil }
-      end
+    env = Sprockets::Environment.new(fixture_path("default"))
+
+    assert_raises Sprockets::FileNotFound do
+      env.each_entry(fixture_path("errors")) { |_| nil }
     end
   end
 
