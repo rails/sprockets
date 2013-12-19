@@ -11,7 +11,7 @@ module Sprockets
     def initialize_engine
       # Double check constant to avoid warning
       unless defined? ::Sass
-        require_template_library 'sass'
+        require 'sass'
       end
 
       # Install custom functions. It'd be great if this didn't need to
@@ -29,8 +29,7 @@ module Sprockets
       cache_store = SassCacheStore.new(context.environment)
 
       options = {
-        :filename => eval_file,
-        :line => line,
+        :filename => file,
         :syntax => syntax,
         :cache_store => cache_store,
         :importer => SassImporter.new(context, context.pathname),

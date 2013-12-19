@@ -7,7 +7,7 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'closure-compiler'
+      require 'closure-compiler'
     end
 
     def evaluate(context, locals, &block)

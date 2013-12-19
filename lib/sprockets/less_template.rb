@@ -7,18 +7,18 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'less'
+      require 'less'
     end
 
     def evaluate(scope, locals, &block)
       if ::Less.const_defined? :Engine
         engine = ::Less::Engine.new(data)
       else
-        parser = ::Less::Parser.new(options.merge :filename => eval_file, :line => line)
+        parser = ::Less::Parser.new(:filename => file)
         engine = parser.parse(data)
       end
 
-      engine.to_css(options)
+      engine.to_css
     end
   end
 end

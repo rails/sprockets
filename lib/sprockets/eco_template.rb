@@ -16,7 +16,7 @@ module Sprockets
     # a thread safetly warning. If you intend to use `.eco` files, you
     # should explicitly require it.
     def initialize_engine
-      require_template_library 'eco'
+      require 'eco'
     end
 
     # Compile template data with Eco compiler.

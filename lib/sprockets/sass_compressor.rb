@@ -7,7 +7,7 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'sass'
+      require 'sass'
     end
 
     def evaluate(context, locals, &block)

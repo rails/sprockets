@@ -7,11 +7,11 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'coffee_script'
+      require 'coffee_script'
     end
 
     def evaluate(scope, locals, &block)
-      @output ||= CoffeeScript.compile(data, options)
+      @output ||= CoffeeScript.compile(data)
     end
   end
 end

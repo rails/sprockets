@@ -5,7 +5,7 @@ module Sprockets
     end
 
     def initialize_engine
-      require_template_library 'yui/compressor'
+      require 'yui/compressor'
     end
 
     def evaluate(context, locals, &block)

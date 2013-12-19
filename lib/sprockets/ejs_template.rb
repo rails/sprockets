@@ -15,7 +15,7 @@ module Sprockets
     # a thread safetly warning. If you intend to use `.ejs` files, you
     # should explicitly require it.
     def initialize_engine
-      require_template_library 'ejs'
+      require 'ejs'
     end
 
     # Compile template data with EJS compiler.
