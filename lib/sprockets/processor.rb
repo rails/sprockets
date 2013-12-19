@@ -5,7 +5,7 @@ module Sprockets
   #       # ...
   #     end
   #
-  class Processor < Template
+  class Processor
     def self.make_processor(klass, &block) # :nodoc:
       return klass unless block_given?
 
@@ -27,6 +27,12 @@ module Sprockets
 
     def self.to_s
       name
+    end
+
+    attr_reader :data
+
+    def initialize(file, &block)
+      @data = block.call(self)
     end
 
     # Call processor block with `context` and `data`.
