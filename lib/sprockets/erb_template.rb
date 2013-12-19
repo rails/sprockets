@@ -10,7 +10,7 @@ module Sprockets
 
     def evaluate(scope, locals, &block)
       engine = ::ERB.new(data, nil, '<>')
-      method_name = "__tilt_#{Thread.current.object_id.abs}"
+      method_name = "__sprockets_#{Thread.current.object_id.abs}"
       klass = (class << scope; self; end)
       engine.def_method(klass, method_name, file)
       scope.send(method_name)
