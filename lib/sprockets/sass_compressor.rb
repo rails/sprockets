@@ -10,9 +10,6 @@ module Sprockets
       require_template_library 'sass'
     end
 
-    def prepare
-    end
-
     def evaluate(context, locals, &block)
       ::Sass::Engine.new(data, {
         :syntax => :scss,

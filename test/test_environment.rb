@@ -423,7 +423,7 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env.js_compressor
   end
 
-  test "setting js compressor to tilt handler" do
+  test "setting js compressor to template handler" do
     assert_nil @env.js_compressor
     @env.js_compressor = Sprockets::UglifierCompressor
     assert_equal Sprockets::UglifierCompressor, @env.js_compressor
@@ -431,7 +431,7 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env.js_compressor
   end
 
-  test "setting css compressor to tilt handler" do
+  test "setting css compressor to template handler" do
     assert_nil @env.css_compressor
     @env.css_compressor = Sprockets::SassCompressor
     assert_equal Sprockets::SassCompressor, @env.css_compressor

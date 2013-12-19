@@ -20,9 +20,6 @@ module Sprockets
       ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
     end
 
-    def prepare
-    end
-
     def syntax
       :sass
     end

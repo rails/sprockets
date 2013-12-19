@@ -10,9 +10,6 @@ module Sprockets
       require_template_library 'coffee_script'
     end
 
-    def prepare
-    end
-
     def evaluate(scope, locals, &block)
       @output ||= CoffeeScript.compile(data, options)
     end

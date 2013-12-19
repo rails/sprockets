@@ -8,9 +8,6 @@ module Sprockets
       require_template_library 'yui/compressor'
     end
 
-    def prepare
-    end
-
     def evaluate(context, locals, &block)
       case context.content_type
       when 'application/javascript'

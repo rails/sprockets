@@ -29,9 +29,6 @@ module Sprockets
       name
     end
 
-    def prepare
-    end
-
     # Call processor block with `context` and `data`.
     def evaluate(context, locals)
       self.class.processor.call(context, data)

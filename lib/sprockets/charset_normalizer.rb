@@ -17,9 +17,6 @@ module Sprockets
   #     environment.unregister_bundle_processor 'text/css', Sprockets::CharsetNormalizer
   #
   class CharsetNormalizer < Template
-    def prepare
-    end
-
     def evaluate(context, locals, &block)
       charset = nil
 

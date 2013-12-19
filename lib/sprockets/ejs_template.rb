@@ -18,9 +18,6 @@ module Sprockets
       require_template_library 'ejs'
     end
 
-    def prepare
-    end
-
     # Compile template data with EJS compiler.
     #
     # Returns a JS function definition String. The result should be

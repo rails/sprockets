@@ -1,13 +1,9 @@
 require 'sprockets_test'
 require 'sprockets/engines'
-require 'tilt'
 
-class AlertTemplate < Tilt::Template
+class AlertTemplate < Sprockets::Template
   def self.default_mime_type
     'application/javascript'
-  end
-
-  def prepare
   end
 
   def evaluate(scope, locals, &block)
@@ -15,10 +11,7 @@ class AlertTemplate < Tilt::Template
   end
 end
 
-class StringTemplate < Tilt::Template
-  def prepare
-  end
-
+class StringTemplate < Sprockets::Template
   def evaluate(scope, locals, &block)
     data.gsub(/#\{.*?\}/, "moo")
   end

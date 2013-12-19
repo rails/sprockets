@@ -10,9 +10,6 @@ module Sprockets
       require_template_library 'uglifier'
     end
 
-    def prepare
-    end
-
     def evaluate(context, locals, &block)
       # Feature detect Uglifier 2.0 option support
       if Uglifier::DEFAULTS[:copyright]

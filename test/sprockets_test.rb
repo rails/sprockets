@@ -1,6 +1,5 @@
 require "minitest/autorun"
 require "sprockets"
-require "tilt"
 require "fileutils"
 
 require "coffee_script"

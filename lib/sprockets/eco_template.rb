@@ -19,9 +19,6 @@ module Sprockets
       require_template_library 'eco'
     end
 
-    def prepare
-    end
-
     # Compile template data with Eco compiler.
     #
     # Returns a JS function definition String. The result should be

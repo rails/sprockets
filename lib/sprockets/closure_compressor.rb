@@ -10,9 +10,6 @@ module Sprockets
       require_template_library 'closure-compiler'
     end
 
-    def prepare
-    end
-
     def evaluate(context, locals, &block)
       Closure::Compiler.new.compile(data)
     end
