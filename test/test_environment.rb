@@ -35,13 +35,13 @@ module EnvironmentTests
   end
 
   test "extensions" do
-    ["coffee", "erb", "less", "sass", "scss", "str", "css", "js"].each do |ext|
+    ["coffee", "erb", "less", "sass", "scss", "css", "js"].each do |ext|
       assert @env.extensions.to_a.include?(".#{ext}"), "'.#{ext}' not in #{@env.extensions.inspect}"
     end
   end
 
   test "engine extensions" do
-    ["coffee", "erb", "less", "sass", "scss", "str"].each do |ext|
+    ["coffee", "erb", "less", "sass", "scss"].each do |ext|
       assert @env.engine_extensions.include?(".#{ext}")
     end
     ["css", "js"].each do |ext|
@@ -53,7 +53,7 @@ module EnvironmentTests
     ["css", "js"].each do |ext|
       assert @env.format_extensions.include?(".#{ext}")
     end
-    ["coffee", "erb", "less", "sass", "scss", "str"].each do |ext|
+    ["coffee", "erb", "less", "sass", "scss"].each do |ext|
       assert !@env.format_extensions.include?(".#{ext}")
     end
   end
@@ -551,7 +551,7 @@ class TestEnvironment < Sprockets::TestCase
     assert !@env.engines[".foo"]
     assert !@env.extensions.include?(".foo")
 
-    @env.register_engine ".foo", Sprockets::StringTemplate
+    @env.register_engine ".foo", Sprockets::ERBTemplate
 
     assert @env.engines[".foo"]
     assert @env.extensions.include?(".foo")
@@ -564,7 +564,7 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil e1.engines[".foo"]
     assert_nil e2.engines[".foo"]
 
-    e1.register_engine ".foo", Sprockets::StringTemplate
+    e1.register_engine ".foo", Sprockets::ERBTemplate
 
     assert e1.engines[".foo"]
     assert_nil e2.engines[".foo"]
@@ -647,7 +647,7 @@ class TestIndex < Sprockets::TestCase
     assert_nil env.engines[".foo"]
     assert_nil index.engines[".foo"]
 
-    env.register_engine ".foo", Sprockets::StringTemplate
+    env.register_engine ".foo", Sprockets::ERBTemplate
 
     assert env.engines[".foo"]
     assert_nil index.engines[".foo"]

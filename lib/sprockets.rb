@@ -28,7 +28,6 @@ module Sprockets
   autoload :SassImporter,            "sprockets/sass_importer"
   autoload :SassTemplate,            "sprockets/sass_template"
   autoload :ScssTemplate,            "sprockets/scss_template"
-  autoload :StringTemplate,          "sprockets/string_template"
 
   # Internal utilities
   autoload :ArgumentError,           "sprockets/errors"
@@ -106,5 +105,4 @@ module Sprockets
 
   # Other
   register_engine '.erb',    ERBTemplate
-  register_engine '.str',    StringTemplate
 end
