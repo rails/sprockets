@@ -551,7 +551,7 @@ class TestEnvironment < Sprockets::TestCase
     assert !@env.engines[".foo"]
     assert !@env.extensions.include?(".foo")
 
-    @env.register_engine ".foo", Tilt::StringTemplate
+    @env.register_engine ".foo", Sprockets::StringTemplate
 
     assert @env.engines[".foo"]
     assert @env.extensions.include?(".foo")
@@ -564,7 +564,7 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil e1.engines[".foo"]
     assert_nil e2.engines[".foo"]
 
-    e1.register_engine ".foo", Tilt::StringTemplate
+    e1.register_engine ".foo", Sprockets::StringTemplate
 
     assert e1.engines[".foo"]
     assert_nil e2.engines[".foo"]
@@ -647,7 +647,7 @@ class TestIndex < Sprockets::TestCase
     assert_nil env.engines[".foo"]
     assert_nil index.engines[".foo"]
 
-    env.register_engine ".foo", Tilt::StringTemplate
+    env.register_engine ".foo", Sprockets::StringTemplate
 
     assert env.engines[".foo"]
     assert_nil index.engines[".foo"]

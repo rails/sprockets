@@ -807,11 +807,9 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal "application/javascript", asset.content_type
   end
 
-  if Tilt::CoffeeScriptTemplate.respond_to?(:default_mime_type)
-    test "asset falls back to engines default mime type" do
-      asset = asset("default_mime_type.js")
-      assert_equal "application/javascript", asset.content_type
-    end
+  test "asset falls back to engines default mime type" do
+    asset = asset("default_mime_type.js")
+    assert_equal "application/javascript", asset.content_type
   end
 
   test "asset is a rack response body" do
