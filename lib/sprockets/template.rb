@@ -19,8 +19,6 @@ module Sprockets
       end
 
       @data = block.call(self)
-
-      prepare if respond_to?(:prepare)
     end
   end
 end

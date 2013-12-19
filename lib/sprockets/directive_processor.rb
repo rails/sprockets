@@ -69,7 +69,12 @@ module Sprockets
     attr_reader :pathname
     attr_reader :header, :body
 
-    def prepare
+    # `context` is a `Context` instance with methods that allow you to
+    # access the environment and append to the bundle. See `Context`
+    # for the complete API.
+    def render(context)
+      @context = context
+
       @pathname = Pathname.new(file)
 
       @header = data[HEADER_PATTERN, 0] || ""
@@ -78,16 +83,9 @@ module Sprockets
       @body  += "\n" if @body != "" && @body !~ /\n\Z/m
 
       @included_pathnames = []
-    end
-
-    # `context` is a `Context` instance with methods that allow you to
-    # access the environment and append to the bundle. See `Context`
-    # for the complete API.
-    def render(context)
-      @context = context
 
       @result = ""
-      @result.force_encoding(body.encoding) if body.respond_to?(:encoding)
+      @result.force_encoding(body.encoding)
 
       @has_written_body = false
 
