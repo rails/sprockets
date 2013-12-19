@@ -6,7 +6,7 @@ require 'pathname'
 require 'set'
 
 module Sprockets
-  # `Context` provides helper methods to all `Tilt` processors. They
+  # `Context` provides helper methods to all `Template` processors. They
   # are typically accessed by ERB templates. You can mix in custom
   # helpers by injecting them into `Environment#context_class`. Do not
   # mix them into `Context` directly.
@@ -194,7 +194,7 @@ module Sprockets
       processors.each do |processor|
         begin
           template = processor.new(pathname.to_s) { result }
-          result = template.render(self, {})
+          result = template.render(self)
         rescue Exception => e
           annotate_exception! e
           raise

@@ -101,11 +101,8 @@ class TestAssetAttributes < Sprockets::TestCase
       pathname("gallery.css.erb").content_type
     assert_equal "application/javascript",
       pathname("jquery.tmpl.min.js").content_type
-
-    if Tilt::CoffeeScriptTemplate.respond_to?(:default_mime_type)
-      assert_equal "application/javascript",
-        pathname("application.coffee").content_type
-    end
+    assert_equal "application/javascript",
+      pathname("application.coffee").content_type
   end
 
   private

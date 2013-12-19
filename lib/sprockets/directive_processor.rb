@@ -1,6 +1,5 @@
 require 'pathname'
 require 'shellwords'
-require 'tilt'
 require 'yaml'
 
 module Sprockets
@@ -20,10 +19,9 @@ module Sprockets
   #      *= require "baz"
   #      */
   #
-  # The Processor is implemented as a `Tilt::Template` and is loosely
-  # coupled to Sprockets. This makes it possible to disable or modify
-  # the processor to do whatever you'd like. You could add your own
-  # custom directives or invent your own directive syntax.
+  # This makes it possible to disable or modify the processor to do whatever
+  # you'd like. You could add your own custom directives or invent your own
+  # directive syntax.
   #
   # `Environment#processors` includes `DirectiveProcessor` by default.
   #
@@ -36,7 +34,7 @@ module Sprockets
   #
   #     env.register_processor('text/css', MyProcessor)
   #
-  class DirectiveProcessor < Tilt::Template
+  class DirectiveProcessor < Template
     # Directives will only be picked up if they are in the header
     # of the source file. C style (/* */), JavaScript (//), and
     # Ruby (#) comments are supported.
@@ -71,8 +69,12 @@ module Sprockets
     attr_reader :pathname
     attr_reader :header, :body
 
-    def prepare
-      @pathname = Pathname.new(file)
+    # `context` is a `Context` instance with methods that allow you to
+    # access the environment and append to the bundle. See `Context`
+    # for the complete API.
+    def render(context)
+      @context = context
+      @pathname = context.pathname
 
       @header = data[HEADER_PATTERN, 0] || ""
       @body   = $' || data
@@ -80,18 +82,9 @@ module Sprockets
       @body  += "\n" if @body != "" && @body !~ /\n\Z/m
 
       @included_pathnames = []
-    end
-
-    # Implemented for Tilt#render.
-    #
-    # `context` is a `Context` instance with methods that allow you to
-    # access the environment and append to the bundle. See `Context`
-    # for the complete API.
-    def evaluate(context, locals, &block)
-      @context = context
 
       @result = ""
-      @result.force_encoding(body.encoding) if body.respond_to?(:encoding)
+      @result.force_encoding(body.encoding)
 
       @has_written_body = false
 
@@ -256,7 +249,7 @@ module Sprockets
 
           entries(root).each do |pathname|
             pathname = root.join(pathname)
-            if pathname.to_s == self.file
+            if pathname.to_s == self.pathname.to_s
               next
             elsif context.asset_requirable?(pathname)
               context.require_asset(pathname)
@@ -285,7 +278,7 @@ module Sprockets
 
           required_paths = []
           context.environment.recursive_stat(root) do |pathname, stat|
-            if pathname.to_s == self.file
+            if pathname.to_s == self.pathname.to_s
               next
             elsif stat.directory?
               context.depend_on(pathname)
