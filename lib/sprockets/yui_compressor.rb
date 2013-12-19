@@ -1,14 +1,8 @@
 module Sprockets
   class YUICompressor < Template
-    def self.engine_initialized?
-      defined?(::YUI)
-    end
-
-    def initialize_engine
-      require 'yui/compressor'
-    end
-
     def render(context)
+      require 'yui/compressor' unless defined? ::YUI
+
       case context.content_type
       when 'application/javascript'
         YUI::JavaScriptCompressor.new.compress(data)

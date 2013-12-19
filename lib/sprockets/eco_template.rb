@@ -7,18 +7,6 @@ module Sprockets
   #   https://github.com/sstephenson/eco
   #
   class EcoTemplate < Template
-    # Check to see if Eco is loaded
-    def self.engine_initialized?
-      defined? ::Eco
-    end
-
-    # Autoload eco library. If the library isn't loaded, it will produce
-    # a thread safetly warning. If you intend to use `.eco` files, you
-    # should explicitly require it.
-    def initialize_engine
-      require 'eco'
-    end
-
     # Compile template data with Eco compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -27,6 +15,7 @@ module Sprockets
     #     # => "function(...) {...}"
     #
     def render(context)
+      require 'eco' unless defined? ::Eco
       Eco.compile(data)
     end
   end

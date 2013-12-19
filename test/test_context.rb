@@ -55,11 +55,8 @@ class TestCustomProcessor < Sprockets::TestCase
     @env.append_path(fixture_path('context'))
   end
 
+  require 'yaml'
   class YamlProcessor < Sprockets::Template
-    def initialize_engine
-      require 'yaml'
-    end
-
     def render(context)
       manifest = YAML.load(data)
       manifest['require'].each do |logical_path|
@@ -75,11 +72,8 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
   end
 
+  require 'base64'
   class DataUriProcessor < Sprockets::Template
-    def initialize_engine
-      require 'base64'
-    end
-
     def render(context)
       data.gsub(/url\(\"(.+?)\"\)/) do
         path = context.resolve($1)

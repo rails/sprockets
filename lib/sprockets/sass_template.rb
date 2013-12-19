@@ -3,28 +3,21 @@ module Sprockets
   class SassTemplate < Template
     self.default_mime_type = 'text/css'
 
-    def self.engine_initialized?
-      defined?(::Sass::Engine) && defined?(::Sass::Script::Functions) &&
-        ::Sass::Script::Functions < Sprockets::SassFunctions
-    end
-
-    def initialize_engine
-      # Double check constant to avoid warning
-      unless defined? ::Sass
-        require 'sass'
-      end
-
-      # Install custom functions. It'd be great if this didn't need to
-      # be installed globally, but could be passed into Engine as an
-      # option.
-      ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
-    end
-
     def syntax
       :sass
     end
 
     def render(context)
+      require 'sass' unless defined? ::Sass
+
+      unless ::Sass::Script::Functions < Sprockets::SassFunctions
+        # Install custom functions. It'd be great if this didn't need to
+        # be installed globally, but could be passed into Engine as an
+        # option.
+        ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
+      end
+
+
       # Use custom importer that knows about Sprockets Caching
       cache_store = SassCacheStore.new(context.environment)
 

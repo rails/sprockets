@@ -2,15 +2,9 @@ module Sprockets
   class UglifierCompressor < Template
     self.default_mime_type = 'application/javascript'
 
-    def self.engine_initialized?
-      defined?(::Uglifier)
-    end
-
-    def initialize_engine
-      require 'uglifier'
-    end
-
     def render(context)
+      require 'uglifier' unless defined? ::Uglifier
+
       # Feature detect Uglifier 2.0 option support
       if Uglifier::DEFAULTS[:copyright]
         # Uglifier < 2.x

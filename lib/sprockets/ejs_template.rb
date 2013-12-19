@@ -6,18 +6,6 @@ module Sprockets
   #   https://github.com/sstephenson/ruby-ejs
   #
   class EjsTemplate < Template
-    # Check to see if EJS is loaded
-    def self.engine_initialized?
-      defined? ::EJS
-    end
-
-    # Autoload ejs library. If the library isn't loaded, it will produce
-    # a thread safetly warning. If you intend to use `.ejs` files, you
-    # should explicitly require it.
-    def initialize_engine
-      require 'ejs'
-    end
-
     # Compile template data with EJS compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -26,6 +14,7 @@ module Sprockets
     #     # => "function(obj){...}"
     #
     def render(context)
+      require 'ejs' unless defined? ::EJS
       EJS.compile(data)
     end
   end

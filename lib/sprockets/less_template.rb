@@ -2,15 +2,9 @@ module Sprockets
   class LessTemplate < Template
     self.default_mime_type = 'text/css'
 
-    def self.engine_initialized?
-      defined? ::Less
-    end
-
-    def initialize_engine
-      require 'less'
-    end
-
     def render(context)
+      require 'less' unless defined? ::Less
+
       if ::Less.const_defined? :Engine
         engine = ::Less::Engine.new(data)
       else
