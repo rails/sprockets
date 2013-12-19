@@ -1,6 +1,8 @@
 module Sprockets
   class SassCompressor < Template
-    self.default_mime_type = 'text/css'
+    def self.default_mime_type
+      'text/css'
+    end
 
     def render(context)
       require 'sass' unless defined? ::Sass::Engine

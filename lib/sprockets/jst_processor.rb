@@ -1,6 +1,8 @@
 module Sprockets
   class JstProcessor < Template
-    self.default_mime_type = 'application/javascript'
+    def self.default_mime_type
+      'application/javascript'
+    end
 
     def self.default_namespace
       'this.JST'

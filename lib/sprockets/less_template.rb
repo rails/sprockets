@@ -1,6 +1,8 @@
 module Sprockets
   class LessTemplate < Template
-    self.default_mime_type = 'text/css'
+    def self.default_mime_type
+      'text/css'
+    end
 
     def render(context)
       require 'less' unless defined? ::Less

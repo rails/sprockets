@@ -1,6 +1,8 @@
 module Sprockets
   class CoffeeScriptTemplate < Template
-    self.default_mime_type = 'application/javascript'
+    def self.default_mime_type
+      'application/javascript'
+    end
 
     def render(context)
       require 'coffee_script' unless defined? ::CoffeeScript

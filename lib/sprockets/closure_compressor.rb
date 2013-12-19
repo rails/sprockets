@@ -1,6 +1,8 @@
 module Sprockets
   class ClosureCompressor < Template
-    self.default_mime_type = 'application/javascript'
+    def self.default_mime_type
+      'application/javascript'
+    end
 
     def render(context)
       require 'closure-compiler' unless defined? ::Closure::Compiler
