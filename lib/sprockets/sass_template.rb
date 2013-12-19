@@ -29,7 +29,7 @@ module Sprockets
       cache_store = SassCacheStore.new(context.environment)
 
       options = {
-        :filename => file,
+        :filename => context.pathname.to_s,
         :syntax => syntax,
         :cache_store => cache_store,
         :importer => SassImporter.new(context, context.pathname),

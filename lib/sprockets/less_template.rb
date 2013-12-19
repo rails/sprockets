@@ -14,7 +14,7 @@ module Sprockets
       if ::Less.const_defined? :Engine
         engine = ::Less::Engine.new(data)
       else
-        parser = ::Less::Parser.new(:filename => file)
+        parser = ::Less::Parser.new(:filename => context.pathname.to_s)
         engine = parser.parse(data)
       end
 

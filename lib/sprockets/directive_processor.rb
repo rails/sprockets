@@ -74,8 +74,7 @@ module Sprockets
     # for the complete API.
     def render(context)
       @context = context
-
-      @pathname = Pathname.new(file)
+      @pathname = context.pathname
 
       @header = data[HEADER_PATTERN, 0] || ""
       @body   = $' || data
@@ -250,7 +249,7 @@ module Sprockets
 
           entries(root).each do |pathname|
             pathname = root.join(pathname)
-            if pathname.to_s == self.file
+            if pathname.to_s == self.pathname.to_s
               next
             elsif context.asset_requirable?(pathname)
               context.require_asset(pathname)
@@ -279,7 +278,7 @@ module Sprockets
 
           required_paths = []
           context.environment.recursive_stat(root) do |pathname, stat|
-            if pathname.to_s == self.file
+            if pathname.to_s == self.pathname.to_s
               next
             elsif stat.directory?
               context.depend_on(pathname)
