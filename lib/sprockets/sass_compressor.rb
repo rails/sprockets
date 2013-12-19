@@ -10,7 +10,7 @@ module Sprockets
       require 'sass'
     end
 
-    def evaluate(context, locals, &block)
+    def render(context)
       ::Sass::Engine.new(data, {
         :syntax => :scss,
         :cache => false,

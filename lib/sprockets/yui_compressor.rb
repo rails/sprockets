@@ -8,7 +8,7 @@ module Sprockets
       require 'yui/compressor'
     end
 
-    def evaluate(context, locals, &block)
+    def render(context)
       case context.content_type
       when 'application/javascript'
         YUI::JavaScriptCompressor.new.compress(data)

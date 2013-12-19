@@ -10,7 +10,7 @@ module Sprockets
       require 'uglifier'
     end
 
-    def evaluate(context, locals, &block)
+    def render(context)
       # Feature detect Uglifier 2.0 option support
       if Uglifier::DEFAULTS[:copyright]
         # Uglifier < 2.x

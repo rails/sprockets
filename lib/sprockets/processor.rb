@@ -30,7 +30,7 @@ module Sprockets
     end
 
     # Call processor block with `context` and `data`.
-    def evaluate(context, locals)
+    def render(context)
       self.class.processor.call(context, data)
     end
   end

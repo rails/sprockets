@@ -60,7 +60,7 @@ class TestCustomProcessor < Sprockets::TestCase
       require 'yaml'
     end
 
-    def evaluate(context, locals)
+    def render(context)
       manifest = YAML.load(data)
       manifest['require'].each do |logical_path|
         context.require_asset(logical_path)
@@ -80,7 +80,7 @@ class TestCustomProcessor < Sprockets::TestCase
       require 'base64'
     end
 
-    def evaluate(context, locals)
+    def render(context)
       data.gsub(/url\(\"(.+?)\"\)/) do
         path = context.resolve($1)
         context.depend_on(path)

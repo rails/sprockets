@@ -80,12 +80,10 @@ module Sprockets
       @included_pathnames = []
     end
 
-    # Implemented for Template#render.
-    #
     # `context` is a `Context` instance with methods that allow you to
     # access the environment and append to the bundle. See `Context`
     # for the complete API.
-    def evaluate(context, locals, &block)
+    def render(context)
       @context = context
 
       @result = ""

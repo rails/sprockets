@@ -10,7 +10,7 @@ module Sprockets
       require 'less'
     end
 
-    def evaluate(scope, locals, &block)
+    def render(context)
       if ::Less.const_defined? :Engine
         engine = ::Less::Engine.new(data)
       else

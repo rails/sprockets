@@ -26,7 +26,7 @@ module Sprockets
     #
     #     # => "function(...) {...}"
     #
-    def evaluate(scope, locals, &block)
+    def render(context)
       Eco.compile(data)
     end
   end

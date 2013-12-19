@@ -10,7 +10,7 @@ module Sprockets
       require 'closure-compiler'
     end
 
-    def evaluate(context, locals, &block)
+    def render(context)
       Closure::Compiler.new.compile(data)
     end
   end

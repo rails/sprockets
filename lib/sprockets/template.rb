@@ -22,9 +22,5 @@ module Sprockets
 
       prepare if respond_to?(:prepare)
     end
-
-    def render(scope = Object.new, locals = {})
-      evaluate(scope, locals)
-    end
   end
 end

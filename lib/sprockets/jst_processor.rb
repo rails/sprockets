@@ -6,10 +6,10 @@ module Sprockets
       'this.JST'
     end
 
-    def evaluate(scope, locals, &block)
+    def render(context)
       namespace = self.class.default_namespace
       <<-JST
-(function() { #{namespace} || (#{namespace} = {}); #{namespace}[#{scope.logical_path.inspect}] = #{indent(data)};
+(function() { #{namespace} || (#{namespace} = {}); #{namespace}[#{context.logical_path.inspect}] = #{indent(data)};
 }).call(this);
       JST
     end

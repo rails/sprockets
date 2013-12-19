@@ -8,12 +8,12 @@ module Sprockets
       require 'erb'
     end
 
-    def evaluate(scope, locals, &block)
+    def render(context)
       engine = ::ERB.new(data, nil, '<>')
       method_name = "__sprockets_#{Thread.current.object_id.abs}"
-      klass = (class << scope; self; end)
+      klass = (class << context; self; end)
       engine.def_method(klass, method_name, file)
-      scope.send(method_name)
+      context.send(method_name)
     end
   end
 end

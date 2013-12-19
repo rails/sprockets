@@ -24,7 +24,7 @@ module Sprockets
       :sass
     end
 
-    def evaluate(context, locals, &block)
+    def render(context)
       # Use custom importer that knows about Sprockets Caching
       cache_store = SassCacheStore.new(context.environment)
 

@@ -25,7 +25,7 @@ module Sprockets
     #
     #     # => "function(obj){...}"
     #
-    def evaluate(scope, locals, &block)
+    def render(context)
       EJS.compile(data)
     end
   end

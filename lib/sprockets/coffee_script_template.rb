@@ -10,7 +10,7 @@ module Sprockets
       require 'coffee_script'
     end
 
-    def evaluate(scope, locals, &block)
+    def render(context)
       @output ||= CoffeeScript.compile(data)
     end
   end

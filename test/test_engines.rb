@@ -6,13 +6,13 @@ class AlertTemplate < Sprockets::Template
     'application/javascript'
   end
 
-  def evaluate(scope, locals, &block)
+  def render(context)
     "alert(#{data.inspect});"
   end
 end
 
 class StringTemplate < Sprockets::Template
-  def evaluate(scope, locals, &block)
+  def render(context)
     data.gsub(/#\{.*?\}/, "moo")
   end
 end

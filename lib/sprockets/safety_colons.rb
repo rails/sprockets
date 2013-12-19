@@ -10,7 +10,7 @@ module Sprockets
   #     environment.unregister_postprocessor 'application/javascript', Sprockets::SafetyColons
   #
   class SafetyColons < Template
-    def evaluate(context, locals, &block)
+    def render(context)
       # If the file is blank or ends in a semicolon, leave it as is
       if data =~ /\A\s*\Z/m || data =~ /;\s*\Z/m
         data

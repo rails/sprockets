@@ -194,7 +194,7 @@ module Sprockets
       processors.each do |processor|
         begin
           template = processor.new(pathname.to_s) { result }
-          result = template.render(self, {})
+          result = template.render(self)
         rescue Exception => e
           annotate_exception! e
           raise
