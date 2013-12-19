@@ -96,7 +96,8 @@ class DirectiveProcessorTest < Sprockets::TestCase
   end
 
   def directive_parser(fixture_name)
-    Sprockets::DirectiveProcessor.new(fixture_path("directives/#{fixture_name}"))
+    path = fixture_path("directives/#{fixture_name}")
+    Sprockets::DirectiveProcessor.new(path) { File.read(path) }
   end
 
   def directive_fixture(name)
