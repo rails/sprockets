@@ -9,7 +9,7 @@ module Sprockets
     end
 
     def initialize_engine
-      # Double check constant to avoid tilt warning
+      # Double check constant to avoid warning
       unless defined? ::Sass
         require_template_library 'sass'
       end

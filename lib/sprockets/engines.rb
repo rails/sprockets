@@ -2,7 +2,6 @@ require 'sprockets/eco_template'
 require 'sprockets/ejs_template'
 require 'sprockets/jst_processor'
 require 'sprockets/utils'
-require 'tilt'
 
 module Sprockets
   # `Engines` provides a global and `Environment` instance registry.
