@@ -1,5 +1,3 @@
-require 'tilt'
-
 module Sprockets
   # Some browsers have issues with stylesheets that contain multiple
   # `@charset` definitions. The issue surfaces while using Sass since
@@ -18,7 +16,7 @@ module Sprockets
   #
   #     environment.unregister_bundle_processor 'text/css', Sprockets::CharsetNormalizer
   #
-  class CharsetNormalizer < Tilt::Template
+  class CharsetNormalizer < Template
     def prepare
     end
 

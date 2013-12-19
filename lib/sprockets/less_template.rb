@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class LessTemplate < Tilt::Template
+  class LessTemplate < Template
     self.default_mime_type = 'text/css'
 
     def self.engine_initialized?

@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class SassCompressor < Tilt::Template
+  class SassCompressor < Template
     self.default_mime_type = 'text/css'
 
     def self.engine_initialized?

@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class ERBTemplate < Tilt::Template
+  class ERBTemplate < Template
     def self.engine_initialized?
       defined? ::ERB
     end

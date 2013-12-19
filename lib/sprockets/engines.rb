@@ -15,8 +15,8 @@ module Sprockets
   # left. `application.js.coffee.erb` will first run `ERBTemplate`
   # then `CoffeeScriptTemplate`.
   #
-  # All `Engine`s must follow the `Tilt::Template` interface. It is
-  # recommended to subclass `Tilt::Template`.
+  # All `Engine`s must follow the `Template` interface. It is
+  # recommended to subclass `Template`.
   #
   # Its recommended that you register engine changes on your local
   # `Environment` instance.

@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class YUICompressor < Tilt::Template
+  class YUICompressor < Template
     def self.engine_initialized?
       defined?(::YUI)
     end

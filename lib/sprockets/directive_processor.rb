@@ -1,6 +1,5 @@
 require 'pathname'
 require 'shellwords'
-require 'tilt'
 require 'yaml'
 
 module Sprockets
@@ -20,10 +19,9 @@ module Sprockets
   #      *= require "baz"
   #      */
   #
-  # The Processor is implemented as a `Tilt::Template` and is loosely
-  # coupled to Sprockets. This makes it possible to disable or modify
-  # the processor to do whatever you'd like. You could add your own
-  # custom directives or invent your own directive syntax.
+  # This makes it possible to disable or modify the processor to do whatever
+  # you'd like. You could add your own custom directives or invent your own
+  # directive syntax.
   #
   # `Environment#processors` includes `DirectiveProcessor` by default.
   #
@@ -36,7 +34,7 @@ module Sprockets
   #
   #     env.register_processor('text/css', MyProcessor)
   #
-  class DirectiveProcessor < Tilt::Template
+  class DirectiveProcessor < Template
     # Directives will only be picked up if they are in the header
     # of the source file. C style (/* */), JavaScript (//), and
     # Ruby (#) comments are supported.
@@ -82,7 +80,7 @@ module Sprockets
       @included_pathnames = []
     end
 
-    # Implemented for Tilt#render.
+    # Implemented for Template#render.
     #
     # `context` is a `Context` instance with methods that allow you to
     # access the environment and append to the bundle. See `Context`

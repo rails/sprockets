@@ -14,6 +14,7 @@ module Sprockets
   autoload :StaticAsset,             "sprockets/static_asset"
 
   # Processing
+  autoload :Template,                "sprockets/template"
   autoload :Context,                 "sprockets/context"
   autoload :CoffeeScriptTemplate,    "sprockets/coffee_script_template"
   autoload :EcoTemplate,             "sprockets/eco_template"
@@ -89,9 +90,6 @@ module Sprockets
 
   require 'sprockets/yui_compressor'
   register_compressor 'application/javascript', :yui, YUICompressor
-
-  # Cherry pick the default Tilt engines that make sense for
-  # Sprockets. We don't need ones that only generate html like HAML.
 
   # Mmm, CoffeeScript
   register_engine '.coffee', CoffeeScriptTemplate

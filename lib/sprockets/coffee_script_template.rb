@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class CoffeeScriptTemplate < Tilt::Template
+  class CoffeeScriptTemplate < Template
     self.default_mime_type = 'application/javascript'
 
     def self.engine_initialized?

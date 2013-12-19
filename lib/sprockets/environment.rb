@@ -5,7 +5,6 @@ require 'sprockets/index'
 require 'hike'
 require 'logger'
 require 'pathname'
-require 'tilt'
 
 module Sprockets
   class Environment < Base

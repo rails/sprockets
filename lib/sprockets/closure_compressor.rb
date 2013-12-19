@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class ClosureCompressor < Tilt::Template
+  class ClosureCompressor < Template
     self.default_mime_type = 'application/javascript'
 
     def self.engine_initialized?

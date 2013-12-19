@@ -1,5 +1,3 @@
-require 'tilt'
-
 module Sprockets
   # For JS developers who are colonfobic, concatenating JS files using
   # the module pattern usually leads to syntax errors.
@@ -11,7 +9,7 @@ module Sprockets
   #
   #     environment.unregister_postprocessor 'application/javascript', Sprockets::SafetyColons
   #
-  class SafetyColons < Tilt::Template
+  class SafetyColons < Template
     def prepare
     end
 

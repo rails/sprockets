@@ -1,19 +1,17 @@
-require 'tilt'
-
 module Sprockets
-  # Tilt engine class for the EJS compiler. Depends on the `ejs` gem.
+  # Template engine class for the EJS compiler. Depends on the `ejs` gem.
   #
   # For more infomation see:
   #
   #   https://github.com/sstephenson/ruby-ejs
   #
-  class EjsTemplate < Tilt::Template
+  class EjsTemplate < Template
     # Check to see if EJS is loaded
     def self.engine_initialized?
       defined? ::EJS
     end
 
-    # Autoload ejs library. If the library isn't loaded, Tilt will produce
+    # Autoload ejs library. If the library isn't loaded, it will produce
     # a thread safetly warning. If you intend to use `.ejs` files, you
     # should explicitly require it.
     def initialize_engine

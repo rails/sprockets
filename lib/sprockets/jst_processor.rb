@@ -1,7 +1,5 @@
-require 'tilt'
-
 module Sprockets
-  class JstProcessor < Tilt::Template
+  class JstProcessor < Template
     self.default_mime_type = 'application/javascript'
 
     def self.default_namespace

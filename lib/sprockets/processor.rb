@@ -1,5 +1,3 @@
-require 'tilt'
-
 module Sprockets
   # `Processor` creates an anonymous processor class from a block.
   #
@@ -7,7 +5,7 @@ module Sprockets
   #       # ...
   #     end
   #
-  class Processor < Tilt::Template
+  class Processor < Template
     def self.make_processor(klass, &block) # :nodoc:
       return klass unless block_given?
 

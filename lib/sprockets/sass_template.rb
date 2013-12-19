@@ -1,12 +1,6 @@
-require 'tilt'
-
 module Sprockets
-  # This custom Tilt handler replaces the one built into Tilt. The
-  # main difference is that it uses a custom importer that plays nice
-  # with sprocket's caching system.
-  #
-  # See `SassImporter` for more infomation.
-  class SassTemplate < Tilt::Template
+  # Also see `SassImporter` for more infomation.
+  class SassTemplate < Template
     self.default_mime_type = 'text/css'
 
     def self.engine_initialized?
