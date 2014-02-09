@@ -13,7 +13,7 @@ Install Sprockets from RubyGems:
 
 Or include it in your project's `Gemfile` with Bundler:
 
-    gem 'sprockets', '~> 2.0'
+    gem 'sprockets', '~> 3.0'
 
 # Understanding the Sprockets Environment #
 
@@ -365,6 +365,8 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**3.0.0**
 
 **2.10.0** (May 24, 2013)
 
