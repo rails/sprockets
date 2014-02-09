@@ -139,6 +139,15 @@ filename. For example, a CSS file written in SCSS might have the name
 `layout.css.scss`, while a JavaScript file written in CoffeeScript
 might have the name `dialog.js.coffee`.
 
+## Minifying Assets ##
+
+Several JavaScript and CSS minifiers are available through shorthand.
+
+``` ruby
+environment.js_compressor  = :uglify
+environment.css_compressor = :scss
+```
+
 ## Styling with Sass and SCSS ##
 
 [Sass](http://sass-lang.com/) is a language that compiles to CSS and
