@@ -15,14 +15,14 @@ module Sprockets
 
     # Returns a `Digest` implementation class.
     #
-    # Defaults to `Digest::MD5`.
+    # Defaults to `Digest::SHA1`.
     attr_reader :digest_class
 
     # Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::MD5` or
-    # `Digest::SHA1`.
+    # `Digest::` implementation such as `Digest::SHA1` or
+    # `Digest::MD5`.
     #
-    #     environment.digest_class = Digest::SHA1
+    #     environment.digest_class = Digest::MD5
     #
     def digest_class=(klass)
       expire_index!

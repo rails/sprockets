@@ -2,6 +2,7 @@ require 'sprockets/base'
 require 'sprockets/context'
 require 'sprockets/index'
 
+require 'digest/sha1'
 require 'hike'
 require 'logger'
 require 'pathname'
@@ -27,8 +28,7 @@ module Sprockets
       @context_class = Class.new(Context)
 
       # Set MD5 as the default digest
-      require 'digest/md5'
-      @digest_class = ::Digest::MD5
+      @digest_class = Digest::SHA1
       @version = ''
 
       @mime_types        = Sprockets.registered_mime_types
