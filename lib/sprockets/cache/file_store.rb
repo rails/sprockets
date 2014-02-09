@@ -9,24 +9,54 @@ module Sprockets
     #     environment.cache = Sprockets::Cache::FileStore.new("/tmp")
     #
     class FileStore
-      def initialize(root)
-        @root = Pathname.new(root)
+      DEFAULT_MAX_SIZE = 1000
+
+      def initialize(root, max_size = DEFAULT_MAX_SIZE)
+        @root = root
+        @max_size = max_size
       end
 
       # Lookup value in cache
       def [](key)
-        pathname = @root.join(key)
-        pathname.exist? ? pathname.open('rb') { |f| Marshal.load(f) } : nil
+        path = File.join(@root, "#{key}.cache")
+
+        if File.exist?(path)
+          value = File.open(path, 'rb') { |f| Marshal.load(f) }
+          FileUtils.touch(path)
+          value
+        else
+          nil
+        end
       end
 
       # Save value to cache
       def []=(key, value)
-        # Ensure directory exists
-        FileUtils.mkdir_p @root.join(key).dirname
+        path = File.join(@root, "#{key}.cache")
 
-        @root.join(key).open('w') { |f| Marshal.dump(value, f)}
+        # Ensure directory exists
+        FileUtils.mkdir_p File.dirname(path)
+
+        # Write data
+        File.open(path, 'w') { |f| Marshal.dump(value, f) }
+
+        # GC if necessary
+        gc!
+
         value
       end
+
+      private
+        def gc!
+          caches = Dir.glob(File.join(@root, '**/*.cache'))
+
+          # Skip if number of files is under max size
+          return unless caches.size > @max_size
+
+          caches.sort_by! { |path| -File.mtime(path).to_i }
+          caches[0, (caches.size - @max_size)].each do |path|
+            File.delete(path)
+          end
+        end
     end
   end
 end

@@ -183,7 +183,7 @@ end
 
 require 'tmpdir'
 
-class TestFileStore < Sprockets::TestCase
+class TestFileStoreCaching < Sprockets::TestCase
   def setup
     @cache = Sprockets::Cache::FileStore.new(Dir::tmpdir)
 
