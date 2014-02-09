@@ -246,7 +246,7 @@ include:
   database, in a JavaScript asset via JSON
 - embedding version constants loaded from another file
 
-See the [Helper Methods](#FIXME) section for more information about
+See the [Helper Methods](lib/sprockets/context.rb) section for more information about
 interacting with `Sprockets::Context` instances via ERB.
 
 ### String Interpolation Syntax ###
