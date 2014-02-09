@@ -536,8 +536,12 @@ class TestEnvironment < Sprockets::TestCase
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.puts "-->" }
-      assert_raises(ExecJS::ProgramError) do
+      begin
         @env["tmp.js"].to_s
+      rescue ExecJS::Error => e
+        assert e
+      else
+        flunk "nothing raised"
       end
 
       File.open(filename, 'w') { |f| f.puts "->" }
