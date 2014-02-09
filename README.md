@@ -506,9 +506,9 @@ submit a pull request.
 
 # License #
 
-Copyright &copy; 2011 Sam Stephenson <<sstephenson@gmail.com>>
+Copyright &copy; 2014 Sam Stephenson <<sstephenson@gmail.com>>
 
-Copyright &copy; 2011 Joshua Peek <<josh@joshpeek.com>>
+Copyright &copy; 2014 Joshua Peek <<josh@joshpeek.com>>
 
 Sprockets is distributed under an MIT-style license. See LICENSE for
 details.
