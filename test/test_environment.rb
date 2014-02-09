@@ -459,8 +459,7 @@ class TestEnvironment < Sprockets::TestCase
     old_digest = @env.digest
     old_asset_digest = @env["gallery.js"].digest
 
-    require 'digest/sha1'
-    @env.digest_class = Digest::SHA1
+    @env.digest_class = Digest::MD5
 
     assert old_digest != @env.digest
     assert old_asset_digest != @env["gallery.js"].digest
