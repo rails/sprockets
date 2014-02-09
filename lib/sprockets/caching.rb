@@ -81,7 +81,7 @@ module Sprockets
         elsif cache.respond_to?(:read)
           ReadWriteAdapter.new cache
         else
-          NullAdapter.new
+          HashAdapter.new Sprockets::Cache::NullStore.new
         end
       end
 
@@ -93,11 +93,6 @@ module Sprockets
     class ReadWriteAdapter < Struct.new(:cache)
       def get(key); cache.read(key); end
       def set(key, value); cache.write(key, value); end
-    end
-
-    class NullAdapter
-      def get(key); nil; end
-      def set(key, value); value; end
     end
   end
 end
