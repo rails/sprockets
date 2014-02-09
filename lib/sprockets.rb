@@ -41,6 +41,7 @@ module Sprockets
 
   module Cache
     autoload :FileStore, "sprockets/cache/file_store"
+    autoload :MemoryStore, "sprockets/cache/memory_store"
     autoload :NullStore, "sprockets/cache/null_store"
   end
 

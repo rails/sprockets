@@ -50,7 +50,7 @@ module Sprockets
         @trail.append_extension(ext)
       end
 
-      self.cache = Sprockets::Cache::NullStore
+      self.cache = Cache::MemoryStore.new
       expire_index!
 
       yield self if block_given?
