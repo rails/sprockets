@@ -380,6 +380,10 @@ submit a pull request.
 * Default digest changed to SHA1. To continue using MD5.
   `env.digest_class = Digest::MD5`.
 
+**2.11.0** (February 19, 2014)
+
+* Support for `.bower.json`
+
 **2.10.0** (May 24, 2013)
 
 * Support for `bower.json`
