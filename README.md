@@ -366,6 +366,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.11.0** (February 19, 2014)
+
+* Support for `.bower.json`
+
 **2.10.0** (May 24, 2013)
 
 * Support for `bower.json`
