@@ -9,12 +9,14 @@ module Sprockets
       # logical path or fully expanded path. The `&block` is passed
       # for finding and building the asset if its not in cache.
       def cache_asset(path)
+        path_cache_key = "asset/#{path.to_s.sub(root, '')}"
+
         # If `cache` is not set, return fast
         if cache.nil?
           yield
 
         # Check cache for `path`
-      elsif (asset = Asset.from_hash(self, cache_adapter.get(expand_cache_key(path.to_s)))) && asset.fresh?(self)
+        elsif (asset = Asset.from_hash(self, cache_adapter.get(path_cache_key))) && asset.fresh?(self)
           asset
 
          # Otherwise yield block that slowly finds and builds the asset
@@ -23,12 +25,13 @@ module Sprockets
           asset.encode_with(hash)
 
           # Save the asset to its path
-          cache_adapter.set(expand_cache_key(path.to_s), hash)
+          cache_adapter.set(path_cache_key, hash)
 
           # Since path maybe a logical or full pathname, save the
           # asset its its full path too
           if path.to_s != asset.pathname.to_s
-            cache_adapter.set(asset.pathname.to_s, hash)
+            pathname_cache_key = "asset/#{asset.pathname.to_s.sub(root, '')}"
+            cache_adapter.set(pathname_cache_key, hash)
           end
 
           asset
@@ -36,13 +39,6 @@ module Sprockets
       end
 
     private
-      # Strips `Environment#root` from key to make the key work
-      # consisently across different servers. The key is also hashed
-      # so it does not exceed 250 characters.
-      def expand_cache_key(key)
-        ['sprockets', digest.hexdigest, digest_class.hexdigest(key.sub(root, ''))].join('/')
-      end
-
       def make_cache_adapter(cache)
         # `Cache#get(key)` for Memcache
         if cache.respond_to?(:get)
@@ -67,11 +63,15 @@ module Sprockets
         end
 
         def get(key)
-          _get(key)
+          _get(expand_key(key))
         end
 
         def set(key, value)
-          _set(key, value)
+          _set(expand_key(key), value)
+        end
+
+        def expand_key(key)
+          ['sprockets', @environment.digest.hexdigest, @environment.digest.update(key).hexdigest].join('/')
         end
       end
 
