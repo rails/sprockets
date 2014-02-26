@@ -14,7 +14,7 @@ module Sprockets
           yield
 
         # Check cache for `path`
-        elsif (asset = Asset.from_hash(self, cache_get_hash(path.to_s))) && asset.fresh?(self)
+      elsif (asset = Asset.from_hash(self, cache_adapter.get(expand_cache_key(path.to_s)))) && asset.fresh?(self)
           asset
 
          # Otherwise yield block that slowly finds and builds the asset
@@ -23,12 +23,12 @@ module Sprockets
           asset.encode_with(hash)
 
           # Save the asset to its path
-          cache_set_hash(path.to_s, hash)
+          cache_adapter.set(expand_cache_key(path.to_s), hash)
 
           # Since path maybe a logical or full pathname, save the
           # asset its its full path too
           if path.to_s != asset.pathname.to_s
-            cache_set_hash(asset.pathname.to_s, hash)
+            cache_adapter.set(asset.pathname.to_s, hash)
           end
 
           asset
@@ -40,20 +40,7 @@ module Sprockets
       # consisently across different servers. The key is also hashed
       # so it does not exceed 250 characters.
       def expand_cache_key(key)
-        File.join('sprockets', digest_class.hexdigest(key.sub(root, '')))
-      end
-
-      def cache_get_hash(key)
-        hash = cache_adapter.get(expand_cache_key(key))
-        if hash.is_a?(Hash) && digest.hexdigest == hash['_version']
-          hash
-        end
-      end
-
-      def cache_set_hash(key, hash)
-        hash['_version'] = digest.hexdigest
-        cache_adapter.set(expand_cache_key(key), hash)
-        hash
+        ['sprockets', digest.hexdigest, digest_class.hexdigest(key.sub(root, ''))].join('/')
       end
 
       def make_cache_adapter(cache)
