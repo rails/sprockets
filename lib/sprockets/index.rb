@@ -104,12 +104,8 @@ module Sprockets
       def cache_asset(path)
         path_cache_key = "asset/#{path.to_s.sub(root, '')}"
 
-        # If `cache` is not set, return fast
-        if cache.nil?
-          yield
-
         # Check cache for `path`
-        elsif (asset = Asset.from_hash(self, cache_adapter.get(path_cache_key))) && asset.fresh?(self)
+        if (asset = Asset.from_hash(self, cache_adapter.get(path_cache_key))) && asset.fresh?(self)
           asset
 
          # Otherwise yield block that slowly finds and builds the asset
