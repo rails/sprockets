@@ -4,18 +4,6 @@ module Sprockets
   module Caching
     attr_reader :cache_adapter
 
-    # Low level cache getter for `key`. Checks a number of supported
-    # cache interfaces.
-    def cache_get(key)
-      cache_adapter.get(key)
-    end
-
-    # Low level cache setter for `key`. Checks a number of supported
-    # cache interfaces.
-    def cache_set(key, value)
-      cache_adapter.set(key, value)
-    end
-
     protected
       # Cache helper method. Takes a `path` argument which maybe a
       # logical path or fully expanded path. The `&block` is passed
@@ -56,7 +44,7 @@ module Sprockets
       end
 
       def cache_get_hash(key)
-        hash = cache_get(expand_cache_key(key))
+        hash = cache_adapter.get(expand_cache_key(key))
         if hash.is_a?(Hash) && digest.hexdigest == hash['_version']
           hash
         end
@@ -64,7 +52,7 @@ module Sprockets
 
       def cache_set_hash(key, hash)
         hash['_version'] = digest.hexdigest
-        cache_set(expand_cache_key(key), hash)
+        cache_adapter.set(expand_cache_key(key), hash)
         hash
       end
 
