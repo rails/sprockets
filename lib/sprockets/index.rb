@@ -57,11 +57,11 @@ module Sprockets
     # Cache `find_asset` calls
     def find_asset(path, options = {})
       options[:bundle] = true unless options.key?(:bundle)
-      if asset = @assets[cache_key_for(path, options)]
+      if asset = @assets[asset_cache_key_for(path, options)]
         asset
       elsif asset = super
-        logical_path_cache_key = cache_key_for(path, options)
-        full_path_cache_key    = cache_key_for(asset.pathname, options)
+        logical_path_cache_key = asset_cache_key_for(path, options)
+        full_path_cache_key    = asset_cache_key_for(asset.pathname, options)
 
         # Cache on Index
         @assets[logical_path_cache_key] = @assets[full_path_cache_key] = asset
@@ -84,7 +84,7 @@ module Sprockets
 
       # Cache asset building in memory and in persisted cache.
       def build_asset(path, pathname, options)
-        key = cache_key_for(pathname, options)
+        key = asset_cache_key_for(pathname, options)
 
         if (asset = Asset.from_hash(self, cache_adapter.get(key))) && asset.fresh?(self)
           asset

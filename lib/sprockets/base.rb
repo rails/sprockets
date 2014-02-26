@@ -315,7 +315,7 @@ module Sprockets
         end
       end
 
-      def cache_key_for(path, options)
+      def asset_cache_key_for(path, options)
         "asset/#{path.to_s.sub(root, '')}:#{options[:bundle] ? '1' : '0'}"
       end
 
