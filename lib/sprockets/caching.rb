@@ -46,28 +46,48 @@ module Sprockets
       def make_cache_adapter(cache)
         # `Cache#get(key)` for Memcache
         if cache.respond_to?(:get)
-          cache
+          CacheAdapter.new(self, cache)
 
         # `Cache#[key]` so `Hash` can be used
         elsif cache.respond_to?(:[])
-          HashAdapter.new cache
+          HashAdapter.new(self, cache)
 
         # `Cache#read(key)` for `ActiveSupport::Cache` support
         elsif cache.respond_to?(:read)
-          ReadWriteAdapter.new cache
+          ReadWriteAdapter.new(self, cache)
+
         else
-          HashAdapter.new Sprockets::Cache::NullStore.new
+          HashAdapter.new(self, Sprockets::Cache::NullStore.new)
         end
       end
 
-    class HashAdapter < Struct.new(:cache)
-      def get(key); cache[key]; end
-      def set(key, value); cache[key] = value; end
-    end
+      class CacheAdapter
+        def initialize(environment, cache)
+          @environment, @cache = environment, cache
+        end
 
-    class ReadWriteAdapter < Struct.new(:cache)
-      def get(key); cache.read(key); end
-      def set(key, value); cache.write(key, value); end
-    end
+        def get(key)
+          _get(key)
+        end
+
+        def set(key, value)
+          _set(key, value)
+        end
+      end
+
+      class GetAdapter < CacheAdapter
+        def _get(key); @cache.get(key); end
+        def _set(key, value); @cache.set(key, value); end
+      end
+
+      class HashAdapter < CacheAdapter
+        def _get(key); @cache[key]; end
+        def _set(key, value); @cache[key] = value; end
+      end
+
+      class ReadWriteAdapter < CacheAdapter
+        def _get(key); @cache.read(key); end
+        def _set(key, value); @cache.write(key, value); end
+      end
   end
 end
