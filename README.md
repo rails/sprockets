@@ -354,8 +354,8 @@ recursively reading the file and following the directives found.
 
 `stub` *path* allows dependency to be excluded from the asset bundle.
 The *path* must be a valid asset and may or may not already be part
-of the bundle. Once stubbed, it is blacklisted and can't be brought
-back by any other `require`.
+of the bundle. `stub` should only be used at the top level bundle, not
+within any subdependencies.
 
 # Development #
 
