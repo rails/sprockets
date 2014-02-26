@@ -2,17 +2,17 @@ require 'sprockets_test'
 
 class TestAssetAttributes < Sprockets::TestCase
   test "search paths" do
-    assert_equal ["index.js", "index/.bower.json", "index/bower.json"],
+    assert_equal ["index.js", "index/bower.json"],
       pathname("index.js").search_paths
-    assert_equal ["foo.js", "foo/.bower.json", "foo/bower.json", "foo/index.js"],
+    assert_equal ["foo.js", "foo/bower.json", "foo/index.js"],
       pathname("foo.js").search_paths
-    assert_equal ["foo", "foo/.bower.json", "foo/bower.json", "foo/index"],
+    assert_equal ["foo", "foo/bower.json", "foo/index"],
       pathname("foo").search_paths
     assert_equal ["foo/bar.js", "foo/bar/index.js"],
       pathname("foo/bar.js").search_paths
-    assert_equal ["jquery.foo.js", "jquery.foo/.bower.json", "jquery.foo/bower.json", "jquery.foo/index.js"],
+    assert_equal ["jquery.foo.js", "jquery.foo/bower.json", "jquery.foo/index.js"],
       pathname("jquery.foo.js").search_paths
-    assert_equal ["jquery.foo", "jquery.foo/.bower.json", "jquery.foo/bower.json", "jquery.foo/index"],
+    assert_equal ["jquery.foo", "jquery.foo/bower.json", "jquery.foo/index"],
       pathname("jquery.foo").search_paths
   end
 

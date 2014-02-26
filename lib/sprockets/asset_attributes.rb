@@ -24,7 +24,6 @@ module Sprockets
 
       # optimization: bower.json can only be nested one level deep
       if !path_without_extension.to_s.index('/')
-        paths << path_without_extension.join(".bower.json").to_s
         paths << path_without_extension.join("bower.json").to_s
       end
 
