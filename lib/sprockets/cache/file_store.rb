@@ -13,6 +13,7 @@ module Sprockets
 
       def initialize(root, max_size = DEFAULT_MAX_SIZE)
         @root = root
+        @size = find_caches.size
         @max_size = max_size
       end
 
@@ -36,26 +37,36 @@ module Sprockets
         # Ensure directory exists
         FileUtils.mkdir_p File.dirname(path)
 
+        # Check if cache exists before writing
+        exists = File.exist?(path)
+
         # Write data
         File.open(path, 'w') { |f| Marshal.dump(value, f) }
 
         # GC if necessary
-        gc!
+        @size += 1 unless exists
+        gc! if @size > @max_size
 
         value
       end
 
       private
-        def gc!
-          caches = Dir.glob(File.join(@root, '**/*.cache'))
+        def find_caches
+          Dir.glob(File.join(@root, '**/*.cache'))
+        end
 
-          # Skip if number of files is under max size
-          return unless caches.size > @max_size
+        def gc!
+          caches = find_caches
+
+          num_to_delete = (caches.size - @max_size)
+          return unless num_to_delete > 0
 
           caches.sort_by! { |path| -File.mtime(path).to_i }
-          caches[0, (caches.size - @max_size)].each do |path|
+          caches[0, num_to_delete].each do |path|
             File.delete(path)
           end
+
+          @size = find_caches.size
         end
     end
   end
