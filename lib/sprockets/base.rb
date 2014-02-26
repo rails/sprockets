@@ -316,7 +316,7 @@ module Sprockets
       end
 
       def cache_key_for(path, options)
-        "#{path}:#{options[:bundle] ? '1' : '0'}"
+        "asset/#{path.to_s.sub(root, '')}:#{options[:bundle] ? '1' : '0'}"
       end
 
       def circular_call_protection(path)

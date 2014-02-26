@@ -84,46 +84,21 @@ module Sprockets
 
       # Cache asset building in memory and in persisted cache.
       def build_asset(path, pathname, options)
-        # Memory cache
         key = cache_key_for(pathname, options)
+
         if @assets.key?(key)
           @assets[key]
         else
           @assets[key] = begin
-            # Persisted cache
-            cache_asset(key) do
-              super
+            if (asset = Asset.from_hash(self, cache_adapter.get(key))) && asset.fresh?(self)
+              asset
+            elsif asset = super
+              hash = {}
+              asset.encode_with(hash)
+              cache_adapter.set(key, hash)
+              asset
             end
           end
-        end
-      end
-
-      # Cache helper method. Takes a `path` argument which maybe a
-      # logical path or fully expanded path. The `&block` is passed
-      # for finding and building the asset if its not in cache.
-      def cache_asset(path)
-        path_cache_key = "asset/#{path.to_s.sub(root, '')}"
-
-        # Check cache for `path`
-        if (asset = Asset.from_hash(self, cache_adapter.get(path_cache_key))) && asset.fresh?(self)
-          asset
-
-         # Otherwise yield block that slowly finds and builds the asset
-        elsif asset = yield
-          hash = {}
-          asset.encode_with(hash)
-
-          # Save the asset to its path
-          cache_adapter.set(path_cache_key, hash)
-
-          # Since path maybe a logical or full pathname, save the
-          # asset its its full path too
-          if path.to_s != asset.pathname.to_s
-            pathname_cache_key = "asset/#{asset.pathname.to_s.sub(root, '')}"
-            cache_adapter.set(pathname_cache_key, hash)
-          end
-
-          asset
         end
       end
   end
