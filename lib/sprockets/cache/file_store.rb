@@ -58,7 +58,8 @@ module Sprockets
         def gc!
           caches = find_caches
 
-          num_to_delete = (caches.size - @max_size)
+          new_size = @max_size * 0.75
+          num_to_delete = caches.size - new_size
           return unless num_to_delete > 0
 
           caches.sort_by! { |path| -File.mtime(path).to_i }
