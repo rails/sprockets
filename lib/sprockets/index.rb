@@ -22,7 +22,6 @@ module Sprockets
       @logger            = environment.logger
       @context_class     = environment.context_class
       @cache             = environment.cache
-      @cache_adapter     = environment.cache_adapter
       @trail             = environment.trail.index
       @digest            = environment.digest
       @digest_class      = environment.digest_class
@@ -86,12 +85,12 @@ module Sprockets
       def build_asset(path, pathname, options)
         key = asset_cache_key_for(pathname, options)
 
-        if (asset = Asset.from_hash(self, cache_adapter[key])) && asset.fresh?(self)
+        if (asset = Asset.from_hash(self, cache[key])) && asset.fresh?(self)
           asset
         elsif asset = super
           hash = {}
           asset.encode_with(hash)
-          cache_adapter[key] = hash
+          cache[key] = hash
           asset
         end
       end

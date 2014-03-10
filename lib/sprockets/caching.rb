@@ -2,10 +2,8 @@ module Sprockets
   # `Caching` is an internal mixin whose public methods are exposed on
   # the `Environment` and `Index` classes.
   module Caching
-    attr_reader :cache_adapter
-
     private
-      def make_cache_adapter(cache)
+      def wrap_cache(cache)
         # `Cache#get(key)` for Memcache
         if cache.respond_to?(:get)
           CacheAdapter.new(self, cache)
