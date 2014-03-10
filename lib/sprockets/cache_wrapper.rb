@@ -6,18 +6,18 @@ module Sprockets
 
       # `Cache#get(key)` for Memcache
       elsif cache.respond_to?(:get)
-        CacheAdapter.new(environment, cache)
+        GetWrapper.new(environment, cache)
 
       # `Cache#[key]` so `Hash` can be used
       elsif cache.respond_to?(:[])
-        HashAdapter.new(environment, cache)
+        HashWrapper.new(environment, cache)
 
       # `Cache#read(key)` for `ActiveSupport::Cache` support
       elsif cache.respond_to?(:read)
-        ReadWriteAdapter.new(environment, cache)
+        ReadWriteWrapper.new(environment, cache)
 
       else
-        HashAdapter.new(environment, Sprockets::Cache::NullStore.new)
+        HashWrapper.new(environment, Sprockets::Cache::NullStore.new)
       end
     end
 
@@ -38,7 +38,22 @@ module Sprockets
     end
   end
 
-  class GetAdapter < CacheWrapper
+  class IndexWrapper < CacheWrapper
+    def initialize(*args)
+      @local = {}
+      super
+    end
+
+    def [](key)
+      @local[key] ||= @cache[key]
+    end
+
+    def []=(key, value)
+      @local[key] = @cache[key] = value
+    end
+  end
+
+  class GetWrapper < CacheWrapper
     def get(key)
       @cache.get(key)
     end
@@ -48,7 +63,7 @@ module Sprockets
     end
   end
 
-  class HashAdapter < CacheWrapper
+  class HashWrapper < CacheWrapper
     def get(key)
       @cache[key]
     end
@@ -58,7 +73,7 @@ module Sprockets
     end
   end
 
-  class ReadWriteAdapter < CacheWrapper
+  class ReadWriteWrapper < CacheWrapper
     def get(key)
       @cache.read(key)
     end
