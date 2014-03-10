@@ -28,12 +28,12 @@ module Sprockets
           @environment, @cache = environment, cache
         end
 
-        def get(key)
-          _get(expand_key(key))
+        def [](key)
+          get(expand_key(key))
         end
 
-        def set(key, value)
-          _set(expand_key(key), value)
+        def []=(key, value)
+          set(expand_key(key), value)
         end
 
         def expand_key(key)
@@ -42,18 +42,18 @@ module Sprockets
       end
 
       class GetAdapter < CacheAdapter
-        def _get(key); @cache.get(key); end
-        def _set(key, value); @cache.set(key, value); end
+        def get(key); @cache.get(key); end
+        def set(key, value); @cache.set(key, value); end
       end
 
       class HashAdapter < CacheAdapter
-        def _get(key); @cache[key]; end
-        def _set(key, value); @cache[key] = value; end
+        def get(key); @cache[key]; end
+        def set(key, value); @cache[key] = value; end
       end
 
       class ReadWriteAdapter < CacheAdapter
-        def _get(key); @cache.read(key); end
-        def _set(key, value); @cache.write(key, value); end
+        def get(key); @cache.read(key); end
+        def set(key, value); @cache.write(key, value); end
       end
   end
 end
