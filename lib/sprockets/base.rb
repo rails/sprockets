@@ -1,6 +1,6 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
-require 'sprockets/caching'
+require 'sprockets/cache_wrapper'
 require 'sprockets/errors'
 require 'sprockets/processed_asset'
 require 'sprockets/server'
@@ -11,7 +11,7 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
-    include Caching, Paths, Mime, Processing, Compressing, Engines, Server
+    include Paths, Mime, Processing, Compressing, Engines, Server
 
     # Returns a `Digest` implementation class.
     #
@@ -95,7 +95,7 @@ module Sprockets
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
       expire_index!
-      @cache = wrap_cache(cache)
+      @cache = CacheWrapper.wrap(self, cache)
     end
 
     def prepend_path(path)
