@@ -63,9 +63,7 @@ module Sprockets
           return unless num_to_delete > 0
 
           caches.sort_by! { |path| -File.mtime(path).to_i }
-          caches[0, num_to_delete].each do |path|
-            File.delete(path)
-          end
+          FileUtils.remove(caches[0, num_to_delete], force: true)
 
           @size = find_caches.size
         end
