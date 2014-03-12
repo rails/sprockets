@@ -83,8 +83,9 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_postprocessor(mime_type, klass, &block)
-      @postprocessors[mime_type].push(Processor.make_processor(klass, &block))
+    def register_postprocessor(mime_type, klass, proc = nil, &block)
+      proc ||= block
+      @postprocessors[mime_type].push(Processor.make_processor(klass, &proc))
     end
 
     # Deprecated alias for `unregister_preprocessor`.

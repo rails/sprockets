@@ -35,9 +35,19 @@ module Sprockets
       @data = block.call
     end
 
-    # Call processor block with `context` and `data`.
     def render(context)
-      self.class.processor.call(context, data)
+      # Legacy argument style.
+      # Call processor block with `context` and `data`.
+      if self.class.processor.arity == 2
+        self.class.processor.call(context, data)
+      else
+        env = {
+          environment: context.environment,
+          context: context,
+          data: data
+        }
+        self.class.processor.call(env)
+      end
     end
   end
 end
