@@ -377,6 +377,7 @@ submit a pull request.
 
 **3.0.0**
 
+* Cache store must now be an LRU implementation.
 * Default digest changed to SHA1. To continue using MD5.
   `env.digest_class = Digest::MD5`.
 

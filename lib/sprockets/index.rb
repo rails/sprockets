@@ -21,8 +21,7 @@ module Sprockets
       # Copy environment attributes
       @logger            = environment.logger
       @context_class     = environment.context_class
-      @cache             = environment.cache
-      @cache_adapter     = environment.cache_adapter
+      @cache             = IndexWrapper.new(self, environment.cache)
       @trail             = environment.trail.index
       @digest            = environment.digest
       @digest_class      = environment.digest_class
@@ -57,11 +56,11 @@ module Sprockets
     # Cache `find_asset` calls
     def find_asset(path, options = {})
       options[:bundle] = true unless options.key?(:bundle)
-      if asset = @assets[cache_key_for(path, options)]
+      if asset = @assets[asset_cache_key_for(path, options)]
         asset
       elsif asset = super
-        logical_path_cache_key = cache_key_for(path, options)
-        full_path_cache_key    = cache_key_for(asset.pathname, options)
+        logical_path_cache_key = asset_cache_key_for(path, options)
+        full_path_cache_key    = asset_cache_key_for(asset.pathname, options)
 
         # Cache on Index
         @assets[logical_path_cache_key] = @assets[full_path_cache_key] = asset
@@ -84,17 +83,15 @@ module Sprockets
 
       # Cache asset building in memory and in persisted cache.
       def build_asset(path, pathname, options)
-        # Memory cache
-        key = cache_key_for(pathname, options)
-        if @assets.key?(key)
-          @assets[key]
-        else
-          @assets[key] = begin
-            # Persisted cache
-            cache_asset(key) do
-              super
-            end
-          end
+        key = asset_cache_key_for(pathname, options)
+
+        if (asset = Asset.from_hash(self, cache[key])) && asset.fresh?(self)
+          asset
+        elsif asset = super
+          hash = {}
+          asset.encode_with(hash)
+          cache[key] = hash
+          asset
         end
       end
   end
