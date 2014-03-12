@@ -9,11 +9,11 @@ module Sprockets
     end
 
     def _store(key, version, sha, contents)
-      environment.cache_set("sass/#{key}", {version: version, sha: sha, contents: contents})
+      environment.cache["sass/#{key}"] = {version: version, sha: sha, contents: contents})
     end
 
     def _retrieve(key, version, sha)
-      if obj = environment.cache_get("sass/#{key}")
+      if obj = environment.cache["sass/#{key}"]
         return unless obj[:version] == version
         return unless obj[:sha] == sha
         obj[:contents]

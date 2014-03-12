@@ -1,6 +1,6 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
-require 'sprockets/caching'
+require 'sprockets/cache_wrapper'
 require 'sprockets/errors'
 require 'sprockets/processed_asset'
 require 'sprockets/server'
@@ -11,18 +11,18 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
-    include Caching, Paths, Mime, Processing, Compressing, Engines, Server
+    include Paths, Mime, Processing, Compressing, Engines, Server
 
     # Returns a `Digest` implementation class.
     #
-    # Defaults to `Digest::MD5`.
+    # Defaults to `Digest::SHA1`.
     attr_reader :digest_class
 
     # Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::MD5` or
-    # `Digest::SHA1`.
+    # `Digest::` implementation such as `Digest::SHA1` or
+    # `Digest::MD5`.
     #
-    #     environment.digest_class = Digest::SHA1
+    #     environment.digest_class = Digest::MD5
     #
     def digest_class=(klass)
       expire_index!
@@ -95,8 +95,7 @@ module Sprockets
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
       expire_index!
-      @cache = cache
-      @cache_adapter = make_cache_adapter(cache)
+      @cache = CacheWrapper.wrap(self, cache)
     end
 
     def prepend_path(path)
@@ -315,8 +314,8 @@ module Sprockets
         end
       end
 
-      def cache_key_for(path, options)
-        "#{path}:#{options[:bundle] ? '1' : '0'}"
+      def asset_cache_key_for(path, options)
+        "asset/#{path.to_s.sub(root, '')}:#{options[:bundle] ? '1' : '0'}"
       end
 
       def circular_call_protection(path)

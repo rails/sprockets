@@ -21,12 +21,13 @@ module Sprockets
 
 
       # Use custom importer that knows about Sprockets Caching
-      cache_store = SassCacheStore.new(context.environment)
+      # cache_store = SassCacheStore.new(context.environment)
 
       options = {
         :filename => context.pathname.to_s,
         :syntax => syntax,
-        :cache_store => cache_store,
+        :cache => false,
+        :read_cache => false,
         :importer => SassImporter.new(context, context.pathname),
         :load_paths => context.environment.paths.map { |path| SassImporter.new(context, path) },
         :sprockets => {

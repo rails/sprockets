@@ -459,8 +459,7 @@ class TestEnvironment < Sprockets::TestCase
     old_digest = @env.digest
     old_asset_digest = @env["gallery.js"].digest
 
-    require 'digest/sha1'
-    @env.digest_class = Digest::SHA1
+    @env.digest_class = Digest::MD5
 
     assert old_digest != @env.digest
     assert old_asset_digest != @env["gallery.js"].digest
@@ -521,8 +520,12 @@ class TestEnvironment < Sprockets::TestCase
 
     sandbox filename do
       File.open(filename, 'w') { |f| f.puts "-->" }
-      assert_raises(ExecJS::RuntimeError) do
+      begin
         @env["tmp.js"].to_s
+      rescue ExecJS::Error => e
+        assert e
+      else
+        flunk "nothing raised"
       end
 
       File.open(filename, 'w') { |f| f.puts "->" }

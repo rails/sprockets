@@ -2,6 +2,7 @@ require 'sprockets/base'
 require 'sprockets/context'
 require 'sprockets/index'
 
+require 'digest/sha1'
 require 'hike'
 require 'logger'
 require 'pathname'
@@ -27,8 +28,7 @@ module Sprockets
       @context_class = Class.new(Context)
 
       # Set MD5 as the default digest
-      require 'digest/md5'
-      @digest_class = ::Digest::MD5
+      @digest_class = Digest::SHA1
       @version = ''
 
       @mime_types        = Sprockets.registered_mime_types
@@ -50,7 +50,7 @@ module Sprockets
         @trail.append_extension(ext)
       end
 
-      self.cache = nil
+      self.cache = Cache::MemoryStore.new
       expire_index!
 
       yield self if block_given?
@@ -70,7 +70,7 @@ module Sprockets
       options[:bundle] = true unless options.key?(:bundle)
 
       # Ensure inmemory cached assets are still fresh on every lookup
-      if (asset = @assets[cache_key_for(path, options)]) && asset.fresh?(self)
+      if (asset = @assets[asset_cache_key_for(path, options)]) && asset.fresh?(self)
         asset
       elsif asset = index.find_asset(path, options)
         # Cache is pushed upstream by Index#find_asset

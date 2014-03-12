@@ -13,7 +13,7 @@ Install Sprockets from RubyGems:
 
 Or include it in your project's `Gemfile` with Bundler:
 
-    gem 'sprockets', '~> 2.0'
+    gem 'sprockets', '~> 3.0'
 
 # Understanding the Sprockets Environment #
 
@@ -139,6 +139,15 @@ filename. For example, a CSS file written in SCSS might have the name
 `layout.css.scss`, while a JavaScript file written in CoffeeScript
 might have the name `dialog.js.coffee`.
 
+## Minifying Assets ##
+
+Several JavaScript and CSS minifiers are available through shorthand.
+
+``` ruby
+environment.js_compressor  = :uglify
+environment.css_compressor = :scss
+```
+
 ## Styling with Sass and SCSS ##
 
 [Sass](http://sass-lang.com/) is a language that compiles to CSS and
@@ -237,7 +246,7 @@ include:
   database, in a JavaScript asset via JSON
 - embedding version constants loaded from another file
 
-See the [Helper Methods](#FIXME) section for more information about
+See the [Helper Methods](lib/sprockets/context.rb) section for more information about
 interacting with `Sprockets::Context` instances via ERB.
 
 ### String Interpolation Syntax ###
@@ -345,8 +354,8 @@ recursively reading the file and following the directives found.
 
 `stub` *path* allows dependency to be excluded from the asset bundle.
 The *path* must be a valid asset and may or may not already be part
-of the bundle. Once stubbed, it is blacklisted and can't be brought
-back by any other `require`.
+of the bundle. `stub` should only be used at the top level bundle, not
+within any subdependencies.
 
 # Development #
 
@@ -365,6 +374,12 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**3.0.0**
+
+* Cache store must now be an LRU implementation.
+* Default digest changed to SHA1. To continue using MD5.
+  `env.digest_class = Digest::MD5`.
 
 **2.10.0** (May 24, 2013)
 
@@ -504,9 +519,9 @@ submit a pull request.
 
 # License #
 
-Copyright &copy; 2011 Sam Stephenson <<sstephenson@gmail.com>>
+Copyright &copy; 2014 Sam Stephenson <<sstephenson@gmail.com>>
 
-Copyright &copy; 2011 Joshua Peek <<josh@joshpeek.com>>
+Copyright &copy; 2014 Joshua Peek <<josh@joshpeek.com>>
 
 Sprockets is distributed under an MIT-style license. See LICENSE for
 details.
