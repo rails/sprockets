@@ -366,9 +366,10 @@ submit a pull request.
 
 ## Version History ##
 
-**2.11.1** (March 13, 2014)
+**2.12.0** (March 13, 2014)
 
-* Avoid context reference in SassImporter hack so its Marshallable.
+* Avoid context reference in SassImporter hack so its Marshallable. Fixes
+ issues with Sass 3.3.x.
 
 **2.11.0** (February 19, 2014)
 
