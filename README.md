@@ -377,6 +377,13 @@ submit a pull request.
 
 **3.0.0**
 
+**2.12.0** (March 13, 2014)
+
+* Avoid context reference in SassImporter hack so its Marshallable. Fixes
+ issues with Sass 3.3.x.
+
+**2.11.0** (February 19, 2014)
+
 * Cache store must now be an LRU implementation.
 * Default digest changed to SHA1. To continue using MD5.
   `env.digest_class = Digest::MD5`.
