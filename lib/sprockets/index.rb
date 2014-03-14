@@ -28,6 +28,7 @@ module Sprockets
       @version           = environment.version
       @mime_types        = environment.mime_types
       @engines           = environment.engines
+      @engine_mime_types = environment.engine_mime_types
       @preprocessors     = environment.preprocessors
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
