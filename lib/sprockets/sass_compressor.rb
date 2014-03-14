@@ -1,7 +1,10 @@
 module Sprockets
-  class SassCompressor < Template
-    def render(context)
+  class SassCompressor
+    def self.call(input)
       require 'sass' unless defined? ::Sass::Engine
+
+      data = input[:data]
+
       ::Sass::Engine.new(data, {
         :syntax => :scss,
         :cache => false,

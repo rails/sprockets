@@ -1,7 +1,8 @@
 module Sprockets
-  class ClosureCompressor < Template
-    def render(context)
+  class ClosureCompressor
+    def self.call(input)
       require 'closure-compiler' unless defined? ::Closure::Compiler
+      data = input[:data]
       Closure::Compiler.new.compile(data)
     end
   end

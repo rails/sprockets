@@ -1,9 +1,11 @@
 module Sprockets
-  class YUICompressor < Template
-    def render(context)
+  class YUICompressor
+    def self.call(input)
       require 'yui/compressor' unless defined? ::YUI
 
-      case context.content_type
+      data = input[:data]
+
+      case input[:content_type]
       when 'application/javascript'
         YUI::JavaScriptCompressor.new.compress(data)
       when 'text/css'

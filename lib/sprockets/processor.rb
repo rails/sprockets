@@ -50,6 +50,7 @@ module Sprockets
         input = {
           environment: context.environment,
           context: context,
+          content_type: context.content_type,
           data: data
         }
         self.class.processor.call(input)
