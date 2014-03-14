@@ -7,7 +7,13 @@ module Sprockets
   #
   class Processor
     def self.make_processor(klass, proc) # :nodoc:
-      return klass unless proc
+      if !proc
+        if klass.respond_to?(:call)
+          proc = klass.method(:call)
+        else
+          return klass
+        end
+      end
 
       name = klass.to_s
       Class.new(Processor) do
