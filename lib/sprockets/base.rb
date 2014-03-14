@@ -166,8 +166,8 @@ module Sprockets
     def register_engine(ext, klass)
       # Overrides the global behavior to expire the index
       expire_index!
-      add_engine_to_trail(ext, klass)
       super
+      add_engine_to_trail(ext)
     end
 
     def register_preprocessor(mime_type, klass, &block)

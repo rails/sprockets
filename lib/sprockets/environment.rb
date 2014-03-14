@@ -33,6 +33,7 @@ module Sprockets
 
       @mime_types        = Sprockets.registered_mime_types
       @engines           = Sprockets.engines
+      @engine_mime_types = Sprockets.engine_mime_types
       @preprocessors     = Sprockets.preprocessors
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors
@@ -43,7 +44,7 @@ module Sprockets
       end
 
       @engines.each do |ext, klass|
-        add_engine_to_trail(ext, klass)
+        add_engine_to_trail(ext)
       end
 
       @mime_types.each do |ext, type|
