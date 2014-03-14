@@ -6,13 +6,13 @@ module Sprockets
   #     end
   #
   class Processor
-    def self.make_processor(klass, &block) # :nodoc:
-      return klass unless block_given?
+    def self.make_processor(klass, proc) # :nodoc:
+      return klass unless proc
 
-      name  = klass.to_s
+      name = klass.to_s
       Class.new(Processor) do
         @name      = name
-        @processor = block
+        @processor = proc
       end
     end
 

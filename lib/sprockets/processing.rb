@@ -71,7 +71,7 @@ module Sprockets
     #
     def register_preprocessor(mime_type, klass, proc = nil, &block)
       proc ||= block
-      @preprocessors[mime_type].push(Processor.make_processor(klass, &proc))
+      @preprocessors[mime_type].push(Processor.make_processor(klass, proc))
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
@@ -86,7 +86,7 @@ module Sprockets
     #
     def register_postprocessor(mime_type, klass, proc = nil, &block)
       proc ||= block
-      @postprocessors[mime_type].push(Processor.make_processor(klass, &proc))
+      @postprocessors[mime_type].push(Processor.make_processor(klass, proc))
     end
 
     # Deprecated alias for `unregister_preprocessor`.
@@ -151,7 +151,7 @@ module Sprockets
     #
     def register_bundle_processor(mime_type, klass, proc = nil, &block)
       proc ||= block
-      @bundle_processors[mime_type].push(Processor.make_processor(klass, &proc))
+      @bundle_processors[mime_type].push(Processor.make_processor(klass, proc))
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
