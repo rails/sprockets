@@ -84,8 +84,8 @@ module EnvironmentTests
   end
 
   test "lookup bundle processors" do
-    assert_equal [], @env.bundle_processors('application/javascript')
-    assert_equal [Sprockets::CharsetNormalizer], @env.bundle_processors('text/css')
+    assert_equal 0, @env.bundle_processors('application/javascript').size
+    assert_equal 1, @env.bundle_processors('text/css').size
   end
 
   test "lookup compressors" do
