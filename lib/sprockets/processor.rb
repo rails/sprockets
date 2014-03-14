@@ -41,12 +41,12 @@ module Sprockets
       if self.class.processor.arity == 2
         self.class.processor.call(context, data)
       else
-        env = {
+        input = {
           environment: context.environment,
           context: context,
           data: data
         }
-        self.class.processor.call(env)
+        self.class.processor.call(input)
       end
     end
   end

@@ -10,8 +10,8 @@ module Sprockets
   #     environment.unregister_postprocessor 'application/javascript', Sprockets::SafetyColons
   #
   module SafetyColons
-    def self.call(env)
-      data = env[:data]
+    def self.call(input)
+      data = input[:data]
 
       # If the file is blank or ends in a semicolon, leave it as is
       if data =~ /\A\s*\Z/m || data =~ /;\s*\Z/m
