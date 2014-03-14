@@ -69,8 +69,9 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_preprocessor(mime_type, klass, &block)
-      @preprocessors[mime_type].push(Processor.make_processor(klass, &block))
+    def register_preprocessor(mime_type, klass, proc = nil, &block)
+      proc ||= block
+      @preprocessors[mime_type].push(Processor.make_processor(klass, &proc))
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
@@ -148,8 +149,9 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_bundle_processor(mime_type, klass, &block)
-      @bundle_processors[mime_type].push(Processor.make_processor(klass, &block))
+    def register_bundle_processor(mime_type, klass, proc = nil, &block)
+      proc ||= block
+      @bundle_processors[mime_type].push(Processor.make_processor(klass, &proc))
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
