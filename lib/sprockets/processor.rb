@@ -38,7 +38,7 @@ module Sprockets
     def render(context)
       # Legacy argument style.
       # Call processor block with `context` and `data`.
-      if self.class.processor.arity == 2
+      if self.class.processor.respond_to?(:arity) && self.class.processor.arity == 2
         self.class.processor.call(context, data)
       else
         input = {
