@@ -1,9 +1,5 @@
 module Sprockets
   class UglifierCompressor < Template
-    def self.default_mime_type
-      'application/javascript'
-    end
-
     def render(context)
       require 'uglifier' unless defined? ::Uglifier
 

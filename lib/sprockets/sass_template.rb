@@ -1,10 +1,6 @@
 module Sprockets
   # Also see `SassImporter` for more infomation.
   class SassTemplate < Template
-    def self.default_mime_type
-      'text/css'
-    end
-
     def syntax
       :sass
     end

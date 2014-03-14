@@ -94,17 +94,17 @@ module Sprockets
   register_compressor 'application/javascript', :yui, YUICompressor
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', CoffeeScriptTemplate
+  register_engine '.coffee', CoffeeScriptTemplate, mime_type: 'application/javascript'
 
   # JST engines
-  register_engine '.jst',    JstProcessor
-  register_engine '.eco',    EcoTemplate
-  register_engine '.ejs',    EjsTemplate
+  register_engine '.jst',    JstProcessor, mime_type: 'application/javascript'
+  register_engine '.eco',    EcoTemplate,  mime_type: 'application/javascript'
+  register_engine '.ejs',    EjsTemplate,  mime_type: 'application/javascript'
 
   # CSS engines
-  register_engine '.less',   LessTemplate
-  register_engine '.sass',   SassTemplate
-  register_engine '.scss',   ScssTemplate
+  register_engine '.less',   LessTemplate, mime_type: 'text/css'
+  register_engine '.sass',   SassTemplate, mime_type: 'text/css'
+  register_engine '.scss',   ScssTemplate, mime_type: 'text/css'
 
   # Other
   register_engine '.erb',    ERBTemplate

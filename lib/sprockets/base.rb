@@ -163,7 +163,7 @@ module Sprockets
     end
 
     # Registers a new Engine `klass` for `ext`.
-    def register_engine(ext, klass)
+    def register_engine(ext, klass, options = {})
       # Overrides the global behavior to expire the index
       expire_index!
       super

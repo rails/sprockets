@@ -66,11 +66,13 @@ module Sprockets
     #
     #     environment.register_engine '.coffee', CoffeeScriptTemplate
     #
-    def register_engine(ext, klass)
+    def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
       @engines[ext] = klass
 
-      if klass.respond_to?(:default_mime_type) && klass.default_mime_type
+      if options[:mime_type]
+        @engine_mime_types[ext.to_s] = options[:mime_type]
+      elsif klass.respond_to?(:default_mime_type) && klass.default_mime_type
         @engine_mime_types[ext.to_s] = klass.default_mime_type
       end
     end
