@@ -69,7 +69,7 @@ module Sprockets
   register_preprocessor 'text/css',               DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
-  autoload :SafetyColons, 'sprockets/safety_colons'
+  require 'sprockets/safety_colons'
   register_postprocessor 'application/javascript', SafetyColons
 
   require 'sprockets/charset_normalizer'
