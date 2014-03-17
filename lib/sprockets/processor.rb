@@ -6,7 +6,7 @@ module Sprockets
   #     end
   #
   class Processor
-    def self.make_processor(klass, proc) # :nodoc:
+    def self.make_processor(klass, proc = nil) # :nodoc:
       if !proc
         if klass.respond_to?(:call)
           proc = klass.method(:call)

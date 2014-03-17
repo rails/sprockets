@@ -68,7 +68,7 @@ module Sprockets
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @engines[ext] = klass
+      @engines[ext] = Processor.make_processor(klass)
 
       if options[:mime_type]
         @engine_mime_types[ext.to_s] = options[:mime_type]
