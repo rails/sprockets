@@ -1,19 +1,27 @@
 require 'sprockets_test'
 require 'sprockets/engines'
 
-class AlertTemplate < Sprockets::Template
+class AlertTemplate
   def self.default_mime_type
     'application/javascript'
   end
 
+  def initialize(file, &block)
+    @data = block.call
+  end
+
   def render(context)
-    "alert(#{data.inspect});"
+    "alert(#{@data.inspect});"
   end
 end
 
-class StringTemplate < Sprockets::Template
+class StringTemplate
+  def initialize(file, &block)
+    @data = block.call
+  end
+
   def render(context)
-    data.gsub(/#\{.*?\}/, "moo")
+    @data.gsub(/#\{.*?\}/, "moo")
   end
 end
 

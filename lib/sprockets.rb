@@ -14,7 +14,6 @@ module Sprockets
   autoload :StaticAsset,             "sprockets/static_asset"
 
   # Processing
-  autoload :Template,                "sprockets/template"
   autoload :Context,                 "sprockets/context"
   autoload :CoffeeScriptTemplate,    "sprockets/coffee_script_template"
   autoload :EcoTemplate,             "sprockets/eco_template"
