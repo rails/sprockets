@@ -5,7 +5,7 @@ module Sprockets
   #
   #   https://github.com/sstephenson/ruby-ejs
   #
-  class EjsTemplate < Template
+  module EjsTemplate
     # Compile template data with EJS compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -13,9 +13,9 @@ module Sprockets
     #
     #     # => "function(obj){...}"
     #
-    def render(context)
+    def self.call(input)
       require 'ejs' unless defined? ::EJS
-      EJS.compile(data)
+      EJS.compile(input[:data])
     end
   end
 end

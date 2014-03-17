@@ -1,20 +1,11 @@
 module Sprockets
-  class JstProcessor < Template
-    def self.default_namespace
-      'this.JST'
-    end
-
-    def render(context)
-      namespace = self.class.default_namespace
+  module JstProcessor
+    def self.call(input)
+      data = input[:data].gsub(/$(.)/m, "\\1  ").strip
       <<-JST
-(function() { #{namespace} || (#{namespace} = {}); #{namespace}[#{context.logical_path.inspect}] = #{indent(data)};
+(function() { this.JST || (this.JST = {}); this.JST[#{input[:logical_path].inspect}] = #{data};
 }).call(this);
       JST
     end
-
-    private
-      def indent(string)
-        string.gsub(/$(.)/m, "\\1  ").strip
-      end
   end
 end

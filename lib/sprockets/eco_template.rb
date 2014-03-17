@@ -6,7 +6,7 @@ module Sprockets
   #   https://github.com/sstephenson/ruby-eco
   #   https://github.com/sstephenson/eco
   #
-  class EcoTemplate < Template
+  module EcoTemplate
     # Compile template data with Eco compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -14,9 +14,9 @@ module Sprockets
     #
     #     # => "function(...) {...}"
     #
-    def render(context)
+    def self.call(input)
       require 'eco' unless defined? ::Eco
-      Eco.compile(data)
+      Eco.compile(input[:data])
     end
   end
 end
