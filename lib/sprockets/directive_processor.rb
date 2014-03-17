@@ -34,7 +34,7 @@ module Sprockets
   #
   #     env.register_processor('text/css', MyProcessor)
   #
-  class DirectiveProcessor < Template
+  class DirectiveProcessor
     # Directives will only be picked up if they are in the header
     # of the source file. C style (/* */), JavaScript (//), and
     # Ruby (#) comments are supported.
@@ -69,13 +69,18 @@ module Sprockets
     attr_reader :pathname
     attr_reader :header, :body
 
+    def self.call(input)
+      new.render(input)
+    end
+
     # `context` is a `Context` instance with methods that allow you to
     # access the environment and append to the bundle. See `Context`
     # for the complete API.
-    def render(context)
-      @context = context
-      @pathname = context.pathname
+    def render(input)
+      @context = input[:context]
+      @pathname = @context.pathname
 
+      data = input[:data]
       @header = data[HEADER_PATTERN, 0] || ""
       @body   = $' || data
       # Ensure body ends in a new line
