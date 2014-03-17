@@ -50,6 +50,7 @@ module Sprockets
         input = {
           environment: context.environment,
           context: context,
+          filename: context.pathname.to_s,
           logical_path: context.logical_path,
           content_type: context.content_type,
           data: data

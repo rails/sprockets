@@ -27,7 +27,7 @@ module Sprockets
   autoload :SassFunctions,           "sprockets/sass_functions"
   autoload :SassImporter,            "sprockets/sass_importer"
   autoload :SassTemplate,            "sprockets/sass_template"
-  autoload :ScssTemplate,            "sprockets/scss_template"
+  autoload :ScssTemplate,            "sprockets/sass_template"
 
   # Internal utilities
   autoload :ArgumentError,           "sprockets/errors"

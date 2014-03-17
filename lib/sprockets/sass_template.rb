@@ -1,11 +1,11 @@
 module Sprockets
   # Also see `SassImporter` for more infomation.
-  class SassTemplate < Template
-    def syntax
+  class SassTemplate
+    def self.syntax
       :sass
     end
 
-    def render(context)
+    def self.call(input)
       require 'sass' unless defined? ::Sass
 
       unless ::Sass::Script::Functions < Sprockets::SassFunctions
@@ -15,32 +15,35 @@ module Sprockets
         ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
       end
 
-      # Use custom importer that knows about Sprockets Caching
-      cache_store = SassCacheStore.new(context.environment)
-
       options = {
-        :filename => context.pathname.to_s,
+        :filename => input[:filename],
         :syntax => syntax,
-        :cache_store => cache_store,
-        :importer => SassImporter.new(context.pathname.to_s),
-        :load_paths => context.environment.paths.map { |path| SassImporter.new(path.to_s) },
+        :cache_store => SassCacheStore.new(input[:environment]),
+        :importer => SassImporter.new(input[:filename]),
+        :load_paths => input[:environment].paths.map { |path| SassImporter.new(path.to_s) },
         :sprockets => {
-          :context => context,
-          :environment => context.environment
+          :context => input[:context],
+          :environment => input[:environment]
         }
       }
 
-      result = ::Sass::Engine.new(data, options).render
+      result = ::Sass::Engine.new(input[:data], options).render
 
       # Track all imported files
       filenames = ([options[:importer].imported_filenames] + options[:load_paths].map(&:imported_filenames)).flatten.uniq
-      filenames.each { |filename| context.depend_on(filename) }
+      filenames.each { |filename| input[:context].depend_on(filename) }
 
       result
     rescue ::Sass::SyntaxError => e
       # Annotates exception message with parse line number
       context.__LINE__ = e.sass_backtrace.first[:line]
       raise e
+    end
+  end
+
+  class ScssTemplate < SassTemplate
+    def self.syntax
+      :scss
     end
   end
 end
