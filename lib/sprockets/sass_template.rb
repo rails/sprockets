@@ -19,24 +19,25 @@ module Sprockets
         :filename => input[:filename],
         :syntax => syntax,
         :cache_store => SassCacheStore.new(input[:environment]),
-        :importer => SassImporter.new(input[:filename]),
-        :load_paths => input[:environment].paths.map { |path| SassImporter.new(path.to_s) },
+        :load_paths => input[:environment].paths,
         :sprockets => {
           :context => input[:context],
           :environment => input[:environment]
         }
       }
 
-      result = ::Sass::Engine.new(input[:data], options).render
+      engine = ::Sass::Engine.new(input[:data], options)
+      css = engine.render
 
       # Track all imported files
-      filenames = ([options[:importer].imported_filenames] + options[:load_paths].map(&:imported_filenames)).flatten.uniq
-      filenames.each { |filename| input[:context].depend_on(filename) }
+      engine.dependencies.each do |dependency|
+        input[:context].depend_on(dependency.options[:filename])
+      end
 
-      result
+      css
     rescue ::Sass::SyntaxError => e
       # Annotates exception message with parse line number
-      context.__LINE__ = e.sass_backtrace.first[:line]
+      input[:context].__LINE__ = e.sass_backtrace.first[:line]
       raise e
     end
   end
