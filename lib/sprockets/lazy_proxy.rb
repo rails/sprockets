@@ -1,13 +1,17 @@
+require 'delegate'
+
 module Sprockets
-  class LazyProxy
+  # Internal: Used for lazy loading processors.
+  #
+  #   LazyProxy.new { CoffeeScriptTemplate }
+  #
+  class LazyProxy < Delegator
     def initialize(&block)
-      @block = block
-      @proc  = nil
+      @_block = block
     end
 
-    def call(*args)
-      @proc ||= @block.call
-      @proc.call(*args)
+    def __getobj__
+      @_obj ||= @_block.call
     end
   end
 end
