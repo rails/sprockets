@@ -14,17 +14,24 @@ module Sprockets
   autoload :StaticAsset,             'sprockets/static_asset'
 
   # Processing
-  autoload :Context,                 'sprockets/context'
+  autoload :CharsetNormalizer,       'sprockets/charset_normalizer'
+  autoload :ClosureCompressor,       'sprockets/closure_compressor'
   autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
+  autoload :Context,                 'sprockets/context'
+  autoload :DirectiveProcessor,      'sprockets/directive_processor'
   autoload :EcoTemplate,             'sprockets/eco_template'
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :LessTemplate,            'sprockets/less_template'
+  autoload :SafetyColons,            'sprockets/safety_colons'
   autoload :SassCacheStore,          'sprockets/sass_cache_store'
+  autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassFunctions,           'sprockets/sass_functions'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
+  autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
+  autoload :YUICompressor,           'sprockets/yui_compressor'
 
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
@@ -64,31 +71,19 @@ module Sprockets
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'
 
-  require 'sprockets/directive_processor'
   register_preprocessor 'text/css',               DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
-  require 'sprockets/safety_colons'
   register_postprocessor 'application/javascript', SafetyColons
 
-  require 'sprockets/charset_normalizer'
   register_bundle_processor 'text/css', CharsetNormalizer
 
-  require 'sprockets/sass_compressor'
   register_compressor 'text/css', :sass, SassCompressor
   register_compressor 'text/css', :scss, SassCompressor
-
-  require 'sprockets/yui_compressor'
   register_compressor 'text/css', :yui, YUICompressor
-
-  autoload :ClosureCompressor, 'sprockets/closure_compressor'
   register_compressor 'application/javascript', :closure, LazyProxy.new { ClosureCompressor }
-
-  require 'sprockets/uglifier_compressor'
   register_compressor 'application/javascript', :uglifier, UglifierCompressor
   register_compressor 'application/javascript', :uglify, UglifierCompressor
-
-  require 'sprockets/yui_compressor'
   register_compressor 'application/javascript', :yui, YUICompressor
 
   # Mmm, CoffeeScript
