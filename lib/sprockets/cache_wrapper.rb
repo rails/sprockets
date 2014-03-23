@@ -27,6 +27,16 @@ module Sprockets
       @cache = cache
     end
 
+    def fetch(key)
+      expanded_key = expand_key(key)
+      value = get(expanded_key)
+      if !value
+        value = yield
+        set(expanded_key, value)
+      end
+      value
+    end
+
     def [](key)
       get(expand_key(key))
     end
@@ -36,7 +46,20 @@ module Sprockets
     end
 
     def expand_key(key)
-      ['sprockets', Digest::SHA1.new.update(key).hexdigest].join('/')
+      digest = Digest::SHA1.new
+      hash_key!(digest, key)
+      ['sprockets', digest.hexdigest].join('/')
+    end
+
+    def hash_key!(digest, obj)
+      case obj
+      when String
+        digest.update(obj)
+      when Array
+        obj.each { |o| hash_key!(digest, o) }
+      else
+        raise ArgumentError, "could not hash #{obj.class}"
+      end
     end
   end
 

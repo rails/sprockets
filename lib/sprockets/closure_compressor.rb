@@ -31,8 +31,9 @@ module Sprockets
     end
 
     def call(input)
-      key = @cache_key + [input[:data]]
-      input[:cache][key] ||= @compiler.compile(input[:data])
+      input[:cache].fetch(@cache_key + [input[:data]]) do
+        @compiler.compile(input[:data])
+      end
     end
   end
 end
