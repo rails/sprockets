@@ -34,6 +34,7 @@ module Sprockets
   autoload :EngineError,             "sprockets/errors"
   autoload :Error,                   "sprockets/errors"
   autoload :FileNotFound,            "sprockets/errors"
+  autoload :LazyProcessor,           "sprockets/lazy_processor"
   autoload :Utils,                   "sprockets/utils"
 
   module Cache
@@ -80,8 +81,8 @@ module Sprockets
   require 'sprockets/yui_compressor'
   register_compressor 'text/css', :yui, YUICompressor
 
-  require 'sprockets/closure_compressor'
-  register_compressor 'application/javascript', :closure, ClosureCompressor
+  autoload :ClosureCompressor, 'sprockets/closure_compressor'
+  register_compressor 'application/javascript', :closure, LazyProcessor.new { ClosureCompressor }
 
   require 'sprockets/uglifier_compressor'
   register_compressor 'application/javascript', :uglifier, UglifierCompressor
