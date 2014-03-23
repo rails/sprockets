@@ -194,6 +194,7 @@ module Sprockets
       input = {
         environment: environment,
         context: self,
+        cache: environment.cache,
         filename: pathname.to_s,
         logical_path: logical_path,
         content_type: content_type,

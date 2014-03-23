@@ -14,16 +14,25 @@ module Sprockets
   #       Sprockets::ClosureCompressor.new({ ... })
   #
   class ClosureCompressor
+    VERSION = '1'
+
     def self.call(*args)
       new.call(*args)
     end
 
-    def initialize(*args)
-      @compiler = Closure::Compiler.new(*args)
+    def initialize(options = {})
+      @compiler = Closure::Compiler.new(options)
+      @cache_key = [
+        Closure::VERSION,
+        Closure::COMPILER_VERSION,
+        VERSION,
+        JSON.generate(options)
+      ]
     end
 
     def call(input)
-      @compiler.compile(input[:data])
+      key = @cache_key + [input[:data]]
+      input[:cache][key] ||= @compiler.compile(input[:data])
     end
   end
 end
