@@ -5,12 +5,12 @@ module Sprockets
   #
   # To accept the default options
   #
-  #     environment.register_bundle_processor 'text/js',
+  #     environment.register_bundle_processor 'application/javascript',
   #       Sprockets::ClosureCompressor
   #
   # Or to pass options to the Closure::Compiler class.
   #
-  #     environment.register_bundle_processor 'text/js',
+  #     environment.register_bundle_processor 'application/javascript',
   #       Sprockets::ClosureCompressor.new({ ... })
   #
   class ClosureCompressor
