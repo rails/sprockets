@@ -1,9 +1,17 @@
+require 'closure-compiler'
+
 module Sprockets
   class ClosureCompressor
-    def self.call(input)
-      require 'closure-compiler' unless defined? ::Closure::Compiler
-      data = input[:data]
-      Closure::Compiler.new.compile(data)
+    def self.call(*args)
+      new.call(*args)
+    end
+
+    def initialize(*args)
+      @compiler = Closure::Compiler.new(*args)
+    end
+
+    def call(input)
+      @compiler.compile(input[:data])
     end
   end
 end
