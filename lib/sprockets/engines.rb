@@ -1,6 +1,7 @@
 require 'sprockets/eco_template'
 require 'sprockets/ejs_template'
 require 'sprockets/jst_processor'
+require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
 module Sprockets
@@ -68,12 +69,17 @@ module Sprockets
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @engines[ext] = Processor.make_processor(klass)
 
-      if options[:mime_type]
-        @engine_mime_types[ext.to_s] = options[:mime_type]
-      elsif klass.respond_to?(:default_mime_type) && klass.default_mime_type
-        @engine_mime_types[ext.to_s] = klass.default_mime_type
+      if klass.respond_to?(:call)
+        @engines[ext] = klass
+        if options[:mime_type]
+          @engine_mime_types[ext.to_s] = options[:mime_type]
+        end
+      else
+        @engines[ext] = LegacyTiltProcessor.new(klass)
+        if klass.respond_to?(:default_mime_type) && klass.default_mime_type
+          @engine_mime_types[ext.to_s] = klass.default_mime_type
+        end
       end
     end
 

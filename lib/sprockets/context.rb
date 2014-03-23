@@ -191,10 +191,18 @@ module Sprockets
         end
       end
 
+      input = {
+        environment: environment,
+        context: self,
+        filename: pathname.to_s,
+        logical_path: logical_path,
+        content_type: content_type,
+        data: result
+      }
+
       processors.each do |processor|
         begin
-          template = processor.new(pathname.to_s) { result }
-          result = template.render(self)
+          result = processor.call(input.merge(data: result))
         rescue Exception => e
           annotate_exception! e
           raise

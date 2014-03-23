@@ -38,8 +38,8 @@ class TestEngines < Sprockets::TestCase
 
   test "registering a global engine" do
     Sprockets.register_engine ".alert", AlertTemplate
-    assert_equal AlertTemplate, Sprockets.engines("alert")
-    assert_equal AlertTemplate, Sprockets.engines(".alert")
+    assert_equal 'AlertTemplate', Sprockets.engines("alert").name
+    assert_equal 'AlertTemplate', Sprockets.engines(".alert").name
 
     env = new_environment
     asset = env["hello.alert"]

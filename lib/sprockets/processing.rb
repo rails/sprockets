@@ -1,6 +1,7 @@
 require 'sprockets/engines'
+require 'sprockets/legacy_proc_processor'
+require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
-require 'sprockets/processor'
 require 'sprockets/utils'
 
 module Sprockets
@@ -69,9 +70,8 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_preprocessor(mime_type, klass, proc = nil, &block)
-      proc ||= block
-      @preprocessors[mime_type].push(Processor.make_processor(klass, proc))
+    def register_preprocessor(mime_type, klass, &block)
+      @preprocessors[mime_type].push(wrap_processor(klass, block))
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
@@ -86,7 +86,7 @@ module Sprockets
     #
     def register_postprocessor(mime_type, klass, proc = nil, &block)
       proc ||= block
-      @postprocessors[mime_type].push(Processor.make_processor(klass, proc))
+      @postprocessors[mime_type].push(wrap_processor(klass, proc))
     end
 
     # Deprecated alias for `unregister_preprocessor`.
@@ -101,7 +101,7 @@ module Sprockets
     def unregister_preprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @preprocessors[mime_type].detect { |cls|
-          cls.name == "Sprockets::Processor (#{klass})"
+          cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
@@ -115,7 +115,7 @@ module Sprockets
     def unregister_postprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @postprocessors[mime_type].detect { |cls|
-          cls.name == "Sprockets::Processor (#{klass})"
+          cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
@@ -149,9 +149,8 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_bundle_processor(mime_type, klass, proc = nil, &block)
-      proc ||= block
-      @bundle_processors[mime_type].push(Processor.make_processor(klass, proc))
+    def register_bundle_processor(mime_type, klass, &block)
+      @bundle_processors[mime_type].push(wrap_processor(klass, block))
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
@@ -161,7 +160,7 @@ module Sprockets
     def unregister_bundle_processor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
         klass = @bundle_processors[mime_type].detect { |cls|
-          cls.name == "Sprockets::Processor (#{klass})"
+          cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
@@ -176,6 +175,20 @@ module Sprockets
           if format_ext = extension_for_mime_type(mime_type)
             @trail.alias_extension(ext.to_s, format_ext)
           end
+        end
+      end
+
+      def wrap_processor(klass, proc)
+        if !proc
+          if klass.respond_to?(:call)
+            klass
+          else
+            LegacyTiltProcessor.new(klass)
+          end
+        elsif proc.respond_to?(:arity) && proc.arity == 2
+          LegacyProcProcessor.new(klass.to_s, proc)
+        else
+          proc
         end
       end
   end

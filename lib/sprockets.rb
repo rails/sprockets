@@ -21,7 +21,6 @@ module Sprockets
   autoload :ERBTemplate,             "sprockets/erb_template"
   autoload :JstProcessor,            "sprockets/jst_processor"
   autoload :LessTemplate,            "sprockets/less_template"
-  autoload :Processor,               "sprockets/processor"
   autoload :SassCacheStore,          "sprockets/sass_cache_store"
   autoload :SassFunctions,           "sprockets/sass_functions"
   autoload :SassTemplate,            "sprockets/sass_template"
