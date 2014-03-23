@@ -1,3 +1,4 @@
+require 'json'
 require 'yui/compressor'
 
 module Sprockets

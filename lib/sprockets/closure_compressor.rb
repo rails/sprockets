@@ -1,4 +1,5 @@
 require 'closure-compiler'
+require 'json'
 
 module Sprockets
   # Public: Closure Compiler minifier.
