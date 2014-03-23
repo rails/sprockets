@@ -89,8 +89,11 @@ module EnvironmentTests
   end
 
   test "lookup compressors" do
-    assert_equal Sprockets::SassCompressor, @env.compressors['text/css'][:sass]
-    assert_equal Sprockets::UglifierCompressor, @env.compressors['application/javascript'][:uglifier]
+    silence_warnings do
+      require 'sprockets/sass_compressor'
+    end
+    assert_equal 'Sprockets::SassCompressor', @env.compressors['text/css'][:sass].name
+    assert_equal 'Sprockets::UglifierCompressor', @env.compressors['application/javascript'][:uglifier].name
   end
 
   test "resolve in environment" do
@@ -442,6 +445,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "setting css compressor to template handler" do
+    silence_warnings do
+      require 'sprockets/sass_compressor'
+    end
     assert_nil @env.css_compressor
     @env.css_compressor = Sprockets::SassCompressor
     assert_equal Sprockets::SassCompressor, @env.css_compressor
@@ -458,9 +464,12 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "setting css compressor to sym" do
+    silence_warnings do
+      require 'sprockets/sass_compressor'
+    end
     assert_nil @env.css_compressor
     @env.css_compressor = :sass
-    assert_equal Sprockets::SassCompressor, @env.css_compressor
+    assert_equal 'Sprockets::SassCompressor', @env.css_compressor.name
     @env.css_compressor = nil
     assert_nil @env.css_compressor
   end

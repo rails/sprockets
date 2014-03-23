@@ -33,6 +33,13 @@ class Sprockets::TestCase < MiniTest::Test
     end
   end
 
+  def silence_warnings
+    old_verbose, $VERBOSE = $VERBOSE, false
+    yield
+  ensure
+    $VERBOSE = old_verbose
+  end
+
   def sandbox(*paths)
     backup_paths = paths.select { |path| File.exist?(path) }
     remove_paths = paths.select { |path| !File.exist?(path) }

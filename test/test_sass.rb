@@ -14,13 +14,6 @@ class TestBaseSass < Sprockets::TestCase
     FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
-
-  def silence_warnings
-    old_verbose, $VERBOSE = $VERBOSE, false
-    yield
-  ensure
-    $VERBOSE = old_verbose
-  end
 end
 
 class TestSprocketsSass < TestBaseSass
