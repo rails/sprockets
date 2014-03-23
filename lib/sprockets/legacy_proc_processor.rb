@@ -1,3 +1,5 @@
+require 'delegate'
+
 module Sprockets
   # Deprecated: Wraps legacy process Procs with new processor call signature.
   #
@@ -6,10 +8,14 @@ module Sprockets
   #     LegacyProcProcessor.new(:compress,
   #       proc { |context, data| data.gsub(...) })
   #
-  class LegacyProcProcessor
+  class LegacyProcProcessor < Delegator
     def initialize(name, proc)
       @name = name
       @proc = proc
+    end
+
+    def __getobj__
+      @proc
     end
 
     def name

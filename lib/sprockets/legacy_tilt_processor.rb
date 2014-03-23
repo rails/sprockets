@@ -1,3 +1,5 @@
+require 'delegate'
+
 module Sprockets
   # Deprecated: Wraps legacy engine and process Tilt templates with new
   # processor call signature.
@@ -6,17 +8,13 @@ module Sprockets
   #
   #     LegacyTiltProcessor.new(Tilt::CoffeeScriptTemplate)
   #
-  class LegacyTiltProcessor
+  class LegacyTiltProcessor < Delegator
     def initialize(klass)
       @klass = klass
     end
 
-    def name
-      @klass.name
-    end
-
-    def to_s
-      @klass.to_s
+    def __getobj__
+      @klass
     end
 
     def call(input)
