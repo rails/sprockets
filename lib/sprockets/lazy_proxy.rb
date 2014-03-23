@@ -1,5 +1,5 @@
 module Sprockets
-  class LazyProcessor
+  class LazyProxy
     def initialize(&block)
       @block = block
       @proc  = nil
