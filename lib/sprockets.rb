@@ -2,45 +2,45 @@ require 'sprockets/version'
 
 module Sprockets
   # Environment
-  autoload :Base,                    "sprockets/base"
-  autoload :Environment,             "sprockets/environment"
-  autoload :Index,                   "sprockets/index"
-  autoload :Manifest,                "sprockets/manifest"
+  autoload :Base,                    'sprockets/base'
+  autoload :Environment,             'sprockets/environment'
+  autoload :Index,                   'sprockets/index'
+  autoload :Manifest,                'sprockets/manifest'
 
   # Assets
-  autoload :Asset,                   "sprockets/asset"
-  autoload :BundledAsset,            "sprockets/bundled_asset"
-  autoload :ProcessedAsset,          "sprockets/processed_asset"
-  autoload :StaticAsset,             "sprockets/static_asset"
+  autoload :Asset,                   'sprockets/asset'
+  autoload :BundledAsset,            'sprockets/bundled_asset'
+  autoload :ProcessedAsset,          'sprockets/processed_asset'
+  autoload :StaticAsset,             'sprockets/static_asset'
 
   # Processing
-  autoload :Context,                 "sprockets/context"
-  autoload :CoffeeScriptTemplate,    "sprockets/coffee_script_template"
-  autoload :EcoTemplate,             "sprockets/eco_template"
-  autoload :EjsTemplate,             "sprockets/ejs_template"
-  autoload :ERBTemplate,             "sprockets/erb_template"
-  autoload :JstProcessor,            "sprockets/jst_processor"
-  autoload :LessTemplate,            "sprockets/less_template"
-  autoload :SassCacheStore,          "sprockets/sass_cache_store"
-  autoload :SassFunctions,           "sprockets/sass_functions"
-  autoload :SassTemplate,            "sprockets/sass_template"
-  autoload :ScssTemplate,            "sprockets/sass_template"
+  autoload :Context,                 'sprockets/context'
+  autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
+  autoload :EcoTemplate,             'sprockets/eco_template'
+  autoload :EjsTemplate,             'sprockets/ejs_template'
+  autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :JstProcessor,            'sprockets/jst_processor'
+  autoload :LessTemplate,            'sprockets/less_template'
+  autoload :SassCacheStore,          'sprockets/sass_cache_store'
+  autoload :SassFunctions,           'sprockets/sass_functions'
+  autoload :SassTemplate,            'sprockets/sass_template'
+  autoload :ScssTemplate,            'sprockets/sass_template'
 
   # Internal utilities
-  autoload :ArgumentError,           "sprockets/errors"
-  autoload :AssetAttributes,         "sprockets/asset_attributes"
-  autoload :CircularDependencyError, "sprockets/errors"
-  autoload :ContentTypeMismatch,     "sprockets/errors"
-  autoload :EngineError,             "sprockets/errors"
-  autoload :Error,                   "sprockets/errors"
-  autoload :FileNotFound,            "sprockets/errors"
-  autoload :LazyProxy,               "sprockets/lazy_proxy"
-  autoload :Utils,                   "sprockets/utils"
+  autoload :ArgumentError,           'sprockets/errors'
+  autoload :AssetAttributes,         'sprockets/asset_attributes'
+  autoload :CircularDependencyError, 'sprockets/errors'
+  autoload :ContentTypeMismatch,     'sprockets/errors'
+  autoload :EngineError,             'sprockets/errors'
+  autoload :Error,                   'sprockets/errors'
+  autoload :FileNotFound,            'sprockets/errors'
+  autoload :LazyProxy,               'sprockets/lazy_proxy'
+  autoload :Utils,                   'sprockets/utils'
 
   module Cache
-    autoload :FileStore, "sprockets/cache/file_store"
-    autoload :MemoryStore, "sprockets/cache/memory_store"
-    autoload :NullStore, "sprockets/cache/null_store"
+    autoload :FileStore, 'sprockets/cache/file_store'
+    autoload :MemoryStore, 'sprockets/cache/memory_store'
+    autoload :NullStore, 'sprockets/cache/null_store'
   end
 
   # Extend Sprockets module to provide global registry
