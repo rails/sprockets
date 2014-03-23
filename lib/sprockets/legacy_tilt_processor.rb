@@ -1,4 +1,11 @@
 module Sprockets
+  # Deprecated: Wraps legacy engine and process Tilt templates with new
+  # processor call signature.
+  #
+  # Will be removed in Sprockets 4.x.
+  #
+  #     LegacyTiltProcessor.new(Tilt::CoffeeScriptTemplate)
+  #
   class LegacyTiltProcessor
     def initialize(klass)
       @klass = klass
