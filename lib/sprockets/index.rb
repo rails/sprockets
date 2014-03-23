@@ -21,7 +21,7 @@ module Sprockets
       # Copy environment attributes
       @logger            = environment.logger
       @context_class     = environment.context_class
-      @cache             = IndexWrapper.new(self, environment.cache)
+      @cache             = environment.cache
       @trail             = environment.trail.index
       @digest            = environment.digest
       @digest_class      = environment.digest_class

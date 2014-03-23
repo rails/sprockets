@@ -1,28 +1,30 @@
+require 'digest/sha1'
+
 module Sprockets
   class CacheWrapper
-    def self.wrap(environment, cache)
+    def self.wrap(cache)
       if cache.is_a?(CacheWrapper)
         cache
 
       # `Cache#get(key)` for Memcache
       elsif cache.respond_to?(:get)
-        GetWrapper.new(environment, cache)
+        GetWrapper.new(cache)
 
       # `Cache#[key]` so `Hash` can be used
       elsif cache.respond_to?(:[])
-        HashWrapper.new(environment, cache)
+        HashWrapper.new(cache)
 
       # `Cache#read(key)` for `ActiveSupport::Cache` support
       elsif cache.respond_to?(:read)
-        ReadWriteWrapper.new(environment, cache)
+        ReadWriteWrapper.new(cache)
 
       else
-        HashWrapper.new(environment, Sprockets::Cache::NullStore.new)
+        HashWrapper.new(Sprockets::Cache::NullStore.new)
       end
     end
 
-    def initialize(environment, cache)
-      @environment, @cache = environment, cache
+    def initialize(cache)
+      @cache = cache
     end
 
     def [](key)
@@ -34,7 +36,7 @@ module Sprockets
     end
 
     def expand_key(key)
-      ['sprockets', @environment.digest.hexdigest, @environment.digest.update(key).hexdigest].join('/')
+      ['sprockets', Digest::SHA1.new.update(key).hexdigest].join('/')
     end
   end
 
