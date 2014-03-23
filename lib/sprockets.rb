@@ -36,6 +36,7 @@ module Sprockets
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
   autoload :AssetAttributes,         'sprockets/asset_attributes'
+  autoload :CacheWrapper,            'sprockets/cache_wrapper'
   autoload :CircularDependencyError, 'sprockets/errors'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :EngineError,             'sprockets/errors'
