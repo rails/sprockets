@@ -93,7 +93,7 @@ module Sprockets
   # JST engines
   register_engine '.jst',    LazyProxy.new { JstProcessor }, mime_type: 'application/javascript'
   register_engine '.eco',    LazyProxy.new { EcoTemplate },  mime_type: 'application/javascript'
-  register_engine '.ejs',    EjsTemplate,  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProxy.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
   register_engine '.less',   LessTemplate, mime_type: 'text/css'

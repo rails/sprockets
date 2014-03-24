@@ -1,3 +1,5 @@
+require 'ejs'
+
 module Sprockets
   # Template engine class for the EJS compiler. Depends on the `ejs` gem.
   #
@@ -14,8 +16,7 @@ module Sprockets
     #     # => "function(obj){...}"
     #
     def self.call(input)
-      require 'ejs' unless defined? ::EJS
-      EJS.compile(input[:data])
+      ::EJS.compile(input[:data])
     end
   end
 end
