@@ -18,11 +18,6 @@ module Sprockets
       @trail.extensions - @engines.keys
     end
 
-    # Deprecated alias for `preprocessors`.
-    def processors(*args)
-      preprocessors(*args)
-    end
-
     # Returns an `Array` of `Processor` classes. If a `mime_type`
     # argument is supplied, the processors registered under that
     # extension will be returned.
@@ -56,11 +51,6 @@ module Sprockets
       end
     end
 
-    # Deprecated alias for `register_preprocessor`.
-    def register_processor(*args, &block)
-      register_preprocessor(*args, &block)
-    end
-
     # Registers a new Preprocessor `klass` for `mime_type`.
     #
     #     register_preprocessor 'text/css', Sprockets::DirectiveProcessor
@@ -88,11 +78,6 @@ module Sprockets
     def register_postprocessor(mime_type, klass, proc = nil, &block)
       proc ||= block
       @postprocessors[mime_type].push(wrap_processor(klass, proc))
-    end
-
-    # Deprecated alias for `unregister_preprocessor`.
-    def unregister_processor(*args)
-      unregister_preprocessor(*args)
     end
 
     # Remove Preprocessor `klass` for `mime_type`.
