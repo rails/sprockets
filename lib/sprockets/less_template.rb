@@ -1,8 +1,8 @@
+require 'less'
+
 module Sprockets
   module LessTemplate
     def self.call(input)
-      require 'less' unless defined? ::Less
-
       if ::Less.const_defined? :Engine
         engine = ::Less::Engine.new(input[:data])
       else
