@@ -88,7 +88,7 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProxy.new { YUICompressor }
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', CoffeeScriptTemplate, mime_type: 'application/javascript'
+  register_engine '.coffee', LazyProxy.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
   register_engine '.jst',    LazyProxy.new { JstProcessor }, mime_type: 'application/javascript'
