@@ -1,6 +1,8 @@
 require 'less'
 
 module Sprockets
+  # TODO: Track processed files
+  # TODO: Add tests
   module LessTemplate
     def self.call(input)
       if ::Less.const_defined? :Engine
