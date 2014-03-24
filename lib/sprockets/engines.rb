@@ -1,6 +1,4 @@
-require 'sprockets/eco_template'
-require 'sprockets/ejs_template'
-require 'sprockets/jst_processor'
+require 'sprockets/lazy_proxy'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
@@ -70,7 +68,7 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      if klass.respond_to?(:call)
+      if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
         @engines[ext] = klass
         if options[:mime_type]
           @engine_mime_types[ext.to_s] = options[:mime_type]
