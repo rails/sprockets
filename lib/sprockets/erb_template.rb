@@ -1,7 +1,8 @@
+require 'erb'
+
 module Sprockets
   module ERBTemplate
     def self.call(input)
-      require 'erb' unless defined? ::ERB
       engine = ::ERB.new(input[:data], nil, '<>')
       method_name = "__sprockets_#{Thread.current.object_id.abs}"
       context = input[:context]

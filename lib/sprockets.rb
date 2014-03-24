@@ -101,5 +101,5 @@ module Sprockets
   register_engine '.scss',   ScssTemplate, mime_type: 'text/css'
 
   # Other
-  register_engine '.erb',    ERBTemplate
+  register_engine '.erb',    LazyProxy.new { ERBTemplate }
 end
