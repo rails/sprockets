@@ -96,9 +96,9 @@ module Sprockets
   register_engine '.ejs',    LazyProxy.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
-  register_engine '.less',   LessTemplate, mime_type: 'text/css'
-  register_engine '.sass',   SassTemplate, mime_type: 'text/css'
-  register_engine '.scss',   ScssTemplate, mime_type: 'text/css'
+  register_engine '.less',   LazyProxy.new { LessTemplate }, mime_type: 'text/css'
+  register_engine '.sass',   LazyProxy.new { SassTemplate }, mime_type: 'text/css'
+  register_engine '.scss',   LazyProxy.new { ScssTemplate }, mime_type: 'text/css'
 
   # Other
   register_engine '.erb',    LazyProxy.new { ERBTemplate }
