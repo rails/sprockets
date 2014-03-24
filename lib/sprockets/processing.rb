@@ -1,4 +1,5 @@
 require 'sprockets/engines'
+require 'sprockets/lazy_proxy'
 require 'sprockets/legacy_proc_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
@@ -180,7 +181,7 @@ module Sprockets
 
       def wrap_processor(klass, proc)
         if !proc
-          if klass.respond_to?(:call)
+          if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
             klass
           else
             LegacyTiltProcessor.new(klass)

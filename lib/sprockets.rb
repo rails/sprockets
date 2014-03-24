@@ -72,12 +72,12 @@ module Sprockets
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'
 
-  register_preprocessor 'text/css',               DirectiveProcessor
-  register_preprocessor 'application/javascript', DirectiveProcessor
+  register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
+  register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
 
-  register_postprocessor 'application/javascript', SafetyColons
+  register_postprocessor 'application/javascript', LazyProxy.new { SafetyColons }
 
-  register_bundle_processor 'text/css', CharsetNormalizer
+  register_bundle_processor 'text/css', LazyProxy.new { CharsetNormalizer }
 
   register_compressor 'text/css', :sass, LazyProxy.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProxy.new { SassCompressor }
