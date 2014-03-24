@@ -83,8 +83,8 @@ module Sprockets
   register_compressor 'text/css', :scss, LazyProxy.new { SassCompressor }
   register_compressor 'text/css', :yui, LazyProxy.new { YUICompressor }
   register_compressor 'application/javascript', :closure, LazyProxy.new { ClosureCompressor }
-  register_compressor 'application/javascript', :uglifier, UglifierCompressor
-  register_compressor 'application/javascript', :uglify, UglifierCompressor
+  register_compressor 'application/javascript', :uglifier, LazyProxy.new { UglifierCompressor }
+  register_compressor 'application/javascript', :uglify, LazyProxy.new { UglifierCompressor }
   register_compressor 'application/javascript', :yui, LazyProxy.new { YUICompressor }
 
   # Mmm, CoffeeScript

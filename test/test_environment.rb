@@ -458,7 +458,7 @@ class TestEnvironment < Sprockets::TestCase
   test "setting js compressor to sym" do
     assert_nil @env.js_compressor
     @env.js_compressor = :uglifier
-    assert_equal Sprockets::UglifierCompressor, @env.js_compressor
+    assert_equal 'Sprockets::UglifierCompressor', @env.js_compressor.name
     @env.js_compressor = nil
     assert_nil @env.js_compressor
   end

@@ -22,10 +22,10 @@ module Sprockets
     end
 
     def initialize(options = {})
-      @compiler = Closure::Compiler.new(options)
+      @compiler = ::Closure::Compiler.new(options)
       @cache_key = [
-        Closure::VERSION,
-        Closure::COMPILER_VERSION,
+        ::Closure::VERSION,
+        ::Closure::COMPILER_VERSION,
         VERSION,
         JSON.generate(options)
       ]
