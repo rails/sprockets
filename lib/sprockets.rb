@@ -91,7 +91,7 @@ module Sprockets
   register_engine '.coffee', CoffeeScriptTemplate, mime_type: 'application/javascript'
 
   # JST engines
-  register_engine '.jst',    JstProcessor, mime_type: 'application/javascript'
+  register_engine '.jst',    LazyProxy.new { JstProcessor }, mime_type: 'application/javascript'
   register_engine '.eco',    EcoTemplate,  mime_type: 'application/javascript'
   register_engine '.ejs',    EjsTemplate,  mime_type: 'application/javascript'
 
