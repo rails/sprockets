@@ -1,3 +1,5 @@
+require 'sass'
+
 module Sprockets
   # Also see `SassImporter` for more infomation.
   class SassTemplate
@@ -6,8 +8,6 @@ module Sprockets
     end
 
     def self.call(input)
-      require 'sass' unless defined? ::Sass
-
       unless ::Sass::Script::Functions < Sprockets::SassFunctions
         # Install custom functions. It'd be great if this didn't need to
         # be installed globally, but could be passed into Engine as an
