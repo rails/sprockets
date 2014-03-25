@@ -86,8 +86,6 @@ module Sprockets
       # Ensure body ends in a new line
       @body  += "\n" if @body != "" && @body !~ /\n\Z/m
 
-      @included_pathnames = []
-
       @result = ""
       @result.force_encoding(body.encoding)
 
@@ -133,7 +131,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :included_pathnames
       attr_reader :context
 
       # Gathers comment directives in the source and processes them.
@@ -171,10 +168,6 @@ module Sprockets
           @result << processed_header << "\n"
         end
 
-        included_pathnames.each do |pathname|
-          @result << context.evaluate(pathname)
-        end
-
         unless @has_written_body
           @result << body
         end
@@ -202,11 +195,10 @@ module Sprockets
         context.require_asset(path)
       end
 
-      # `require_self` causes the body of the current file to be
-      # inserted before any subsequent `require` or `include`
-      # directives. Useful in CSS files, where it's common for the
-      # index file to contain global styles that need to be defined
-      # before other dependencies are loaded.
+      # `require_self` causes the body of the current file to be inserted
+      # before any subsequent `require` directives. Useful in CSS files, where
+      # it's common for the index file to contain global styles that need to
+      # be defined before other dependencies are loaded.
       #
       #     /*= require "reset"
       #      *= require_self
@@ -220,20 +212,7 @@ module Sprockets
 
         context.require_asset(pathname)
         process_source
-        included_pathnames.clear
         @has_written_body = true
-      end
-
-      # The `include` directive works similar to `require` but
-      # inserts the contents of the dependency even if it already
-      # has been required.
-      #
-      #     //= include "header"
-      #
-      def process_include_directive(path)
-        pathname = context.resolve(path)
-        context.depend_on_asset(pathname)
-        included_pathnames << pathname
       end
 
       # `require_directory` requires all the files inside a single
