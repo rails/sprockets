@@ -70,13 +70,13 @@ module Sprockets
     attr_reader :header, :body
 
     def self.call(input)
-      new.render(input)
+      new.call(input)
     end
 
     # `context` is a `Context` instance with methods that allow you to
     # access the environment and append to the bundle. See `Context`
     # for the complete API.
-    def render(input)
+    def call(input)
       @context = input[:context]
       @pathname = @context.pathname
 
