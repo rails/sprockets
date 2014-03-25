@@ -22,13 +22,13 @@ module Sprockets
 
     def call(input)
       options = {
-        :filename => input[:filename],
-        :syntax => self.class.syntax,
-        :cache_store => SassCacheStore.new(input[:cache]),
-        :load_paths => input[:environment].paths,
-        :sprockets => {
-          :context => input[:context],
-          :environment => input[:environment]
+        filename: input[:filename],
+        syntax: self.class.syntax,
+        cache_store: SassCacheStore.new(input[:cache]),
+        load_paths: input[:environment].paths,
+        sprockets: {
+          context: input[:context],
+          environment: input[:environment]
         }
       }
 
