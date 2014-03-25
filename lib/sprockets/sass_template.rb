@@ -7,18 +7,24 @@ module Sprockets
       :sass
     end
 
-    def self.call(input)
+    def self.call(*args)
+      new.call(*args)
+    end
+
+    def initialize
       unless ::Sass::Script::Functions < Sprockets::SassFunctions
         # Install custom functions. It'd be great if this didn't need to
         # be installed globally, but could be passed into Engine as an
         # option.
         ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
       end
+    end
 
+    def call(input)
       options = {
         :filename => input[:filename],
-        :syntax => syntax,
-        :cache_store => SassCacheStore.new(input[:environment]),
+        :syntax => self.class.syntax,
+        :cache_store => SassCacheStore.new(input[:cache]),
         :load_paths => input[:environment].paths,
         :sprockets => {
           :context => input[:context],
