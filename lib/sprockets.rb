@@ -30,18 +30,13 @@ module Sprockets
   # Internal utilities
   autoload :ArgumentError,           "sprockets/errors"
   autoload :AssetAttributes,         "sprockets/asset_attributes"
+  autoload :Cache,                   "sprockets/cache"
   autoload :CircularDependencyError, "sprockets/errors"
   autoload :ContentTypeMismatch,     "sprockets/errors"
   autoload :EngineError,             "sprockets/errors"
   autoload :Error,                   "sprockets/errors"
   autoload :FileNotFound,            "sprockets/errors"
   autoload :Utils,                   "sprockets/utils"
-
-  module Cache
-    autoload :FileStore, "sprockets/cache/file_store"
-    autoload :MemoryStore, "sprockets/cache/memory_store"
-    autoload :NullStore, "sprockets/cache/null_store"
-  end
 
   # Extend Sprockets module to provide global registry
   require 'hike'

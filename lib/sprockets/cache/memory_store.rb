@@ -1,5 +1,5 @@
 module Sprockets
-  module Cache
+  class Cache
     # Basic in memory LRU cache.
     #
     #     environment.cache = Sprockets::Cache::MemoryStore.new(1000)
