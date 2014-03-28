@@ -85,12 +85,12 @@ module Sprockets
       def build_asset(path, pathname, options)
         key = asset_cache_key_for(pathname, options)
 
-        if (asset = Asset.from_hash(self, cache[key])) && asset.fresh?(self)
+        if (asset = Asset.from_hash(self, cache.get(key))) && asset.fresh?(self)
           asset
         elsif asset = super
           hash = {}
           asset.encode_with(hash)
-          cache[key] = hash
+          cache.set(key, hash)
           asset
         end
       end
