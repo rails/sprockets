@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "ejs", "~> 1.0"
   s.add_development_dependency "execjs", "~> 2.0"
   s.add_development_dependency "json"
-  s.add_development_dependency "less"
   s.add_development_dependency "minitest"
   s.add_development_dependency "rack-test"
   s.add_development_dependency "rake"
