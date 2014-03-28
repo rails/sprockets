@@ -8,6 +8,8 @@ module Sprockets
   #   https://github.com/sstephenson/ruby-ejs
   #
   module EjsTemplate
+    VERSION = '1'
+
     # Compile template data with EJS compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -16,7 +18,11 @@ module Sprockets
     #     # => "function(obj){...}"
     #
     def self.call(input)
-      ::EJS.compile(input[:data])
+      data = input[:data]
+      key  = [VERSION, data]
+      input[:cache].fetch(key) do
+        ::EJS.compile(data)
+      end
     end
   end
 end
