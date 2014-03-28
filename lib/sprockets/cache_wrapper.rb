@@ -63,21 +63,6 @@ module Sprockets
     end
   end
 
-  class IndexWrapper < CacheWrapper
-    def initialize(*args)
-      @local = {}
-      super
-    end
-
-    def [](key)
-      @local[key] ||= @cache[key]
-    end
-
-    def []=(key, value)
-      @local[key] = @cache[key] = value
-    end
-  end
-
   class GetWrapper < CacheWrapper
     def get(key)
       @cache.get(key)
