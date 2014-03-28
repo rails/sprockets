@@ -208,7 +208,7 @@ class TestSassCompressor < TestBaseSass
       compressed   = "p{margin:0;padding:0}\n"
       input = {
         data: uncompressed,
-        cache: Sprockets::CacheWrapper.wrap(nil)
+        cache: Sprockets::Cache.new
       }
       assert_equal compressed, Sprockets::SassCompressor.call(input)
     end

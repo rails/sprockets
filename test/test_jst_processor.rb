@@ -7,7 +7,7 @@ class TestJstProcessor < Sprockets::TestCase
       logical_path: 'users/show',
       content_type: 'application/javascript',
       data: "function(obj) {\n  return 'Hello, '+obj.name;\n}",
-      cache: Sprockets::CacheWrapper.wrap(nil)
+      cache: Sprockets::Cache.new
     }
     output = <<-EOS
 (function() { this.JST || (this.JST = {}); this.JST["users/show"] = function(obj) {
@@ -23,7 +23,7 @@ class TestJstProcessor < Sprockets::TestCase
       logical_path: 'users/show',
       content_type: 'application/javascript',
       data: "function(obj) {\n  return 'Hello, '+obj.name;\n}",
-      cache: Sprockets::CacheWrapper.wrap(nil)
+      cache: Sprockets::Cache.new
     }
     output = <<-EOS
 (function() { this.TEMPLATES || (this.TEMPLATES = {}); this.TEMPLATES["users/show"] = function(obj) {

@@ -3,7 +3,7 @@ require 'fileutils'
 require 'pathname'
 
 module Sprockets
-  module Cache
+  class Cache
     # A simple file system cache store.
     #
     #     environment.cache = Sprockets::Cache::FileStore.new("/tmp")

@@ -1,6 +1,5 @@
 require 'sprockets/asset_attributes'
 require 'sprockets/bundled_asset'
-require 'sprockets/cache_wrapper'
 require 'sprockets/errors'
 require 'sprockets/processed_asset'
 require 'sprockets/server'
@@ -95,7 +94,7 @@ module Sprockets
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
       expire_index!
-      @cache = CacheWrapper.wrap(cache)
+      @cache = Cache.new(cache)
     end
 
     def prepend_path(path)

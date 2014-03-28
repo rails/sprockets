@@ -6,7 +6,7 @@ class TestEcoTemplate < Sprockets::TestCase
     input = {
       content_type: 'application/javascript',
       data: "<span>Hello, <%= name %></p>",
-      cache: Sprockets::CacheWrapper.wrap(nil)
+      cache: Sprockets::Cache.new
     }
     assert Sprockets::EcoTemplate.call(input).match(/<span>Hello, /)
   end

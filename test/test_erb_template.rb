@@ -12,7 +12,7 @@ class TestERBTemplate < Sprockets::TestCase
       filename: "foo.js.erb",
       content_type: 'application/javascript',
       data: "var data = <%= JSON.generate({foo: true}) %>;",
-      cache: Sprockets::CacheWrapper.wrap(nil)
+      cache: Sprockets::Cache.new
     }
     output = "var data = {\"foo\":true};"
     assert_equal output, Sprockets::ERBTemplate.call(input)

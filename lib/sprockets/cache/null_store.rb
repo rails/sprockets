@@ -1,5 +1,5 @@
 module Sprockets
-  module Cache
+  class Cache
     # A compatible cache store that doesn't store anything. Used by default
     # when no Environment#cache is configured.
     #

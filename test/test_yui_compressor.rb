@@ -6,7 +6,7 @@ class TestYUICompressor < Sprockets::TestCase
     input = {
       content_type: 'application/javascript',
       data: "function foo() {\n  return true;\n}",
-      cache: Sprockets::CacheWrapper.wrap(nil)
+      cache: Sprockets::Cache.new
     }
     output = "function foo(){return true};"
     assert_equal output, Sprockets::YUICompressor.call(input)
@@ -16,7 +16,7 @@ class TestYUICompressor < Sprockets::TestCase
     input = {
       content_type: 'text/css',
       data: "h1 {\n  color: red;\n}\n",
-      cache: Sprockets::CacheWrapper.wrap(nil)
+      cache: Sprockets::Cache.new
     }
     output = "h1{color:red}"
     assert_equal output, Sprockets::YUICompressor.call(input)
