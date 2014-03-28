@@ -95,7 +95,7 @@ module Sprockets
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
       expire_index!
-      @cache = CacheWrapper.wrap(self, cache)
+      @cache = CacheWrapper.wrap(cache)
     end
 
     def prepend_path(path)
@@ -315,7 +315,7 @@ module Sprockets
       end
 
       def asset_cache_key_for(path, options)
-        "asset/#{path.to_s.sub(root, '')}:#{options[:bundle] ? '1' : '0'}"
+        "#{digest.hexdigest}/asset/#{path.to_s.sub(root, '')}:#{options[:bundle] ? '1' : '0'}"
       end
 
       def circular_call_protection(path)

@@ -1,28 +1,40 @@
+require 'digest/sha1'
+
 module Sprockets
   class CacheWrapper
-    def self.wrap(environment, cache)
+    def self.wrap(cache)
       if cache.is_a?(CacheWrapper)
         cache
 
       # `Cache#get(key)` for Memcache
       elsif cache.respond_to?(:get)
-        GetWrapper.new(environment, cache)
+        GetWrapper.new(cache)
 
       # `Cache#[key]` so `Hash` can be used
       elsif cache.respond_to?(:[])
-        HashWrapper.new(environment, cache)
+        HashWrapper.new(cache)
 
       # `Cache#read(key)` for `ActiveSupport::Cache` support
       elsif cache.respond_to?(:read)
-        ReadWriteWrapper.new(environment, cache)
+        ReadWriteWrapper.new(cache)
 
       else
-        HashWrapper.new(environment, Sprockets::Cache::NullStore.new)
+        HashWrapper.new(Sprockets::Cache::NullStore.new)
       end
     end
 
-    def initialize(environment, cache)
-      @environment, @cache = environment, cache
+    def initialize(cache)
+      @cache = cache
+    end
+
+    def fetch(key)
+      expanded_key = expand_key(key)
+      value = get(expanded_key)
+      if !value
+        value = yield
+        set(expanded_key, value)
+      end
+      value
     end
 
     def [](key)
@@ -34,22 +46,20 @@ module Sprockets
     end
 
     def expand_key(key)
-      ['sprockets', @environment.digest.hexdigest, @environment.digest.update(key).hexdigest].join('/')
-    end
-  end
-
-  class IndexWrapper < CacheWrapper
-    def initialize(*args)
-      @local = {}
-      super
+      digest = Digest::SHA1.new
+      hash_key!(digest, key)
+      ['sprockets', digest.hexdigest].join('/')
     end
 
-    def [](key)
-      @local[key] ||= @cache[key]
-    end
-
-    def []=(key, value)
-      @local[key] = @cache[key] = value
+    def hash_key!(digest, obj)
+      case obj
+      when String
+        digest.update(obj)
+      when Array
+        obj.each { |o| hash_key!(digest, o) }
+      else
+        raise ArgumentError, "could not hash #{obj.class}"
+      end
     end
   end
 
