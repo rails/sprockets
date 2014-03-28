@@ -21,7 +21,6 @@ module Sprockets
   autoload :EjsTemplate,             "sprockets/ejs_template"
   autoload :ERBTemplate,             "sprockets/erb_template"
   autoload :JstProcessor,            "sprockets/jst_processor"
-  autoload :LessTemplate,            "sprockets/less_template"
   autoload :Processor,               "sprockets/processor"
   autoload :SassCacheStore,          "sprockets/sass_cache_store"
   autoload :SassFunctions,           "sprockets/sass_functions"
@@ -100,7 +99,6 @@ module Sprockets
   register_engine '.ejs',    EjsTemplate
 
   # CSS engines
-  register_engine '.less',   LessTemplate
   register_engine '.sass',   SassTemplate
   register_engine '.scss',   ScssTemplate
 
