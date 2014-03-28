@@ -23,7 +23,6 @@ module Sprockets
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
   autoload :JstProcessor,            'sprockets/jst_processor'
-  autoload :LessTemplate,            'sprockets/less_template'
   autoload :SafetyColons,            'sprockets/safety_colons'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassFunctions,           'sprockets/sass_functions'
@@ -95,7 +94,6 @@ module Sprockets
   register_engine '.ejs',    LazyProxy.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
-  register_engine '.less',   LazyProxy.new { LessTemplate }, mime_type: 'text/css'
   register_engine '.sass',   LazyProxy.new { SassTemplate }, mime_type: 'text/css'
   register_engine '.scss',   LazyProxy.new { ScssTemplate }, mime_type: 'text/css'
 

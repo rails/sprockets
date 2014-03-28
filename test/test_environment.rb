@@ -35,13 +35,13 @@ module EnvironmentTests
   end
 
   test "extensions" do
-    ["coffee", "erb", "less", "sass", "scss", "css", "js"].each do |ext|
+    ["coffee", "erb", "sass", "scss", "css", "js"].each do |ext|
       assert @env.extensions.to_a.include?(".#{ext}"), "'.#{ext}' not in #{@env.extensions.inspect}"
     end
   end
 
   test "engine extensions" do
-    ["coffee", "erb", "less", "sass", "scss"].each do |ext|
+    ["coffee", "erb", "sass", "scss"].each do |ext|
       assert @env.engine_extensions.include?(".#{ext}")
     end
     ["css", "js"].each do |ext|
@@ -53,7 +53,7 @@ module EnvironmentTests
     ["css", "js"].each do |ext|
       assert @env.format_extensions.include?(".#{ext}")
     end
-    ["coffee", "erb", "less", "sass", "scss"].each do |ext|
+    ["coffee", "erb", "sass", "scss"].each do |ext|
       assert !@env.format_extensions.include?(".#{ext}")
     end
   end

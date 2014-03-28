@@ -3,7 +3,7 @@
 Sprockets is a Ruby library for compiling and serving web assets.
 It features declarative dependency management for JavaScript and CSS
 assets, as well as a powerful preprocessor pipeline that allows you to
-write assets in languages like CoffeeScript, Sass, SCSS and LESS.
+write assets in languages like CoffeeScript, Sass and SCSS.
 
 # Installation #
 
@@ -160,19 +160,6 @@ to write CSS assets in Sprockets.
 Sprockets supports both Sass syntaxes. For the original
 whitespace-sensitive syntax, use the extension `.css.sass`. For the
 new SCSS syntax, use the extension `.css.scss`.
-
-## Styling with LESS ##
-
-[LESS](http://lesscss.org/) extends CSS with dynamic behavior such as
-variables, mixins, operations and functions.
-
-If the `less` gem is available to your application, you can use LESS
-to write CSS assets in Sprockets. Note that the LESS compiler is
-written in JavaScript and the `less` gem (on MRI) uses `therubyracer`
-which embeds the V8 JavaScript runtime in Ruby, while on JRuby you're
-going to need `therubyrhino` gem installed.
-
-To write CSS assets with LESS, use the extension `.css.less`.
 
 ## Scripting with CoffeeScript ##
 
@@ -376,6 +363,8 @@ submit a pull request.
 ## Version History ##
 
 **3.0.0**
+
+* Removed builtin support for LESS.
 
 **2.12.0** (March 13, 2014)
 
