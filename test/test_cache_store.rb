@@ -15,6 +15,11 @@ module CacheStoreNullTests
     @store["foo"] = "bar"
     refute @store["foo"]
   end
+
+  def test_fetch
+    result = @store.fetch("foo") { "bar" }
+    assert_equal "bar", result
+  end
 end
 
 module CacheStoreTests
@@ -48,11 +53,16 @@ module CacheStoreTests
     @store["foo"] = nil
     assert_equal nil, @store["foo"]
   end
+
+  def test_fetch
+    result = @store.fetch("user") { "josh" }
+    assert_equal "josh", result
+  end
 end
 
 class TestNullStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache::NullStore.new
+    @store = Sprockets::Cache.new(Sprockets::Cache::NullStore.new)
   end
 
   include CacheStoreNullTests
@@ -60,7 +70,7 @@ end
 
 class TestMemoryStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache::MemoryStore.new
+    @store = Sprockets::Cache.new(Sprockets::Cache::MemoryStore.new)
   end
 
   include CacheStoreTests
@@ -68,7 +78,7 @@ end
 
 class TestZeroMemoryStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache::MemoryStore.new(0)
+    @store = Sprockets::Cache.new(Sprockets::Cache::MemoryStore.new(0))
   end
 
   include CacheStoreNullTests
@@ -76,7 +86,7 @@ end
 
 class TestFileStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store"))
+    @store = Sprockets::Cache.new(Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store")))
   end
 
   include CacheStoreTests
@@ -84,7 +94,7 @@ end
 
 class TestZeroFileStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store-zero"), 0)
+    @store = Sprockets::Cache.new(Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store-zero"), 0))
   end
 
   include CacheStoreNullTests
