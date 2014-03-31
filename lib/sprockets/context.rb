@@ -180,14 +180,14 @@ module Sprockets
       processors = options[:processors] || attributes.processors
 
       if options[:data]
-        result = options[:data]
+        data = options[:data]
       else
         if environment.respond_to?(:default_external_encoding)
           mime_type = environment.mime_types(pathname.extname)
           encoding  = environment.encoding_for_mime_type(mime_type)
-          result    = Sprockets::Utils.read_unicode(pathname, encoding)
+          data      = Sprockets::Utils.read_unicode(pathname, encoding)
         else
-          result = Sprockets::Utils.read_unicode(pathname)
+          data = Sprockets::Utils.read_unicode(pathname)
         end
       end
 
@@ -198,19 +198,31 @@ module Sprockets
         filename: pathname.to_s,
         logical_path: logical_path,
         content_type: content_type,
-        data: result
+        data: data
       }
 
       processors.each do |processor|
         begin
-          result = processor.call(input.merge(data: result))
+          result = processor.call(input.merge(data: data))
+          case result
+          when Hash
+            data = result[:data]
+            Array(result[:required_paths]).each { |p| require_asset(p) }
+            Array(result[:stubbed_assets]).each { |p| stub_asset(p) }
+            Array(result[:dependency_paths]).each { |p| depend_on(p) }
+            Array(result[:dependency_assets]).each { |p| depend_on_asset(p) }
+          when String
+            data = result
+          else
+            raise Error, "invalid processor return type: #{result.class}"
+          end
         rescue Exception => e
           annotate_exception! e
           raise
         end
       end
 
-      result
+      data
     end
 
     # Returns a Base64-encoded `data:` URI with the contents of the

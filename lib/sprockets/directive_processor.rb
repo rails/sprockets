@@ -1,4 +1,5 @@
 require 'pathname'
+require 'set'
 require 'shellwords'
 require 'yaml'
 
@@ -91,10 +92,21 @@ module Sprockets
 
       @has_written_body = false
 
+      @required_paths    = []
+      @stubbed_assets    = Set.new
+      @dependency_paths  = Set.new
+      @dependency_assets = Set.new
+
       process_directives
       process_source
 
-      @result
+      {
+        data: @result,
+        required_paths: @required_paths,
+        stubbed_assets: @stubbed_assets,
+        dependency_paths: @dependency_paths,
+        dependency_assets: @dependency_assets
+      }
     end
 
     # Returns the header String with any directives stripped.
@@ -192,7 +204,9 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        context.require_asset(path)
+        pathname = context.resolve(path, content_type: :self)
+        @dependency_assets << pathname.to_s
+        @required_paths << pathname.to_s
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -210,7 +224,7 @@ module Sprockets
           raise ArgumentError, "require_self can only be called once per source file"
         end
 
-        context.require_asset(pathname)
+        @required_paths << pathname
         process_source
         @has_written_body = true
       end
@@ -225,18 +239,19 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless (stats = stat(root)) && stats.directory?
+          unless (stats = context.environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          context.depend_on(root)
+          @dependency_paths << root.to_s
 
-          entries(root).each do |pathname|
+          context.environment.entries(root).each do |pathname|
             pathname = root.join(pathname)
             if pathname.to_s == self.pathname.to_s
               next
             elsif context.asset_requirable?(pathname)
-              context.require_asset(pathname)
+              @dependency_assets << pathname.to_s
+              @required_paths << pathname.to_s
             end
           end
         else
@@ -254,24 +269,25 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless (stats = stat(root)) && stats.directory?
+          unless (stats = context.environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          context.depend_on(root)
+          @dependency_paths << root.to_s
 
           required_paths = []
           context.environment.recursive_stat(root) do |pathname, stat|
             if pathname.to_s == self.pathname.to_s
               next
             elsif stat.directory?
-              context.depend_on(pathname)
+              @dependency_paths << pathname.to_s
             elsif context.asset_requirable?(pathname)
               required_paths << pathname
             end
           end
           required_paths.sort_by(&:to_s).each do |pathname|
-            context.require_asset(pathname)
+            @dependency_assets << pathname.to_s
+            @required_paths << pathname.to_s
           end
         else
           # The path must be relative and start with a `./`.
@@ -292,7 +308,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        context.depend_on(path)
+        @dependency_paths << context.resolve(path).to_s
       end
 
       # Allows you to state a dependency on an asset without including
@@ -307,7 +323,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        context.depend_on_asset(path)
+        @dependency_assets << context.resolve(path).to_s
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -319,20 +335,12 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        context.stub_asset(path)
+        @stubbed_assets << context.resolve(path, content_type: :self).to_s
       end
 
     private
       def relative?(path)
         path =~ /^\.($|\.?\/)/
-      end
-
-      def stat(path)
-        context.environment.stat(path)
-      end
-
-      def entries(path)
-        context.environment.entries(path)
       end
   end
 end
