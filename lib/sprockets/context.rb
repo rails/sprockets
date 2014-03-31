@@ -286,10 +286,5 @@ Extend your environment context with a custom method.
     def stylesheet_path(path)
       asset_path(path, type: :stylesheet)
     end
-
-    private
-      def logger
-        environment.logger
-      end
   end
 end
