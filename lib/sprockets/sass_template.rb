@@ -36,11 +36,11 @@ module Sprockets
       css = engine.render
 
       # Track all imported files
-      engine.dependencies.each do |dependency|
-        input[:context].depend_on(dependency.options[:filename])
+      dependency_paths = engine.dependencies.map do |dependency|
+        dependency.options[:filename]
       end
 
-      css
+      { data: css, dependency_paths: dependency_paths }
     rescue ::Sass::SyntaxError => e
       # Annotates exception message with parse line number
       input[:context].__LINE__ = e.sass_backtrace.first[:line]
