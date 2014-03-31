@@ -79,7 +79,8 @@ module Sprockets
     # for the complete API.
     def call(input)
       @context = input[:context]
-      @pathname = @context.pathname
+      @filename = input[:filename]
+      @pathname = Pathname.new(@filename)
 
       data = input[:data]
       @header = data[HEADER_PATTERN, 0] || ""
