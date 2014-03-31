@@ -9,12 +9,4 @@ module Sprockets
   class FileOutsidePaths        < Error; end
   class NotImplementedError     < Error; end
   class UnserializeError        < Error; end
-
-  module EngineError
-    attr_accessor :sprockets_annotation
-
-    def message
-      [super, sprockets_annotation].compact.join("\n")
-    end
-  end
 end

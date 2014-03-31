@@ -41,10 +41,6 @@ module Sprockets
       end
 
       { data: css, dependency_paths: dependency_paths }
-    rescue ::Sass::SyntaxError => e
-      # Annotates exception message with parse line number
-      input[:context].__LINE__ = e.sass_backtrace.first[:line]
-      raise e
     end
   end
 

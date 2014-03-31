@@ -37,7 +37,6 @@ module Sprockets
   autoload :Cache,                   'sprockets/cache'
   autoload :CircularDependencyError, 'sprockets/errors'
   autoload :ContentTypeMismatch,     'sprockets/errors'
-  autoload :EngineError,             'sprockets/errors'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
   autoload :LazyProxy,               'sprockets/lazy_proxy'

@@ -24,13 +24,11 @@ module Sprockets
     attr_reader :environment, :pathname
     attr_reader :_required_paths, :_stubbed_assets
     attr_reader :_dependency_paths, :_dependency_assets
-    attr_writer :__LINE__
 
     def initialize(environment, logical_path, pathname)
       @environment  = environment
       @logical_path = logical_path
       @pathname     = pathname
-      @__LINE__     = nil
 
       @_required_paths    = []
       @_stubbed_assets    = Set.new
@@ -216,9 +214,6 @@ module Sprockets
           else
             raise Error, "invalid processor return type: #{result.class}"
           end
-        rescue Exception => e
-          annotate_exception! e
-          raise
         end
       end
 
@@ -293,16 +288,6 @@ Extend your environment context with a custom method.
     end
 
     private
-      # Annotates exception backtrace with the original template that
-      # the exception was raised in.
-      def annotate_exception!(exception)
-        location = pathname.to_s
-        location << ":#{@__LINE__}" if @__LINE__
-
-        exception.extend(Sprockets::EngineError)
-        exception.sprockets_annotation = "  (in #{location})"
-      end
-
       def logger
         environment.logger
       end

@@ -169,9 +169,12 @@ module Sprockets
       #
       def process_directives
         directives.each do |line_number, name, *args|
-          context.__LINE__ = line_number
-          send("process_#{name}_directive", *args)
-          context.__LINE__ = nil
+          begin
+            send("process_#{name}_directive", *args)
+          rescue Exception => e
+            e.set_backtrace(["#{pathname}:#{line_number}"] + e.backtrace)
+            raise e
+          end
         end
       end
 

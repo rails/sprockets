@@ -199,6 +199,20 @@ a:link {
   color: "blue"; }
     EOS
   end
+
+  test "raise sass error with line number" do
+    begin
+      ::Sass::Util.silence_sass_warnings do
+        render('sass/error.sass')
+      end
+      flunk
+    rescue Sass::SyntaxError => error
+      assert error.message.include?("invalid")
+      trace = error.backtrace[0]
+      assert trace.include?("error.sass")
+      assert trace.include?(":5")
+    end
+  end
 end
 
 class TestSassCompressor < TestBaseSass
