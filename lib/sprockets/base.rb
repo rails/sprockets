@@ -124,13 +124,6 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(logical_path, options = {})
-      _resolve(logical_path, options).first ||
-        raise(FileNotFound, "couldn't find file '#{logical_path}'")
-    end
-
-    def _resolve(logical_path, options = {})
-      return to_enum(__method__, logical_path, options) unless block_given?
-
       options = options.dup
       content_type = options.delete(:content_type)
 
@@ -149,8 +142,10 @@ module Sprockets
       @trail.find_all(*args).each do |path|
         path = expand_bower_path(path, extension) || path
         next if content_type && content_type != content_type_of(path)
-        yield Pathname.new(path)
+        return Pathname.new(path)
       end
+
+      raise FileNotFound, "couldn't find file '#{logical_path}'"
     end
 
     # Register a new mime type.
