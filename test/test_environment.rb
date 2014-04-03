@@ -102,6 +102,19 @@ module EnvironmentTests
       @env.resolve("coffee/foo.js").to_s
   end
 
+  test "resolve content type in environment" do
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery.js").to_s
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery.js", content_type: "application/javascript").to_s
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery", content_type: "application/javascript").to_s
+
+    assert_raises(Sprockets::ContentTypeMismatch) do
+      @env.resolve("gallery.js", content_type: "text/css")
+    end
+  end
+
   test "resolve bower special case" do
     assert_equal fixture_path('default/bower/main.js'),
       @env.resolve("bower.js").to_s

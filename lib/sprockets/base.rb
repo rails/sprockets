@@ -135,11 +135,25 @@ module Sprockets
     def _resolve(logical_path, options = {})
       return to_enum(__method__, logical_path, options) unless block_given?
 
-      attrs = attributes_for(logical_path)
-      extension = attrs.format_extension
-      args = attrs.search_paths + [options]
+      options = options.dup
+      content_type = options.delete(:content_type)
+
+      attributes = attributes_for(logical_path)
+      extension = attributes.format_extension || extension_for_mime_type(content_type)
+      args = attributes.search_paths + [options]
+
+      if content_type && attributes.format_extension
+        raise content_type if content_type == ''
+        if content_type != attributes.content_type
+          raise ContentTypeMismatch, "#{logical_path} is " +
+            "'#{attributes.content_type}', not '#{content_type}'"
+        end
+      end
+
       @trail.find_all(*args).each do |path|
-        yield Pathname.new(expand_bower_path(path, extension) || path)
+        path = expand_bower_path(path, extension) || path
+        next if content_type && content_type != content_type_of(path)
+        yield Pathname.new(path)
       end
     end
 
