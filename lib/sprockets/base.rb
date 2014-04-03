@@ -1,4 +1,5 @@
 require 'sprockets/asset_attributes'
+require 'sprockets/bower'
 require 'sprockets/bundled_asset'
 require 'sprockets/errors'
 require 'sprockets/processed_asset'
@@ -10,7 +11,7 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
-    include Paths, Mime, Processing, Compressing, Engines, Server
+    include Paths, Bower, Mime, Processing, Compressing, Engines, Server
 
     # Returns a `Digest` implementation class.
     #
@@ -134,25 +135,11 @@ module Sprockets
     def _resolve(logical_path, options = {})
       return to_enum(__method__, logical_path, options) unless block_given?
 
-      args = attributes_for(logical_path).search_paths + [options]
+      attrs = attributes_for(logical_path)
+      extension = attrs.format_extension
+      args = attrs.search_paths + [options]
       @trail.find_all(*args).each do |path|
-        pathname = Pathname.new(path)
-        if pathname.basename.to_s == "bower.json"
-          bower = json_decode(pathname.read)
-          case bower['main']
-          when String
-            yield pathname.dirname.join(bower['main'])
-          when Array
-            extname = File.extname(logical_path)
-            bower['main'].each do |fn|
-              if extname == "" || extname == File.extname(fn)
-                yield pathname.dirname.join(fn)
-              end
-            end
-          end
-        else
-          yield pathname
-        end
+        yield Pathname.new(expand_bower_path(path, extension) || path)
       end
     end
 
@@ -330,10 +317,6 @@ module Sprockets
         yield
       ensure
         Thread.current[:sprockets_circular_calls] = nil if reset
-      end
-
-      def json_decode(obj)
-        JSON.parse(obj, create_additions: false)
       end
   end
 end
