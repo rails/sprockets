@@ -132,7 +132,6 @@ module Sprockets
       args = attributes.search_paths + [options]
 
       if content_type && attributes.format_extension
-        raise content_type if content_type == ''
         if content_type != attributes.content_type
           raise ContentTypeMismatch, "#{logical_path} is " +
             "'#{attributes.content_type}', not '#{content_type}'"
