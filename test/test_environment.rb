@@ -102,6 +102,15 @@ module EnvironmentTests
       @env.resolve("coffee/foo.js").to_s
   end
 
+  test "resolve bower special case" do
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower.js").to_s
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit.js").to_s
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.resolve("qunit.css").to_s
+  end
+
   test "missing file raises an exception" do
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve!("null")
