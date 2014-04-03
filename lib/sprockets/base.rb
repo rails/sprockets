@@ -122,34 +122,37 @@ module Sprockets
     #     # => "/path/to/app/javascripts/application.js.coffee"
     #
     # A `FileNotFound` exception is raised if the file does not exist.
-    def resolve(logical_path, options = {})
-      # If a block is given, preform an iterable search
-      if block_given?
-        args = attributes_for(logical_path).search_paths + [options]
-        @trail.find_all(*args).each do |path|
-          pathname = Pathname.new(path)
-          if pathname.basename.to_s == "bower.json"
-            bower = json_decode(pathname.read)
-            case bower['main']
-            when String
-              yield pathname.dirname.join(bower['main'])
-            when Array
-              extname = File.extname(logical_path)
-              bower['main'].each do |fn|
-                if extname == "" || extname == File.extname(fn)
-                  yield pathname.dirname.join(fn)
-                end
+    def resolve(logical_path, options = {}, &block)
+      enum = _resolve(logical_path, options)
+      block_given? ? enum.each(&block) : enum.first
+    end
+
+    def resolve!(logical_path, options = {})
+      resolve(logical_path, options) || raise(FileNotFound, "couldn't find file '#{logical_path}'")
+    end
+
+    def _resolve(logical_path, options = {})
+      return to_enum(__method__, logical_path, options) unless block_given?
+
+      args = attributes_for(logical_path).search_paths + [options]
+      @trail.find_all(*args).each do |path|
+        pathname = Pathname.new(path)
+        if pathname.basename.to_s == "bower.json"
+          bower = json_decode(pathname.read)
+          case bower['main']
+          when String
+            yield pathname.dirname.join(bower['main'])
+          when Array
+            extname = File.extname(logical_path)
+            bower['main'].each do |fn|
+              if extname == "" || extname == File.extname(fn)
+                yield pathname.dirname.join(fn)
               end
             end
-          else
-            yield pathname
           end
+        else
+          yield pathname
         end
-      else
-        resolve(logical_path, options) do |pathname|
-          return pathname
-        end
-        raise FileNotFound, "couldn't find file '#{logical_path}'"
       end
     end
 
@@ -253,7 +256,7 @@ module Sprockets
         logical_path = attributes_for(pathname).logical_path
       else
         begin
-          pathname = resolve(logical_path)
+          pathname = resolve!(logical_path)
 
           # If logical path is missing a mime type extension, append
           # the absolute path extname so it has one.

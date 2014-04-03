@@ -105,7 +105,11 @@ module Sprockets
 
         raise FileNotFound, "couldn't find file '#{path}'"
       else
-        environment.resolve(path, {base_path: self.pathname.dirname}.merge(options), &block)
+        if block_given?
+          environment.resolve(path, {base_path: self.pathname.dirname}.merge(options), &block)
+        else
+          environment.resolve!(path, {base_path: self.pathname.dirname}.merge(options))
+        end
       end
     end
 

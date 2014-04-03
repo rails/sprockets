@@ -104,7 +104,7 @@ module EnvironmentTests
 
   test "missing file raises an exception" do
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("null")
+      @env.resolve!("null")
     end
   end
 
