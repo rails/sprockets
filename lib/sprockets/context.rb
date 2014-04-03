@@ -80,16 +80,7 @@ module Sprockets
       pathname = Pathname.new(path)
       options  = {base_path: self.pathname.dirname}.merge(options)
       options[:content_type] = self.content_type if options[:content_type] == :self
-
-      if pathname.absolute?
-        if environment.stat(pathname)
-          pathname
-        else
-          raise FileNotFound, "couldn't find file '#{pathname}'"
-        end
-      else
-        environment.resolve(path, options)
-      end
+      environment.resolve(path, options)
     end
 
     # `depend_on` allows you to state a dependency on a file without

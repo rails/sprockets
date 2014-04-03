@@ -93,6 +93,15 @@ module EnvironmentTests
     assert_equal Sprockets::UglifierCompressor, @env.compressors['application/javascript'][:uglifier]
   end
 
+  test "resolve absolute path in environment" do
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/gallery.js')).to_s
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/gallery.foo'))
+    end
+  end
+
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js").to_s
@@ -100,6 +109,10 @@ module EnvironmentTests
       @env.resolve(Pathname.new("gallery.js")).to_s
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve("coffee/foo.js").to_s
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("null")
+    end
   end
 
   test "resolve content type in environment" do
@@ -122,12 +135,6 @@ module EnvironmentTests
       @env.resolve("qunit.js").to_s
     assert_equal fixture_path('default/qunit/qunit.css'),
       @env.resolve("qunit.css").to_s
-  end
-
-  test "missing file raises an exception" do
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("null")
-    end
   end
 
   test "find bundled asset in environment" do
