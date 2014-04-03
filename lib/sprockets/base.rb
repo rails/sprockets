@@ -126,7 +126,7 @@ module Sprockets
       # If a block is given, preform an iterable search
       if block_given?
         args = attributes_for(logical_path).search_paths + [options]
-        @trail.find(*args) do |path|
+        @trail.find_all(*args).each do |path|
           pathname = Pathname.new(path)
           if pathname.basename.to_s == "bower.json"
             bower = json_decode(pathname.read)
