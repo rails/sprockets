@@ -123,13 +123,9 @@ module Sprockets
     #     # => "/path/to/app/javascripts/application.js.coffee"
     #
     # A `FileNotFound` exception is raised if the file does not exist.
-    def resolve(logical_path, options = {}, &block)
-      enum = _resolve(logical_path, options)
-      block_given? ? enum.each(&block) : enum.first
-    end
-
-    def resolve!(logical_path, options = {})
-      resolve(logical_path, options) || raise(FileNotFound, "couldn't find file '#{logical_path}'")
+    def resolve(logical_path, options = {})
+      _resolve(logical_path, options).first ||
+        raise(FileNotFound, "couldn't find file '#{logical_path}'")
     end
 
     def _resolve(logical_path, options = {})
@@ -257,7 +253,7 @@ module Sprockets
         logical_path = attributes_for(pathname).logical_path
       else
         begin
-          pathname = resolve!(logical_path)
+          pathname = resolve(logical_path)
 
           # If logical path is missing a mime type extension, append
           # the absolute path extname so it has one.

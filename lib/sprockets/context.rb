@@ -88,7 +88,7 @@ module Sprockets
           raise FileNotFound, "couldn't find file '#{pathname}'"
         end
       else
-        environment.resolve!(path, options)
+        environment.resolve(path, options)
       end
     end
 
