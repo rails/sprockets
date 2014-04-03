@@ -76,9 +76,10 @@ module Sprockets
     #     resolve("./bar.js")
     #     # => "/path/to/app/javascripts/bar.js"
     #
-    def resolve(path, options = {}, &block)
+    def resolve(path, options = {})
       pathname   = Pathname.new(path)
       attributes = environment.attributes_for(pathname)
+      options    = {base_path: self.pathname.dirname}.merge(options)
 
       if pathname.absolute?
         if environment.stat(pathname)
@@ -97,7 +98,7 @@ module Sprockets
           end
         end
 
-        resolve(path) do |candidate|
+        environment._resolve(path, options).each do |candidate|
           if self.content_type == environment.content_type_of(candidate)
             return candidate
           end
@@ -105,11 +106,7 @@ module Sprockets
 
         raise FileNotFound, "couldn't find file '#{path}'"
       else
-        if block_given?
-          environment.resolve(path, {base_path: self.pathname.dirname}.merge(options), &block)
-        else
-          environment.resolve!(path, {base_path: self.pathname.dirname}.merge(options))
-        end
+        environment.resolve!(path, options)
       end
     end
 
