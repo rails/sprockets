@@ -96,9 +96,19 @@ module EnvironmentTests
   test "resolve absolute path in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve(fixture_path('default/gallery.js'))
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve(fixture_path('default/coffee/foo.coffee'))
+
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
 
     assert_raises(Sprockets::ContentTypeMismatch) do
       @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
+    end
+    assert_raises(Sprockets::ContentTypeMismatch) do
+      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css')
     end
 
     assert_raises(Sprockets::FileNotFound) do
@@ -126,6 +136,10 @@ module EnvironmentTests
       @env.resolve("gallery.js", content_type: "application/javascript")
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery", content_type: "application/javascript")
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve('coffee/foo', content_type: 'application/javascript')
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve('coffee/foo.coffee', content_type: 'application/javascript')
 
     assert_raises(Sprockets::ContentTypeMismatch) do
       @env.resolve("gallery.js", content_type: "text/css")

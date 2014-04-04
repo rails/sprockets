@@ -128,7 +128,7 @@ module Sprockets
       content_type = options[:content_type]
       attributes = attributes_for(logical_path)
 
-      if content_type && attributes.format_extension
+      if content_type && (attributes.format_extension || attributes.engine_extensions.any?)
         if content_type != attributes.content_type
           raise ContentTypeMismatch, "#{logical_path} is " +
             "'#{attributes.content_type}', not '#{content_type}'"
