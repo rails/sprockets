@@ -97,6 +97,10 @@ module EnvironmentTests
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve(fixture_path('default/gallery.js'))
 
+    assert_raises(Sprockets::ContentTypeMismatch) do
+      @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
+    end
+
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve(fixture_path('default/gallery.foo'))
     end
