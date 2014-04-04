@@ -148,7 +148,8 @@ module Sprockets
     #     <%= evaluate "bar.js" %>
     #
     def evaluate(path, options = {})
-      pathname   = resolve(path)
+      filename   = resolve(path)
+      pathname   = Pathname.new(filename)
       attributes = environment.attributes_for(pathname)
       processors = options[:processors] || attributes.processors
 

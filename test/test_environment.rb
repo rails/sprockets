@@ -95,7 +95,7 @@ module EnvironmentTests
 
   test "resolve absolute path in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js')).to_s
+      @env.resolve(fixture_path('default/gallery.js'))
 
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve(fixture_path('default/gallery.foo'))
@@ -104,11 +104,11 @@ module EnvironmentTests
 
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js").to_s
+      @env.resolve("gallery.js")
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js")).to_s
+      @env.resolve(Pathname.new("gallery.js"))
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve("coffee/foo.js").to_s
+      @env.resolve("coffee/foo.js")
 
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("null")
@@ -117,11 +117,11 @@ module EnvironmentTests
 
   test "resolve content type in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js").to_s
+      @env.resolve("gallery.js")
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js", content_type: "application/javascript").to_s
+      @env.resolve("gallery.js", content_type: "application/javascript")
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery", content_type: "application/javascript").to_s
+      @env.resolve("gallery", content_type: "application/javascript")
 
     assert_raises(Sprockets::ContentTypeMismatch) do
       @env.resolve("gallery.js", content_type: "text/css")
@@ -130,11 +130,11 @@ module EnvironmentTests
 
   test "resolve bower special case" do
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js").to_s
+      @env.resolve("bower.js")
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js").to_s
+      @env.resolve("qunit.js")
     assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css").to_s
+      @env.resolve("qunit.css")
   end
 
   test "find bundled asset in environment" do

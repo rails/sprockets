@@ -135,10 +135,9 @@ module Sprockets
         end
       end
 
-      pathname = Pathname.new(logical_path)
-      if pathname.absolute?
-        if stat(pathname)
-          return pathname
+      if Pathname.new(logical_path).absolute?
+        if stat(logical_path)
+          return logical_path
         end
       else
         extension = attributes.format_extension || extension_for_mime_type(content_type)
@@ -146,7 +145,7 @@ module Sprockets
         @trail.find_all(*args).each do |path|
           path = expand_bower_path(path, extension) || path
           next if content_type && content_type != content_type_of(path)
-          return Pathname.new(path)
+          return path
         end
       end
 
