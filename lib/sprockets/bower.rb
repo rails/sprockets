@@ -17,7 +17,11 @@ module Sprockets
         when String
           main = bower['main']
         when Array
-          main = bower['main'].find { |fn| extname == File.extname(fn) }
+          if extname
+            main = bower['main'].find { |fn| extname == File.extname(fn) }
+          else
+            main = bower['main'].first
+          end
         end
 
         File.expand_path("../#{main}", filename) if main

@@ -159,10 +159,6 @@ module EnvironmentTests
   end
 
   test "resolve bower special case" do
-    # undefined
-    assert_equal fixture_path('default/qunit/bower.json'),
-      @env.resolve("qunit")
-
     assert_equal fixture_path('default/bower/main.js'),
       @env.resolve("bower")
     assert_equal fixture_path('default/bower/main.js'),
@@ -175,6 +171,8 @@ module EnvironmentTests
       @env.resolve("bower.css", content_type: 'text/css')
     end
 
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit")
     assert_equal fixture_path('default/qunit/qunit.js'),
       @env.resolve("qunit.js")
     assert_equal fixture_path('default/qunit/qunit.js'),
