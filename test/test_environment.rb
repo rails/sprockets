@@ -98,11 +98,15 @@ module EnvironmentTests
       @env.resolve(fixture_path('default/gallery.js'))
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve(fixture_path('default/coffee/foo.coffee'))
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve(fixture_path('default/jquery.tmpl.min.js'))
 
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
 
     assert_raises(Sprockets::ContentTypeMismatch) do
       @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
@@ -123,6 +127,10 @@ module EnvironmentTests
       @env.resolve(Pathname.new("gallery.js"))
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve("coffee/foo.js")
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min")
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min.js")
 
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("null")
@@ -140,6 +148,10 @@ module EnvironmentTests
       @env.resolve('coffee/foo', content_type: 'application/javascript')
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve('coffee/foo.coffee', content_type: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min", content_type: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min.js", content_type: 'application/javascript')
 
     assert_raises(Sprockets::ContentTypeMismatch) do
       @env.resolve("gallery.js", content_type: "text/css")
@@ -236,7 +248,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  ENTRIES_IN_PATH = 43
+  ENTRIES_IN_PATH = 44
 
   test "iterate over each entry" do
     entries = []
@@ -249,7 +261,7 @@ module EnvironmentTests
     end
   end
 
-  FILES_IN_PATH = 36
+  FILES_IN_PATH = 37
 
   test "iterate over each logical path" do
     paths = []
