@@ -159,12 +159,34 @@ module EnvironmentTests
   end
 
   test "resolve bower special case" do
+    # undefined
+    assert_equal fixture_path('default/qunit/bower.json'),
+      @env.resolve("qunit")
+
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower")
     assert_equal fixture_path('default/bower/main.js'),
       @env.resolve("bower.js")
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower", content_type: 'application/javascript')
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower.js", content_type: 'application/javascript')
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("bower.css", content_type: 'text/css')
+    end
+
     assert_equal fixture_path('default/qunit/qunit.js'),
       @env.resolve("qunit.js")
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit", content_type: 'application/javascript')
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit.js", content_type: 'application/javascript')
     assert_equal fixture_path('default/qunit/qunit.css'),
       @env.resolve("qunit.css")
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.resolve("qunit", content_type: 'text/css')
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.resolve("qunit.css", content_type: 'text/css')
   end
 
   test "find bundled asset in environment" do
