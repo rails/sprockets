@@ -17,10 +17,7 @@ module Sprockets
         when String
           main = bower['main']
         when Array
-          main = bower['main'].find { |fn|
-            # TODO: nil extname is fishy
-            extname == nil || extname == File.extname(fn)
-          }
+          main = bower['main'].find { |fn| extname == File.extname(fn) }
         end
 
         pathname.dirname.join(main).to_s if main
