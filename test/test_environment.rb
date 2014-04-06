@@ -108,6 +108,10 @@ module EnvironmentTests
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
       @env.resolve(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
 
+    assert_raises(Sprockets::FileOutsidePaths) do
+      @env.resolve("/bin/sh")
+    end
+
     assert_raises(Sprockets::ContentTypeMismatch) do
       @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
     end
@@ -254,7 +258,7 @@ module EnvironmentTests
   end
 
   test "asset with missing absolute depend_on raises an exception" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::FileOutsidePaths do
       @env["missing_absolute_depend_on.js"]
     end
   end

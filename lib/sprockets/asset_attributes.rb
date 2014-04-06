@@ -104,14 +104,22 @@ module Sprockets
         if format_extension.nil?
           engine_content_type || 'application/octet-stream'
         else
-          @environment.mime_types(format_extension) ||
+          format_content_type ||
             engine_content_type ||
             'application/octet-stream'
         end
       end
     end
 
+    def explicit_content_type?
+      format_content_type || engine_content_type ? true : false
+    end
+
     private
+      def format_content_type
+        format_extension && environment.mime_types(format_extension)
+      end
+
       # Returns implicit engine content type.
       #
       # `.coffee` files carry an implicit `application/javascript`

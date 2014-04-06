@@ -128,7 +128,7 @@ module Sprockets
       content_type = options[:content_type]
       attributes = attributes_for(logical_path)
 
-      if content_type && (attributes.format_extension || attributes.engine_extensions.any?)
+      if content_type && attributes.explicit_content_type?
         if content_type != attributes.content_type
           raise ContentTypeMismatch, "#{logical_path} is " +
             "'#{attributes.content_type}', not '#{content_type}'"
@@ -136,8 +136,14 @@ module Sprockets
       end
 
       if Pathname.new(logical_path).absolute?
+        unless paths.detect { |path| logical_path.to_s[path] }
+          raise FileOutsidePaths, "#{logical_path} isn't in paths: #{paths.join(', ')}"
+        end
+
         if stat(logical_path)
-          return logical_path
+          if content_type.nil? || content_type == content_type_of(logical_path)
+            return logical_path
+          end
         end
       else
         extension = attributes.format_extension || extension_for_mime_type(content_type)
