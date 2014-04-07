@@ -138,7 +138,7 @@ module Sprockets
     def evaluate(path, options = {})
       filename   = resolve(path)
       pathname   = Pathname.new(filename)
-      attributes = environment.attributes_for(pathname)
+      attributes = environment.attributes_for(filename)
       processors = options[:processors] || attributes.processors
 
       if options[:data]
@@ -157,7 +157,7 @@ module Sprockets
         environment: environment,
         context: self,
         cache: environment.cache,
-        filename: pathname.to_s,
+        filename: filename,
         logical_path: logical_path,
         content_type: content_type,
         data: data
