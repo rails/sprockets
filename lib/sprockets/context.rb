@@ -144,13 +144,9 @@ module Sprockets
       if options[:data]
         data = options[:data]
       else
-        if environment.respond_to?(:default_external_encoding)
-          mime_type = environment.mime_types(pathname.extname)
-          encoding  = environment.encoding_for_mime_type(mime_type)
-          data      = Sprockets::Utils.read_unicode(pathname, encoding)
-        else
-          data = Sprockets::Utils.read_unicode(pathname)
-        end
+        mime_type = environment.mime_types(pathname.extname)
+        encoding  = environment.encoding_for_mime_type(mime_type)
+        data      = Sprockets::Utils.read_unicode(pathname, encoding)
       end
 
       input = {

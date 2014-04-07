@@ -34,7 +34,7 @@ module Sprockets
     # back on the default external encoding, if it exists.
     def encoding_for_mime_type(type)
       encoding = Encoding::BINARY if type =~ %r{^(image|audio|video)/}
-      encoding ||= default_external_encoding if respond_to?(:default_external_encoding)
+      encoding ||= default_external_encoding
       encoding
     end
   end
