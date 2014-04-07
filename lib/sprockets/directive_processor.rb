@@ -74,13 +74,11 @@ module Sprockets
       new.call(input)
     end
 
-    # `context` is a `Context` instance with methods that allow you to
-    # access the environment and append to the bundle. See `Context`
-    # for the complete API.
     def call(input)
-      @context = input[:context]
+      @environment = input[:environment]
       @filename = input[:filename]
       @pathname = Pathname.new(@filename)
+      @content_type = input[:content_type]
 
       data = input[:data]
       @header = data[HEADER_PATTERN, 0] || ""
@@ -144,8 +142,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :context
-
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
       # automatically be available. This makes it easy to extend the
@@ -208,7 +204,10 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        pathname = context.resolve(path, content_type: :self)
+        pathname = @environment.resolve(path, {
+          base_path: @pathname.dirname,
+          content_type: @content_type
+        })
         @dependency_assets << pathname.to_s
         @required_paths << pathname.to_s
       end
@@ -243,17 +242,20 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless (stats = context.environment.stat(root)) && stats.directory?
+          unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
           @dependency_paths << root.to_s
 
-          context.environment.entries(root).each do |pathname|
+          @environment.entries(root).each do |pathname|
             pathname = root.join(pathname)
+            stat = @environment.stat(pathname)
+            content_type = @environment.content_type_of(pathname)
+
             if pathname.to_s == self.pathname.to_s
               next
-            elsif context.asset_requirable?(pathname)
+            elsif stat.file? && content_type == @content_type
               @dependency_assets << pathname.to_s
               @required_paths << pathname.to_s
             end
@@ -273,19 +275,21 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless (stats = context.environment.stat(root)) && stats.directory?
+          unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
           @dependency_paths << root.to_s
 
           required_paths = []
-          context.environment.recursive_stat(root) do |pathname, stat|
+          @environment.recursive_stat(root) do |pathname, stat|
+            content_type = @environment.content_type_of(pathname)
+
             if pathname.to_s == self.pathname.to_s
               next
             elsif stat.directory?
               @dependency_paths << pathname.to_s
-            elsif context.asset_requirable?(pathname)
+            elsif stat.file? && content_type == @content_type
               required_paths << pathname
             end
           end
@@ -312,7 +316,9 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << context.resolve(path).to_s
+        @dependency_paths << @environment.resolve(path, {
+          base_path: @pathname.dirname
+        })
       end
 
       # Allows you to state a dependency on an asset without including
@@ -327,7 +333,9 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        @dependency_assets << context.resolve(path).to_s
+        @dependency_assets << @environment.resolve(path, {
+          base_path: @pathname.dirname
+        })
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -339,7 +347,10 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_assets << context.resolve(path, content_type: :self).to_s
+        @stubbed_assets << @environment.resolve(path, {
+          base_path: @pathname.dirname,
+          content_type: @content_type
+        })
       end
 
     private
