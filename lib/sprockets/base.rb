@@ -124,9 +124,7 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(logical_path, options = {})
-      options = options.dup
       content_type = options[:content_type]
-      attributes = attributes_for(logical_path)
 
       if Pathname.new(logical_path).absolute?
         unless paths.detect { |path| logical_path.to_s[path] }
@@ -139,8 +137,10 @@ module Sprockets
           end
         end
       else
+        attributes = attributes_for(logical_path)
         extension = attributes.format_extension || extension_for_mime_type(content_type)
         args = attributes.search_paths + [options]
+
         @trail.find_all(*args).each do |path|
           path = expand_bower_path(path, extension) || path
           if content_type.nil? || content_type == content_type_of(path)
