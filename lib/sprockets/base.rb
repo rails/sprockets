@@ -224,11 +224,9 @@ module Sprockets
       raise NotImplementedError
     end
 
-    if defined? Encoding.default_external
-      # Define `default_external_encoding` accessor on 1.9.
-      # Defaults to UTF-8.
-      attr_accessor :default_external_encoding
-    end
+    # Define `default_external_encoding` accessor on 1.9.
+    # Defaults to UTF-8.
+    attr_accessor :default_external_encoding
 
     # Read and compute digest of filename.
     #

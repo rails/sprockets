@@ -20,9 +20,7 @@ module Sprockets
       self.logger = Logger.new($stderr)
       self.logger.level = Logger::FATAL
 
-      if respond_to?(:default_external_encoding)
-        self.default_external_encoding = Encoding::UTF_8
-      end
+      self.default_external_encoding = Encoding::UTF_8
 
       # Create a safe `Context` subclass to mutate
       @context_class = Class.new(Context)

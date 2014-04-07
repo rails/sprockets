@@ -7,12 +7,10 @@ require "eco"
 require "ejs"
 require "erb"
 
-if defined? Encoding
-  old_verbose, $VERBOSE = $VERBOSE, false
-  Encoding.default_external = 'UTF-8'
-  Encoding.default_internal = 'UTF-8'
-  $VERBOSE = old_verbose
-end
+old_verbose, $VERBOSE = $VERBOSE, false
+Encoding.default_external = 'UTF-8'
+Encoding.default_internal = 'UTF-8'
+$VERBOSE = old_verbose
 
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
