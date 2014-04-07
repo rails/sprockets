@@ -111,10 +111,6 @@ module Sprockets
       end
     end
 
-    def explicit_content_type?
-      format_content_type || engine_content_type ? true : false
-    end
-
     private
       def format_content_type
         format_extension && environment.mime_types(format_extension)

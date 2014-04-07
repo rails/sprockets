@@ -128,13 +128,6 @@ module Sprockets
       content_type = options[:content_type]
       attributes = attributes_for(logical_path)
 
-      if content_type && attributes.explicit_content_type?
-        if content_type != attributes.content_type
-          raise ContentTypeMismatch, "#{logical_path} is " +
-            "'#{attributes.content_type}', not '#{content_type}'"
-        end
-      end
-
       if Pathname.new(logical_path).absolute?
         unless paths.detect { |path| logical_path.to_s[path] }
           raise FileOutsidePaths, "#{logical_path} isn't in paths: #{paths.join(', ')}"
@@ -155,7 +148,9 @@ module Sprockets
         end
       end
 
-      raise FileNotFound, "couldn't find file '#{logical_path}'"
+      message = "couldn't find file '#{logical_path}'"
+      message << " with content type '#{content_type}'" if content_type
+      raise FileNotFound, message
     end
 
     # Register a new mime type.

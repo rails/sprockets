@@ -619,7 +619,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring a file of a different format raises an exception" do
-    assert_raises Sprockets::ContentTypeMismatch do
+    assert_raises Sprockets::FileNotFound do
       asset("mismatch.js")
     end
   end
