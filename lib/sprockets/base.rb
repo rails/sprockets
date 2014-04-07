@@ -124,6 +124,7 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(logical_path, options = {})
+      logical_path = logical_path.to_s if logical_path
       content_type = options[:content_type]
 
       if Pathname.new(logical_path).absolute?
@@ -137,12 +138,24 @@ module Sprockets
           end
         end
       else
-        attributes = attributes_for(logical_path)
-        extension = attributes.format_extension || extension_for_mime_type(content_type)
-        args = attributes.search_paths + [options]
+        extension = attributes_for(logical_path).format_extension
+        content_type_extension = extension_for_mime_type(content_type)
 
-        @trail.find_all(*args).each do |path|
-          path = expand_bower_path(path, extension) || path
+        paths = [logical_path]
+
+        path_without_extension = extension ?
+          logical_path.sub(extension, '') :
+          logical_path
+
+        # optimization: bower.json can only be nested one level deep
+        if !path_without_extension.index('/')
+          paths << File.join(path_without_extension, "bower.json")
+        end
+
+        paths << File.join(path_without_extension, "index#{extension}")
+
+        @trail.find_all(*paths, options).each do |path|
+          path = expand_bower_path(path, extension || content_type_extension) || path
           if content_type.nil? || content_type == content_type_of(path)
             return path
           end
