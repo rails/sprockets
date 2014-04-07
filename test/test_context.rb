@@ -121,8 +121,7 @@ class TestCustomProcessor < Sprockets::TestCase
   test "resolve with content type" do
     assert_equal [fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
-     fixture_path("context/foo.js"),
-     "foo.js is 'application/javascript', not 'text/css';"
-    ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
+     fixture_path("context/foo.js")
+    ].join(",\n") + ";", @env["resolve_content_type.js"].to_s.strip
   end
 end

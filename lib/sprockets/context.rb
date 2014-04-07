@@ -74,37 +74,10 @@ module Sprockets
     #     resolve("./bar.js")
     #     # => "/path/to/app/javascripts/bar.js"
     #
-    def resolve(path, options = {}, &block)
-      pathname   = Pathname.new(path)
-      attributes = environment.attributes_for(pathname)
-
-      if pathname.absolute?
-        if environment.stat(pathname)
-          pathname
-        else
-          raise FileNotFound, "couldn't find file '#{pathname}'"
-        end
-
-      elsif content_type = options[:content_type]
-        content_type = self.content_type if content_type == :self
-
-        if attributes.format_extension
-          if content_type != attributes.content_type
-            raise ContentTypeMismatch, "#{path} is " +
-              "'#{attributes.content_type}', not '#{content_type}'"
-          end
-        end
-
-        resolve(path) do |candidate|
-          if self.content_type == environment.content_type_of(candidate)
-            return candidate
-          end
-        end
-
-        raise FileNotFound, "couldn't find file '#{path}'"
-      else
-        environment.resolve(path, {base_path: self.pathname.dirname}.merge(options), &block)
-      end
+    def resolve(path, options = {})
+      options  = {base_path: self.pathname.dirname}.merge(options)
+      options[:content_type] = self.content_type if options[:content_type] == :self
+      environment.resolve(path, options)
     end
 
     # `depend_on` allows you to state a dependency on a file without
@@ -173,7 +146,8 @@ module Sprockets
     #     <%= evaluate "bar.js" %>
     #
     def evaluate(path, options = {})
-      pathname   = resolve(path)
+      filename   = resolve(path)
+      pathname   = Pathname.new(filename)
       attributes = environment.attributes_for(pathname)
       processors = options[:processors] || attributes.processors
 

@@ -1,4 +1,5 @@
 require 'sprockets/asset_attributes'
+require 'sprockets/bower'
 require 'sprockets/bundled_asset'
 require 'sprockets/errors'
 require 'sprockets/processed_asset'
@@ -10,7 +11,7 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Index`.
   class Base
-    include Paths, Mime, Processing, Compressing, Engines, Server
+    include Paths, Bower, Mime, Processing, Compressing, Engines, Server
 
     # Returns a `Digest` implementation class.
     #
@@ -123,34 +124,47 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(logical_path, options = {})
-      # If a block is given, preform an iterable search
-      if block_given?
-        args = attributes_for(logical_path).search_paths + [options]
-        @trail.find(*args) do |path|
-          pathname = Pathname.new(path)
-          if pathname.basename.to_s == "bower.json"
-            bower = json_decode(pathname.read)
-            case bower['main']
-            when String
-              yield pathname.dirname.join(bower['main'])
-            when Array
-              extname = File.extname(logical_path)
-              bower['main'].each do |fn|
-                if extname == "" || extname == File.extname(fn)
-                  yield pathname.dirname.join(fn)
-                end
-              end
-            end
-          else
-            yield pathname
+      logical_path = logical_path.to_s if logical_path
+      content_type = options[:content_type]
+
+      if Pathname.new(logical_path).absolute?
+        unless paths.detect { |path| logical_path.to_s[path] }
+          raise FileOutsidePaths, "#{logical_path} isn't in paths: #{paths.join(', ')}"
+        end
+
+        if stat(logical_path)
+          if content_type.nil? || content_type == content_type_of(logical_path)
+            return logical_path
           end
         end
       else
-        resolve(logical_path, options) do |pathname|
-          return pathname
+        extension = attributes_for(logical_path).format_extension
+        content_type_extension = extension_for_mime_type(content_type)
+
+        paths = [logical_path]
+
+        path_without_extension = extension ?
+          logical_path.sub(extension, '') :
+          logical_path
+
+        # optimization: bower.json can only be nested one level deep
+        if !path_without_extension.index('/')
+          paths << File.join(path_without_extension, "bower.json")
         end
-        raise FileNotFound, "couldn't find file '#{logical_path}'"
+
+        paths << File.join(path_without_extension, "index#{extension}")
+
+        @trail.find_all(*paths, options).each do |path|
+          path = expand_bower_path(path, extension || content_type_extension) || path
+          if content_type.nil? || content_type == content_type_of(path)
+            return path
+          end
+        end
       end
+
+      message = "couldn't find file '#{logical_path}'"
+      message << " with content type '#{content_type}'" if content_type
+      raise FileNotFound, message
     end
 
     # Register a new mime type.
@@ -327,10 +341,6 @@ module Sprockets
         yield
       ensure
         Thread.current[:sprockets_circular_calls] = nil if reset
-      end
-
-      def json_decode(obj)
-        JSON.parse(obj, create_additions: false)
       end
   end
 end

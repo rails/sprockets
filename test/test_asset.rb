@@ -619,13 +619,13 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring a file of a different format raises an exception" do
-    assert_raises Sprockets::ContentTypeMismatch do
+    assert_raises Sprockets::FileNotFound do
       asset("mismatch.js")
     end
   end
 
   test "splatted asset includes itself" do
-    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname)
+    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname).map(&:to_s)
   end
 
   test "splatted assets are processed assets" do
@@ -638,12 +638,12 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "asset with child dependencies" do
     assert_equal [resolve("project.js"), resolve("users.js")],
-      asset("application.js").dependencies.map(&:pathname)
+      asset("application.js").dependencies.map(&:pathname).map(&:to_s)
   end
 
   test "splatted asset with child dependencies" do
     assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
-      asset("application.js").to_a.map(&:pathname)
+      asset("application.js").to_a.map(&:pathname).map(&:to_s)
   end
 
   test "bundled asset body is just its own contents" do

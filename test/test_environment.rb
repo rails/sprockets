@@ -96,19 +96,101 @@ module EnvironmentTests
     assert_equal 'Sprockets::UglifierCompressor', @env.compressors['application/javascript'][:uglifier].name
   end
 
-  test "resolve in environment" do
+  test "resolve absolute path in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js").to_s
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js")).to_s
+      @env.resolve(fixture_path('default/gallery.js'))
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve("coffee/foo.js").to_s
+      @env.resolve(fixture_path('default/coffee/foo.coffee'))
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve(fixture_path('default/jquery.tmpl.min.js'))
+
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
+
+    assert_raises(Sprockets::FileOutsidePaths) do
+      @env.resolve("/bin/sh")
+    end
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
+    end
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css')
+    end
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/gallery.foo'))
+    end
   end
 
-  test "missing file raises an exception" do
+  test "resolve in environment" do
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery.js")
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(Pathname.new("gallery.js"))
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve("coffee/foo.js")
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min")
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min.js")
+
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("null")
     end
+  end
+
+  test "resolve content type in environment" do
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery.js")
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery.js", content_type: "application/javascript")
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve("gallery", content_type: "application/javascript")
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve('coffee/foo', content_type: 'application/javascript')
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve('coffee/foo.coffee', content_type: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min", content_type: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve("jquery.tmpl.min.js", content_type: 'application/javascript')
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("gallery.js", content_type: "text/css")
+    end
+  end
+
+  test "resolve bower special case" do
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower")
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower.js")
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower", content_type: 'application/javascript')
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.resolve("bower.js", content_type: 'application/javascript')
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve("bower.css", content_type: 'text/css')
+    end
+
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit")
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit.js")
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit", content_type: 'application/javascript')
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.resolve("qunit.js", content_type: 'application/javascript')
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.resolve("qunit.css")
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.resolve("qunit", content_type: 'text/css')
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.resolve("qunit.css", content_type: 'text/css')
   end
 
   test "find bundled asset in environment" do
@@ -178,7 +260,7 @@ module EnvironmentTests
   end
 
   test "asset with missing absolute depend_on raises an exception" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::FileOutsidePaths do
       @env["missing_absolute_depend_on.js"]
     end
   end
@@ -192,7 +274,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  ENTRIES_IN_PATH = 43
+  ENTRIES_IN_PATH = 44
 
   test "iterate over each entry" do
     entries = []
@@ -205,7 +287,7 @@ module EnvironmentTests
     end
   end
 
-  FILES_IN_PATH = 36
+  FILES_IN_PATH = 37
 
   test "iterate over each logical path" do
     paths = []
