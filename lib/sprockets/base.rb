@@ -143,8 +143,9 @@ module Sprockets
         args = attributes.search_paths + [options]
         @trail.find_all(*args).each do |path|
           path = expand_bower_path(path, extension) || path
-          next if content_type && content_type != content_type_of(path)
-          return path
+          if content_type.nil? || content_type == content_type_of(path)
+            return path
+          end
         end
       end
 
