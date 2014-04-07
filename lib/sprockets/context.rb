@@ -128,16 +128,6 @@ module Sprockets
       nil
     end
 
-    # Tests if target path is able to be safely required into the
-    # current concatenation.
-    def asset_requirable?(path)
-      pathname = resolve(path)
-      content_type = environment.content_type_of(pathname)
-      stat = environment.stat(path)
-      return false unless stat && stat.file?
-      self.content_type.nil? || self.content_type == content_type
-    end
-
     # Reads `path` and runs processors on the file.
     #
     # This allows you to capture the result of an asset and include it
