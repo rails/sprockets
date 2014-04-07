@@ -58,6 +58,10 @@ module Sprockets
       Sass::Script::String.new("url(" + sprockets_context.stylesheet_path(path.value) + ")")
     end
 
+    def asset_data_url(path)
+      Sass::Script::String.new("url(" + sprockets_context.asset_data_uri(path.value) + ")")
+    end
+
     protected
       def sprockets_context
         options[:sprockets][:context]

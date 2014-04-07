@@ -254,4 +254,11 @@ div {
   url: url(/foo.css); }
     EOS
   end
+
+  test "data-url function" do
+    assert_equal <<-EOS, render('sass/data_url.scss')
+div {
+  url: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAMAAAAoyzS7AAAABlBMVEUFO2sAAADPfNHpAAAACklEQVQIW2NgAAAAAgABYkBPaAAAAABJRU5ErkJggg%3D%3D); }
+    EOS
+  end
 end
