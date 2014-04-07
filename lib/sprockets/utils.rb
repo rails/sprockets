@@ -1,3 +1,5 @@
+require 'pathname'
+
 module Sprockets
   # `Utils`, we didn't know where else to put it!
   module Utils
@@ -7,7 +9,7 @@ module Sprockets
     UTF8_BOM_PATTERN = Regexp.new("\\A\uFEFF".encode('utf-8'))
 
     def self.read_unicode(pathname, external_encoding = Encoding.default_external)
-      pathname.open("r:#{external_encoding}") do |f|
+      Pathname.new(pathname).open("r:#{external_encoding}") do |f|
         f.read.tap do |data|
           # Eager validate the file's encoding. In most cases we
           # expect it to be UTF-8 unless `default_external` is set to

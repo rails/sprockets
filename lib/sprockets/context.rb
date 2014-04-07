@@ -2,7 +2,6 @@ require 'base64'
 require 'rack/utils'
 require 'sprockets/errors'
 require 'sprockets/utils'
-require 'pathname'
 require 'set'
 
 module Sprockets
@@ -137,16 +136,15 @@ module Sprockets
     #
     def evaluate(path, options = {})
       filename   = resolve(path)
-      pathname   = Pathname.new(filename)
       attributes = environment.attributes_for(filename)
       processors = options[:processors] || attributes.processors
 
       if options[:data]
         data = options[:data]
       else
-        mime_type = environment.mime_types(pathname.extname)
+        mime_type = environment.mime_types(File.extname(filename))
         encoding  = environment.encoding_for_mime_type(mime_type)
-        data      = Sprockets::Utils.read_unicode(pathname, encoding)
+        data      = Sprockets::Utils.read_unicode(filename, encoding)
       end
 
       input = {
