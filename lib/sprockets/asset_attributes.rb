@@ -13,27 +13,6 @@ module Sprockets
       @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
     end
 
-    # Returns paths search the load path for.
-    def search_paths
-      paths = [pathname.to_s]
-
-      extension = format_extension
-      path_without_extension = extension ?
-        pathname.sub(extension, '') :
-        pathname
-
-      # optimization: bower.json can only be nested one level deep
-      if !path_without_extension.to_s.index('/')
-        paths << path_without_extension.join("bower.json").to_s
-      end
-
-      if pathname.basename(extension.to_s).to_s != 'index'
-        paths << path_without_extension.join("index#{extension}").to_s
-      end
-
-      paths
-    end
-
     # Reverse guess logical path for fully expanded path.
     #
     # This has some known issues. For an example if a file is
@@ -104,7 +83,7 @@ module Sprockets
         if format_extension.nil?
           engine_content_type || 'application/octet-stream'
         else
-          @environment.mime_types(format_extension) ||
+          format_content_type ||
             engine_content_type ||
             'application/octet-stream'
         end
@@ -112,6 +91,10 @@ module Sprockets
     end
 
     private
+      def format_content_type
+        format_extension && environment.mime_types(format_extension)
+      end
+
       # Returns implicit engine content type.
       #
       # `.coffee` files carry an implicit `application/javascript`
