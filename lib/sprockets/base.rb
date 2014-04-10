@@ -305,7 +305,6 @@ module Sprockets
         content_type: content_type_of(filename),
         data: data
       }
-      input[:context] = context_class.new(input)
 
       required_paths    = []
       stubbed_assets    = Set.new
@@ -329,13 +328,6 @@ module Sprockets
           end
         end
       end
-
-      # Gather legacy context paths
-      result = input[:context].to_hash
-      Array(result[:required_paths]).each { |p| required_paths << p }
-      Array(result[:stubbed_assets]).each { |p| stubbed_assets << p }
-      Array(result[:dependency_paths]).each { |p| dependency_paths << p }
-      Array(result[:dependency_assets]).each { |p| dependency_assets << p }
 
       {
         data: data,
