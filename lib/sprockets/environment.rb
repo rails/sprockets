@@ -25,7 +25,7 @@ module Sprockets
       # Create a safe `Context` subclass to mutate
       @context_class = Class.new(Context)
 
-      # Set MD5 as the default digest
+      # Set the default digest
       @digest_class = Digest::SHA1
       @version = ''
 
