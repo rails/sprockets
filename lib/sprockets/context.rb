@@ -30,7 +30,7 @@ module Sprockets
       @_required_paths    = []
       @_stubbed_assets    = Set.new
       @_dependency_paths  = Set.new
-      @_dependency_assets = Set.new([input[:filename]])
+      @_dependency_assets = Set.new
     end
 
     def to_hash

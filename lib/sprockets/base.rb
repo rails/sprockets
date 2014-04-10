@@ -309,7 +309,7 @@ module Sprockets
       required_paths    = []
       stubbed_assets    = Set.new
       dependency_paths  = Set.new
-      dependency_assets = Set.new
+      dependency_assets = Set.new([filename])
 
       processors.each do |processor|
         begin
