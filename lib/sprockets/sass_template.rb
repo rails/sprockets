@@ -21,13 +21,15 @@ module Sprockets
     end
 
     def call(input)
+      context = input[:environment].context_class.new(input)
+
       options = {
         filename: input[:filename],
         syntax: self.class.syntax,
         cache_store: SassCacheStore.new(input[:cache]),
         load_paths: input[:environment].paths,
         sprockets: {
-          context: input[:environment].context_class.new(input),
+          context: context,
           environment: input[:environment]
         }
       }
@@ -40,7 +42,7 @@ module Sprockets
         dependency.options[:filename]
       end
 
-      { data: css, dependency_paths: dependency_paths }
+      context.to_hash.merge(data: css, dependency_paths: dependency_paths)
     end
   end
 
