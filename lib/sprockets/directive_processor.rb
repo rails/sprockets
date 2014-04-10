@@ -227,7 +227,7 @@ module Sprockets
           raise ArgumentError, "require_self can only be called once per source file"
         end
 
-        @required_paths << pathname
+        @required_paths << pathname.to_s
         process_source
         @has_written_body = true
       end

@@ -21,18 +21,25 @@ module Sprockets
   # assets. See `DirectiveProcessor` for an example of this.
   class Context
     attr_reader :environment, :pathname
-    attr_reader :_required_paths, :_stubbed_assets
-    attr_reader :_dependency_paths, :_dependency_assets
 
-    def initialize(environment, logical_path, pathname)
-      @environment  = environment
-      @logical_path = logical_path
-      @pathname     = pathname
+    def initialize(input)
+      @environment  = input[:environment]
+      @logical_path = input[:logical_path]
+      @pathname     = Pathname.new(input[:filename])
 
       @_required_paths    = []
       @_stubbed_assets    = Set.new
       @_dependency_paths  = Set.new
-      @_dependency_assets = Set.new([pathname.to_s])
+      @_dependency_assets = Set.new([input[:filename]])
+    end
+
+    def to_hash
+      {
+        required_paths: @_required_paths,
+        stubbed_assets: @_stubbed_assets,
+        dependency_paths: @_dependency_paths,
+        dependency_assets: @_dependency_assets
+      }
     end
 
     # Returns the environment path that contains the file.
@@ -49,9 +56,7 @@ module Sprockets
     #     'app/javascripts/application.js'
     #     # => 'application'
     #
-    def logical_path
-      @logical_path.chomp(File.extname(@logical_path))
-    end
+    attr_reader :logical_path
 
     # Returns content type of file
     #
@@ -74,7 +79,7 @@ module Sprockets
     #     # => "/path/to/app/javascripts/bar.js"
     #
     def resolve(path, options = {})
-      options  = {base_path: self.pathname.dirname}.merge(options)
+      options = {base_path: self.pathname.dirname}.merge(options)
       options[:content_type] = self.content_type if options[:content_type] == :self
       environment.resolve(path, options)
     end
@@ -125,57 +130,6 @@ module Sprockets
     def stub_asset(path)
       @_stubbed_assets << resolve(path, content_type: :self).to_s
       nil
-    end
-
-    # Reads `path` and runs processors on the file.
-    #
-    # This allows you to capture the result of an asset and include it
-    # directly in another.
-    #
-    #     <%= evaluate "bar.js" %>
-    #
-    def evaluate(path, options = {})
-      filename   = resolve(path)
-      attributes = environment.attributes_for(filename)
-      processors = options[:processors] || attributes.processors
-
-      if options[:data]
-        data = options[:data]
-      else
-        mime_type = environment.mime_types(File.extname(filename))
-        encoding  = environment.encoding_for_mime_type(mime_type)
-        data      = Sprockets::Utils.read_unicode(filename, encoding)
-      end
-
-      input = {
-        environment: environment,
-        context: self,
-        cache: environment.cache,
-        filename: filename,
-        logical_path: logical_path,
-        content_type: content_type,
-        data: data
-      }
-
-      processors.each do |processor|
-        begin
-          result = processor.call(input.merge(data: data))
-          case result
-          when Hash
-            data = result[:data]
-            Array(result[:required_paths]).each { |p| require_asset(p) }
-            Array(result[:stubbed_assets]).each { |p| stub_asset(p) }
-            Array(result[:dependency_paths]).each { |p| depend_on(p) }
-            Array(result[:dependency_assets]).each { |p| depend_on_asset(p) }
-          when String
-            data = result
-          else
-            raise Error, "invalid processor return type: #{result.class}"
-          end
-        end
-      end
-
-      data
     end
 
     # Returns a Base64-encoded `data:` URI with the contents of the
