@@ -24,8 +24,10 @@ module Sprockets
 
     def initialize(input)
       @environment  = input[:environment]
+      @root_path    = input[:root_path]
       @logical_path = input[:logical_path]
       @pathname     = Pathname.new(input[:filename])
+      @content_type = input[:content_type]
 
       @_required_paths    = []
       @_stubbed_assets    = Set.new
@@ -47,9 +49,7 @@ module Sprockets
     # If `app/javascripts` and `app/stylesheets` are in your path, and
     # current file is `app/javascripts/foo/bar.js`, `root_path` would
     # return `app/javascripts`.
-    def root_path
-      environment.paths.detect { |path| pathname.to_s[path] }
-    end
+    attr_reader :root_path
 
     # Returns logical path without any file extensions.
     #
@@ -63,9 +63,7 @@ module Sprockets
     #     'application/javascript'
     #     'text/css'
     #
-    def content_type
-      environment.content_type_of(pathname)
-    end
+    attr_reader :content_type
 
     # Given a logical path, `resolve` will find and return the fully
     # expanded path. Relative paths will also be resolved. An optional

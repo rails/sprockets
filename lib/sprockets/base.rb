@@ -300,6 +300,7 @@ module Sprockets
         environment: self,
         cache: cache,
         filename: filename,
+        root_path: paths.find { |path| filename[path] },
         logical_path: logical_path.chomp(File.extname(logical_path)),
         content_type: content_type_of(filename),
         data: data
