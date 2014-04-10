@@ -27,7 +27,7 @@ module Sprockets
         cache_store: SassCacheStore.new(input[:cache]),
         load_paths: input[:environment].paths,
         sprockets: {
-          context: input[:context],
+          context: input[:environment].context_class.new(input),
           environment: input[:environment]
         }
       }
