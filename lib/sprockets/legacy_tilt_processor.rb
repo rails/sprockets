@@ -20,9 +20,10 @@ module Sprockets
     def call(input)
       filename = input[:filename]
       data     = input[:data]
-      context  = input[:context]
+      context  = input[:environment].context_class.new(input)
 
-      @klass.new(filename) { data }.render(context)
+      data = @klass.new(filename) { data }.render(context)
+      context.to_hash.merge(data: data)
     end
   end
 end

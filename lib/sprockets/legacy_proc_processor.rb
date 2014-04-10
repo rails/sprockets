@@ -27,7 +27,9 @@ module Sprockets
     end
 
     def call(input)
-      @proc.call(input[:context], input[:data])
+      context = input[:environment].context_class.new(input)
+      data = @proc.call(context, input[:data])
+      context.to_hash.merge(data: data)
     end
   end
 end
