@@ -21,10 +21,12 @@ module Sprockets
       @source = to_a.map { |dependency| dependency.to_s }.join
 
       # Run bundle processors on concatenated source
-      @source = environment.evaluate(pathname.to_s, logical_path, {
-        data: @source,
-        processors: environment.bundle_processors(content_type)
-      })[:data]
+      @source = environment.process(
+        environment.bundle_processors(content_type),
+        pathname.to_s,
+        logical_path,
+        @source
+      )[:data]
 
       @mtime  = (to_a + @dependency_paths).map(&:mtime).max
       @length = Rack::Utils.bytesize(source)

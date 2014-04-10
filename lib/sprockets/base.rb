@@ -284,60 +284,6 @@ module Sprockets
       build_asset(logical_path, pathname, options)
     end
 
-    def evaluate(filename, logical_path, options = {})
-      attributes = attributes_for(filename)
-      processors = options[:processors] || attributes.processors
-
-      if options[:data]
-        data = options[:data]
-      else
-        mime_type = mime_types(File.extname(filename))
-        encoding  = encoding_for_mime_type(mime_type)
-        data      = Sprockets::Utils.read_unicode(filename, encoding)
-      end
-
-      input = {
-        environment: self,
-        cache: cache,
-        filename: filename,
-        root_path: paths.find { |path| filename[path] },
-        logical_path: logical_path.chomp(File.extname(logical_path)),
-        content_type: content_type_of(filename),
-        data: data
-      }
-
-      required_paths    = []
-      stubbed_assets    = Set.new
-      dependency_paths  = Set.new
-      dependency_assets = Set.new([filename])
-
-      processors.each do |processor|
-        begin
-          result = processor.call(input.merge(data: data))
-          case result
-          when Hash
-            data = result[:data]
-            Array(result[:required_paths]).each { |p| required_paths << p }
-            Array(result[:stubbed_assets]).each { |p| stubbed_assets << p }
-            Array(result[:dependency_paths]).each { |p| dependency_paths << p }
-            Array(result[:dependency_assets]).each { |p| dependency_assets << p }
-          when String
-            data = result
-          else
-            raise Error, "invalid processor return type: #{result.class}"
-          end
-        end
-      end
-
-      {
-        data: data,
-        required_paths: required_paths,
-        stubbed_assets: stubbed_assets,
-        dependency_paths: dependency_paths,
-        dependency_assets: dependency_assets
-      }
-    end
-
     # Preferred `find_asset` shorthand.
     #
     #     environment['application.js']

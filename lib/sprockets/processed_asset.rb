@@ -9,7 +9,16 @@ module Sprockets
 
       start_time = Time.now.to_f
 
-      result = environment.evaluate(pathname.to_s, logical_path)
+      mime_type = environment.mime_types(File.extname(pathname))
+      encoding  = environment.encoding_for_mime_type(mime_type)
+      data      = Sprockets::Utils.read_unicode(pathname, encoding)
+
+      result = environment.process(
+        environment.attributes_for(pathname).processors,
+        pathname.to_s,
+        logical_path,
+        data
+      )
       @source = result[:data]
 
       @length = source.bytesize
