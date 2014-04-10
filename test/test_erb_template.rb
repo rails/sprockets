@@ -12,9 +12,8 @@ class TestERBTemplate < Sprockets::TestCase
       data: "var data = <%= JSON.generate({foo: true}) %>;",
       cache: Sprockets::Cache.new
     }
-    input[:context] = environment.context_class.new(input)
 
     output = "var data = {\"foo\":true};"
-    assert_equal output, Sprockets::ERBTemplate.call(input)
+    assert_equal output, Sprockets::ERBTemplate.call(input)[:data]
   end
 end
