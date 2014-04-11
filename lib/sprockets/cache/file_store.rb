@@ -18,7 +18,7 @@ module Sprockets
       end
 
       # Lookup value in cache
-      def [](key)
+      def get(key)
         path = File.join(@root, "#{key}.cache")
 
         if File.exist?(path)
@@ -31,7 +31,7 @@ module Sprockets
       end
 
       # Save value to cache
-      def []=(key, value)
+      def set(key, value)
         path = File.join(@root, "#{key}.cache")
 
         # Ensure directory exists

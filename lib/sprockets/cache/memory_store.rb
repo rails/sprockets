@@ -16,7 +16,7 @@ module Sprockets
         @cache = {}
       end
 
-      def [](key)
+      def get(key)
         exists = true
         value = @cache.delete(key) { exists = false }
         if exists
@@ -26,7 +26,7 @@ module Sprockets
         end
       end
 
-      def []=(key, value)
+      def set(key, value)
         @cache.delete(key)
         @cache[key] = value
         @cache.shift if @cache.size > @max_size

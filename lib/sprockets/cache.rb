@@ -64,7 +64,7 @@ module Sprockets
 
         else
           cache = Sprockets::Cache::NullStore.new
-          HashWrapper.new(cache)
+          GetWrapper.new(cache)
         end
       end
 

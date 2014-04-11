@@ -10,11 +10,11 @@ module Sprockets
     #   ActiveSupport::Cache::NullStore
     #
     class NullStore
-      def [](key)
+      def get(key)
         nil
       end
 
-      def []=(key, value)
+      def set(key, value)
         value
       end
     end
