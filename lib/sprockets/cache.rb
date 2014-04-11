@@ -20,11 +20,11 @@ module Sprockets
       value
     end
 
-    def get(key)
+    def _get(key)
       @cache_wrapper.get(expand_key(key))
     end
 
-    def set(key, value)
+    def _set(key, value)
       @cache_wrapper.set(expand_key(key), value)
     end
 
