@@ -676,18 +676,9 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal read("users.js") + "var jQuery;\n\n\n", asset("unknownexts.min.js").to_s
   end
 
-  test "included dependencies are inserted after the header of the dependent file" do
-    assert_equal "# My Application\n\n" + read("project.js") + "\n\nhello();\n",
-      asset("included_header.js").to_s
-  end
-
   test "requiring a file with a relative path" do
     assert_equal read("project.js") + "\n",
       asset("relative/require.js").to_s
-  end
-
-  test "including a file with a relative path" do
-    assert_equal "// Included relatively\n\n" + read("project.js") + "\n\nhello();\n", asset("relative/include.js").to_s
   end
 
   test "can't require files outside the load path" do
@@ -763,7 +754,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "require_self inserts the current file's body at the specified point" do
-    assert_equal "/* b.css */\n\nb { display: none }\n/*\n\n\n\n\n\n */\n.one {}\n\n\nbody {}\n.two {}\n.project {}\n", asset("require_self.css").to_s
+    assert_equal "/* b.css */\n\nb { display: none }\n/*\n\n\n\n */\n\n\nbody {}\n.project {}\n", asset("require_self.css").to_s
   end
 
   test "multiple require_self directives raises and error" do

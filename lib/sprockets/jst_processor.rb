@@ -1,24 +1,42 @@
 module Sprockets
-  class JstProcessor < Template
-    def self.default_mime_type
-      'application/javascript'
-    end
-
+  # Public: .jst engine.
+  #
+  # Exports server side compliled templates to an object.
+  #
+  # Name your template "users/show.ejs.jst", "users/new.eco.jst", etc.
+  #
+  # To accept the default options
+  #
+  #     environment.register_engine '.jst',
+  #       JstProcessor,
+  #       mime_type: 'application/javascript'
+  #
+  # Change the default namespace.
+  #
+  #     environment.register_engine '.jst',
+  #       JstProcessor.new(namespace: 'App.templates'),
+  #       mime_type: 'application/javascript'
+  #
+  class JstProcessor
     def self.default_namespace
       'this.JST'
     end
 
-    def render(context)
-      namespace = self.class.default_namespace
+    def self.call(*args)
+      new.call(*args)
+    end
+
+    def initialize(options = {})
+      @namespace = options[:namespace] || self.class.default_namespace
+    end
+
+    def call(input)
+      data = input[:data].gsub(/$(.)/m, "\\1  ").strip
+      key = input[:logical_path]
       <<-JST
-(function() { #{namespace} || (#{namespace} = {}); #{namespace}[#{context.logical_path.inspect}] = #{indent(data)};
+(function() { #{@namespace} || (#{@namespace} = {}); #{@namespace}[#{key.inspect}] = #{data};
 }).call(this);
       JST
     end
-
-    private
-      def indent(string)
-        string.gsub(/$(.)/m, "\\1  ").strip
-      end
   end
 end

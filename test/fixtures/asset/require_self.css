@@ -1,9 +1,7 @@
 /*
  *= require tree/all/b
- *= include one
  *= require_self
  *= require project
- *= include two
  */
 
 body {}

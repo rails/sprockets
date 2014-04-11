@@ -84,13 +84,16 @@ module EnvironmentTests
   end
 
   test "lookup bundle processors" do
-    assert_equal [], @env.bundle_processors('application/javascript')
-    assert_equal [Sprockets::CharsetNormalizer], @env.bundle_processors('text/css')
+    assert_equal 0, @env.bundle_processors('application/javascript').size
+    assert_equal 1, @env.bundle_processors('text/css').size
   end
 
   test "lookup compressors" do
-    assert_equal Sprockets::SassCompressor, @env.compressors['text/css'][:sass]
-    assert_equal Sprockets::UglifierCompressor, @env.compressors['application/javascript'][:uglifier]
+    silence_warnings do
+      require 'sprockets/sass_compressor'
+    end
+    assert_equal 'Sprockets::SassCompressor', @env.compressors['text/css'][:sass].name
+    assert_equal 'Sprockets::UglifierCompressor', @env.compressors['application/javascript'][:uglifier].name
   end
 
   test "resolve absolute path in environment" do
@@ -395,6 +398,12 @@ module EnvironmentTests
   end
 end
 
+class WhitespaceProcessor
+  def self.call(input)
+    input[:data].gsub(/\s+/, "")
+  end
+end
+
 class WhitespaceCompressor
   def self.compress(source)
     source.gsub(/\s+/, "")
@@ -432,9 +441,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register bundle processor" do
-    assert !@env.bundle_processors('text/css').include?(WhitespaceCompressor)
-    @env.register_bundle_processor 'text/css', WhitespaceCompressor
-    assert @env.bundle_processors('text/css').include?(WhitespaceCompressor)
+    old_size = @env.bundle_processors('text/css').size
+    @env.register_bundle_processor 'text/css', WhitespaceProcessor
+    assert_equal old_size+1, @env.bundle_processors('text/css').size
   end
 
   test "register compressor" do
@@ -484,11 +493,15 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register global bundle processor" do
-    assert !@env.bundle_processors('text/css').include?(WhitespaceCompressor)
-    Sprockets.register_bundle_processor 'text/css', WhitespaceCompressor
+    old_size = Sprockets.bundle_processors('text/css').size
+    Sprockets.register_bundle_processor 'text/css', WhitespaceProcessor
+    assert_equal old_size+1, Sprockets.bundle_processors('text/css').size
+
     env = new_environment
-    assert env.bundle_processors('text/css').include?(WhitespaceCompressor)
-    Sprockets.unregister_bundle_processor 'text/css', WhitespaceCompressor
+    assert_equal old_size+1, env.bundle_processors('text/css').size
+
+    Sprockets.unregister_bundle_processor 'text/css', WhitespaceProcessor
+    assert_equal old_size, Sprockets.bundle_processors('text/css').size
   end
 
   test "setting css compressor to nil clears current compressor" do
@@ -514,6 +527,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "setting css compressor to template handler" do
+    silence_warnings do
+      require 'sprockets/sass_compressor'
+    end
     assert_nil @env.css_compressor
     @env.css_compressor = Sprockets::SassCompressor
     assert_equal Sprockets::SassCompressor, @env.css_compressor
@@ -524,15 +540,18 @@ class TestEnvironment < Sprockets::TestCase
   test "setting js compressor to sym" do
     assert_nil @env.js_compressor
     @env.js_compressor = :uglifier
-    assert_equal Sprockets::UglifierCompressor, @env.js_compressor
+    assert_equal 'Sprockets::UglifierCompressor', @env.js_compressor.name
     @env.js_compressor = nil
     assert_nil @env.js_compressor
   end
 
   test "setting css compressor to sym" do
+    silence_warnings do
+      require 'sprockets/sass_compressor'
+    end
     assert_nil @env.css_compressor
     @env.css_compressor = :sass
-    assert_equal Sprockets::SassCompressor, @env.css_compressor
+    assert_equal 'Sprockets::SassCompressor', @env.css_compressor.name
     @env.css_compressor = nil
     assert_nil @env.css_compressor
   end
@@ -694,13 +713,13 @@ class TestIndex < Sprockets::TestCase
 
   test "does not allow new bundle processors to be added" do
     assert_raises TypeError do
-      @env.register_bundle_processor 'text/css', WhitespaceCompressor
+      @env.register_bundle_processor 'text/css', WhitespaceProcessor
     end
   end
 
   test "does not allow bundle processors to be removed" do
     assert_raises TypeError do
-      @env.unregister_bundle_processor 'text/css', WhitespaceCompressor
+      @env.unregister_bundle_processor 'text/css', WhitespaceProcessor
     end
   end
 
@@ -708,9 +727,9 @@ class TestIndex < Sprockets::TestCase
     env = Sprockets::Environment.new(".")
     index = env.index
 
-    assert !index.bundle_processors('text/css').include?(WhitespaceCompressor)
-    env.register_bundle_processor 'text/css', WhitespaceCompressor
-    assert !index.bundle_processors('text/css').include?(WhitespaceCompressor)
+    assert !index.bundle_processors('text/css').include?(WhitespaceProcessor)
+    env.register_bundle_processor 'text/css', WhitespaceProcessor
+    assert !index.bundle_processors('text/css').include?(WhitespaceProcessor)
   end
 
   test "does not allow css compressor to be changed" do

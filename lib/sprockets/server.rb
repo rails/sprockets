@@ -101,7 +101,7 @@ module Sprockets
       # Returns a JavaScript response that re-throws a Ruby exception
       # in the browser
       def javascript_exception_response(exception)
-        err  = "#{exception.class.name}: #{exception.message}"
+        err  = "#{exception.class.name}: #{exception.message}\n  (in #{exception.backtrace[0]})"
         body = "throw Error(#{err.inspect})"
         [ 200, { "Content-Type" => "application/javascript", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
       end

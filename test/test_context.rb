@@ -56,9 +56,13 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   require 'yaml'
-  class YamlProcessor < Sprockets::Template
+  class YamlProcessor
+    def initialize(file, &block)
+      @data = block.call
+    end
+
     def render(context)
-      manifest = YAML.load(data)
+      manifest = YAML.load(@data)
       manifest['require'].each do |logical_path|
         context.require_asset(logical_path)
       end
@@ -73,8 +77,13 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   require 'base64'
-  class DataUriProcessor < Sprockets::Template
+  class DataUriProcessor
+    def initialize(file, &block)
+      @data = block.call
+    end
+
     def render(context)
+      data = @data
       data.gsub(/url\(\"(.+?)\"\)/) do
         path = context.resolve($1)
         context.depend_on(path)

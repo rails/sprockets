@@ -1,6 +1,5 @@
-require 'sprockets/eco_template'
-require 'sprockets/ejs_template'
-require 'sprockets/jst_processor'
+require 'sprockets/lazy_proxy'
+require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
 module Sprockets
@@ -54,14 +53,32 @@ module Sprockets
       @engines.keys
     end
 
+    # Returns an `Array` of engine extension to mime types.
+    #
+    # # => { '.coffee' => 'application/javascript' }
+    def engine_mime_types
+      @engine_mime_types.dup
+    end
+
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
     #     environment.register_engine '.coffee', CoffeeScriptTemplate
     #
-    def register_engine(ext, klass)
+    def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @engines[ext] = klass
+
+      if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
+        @engines[ext] = klass
+        if options[:mime_type]
+          @engine_mime_types[ext.to_s] = options[:mime_type]
+        end
+      else
+        @engines[ext] = LegacyTiltProcessor.new(klass)
+        if klass.respond_to?(:default_mime_type) && klass.default_mime_type
+          @engine_mime_types[ext.to_s] = klass.default_mime_type
+        end
+      end
     end
 
     private

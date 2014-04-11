@@ -1,3 +1,5 @@
+require 'ejs'
+
 module Sprockets
   # Template engine class for the EJS compiler. Depends on the `ejs` gem.
   #
@@ -5,7 +7,9 @@ module Sprockets
   #
   #   https://github.com/sstephenson/ruby-ejs
   #
-  class EjsTemplate < Template
+  module EjsTemplate
+    VERSION = '1'
+
     # Compile template data with EJS compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -13,9 +17,12 @@ module Sprockets
     #
     #     # => "function(obj){...}"
     #
-    def render(context)
-      require 'ejs' unless defined? ::EJS
-      EJS.compile(data)
+    def self.call(input)
+      data = input[:data]
+      key  = [VERSION, data]
+      input[:cache].fetch(key) do
+        ::EJS.compile(data)
+      end
     end
   end
 end

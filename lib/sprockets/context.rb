@@ -2,7 +2,6 @@ require 'base64'
 require 'rack/utils'
 require 'sprockets/errors'
 require 'sprockets/utils'
-require 'pathname'
 require 'set'
 
 module Sprockets
@@ -22,20 +21,27 @@ module Sprockets
   # assets. See `DirectiveProcessor` for an example of this.
   class Context
     attr_reader :environment, :pathname
-    attr_reader :_required_paths, :_stubbed_assets
-    attr_reader :_dependency_paths, :_dependency_assets
-    attr_writer :__LINE__
 
-    def initialize(environment, logical_path, pathname)
-      @environment  = environment
-      @logical_path = logical_path
-      @pathname     = pathname
-      @__LINE__     = nil
+    def initialize(input)
+      @environment  = input[:environment]
+      @root_path    = input[:root_path]
+      @logical_path = input[:logical_path]
+      @pathname     = Pathname.new(input[:filename])
+      @content_type = input[:content_type]
 
       @_required_paths    = []
       @_stubbed_assets    = Set.new
       @_dependency_paths  = Set.new
-      @_dependency_assets = Set.new([pathname.to_s])
+      @_dependency_assets = Set.new
+    end
+
+    def to_hash
+      {
+        required_paths: @_required_paths,
+        stubbed_assets: @_stubbed_assets,
+        dependency_paths: @_dependency_paths,
+        dependency_assets: @_dependency_assets
+      }
     end
 
     # Returns the environment path that contains the file.
@@ -43,27 +49,21 @@ module Sprockets
     # If `app/javascripts` and `app/stylesheets` are in your path, and
     # current file is `app/javascripts/foo/bar.js`, `root_path` would
     # return `app/javascripts`.
-    def root_path
-      environment.paths.detect { |path| pathname.to_s[path] }
-    end
+    attr_reader :root_path
 
     # Returns logical path without any file extensions.
     #
     #     'app/javascripts/application.js'
     #     # => 'application'
     #
-    def logical_path
-      @logical_path.chomp(File.extname(@logical_path))
-    end
+    attr_reader :logical_path
 
     # Returns content type of file
     #
     #     'application/javascript'
     #     'text/css'
     #
-    def content_type
-      environment.content_type_of(pathname)
-    end
+    attr_reader :content_type
 
     # Given a logical path, `resolve` will find and return the fully
     # expanded path. Relative paths will also be resolved. An optional
@@ -77,7 +77,7 @@ module Sprockets
     #     # => "/path/to/app/javascripts/bar.js"
     #
     def resolve(path, options = {})
-      options  = {base_path: self.pathname.dirname}.merge(options)
+      options = {base_path: self.pathname.dirname}.merge(options)
       options[:content_type] = self.content_type if options[:content_type] == :self
       environment.resolve(path, options)
     end
@@ -128,50 +128,6 @@ module Sprockets
     def stub_asset(path)
       @_stubbed_assets << resolve(path, content_type: :self).to_s
       nil
-    end
-
-    # Tests if target path is able to be safely required into the
-    # current concatenation.
-    def asset_requirable?(path)
-      pathname = resolve(path)
-      content_type = environment.content_type_of(pathname)
-      stat = environment.stat(path)
-      return false unless stat && stat.file?
-      self.content_type.nil? || self.content_type == content_type
-    end
-
-    # Reads `path` and runs processors on the file.
-    #
-    # This allows you to capture the result of an asset and include it
-    # directly in another.
-    #
-    #     <%= evaluate "bar.js" %>
-    #
-    def evaluate(path, options = {})
-      filename   = resolve(path)
-      pathname   = Pathname.new(filename)
-      attributes = environment.attributes_for(pathname)
-      processors = options[:processors] || attributes.processors
-
-      if options[:data]
-        result = options[:data]
-      else
-        mime_type = environment.mime_types(pathname.extname)
-        encoding  = environment.encoding_for_mime_type(mime_type)
-        result    = Sprockets::Utils.read_unicode(pathname, encoding)
-      end
-
-      processors.each do |processor|
-        begin
-          template = processor.new(pathname.to_s) { result }
-          result = template.render(self)
-        rescue Exception => e
-          annotate_exception! e
-          raise
-        end
-      end
-
-      result
     end
 
     # Returns a Base64-encoded `data:` URI with the contents of the
@@ -240,20 +196,5 @@ Extend your environment context with a custom method.
     def stylesheet_path(path)
       asset_path(path, type: :stylesheet)
     end
-
-    private
-      # Annotates exception backtrace with the original template that
-      # the exception was raised in.
-      def annotate_exception!(exception)
-        location = pathname.to_s
-        location << ":#{@__LINE__}" if @__LINE__
-
-        exception.extend(Sprockets::EngineError)
-        exception.sprockets_annotation = "  (in #{location})"
-      end
-
-      def logger
-        environment.logger
-      end
   end
 end

@@ -16,8 +16,9 @@ module Sprockets
   #
   #     environment.unregister_bundle_processor 'text/css', Sprockets::CharsetNormalizer
   #
-  class CharsetNormalizer < Template
-    def render(context)
+  module CharsetNormalizer
+    def self.call(input)
+      data = input[:data]
       charset = nil
 
       # Find and strip out any `@charset` definitions

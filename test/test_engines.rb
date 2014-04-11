@@ -1,19 +1,27 @@
 require 'sprockets_test'
 require 'sprockets/engines'
 
-class AlertTemplate < Sprockets::Template
+class AlertTemplate
   def self.default_mime_type
     'application/javascript'
   end
 
+  def initialize(file, &block)
+    @data = block.call
+  end
+
   def render(context)
-    "alert(#{data.inspect});"
+    "alert(#{@data.inspect});"
   end
 end
 
-class StringTemplate < Sprockets::Template
+class StringTemplate
+  def initialize(file, &block)
+    @data = block.call
+  end
+
   def render(context)
-    data.gsub(/#\{.*?\}/, "moo")
+    @data.gsub(/#\{.*?\}/, "moo")
   end
 end
 
@@ -30,8 +38,8 @@ class TestEngines < Sprockets::TestCase
 
   test "registering a global engine" do
     Sprockets.register_engine ".alert", AlertTemplate
-    assert_equal AlertTemplate, Sprockets.engines("alert")
-    assert_equal AlertTemplate, Sprockets.engines(".alert")
+    assert_equal 'AlertTemplate', Sprockets.engines("alert").name
+    assert_equal 'AlertTemplate', Sprockets.engines(".alert").name
 
     env = new_environment
     asset = env["hello.alert"]

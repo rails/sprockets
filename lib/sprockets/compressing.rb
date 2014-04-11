@@ -28,10 +28,7 @@ module Sprockets
       end
 
       if compressor.respond_to?(:compress)
-        klass = Class.new(Processor) do
-          @name = "css_compressor"
-          @processor = proc { |context, data| compressor.compress(data) }
-        end
+        klass = LegacyProcProcessor.new(:css_compressor, proc { |context, data| compressor.compress(data) })
         @css_compressor = :css_compressor
       else
         @css_compressor = klass = compressor
@@ -58,10 +55,7 @@ module Sprockets
       end
 
       if compressor.respond_to?(:compress)
-        klass = Class.new(Processor) do
-          @name = "js_compressor"
-          @processor = proc { |context, data| compressor.compress(data) }
-        end
+        klass = LegacyProcProcessor.new(:js_compressor, proc { |context, data| compressor.compress(data) })
         @js_compressor = :js_compressor
       else
         @js_compressor = klass = compressor

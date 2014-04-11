@@ -9,13 +9,23 @@ module Sprockets
 
       start_time = Time.now.to_f
 
-      context = environment.context_class.new(environment, logical_path, pathname)
-      @source = context.evaluate(pathname)
+      mime_type = environment.mime_types(File.extname(pathname))
+      encoding  = environment.encoding_for_mime_type(mime_type)
+      data      = Sprockets::Utils.read_unicode(pathname, encoding)
+
+      result = environment.process(
+        environment.attributes_for(pathname).processors,
+        pathname.to_s,
+        logical_path,
+        data
+      )
+      @source = result[:data]
+
       @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
 
-      build_required_assets(environment, context)
-      @dependency_paths = build_dependency_paths(environment, context)
+      build_required_assets(environment, result)
+      @dependency_paths = build_dependency_paths(environment, result)
 
       @dependency_digest = compute_dependency_digest(environment)
 
@@ -94,9 +104,9 @@ module Sprockets
       end
 
     private
-      def build_required_assets(environment, context)
-        @required_assets = resolve_dependencies(environment, context._required_paths + [pathname.to_s]) -
-          resolve_dependencies(environment, context._stubbed_assets.to_a)
+      def build_required_assets(environment, result)
+        @required_assets = resolve_dependencies(environment, result[:required_paths] + [pathname.to_s]) -
+          resolve_dependencies(environment, result[:stubbed_assets].to_a)
       end
 
       def resolve_dependencies(environment, paths)
@@ -115,12 +125,12 @@ module Sprockets
         assets.to_a
       end
 
-      def build_dependency_paths(environment, context)
-        paths = context._dependency_paths.map do |path|
+      def build_dependency_paths(environment, result)
+        paths = result[:dependency_paths].map do |path|
           DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
         end
 
-        assets = context._dependency_assets.flat_map do |path|
+        assets = result[:dependency_assets].flat_map do |path|
           if path == self.pathname.to_s
             DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
           elsif asset = environment.find_asset(path, bundle: false)

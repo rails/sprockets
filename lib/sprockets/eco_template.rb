@@ -1,3 +1,6 @@
+require 'eco'
+require 'json'
+
 module Sprockets
   # Template engine class for the Eco compiler. Depends on the `eco` gem.
   #
@@ -6,7 +9,9 @@ module Sprockets
   #   https://github.com/sstephenson/ruby-eco
   #   https://github.com/sstephenson/eco
   #
-  class EcoTemplate < Template
+  module EcoTemplate
+    VERSION = '1'
+
     # Compile template data with Eco compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -14,9 +19,12 @@ module Sprockets
     #
     #     # => "function(...) {...}"
     #
-    def render(context)
-      require 'eco' unless defined? ::Eco
-      Eco.compile(data)
+    def self.call(input)
+      data = input[:data]
+      key  = [::Eco::Source::VERSION, VERSION, data]
+      input[:cache].fetch(key) do
+        ::Eco.compile(data)
+      end
     end
   end
 end

@@ -1,12 +1,23 @@
-module Sprockets
-  class CoffeeScriptTemplate < Template
-    def self.default_mime_type
-      'application/javascript'
-    end
+require 'coffee_script'
+require 'json'
 
-    def render(context)
-      require 'coffee_script' unless defined? ::CoffeeScript
-      @output ||= CoffeeScript.compile(data)
+module Sprockets
+  # Template engine class for the CoffeeScript compiler.
+  # Depends on the `coffee-script` and `coffee-script-source` gems.
+  #
+  # For more infomation see:
+  #
+  #   https://github.com/josh/ruby-coffee-script
+  #
+  module CoffeeScriptTemplate
+    VERSION = '1'
+
+    def self.call(input)
+      data = input[:data]
+      key  = [::CoffeeScript::Source.version, VERSION, data]
+      input[:cache].fetch(key) do
+        ::CoffeeScript.compile(data)
+      end
     end
   end
 end

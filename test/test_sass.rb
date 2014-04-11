@@ -14,13 +14,6 @@ class TestBaseSass < Sprockets::TestCase
     FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
-
-  def silence_warnings
-    old_verbose, $VERBOSE = $VERBOSE, false
-    yield
-  ensure
-    $VERBOSE = old_verbose
-  end
 end
 
 class TestSprocketsSass < TestBaseSass
@@ -206,6 +199,20 @@ a:link {
   color: "blue"; }
     EOS
   end
+
+  test "raise sass error with line number" do
+    begin
+      ::Sass::Util.silence_sass_warnings do
+        render('sass/error.sass')
+      end
+      flunk
+    rescue Sass::SyntaxError => error
+      assert error.message.include?("invalid")
+      trace = error.backtrace[0]
+      assert trace.include?("error.sass")
+      assert trace.include?(":5")
+    end
+  end
 end
 
 class TestSassCompressor < TestBaseSass
@@ -213,7 +220,11 @@ class TestSassCompressor < TestBaseSass
     silence_warnings do
       uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
       compressed   = "p{margin:0;padding:0}\n"
-      assert_equal compressed, Sprockets::SassCompressor.new("foo.css") { uncompressed }.render(Object.new)
+      input = {
+        data: uncompressed,
+        cache: Sprockets::Cache.new
+      }
+      assert_equal compressed, Sprockets::SassCompressor.call(input)
     end
   end
 end

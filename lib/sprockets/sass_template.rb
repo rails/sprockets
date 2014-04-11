@@ -1,51 +1,75 @@
+require 'sass'
+
 module Sprockets
   # Also see `SassImporter` for more infomation.
-  class SassTemplate < Template
-    def self.default_mime_type
-      'text/css'
-    end
-
-    def syntax
+  class SassTemplate
+    def self.syntax
       :sass
     end
 
-    def render(context)
-      require 'sass' unless defined? ::Sass
+    def self.call(*args)
+      new.call(*args)
+    end
 
+    def initialize
       unless ::Sass::Script::Functions < Sprockets::SassFunctions
         # Install custom functions. It'd be great if this didn't need to
         # be installed globally, but could be passed into Engine as an
         # option.
         ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
       end
+    end
 
-      # Use custom importer that knows about Sprockets Caching
-      cache_store = SassCacheStore.new(context.environment)
+    def call(input)
+      context = input[:environment].context_class.new(input)
 
       options = {
-        :filename => context.pathname.to_s,
-        :syntax => syntax,
-        :cache_store => cache_store,
-        :load_paths => context.environment.paths,
-        :sprockets => {
-          :context => context,
-          :environment => context.environment
+        filename: input[:filename],
+        syntax: self.class.syntax,
+        cache_store: SassCacheStore.new(input[:cache]),
+        load_paths: input[:environment].paths,
+        sprockets: {
+          context: context,
+          environment: input[:environment]
         }
       }
 
-      engine = ::Sass::Engine.new(data, options)
+      engine = ::Sass::Engine.new(input[:data], options)
       css = engine.render
 
       # Track all imported files
-      engine.dependencies.each do |dependency|
-        context.depend_on(dependency.options[:filename])
+      dependency_paths = engine.dependencies.map do |dependency|
+        dependency.options[:filename]
       end
 
-      css
-    rescue ::Sass::SyntaxError => e
-      # Annotates exception message with parse line number
-      context.__LINE__ = e.sass_backtrace.first[:line]
-      raise e
+      context.to_hash.merge(data: css, dependency_paths: dependency_paths)
+    end
+  end
+
+  class ScssTemplate < SassTemplate
+    def self.syntax
+      :scss
+    end
+  end
+
+  # Internal: Cache wrapper for Sprockets cache adapter.
+  class SassCacheStore < ::Sass::CacheStores::Base
+    VERSION = '1'
+
+    def initialize(cache)
+      @cache = cache
+    end
+
+    def _store(key, version, sha, contents)
+      @cache.set("#{VERSION}/#{version}/#{key}/#{sha}", contents)
+    end
+
+    def _retrieve(key, version, sha)
+      @cache.get("#{VERSION}/#{version}/#{key}/#{sha}")
+    end
+
+    def path_to(key)
+      key
     end
   end
 end

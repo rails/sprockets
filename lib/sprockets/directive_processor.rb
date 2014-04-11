@@ -1,4 +1,5 @@
 require 'pathname'
+require 'set'
 require 'shellwords'
 require 'yaml'
 
@@ -34,7 +35,7 @@ module Sprockets
   #
   #     env.register_processor('text/css', MyProcessor)
   #
-  class DirectiveProcessor < Template
+  class DirectiveProcessor
     # Directives will only be picked up if they are in the header
     # of the source file. C style (/* */), JavaScript (//), and
     # Ruby (#) comments are supported.
@@ -69,29 +70,42 @@ module Sprockets
     attr_reader :pathname
     attr_reader :header, :body
 
-    # `context` is a `Context` instance with methods that allow you to
-    # access the environment and append to the bundle. See `Context`
-    # for the complete API.
-    def render(context)
-      @context = context
-      @pathname = context.pathname
+    def self.call(input)
+      new.call(input)
+    end
 
+    def call(input)
+      @environment = input[:environment]
+      @filename = input[:filename]
+      @pathname = Pathname.new(@filename)
+      @content_type = input[:content_type]
+
+      data = input[:data]
       @header = data[HEADER_PATTERN, 0] || ""
       @body   = $' || data
       # Ensure body ends in a new line
       @body  += "\n" if @body != "" && @body !~ /\n\Z/m
-
-      @included_pathnames = []
 
       @result = ""
       @result.force_encoding(body.encoding)
 
       @has_written_body = false
 
+      @required_paths    = []
+      @stubbed_assets    = Set.new
+      @dependency_paths  = Set.new
+      @dependency_assets = Set.new
+
       process_directives
       process_source
 
-      @result
+      {
+        data: @result,
+        required_paths: @required_paths,
+        stubbed_assets: @stubbed_assets,
+        dependency_paths: @dependency_paths,
+        dependency_assets: @dependency_assets
+      }
     end
 
     # Returns the header String with any directives stripped.
@@ -128,9 +142,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :included_pathnames
-      attr_reader :context
-
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
       # automatically be available. This makes it easy to extend the
@@ -155,19 +166,18 @@ module Sprockets
       #
       def process_directives
         directives.each do |line_number, name, *args|
-          context.__LINE__ = line_number
-          send("process_#{name}_directive", *args)
-          context.__LINE__ = nil
+          begin
+            send("process_#{name}_directive", *args)
+          rescue Exception => e
+            e.set_backtrace(["#{pathname}:#{line_number}"] + e.backtrace)
+            raise e
+          end
         end
       end
 
       def process_source
         unless @has_written_body || processed_header.empty?
           @result << processed_header << "\n"
-        end
-
-        included_pathnames.each do |pathname|
-          @result << context.evaluate(pathname)
         end
 
         unless @has_written_body
@@ -194,14 +204,18 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        context.require_asset(path)
+        pathname = @environment.resolve(path, {
+          base_path: @pathname.dirname,
+          content_type: @content_type
+        })
+        @dependency_assets << pathname.to_s
+        @required_paths << pathname.to_s
       end
 
-      # `require_self` causes the body of the current file to be
-      # inserted before any subsequent `require` or `include`
-      # directives. Useful in CSS files, where it's common for the
-      # index file to contain global styles that need to be defined
-      # before other dependencies are loaded.
+      # `require_self` causes the body of the current file to be inserted
+      # before any subsequent `require` directives. Useful in CSS files, where
+      # it's common for the index file to contain global styles that need to
+      # be defined before other dependencies are loaded.
       #
       #     /*= require "reset"
       #      *= require_self
@@ -213,22 +227,9 @@ module Sprockets
           raise ArgumentError, "require_self can only be called once per source file"
         end
 
-        context.require_asset(pathname)
+        @required_paths << pathname.to_s
         process_source
-        included_pathnames.clear
         @has_written_body = true
-      end
-
-      # The `include` directive works similar to `require` but
-      # inserts the contents of the dependency even if it already
-      # has been required.
-      #
-      #     //= include "header"
-      #
-      def process_include_directive(path)
-        pathname = context.resolve(path)
-        context.depend_on_asset(pathname)
-        included_pathnames << pathname
       end
 
       # `require_directory` requires all the files inside a single
@@ -241,18 +242,22 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless (stats = stat(root)) && stats.directory?
+          unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          context.depend_on(root)
+          @dependency_paths << root.to_s
 
-          entries(root).each do |pathname|
+          @environment.entries(root).each do |pathname|
             pathname = root.join(pathname)
+            stat = @environment.stat(pathname)
+            content_type = @environment.content_type_of(pathname)
+
             if pathname.to_s == self.pathname.to_s
               next
-            elsif context.asset_requirable?(pathname)
-              context.require_asset(pathname)
+            elsif stat.file? && content_type == @content_type
+              @dependency_assets << pathname.to_s
+              @required_paths << pathname.to_s
             end
           end
         else
@@ -270,24 +275,27 @@ module Sprockets
         if relative?(path)
           root = pathname.dirname.join(path).expand_path
 
-          unless (stats = stat(root)) && stats.directory?
+          unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          context.depend_on(root)
+          @dependency_paths << root.to_s
 
           required_paths = []
-          context.environment.recursive_stat(root) do |pathname, stat|
+          @environment.recursive_stat(root) do |pathname, stat|
+            content_type = @environment.content_type_of(pathname)
+
             if pathname.to_s == self.pathname.to_s
               next
             elsif stat.directory?
-              context.depend_on(pathname)
-            elsif context.asset_requirable?(pathname)
+              @dependency_paths << pathname.to_s
+            elsif stat.file? && content_type == @content_type
               required_paths << pathname
             end
           end
           required_paths.sort_by(&:to_s).each do |pathname|
-            context.require_asset(pathname)
+            @dependency_assets << pathname.to_s
+            @required_paths << pathname.to_s
           end
         else
           # The path must be relative and start with a `./`.
@@ -308,7 +316,9 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        context.depend_on(path)
+        @dependency_paths << @environment.resolve(path, {
+          base_path: @pathname.dirname
+        })
       end
 
       # Allows you to state a dependency on an asset without including
@@ -323,7 +333,9 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        context.depend_on_asset(path)
+        @dependency_assets << @environment.resolve(path, {
+          base_path: @pathname.dirname
+        })
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -335,20 +347,15 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        context.stub_asset(path)
+        @stubbed_assets << @environment.resolve(path, {
+          base_path: @pathname.dirname,
+          content_type: @content_type
+        })
       end
 
     private
       def relative?(path)
         path =~ /^\.($|\.?\/)/
-      end
-
-      def stat(path)
-        context.environment.stat(path)
-      end
-
-      def entries(path)
-        context.environment.entries(path)
       end
   end
 end
