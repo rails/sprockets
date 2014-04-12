@@ -1,6 +1,6 @@
 require 'digest/md5'
 require 'fileutils'
-require 'pathname'
+require 'sprockets/fileutils'
 
 module Sprockets
   class Cache
@@ -66,7 +66,7 @@ module Sprockets
         exists = File.exist?(path)
 
         # Write data
-        File.open(path, 'w') { |f| Marshal.dump(value, f) }
+        FileUtils.atomic_write(path) { |f| Marshal.dump(value, f) }
 
         # GC if necessary
         @size += 1 unless exists
