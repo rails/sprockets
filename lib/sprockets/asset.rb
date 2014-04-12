@@ -141,7 +141,7 @@ module Sprockets
       # Gzip contents if filename has '.gz'
       options[:compress] ||= File.extname(filename) == '.gz'
 
-      FileUtils.mkdir_p File.dirname(filename)
+      ::FileUtils.mkdir_p File.dirname(filename)
 
       File.open("#{filename}+", 'wb') do |f|
         if options[:compress]
@@ -157,7 +157,7 @@ module Sprockets
       end
 
       # Atomic write
-      FileUtils.mv("#{filename}+", filename)
+      ::FileUtils.mv("#{filename}+", filename)
 
       # Set mtime correctly
       File.utime(mtime, mtime, filename)
@@ -165,7 +165,7 @@ module Sprockets
       nil
     ensure
       # Ensure tmp file gets cleaned up
-      FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
+      ::FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
     # Pretty inspect

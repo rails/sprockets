@@ -156,8 +156,8 @@ module Sprockets
       end
 
       files.delete(filename)
-      FileUtils.rm(path) if File.exist?(path)
-      FileUtils.rm(gzip) if File.exist?(gzip)
+      ::FileUtils.rm(path) if File.exist?(path)
+      ::FileUtils.rm(gzip) if File.exist?(gzip)
 
       save
 
@@ -183,7 +183,7 @@ module Sprockets
 
     # Wipe directive
     def clobber
-      FileUtils.rm_r(@dir) if File.exist?(@dir)
+      ::FileUtils.rm_r(@dir) if File.exist?(@dir)
       logger.info "Removed #{@dir}"
       nil
     end
@@ -216,7 +216,7 @@ module Sprockets
 
       # Persist manfiest back to FS
       def save
-        FileUtils.mkdir_p dir
+        ::FileUtils.mkdir_p dir
         File.open(path, 'w') do |f|
           f.write json_encode(@data)
         end

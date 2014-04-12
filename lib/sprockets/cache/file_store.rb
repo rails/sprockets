@@ -41,7 +41,7 @@ module Sprockets
 
         if File.exist?(path)
           value = File.open(path, 'rb') { |f| Marshal.load(f) }
-          FileUtils.touch(path)
+          ::FileUtils.touch(path)
           value
         else
           nil
@@ -60,7 +60,7 @@ module Sprockets
         path = File.join(@root, "#{key}.cache")
 
         # Ensure directory exists
-        FileUtils.mkdir_p File.dirname(path)
+        ::FileUtils.mkdir_p File.dirname(path)
 
         # Check if cache exists before writing
         exists = File.exist?(path)
@@ -88,7 +88,7 @@ module Sprockets
           return unless num_to_delete > 0
 
           caches.sort_by! { |path| -File.mtime(path).to_i }
-          FileUtils.remove(caches[0, num_to_delete], force: true)
+          ::FileUtils.remove(caches[0, num_to_delete], force: true)
 
           @size = find_caches.size
         end
