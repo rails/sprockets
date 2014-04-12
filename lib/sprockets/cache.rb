@@ -1,51 +1,125 @@
 require 'digest/sha1'
 
 module Sprockets
+  # Public: Wrapper interface to backend cache stores. Ensures a consistent API
+  # even when the backend uses get/set or read/write.
+  #
+  # Public cache interface
+  #
+  # Always assign the backend store instance to Environment#cache=.
+  #
+  #     environment.cache = Sprockets::Cache::MemoryStore.new(1000)
+  #
+  # Environment#cache will always return a wrapped Cache interface. See the
+  # methods marked public on this class.
+  #
+  #
+  # Backend cache interface
+  #
+  # The Backend cache store must implement two methods.
+  #
+  # get(key)
+  #
+  #   key - An opaque String with a length less than 250 characters.
+  #
+  #   Returns an JSON serializable object.
+  #
+  # set(key, value)
+  #
+  #   Will only be called once per key. Setting a key "foo" with value "bar",
+  #   then later key "foo" with value "baz" is an undefined behavior.
+  #
+  #   key   - An opaque String with a length less than 250 characters.
+  #   value - A JSON serializable object.
+  #
+  #   Returns argument value.
+  #
   class Cache
+    # Builtin cache stores.
     autoload :FileStore,   'sprockets/cache/file_store'
     autoload :MemoryStore, 'sprockets/cache/memory_store'
     autoload :NullStore,   'sprockets/cache/null_store'
 
+    # Internal: Wrap a backend cache store.
+    #
+    # Always assign a backend cache store instance to Environment#cache= and
+    # use Environment#cache to retreive a wrapped interface.
+    #
+    # cache - A compatible backend cache store instance.
     def initialize(cache = nil)
       @cache_wrapper = get_cache_wrapper(cache)
     end
 
+    # Public: Prefer API to retrieve and set values in the cache store.
+    #
+    # key   - String key
+    # block -
+    #   Must return a consistent JSON serializable object for the given key.
+    #
+    # Examples
+    #
+    #   cache.fetch("foo") { "bar" }
+    #
+    # Returns a JSON serializable object.
     def fetch(key)
       expanded_key = expand_key(key)
       value = @cache_wrapper.get(expanded_key)
-      if !value
+      if value.nil?
         value = yield
         @cache_wrapper.set(expanded_key, value)
       end
       value
     end
 
+    # Public: Low level API to retrieve item directly from the backend cache
+    # store.
+    #
+    # This API may be used publicaly, but may have undefined behavior
+    # depending on the backend store being used. Therefore it must be used
+    # with caution, which is why its prefixed with an underscore. Prefer the
+    # Cache#fetch API over using this.
+    #
+    # key   - String key
+    # value - A consistent JSON serializable object for the given key. Setting
+    #         a different value for the given key has undefined behavior.
+    #
+    # Returns a JSON serializable object or nil if there was a cache miss.
     def _get(key)
       @cache_wrapper.get(expand_key(key))
     end
 
+    # Public: Low level API to set item directly to the backend cache store.
+    #
+    # This API may be used publicaly, but may have undefined behavior
+    # depending on the backend store being used. Therefore it must be used
+    # with caution, which is why its prefixed with an underscore. Prefer the
+    # Cache#fetch API over using this.
+    #
+    # key - String key
+    #
+    # Returns the value argument.
     def _set(key, value)
       @cache_wrapper.set(expand_key(key), value)
     end
 
-    def expand_key(key)
-      digest = Digest::SHA1.new
-      hash_key!(digest, key)
-      ['sprockets', digest.hexdigest].join('/')
-    end
-
-    def hash_key!(digest, obj)
-      case obj
-      when String
-        digest.update(obj)
-      when Array
-        obj.each { |o| hash_key!(digest, o) }
-      else
-        raise ArgumentError, "could not hash #{obj.class}"
-      end
-    end
-
     private
+      def expand_key(key)
+        digest = Digest::SHA1.new
+        hash_key!(digest, key)
+        ['sprockets', digest.hexdigest].join('/')
+      end
+
+      def hash_key!(digest, obj)
+        case obj
+        when String
+          digest.update(obj)
+        when Array
+          obj.each { |o| hash_key!(digest, o) }
+        else
+          raise ArgumentError, "could not hash #{obj.class}"
+        end
+      end
+
       def get_cache_wrapper(cache)
         if cache.is_a?(Cache)
           cache

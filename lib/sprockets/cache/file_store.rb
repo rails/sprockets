@@ -4,20 +4,38 @@ require 'pathname'
 
 module Sprockets
   class Cache
-    # A simple file system cache store.
+    # Public: A file system cache store that automatically cleans up old keys.
+    #
+    # Assign the instance to the Environment#cache.
     #
     #     environment.cache = Sprockets::Cache::FileStore.new("/tmp")
     #
+    # See Also
+    #
+    #   ActiveSupport::Cache::FileStore
+    #
     class FileStore
+      # Internal: Default key limit for store.
       DEFAULT_MAX_SIZE = 1000
 
+      # Public: Initialize the cache store.
+      #
+      # root     - A String path to a directory to persist cached values to.
+      # max_size - A Integer of the maximum number of keys the store will hold.
+      #            (default: 1000).
       def initialize(root, max_size = DEFAULT_MAX_SIZE)
         @root = root
         @size = find_caches.size
         @max_size = max_size
       end
 
-      # Lookup value in cache
+      # Public: Retrieve value from cache.
+      #
+      # This API should not be used directly, but via the Cache wrapper API.
+      #
+      # key - String cache key.
+      #
+      # Returns Object or nil or the value is not set.
       def get(key)
         path = File.join(@root, "#{key}.cache")
 
@@ -30,7 +48,14 @@ module Sprockets
         end
       end
 
-      # Save value to cache
+      # Public: Set a key and value in the cache.
+      #
+      # This API should not be used directly, but via the Cache wrapper API.
+      #
+      # key   - String cache key.
+      # value - Object value.
+      #
+      # Returns Object value.
       def set(key, value)
         path = File.join(@root, "#{key}.cache")
 
