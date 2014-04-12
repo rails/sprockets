@@ -108,6 +108,14 @@ module Sprockets
     end
 
     private
+      # Internal: Expand object cache key into a short String key.
+      #
+      # The String should be under 250 characters so its compatible with
+      # Memcache.
+      #
+      # key - JSON serializable key
+      #
+      # Returns a String with a length less than 250 characters.
       def expand_key(key)
         "sprockets/v#{VERSION}/#{Utils.hexdigest(key)}"
       end
