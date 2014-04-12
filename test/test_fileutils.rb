@@ -17,4 +17,19 @@ class TestUtils < Sprockets::TestCase
       read_unicode(fixture_path('encoding/utf16.js'))
     end
   end
+
+  test "atomic write without errors" do
+    filename = "atomic.file"
+    begin
+      contents = "Atomic Text"
+      atomic_write(filename, Dir.pwd) do |file|
+        file.write(contents)
+        assert !File.exist?(filename)
+      end
+      assert File.exist?(filename)
+      assert_equal contents, File.read(filename)
+    ensure
+      File.unlink(filename) rescue nil
+    end
+  end
 end

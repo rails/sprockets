@@ -1,5 +1,7 @@
+require 'fileutils'
 require 'pathname'
 require 'sprockets/errors'
+require 'tempfile'
 
 module Sprockets
   module FileUtils
@@ -30,6 +32,71 @@ module Sprockets
           end
         end
       end
+    end
+
+    # Internal: Write to a file atomically. Useful for situations where you
+    # don't want other processes or threads to see half-written files.
+    #
+    #   FileUtils.atomic_write('important.file') do |file|
+    #     file.write('hello')
+    #   end
+    #
+    # If your temp directory is not on the same filesystem as the file you're
+    # trying to write, you can provide a different temporary directory.
+    #
+    #   FileUtils.atomic_write('/data/something.important', '/data/tmp') do |file|
+    #     file.write('hello')
+    #   end
+    #
+    # Taken from ActiveSupport.
+    #
+    # https://github.com/rails/rails/blob/master/
+    #   activesupport/lib/active_support/core_ext/file/atomic.rb
+    def atomic_write(file_name, temp_dir = Dir.tmpdir)
+      temp_file = Tempfile.new(File.basename(file_name), temp_dir)
+      temp_file.binmode
+      yield temp_file
+      temp_file.close
+
+      if File.exist?(file_name)
+        # Get original file permissions
+        old_stat = stat(file_name)
+      else
+        # If not possible, probe which are the default permissions in the
+        # destination directory.
+        old_stat = probe_stat_in(File.dirname(file_name))
+      end
+
+      # Overwrite original file with temp file
+      ::FileUtils.mv(temp_file.path, file_name)
+
+      # Set correct permissions on new file
+      begin
+        File.chown(old_stat.uid, old_stat.gid, file_name)
+        # This operation will affect filesystem ACL's
+        File.chmod(old_stat.mode, file_name)
+      rescue Errno::EPERM
+        # Changing file ownership failed, moving on.
+      end
+    end
+
+    # Internal: Taken from ActiveSupport.
+    #
+    # https://github.com/rails/rails/blob/master/
+    #   activesupport/lib/active_support/core_ext/file/atomic.rb
+    def probe_stat_in(dir)
+      basename = [
+        '.permissions_check',
+        Thread.current.object_id,
+        Process.pid,
+        rand(1000000)
+      ].join('.')
+
+      file_name = File.join(dir, basename)
+      ::FileUtils.touch(file_name)
+      File.stat(file_name)
+    ensure
+      ::FileUtils.rm_f(file_name) if file_name
     end
   end
 end
