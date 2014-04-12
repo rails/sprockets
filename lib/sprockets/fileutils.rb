@@ -60,7 +60,7 @@ module Sprockets
 
       if File.exist?(file_name)
         # Get original file permissions
-        old_stat = stat(file_name)
+        old_stat = File.stat(file_name)
       else
         # If not possible, probe which are the default permissions in the
         # destination directory.
