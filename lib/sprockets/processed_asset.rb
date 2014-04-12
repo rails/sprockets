@@ -1,5 +1,5 @@
 require 'sprockets/asset'
-require 'sprockets/utils'
+require 'sprockets/fileutils'
 require 'set'
 
 module Sprockets
@@ -11,7 +11,7 @@ module Sprockets
 
       mime_type = environment.mime_types(File.extname(pathname))
       encoding  = environment.encoding_for_mime_type(mime_type)
-      data      = Sprockets::Utils.read_unicode(pathname, encoding)
+      data      = FileUtils.read_unicode(pathname, encoding)
 
       result = environment.process(
         environment.attributes_for(pathname).processors,
