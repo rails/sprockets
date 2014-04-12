@@ -396,6 +396,24 @@ module EnvironmentTests
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)
   end
+
+  test "logical path" do
+    assert_raises Sprockets::FileOutsidePaths do
+      @env.logical_path_for(fixture_path("missing/application.js"))
+    end
+
+    assert_equal "application.js", @env.logical_path_for(fixture_path("default/application.js"))
+    assert_equal "application.css", @env.logical_path_for(fixture_path("default/application.css"))
+    assert_equal "jquery.foo.min.js", @env.logical_path_for(fixture_path("default/jquery.foo.min.js"))
+
+    assert_equal "application.js", @env.logical_path_for(fixture_path("default/application.js.erb"))
+    assert_equal "application.js", @env.logical_path_for(fixture_path("default/application.js.coffee"))
+    assert_equal "application.css", @env.logical_path_for(fixture_path("default/application.css.scss"))
+
+    assert_equal "application.js", @env.logical_path_for(fixture_path("default/application.coffee"))
+    assert_equal "application.css", @env.logical_path_for(fixture_path("default/application.scss"))
+    assert_equal "hello.js", @env.logical_path_for(fixture_path("default/hello.jst.ejs"))
+  end
 end
 
 class WhitespaceProcessor

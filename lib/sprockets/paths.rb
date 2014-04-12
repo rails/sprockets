@@ -118,17 +118,17 @@ module Sprockets
     protected
       attr_reader :trail
 
-      def logical_path_for_filename(filename, filters)
-        logical_path = attributes_for(filename).logical_path.to_s
+      def logical_path_for_filename(pathname, filters)
+        logical_path = logical_path_for(pathname.to_s)
 
-        if matches_filter(filters, logical_path, filename)
+        if matches_filter(filters, logical_path, pathname)
           return logical_path
         end
 
-        # If filename is an index file, retest with alias
+        # If pathname is an index file, retest with alias
         if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
           path = logical_path.sub(/\/index\./, '.')
-          if matches_filter(filters, path, filename)
+          if matches_filter(filters, path, pathname)
             return path
           end
         end

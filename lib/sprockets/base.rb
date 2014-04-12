@@ -116,6 +116,23 @@ module Sprockets
       super
     end
 
+    # Reverse guess logical path for fully expanded path.
+    #
+    # This has some known issues. For an example if a file is
+    # shaddowed in the path, but is required relatively, its logical
+    # path will be incorrect.
+    def logical_path_for(filename)
+      if root_path = paths.detect { |path| filename[path] }
+        path = Pathname.new(filename).relative_path_from(Pathname.new(root_path)).to_s
+        attributes = attributes_for(filename)
+        path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
+        path = "#{path}#{attributes.send(:engine_format_extension)}" unless attributes.format_extension
+        path
+      else
+        raise FileOutsidePaths, "#{filename} isn't in paths: #{paths.join(', ')}"
+      end
+    end
+
     # Finds the expanded real path for a given logical path by
     # searching the environment's paths.
     #
@@ -258,14 +275,15 @@ module Sprockets
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
       logical_path = path
-      pathname     = Pathname.new(path)
 
-      if pathname.absolute?
-        return unless stat(pathname)
-        logical_path = attributes_for(pathname).logical_path
+      # TODO: Pass absolute paths to resolve
+      if Pathname.new(path).absolute?
+        return unless stat(path)
+        filename = path.to_s
+        logical_path = logical_path_for(filename)
       else
         begin
-          pathname = resolve(logical_path)
+          filename = resolve(logical_path)
 
           # If logical path is missing a mime type extension, append
           # the absolute path extname so it has one.
@@ -273,7 +291,7 @@ module Sprockets
           # Ensures some consistency between finding "foo/bar" vs
           # "foo/bar.js".
           if File.extname(logical_path) == ""
-            expanded_logical_path = attributes_for(pathname).logical_path
+            expanded_logical_path = logical_path_for(filename)
             logical_path += File.extname(expanded_logical_path)
           end
         rescue FileNotFound
@@ -281,7 +299,7 @@ module Sprockets
         end
       end
 
-      build_asset(logical_path, pathname, options)
+      build_asset(logical_path, filename, options)
     end
 
     # Preferred `find_asset` shorthand.
