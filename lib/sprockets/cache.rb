@@ -1,4 +1,4 @@
-require 'digest/sha1'
+require 'sprockets/utils'
 
 module Sprockets
   # Public: Wrapper interface to backend cache stores. Ensures a consistent API
@@ -40,6 +40,11 @@ module Sprockets
     autoload :MemoryStore, 'sprockets/cache/memory_store'
     autoload :NullStore,   'sprockets/cache/null_store'
 
+    # Internal: Cache key version for this class. Rarely should have to change
+    # unless the cache format radically changes. Will be bump on major version
+    # releases though.
+    VERSION = '3.0'
+
     # Internal: Wrap a backend cache store.
     #
     # Always assign a backend cache store instance to Environment#cache= and
@@ -52,7 +57,7 @@ module Sprockets
 
     # Public: Prefer API to retrieve and set values in the cache store.
     #
-    # key   - String key
+    # key   - JSON serializable key
     # block -
     #   Must return a consistent JSON serializable object for the given key.
     #
@@ -79,7 +84,7 @@ module Sprockets
     # with caution, which is why its prefixed with an underscore. Prefer the
     # Cache#fetch API over using this.
     #
-    # key   - String key
+    # key   - JSON serializable key
     # value - A consistent JSON serializable object for the given key. Setting
     #         a different value for the given key has undefined behavior.
     #
@@ -95,7 +100,7 @@ module Sprockets
     # with caution, which is why its prefixed with an underscore. Prefer the
     # Cache#fetch API over using this.
     #
-    # key - String key
+    # key - JSON serializable key
     #
     # Returns the value argument.
     def _set(key, value)
@@ -104,20 +109,7 @@ module Sprockets
 
     private
       def expand_key(key)
-        digest = Digest::SHA1.new
-        hash_key!(digest, key)
-        ['sprockets', digest.hexdigest].join('/')
-      end
-
-      def hash_key!(digest, obj)
-        case obj
-        when String
-          digest.update(obj)
-        when Array
-          obj.each { |o| hash_key!(digest, o) }
-        else
-          raise ArgumentError, "could not hash #{obj.class}"
-        end
+        "sprockets/v#{VERSION}/#{Utils.hexdigest(key)}"
       end
 
       def get_cache_wrapper(cache)

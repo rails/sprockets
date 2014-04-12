@@ -1,14 +1,17 @@
+require 'digest/sha1'
 require 'pathname'
 
 module Sprockets
   # `Utils`, we didn't know where else to put it!
   module Utils
+    extend self
+
     # Define UTF-8 BOM pattern matcher.
     # Avoid using a Regexp literal because it inheirts the files
     # encoding and we want to avoid syntax errors in other interpreters.
     UTF8_BOM_PATTERN = Regexp.new("\\A\uFEFF".encode('utf-8'))
 
-    def self.read_unicode(filename, external_encoding = Encoding.default_external)
+    def read_unicode(filename, external_encoding = Encoding.default_external)
       Pathname.new(filename).open("r:#{external_encoding}") do |f|
         f.read.tap do |data|
           # Eager validate the file's encoding. In most cases we
@@ -35,13 +38,43 @@ module Sprockets
     #     normalize_extension(".css")
     #     # => ".css"
     #
-    def self.normalize_extension(extension)
+    def normalize_extension(extension)
       extension = extension.to_s
       if extension[/^\./]
         extension
       else
         ".#{extension}"
       end
+    end
+
+    # Internal: Generate a hexdigest for a nested JSON serializable object.
+    #
+    # obj    - A JSON serializable object.
+    # digest - Digest instance to modify
+    #
+    # Returns a String SHA1 digest of the object.
+    def hexdigest(obj, digest = ::Digest::SHA1.new)
+      case obj
+      when String, Symbol, Integer
+        digest.update "#{obj.class}"
+        digest.update "#{obj}"
+      when TrueClass, FalseClass, NilClass
+        digest.update "#{obj.class}"
+      when Array
+        digest.update "#{obj.class}"
+        obj.each do |e|
+          hexdigest(e, digest)
+        end
+      when Hash
+        digest.update "#{obj.class}"
+        obj.map { |(k, v)| hexdigest([k, v]) }.sort.each do |e|
+          digest.update(e)
+        end
+      else
+        raise TypeError, "can't convert #{obj.inspect} into String"
+      end
+
+      digest.hexdigest
     end
   end
 end
