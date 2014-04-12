@@ -1,4 +1,5 @@
 require 'sprockets/asset'
+require 'sprockets/fileutils'
 require 'fileutils'
 require 'zlib'
 
@@ -28,7 +29,7 @@ module Sprockets
       if options[:compress]
         # Open file and run it through `Zlib`
         pathname.open('rb') do |rd|
-          File.open("#{filename}+", 'wb') do |wr|
+          FileUtils.atomic_write(filename) do |wr|
             gz = Zlib::GzipWriter.new(wr, Zlib::BEST_COMPRESSION)
             gz.mtime = mtime.to_i
             buf = ""
@@ -40,11 +41,8 @@ module Sprockets
         end
       else
         # If no compression needs to be done, we can just copy it into place.
-        ::FileUtils.cp(pathname, "#{filename}+")
+        ::FileUtils.cp(pathname, filename)
       end
-
-      # Atomic write
-      ::FileUtils.mv("#{filename}+", filename)
 
       # Set mtime correctly
       File.utime(mtime, mtime, filename)

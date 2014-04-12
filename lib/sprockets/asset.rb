@@ -1,5 +1,6 @@
-require 'time'
 require 'set'
+require 'sprockets/fileutils'
+require 'time'
 
 module Sprockets
   # `Asset` is the base class for `BundledAsset` and `StaticAsset`.
@@ -143,7 +144,7 @@ module Sprockets
 
       ::FileUtils.mkdir_p File.dirname(filename)
 
-      File.open("#{filename}+", 'wb') do |f|
+      FileUtils.atomic_write(filename) do |f|
         if options[:compress]
           # Run contents through `Zlib`
           gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
@@ -155,9 +156,6 @@ module Sprockets
           f.write to_s
         end
       end
-
-      # Atomic write
-      ::FileUtils.mv("#{filename}+", filename)
 
       # Set mtime correctly
       File.utime(mtime, mtime, filename)
