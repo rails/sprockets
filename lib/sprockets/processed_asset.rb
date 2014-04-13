@@ -41,8 +41,6 @@ module Sprockets
       @source = coder['source']
 
       @required_assets = coder['required_paths'].map { |p|
-        p = expand_root_path(p)
-
         unless environment.paths.detect { |path| p[path] }
           raise UnserializeError, "#{p} isn't in paths"
         end
@@ -56,10 +54,7 @@ module Sprockets
       super
 
       coder['source'] = source
-
-      coder['required_paths'] = required_assets.map { |a|
-        relativize_root_path(a.pathname).to_s
-      }
+      coder['required_paths'] = required_assets.map(&:filename)
     end
 
     private

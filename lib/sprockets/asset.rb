@@ -53,13 +53,9 @@ module Sprockets
       @root = environment.root
 
       @logical_path = coder['logical_path']
+      @filename     = coder['filename']
       @content_type = coder['content_type']
       @digest       = coder['digest']
-
-      if filename = coder['filename']
-        # Expand `$root` placeholder and wrapper string in a `Pathname`
-        @filename = expand_root_path(filename)
-      end
 
       if mtime = coder['mtime']
         @mtime = Time.at(mtime)
@@ -79,7 +75,7 @@ module Sprockets
     def encode_with(coder)
       coder['class']        = self.class.name.sub(/Sprockets::/, '')
       coder['logical_path'] = logical_path
-      coder['filename']     = relativize_root_path(pathname).to_s
+      coder['filename']     = filename
       coder['content_type'] = content_type
       coder['mtime']        = mtime.to_i
       coder['length']       = length
@@ -204,16 +200,6 @@ module Sprockets
       # Default to an empty `Array`.
       def required_assets
         @required_assets ||= []
-      end
-
-      # Replace `$root` placeholder with actual environment root.
-      def expand_root_path(path)
-        path.to_s.sub(/^\$root/, @root)
-      end
-
-      # Replace actual environment root with `$root` placeholder.
-      def relativize_root_path(path)
-        path.to_s.sub(/^#{Regexp.escape(@root)}/, '$root')
       end
   end
 end

@@ -370,7 +370,7 @@ module Sprockets
       end
 
       def asset_cache_key_for(path, options)
-        "#{digest.hexdigest}/asset/#{path.to_s.sub(root, '')}:#{options[:bundle] ? '1' : '0'}"
+        "#{digest.hexdigest}/asset/#{path}:#{options[:bundle] ? '1' : '0'}"
       end
 
       def circular_call_protection(path)

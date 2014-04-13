@@ -71,7 +71,7 @@ class TestCaching < Sprockets::TestCase
     assert asset2.equal?(asset1)
   end
 
-  test "shared cache objects are eql" do
+  test "xxx shared cache objects are eql" do
     asset1 = @env1['gallery.js']
     asset2 = @env2['gallery.js']
 
