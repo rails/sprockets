@@ -128,14 +128,6 @@ module Sprockets
       self.digest == environment.file_hexdigest(self.pathname.to_s)
     end
 
-    # Checks if Asset is stale by comparing the actual mtime and
-    # digest to the inmemory model.
-    #
-    # Subclass must override `fresh?` or `stale?`.
-    def stale?(environment)
-      !fresh?(environment)
-    end
-
     # Save asset to disk.
     def write_to(filename, options = {})
       # Gzip contents if filename has '.gz'

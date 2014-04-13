@@ -26,10 +26,6 @@ module AssetTests
     assert_equal @asset.to_s.bytesize, @asset.bytesize
   end
 
-  test "stale?" do
-    assert !@asset.stale?(@env)
-  end
-
   test "fresh?" do
     assert @asset.fresh?(@env)
   end
@@ -97,7 +93,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -112,7 +108,7 @@ module FreshnessTests
 
       File.unlink(filename)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -131,7 +127,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -150,7 +146,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -167,7 +163,7 @@ module FreshnessTests
 
       File.unlink(dep)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -186,7 +182,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -211,9 +207,9 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      assert asset_a.stale?(@env)
-      assert asset_b.stale?(@env)
-      assert asset_c.stale?(@env)
+      refute asset_a.fresh?(@env)
+      refute asset_b.fresh?(@env)
+      refute asset_c.fresh?(@env)
     end
   end
 
@@ -238,9 +234,9 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      assert asset_a.stale?(@env)
-      assert asset_b.stale?(@env)
-      assert asset_c.stale?(@env)
+      refute asset_a.fresh?(@env)
+      refute asset_b.fresh?(@env)
+      refute asset_c.fresh?(@env)
     end
   end
 
@@ -265,9 +261,9 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      assert asset_a.stale?(@env)
-      assert asset_b.stale?(@env)
-      assert asset_c.stale?(@env)
+      refute asset_a.fresh?(@env)
+      refute asset_b.fresh?(@env)
+      refute asset_c.fresh?(@env)
     end
   end
 
@@ -284,7 +280,7 @@ module FreshnessTests
 
       File.unlink(dep)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -300,7 +296,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dirname)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -316,7 +312,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, dirname)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
@@ -333,7 +329,7 @@ module FreshnessTests
       mtime = Time.now + 1
       File.utime(mtime, mtime, image)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 end
@@ -419,11 +415,11 @@ class StaticAssetTest < Sprockets::TestCase
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
-  test "asset is stale if the file is removed" do
+  test "asset is fresh if the file is removed" do
     filename = fixture_path('asset/POW.png')
 
     sandbox filename do
@@ -434,7 +430,7 @@ class StaticAssetTest < Sprockets::TestCase
 
       File.unlink(filename)
 
-      assert asset.stale?(@env)
+      refute asset.fresh?(@env)
     end
   end
 
