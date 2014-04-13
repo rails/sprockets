@@ -4,18 +4,18 @@ require 'set'
 
 module Sprockets
   class ProcessedAsset < Asset
-    def initialize(environment, logical_path, pathname)
+    def initialize(environment, logical_path, filename)
       super
 
       start_time = Time.now.to_f
 
-      mime_type = environment.mime_types(File.extname(pathname))
+      mime_type = environment.mime_types(File.extname(filename))
       encoding  = environment.encoding_for_mime_type(mime_type)
-      data      = FileUtils.read_unicode(pathname, encoding)
+      data      = FileUtils.read_unicode(filename, encoding)
 
       result = environment.process(
-        environment.attributes_for(pathname).processors,
-        pathname.to_s,
+        environment.attributes_for(filename).processors,
+        filename,
         logical_path,
         data
       )
@@ -47,7 +47,7 @@ module Sprockets
           raise UnserializeError, "#{p} isn't in paths"
         end
 
-        p == pathname.to_s ? self : environment.find_asset(p, bundle: false)
+        p == filename ? self : environment.find_asset(p, bundle: false)
       }
     end
 
@@ -64,7 +64,7 @@ module Sprockets
 
     private
       def build_required_assets(environment, result)
-        @required_assets = resolve_dependencies(environment, result[:required_paths] + [pathname.to_s]) -
+        @required_assets = resolve_dependencies(environment, result[:required_paths] + [filename]) -
           resolve_dependencies(environment, result[:stubbed_assets].to_a)
       end
 
@@ -72,12 +72,10 @@ module Sprockets
         assets = Set.new
 
         paths.each do |path|
-          if path == self.pathname.to_s
+          if path == self.filename
             assets << self
           elsif asset = environment.find_asset(path, bundle: false)
-            asset.required_assets.each do |asset_dependency|
-              assets << asset_dependency
-            end
+            assets.merge(asset.required_assets)
           end
         end
 
@@ -95,7 +93,7 @@ module Sprockets
         end
 
         result[:dependency_assets].flat_map do |path|
-          if path == self.pathname.to_s
+          if path == self.filename
             mtimes << environment.stat(path).mtime
             paths << path
           elsif asset = environment.find_asset(path, bundle: false)

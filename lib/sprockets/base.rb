@@ -359,13 +359,13 @@ module Sprockets
         if attributes_for(pathname).processors.any?
           if options[:bundle] == false
             circular_call_protection(pathname.to_s) do
-              ProcessedAsset.new(index, logical_path, pathname)
+              ProcessedAsset.new(index, logical_path, pathname.to_s)
             end
           else
-            BundledAsset.new(index, logical_path, pathname)
+            BundledAsset.new(index, logical_path, pathname.to_s)
           end
         else
-          StaticAsset.new(index, logical_path, pathname)
+          StaticAsset.new(index, logical_path, pathname.to_s)
         end
       end
 

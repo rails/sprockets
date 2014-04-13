@@ -10,10 +10,10 @@ module Sprockets
   class BundledAsset < Asset
     attr_reader :source
 
-    def initialize(environment, logical_path, pathname)
-      super(environment, logical_path, pathname)
+    def initialize(environment, logical_path, filename)
+      super
 
-      @processed_asset = environment.find_asset(pathname, bundle: false)
+      @processed_asset = environment.find_asset(filename, bundle: false)
       @required_assets = @processed_asset.required_assets
 
       @dependency_paths  = @processed_asset.dependency_paths
@@ -26,7 +26,7 @@ module Sprockets
       # Run bundle processors on concatenated source
       @source = environment.process(
         environment.bundle_processors(content_type),
-        pathname.to_s,
+        filename,
         logical_path,
         @source
       )[:data]
@@ -40,7 +40,7 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      @processed_asset = environment.find_asset(pathname, bundle: false)
+      @processed_asset = environment.find_asset(filename, bundle: false)
       @required_assets = @processed_asset.required_assets
 
       if @processed_asset.dependency_digest != coder['required_assets_digest']

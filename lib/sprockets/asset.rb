@@ -29,21 +29,21 @@ module Sprockets
       nil
     end
 
-    attr_reader :logical_path, :pathname
+    attr_reader :logical_path, :filename
     attr_reader :content_type, :mtime, :length, :digest
     alias_method :bytesize, :length
 
-    def initialize(environment, logical_path, pathname)
+    def initialize(environment, logical_path, filename)
       raise ArgumentError, "Asset logical path has no extension: #{logical_path}" if File.extname(logical_path) == ""
 
       @root         = environment.root
       @logical_path = logical_path.to_s
-      @pathname     = Pathname.new(pathname)
-      @content_type = environment.content_type_of(pathname)
+      @filename     = filename
+      @content_type = environment.content_type_of(filename)
       # drop precision to 1 second, same pattern followed elsewhere
-      @mtime        = Time.at(environment.stat(pathname).mtime.to_i)
-      @length       = environment.stat(pathname).size
-      @digest       = environment.digest.file(pathname).hexdigest
+      @mtime        = Time.at(environment.stat(filename).mtime.to_i)
+      @length       = environment.stat(filename).size
+      @digest       = environment.digest.file(filename).hexdigest
 
       @dependency_digest = environment.dependencies_hexdigest(dependency_paths)
     end
@@ -56,9 +56,9 @@ module Sprockets
       @content_type = coder['content_type']
       @digest       = coder['digest']
 
-      if pathname = coder['pathname']
+      if filename = coder['filename']
         # Expand `$root` placeholder and wrapper string in a `Pathname`
-        @pathname = Pathname.new(expand_root_path(pathname))
+        @filename = expand_root_path(filename)
       end
 
       if mtime = coder['mtime']
@@ -79,7 +79,7 @@ module Sprockets
     def encode_with(coder)
       coder['class']        = self.class.name.sub(/Sprockets::/, '')
       coder['logical_path'] = logical_path
-      coder['pathname']     = relativize_root_path(pathname).to_s
+      coder['filename']     = relativize_root_path(pathname).to_s
       coder['content_type'] = content_type
       coder['mtime']        = mtime.to_i
       coder['length']       = length
@@ -88,6 +88,10 @@ module Sprockets
       coder['dependency_paths']  = dependency_paths.to_a
       coder['dependency_mtime']  = dependency_mtime.to_i
       coder['dependency_digest'] = dependency_digest
+    end
+
+    def pathname
+      @pathname ||= Pathname.new(filename)
     end
 
     # Return logical path with digest spliced in.
@@ -162,7 +166,7 @@ module Sprockets
     # Pretty inspect
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
-        "pathname=#{pathname.to_s.inspect}, " +
+        "filename=#{filename.inspect}, " +
         "mtime=#{mtime.inspect}, " +
         "digest=#{digest.inspect}" +
         ">"
@@ -186,7 +190,7 @@ module Sprockets
       #
       # Default to an `Set` with self.
       def dependency_paths
-        @dependency_paths ||= Set.new([self.pathname.to_s])
+        @dependency_paths ||= Set.new([self.filename])
       end
 
       def dependency_mtime
