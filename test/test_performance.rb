@@ -69,7 +69,7 @@ class TestPerformance < Sprockets::TestCase
     asset = @env["mobile.js"]
     reset_stats!
 
-    assert asset.fresh?(@env)
+    assert @env.asset_fresh?(asset)
     assert_no_redundant_stat_calls
   end
 
@@ -78,7 +78,7 @@ class TestPerformance < Sprockets::TestCase
     asset = index["mobile.js"]
     reset_stats!
 
-    assert asset.fresh?(index)
+    assert index.asset_fresh?(asset)
     assert_no_stat_calls
   end
 

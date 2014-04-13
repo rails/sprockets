@@ -173,7 +173,6 @@ class TestCaching < Sprockets::TestCase
 
     assert_equal "jQuery;\n", env1["main.js"].to_s
     assert_equal "jQuery;\n", env1["jquery.js"].to_s
-    assert env1["main.js"].fresh?(env1)
 
     assert_raises Sprockets::FileNotFound do
       env2["main.js"].to_s

@@ -249,7 +249,7 @@ module Sprockets
     #
     # path - String filename or directory path.
     #
-    # Returns a String hexdigest or nil.
+    # Returns a String SHA1 hexdigest or nil.
     def file_hexdigest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
@@ -257,16 +257,35 @@ module Sprockets
         # negligently reset thus appearing as if the file hasn't changed on
         # disk. Also, the mtime is only read to the nearest second. Its
         # also possible the file was updated more than once in a given second.
-        cache.fetch("hexdigest:#{digest.hexdigest}:#{path}:#{stat.mtime.to_i}") do
+        cache.fetch("hexdigest:#{path}:#{stat.mtime.to_i}") do
           if stat.directory?
             # If its a directive, digest the list of filenames
-            digest.update(self.entries(path).join(',')).hexdigest
+            Digest::SHA1.hexdigest(self.entries(path).join(','))
           elsif stat.file?
             # If its a file, digest the contents
-            digest.file(path.to_s).hexdigest
+            Digest::SHA1.file(path.to_s).hexdigest
           end
         end
       end
+    end
+
+    # Internal: Compute hexdigest for a set of paths.
+    #
+    # paths - Array of filename or directory paths.
+    #
+    # Returns a String SHA1 hexdigest.
+    def dependencies_hexdigest(paths)
+      digest = Digest::SHA1.new
+      paths.each { |path| digest.update(file_hexdigest(path).to_s) }
+      digest.hexdigest
+    end
+
+    # Checks if Asset is fresh by comparing the contents hexdigest to the
+    # inmemory model.
+    #
+    # Used to test if cached models need to be rebuilt.
+    def asset_fresh?(asset)
+      dependencies_hexdigest(asset.send(:dependency_paths)) == asset.send(:dependency_digest)
     end
 
     # Internal. Return a `AssetAttributes` for `path`.

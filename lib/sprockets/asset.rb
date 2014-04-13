@@ -43,7 +43,9 @@ module Sprockets
       # drop precision to 1 second, same pattern followed elsewhere
       @mtime        = Time.at(environment.stat(pathname).mtime.to_i)
       @length       = environment.stat(pathname).size
-      @digest       = environment.file_hexdigest(pathname)
+      @digest       = environment.digest.file(pathname).hexdigest
+
+      @dependency_digest = environment.dependencies_hexdigest(dependency_paths)
     end
 
     # Initialize `Asset` from serialized `Hash`.
@@ -67,6 +69,10 @@ module Sprockets
         # Convert length to an `Integer`
         @length = Integer(length)
       end
+
+      @dependency_paths  = Set.new(coder['dependency_paths'])
+      @dependency_mtime  = Time.at(coder['dependency_mtime'])
+      @dependency_digest = coder['dependency_digest']
     end
 
     # Copy serialized attributes to the coder object
@@ -78,6 +84,10 @@ module Sprockets
       coder['mtime']        = mtime.to_i
       coder['length']       = length
       coder['digest']       = digest
+
+      coder['dependency_paths']  = dependency_paths.to_a
+      coder['dependency_mtime']  = dependency_mtime.to_i
+      coder['dependency_digest'] = dependency_digest
     end
 
     # Return logical path with digest spliced in.
@@ -118,14 +128,6 @@ module Sprockets
     # compatible body objects.
     def each
       yield to_s
-    end
-
-    # Checks if Asset is fresh by comparing the contents hexdigest to the
-    # inmemory model.
-    #
-    # Used to test if cached models need to be rebuilt.
-    def fresh?(environment)
-      self.digest == environment.file_hexdigest(self.pathname.to_s)
     end
 
     # Save asset to disk.
@@ -182,10 +184,16 @@ module Sprockets
     protected
       # Internal: String paths that are marked as dependencies after processing.
       #
-      # Default to an empty `Array`.
+      # Default to an `Set` with self.
       def dependency_paths
-        @dependency_paths ||= []
+        @dependency_paths ||= Set.new([self.pathname.to_s])
       end
+
+      def dependency_mtime
+        @dependency_mtime ||= @mtime
+      end
+
+      attr_reader :dependency_digest
 
       # Internal: `ProccessedAsset`s that are required after processing.
       #

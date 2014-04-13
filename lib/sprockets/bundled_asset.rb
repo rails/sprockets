@@ -13,9 +13,12 @@ module Sprockets
     def initialize(environment, logical_path, pathname)
       super(environment, logical_path, pathname)
 
-      @processed_asset  = environment.find_asset(pathname, bundle: false)
-      @required_assets  = @processed_asset.required_assets
-      @dependency_paths = @processed_asset.dependency_paths
+      @processed_asset = environment.find_asset(pathname, bundle: false)
+      @required_assets = @processed_asset.required_assets
+
+      @dependency_paths  = @processed_asset.dependency_paths
+      @dependency_digest = @processed_asset.dependency_digest
+      @dependency_mtime  = @processed_asset.dependency_mtime
 
       # Explode Asset into parts and gather the dependency bodies
       @source = to_a.map { |dependency| dependency.to_s }.join
@@ -28,7 +31,7 @@ module Sprockets
         @source
       )[:data]
 
-      @mtime  = (to_a + @dependency_paths).map(&:mtime).max
+      @mtime  = @processed_asset.dependency_mtime
       @length = Rack::Utils.bytesize(source)
       @digest = environment.digest.update(source).hexdigest
     end
@@ -70,12 +73,6 @@ module Sprockets
     # Expand asset into an `Array` of parts.
     def to_a
       required_assets
-    end
-
-    # Checks if Asset is stale by comparing the actual mtime and
-    # digest to the inmemory model.
-    def fresh?(environment)
-      @processed_asset.fresh?(environment)
     end
   end
 end
