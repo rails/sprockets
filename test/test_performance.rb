@@ -65,23 +65,6 @@ class TestPerformance < Sprockets::TestCase
     assert_no_redundant_stat_calls
   end
 
-  test "checking freshness" do
-    asset = @env["mobile.js"]
-    reset_stats!
-
-    assert @env.asset_fresh?(asset)
-    assert_no_redundant_stat_calls
-  end
-
-  test "checking freshness of from index" do
-    index = @env.index
-    asset = index["mobile.js"]
-    reset_stats!
-
-    assert index.asset_fresh?(asset)
-    assert_no_stat_calls
-  end
-
   test "loading from cache" do
     env1, env2 = new_environment, new_environment
     env1.cache = {}
