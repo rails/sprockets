@@ -33,8 +33,7 @@ module Sprockets
       @compressors       = environment.compressors
 
       # Initialize caches
-      @assets  = {}
-      @digests = {}
+      @assets = {}
     end
 
     # No-op return self as index
