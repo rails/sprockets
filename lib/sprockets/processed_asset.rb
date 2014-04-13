@@ -80,7 +80,9 @@ module Sprockets
     # digest to the inmemory model.
     def fresh?(environment)
       # Check freshness of all declared dependencies
-      @dependency_paths.all? { |dep| dependency_fresh?(environment, dep) }
+      @dependency_paths.all? do |dep|
+        dep.digest == environment.file_hexdigest(dep.pathname.to_s)
+      end
     end
 
     protected
@@ -127,12 +129,12 @@ module Sprockets
 
       def build_dependency_paths(environment, result)
         paths = result[:dependency_paths].map do |path|
-          DependencyFile.new(path, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
+          DependencyFile.new(path, environment.stat(path).mtime, environment.file_hexdigest(path))
         end
 
         assets = result[:dependency_assets].flat_map do |path|
           if path == self.pathname.to_s
-            DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_digest(path).hexdigest)
+            DependencyFile.new(pathname, environment.stat(path).mtime, environment.file_hexdigest(path))
           elsif asset = environment.find_asset(path, bundle: false)
             asset.dependency_paths
           end

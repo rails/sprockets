@@ -42,16 +42,6 @@ module Sprockets
       self
     end
 
-    # Cache calls to `file_digest`
-    def file_digest(pathname)
-      key = pathname.to_s
-      if @digests.key?(key)
-        @digests[key]
-      else
-        @digests[key] = super
-      end
-    end
-
     # Cache `find_asset` calls
     def find_asset(path, options = {})
       options[:bundle] = true unless options.key?(:bundle)

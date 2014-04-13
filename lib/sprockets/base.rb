@@ -245,19 +245,26 @@ module Sprockets
     # Defaults to UTF-8.
     attr_accessor :default_external_encoding
 
-    # Read and compute digest of filename.
+    # Internal: Compute hexdigest for path.
     #
-    # Subclasses may cache this method.
-    def file_digest(path)
+    # path - String filename or directory path.
+    #
+    # Returns a String hexdigest or nil.
+    def file_hexdigest(path)
       if stat = self.stat(path)
-        # If its a file, digest the contents
-        if stat.file?
-          digest.file(path.to_s)
-
-        # If its a directive, digest the list of filenames
-        elsif stat.directory?
-          contents = self.entries(path).join(',')
-          digest.update(contents)
+        # Caveat: Digests are cached by the path's current mtime. Its possible
+        # for a files contents to have changed and its mtime to have been
+        # negligently reset thus appearing as if the file hasn't changed on
+        # disk. Also, the mtime is only read to the nearest second. Its
+        # also possible the file was updated more than once in a given second.
+        cache.fetch("hexdigest:#{digest.hexdigest}:#{path}:#{stat.mtime.to_i}") do
+          if stat.directory?
+            # If its a directive, digest the list of filenames
+            digest.update(self.entries(path).join(',')).hexdigest
+          elsif stat.file?
+            # If its a file, digest the contents
+            digest.file(path.to_s).hexdigest
+          end
         end
       end
     end

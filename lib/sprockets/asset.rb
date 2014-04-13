@@ -43,7 +43,7 @@ module Sprockets
       # drop precision to 1 second, same pattern followed elsewhere
       @mtime        = Time.at(environment.stat(pathname).mtime.to_i)
       @length       = environment.stat(pathname).size
-      @digest       = environment.file_digest(pathname).hexdigest
+      @digest       = environment.file_hexdigest(pathname)
     end
 
     # Initialize `Asset` from serialized `Hash`.
@@ -120,13 +120,12 @@ module Sprockets
       yield to_s
     end
 
-    # Checks if Asset is fresh by comparing the actual mtime and
-    # digest to the inmemory model.
+    # Checks if Asset is fresh by comparing the contents hexdigest to the
+    # inmemory model.
     #
     # Used to test if cached models need to be rebuilt.
     def fresh?(environment)
-      # Check current mtime and digest
-      dependency_fresh?(environment, self)
+      self.digest == environment.file_hexdigest(self.pathname.to_s)
     end
 
     # Checks if Asset is stale by comparing the actual mtime and
@@ -216,50 +215,6 @@ module Sprockets
       # Replace actual environment root with `$root` placeholder.
       def relativize_root_path(path)
         path.to_s.sub(/^#{Regexp.escape(@root)}/, '$root')
-      end
-
-      # Check if dependency is fresh.
-      #
-      # `dep` is a `Hash` with `path`, `mtime` and `hexdigest` keys.
-      #
-      # A `Hash` is used rather than other `Asset` object because we
-      # want to test non-asset files and directories.
-      def dependency_fresh?(environment, dep)
-        path, mtime, hexdigest = dep.pathname.to_s, dep.mtime, dep.digest
-
-        stat = environment.stat(path)
-
-        # If path no longer exists, its definitely stale.
-        if stat.nil?
-          return false
-        end
-
-        # Compare dependency mtime to the actual mtime. If the
-        # dependency mtime is newer than the actual mtime, the file
-        # hasn't changed since we created this `Asset` instance.
-        #
-        # However, if the mtime is newer it doesn't mean the asset is
-        # stale. Many deployment environments may recopy or recheckout
-        # assets on each deploy. In this case the mtime would be the
-        # time of deploy rather than modified time.
-        #
-        # Note: to_i is used in eql? and write_to we assume fidelity of 1 second
-        #  if people save files more frequently than 1 second sprockets may
-        #  not pick it up, by design
-        if mtime.to_i >= stat.mtime.to_i
-          return true
-        end
-
-        digest = environment.file_digest(path)
-
-        # If the mtime is newer, do a full digest comparsion. Return
-        # fresh if the digests match.
-        if hexdigest == digest.hexdigest
-          return true
-        end
-
-        # Otherwise, its stale.
-        false
       end
   end
 end
