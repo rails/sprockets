@@ -194,11 +194,6 @@ module Sprockets
         @required_assets ||= []
       end
 
-      # Get pathname with its root stripped.
-      def relative_pathname
-        @relative_pathname ||= Pathname.new(relativize_root_path(pathname))
-      end
-
       # Replace `$root` placeholder with actual environment root.
       def expand_root_path(path)
         path.to_s.sub(/^\$root/, @root)
