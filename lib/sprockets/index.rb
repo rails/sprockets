@@ -73,14 +73,21 @@ module Sprockets
       def build_asset(path, pathname, options)
         key = asset_cache_key_for(pathname, options)
 
-        if (asset = Asset.from_hash(self, cache._get(key))) && asset_fresh?(asset)
-          asset
-        elsif asset = super
+        if asset = Asset.from_hash(self, cache._get(key))
+          paths, digest = asset.send(:dependency_paths), asset.send(:dependency_digest)
+          if dependencies_hexdigest(paths) == digest
+            return asset
+          end
+        end
+
+        if asset = super
           hash = {}
           asset.encode_with(hash)
           cache._set(key, hash)
-          asset
+          return asset
         end
+
+        nil
       end
   end
 end

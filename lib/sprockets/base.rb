@@ -280,14 +280,6 @@ module Sprockets
       digest.hexdigest
     end
 
-    # Checks if Asset is fresh by comparing the contents hexdigest to the
-    # inmemory model.
-    #
-    # Used to test if cached models need to be rebuilt.
-    def asset_fresh?(asset)
-      dependencies_hexdigest(asset.send(:dependency_paths)) == asset.send(:dependency_digest)
-    end
-
     # Internal. Return a `AssetAttributes` for `path`.
     def attributes_for(path)
       AssetAttributes.new(self, path)
