@@ -15,9 +15,7 @@ module Sprockets
     end
 
     # Implemented for Rack SendFile support.
-    def to_path
-      pathname.to_s
-    end
+    alias_method :to_path, :filename
 
     # Save asset to disk.
     def write_to(filename, options = {})
