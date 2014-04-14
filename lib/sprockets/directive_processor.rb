@@ -196,10 +196,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        filename = @environment.resolve(path, {
-          base_path: @base_path,
-          content_type: @content_type
-        })
+        filename = resolve(path, content_type: @content_type)
         @dependency_assets << filename
         @required_paths << filename
       end
@@ -308,9 +305,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << @environment.resolve(path, {
-          base_path: @base_path
-        })
+        @dependency_paths << resolve(path)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -325,9 +320,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        @dependency_assets << @environment.resolve(path, {
-          base_path: @base_path
-        })
+        @dependency_assets << resolve(path)
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -339,15 +332,16 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_assets << @environment.resolve(path, {
-          base_path: @base_path,
-          content_type: @content_type
-        })
+        @stubbed_assets << resolve(path, content_type: @content_type)
       end
 
     private
       def relative?(path)
         path =~ /^\.($|\.?\/)/
+      end
+
+      def resolve(path, options = {})
+        @environment.resolve(path, options.merge(base_path: @base_path))
       end
   end
 end
