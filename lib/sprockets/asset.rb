@@ -1,3 +1,4 @@
+require 'pathname'
 require 'set'
 require 'sprockets/fileutils'
 require 'time'

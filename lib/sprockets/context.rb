@@ -1,8 +1,9 @@
 require 'base64'
+require 'pathname'
 require 'rack/utils'
+require 'set'
 require 'sprockets/errors'
 require 'sprockets/utils'
-require 'set'
 
 module Sprockets
   # `Context` provides helper methods to all `Template` processors. They

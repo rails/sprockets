@@ -5,7 +5,6 @@ require 'sprockets/index'
 require 'digest/sha1'
 require 'hike'
 require 'logger'
-require 'pathname'
 
 module Sprockets
   class Environment < Base

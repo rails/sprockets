@@ -55,8 +55,8 @@ module Sprockets
     # Works like `Dir.entries`.
     #
     # Subclasses may cache this method.
-    def entries(pathname)
-      @trail.entries(pathname)
+    def entries(filename)
+      @trail.entries(filename)
     end
 
     # Works like `File.stat`.
@@ -68,17 +68,15 @@ module Sprockets
 
     # Recursive stat all the files under a directory.
     #
-    # root  - A String or Pathname directory
+    # root  - A String directory
     # block - Block called for each entry
-    #   path - Pathname
+    #   path - String filename
     #   stat - File::Stat
     #
     # Returns nothing.
     def recursive_stat(root, &block)
-      root = Pathname.new(root) unless root.is_a?(Pathname)
-
       entries(root).sort.each do |filename|
-        path = root.join(filename)
+        path = File.join(root, filename)
         next unless stat = self.stat(path)
         yield path, stat
 
@@ -181,17 +179,17 @@ module Sprockets
     protected
       attr_reader :trail
 
-      def logical_path_for_filename(pathname, filters)
-        logical_path = logical_path_for(pathname.to_s)
+      def logical_path_for_filename(filename, filters)
+        logical_path = logical_path_for(filename)
 
-        if matches_filter(filters, logical_path, pathname)
+        if matches_filter(filters, logical_path, filename)
           return logical_path
         end
 
-        # If pathname is an index file, retest with alias
+        # If filename is an index file, retest with alias
         if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
           path = logical_path.sub(/\/index\./, '.')
-          if matches_filter(filters, path, pathname)
+          if matches_filter(filters, path, filename)
             return path
           end
         end
