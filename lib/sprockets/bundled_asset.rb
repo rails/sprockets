@@ -67,11 +67,6 @@ module Sprockets
       @body
     end
 
-    # Return an `Array` of `Asset` files that are declared dependencies.
-    def dependencies
-      to_a.reject { |a| a.filename == self.filename }
-    end
-
     # Expand asset into an `Array` of parts.
     def to_a
       required_assets

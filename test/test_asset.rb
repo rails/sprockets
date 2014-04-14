@@ -26,10 +26,6 @@ module AssetTests
     assert_equal @asset.to_s.bytesize, @asset.bytesize
   end
 
-  test "dependencies are an Array" do
-    assert_kind_of Array, @asset.dependencies
-  end
-
   test "splat asset" do
     assert_kind_of Array, @asset.to_a
   end
@@ -158,10 +154,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal [@asset], @asset.to_a
   end
 
-  test "dependencies" do
-    assert_equal [], @asset.dependencies
-  end
-
   test "to path" do
     assert_equal fixture_path('asset/POW.png'), @asset.to_path
   end
@@ -235,7 +227,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
 
-    assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
@@ -279,10 +270,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal [@asset], @asset.to_a
   end
 
-  test "dependencies" do
-    assert_equal [], @asset.dependencies
-  end
-
   test "to_s" do
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
@@ -314,7 +301,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal expected.length, actual.length
     assert_equal expected.digest, actual.digest
 
-    assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
@@ -619,15 +605,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset("project.js").to_a.all? { |a| a.is_a?(Sprockets::ProcessedAsset) }
   end
 
-  test "asset doesn't include self as dependency" do
-    assert_equal [], asset("project.js").dependencies.map(&:pathname)
-  end
-
-  test "asset with child dependencies" do
-    assert_equal [resolve("project.js"), resolve("users.js")],
-      asset("application.js").dependencies.map(&:pathname).map(&:to_s)
-  end
-
   test "splatted asset with child dependencies" do
     assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
       asset("application.js").to_a.map(&:pathname).map(&:to_s)
@@ -837,7 +814,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal expected.bytesize, actual.bytesize
     assert_equal expected.digest, actual.digest
 
-    assert_equal expected.dependencies, actual.dependencies
     assert_equal expected.to_a, actual.to_a
     assert_equal expected.to_s, actual.to_s
 
