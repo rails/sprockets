@@ -35,4 +35,25 @@ class TestERBTemplate < Sprockets::TestCase
     assert_equal output, result[:data]
     assert_equal path, result[:dependency_paths].first
   end
+
+  test "pass custom erb helpers to template" do
+    environment = Sprockets::Environment.new
+
+    template = Sprockets::ERBTemplate.new do
+      def foo
+        :bar
+      end
+    end
+
+    input = {
+      environment: environment,
+      filename: "foo.js.erb",
+      content_type: 'application/javascript',
+      data: "var foo = <%= foo %>;",
+      cache: Sprockets::Cache.new
+    }
+
+    output = "var foo = bar;"
+    assert_equal output, template.call(input)[:data]
+  end
 end
