@@ -18,14 +18,15 @@ class TestManifest < Sprockets::TestCase
     assert Dir["#{@dir}/*"].empty?
   end
 
-  test "specify full manifest path" do
-    dir  = Dir::tmpdir
-    path = File.join(dir, 'manifest.json')
+  test "specify full manifest filename" do
+    directory = Dir::tmpdir
+    filename  = File.join(directory, 'manifest.json')
 
-    manifest = Sprockets::Manifest.new(@env, path)
+    manifest = Sprockets::Manifest.new(@env, filename)
 
-    assert_equal dir, manifest.dir
-    assert_equal path, manifest.path
+    assert_equal directory, manifest.directory
+    assert_equal filename, manifest.filename
+    assert_equal filename, manifest.path
   end
 
   test "specify manifest directory yields random manifest-*.json" do
@@ -35,8 +36,8 @@ class TestManifest < Sprockets::TestCase
     assert !File.exist?("#{dir}/manifest.json")
     manifest = Sprockets::Manifest.new(@env, dir)
 
-    assert_equal dir, manifest.dir
-    assert_match %r{manifest-[a-f0-9]+\.json}, manifest.path
+    assert_equal dir, manifest.directory
+    assert_match %r{manifest-[a-f0-9]+\.json}, manifest.filename
   end
 
   test "specify manifest directory with existing manifest.json" do
@@ -50,8 +51,8 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?(path)
     manifest = Sprockets::Manifest.new(@env, dir)
 
-    assert_equal dir, manifest.dir
-    assert_equal path, manifest.path
+    assert_equal dir, manifest.directory
+    assert_equal path, manifest.filename
   end
 
   test "specify manifest directory with existing manifest-123.json" do
@@ -64,8 +65,8 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?(path)
     manifest = Sprockets::Manifest.new(@env, dir)
 
-    assert_equal dir, manifest.dir
-    assert_equal path, manifest.path
+    assert_equal dir, manifest.directory
+    assert_equal path, manifest.filename
   end
 
   test "specify manifest directory and seperate location" do
@@ -78,8 +79,8 @@ class TestManifest < Sprockets::TestCase
 
     manifest = Sprockets::Manifest.new(@env, dir, path)
 
-    assert_equal dir, manifest.dir
-    assert_equal path, manifest.path
+    assert_equal dir, manifest.directory
+    assert_equal path, manifest.filename
   end
 
   test "compile asset" do
@@ -88,11 +89,13 @@ class TestManifest < Sprockets::TestCase
     assert !File.exist?("#{@dir}/#{digest_path}")
 
     @manifest.compile('application.js')
+    assert File.directory?(@manifest.directory)
+    assert File.file?(@manifest.filename)
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{digest_path}")
 
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['files'][digest_path]
     assert_equal "application.js", data['files'][digest_path]['logical_path']
     assert data['files'][digest_path]['size'] > 230
@@ -109,7 +112,7 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{digest_path}")
 
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['files'][digest_path]
     assert_equal digest_path, data['assets']['application.js']
   end
@@ -127,7 +130,7 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{app_digest_path}")
     assert File.exist?("#{@dir}/#{gallery_digest_path}")
 
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['files'][app_digest_path]
     assert data['files'][gallery_digest_path]
     assert_equal app_digest_path, data['assets']['application.js']
@@ -147,7 +150,7 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{app_digest_path}")
     assert File.exist?("#{@dir}/#{gallery_digest_path}")
 
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['files'][app_digest_path]
     assert data['files'][gallery_digest_path]
     assert_equal app_digest_path, data['assets']['application.js']
@@ -178,7 +181,7 @@ class TestManifest < Sprockets::TestCase
       assert File.exist?("#{@dir}/manifest.json")
       assert File.exist?("#{@dir}/#{digest_path}")
 
-      data = JSON.parse(File.read(@manifest.path))
+      data = JSON.parse(File.read(@manifest.filename))
       assert data['files'][digest_path]
       assert_equal digest_path, data['assets']['application.js']
 
@@ -193,7 +196,7 @@ class TestManifest < Sprockets::TestCase
       assert File.exist?("#{@dir}/#{digest_path}")
       assert File.exist?("#{@dir}/#{new_digest_path}")
 
-      data = JSON.parse(File.read(@manifest.path))
+      data = JSON.parse(File.read(@manifest.filename))
       assert data['files'][digest_path]
       assert data['files'][new_digest_path]
       assert_equal new_digest_path, data['assets']['application.js']
@@ -207,7 +210,7 @@ class TestManifest < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
     assert File.exist?("#{@dir}/#{digest_path}.gz")
 
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['files'][digest_path]
     assert data['assets']['application.js']
 
@@ -216,7 +219,7 @@ class TestManifest < Sprockets::TestCase
     assert !File.exist?("#{@dir}/#{digest_path}")
     assert !File.exist?("#{@dir}/#{digest_path}.gz")
 
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert !data['files'][digest_path]
     assert !data['assets']['application.js']
   end
@@ -240,7 +243,7 @@ class TestManifest < Sprockets::TestCase
       @manifest.remove(digest_path)
       assert !File.exist?("#{@dir}/#{digest_path}")
 
-      data = JSON.parse(File.read(@manifest.path))
+      data = JSON.parse(File.read(@manifest.filename))
       assert !data['files'][digest_path]
       assert data['files'][new_digest_path]
       assert_equal new_digest_path, data['assets']['application.js']
@@ -286,7 +289,7 @@ class TestManifest < Sprockets::TestCase
       assert File.exist?("#{@dir}/#{new_digest_path2}")
       assert File.exist?("#{@dir}/#{new_digest_path3}")
 
-      data = JSON.parse(File.read(@manifest.path))
+      data = JSON.parse(File.read(@manifest.filename))
       assert !data['files'][digest_path]
       assert !data['files'][new_digest_path1]
       assert data['files'][new_digest_path2]
@@ -302,7 +305,7 @@ class TestManifest < Sprockets::TestCase
     @manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['assets']['application.js']
   end
 
@@ -317,7 +320,7 @@ class TestManifest < Sprockets::TestCase
     @manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['assets']['application.js']
   end
 
@@ -332,7 +335,7 @@ class TestManifest < Sprockets::TestCase
     @manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    data = JSON.parse(File.read(@manifest.path))
+    data = JSON.parse(File.read(@manifest.filename))
     assert data['assets']['application.js']
   end
 

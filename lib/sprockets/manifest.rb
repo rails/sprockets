@@ -3,24 +3,23 @@ require 'securerandom'
 require 'time'
 
 module Sprockets
-  # The Manifest logs the contents of assets compiled to a single
-  # directory. It records basic attributes about the asset for fast
-  # lookup without having to compile. A pointer from each logical path
-  # indicates which fingerprinted asset is the current one.
+  # The Manifest logs the contents of assets compiled to a single directory. It
+  # records basic attributes about the asset for fast lookup without having to
+  # compile. A pointer from each logical path indicates which fingerprinted
+  # asset is the current one.
   #
-  # The JSON is part of the public API and should be considered
-  # stable. This should make it easy to read from other programming
-  # languages and processes that don't have sprockets loaded. See
-  # `#assets` and `#files` for more infomation about the structure.
+  # The JSON is part of the public API and should be considered stable. This
+  # should make it easy to read from other programming languages and processes
+  # that don't have sprockets loaded. See `#assets` and `#files` for more
+  # infomation about the structure.
   class Manifest
-    attr_reader :environment, :path, :dir
+    attr_reader :environment
 
-    # Create new Manifest associated with an `environment`. `path` is
-    # a full path to the manifest json file. The file may or may not
-    # already exist. The dirname of the `path` will be used to write
-    # compiled assets to. Otherwise, if the path is a directory, the
-    # filename will default a random "manifest-123.json" file in that
-    # directory.
+    # Create new Manifest associated with an `environment`. `filename` is a full
+    # path to the manifest json file. The file may or may not already exist. The
+    # dirname of the `filename` will be used to write compiled assets to.
+    # Otherwise, if the path is a directory, the filename will default a random
+    # "manifest-123.json" file in that directory.
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
@@ -29,47 +28,54 @@ module Sprockets
         @environment = args.shift
       end
 
-      @dir, @path = args[0], args[1]
+      @directory, @filename = args[0], args[1]
 
       # Expand paths
-      @dir  = File.expand_path(@dir) if @dir
-      @path = File.expand_path(@path) if @path
+      @directory = File.expand_path(@directory) if @directory
+      @filename  = File.expand_path(@filename) if @filename
 
-      # If path is given as the second arg
-      if @dir && File.extname(@dir) != ""
-        @dir, @path = nil, @dir
+      # If filename is given as the second arg
+      if @directory && File.extname(@directory) != ""
+        @directory, @filename = nil, @directory
       end
 
-      # Default dir to the directory of the path
-      @dir ||= File.dirname(@path) if @path
+      # Default dir to the directory of the filename
+      @directory ||= File.dirname(@filename) if @filename
 
-      # If directory is given w/o path, pick a random manifest.json location
-      if @dir && @path.nil?
+      # If directory is given w/o filename, pick a random manifest.json location
+      if @directory && @filename.nil?
         # Find the first manifest.json in the directory
-        paths = Dir[File.join(@dir, "manifest*.json")]
-        if paths.any?
-          @path = paths.first
+        filenames = Dir[File.join(@directory, "manifest*.json")]
+        if filenames.any?
+          @filename = filenames.first
         else
-          @path = File.join(@dir, "manifest-#{SecureRandom.hex(16)}.json")
+          @filename = File.join(@directory, "manifest-#{SecureRandom.hex(16)}.json")
         end
       end
 
-      unless @dir && @path
-        raise ArgumentError, "manifest requires output path"
+      unless @directory && @filename
+        raise ArgumentError, "manifest requires output filename"
       end
 
       data = {}
 
       begin
-        if File.exist?(@path)
-          data = json_decode(File.read(@path))
+        if File.exist?(@filename)
+          data = json_decode(File.read(@filename))
         end
       rescue JSON::ParserError => e
-        logger.error "#{@path} is invalid: #{e.class} #{e.message}"
+        logger.error "#{@filename} is invalid: #{e.class} #{e.message}"
       end
 
       @data = data
     end
+
+    # Returns String path to manifest.json file.
+    attr_reader :filename
+    alias_method :path, :filename
+
+    attr_reader :directory
+    alias_method :dir, :directory
 
     # Returns internal assets mapping. Keys are logical paths which
     # map to the latest fingerprinted filename.
@@ -183,8 +189,8 @@ module Sprockets
 
     # Wipe directive
     def clobber
-      ::FileUtils.rm_r(@dir) if File.exist?(@dir)
-      logger.info "Removed #{@dir}"
+      ::FileUtils.rm_r(directory) if File.exist?(directory)
+      logger.info "Removed #{directory}"
       nil
     end
 
