@@ -67,9 +67,6 @@ module Sprockets
       ^ \W* = \s* (\w+.*?) (\*\/)? $
     /x
 
-    attr_reader :pathname
-    attr_reader :header, :body
-
     def self.call(input)
       new.call(input)
     end
@@ -77,7 +74,7 @@ module Sprockets
     def call(input)
       @environment = input[:environment]
       @filename = input[:filename]
-      @pathname = Pathname.new(@filename)
+      @base_path = Pathname.new(@filename).dirname
       @content_type = input[:content_type]
 
       data = input[:data]
@@ -87,7 +84,7 @@ module Sprockets
       @body  += "\n" if @body != "" && @body !~ /\n\Z/m
 
       @result = ""
-      @result.force_encoding(body.encoding)
+      @result.force_encoding(@body.encoding)
 
       @has_written_body = false
 
@@ -111,7 +108,7 @@ module Sprockets
     # Returns the header String with any directives stripped.
     def processed_header
       lineno = 0
-      @processed_header ||= header.lines.map { |line|
+      @processed_header ||= @header.lines.map { |line|
         lineno += 1
         # Replace directive line with a clean break
         directives.assoc(lineno) ? "\n" : line
@@ -126,7 +123,7 @@ module Sprockets
     #     [[1, "require", "foo"], [2, "require", "bar"]]
     #
     def directives
-      @directives ||= header.lines.each_with_index.map { |line, index|
+      @directives ||= @header.lines.each_with_index.map { |line, index|
         if directive = line[DIRECTIVE_PATTERN, 1]
           name, *args = Shellwords.shellwords(directive)
           if respond_to?("process_#{name}_directive", true)
@@ -164,7 +161,7 @@ module Sprockets
           begin
             send("process_#{name}_directive", *args)
           rescue Exception => e
-            e.set_backtrace(["#{pathname}:#{line_number}"] + e.backtrace)
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
           end
         end
@@ -176,7 +173,7 @@ module Sprockets
         end
 
         unless @has_written_body
-          @result << body
+          @result << @body
         end
       end
 
@@ -200,7 +197,7 @@ module Sprockets
       #
       def process_require_directive(path)
         filename = @environment.resolve(path, {
-          base_path: @pathname.dirname,
+          base_path: @base_path,
           content_type: @content_type
         })
         @dependency_assets << filename
@@ -222,7 +219,7 @@ module Sprockets
           raise ArgumentError, "require_self can only be called once per source file"
         end
 
-        @required_paths << pathname.to_s
+        @required_paths << @filename
         process_source
         @has_written_body = true
       end
@@ -235,7 +232,7 @@ module Sprockets
       #
       def process_require_directory_directive(path = ".")
         if relative?(path)
-          root = pathname.dirname.join(path).expand_path
+          root = @base_path.join(path).expand_path
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
@@ -248,7 +245,7 @@ module Sprockets
             stat = @environment.stat(pathname)
             content_type = @environment.content_type_of(pathname)
 
-            if pathname.to_s == self.pathname.to_s
+            if pathname.to_s == @filename
               next
             elsif stat.file? && content_type == @content_type
               @dependency_assets << pathname.to_s
@@ -268,7 +265,7 @@ module Sprockets
       #
       def process_require_tree_directive(path = ".")
         if relative?(path)
-          root = pathname.dirname.join(path).expand_path
+          root = @base_path.join(path).expand_path
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
@@ -280,7 +277,7 @@ module Sprockets
           @environment.recursive_stat(root).each do |pathname, stat|
             content_type = @environment.content_type_of(pathname)
 
-            if pathname.to_s == self.pathname.to_s
+            if pathname.to_s == @filename
               next
             elsif stat.directory?
               @dependency_paths << pathname.to_s
@@ -312,7 +309,7 @@ module Sprockets
       #
       def process_depend_on_directive(path)
         @dependency_paths << @environment.resolve(path, {
-          base_path: @pathname.dirname
+          base_path: @base_path
         })
       end
 
@@ -329,7 +326,7 @@ module Sprockets
       #
       def process_depend_on_asset_directive(path)
         @dependency_assets << @environment.resolve(path, {
-          base_path: @pathname.dirname
+          base_path: @base_path
         })
       end
 
@@ -343,7 +340,7 @@ module Sprockets
       #
       def process_stub_directive(path)
         @stubbed_assets << @environment.resolve(path, {
-          base_path: @pathname.dirname,
+          base_path: @base_path,
           content_type: @content_type
         })
       end
