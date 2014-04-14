@@ -40,17 +40,13 @@ module Sprockets
     end
 
     # Cache `find_asset` calls
-    def find_asset(path, options = {})
-      options[:bundle] = true unless options.key?(:bundle)
-
-      if filename = resolve_all(path.to_s).first
-        if asset = build_asset(filename, options)
-          if cached_asset = @asset_cache.get(asset.cache_key)
-            cached_asset
-          else
-            @asset_cache.set(asset.cache_key, asset)
-            asset
-          end
+    def find_asset(*args)
+      if asset = super
+        if cached_asset = @asset_cache.get(asset.cache_key)
+          cached_asset
+        else
+          @asset_cache.set(asset.cache_key, asset)
+          asset
         end
       end
     end

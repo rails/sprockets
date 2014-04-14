@@ -264,8 +264,13 @@ module Sprockets
     end
 
     # Find asset by logical path or expanded path.
-    # def find_asset(path, options = {})
-    # end
+    def find_asset(path, options = {})
+      options[:bundle] = true unless options.key?(:bundle)
+
+      if filename = resolve_all(path.to_s).first
+        build_asset(filename, options)
+      end
+    end
 
     # Preferred `find_asset` shorthand.
     #
