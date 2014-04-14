@@ -328,7 +328,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def resolve(logical_path)
-    @env.resolve!(logical_path)
+    @env.resolve(logical_path)
   end
 end
 
@@ -863,7 +863,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   def resolve(logical_path)
-    @env.resolve!(logical_path)
+    @env.resolve(logical_path)
   end
 
   def read(logical_path)

@@ -139,69 +139,15 @@ module Sprockets
     #     resolve("application.js")
     #     # => "/path/to/app/javascripts/application.js.coffee"
     #
-    # Returns nil if the file does not exist.
-    def resolve(logical_path, options = {})
-      logical_path = logical_path.to_s if logical_path
-      content_type = options[:content_type]
-
-      if Pathname.new(logical_path).absolute?
-        unless paths.detect { |path| logical_path.to_s[path] }
-          raise FileOutsidePaths, "#{logical_path} isn't in paths: #{paths.join(', ')}"
-        end
-
-        if stat(logical_path)
-          if content_type.nil? || content_type == content_type_of(logical_path)
-            if block_given?
-              yield logical_path
-            else
-              return logical_path
-            end
-          end
-        end
-      else
-        extension = attributes_for(logical_path).format_extension
-        content_type_extension = extension_for_mime_type(content_type)
-
-        paths = [logical_path]
-
-        path_without_extension = extension ?
-          logical_path.sub(extension, '') :
-          logical_path
-
-        # optimization: bower.json can only be nested one level deep
-        if !path_without_extension.index('/')
-          paths << File.join(path_without_extension, "bower.json")
-        end
-
-        paths << File.join(path_without_extension, "index#{extension}")
-
-        @trail.find_all(*paths, options).each do |path|
-          if File.basename(logical_path) != 'bower.json'
-            path = expand_bower_path(path, extension || content_type_extension) || path
-          end
-
-          if content_type.nil? || content_type == content_type_of(path)
-            if block_given?
-              yield path
-            else
-              return path
-            end
-          end
+    # A `FileNotFound` exception is raised if the file does not exist.
+    def resolve(path, options = {})
+      if Pathname.new(path).absolute?
+        unless paths.detect { |root| path[root] }
+          raise FileOutsidePaths, "#{path} isn't in paths: #{paths.join(', ')}"
         end
       end
 
-      nil
-    end
-
-    # Finds the expanded real path for a given logical path by
-    # searching the environment's paths.
-    #
-    #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js.coffee"
-    #
-    # A `FileNotFound` exception is raised if the file does not exist.
-    def resolve!(path, options = {})
-      if filename = resolve(path, options)
+      if filename = resolve_all(path, options).first
         filename
       else
         content_type = options[:content_type]

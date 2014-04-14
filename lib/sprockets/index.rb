@@ -45,7 +45,7 @@ module Sprockets
     def find_asset(path, options = {})
       options[:bundle] = true unless options.key?(:bundle)
 
-      if filename = resolve(path)
+      if filename = resolve_all(path).first
         key = asset_cache_key_for(filename, options)
         if asset = @assets[key]
           asset

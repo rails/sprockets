@@ -79,7 +79,7 @@ module Sprockets
     def resolve(path, options = {})
       options = {base_path: self.pathname.dirname}.merge(options)
       options[:content_type] = self.content_type if options[:content_type] == :self
-      environment.resolve!(path, options)
+      environment.resolve(path, options)
     end
 
     # `depend_on` allows you to state a dependency on a file without

@@ -70,7 +70,7 @@ module Sprockets
 
       index = self.index
 
-      if filename = index.resolve(path)
+      if filename = index.resolve_all(path).first
         # Ensure inmemory cached assets are still fresh on every lookup
         key = asset_cache_key_for(filename, options)
         if asset = @assets[key]

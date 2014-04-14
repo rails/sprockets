@@ -204,7 +204,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        filename = @environment.resolve!(path, {
+        filename = @environment.resolve(path, {
           base_path: @pathname.dirname,
           content_type: @content_type
         })
@@ -316,7 +316,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << @environment.resolve!(path, {
+        @dependency_paths << @environment.resolve(path, {
           base_path: @pathname.dirname
         })
       end
@@ -333,7 +333,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        @dependency_assets << @environment.resolve!(path, {
+        @dependency_assets << @environment.resolve(path, {
           base_path: @pathname.dirname
         })
       end
@@ -347,7 +347,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_assets << @environment.resolve!(path, {
+        @stubbed_assets << @environment.resolve(path, {
           base_path: @pathname.dirname,
           content_type: @content_type
         })
