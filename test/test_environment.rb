@@ -286,14 +286,10 @@ module EnvironmentTests
   ENTRIES_IN_PATH = 44
 
   test "iterate over each entry" do
-    entries = []
-    @env.recursive_stat(fixture_path("default")) do |path, stat|
-      entries << path
-    end
+    entries = @env.recursive_stat(fixture_path("default")).to_a
     assert_equal ENTRIES_IN_PATH, entries.length
 
-    @env.recursive_stat(fixture_path("errors")) do |path, stat|
-    end
+    assert_equal [], @env.recursive_stat(fixture_path("errors")).to_a
   end
 
   FILES_IN_PATH = 37

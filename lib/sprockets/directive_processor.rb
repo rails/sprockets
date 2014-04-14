@@ -282,7 +282,7 @@ module Sprockets
           @dependency_paths << root.to_s
 
           required_paths = []
-          @environment.recursive_stat(root) do |pathname, stat|
+          @environment.recursive_stat(root).each do |pathname, stat|
             content_type = @environment.content_type_of(pathname)
 
             if pathname.to_s == self.pathname.to_s

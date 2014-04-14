@@ -75,6 +75,8 @@ module Sprockets
     #
     # Returns nothing.
     def recursive_stat(root, &block)
+      return to_enum(__method__, root) unless block_given?
+
       entries(root).sort.each do |filename|
         path = File.join(root, filename)
         next unless stat = self.stat(path)
@@ -157,7 +159,7 @@ module Sprockets
       files = {}
 
       paths.each do |root|
-        recursive_stat(root) do |path, stat|
+        recursive_stat(root).each do |path, stat|
           next unless stat.file?
 
           if logical_path = logical_path_for_filename(path, filters)
