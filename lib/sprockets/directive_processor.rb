@@ -118,11 +118,6 @@ module Sprockets
       }.join.chomp
     end
 
-    # Returns the source String with any directives stripped.
-    def processed_source
-      @processed_source ||= processed_header + body
-    end
-
     # Returns an Array of directive structures. Each structure
     # is an Array with the line number as the first element, the
     # directive name as the second element, followed by any
