@@ -9,14 +9,10 @@ class TestCaching < Sprockets::TestCase
       env.cache = @cache
     end
 
-    @env2 = Sprockets::Environment.new(fixture_path('symlink')) do |env|
+    @env2 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
       env.cache = @cache
     end
-  end
-
-  test "environment digests are the same for different roots" do
-    assert_equal @env1.digest, @env2.digest
   end
 
   test "same environment instance cache objects are equal" do
@@ -71,7 +67,7 @@ class TestCaching < Sprockets::TestCase
     assert asset2.equal?(asset1)
   end
 
-  test "xxx shared cache objects are eql" do
+  test "shared cache objects are eql" do
     asset1 = @env1['gallery.js']
     asset2 = @env2['gallery.js']
 
@@ -191,7 +187,7 @@ class TestFileStoreCaching < Sprockets::TestCase
       env.cache = @cache
     end
 
-    @env2 = Sprockets::Environment.new(fixture_path('symlink')) do |env|
+    @env2 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
       env.cache = @cache
     end
