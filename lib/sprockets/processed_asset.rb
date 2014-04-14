@@ -9,9 +9,8 @@ module Sprockets
 
       start_time = Time.now.to_f
 
-      mime_type = environment.mime_types(File.extname(filename))
-      encoding  = environment.encoding_for_mime_type(mime_type)
-      data      = FileUtils.read_unicode(filename, encoding)
+      encoding = environment.encoding_for_mime_type(content_type)
+      data     = FileUtils.read_unicode(filename, encoding)
 
       result = environment.process(
         environment.attributes_for(filename).processors,
