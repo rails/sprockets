@@ -22,7 +22,7 @@ module Sprockets
       @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
 
-      build_required_assets(environment, result)
+      @required_assets = build_required_assets(environment, result)
       @dependency_paths, @dependency_mtime = build_dependency_paths(environment, result)
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
 
@@ -57,8 +57,8 @@ module Sprockets
 
     private
       def build_required_assets(environment, result)
-        @required_assets = resolve_dependencies(environment, result[:required_paths] + [filename]) -
-          resolve_dependencies(environment, result[:stubbed_assets].to_a)
+        resolve_dependencies(environment, result[:required_paths] + [filename]) -
+          resolve_dependencies(environment, result[:stubbed_assets])
       end
 
       def resolve_dependencies(environment, paths)
