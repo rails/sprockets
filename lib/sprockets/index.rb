@@ -44,21 +44,20 @@ module Sprockets
     # Cache `find_asset` calls
     def find_asset(path, options = {})
       options[:bundle] = true unless options.key?(:bundle)
-      if asset = @assets[asset_cache_key_for(path, options)]
-        asset
-      elsif asset = super
-        logical_path_cache_key = asset_cache_key_for(path, options)
-        full_path_cache_key    = asset_cache_key_for(asset.pathname, options)
 
-        # Cache on Index
-        @assets[logical_path_cache_key] = @assets[full_path_cache_key] = asset
+      if filename = resolve(path)
+        key = asset_cache_key_for(filename, options)
+        if asset = @assets[key]
+          asset
+        elsif asset = build_asset(filename, options)
+          # Cache on Index
+          @assets[key] = asset
 
-        # Push cache upstream to Environment
-        @environment.instance_eval do
-          @assets[logical_path_cache_key] = @assets[full_path_cache_key] = asset
+          # Push cache upstream to Environment
+          @environment.instance_eval do
+            @assets[key] = asset
+          end
         end
-
-        asset
       end
     end
 

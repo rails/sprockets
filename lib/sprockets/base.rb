@@ -307,11 +307,8 @@ module Sprockets
     end
 
     # Find asset by logical path or expanded path.
-    def find_asset(path, options = {})
-      if filename = resolve(path)
-        build_asset(filename, options)
-      end
-    end
+    # def find_asset(path, options = {})
+    # end
 
     # Preferred `find_asset` shorthand.
     #
