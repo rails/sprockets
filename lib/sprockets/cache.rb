@@ -53,6 +53,7 @@ module Sprockets
     # cache - A compatible backend cache store instance.
     def initialize(cache = nil)
       @cache_wrapper = get_cache_wrapper(cache)
+      @fetch_cache   = Cache::MemoryStore.new(1024)
     end
 
     # Public: Prefer API to retrieve and set values in the cache store.
@@ -68,10 +69,14 @@ module Sprockets
     # Returns a JSON serializable object.
     def fetch(key)
       expanded_key = expand_key(key)
-      value = @cache_wrapper.get(expanded_key)
+      value = @fetch_cache.get(expanded_key)
       if value.nil?
-        value = yield
-        @cache_wrapper.set(expanded_key, value)
+        value = @cache_wrapper.get(expanded_key)
+        if value.nil?
+          value = yield
+          @cache_wrapper.set(expanded_key, value)
+          @fetch_cache.set(expanded_key, value)
+        end
       end
       value
     end
