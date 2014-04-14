@@ -20,6 +20,7 @@ module Sprockets
       @logger            = environment.logger
       @context_class     = environment.context_class
       @cache             = environment.cache
+      @asset_cache       = environment.asset_cache
       @trail             = environment.trail.cached
       @digest            = environment.digest
       @digest_class      = environment.digest_class
@@ -31,9 +32,6 @@ module Sprockets
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
-
-      # Initialize caches
-      @assets = {}
     end
 
     # No-op return self as index
@@ -46,16 +44,12 @@ module Sprockets
       options[:bundle] = true unless options.key?(:bundle)
 
       if filename = resolve_all(path.to_s).first
-        key = asset_cache_key_for(filename, options)
-        if asset = @assets[key]
-          asset
-        elsif asset = build_asset(filename, options)
-          # Cache on Index
-          @assets[key] = asset
-
-          # Push cache upstream to Environment
-          @environment.instance_eval do
-            @assets[key] = asset
+        if asset = build_asset(filename, options)
+          if cached_asset = @asset_cache.get(asset.cache_key)
+            cached_asset
+          else
+            @asset_cache.set(asset.cache_key, asset)
+            asset
           end
         end
       end
@@ -70,7 +64,7 @@ module Sprockets
 
       # Cache asset building in memory and in persisted cache.
       def build_asset(filename, options)
-        key = asset_cache_key_for(filename, options)
+        key = "#{self.digest.hexdigest}/asset/#{filename}:#{options[:bundle] ? '1' : '0'}"
 
         if asset = Asset.from_hash(self, cache._get(key))
           paths, digest = asset.send(:dependency_paths), asset.send(:dependency_digest)

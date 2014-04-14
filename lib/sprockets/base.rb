@@ -285,6 +285,8 @@ module Sprockets
     end
 
     protected
+      attr_reader :asset_cache
+
       # Clear index after mutating state. Must be implemented by the subclass.
       def expire_index!
         raise NotImplementedError
@@ -306,10 +308,6 @@ module Sprockets
         else
           StaticAsset.new(index, logical_path, filename)
         end
-      end
-
-      def asset_cache_key_for(path, options)
-        "#{digest.hexdigest}/asset/#{path}:#{options[:bundle] ? '1' : '0'}"
       end
 
       def circular_call_protection(path)

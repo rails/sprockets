@@ -1,4 +1,5 @@
 require 'pathname'
+require 'securerandom'
 require 'set'
 require 'sprockets/fileutils'
 require 'time'
@@ -30,6 +31,7 @@ module Sprockets
       nil
     end
 
+    attr_reader :cache_key
     attr_reader :logical_path, :filename
     attr_reader :content_type, :mtime, :length, :digest
     alias_method :bytesize, :length
@@ -37,6 +39,7 @@ module Sprockets
     def initialize(environment, logical_path, filename)
       raise ArgumentError, "Asset logical path has no extension: #{logical_path}" if File.extname(logical_path) == ""
 
+      @cache_key    = SecureRandom.hex
       @root         = environment.root
       @logical_path = logical_path.to_s
       @filename     = filename
@@ -53,6 +56,7 @@ module Sprockets
     def init_with(environment, coder)
       @root = environment.root
 
+      @cache_key    = coder['cache_key']
       @logical_path = coder['logical_path']
       @filename     = coder['filename']
       @content_type = coder['content_type']
@@ -74,6 +78,7 @@ module Sprockets
 
     # Copy serialized attributes to the coder object
     def encode_with(coder)
+      coder['cache_key']    = cache_key
       coder['class']        = self.class.name.sub(/Sprockets::/, '')
       coder['logical_path'] = logical_path
       coder['filename']     = filename
