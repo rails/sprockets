@@ -139,7 +139,7 @@ module Sprockets
     #     resolve("application.js")
     #     # => "/path/to/app/javascripts/application.js.coffee"
     #
-    # A `FileNotFound` exception is raised if the file does not exist.
+    # Returns nil if the file does not exist.
     def resolve(logical_path, options = {})
       logical_path = logical_path.to_s if logical_path
       content_type = options[:content_type]
@@ -179,9 +179,25 @@ module Sprockets
         end
       end
 
-      message = "couldn't find file '#{logical_path}'"
-      message << " with content type '#{content_type}'" if content_type
-      raise FileNotFound, message
+      nil
+    end
+
+    # Finds the expanded real path for a given logical path by
+    # searching the environment's paths.
+    #
+    #     resolve("application.js")
+    #     # => "/path/to/app/javascripts/application.js.coffee"
+    #
+    # A `FileNotFound` exception is raised if the file does not exist.
+    def resolve!(path, options = {})
+      if filename = resolve(path, options)
+        filename
+      else
+        content_type = options[:content_type]
+        message = "couldn't find file '#{path}'"
+        message << " with content type '#{content_type}'" if content_type
+        raise FileNotFound, message
+      end
     end
 
     # Register a new mime type.
@@ -292,13 +308,9 @@ module Sprockets
 
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
-      begin
-        filename = resolve(path)
-      rescue FileNotFound
-        return nil
+      if filename = resolve(path)
+        build_asset(filename, options)
       end
-
-      build_asset(filename, options)
     end
 
     # Preferred `find_asset` shorthand.

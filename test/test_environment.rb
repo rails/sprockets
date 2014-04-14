@@ -98,99 +98,99 @@ module EnvironmentTests
 
   test "resolve absolute path in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'))
+      @env.resolve!(fixture_path('default/gallery.js'))
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo.coffee'))
+      @env.resolve!(fixture_path('default/coffee/foo.coffee'))
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min.js'))
+      @env.resolve!(fixture_path('default/jquery.tmpl.min.js'))
 
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
+      @env.resolve!(fixture_path('default/gallery.js'), content_type: 'application/javascript')
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
+      @env.resolve!(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
+      @env.resolve!(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
 
     assert_raises(Sprockets::FileOutsidePaths) do
-      @env.resolve("/bin/sh")
+      @env.resolve!("/bin/sh")
     end
 
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
+      @env.resolve!(fixture_path('default/gallery.js'), content_type: 'text/css')
     end
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css')
+      @env.resolve!(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css')
     end
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/gallery.foo'))
+      @env.resolve!(fixture_path('default/gallery.foo'))
     end
   end
 
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
+      @env.resolve!("gallery.js")
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js"))
+      @env.resolve!(Pathname.new("gallery.js"))
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve("coffee/foo.js")
+      @env.resolve!("coffee/foo.js")
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min")
+      @env.resolve!("jquery.tmpl.min")
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js")
+      @env.resolve!("jquery.tmpl.min.js")
 
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("null")
+      @env.resolve!("null")
     end
   end
 
   test "resolve content type in environment" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
+      @env.resolve!("gallery.js")
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js", content_type: "application/javascript")
+      @env.resolve!("gallery.js", content_type: "application/javascript")
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery", content_type: "application/javascript")
+      @env.resolve!("gallery", content_type: "application/javascript")
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve('coffee/foo', content_type: 'application/javascript')
+      @env.resolve!('coffee/foo', content_type: 'application/javascript')
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve('coffee/foo.coffee', content_type: 'application/javascript')
+      @env.resolve!('coffee/foo.coffee', content_type: 'application/javascript')
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min", content_type: 'application/javascript')
+      @env.resolve!("jquery.tmpl.min", content_type: 'application/javascript')
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js", content_type: 'application/javascript')
+      @env.resolve!("jquery.tmpl.min.js", content_type: 'application/javascript')
 
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("gallery.js", content_type: "text/css")
+      @env.resolve!("gallery.js", content_type: "text/css")
     end
   end
 
   test "resolve bower special case" do
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower")
+      @env.resolve!("bower")
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js")
+      @env.resolve!("bower.js")
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower", content_type: 'application/javascript')
+      @env.resolve!("bower", content_type: 'application/javascript')
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js", content_type: 'application/javascript')
+      @env.resolve!("bower.js", content_type: 'application/javascript')
     assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("bower.css", content_type: 'text/css')
+      @env.resolve!("bower.css", content_type: 'text/css')
     end
 
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit")
+      @env.resolve!("qunit")
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js")
+      @env.resolve!("qunit.js")
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit", content_type: 'application/javascript')
+      @env.resolve!("qunit", content_type: 'application/javascript')
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js", content_type: 'application/javascript')
+      @env.resolve!("qunit.js", content_type: 'application/javascript')
     assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css")
+      @env.resolve!("qunit.css")
     assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit", content_type: 'text/css')
+      @env.resolve!("qunit", content_type: 'text/css')
     assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css", content_type: 'text/css')
+      @env.resolve!("qunit.css", content_type: 'text/css')
   end
 
   test "find bundled asset in environment" do
