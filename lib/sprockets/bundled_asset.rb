@@ -27,7 +27,6 @@ module Sprockets
       @source = environment.process(
         environment.bundle_processors(content_type),
         filename,
-        logical_path,
         @source
       )[:data]
 

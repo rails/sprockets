@@ -16,7 +16,6 @@ module Sprockets
       result = environment.process(
         environment.attributes_for(filename).processors,
         filename,
-        logical_path,
         data
       )
       @source = result[:data]
