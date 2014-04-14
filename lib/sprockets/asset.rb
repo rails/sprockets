@@ -32,9 +32,8 @@ module Sprockets
     end
 
     attr_reader :cache_key
-    attr_reader :logical_path, :filename
-    attr_reader :content_type, :mtime, :length, :digest
-    alias_method :bytesize, :length
+    attr_reader :logical_path
+    attr_reader :content_type
 
     def initialize(environment, logical_path, filename)
       raise ArgumentError, "Asset logical path has no extension: #{logical_path}" if File.extname(logical_path) == ""
@@ -92,14 +91,21 @@ module Sprockets
       coder['dependency_digest'] = dependency_digest
     end
 
+    # Public: Returns String path of asset.
+    attr_reader :filename
+
+    # Deprecated: Use #filename instead.
+    #
+    # Returns Pathname.
     def pathname
       @pathname ||= Pathname.new(filename)
     end
 
-    # Return logical path with digest spliced in.
+    # Public: Return logical path with digest spliced in.
     #
     #   "foo/bar-37b51d194a7513e45b56f6524f2d51f2.js"
     #
+    # Returns String.
     def digest_path
       logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
     end
@@ -120,18 +126,41 @@ module Sprockets
       source
     end
 
-    # Return `String` of concatenated source.
+    # Public: Return `String` of concatenated source.
+    #
+    # Returns String.
     def to_s
       source
     end
 
-    # Add enumerator to allow `Asset` instances to be used as Rack
+    # Public: Returns Integer length of source.
+    attr_reader :length
+    alias_method :bytesize, :length
+
+    # Public: Returns Time of the last time the source was modified.
+    attr_reader :mtime
+
+    # Public: Returns String hexdigest of source.
+    attr_reader :digest
+
+    # Public: Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.
+    #
+    # block
+    #   part - String body chunk
+    #
+    # Returns nothing.
     def each
       yield to_s
     end
 
-    # Save asset to disk.
+    # Public: Save asset to disk.
+    #
+    # filename - String target
+    # options  - Hash
+    #   compress - Boolean to write out .gz file
+    #
+    # Returns nothing.
     def write_to(filename, options = {})
       # Gzip contents if filename has '.gz'
       options[:compress] ||= File.extname(filename) == '.gz'
@@ -155,12 +184,11 @@ module Sprockets
       File.utime(mtime, mtime, filename)
 
       nil
-    ensure
-      # Ensure tmp file gets cleaned up
-      ::FileUtils.rm("#{filename}+") if File.exist?("#{filename}+")
     end
 
-    # Pretty inspect
+    # Public: Pretty inspect
+    #
+    # Returns String.
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
         "filename=#{filename.inspect}, " +
@@ -169,14 +197,22 @@ module Sprockets
         ">"
     end
 
+    # Public: Implements Object#hash so Assets can be used as a Hash key or
+    # in a Set.
+    #
+    # Returns Integer hash of digest.
     def hash
       digest.hash
     end
 
+    # Public: Compare assets.
+    #
     # Assets are equal if they share the same path, mtime and digest.
+    #
+    # Returns true or false.
     def eql?(other)
       other.class == self.class &&
-        other.logical_path == self.logical_path &&
+        other.filename == self.filename &&
         other.mtime.to_i == self.mtime.to_i &&
         other.digest == self.digest
     end
