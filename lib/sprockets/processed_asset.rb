@@ -30,8 +30,6 @@ module Sprockets
       environment.logger.debug "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
     end
 
-    attr_reader :source
-
     # Initialize `BundledAsset` from serialized `Hash`.
     def init_with(environment, coder)
       super

@@ -8,8 +8,6 @@ module Sprockets
   # `BundledAsset`s are used for files that need to be processed and
   # concatenated with other assets. Use for `.js` and `.css` files.
   class BundledAsset < Asset
-    attr_reader :source
-
     def initialize(environment, logical_path, filename)
       super
 

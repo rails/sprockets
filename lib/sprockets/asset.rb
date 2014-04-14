@@ -124,6 +124,11 @@ module Sprockets
     # Public: Return `String` of concatenated source.
     #
     # Returns String.
+    attr_reader :source
+
+    # Public: Alias for #source.
+    #
+    # Returns String.
     def to_s
       source
     end
