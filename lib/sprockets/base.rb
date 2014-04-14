@@ -116,7 +116,7 @@ module Sprockets
       super
     end
 
-    # Reverse guess logical path for fully expanded path.
+    # Internal: Reverse guess logical path for fully expanded path.
     #
     # This has some known issues. For an example if a file is
     # shaddowed in the path, but is required relatively, its logical
@@ -292,32 +292,13 @@ module Sprockets
 
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
-      logical_path = path
-
-      # TODO: Pass absolute paths to resolve
-      if Pathname.new(path).absolute?
-        return unless stat(path)
-        filename = path.to_s
-        logical_path = logical_path_for(filename)
-      else
-        begin
-          filename = resolve(logical_path)
-
-          # If logical path is missing a mime type extension, append
-          # the absolute path extname so it has one.
-          #
-          # Ensures some consistency between finding "foo/bar" vs
-          # "foo/bar.js".
-          if File.extname(logical_path) == ""
-            expanded_logical_path = logical_path_for(filename)
-            logical_path += File.extname(expanded_logical_path)
-          end
-        rescue FileNotFound
-          return nil
-        end
+      begin
+        filename = resolve(path)
+      rescue FileNotFound
+        return nil
       end
 
-      build_asset(logical_path, filename, options)
+      build_asset(filename, options)
     end
 
     # Preferred `find_asset` shorthand.
@@ -343,21 +324,21 @@ module Sprockets
         raise NotImplementedError
       end
 
-      def build_asset(logical_path, pathname, options)
-        pathname = Pathname.new(pathname)
+      def build_asset(filename, options)
+        logical_path = logical_path_for(filename)
 
         # If there are any processors to run on the pathname, use
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
-        if attributes_for(pathname).processors.any?
+        if attributes_for(filename).processors.any?
           if options[:bundle] == false
-            circular_call_protection(pathname.to_s) do
-              ProcessedAsset.new(index, logical_path, pathname.to_s)
+            circular_call_protection(filename) do
+              ProcessedAsset.new(index, logical_path, filename)
             end
           else
-            BundledAsset.new(index, logical_path, pathname.to_s)
+            BundledAsset.new(index, logical_path, filename)
           end
         else
-          StaticAsset.new(index, logical_path, pathname.to_s)
+          StaticAsset.new(index, logical_path, filename)
         end
       end
 

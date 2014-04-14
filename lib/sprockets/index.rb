@@ -70,8 +70,8 @@ module Sprockets
       end
 
       # Cache asset building in memory and in persisted cache.
-      def build_asset(path, pathname, options)
-        key = asset_cache_key_for(pathname, options)
+      def build_asset(filename, options)
+        key = asset_cache_key_for(filename, options)
 
         if asset = Asset.from_hash(self, cache._get(key))
           paths, digest = asset.send(:dependency_paths), asset.send(:dependency_digest)
