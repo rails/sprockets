@@ -60,7 +60,7 @@ module Sprockets
 
       # Cache asset building in memory and in persisted cache.
       def build_asset(filename, options)
-        key = "#{self.digest.hexdigest}/asset/#{filename}:#{options[:bundle] ? '1' : '0'}"
+        key = "#{self.digest.hexdigest}:asset:#{filename}:#{file_hexdigest(filename)}:#{options[:bundle] ? '1' : '0'}"
 
         if asset = Asset.from_hash(self, cache._get(key))
           paths, digest = asset.send(:dependency_paths), asset.send(:dependency_digest)
