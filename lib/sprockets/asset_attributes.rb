@@ -83,7 +83,7 @@ module Sprockets
       # `.coffee` files carry an implicit `application/javascript`
       # content type.
       def engine_content_type
-        engine_extensions.reverse.each do |ext|
+        engine_extensions.each do |ext|
           if mime_type = environment.engine_mime_types[ext]
             return mime_type
           end
