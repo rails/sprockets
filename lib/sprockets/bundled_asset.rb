@@ -20,8 +20,6 @@ module Sprockets
       @dependency_digest = processed_asset.dependency_digest
       @dependency_mtime  = processed_asset.dependency_mtime
 
-      @body = processed_asset.source
-
       # Explode Asset into parts and gather the dependency bodies
       @source = to_a.map { |dependency| dependency.to_s }.join
 
@@ -49,7 +47,6 @@ module Sprockets
       end
 
       @source = coder['source']
-      @body   = coder['body']
     end
 
     # Serialize custom attributes in `BundledAsset`.
@@ -57,14 +54,6 @@ module Sprockets
       super
 
       coder['source'] = source
-      coder['body']   = body
-    end
-
-    # Get asset's own processed contents. Excludes any of its required
-    # dependencies but does run any processors or engines on the
-    # original file.
-    def body
-      @body
     end
 
     # Expand asset into an `Array` of parts.

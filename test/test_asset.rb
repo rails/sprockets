@@ -30,14 +30,10 @@ module AssetTests
     assert_kind_of Array, @asset.to_a
   end
 
-  test "body is a String" do
-    assert_kind_of String, @asset.body
-  end
-
   test "to_a body parts equals to_s" do
     source = ""
     @asset.to_a.each do |asset|
-      source << asset.body
+      source << asset.to_s
     end
     assert_equal @asset.to_s, source
   end
@@ -158,10 +154,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal fixture_path('asset/POW.png'), @asset.to_path
   end
 
-  test "body is entire contents" do
-    assert_equal @asset.to_s, @asset.body
-  end
-
   test "asset is fresh if its mtime is changed but its contents is the same" do
     filename = fixture_path('asset/test-POW.png')
 
@@ -228,7 +220,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal expected.digest, actual.digest
 
     assert_equal expected.to_a, actual.to_a
-    assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
 
     assert actual.eql?(expected)
@@ -283,7 +274,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   test "to_a" do
     body = ""
     @asset.to_a.each do |asset|
-      body << asset.body
+      body << asset.to_s
     end
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
@@ -302,7 +293,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal expected.digest, actual.digest
 
     assert_equal expected.to_a, actual.to_a
-    assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
 
     assert actual.eql?(expected)
@@ -610,11 +600,6 @@ class BundledAssetTest < Sprockets::TestCase
       asset("application.js").to_a.map(&:pathname).map(&:to_s)
   end
 
-  test "bundled asset body is just its own contents" do
-    assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
-      asset("application.js").body
-  end
-
   test "bundling joins files with blank line" do
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
       asset("application.js").to_s
@@ -807,7 +792,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_kind_of Sprockets::BundledAsset, actual
     assert_equal expected.logical_path, actual.logical_path
     assert_equal expected.pathname, actual.pathname
-    assert_equal expected.body, actual.body
     assert_equal expected.to_s, actual.to_s
     assert_equal expected.content_type, actual.content_type
     assert_equal expected.length, actual.length

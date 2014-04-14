@@ -121,11 +121,6 @@ module Sprockets
       [self]
     end
 
-    # `body` is aliased to source by default if it can't have any dependencies.
-    def body
-      source
-    end
-
     # Public: Return `String` of concatenated source.
     #
     # Returns String.
