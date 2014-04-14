@@ -104,50 +104,16 @@ module Sprockets
     #       mime_type_for(path) == "text/css"
     #     end
     #
-    def resolve_all(logical_path, options = {})
-      return to_enum(__method__, logical_path, options) unless block_given?
+    def resolve_all(path, options = {}, &block)
+      return to_enum(__method__, path, options) unless block_given?
+      path = path.to_s
 
-      logical_path = logical_path.to_s if logical_path
-      content_type = options[:content_type]
-
-      if Pathname.new(logical_path).absolute?
-        if paths.detect { |path| logical_path.to_s[path] }
-          if stat(logical_path)
-            if content_type.nil? || content_type == content_type_of(logical_path)
-              if block_given?
-                yield logical_path
-              end
-            end
-          end
+      if Pathname.new(path).absolute?
+        if filename = resolve_absolute_path(path, options)
+          yield filename
         end
       else
-        extension = attributes_for(logical_path).format_extension
-        content_type_extension = extension_for_mime_type(content_type)
-
-        paths = [logical_path]
-
-        path_without_extension = extension ?
-          logical_path.sub(extension, '') :
-          logical_path
-
-        # optimization: bower.json can only be nested one level deep
-        if !path_without_extension.index('/')
-          paths << File.join(path_without_extension, "bower.json")
-        end
-
-        paths << File.join(path_without_extension, "index#{extension}")
-
-        @trail.find_all(*paths, options).each do |path|
-          if File.basename(logical_path) != 'bower.json'
-            path = expand_bower_path(path, extension || content_type_extension) || path
-          end
-
-          if content_type.nil? || content_type == content_type_of(path)
-            if block_given?
-              yield path
-            end
-          end
-        end
+        resolve_all_logical_paths(path, options, &block)
       end
 
       nil
@@ -180,6 +146,62 @@ module Sprockets
 
     protected
       attr_reader :trail
+
+      # Internal: Resolve absolute path to ensure it exists and is in the
+      # load path.
+      #
+      # filename - String
+      # options  - Hash (default: {})
+      #
+      # Returns String filename or nil
+      def resolve_absolute_path(filename, options = {})
+        content_type = options[:content_type]
+
+        if paths.detect { |path| filename[path] }
+          if stat(filename)
+            if content_type.nil? || content_type == content_type_of(filename)
+              return filename
+            end
+          end
+        end
+      end
+
+      # Internal: Resolve logical path in trail load paths.
+      #
+      # logical_path - String
+      # options      - Hash (default: {})
+      # block
+      #   filename - String or nil
+      #
+      # Returns nothing.
+      def resolve_all_logical_paths(logical_path, options = {})
+        content_type = options[:content_type]
+        extension = attributes_for(logical_path).format_extension
+        content_type_extension = extension_for_mime_type(content_type)
+
+        paths = [logical_path]
+
+        path_without_extension = extension ?
+          logical_path.sub(extension, '') :
+          logical_path
+
+        # optimization: bower.json can only be nested one level deep
+        if !path_without_extension.index('/')
+          paths << File.join(path_without_extension, "bower.json")
+        end
+
+        paths << File.join(path_without_extension, "index#{extension}")
+
+        @trail.find_all(*paths, options).each do |path|
+          if File.basename(logical_path) != 'bower.json'
+            path = expand_bower_path(path, extension || content_type_extension) || path
+          end
+
+          if content_type.nil? || content_type == content_type_of(path)
+            yield path
+          end
+        end
+      end
 
       def logical_path_for_filename(filename, filters)
         logical_path = logical_path_for(filename)
