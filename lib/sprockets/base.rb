@@ -151,7 +151,11 @@ module Sprockets
 
         if stat(logical_path)
           if content_type.nil? || content_type == content_type_of(logical_path)
-            return logical_path
+            if block_given?
+              yield logical_path
+            else
+              return logical_path
+            end
           end
         end
       else
@@ -172,9 +176,16 @@ module Sprockets
         paths << File.join(path_without_extension, "index#{extension}")
 
         @trail.find_all(*paths, options).each do |path|
-          path = expand_bower_path(path, extension || content_type_extension) || path
+          if File.basename(logical_path) != 'bower.json'
+            path = expand_bower_path(path, extension || content_type_extension) || path
+          end
+
           if content_type.nil? || content_type == content_type_of(path)
-            return path
+            if block_given?
+              yield path
+            else
+              return path
+            end
           end
         end
       end

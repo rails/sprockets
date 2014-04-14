@@ -165,6 +165,8 @@ module EnvironmentTests
   end
 
   test "resolve bower special case" do
+    assert_equal fixture_path('default/bower/bower.json'),
+      @env.resolve!("bower/bower.json")
     assert_equal fixture_path('default/bower/main.js'),
       @env.resolve!("bower")
     assert_equal fixture_path('default/bower/main.js'),
@@ -695,6 +697,20 @@ class TestEnvironment < Sprockets::TestCase
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
+  end
+
+  test "verify all logical paths" do
+    env = new_environment
+    Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
+      unless %w( . ..).include?(dir)
+        env.append_path(fixture_path(dir))
+      end
+    end
+
+    env.find_logical_paths.each do |logical_path, filename|
+      paths = env.to_enum(:resolve, logical_path).to_a
+      assert_includes paths, filename
+    end
   end
 end
 
