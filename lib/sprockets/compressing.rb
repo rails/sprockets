@@ -1,6 +1,6 @@
 module Sprockets
   # `Compressing` is an internal mixin whose public methods are exposed on
-  # the `Environment` and `Index` classes.
+  # the `Environment` and `CachedEnvironment` classes.
   module Compressing
     def compressors
       deep_copy_hash(@compressors)

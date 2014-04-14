@@ -50,8 +50,8 @@ class TestPerformance < Sprockets::TestCase
     assert_no_redundant_stat_calls
   end
 
-  test "indexed simple file" do
-    @env.index["gallery.js"].to_s
+  test "cached simple file" do
+    @env.cached["gallery.js"].to_s
     assert_no_redundant_stat_calls
   end
 
@@ -60,8 +60,8 @@ class TestPerformance < Sprockets::TestCase
     assert_no_redundant_stat_calls
   end
 
-  test "indexed file with deps" do
-    @env.index["mobile.js"].to_s
+  test "cached file with deps" do
+    @env.cached["mobile.js"].to_s
     assert_no_redundant_stat_calls
   end
 
@@ -77,15 +77,15 @@ class TestPerformance < Sprockets::TestCase
     assert_no_redundant_stat_calls
   end
 
-  test "loading from indexed cache" do
+  test "loading from cached cache" do
     env1, env2 = new_environment, new_environment
     env1.cache = {}
     env2.cache = {}
 
-    env1.index["mobile.js"]
+    env1.cached["mobile.js"]
     reset_stats!
 
-    env2.index["mobile.js"]
+    env2.cached["mobile.js"]
     assert_no_redundant_stat_calls
   end
 

@@ -4,7 +4,7 @@ module Sprockets
   # Environment
   autoload :Base,                    'sprockets/base'
   autoload :Environment,             'sprockets/environment'
-  autoload :Index,                   'sprockets/index'
+  autoload :CachedEnvironment,       'sprockets/cached_environment'
   autoload :Manifest,                'sprockets/manifest'
 
   # Assets

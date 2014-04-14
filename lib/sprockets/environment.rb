@@ -1,6 +1,6 @@
 require 'sprockets/base'
 require 'sprockets/context'
-require 'sprockets/index'
+require 'sprockets/cached_environment'
 
 require 'digest/sha1'
 require 'hike'
@@ -49,27 +49,28 @@ module Sprockets
       end
 
       self.cache = Cache::MemoryStore.new
-      expire_index!
+      expire_cache!
 
       yield self if block_given?
     end
 
     # Returns a cached version of the environment.
     #
-    # All its file system calls are cached which makes `index` much
+    # All its file system calls are cached which makes `cached` much
     # faster. This behavior is ideal in production since the file
     # system only changes between deploys.
-    def index
-      Index.new(self)
+    def cached
+      CachedEnvironment.new(self)
     end
+    alias_method :index, :cached
 
     # Cache `find_asset` calls
     def find_asset(path, options = {})
-      index.find_asset(path, options)
+      cached.find_asset(path, options)
     end
 
     protected
-      def expire_index!
+      def expire_cache!
         # Clear digest to be recomputed
         @digest = nil
         @asset_cache = Cache::MemoryStore.new

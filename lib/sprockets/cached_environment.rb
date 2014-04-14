@@ -1,16 +1,16 @@
 require 'sprockets/base'
 
 module Sprockets
-  # `Index` is a special cached version of `Environment`.
+  # `Cached` is a special cached version of `Environment`.
   #
   # The expection is that all of its file system methods are cached
-  # for the instances lifetime. This makes `Index` much faster. This
+  # for the instances lifetime. This makes `Cached` much faster. This
   # behavior is ideal in production environments where the file system
   # is immutable.
   #
-  # `Index` should not be initialized directly. Instead use
-  # `Environment#index`.
-  class Index < Base
+  # `Cached` should not be initialized directly. Instead use
+  # `Environment#cached`.
+  class CachedEnvironment < Base
     def initialize(environment)
       @environment = environment
 
@@ -34,10 +34,11 @@ module Sprockets
       @compressors       = environment.compressors
     end
 
-    # No-op return self as index
-    def index
+    # No-op return self as cached environment.
+    def cached
       self
     end
+    alias_method :index, :cached
 
     # Cache `find_asset` calls
     def find_asset(*args)
@@ -52,10 +53,10 @@ module Sprockets
     end
 
     protected
-      # Index is immutable, any methods that try to clear the cache
+      # Cache is immutable, any methods that try to clear the cache
       # should bomb.
-      def expire_index!
-        raise TypeError, "can't modify immutable index"
+      def expire_cache!
+        raise TypeError, "can't modify immutable cached environment"
       end
 
       # Cache asset building in memory and in persisted cache.

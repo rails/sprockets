@@ -23,7 +23,7 @@ class TestServer < Sprockets::TestCase
       end
 
       map "/cached/javascripts" do
-        run env.index
+        run env.cached
       end
     end
   end
@@ -44,7 +44,7 @@ class TestServer < Sprockets::TestCase
     assert_equal "9", last_response.headers['Content-Length']
   end
 
-  test "serve single source file from indexed environment" do
+  test "serve single source file from cached environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
   end
@@ -102,7 +102,7 @@ class TestServer < Sprockets::TestCase
     end
   end
 
-  test "file updates do not update last modified header for indexed environments" do
+  test "file updates do not update last modified header for cached environments" do
     time = Time.now
     path = fixture_path "server/app/javascripts/foo.js"
     File.utime(time, time, path)

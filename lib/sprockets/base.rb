@@ -9,7 +9,7 @@ require 'json'
 require 'pathname'
 
 module Sprockets
-  # `Base` class for `Environment` and `Index`.
+  # `Base` class for `Environment` and `Cached`.
   class Base
     include Paths, Bower, Mime, Processing, Compressing, Engines, Server
 
@@ -25,7 +25,7 @@ module Sprockets
     #     environment.digest_class = Digest::MD5
     #
     def digest_class=(klass)
-      expire_index!
+      expire_cache!
       @digest_class = klass
     end
 
@@ -46,7 +46,7 @@ module Sprockets
     #     environment.version = '2.0'
     #
     def version=(version)
-      expire_index!
+      expire_cache!
       @version = version
     end
 
@@ -94,25 +94,25 @@ module Sprockets
     # setters. Either `get(key)`/`set(key, value)`,
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
-      expire_index!
+      expire_cache!
       @cache = Cache.new(cache)
     end
 
     def prepend_path(path)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def append_path(path)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def clear_paths
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
@@ -159,60 +159,61 @@ module Sprockets
 
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       @trail.append_extension(ext)
       super
     end
 
     # Registers a new Engine `klass` for `ext`.
     def register_engine(ext, klass, options = {})
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
       add_engine_to_trail(ext)
     end
 
     def register_preprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def unregister_preprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def register_postprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def unregister_postprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def register_bundle_processor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
     def unregister_bundle_processor(mime_type, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
+      # Overrides the global behavior to expire the cache
+      expire_cache!
       super
     end
 
-    # Return an `Index`. Must be implemented by the subclass.
-    def index
+    # Return an `Cached`. Must be implemented by the subclass.
+    def cached
       raise NotImplementedError
     end
+    alias_method :index, :cached
 
     # Define `default_external_encoding` accessor on 1.9.
     # Defaults to UTF-8.
@@ -292,8 +293,9 @@ module Sprockets
     protected
       attr_reader :asset_cache
 
-      # Clear index after mutating state. Must be implemented by the subclass.
-      def expire_index!
+      # Clear cached environment after mutating state. Must be implemented by
+      # the subclass.
+      def expire_cache!
         raise NotImplementedError
       end
 
@@ -305,13 +307,13 @@ module Sprockets
         if attributes_for(filename).processors.any?
           if options[:bundle] == false
             circular_call_protection(filename) do
-              ProcessedAsset.new(index, logical_path, filename)
+              ProcessedAsset.new(cached, logical_path, filename)
             end
           else
-            BundledAsset.new(index, logical_path, filename)
+            BundledAsset.new(cached, logical_path, filename)
           end
         else
-          StaticAsset.new(index, logical_path, filename)
+          StaticAsset.new(cached, logical_path, filename)
         end
       end
 

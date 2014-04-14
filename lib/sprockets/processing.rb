@@ -7,7 +7,7 @@ require 'sprockets/utils'
 
 module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
-  # the `Environment` and `Index` classes.
+  # the `Environment` and `CachedEnvironment` classes.
   module Processing
     # Returns an `Array` of format extension `String`s.
     #

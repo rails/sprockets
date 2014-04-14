@@ -28,11 +28,11 @@ class TestCaching < Sprockets::TestCase
     assert asset2.equal?(asset1)
   end
 
-  test "same index instance cache objects are equal" do
-    index = @env1.index
+  test "same cached instance cache objects are equal" do
+    cached = @env1.cached
 
-    asset1 = index['gallery.js']
-    asset2 = index['gallery.js']
+    asset1 = cached['gallery.js']
+    asset2 = cached['gallery.js']
 
     assert asset1
     assert asset2
@@ -54,11 +54,11 @@ class TestCaching < Sprockets::TestCase
     assert asset2.equal?(asset1)
   end
 
-  test "same index instance is cached at logical and expanded path" do
-    index = @env1.index
+  test "same cached instance is cached at logical and expanded path" do
+    cached = @env1.cached
 
-    asset1 = index['gallery.js']
-    asset2 = index[asset1.pathname]
+    asset1 = cached['gallery.js']
+    asset2 = cached[asset1.pathname]
 
     assert asset1
     assert asset2
@@ -105,12 +105,12 @@ class TestCaching < Sprockets::TestCase
     assert_kind_of Sprockets::BundledAsset,   env.find_asset('gallery.js', :bundle => true)
   end
 
-  test "proccessed and bundled assets are cached separately on index" do
-    index = @env1.index
-    assert_kind_of Sprockets::ProcessedAsset, index.find_asset('gallery.js', :bundle => false)
-    assert_kind_of Sprockets::BundledAsset,   index.find_asset('gallery.js', :bundle => true)
-    assert_kind_of Sprockets::ProcessedAsset, index.find_asset('gallery.js', :bundle => false)
-    assert_kind_of Sprockets::BundledAsset,   index.find_asset('gallery.js', :bundle => true)
+  test "proccessed and bundled assets are cached separately on cached" do
+    cached = @env1.cached
+    assert_kind_of Sprockets::ProcessedAsset, cached.find_asset('gallery.js', :bundle => false)
+    assert_kind_of Sprockets::BundledAsset,   cached.find_asset('gallery.js', :bundle => true)
+    assert_kind_of Sprockets::ProcessedAsset, cached.find_asset('gallery.js', :bundle => false)
+    assert_kind_of Sprockets::BundledAsset,   cached.find_asset('gallery.js', :bundle => true)
   end
 
   test "keys are different if environment digest changes" do

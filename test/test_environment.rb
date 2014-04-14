@@ -717,7 +717,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 end
 
-class TestIndex < Sprockets::TestCase
+class TestCached < Sprockets::TestCase
   include EnvironmentTests
 
   def new_environment
@@ -725,7 +725,7 @@ class TestIndex < Sprockets::TestCase
       env.append_path(fixture_path('default'))
       env.cache = {}
       yield env if block_given?
-    end.index
+    end.cached
   end
 
   def setup
@@ -738,14 +738,14 @@ class TestIndex < Sprockets::TestCase
     end
   end
 
-  test "change in environment mime types does not affect index" do
+  test "change in environment mime types does not affect cache" do
     env = Sprockets::Environment.new(".")
     env.register_mime_type "application/javascript", ".jst"
-    index = env.index
+    cached = env.cached
 
-    assert_equal "application/javascript", index.mime_types("jst")
+    assert_equal "application/javascript", cached.mime_types("jst")
     env.register_mime_type nil, ".jst"
-    assert_equal "application/javascript", index.mime_types("jst")
+    assert_equal "application/javascript", cached.mime_types("jst")
   end
 
   test "does not allow new bundle processors to be added" do
@@ -760,13 +760,13 @@ class TestIndex < Sprockets::TestCase
     end
   end
 
-  test "change in environment bundle_processors does not affect index" do
+  test "change in environment bundle_processors does not affect cache" do
     env = Sprockets::Environment.new(".")
-    index = env.index
+    cached = env.cached
 
-    assert !index.bundle_processors('text/css').include?(WhitespaceProcessor)
+    assert !cached.bundle_processors('text/css').include?(WhitespaceProcessor)
     env.register_bundle_processor 'text/css', WhitespaceProcessor
-    assert !index.bundle_processors('text/css').include?(WhitespaceProcessor)
+    assert !cached.bundle_processors('text/css').include?(WhitespaceProcessor)
   end
 
   test "does not allow css compressor to be changed" do
@@ -781,16 +781,16 @@ class TestIndex < Sprockets::TestCase
     end
   end
 
-  test "change in environment engines does not affect index" do
+  test "change in environment engines does not affect cache" do
     env = Sprockets::Environment.new
-    index = env.index
+    cached = env.cached
 
     assert_nil env.engines[".foo"]
-    assert_nil index.engines[".foo"]
+    assert_nil cached.engines[".foo"]
 
     env.register_engine ".foo", Sprockets::ERBTemplate
 
     assert env.engines[".foo"]
-    assert_nil index.engines[".foo"]
+    assert_nil cached.engines[".foo"]
   end
 end
