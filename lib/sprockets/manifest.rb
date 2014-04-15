@@ -222,8 +222,8 @@ module Sprockets
 
       # Persist manfiest back to FS
       def save
-        ::FileUtils.mkdir_p dir
-        File.open(path, 'w') do |f|
+        ::FileUtils.mkdir_p File.dirname(filename)
+        File.open(filename, 'w') do |f|
           f.write json_encode(@data)
         end
       end
