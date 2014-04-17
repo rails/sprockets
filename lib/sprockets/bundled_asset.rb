@@ -20,6 +20,7 @@ module Sprockets
         @dependency_paths.merge(asset.dependency_paths)
       end
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
+      @mtime = @required_assets.map(&:mtime).max.to_i
 
       # Explode Asset into parts and gather the dependency bodies
       @source = @required_assets.map { |asset| asset.to_s }.join
@@ -30,8 +31,6 @@ module Sprockets
         filename,
         @source
       )[:data]
-
-      @mtime  = @required_assets.map(&:mtime).max
       @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
     end

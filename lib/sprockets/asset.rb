@@ -42,10 +42,6 @@ module Sprockets
       @logical_path = logical_path.to_s
       @filename     = filename
       @content_type = environment.content_type_of(filename)
-      # drop precision to 1 second, same pattern followed elsewhere
-      @mtime        = Time.at(environment.stat(filename).mtime.to_i)
-      @length       = environment.stat(filename).size
-      @digest       = environment.digest.file(filename).hexdigest
 
       @dependency_digest = environment.dependencies_hexdigest(dependency_paths)
     end
@@ -61,7 +57,7 @@ module Sprockets
       @digest       = coder['digest']
 
       if mtime = coder['mtime']
-        @mtime = Time.at(mtime)
+        @mtime = mtime
       end
 
       if length = coder['length']
@@ -80,7 +76,7 @@ module Sprockets
       coder['logical_path'] = logical_path
       coder['filename']     = filename
       coder['content_type'] = content_type
-      coder['mtime']        = mtime.to_i
+      coder['mtime']        = @mtime
       coder['length']       = length
       coder['digest']       = digest
 
@@ -135,7 +131,13 @@ module Sprockets
     alias_method :bytesize, :length
 
     # Public: Returns Time of the last time the source was modified.
-    attr_reader :mtime
+    #
+    # Time resolution is normalized to the nearest second.
+    #
+    # Returns Time.
+    def mtime
+      Time.at(@mtime.to_i)
+    end
 
     # Public: Returns String hexdigest of source.
     attr_reader :digest

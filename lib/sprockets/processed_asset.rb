@@ -17,7 +17,6 @@ module Sprockets
         data
       )
       @source = result[:data]
-
       @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
 
@@ -26,7 +25,7 @@ module Sprockets
       @dependency_paths = result[:dependency_paths]
 
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
-      @mtime = @dependency_paths.map { |path| environment.stat(path).mtime }.max
+      @mtime = @dependency_paths.map { |path| environment.stat(path).mtime }.max.to_i
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
       environment.logger.debug "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
