@@ -21,11 +21,12 @@ module Sprockets
       @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
 
-      @required_paths = result[:required_paths] + [filename]
-      @stubbed_paths  = result[:stubbed_assets]
+      @required_paths   = result[:required_paths] + [filename]
+      @stubbed_paths    = result[:stubbed_assets]
+      @dependency_paths = result[:dependency_paths]
 
-      @dependency_paths, @mtime = build_dependency_paths(environment, result)
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
+      @mtime = @dependency_paths.map { |path| environment.stat(path).mtime }.max
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
       environment.logger.debug "Compiled #{logical_path}  (#{elapsed_time}ms)  (pid #{Process.pid})"
@@ -46,29 +47,5 @@ module Sprockets
       coder['required_paths'] = required_paths
       coder['stubbed_paths']  = stubbed_paths
     end
-
-    private
-      def build_dependency_paths(environment, result)
-        mtimes = []
-
-        paths = Set.new
-
-        result[:dependency_paths].map do |path|
-          mtimes << environment.stat(path).mtime
-          paths << path
-        end
-
-        result[:dependency_assets].flat_map do |path|
-          if path == self.filename
-            mtimes << environment.stat(path).mtime
-            paths << path
-          elsif asset = environment.find_asset(path, bundle: false)
-            mtimes << asset.mtime
-            paths.merge(asset.dependency_paths)
-          end
-        end
-
-        return paths, mtimes.max
-      end
   end
 end

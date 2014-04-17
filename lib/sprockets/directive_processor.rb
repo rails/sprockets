@@ -88,10 +88,9 @@ module Sprockets
 
       @has_written_body = false
 
-      @required_paths    = []
-      @stubbed_assets    = Set.new
-      @dependency_paths  = Set.new
-      @dependency_assets = Set.new
+      @required_paths   = []
+      @stubbed_assets   = Set.new
+      @dependency_paths = Set.new
 
       process_directives
       process_source
@@ -100,8 +99,7 @@ module Sprockets
         data: @result,
         required_paths: @required_paths,
         stubbed_assets: @stubbed_assets,
-        dependency_paths: @dependency_paths,
-        dependency_assets: @dependency_assets
+        dependency_paths: @dependency_paths
       }
     end
 
@@ -311,7 +309,9 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        @dependency_assets << resolve(path)
+        if asset = @environment.find_asset(resolve(path))
+          @dependency_paths.merge(asset.send(:dependency_paths))
+        end
       end
 
       # Allows dependency to be excluded from the asset bundle.

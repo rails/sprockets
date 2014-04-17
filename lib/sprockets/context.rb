@@ -30,18 +30,16 @@ module Sprockets
       @pathname     = Pathname.new(input[:filename])
       @content_type = input[:content_type]
 
-      @_required_paths    = []
-      @_stubbed_assets    = Set.new
-      @_dependency_paths  = Set.new
-      @_dependency_assets = Set.new
+      @_required_paths   = []
+      @_stubbed_assets   = Set.new
+      @_dependency_paths = Set.new
     end
 
     def to_hash
       {
         required_paths: @_required_paths,
         stubbed_assets: @_stubbed_assets,
-        dependency_paths: @_dependency_paths,
-        dependency_assets: @_dependency_assets
+        dependency_paths: @_dependency_paths
       }
     end
 
@@ -102,8 +100,9 @@ module Sprockets
     # file. Unlike `depend_on`, this will include recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
-      filename = resolve(path).to_s
-      @_dependency_assets << filename
+      if asset = @environment.find_asset(resolve(path))
+        @_dependency_paths.merge(asset.send(:dependency_paths))
+      end
       nil
     end
 
