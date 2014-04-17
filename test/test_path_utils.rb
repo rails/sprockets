@@ -27,6 +27,15 @@ class TestPathUtils < Sprockets::TestCase
     ], entries(FIXTURE_ROOT)
   end
 
+  test "stat directory" do
+    assert_equal 23, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
+    path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
+    assert_equal fixture_path("default/app"), path
+    assert_kind_of File::Stat, stat
+
+    assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
+  end
+
   test "stat tree" do
     assert_equal 44, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first

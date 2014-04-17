@@ -237,16 +237,12 @@ module Sprockets
 
           @dependency_paths << root.to_s
 
-          @environment.entries(root).each do |entry|
-            pathname = root.join(entry)
-            stat = @environment.stat(pathname)
-            content_type = @environment.content_type_of(pathname)
-
-            if pathname.to_s == @filename
+          @environment.stat_directory(root).each do |subpath, stat|
+            if subpath == @filename
               next
-            elsif stat.file? && content_type == @content_type
-              @dependency_assets << pathname.to_s
-              @required_paths << pathname.to_s
+            elsif stat.file? && @environment.content_type_of(subpath) == @content_type
+              @dependency_assets << subpath
+              @required_paths << subpath
             end
           end
         else
@@ -271,20 +267,18 @@ module Sprockets
           @dependency_paths << root.to_s
 
           required_paths = []
-          @environment.stat_tree(root).each do |pathname, stat|
-            content_type = @environment.content_type_of(pathname)
-
-            if pathname.to_s == @filename
+          @environment.stat_tree(root).each do |subpath, stat|
+            if subpath == @filename
               next
             elsif stat.directory?
-              @dependency_paths << pathname.to_s
-            elsif stat.file? && content_type == @content_type
-              required_paths << pathname
+              @dependency_paths << subpath
+            elsif stat.file? && @environment.content_type_of(subpath) == @content_type
+              required_paths << subpath
             end
           end
-          required_paths.sort_by(&:to_s).each do |pathname|
-            @dependency_assets << pathname.to_s
-            @required_paths << pathname.to_s
+          required_paths.sort_by(&:to_s).each do |filename|
+            @dependency_assets << filename
+            @required_paths << filename
           end
         else
           # The path must be relative and start with a `./`.

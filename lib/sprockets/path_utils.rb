@@ -15,17 +15,33 @@ module Sprockets
     # Include Hike's FileUtils for stat() and entries()
     include Hike::FileUtils
 
-    # Internal: Recursive stat all the files under a directory.
+    # Internal: Stat all the files under a directory.
     #
-    # root  - A String directory
+    # dir - A String directory
     #
     # Returns an Enumerator of [path, stat].
-    def stat_tree(root, &block)
-      return to_enum(__method__, root) unless block_given?
+    def stat_directory(dir)
+      return to_enum(__method__, dir) unless block_given?
 
-      self.entries(root).sort.each do |entry|
-        path = File.join(root, entry)
-        next unless stat = self.stat(path)
+      self.entries(dir).each do |entry|
+        path = File.join(dir, entry)
+        if stat = self.stat(path)
+          yield path, stat
+        end
+      end
+
+      nil
+    end
+
+    # Internal: Recursive stat all the files under a directory.
+    #
+    # dir - A String directory
+    #
+    # Returns an Enumerator of [path, stat].
+    def stat_tree(dir, &block)
+      return to_enum(__method__, dir) unless block_given?
+
+      self.stat_directory(dir) do |path, stat|
         yield path, stat
 
         if stat.directory?
