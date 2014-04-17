@@ -287,9 +287,7 @@ module EnvironmentTests
 
   test "iterate over each logical path" do
     paths = []
-    @env.find_logical_paths do |logical_path|
-      paths << logical_path
-    end
+    paths = @env.logical_paths.to_a.map(&:first)
     assert_equal FILES_IN_PATH, paths.length
     assert_equal paths.size, paths.uniq.size, "has duplicates"
 
@@ -302,7 +300,7 @@ module EnvironmentTests
   test "iterate over each logical path and filename" do
     paths = []
     filenames = []
-    @env.find_logical_paths do |logical_path, filename|
+    @env.logical_paths.each do |logical_path, filename|
       paths << logical_path
       filenames << filename
     end
@@ -315,77 +313,6 @@ module EnvironmentTests
     assert !paths.include?("coffee")
 
     assert filenames.any? { |p| p =~ /application.js.coffee/ }
-  end
-
-  test "find logical path enumerator" do
-    enum = @env.find_logical_paths
-    assert_kind_of String, enum.first
-    assert_equal FILES_IN_PATH, enum.to_a.length
-  end
-
-  test "iterate over each logical path matching fnmatch filters" do
-    paths = []
-    @env.find_logical_paths("*.js") do |logical_path|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matches index files" do
-    paths = []
-    @env.find_logical_paths("coffee.js") do |logical_path|
-      paths << logical_path
-    end
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee/index.js")
-  end
-
-  test "each logical path enumerator matching fnmatch filters" do
-    paths = []
-    enum = @env.find_logical_paths("*.js")
-    enum.to_a.each do |logical_path|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matching regexp filters" do
-    paths = []
-    @env.find_logical_paths(/.*\.js/) do |logical_path|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matching proc filters" do
-    paths = []
-    @env.find_logical_paths(proc { |fn| File.extname(fn) == '.js' }) do |logical_path|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matching proc filters with full path arg" do
-    paths = []
-    @env.find_logical_paths(proc { |_, fn| fn.match(fixture_path('default/mobile')) }) do |logical_path|
-      paths << logical_path
-    end
-
-    assert paths.include?("mobile/a.js")
-    assert paths.include?("mobile/b.js")
-    assert !paths.include?("application.js")
   end
 
   test "CoffeeScript files are compiled in a closure" do
@@ -707,9 +634,9 @@ class TestEnvironment < Sprockets::TestCase
       end
     end
 
-    env.find_logical_paths.each do |logical_path, filename|
-      paths = env.resolve_all(logical_path).to_a
-      assert_includes paths, filename
+    env.logical_paths.each do |logical_path, filename|
+      assert_equal filename, env.resolve_all(logical_path).first,
+        "Expected #{logical_path.inspect} to resolve to #{filename}."
     end
   end
 end

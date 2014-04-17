@@ -106,6 +106,53 @@ module Sprockets
       @data['files'] ||= {}
     end
 
+    # Internal: Compile logical path matching filter into a proc that can be
+    # passed to logical_paths.select(&proc).
+    #
+    #   compile_match_filter(proc { |logical_path|
+    #     File.extname(logical_path) == '.js'
+    #   })
+    #
+    #   compile_match_filter(/application.js/)
+    #
+    #   compile_match_filter("foo/*.js")
+    #
+    # Returns a Proc or raise a TypeError.
+    def self.compile_match_filter(filter)
+      # If the filter is already a proc, great nothing to do.
+      if filter.respond_to?(:call)
+        filter
+      # If the filter is a regexp, wrap it in a proc that tests it against the
+      # logical path.
+      elsif filter.is_a?(Regexp)
+        proc { |logical_path| filter.match(logical_path) }
+      elsif filter.is_a?(String)
+        # If its an absolute path, detect the matching full filename
+        if Pathname.new(filter).absolute?
+          proc { |logical_path, filename| filename == filter.to_s }
+        else
+          # Otherwise do an fnmatch against the logical path.
+          proc { |logical_path| File.fnmatch(filter.to_s, logical_path) }
+        end
+      else
+        raise TypeError, "unknown filter type: #{filter.inspect}"
+      end
+    end
+
+    # Public: Filter logical paths in environment. Useful for selecting what
+    # files you want to compile.
+    #
+    # Returns an Enumerator.
+    def filter_logical_paths(*args)
+      filters = args.flatten.map { |arg| self.class.compile_match_filter(arg) }
+      environment.logical_paths.select do |a, b|
+        filters.any? { |f| f.call(a, b) }
+      end
+    end
+
+    # Deprecated alias.
+    alias_method :find_logical_paths, :filter_logical_paths
+
     # Compile and write asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
@@ -118,11 +165,10 @@ module Sprockets
         raise Error, "manifest requires environment for compilation"
       end
 
-      paths = environment.find_logical_paths(*args).to_a +
-        args.flatten.select { |fn| Pathname.new(fn).absolute? if fn.is_a?(String)}
+      filenames = []
 
-      paths.each do |path|
-        if asset = find_asset(path)
+      filter_logical_paths(*args).each do |logical_path, filename|
+        if asset = find_asset(filename)
           files[asset.digest_path] = {
             'logical_path' => asset.logical_path,
             'mtime'        => asset.mtime.iso8601,
@@ -141,10 +187,12 @@ module Sprockets
             asset.write_to "#{target}.gz" if asset.is_a?(BundledAsset)
           end
 
+          filenames << filename
         end
       end
       save
-      paths
+
+      filenames
     end
 
     # Removes file from directory and from manifest. `filename` must

@@ -114,28 +114,25 @@ module Sprockets
       nil
     end
 
-    def find_logical_paths(*args, &block)
-      return to_enum(__method__, *args) unless block_given?
-      filters = args.flatten
-      files = {}
+    # Public: Enumerate over all logical paths in the environment.
+    #
+    # Returns an Enumerator of [logical_path, filename].
+    def logical_paths
+      return to_enum(__method__) unless block_given?
 
+      seen = Set.new
       paths.each do |root|
-        stat_tree(root).each do |path, stat|
-          next unless stat.file?
-
-          if logical_path = logical_path_for_filename(path, filters)
-            unless files[logical_path]
-              if block.arity == 2
-                yield logical_path, path.to_s
-              else
-                yield logical_path
-              end
+        stat_tree(root).each do |filename, stat|
+          if stat.file?
+            logical_path = logical_path_for(filename)
+            if !seen.include?(logical_path)
+              yield logical_path, filename
+              seen << logical_path
             end
-
-            files[logical_path] = true
           end
         end
       end
+
       nil
     end
 
@@ -194,34 +191,6 @@ module Sprockets
 
           if content_type.nil? || content_type == content_type_of(path)
             yield path
-          end
-        end
-      end
-
-      def logical_path_for_filename(filename, filters)
-        logical_path = logical_path_for(filename)
-
-        if matches_filter(filters, logical_path, filename)
-          return logical_path
-        end
-
-        nil
-      end
-
-      def matches_filter(filters, logical_path, filename)
-        return true if filters.empty?
-
-        filters.any? do |filter|
-          if filter.is_a?(Regexp)
-            filter.match(logical_path)
-          elsif filter.respond_to?(:call)
-            if filter.arity == 1
-              filter.call(logical_path)
-            else
-              filter.call(logical_path, filename.to_s)
-            end
-          else
-            File.fnmatch(filter.to_s, logical_path)
           end
         end
       end
