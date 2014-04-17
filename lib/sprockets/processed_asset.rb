@@ -22,7 +22,7 @@ module Sprockets
       @digest = environment.digest.update(source).hexdigest
 
       @required_paths   = result[:required_paths] + [filename]
-      @stubbed_paths    = result[:stubbed_assets]
+      @stubbed_paths    = result[:stubbed_paths]
       @dependency_paths = result[:dependency_paths]
 
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)

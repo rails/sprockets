@@ -31,14 +31,14 @@ module Sprockets
       @content_type = input[:content_type]
 
       @_required_paths   = []
-      @_stubbed_assets   = Set.new
+      @_stubbed_paths    = Set.new
       @_dependency_paths = Set.new
     end
 
     def to_hash
       {
         required_paths: @_required_paths,
-        stubbed_assets: @_stubbed_assets,
+        stubbed_paths: @_stubbed_paths,
         dependency_paths: @_dependency_paths
       }
     end
@@ -126,7 +126,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @_stubbed_assets << resolve(path, content_type: :self).to_s
+      @_stubbed_paths << resolve(path, content_type: :self).to_s
       nil
     end
 

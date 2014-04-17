@@ -170,7 +170,7 @@ module Sprockets
       }
 
       required_paths   = []
-      stubbed_assets   = Set.new
+      stubbed_paths    = Set.new
       dependency_paths = Set.new([filename])
 
       processors.each do |processor|
@@ -180,7 +180,7 @@ module Sprockets
           when Hash
             data = result[:data]
             Array(result[:required_paths]).each { |p| required_paths << p }
-            Array(result[:stubbed_assets]).each { |p| stubbed_assets << p }
+            Array(result[:stubbed_paths]).each { |p| stubbed_paths << p }
             Array(result[:dependency_paths]).each { |p| dependency_paths << p }
           when String
             data = result
@@ -193,7 +193,7 @@ module Sprockets
       {
         data: data,
         required_paths: required_paths,
-        stubbed_assets: stubbed_assets,
+        stubbed_paths: stubbed_paths,
         dependency_paths: dependency_paths
       }
     end

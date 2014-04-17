@@ -89,7 +89,7 @@ module Sprockets
       @has_written_body = false
 
       @required_paths   = []
-      @stubbed_assets   = Set.new
+      @stubbed_paths    = Set.new
       @dependency_paths = Set.new
 
       process_directives
@@ -98,7 +98,7 @@ module Sprockets
       {
         data: @result,
         required_paths: @required_paths,
-        stubbed_assets: @stubbed_assets,
+        stubbed_paths: @stubbed_paths,
         dependency_paths: @dependency_paths
       }
     end
@@ -323,7 +323,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_assets << resolve(path, content_type: @content_type)
+        @stubbed_paths << resolve(path, content_type: @content_type)
       end
 
     private
