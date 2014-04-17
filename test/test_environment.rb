@@ -295,7 +295,7 @@ module EnvironmentTests
 
     assert paths.include?("application.js")
     assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee/index.js")
+    assert paths.include?("coffee.js")
     assert !paths.include?("coffee")
   end
 
@@ -311,7 +311,7 @@ module EnvironmentTests
 
     assert paths.include?("application.js")
     assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee/index.js")
+    assert paths.include?("coffee.js")
     assert !paths.include?("coffee")
 
     assert filenames.any? { |p| p =~ /application.js.coffee/ }
@@ -413,7 +413,7 @@ module EnvironmentTests
     assert_equal "bower/main.js", @env.logical_path_for(fixture_path("default/bower/main.js"))
     assert_equal "bower/bower.json", @env.logical_path_for(fixture_path("default/bower/bower.json"))
 
-    assert_equal "coffee/index.js", @env.logical_path_for(fixture_path("default/coffee/index.js"))
+    assert_equal "coffee.js", @env.logical_path_for(fixture_path("default/coffee/index.js"))
     assert_equal "coffee/foo.js", @env.logical_path_for(fixture_path("default/coffee/foo.coffee"))
   end
 end

@@ -77,6 +77,8 @@ module Sprockets
         attributes = attributes_for(filename)
         path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
         path = "#{path}#{attributes.send(:engine_format_extension)}" unless attributes.format_extension
+        extname = File.extname(path)
+        path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
         path
       else
         raise FileOutsidePaths, "#{filename} isn't in paths: #{paths.join(', ')}"
@@ -201,14 +203,6 @@ module Sprockets
 
         if matches_filter(filters, logical_path, filename)
           return logical_path
-        end
-
-        # If filename is an index file, retest with alias
-        if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
-          path = logical_path.sub(/\/index\./, '.')
-          if matches_filter(filters, path, filename)
-            return path
-          end
         end
 
         nil
