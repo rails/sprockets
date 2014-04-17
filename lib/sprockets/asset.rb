@@ -1,7 +1,6 @@
 require 'pathname'
 require 'securerandom'
 require 'set'
-require 'sprockets/fileutils'
 require 'time'
 
 module Sprockets
@@ -165,9 +164,9 @@ module Sprockets
       # Gzip contents if filename has '.gz'
       options[:compress] ||= File.extname(filename) == '.gz'
 
-      ::FileUtils.mkdir_p File.dirname(filename)
+      FileUtils.mkdir_p File.dirname(filename)
 
-      FileUtils.atomic_write(filename) do |f|
+      Utils.atomic_write(filename) do |f|
         if options[:compress]
           # Run contents through `Zlib`
           gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)

@@ -1,5 +1,4 @@
 require 'sprockets/asset'
-require 'sprockets/fileutils'
 require 'set'
 
 module Sprockets
@@ -10,7 +9,7 @@ module Sprockets
       start_time = Time.now.to_f
 
       encoding = environment.encoding_for_mime_type(content_type)
-      data     = FileUtils.read_unicode(filename, encoding)
+      data     = Utils.read_unicode(filename, encoding)
 
       result = environment.process(
         environment.attributes_for(filename).processors,
