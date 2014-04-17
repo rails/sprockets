@@ -70,7 +70,6 @@ module Sprockets
       end
 
       @dependency_paths  = Set.new(coder['dependency_paths'])
-      @dependency_mtime  = Time.at(coder['dependency_mtime'])
       @dependency_digest = coder['dependency_digest']
     end
 
@@ -86,7 +85,6 @@ module Sprockets
       coder['digest']       = digest
 
       coder['dependency_paths']  = dependency_paths.to_a
-      coder['dependency_mtime']  = dependency_mtime.to_i
       coder['dependency_digest'] = dependency_digest
     end
 
@@ -224,18 +222,6 @@ module Sprockets
       def dependency_paths
         @dependency_paths ||= Set.new([self.filename])
       end
-
-      def dependency_mtime
-        @dependency_mtime ||= @mtime
-      end
-
-      attr_reader :dependency_digest
-
-      # Internal: `ProccessedAsset`s that are required after processing.
-      #
-      # Default to an empty `Array`.
-      def required_assets
-        @required_assets ||= []
-      end
+      attr_reader :dependency_digest, :required_paths, :stubbed_paths
   end
 end

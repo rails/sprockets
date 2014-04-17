@@ -12,14 +12,15 @@ module Sprockets
       super
 
       processed_asset = environment.find_asset(filename, bundle: false)
-      @required_assets = processed_asset.required_assets
+      @required_assets = resolve_dependencies(environment, processed_asset, processed_asset.required_paths) -
+        resolve_dependencies(environment, processed_asset, processed_asset.stubbed_paths)
 
       @dependency_paths  = processed_asset.dependency_paths
       @dependency_digest = processed_asset.dependency_digest
-      @dependency_mtime  = processed_asset.dependency_mtime
+      @mtime             = @required_assets.map(&:mtime).max
 
       # Explode Asset into parts and gather the dependency bodies
-      @source = to_a.map { |dependency| dependency.to_s }.join
+      @source = @required_assets.map { |asset| asset.to_s }.join
 
       # Run bundle processors on concatenated source
       @source = environment.process(
@@ -28,7 +29,6 @@ module Sprockets
         @source
       )[:data]
 
-      @mtime  = processed_asset.dependency_mtime
       @length = Rack::Utils.bytesize(source)
       @digest = environment.digest.update(source).hexdigest
     end
@@ -37,12 +37,13 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      processed_asset = environment.find_asset(filename, bundle: false)
-      @required_assets = processed_asset.required_assets
-
-      if processed_asset.dependency_digest != dependency_digest
-        raise UnserializeError, "processed asset belongs to a stale environment"
-      end
+      @required_assets = coder['required_paths'].map { |filename, digest|
+        asset = environment.find_asset(filename, bundle: false)
+        if asset.nil? || asset.digest != digest
+          raise UnserializeError, "asset belongs to a stale environment"
+        end
+        asset
+      }
 
       @source = coder['source']
     end
@@ -52,11 +53,29 @@ module Sprockets
       super
 
       coder['source'] = source
+      coder['required_paths'] = @required_assets.map { |a| [a.filename, a.digest] }
     end
 
     # Expand asset into an `Array` of parts.
     def to_a
-      required_assets
+      @required_assets
     end
+
+    private
+      def resolve_dependencies(environment, processed_asset, paths)
+        assets = Set.new
+
+        paths.each do |path|
+          if path == self.filename
+            assets << processed_asset
+          elsif asset = environment.find_asset(path, bundle: true)
+            assets.merge(asset.to_a)
+          else
+            raise FileNotFound, "could not find #{path}"
+          end
+        end
+
+        assets.to_a
+      end
   end
 end

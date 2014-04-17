@@ -21,8 +21,10 @@ module Sprockets
       @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
 
-      @required_assets = build_required_assets(environment, result)
-      @dependency_paths, @dependency_mtime = build_dependency_paths(environment, result)
+      @required_paths = result[:required_paths] + [filename]
+      @stubbed_paths  = result[:stubbed_assets]
+
+      @dependency_paths, @mtime = build_dependency_paths(environment, result)
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
 
       elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
@@ -32,46 +34,20 @@ module Sprockets
     # Initialize `BundledAsset` from serialized `Hash`.
     def init_with(environment, coder)
       super
-
-      @source = coder['source']
-
-      @required_assets = coder['required_paths'].map { |p|
-        unless environment.paths.detect { |path| p[path] }
-          raise UnserializeError, "#{p} isn't in paths"
-        end
-
-        p == filename ? self : environment.find_asset(p, bundle: false)
-      }
+      @source         = coder['source']
+      @required_paths = coder['required_paths']
+      @stubbed_paths  = coder['stubbed_paths']
     end
 
     # Serialize custom attributes in `BundledAsset`.
     def encode_with(coder)
       super
-
-      coder['source'] = source
-      coder['required_paths'] = required_assets.map(&:filename)
+      coder['source']         = source
+      coder['required_paths'] = required_paths
+      coder['stubbed_paths']  = stubbed_paths
     end
 
     private
-      def build_required_assets(environment, result)
-        resolve_dependencies(environment, result[:required_paths] + [filename]) -
-          resolve_dependencies(environment, result[:stubbed_assets])
-      end
-
-      def resolve_dependencies(environment, paths)
-        assets = Set.new
-
-        paths.each do |path|
-          if path == self.filename
-            assets << self
-          elsif asset = environment.find_asset(path, bundle: false)
-            assets.merge(asset.required_assets)
-          end
-        end
-
-        assets.to_a
-      end
-
       def build_dependency_paths(environment, result)
         mtimes = []
 
@@ -87,7 +63,7 @@ module Sprockets
             mtimes << environment.stat(path).mtime
             paths << path
           elsif asset = environment.find_asset(path, bundle: false)
-            mtimes << asset.dependency_mtime
+            mtimes << asset.mtime
             paths.merge(asset.dependency_paths)
           end
         end
