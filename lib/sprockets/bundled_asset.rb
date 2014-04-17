@@ -32,7 +32,7 @@ module Sprockets
       )[:data]
 
       @mtime  = @required_assets.map(&:mtime).max
-      @length = Rack::Utils.bytesize(source)
+      @length = source.bytesize
       @digest = environment.digest.update(source).hexdigest
     end
 
