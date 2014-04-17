@@ -366,6 +366,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.12.1** (April 17, 2014)
+
+* Fix making manifest target directory when its different than the output directory.
+
 **2.12.0** (March 13, 2014)
 
 * Avoid context reference in SassImporter hack so its Marshallable. Fixes
