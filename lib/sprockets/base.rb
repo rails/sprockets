@@ -117,23 +117,6 @@ module Sprockets
       super
     end
 
-    # Internal: Reverse guess logical path for fully expanded path.
-    #
-    # This has some known issues. For an example if a file is
-    # shaddowed in the path, but is required relatively, its logical
-    # path will be incorrect.
-    def logical_path_for(filename)
-      if root_path = paths.detect { |path| filename[path] }
-        path = Pathname.new(filename).relative_path_from(Pathname.new(root_path)).to_s
-        attributes = attributes_for(filename)
-        path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
-        path = "#{path}#{attributes.send(:engine_format_extension)}" unless attributes.format_extension
-        path
-      else
-        raise FileOutsidePaths, "#{filename} isn't in paths: #{paths.join(', ')}"
-      end
-    end
-
     # Finds the expanded real path for a given logical path by
     # searching the environment's paths.
     #
