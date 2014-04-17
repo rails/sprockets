@@ -409,6 +409,12 @@ module EnvironmentTests
     assert_equal "application.js", @env.logical_path_for(fixture_path("default/application.coffee"))
     assert_equal "application.css", @env.logical_path_for(fixture_path("default/application.scss"))
     assert_equal "hello.js", @env.logical_path_for(fixture_path("default/hello.jst.ejs"))
+
+    assert_equal "bower/main.js", @env.logical_path_for(fixture_path("default/bower/main.js"))
+    assert_equal "bower/bower.json", @env.logical_path_for(fixture_path("default/bower/bower.json"))
+
+    assert_equal "coffee/index.js", @env.logical_path_for(fixture_path("default/coffee/index.js"))
+    assert_equal "coffee/foo.js", @env.logical_path_for(fixture_path("default/coffee/foo.coffee"))
   end
 end
 
