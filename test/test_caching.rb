@@ -138,7 +138,7 @@ class TestCaching < Sprockets::TestCase
     end
   end
 
-  test "stale cached asset isn't loaded if depedency is changed and removed" do
+  test "stale cached asset isn't loaded if dependency is changed and removed" do
     foo = fixture_path("default/foo-tmp.js")
     bar = fixture_path("default/bar-tmp.js")
 
@@ -150,8 +150,10 @@ class TestCaching < Sprockets::TestCase
 
       File.open(foo, 'w') { |f| f.puts "foo;" }
       File.unlink(bar)
-      assert_equal "foo;\n", @env1["foo-tmp.js"].to_s
       assert_nil @env2["bar-tmp.js"]
+      assert_raises Sprockets::FileNotFound do
+        @env1["foo-tmp.js"].to_s
+      end
     end
   end
 

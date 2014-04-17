@@ -96,23 +96,6 @@ module FreshnessTests
       refute asset('test.js')
     end
   end
-
-  test "asset if stale if once of its source files is removed" do
-    main = fixture_path('asset/test-main.js')
-    dep  = fixture_path('asset/test-dep.js')
-
-    sandbox main, dep do
-      File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
-      File.open(dep, 'w') { |f| f.write "a;" }
-      assert asset('test-main.js')
-
-      File.unlink(dep)
-
-      assert_raises(Sprockets::FileNotFound) do
-        asset('test-main.js')
-      end
-    end
-  end
 end
 
 class StaticAssetTest < Sprockets::TestCase
@@ -554,6 +537,23 @@ class BundledAssetTest < Sprockets::TestCase
       File.utime(mtime, mtime, image)
 
       refute_equal old_mtime, asset('sprite.css').mtime
+    end
+  end
+
+  test "asset if stale if once of its source files is removed" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
+      File.open(dep, 'w') { |f| f.write "a;" }
+      assert asset('test-main.js')
+
+      File.unlink(dep)
+
+      assert_raises(Sprockets::FileNotFound) do
+        asset('test-main.js')
+      end
     end
   end
 

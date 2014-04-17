@@ -290,11 +290,13 @@ module Sprockets
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if attributes_for(filename).processors.any?
           if options[:bundle] == false
-            circular_call_protection(filename) do
+            circular_call_protection("#{filename}:processed") do
               ProcessedAsset.new(cached, logical_path, filename)
             end
           else
-            BundledAsset.new(cached, logical_path, filename)
+            circular_call_protection("#{filename}:bundle") do
+              BundledAsset.new(cached, logical_path, filename)
+            end
           end
         else
           StaticAsset.new(cached, logical_path, filename)

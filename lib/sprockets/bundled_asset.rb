@@ -15,9 +15,12 @@ module Sprockets
       @required_assets = resolve_dependencies(environment, processed_asset, processed_asset.required_paths) -
         resolve_dependencies(environment, processed_asset, processed_asset.stubbed_paths)
 
-      @dependency_paths  = processed_asset.dependency_paths
-      @dependency_digest = processed_asset.dependency_digest
-      @mtime             = @required_assets.map(&:mtime).max
+      @dependency_paths = Set.new
+      @required_assets.each do |asset|
+        @dependency_paths.merge(asset.required_paths)
+        @dependency_paths.merge(asset.dependency_paths)
+      end
+      @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
 
       # Explode Asset into parts and gather the dependency bodies
       @source = @required_assets.map { |asset| asset.to_s }.join
@@ -29,6 +32,7 @@ module Sprockets
         @source
       )[:data]
 
+      @mtime  = @required_assets.map(&:mtime).max
       @length = Rack::Utils.bytesize(source)
       @digest = environment.digest.update(source).hexdigest
     end

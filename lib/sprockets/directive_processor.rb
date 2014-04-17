@@ -197,7 +197,6 @@ module Sprockets
       #
       def process_require_directive(path)
         filename = resolve(path, content_type: @content_type)
-        @dependency_assets << filename
         @required_paths << filename
       end
 
@@ -241,7 +240,6 @@ module Sprockets
             if subpath == @filename
               next
             elsif stat.file? && @environment.content_type_of(subpath) == @content_type
-              @dependency_assets << subpath
               @required_paths << subpath
             end
           end
@@ -277,7 +275,6 @@ module Sprockets
             end
           end
           required_paths.sort_by(&:to_s).each do |filename|
-            @dependency_assets << filename
             @required_paths << filename
           end
         else
