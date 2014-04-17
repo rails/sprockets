@@ -17,7 +17,6 @@ module Sprockets
 
       @dependency_paths = Set.new
       @required_assets.each do |asset|
-        @dependency_paths.merge(asset.required_paths)
         @dependency_paths.merge(asset.dependency_paths)
       end
       @dependency_digest = environment.dependencies_hexdigest(@dependency_paths)
