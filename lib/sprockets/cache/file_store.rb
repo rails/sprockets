@@ -65,7 +65,7 @@ module Sprockets
         exists = File.exist?(path)
 
         # Write data
-        Utils.atomic_write(path) { |f| Marshal.dump(value, f) }
+        PathUtils.atomic_write(path) { |f| Marshal.dump(value, f) }
 
         # GC if necessary
         @size += 1 unless exists

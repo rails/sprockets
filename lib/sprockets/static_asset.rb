@@ -26,7 +26,7 @@ module Sprockets
       if options[:compress]
         # Open file and run it through `Zlib`
         pathname.open('rb') do |rd|
-          Utils.atomic_write(filename) do |wr|
+          PathUtils.atomic_write(filename) do |wr|
             gz = Zlib::GzipWriter.new(wr, Zlib::BEST_COMPRESSION)
             gz.mtime = mtime.to_i
             buf = ""

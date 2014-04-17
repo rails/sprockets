@@ -166,7 +166,7 @@ module Sprockets
 
       FileUtils.mkdir_p File.dirname(filename)
 
-      Utils.atomic_write(filename) do |f|
+      PathUtils.atomic_write(filename) do |f|
         if options[:compress]
           # Run contents through `Zlib`
           gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)

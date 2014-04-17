@@ -40,6 +40,7 @@ module Sprockets
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
   autoload :LazyProxy,               'sprockets/lazy_proxy'
+  autoload :PathUtils,               'sprockets/path_utils'
   autoload :Utils,                   'sprockets/utils'
 
   # Extend Sprockets module to provide global registry
