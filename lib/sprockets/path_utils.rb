@@ -15,6 +15,27 @@ module Sprockets
     # Include Hike's FileUtils for stat() and entries()
     include Hike::FileUtils
 
+    # Internal: Recursive stat all the files under a directory.
+    #
+    # root  - A String directory
+    #
+    # Returns an Enumerator of [path, stat].
+    def stat_tree(root, &block)
+      return to_enum(__method__, root) unless block_given?
+
+      self.entries(root).sort.each do |entry|
+        path = File.join(root, entry)
+        next unless stat = self.stat(path)
+        yield path, stat
+
+        if stat.directory?
+          stat_tree(path, &block)
+        end
+      end
+
+      nil
+    end
+
     # Define UTF-8 BOM pattern matcher.
     # Avoid using a Regexp literal because it inheirts the files
     # encoding and we want to avoid syntax errors in other interpreters.

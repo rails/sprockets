@@ -66,30 +66,6 @@ module Sprockets
       @trail.stat(path)
     end
 
-    # Recursive stat all the files under a directory.
-    #
-    # root  - A String directory
-    # block - Block called for each entry
-    #   path - String filename
-    #   stat - File::Stat
-    #
-    # Returns nothing.
-    def recursive_stat(root, &block)
-      return to_enum(__method__, root) unless block_given?
-
-      entries(root).sort.each do |entry|
-        path = File.join(root, entry)
-        next unless stat = self.stat(path)
-        yield path, stat
-
-        if stat.directory?
-          recursive_stat(path, &block)
-        end
-      end
-
-      nil
-    end
-
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
     # and shadowed matches.
@@ -125,7 +101,7 @@ module Sprockets
       files = {}
 
       paths.each do |root|
-        recursive_stat(root).each do |path, stat|
+        stat_tree(root).each do |path, stat|
           next unless stat.file?
 
           if logical_path = logical_path_for_filename(path, filters)

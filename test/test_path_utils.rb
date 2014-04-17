@@ -27,6 +27,15 @@ class TestPathUtils < Sprockets::TestCase
     ], entries(FIXTURE_ROOT)
   end
 
+  test "stat tree" do
+    assert_equal 44, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
+    path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first
+    assert_equal fixture_path("default/app"), path
+    assert_kind_of File::Stat, stat
+
+    assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a
+  end
+
   test "read unicode" do
     assert_equal "var foo = \"bar\";\n",
       read_unicode_file(fixture_path('encoding/ascii.js'))

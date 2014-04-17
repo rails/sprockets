@@ -271,7 +271,7 @@ module Sprockets
           @dependency_paths << root.to_s
 
           required_paths = []
-          @environment.recursive_stat(root).each do |pathname, stat|
+          @environment.stat_tree(root).each do |pathname, stat|
             content_type = @environment.content_type_of(pathname)
 
             if pathname.to_s == @filename

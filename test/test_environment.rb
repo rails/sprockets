@@ -283,15 +283,6 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  ENTRIES_IN_PATH = 44
-
-  test "iterate over each entry" do
-    entries = @env.recursive_stat(fixture_path("default")).to_a
-    assert_equal ENTRIES_IN_PATH, entries.length
-
-    assert_equal [], @env.recursive_stat(fixture_path("errors")).to_a
-  end
-
   FILES_IN_PATH = 37
 
   test "iterate over each logical path" do
