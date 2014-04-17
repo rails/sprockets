@@ -40,9 +40,9 @@ module Sprockets
     def init_with(environment, coder)
       super
 
-      @required_assets = coder['required_paths'].map { |filename, digest|
+      @required_assets = coder['required_paths'].map { |filename|
         asset = environment.find_asset(filename, bundle: false)
-        if asset.nil? || asset.digest != digest
+        if asset.nil?
           raise UnserializeError, "asset belongs to a stale environment"
         end
         asset
@@ -56,7 +56,7 @@ module Sprockets
       super
 
       coder['source'] = source
-      coder['required_paths'] = @required_assets.map { |a| [a.filename, a.digest] }
+      coder['required_paths'] = @required_assets.map { |a| a.filename }
     end
 
     # Expand asset into an `Array` of parts.
