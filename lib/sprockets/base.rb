@@ -11,7 +11,8 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils, Paths, Bower, Mime, Processing, Compressing, Engines, Server
+    include PathUtils
+    include Paths, Bower, Mime, Processing, Compressing, Engines, Server
 
     # Returns a `Digest` implementation class.
     #

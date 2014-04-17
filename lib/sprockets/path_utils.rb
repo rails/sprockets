@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'hike/fileutils'
 require 'pathname'
 require 'sprockets/errors'
 require 'tempfile'
@@ -10,6 +11,9 @@ module Sprockets
   # when code actually wants to reference ::FileUtils.
   module PathUtils
     extend self
+
+    # Include Hike's FileUtils for stat() and entries()
+    include Hike::FileUtils
 
     # Define UTF-8 BOM pattern matcher.
     # Avoid using a Regexp literal because it inheirts the files

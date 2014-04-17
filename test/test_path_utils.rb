@@ -5,6 +5,28 @@ require 'sprockets/path_utils'
 class TestPathUtils < Sprockets::TestCase
   include Sprockets::PathUtils
 
+  test "stat" do
+    assert_kind_of File::Stat, stat(FIXTURE_ROOT)
+    refute stat("/tmp/sprockets/missingfile")
+  end
+
+  test "entries" do
+    assert_equal [
+      "asset",
+      "compass",
+      "context",
+      "default",
+      "directives",
+      "encoding",
+      "engines",
+      "errors",
+      "public",
+      "sass",
+      "server",
+      "symlink"
+    ], entries(FIXTURE_ROOT)
+  end
+
   test "read unicode" do
     assert_equal "var foo = \"bar\";\n",
       read_unicode_file(fixture_path('encoding/ascii.js'))
