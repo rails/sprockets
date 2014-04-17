@@ -237,8 +237,8 @@ module Sprockets
 
           @dependency_paths << root.to_s
 
-          @environment.entries(root).each do |pathname|
-            pathname = root.join(pathname)
+          @environment.entries(root).each do |entry|
+            pathname = root.join(entry)
             stat = @environment.stat(pathname)
             content_type = @environment.content_type_of(pathname)
 

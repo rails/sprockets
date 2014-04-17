@@ -77,8 +77,8 @@ module Sprockets
     def recursive_stat(root, &block)
       return to_enum(__method__, root) unless block_given?
 
-      entries(root).sort.each do |filename|
-        path = File.join(root, filename)
+      entries(root).sort.each do |entry|
+        path = File.join(root, entry)
         next unless stat = self.stat(path)
         yield path, stat
 
