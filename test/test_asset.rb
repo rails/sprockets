@@ -68,32 +68,85 @@ module FreshnessTests
     define_method("test_#{name.inspect}", &block)
   end
 
-  test "asset is stale when its contents has changed" do
+  test "modify asset contents" do
     filename = fixture_path('asset/test.js')
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.write "a;" }
-      asset = asset('test.js')
+      write(filename, "a;")
+      asset      = asset('test.js')
       old_digest = asset.digest
+      old_mtime  = asset.mtime
+      assert_equal "a;\n", asset.to_s
 
-      File.open(filename, 'w') { |f| f.write "b;" }
-      mtime = Time.now + 1
-      File.utime(mtime, mtime, filename)
-
-      refute_equal old_digest, asset('test.js').digest
+      write(filename, "b;")
+      asset = asset('test.js')
+      refute_equal old_digest, asset.digest
+      refute_equal old_mtime, asset.mtime
+      assert_equal "b;\n", asset.to_s
     end
   end
 
-  test "asset is stale if the file is removed" do
+  test "remove asset" do
     filename = fixture_path('asset/test.js')
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.write "a;" }
+      write(filename, "a;")
       asset = asset('test.js')
 
       File.unlink(filename)
 
       refute asset('test.js')
+    end
+  end
+
+  test "modify asset's dependency file" do
+    main = fixture_path('asset/test-main.js.erb')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      write(main, "//= depend_on test-dep\n<%= File.read('#{dep}') %>")
+      write(dep, "a;")
+      asset      = asset('test-main.js')
+      old_mtime  = asset.mtime
+      old_digest = asset.digest
+      assert_equal "a;", asset.to_s
+
+      write(dep, "b;")
+      asset = asset('test-main.js')
+      refute_equal old_mtime, asset.mtime
+      refute_equal old_digest, asset.digest
+      assert_equal "b;", asset.to_s
+    end
+  end
+
+  test "remove asset's dependency file" do
+    main = fixture_path('asset/test-main.js')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      write(main, "//= depend_on test-dep\n")
+      write(dep, "a;")
+      asset = asset('test-main.js')
+
+      File.unlink(dep)
+
+      assert_raises(Sprockets::FileNotFound) do
+        asset('test-main.js')
+      end
+    end
+  end
+
+  def write(filename, contents)
+    if File.exist?(filename)
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
+      mtime = File.stat(filename).mtime.to_i + 1
+      File.utime(mtime, mtime, filename)
+    else
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
     end
   end
 end
@@ -306,44 +359,6 @@ class BundledAssetTest < Sprockets::TestCase
       File.utime(mtime, mtime, dep)
 
       refute_equal old_digest, asset('test-main.js').digest
-    end
-  end
-
-  test "asset is stale when one of its dependencies is modified" do
-    main = fixture_path('asset/test-main.js')
-    dep  = fixture_path('asset/test-dep.js')
-
-    sandbox main, dep do
-      File.open(main, 'w') { |f| f.write "//= depend_on test-dep\n" }
-      File.open(dep, 'w') { |f| f.write "a;" }
-      asset = asset('test-main.js')
-      old_mtime = asset.mtime
-      old_digest = asset.digest
-
-      File.open(dep, 'w') { |f| f.write "b;" }
-      mtime = Time.now + 1
-      File.utime(mtime, mtime, dep)
-
-      asset = asset('test-main.js')
-      refute_equal old_mtime, asset.mtime
-      assert_equal old_digest, asset.digest
-    end
-  end
-
-  test "asset is stale when one of its dependencies is removed" do
-    main = fixture_path('asset/test-main.js')
-    dep  = fixture_path('asset/test-dep.js')
-
-    sandbox main, dep do
-      File.open(main, 'w') { |f| f.write "//= depend_on test-dep\n" }
-      File.open(dep, 'w') { |f| f.write "a;" }
-      asset = asset('test-main.js')
-
-      File.unlink(dep)
-
-      assert_raises(Sprockets::FileNotFound) do
-        asset('test-main.js')
-      end
     end
   end
 
