@@ -40,18 +40,6 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Cache `find_asset` calls
-    def find_asset(*args)
-      if asset = super
-        if cached_asset = @asset_cache.get(asset.cache_key)
-          cached_asset
-        else
-          @asset_cache.set(asset.cache_key, asset)
-          asset
-        end
-      end
-    end
-
     protected
       # Cache is immutable, any methods that try to clear the cache
       # should bomb.
@@ -60,21 +48,26 @@ module Sprockets
       end
 
       # Cache asset building in memory and in persisted cache.
-      def build_asset(filename, options)
-        key = "#{self.digest.hexdigest}:asset:#{filename}:#{file_hexdigest(filename)}:#{options[:bundle] ? '1' : '0'}"
+      def build_asset_hash(filename, bundle = true)
+        key = [
+          'asset-hash',
+          self.digest.hexdigest,
+          filename,
+          bundle,
+          file_hexdigest(filename),
+          paths
+        ]
 
-        if asset = Asset.from_hash(self, cache._get(key))
-          paths, digest = asset.send(:dependency_paths), asset.send(:dependency_digest)
+        if hash = cache._get(key)
+          digest, paths = hash.values_at(:dependency_digest, :dependency_paths)
           if dependencies_hexdigest(paths) == digest
-            return asset
+            return hash
           end
         end
 
-        if asset = super
-          hash = {}
-          asset.encode_with(hash)
+        if hash = super
           cache._set(key, hash)
-          return asset
+          return hash
         end
 
         nil

@@ -188,26 +188,6 @@ class StaticAssetTest < Sprockets::TestCase
       refute @env['POW.png']
     end
   end
-
-  test "serializing asset to and from hash" do
-    expected = @asset
-    hash     = {}
-    @asset.encode_with(hash)
-    actual   = Sprockets::Asset.from_hash(@env, hash)
-
-    assert_kind_of Sprockets::StaticAsset, actual
-    assert_equal expected.logical_path, actual.logical_path
-    assert_equal expected.pathname, actual.pathname
-    assert_equal expected.content_type, actual.content_type
-    assert_equal expected.length, actual.length
-    assert_equal expected.digest, actual.digest
-
-    assert_equal expected.to_a, actual.to_a
-    assert_equal expected.to_s, actual.to_s
-
-    assert actual.eql?(expected)
-    assert expected.eql?(actual)
-  end
 end
 
 class ProcessedAssetTest < Sprockets::TestCase
@@ -260,26 +240,6 @@ class ProcessedAssetTest < Sprockets::TestCase
       body << asset.to_s
     end
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
-  end
-
-  test "serializing asset to and from hash" do
-    expected = @asset
-    hash     = {}
-    @asset.encode_with(hash)
-    actual   = Sprockets::Asset.from_hash(@env, hash)
-
-    assert_kind_of Sprockets::ProcessedAsset, actual
-    assert_equal expected.logical_path, actual.logical_path
-    assert_equal expected.pathname, actual.pathname
-    assert_equal expected.content_type, actual.content_type
-    assert_equal expected.length, actual.length
-    assert_equal expected.digest, actual.digest
-
-    assert_equal expected.to_a, actual.to_a
-    assert_equal expected.to_s, actual.to_s
-
-    assert actual.eql?(expected)
-    assert expected.eql?(actual)
   end
 
   def asset(logical_path)
@@ -781,28 +741,6 @@ class BundledAssetTest < Sprockets::TestCase
   test "appends missing semicolons" do
     assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n;\n",
       asset("semicolons.js").to_s
-  end
-
-  test "serializing asset to and from hash" do
-    expected = @asset
-    hash     = {}
-    @asset.encode_with(hash)
-    actual   = Sprockets::Asset.from_hash(@env, hash)
-
-    assert_kind_of Sprockets::BundledAsset, actual
-    assert_equal expected.logical_path, actual.logical_path
-    assert_equal expected.pathname, actual.pathname
-    assert_equal expected.to_s, actual.to_s
-    assert_equal expected.content_type, actual.content_type
-    assert_equal expected.length, actual.length
-    assert_equal expected.bytesize, actual.bytesize
-    assert_equal expected.digest, actual.digest
-
-    assert_equal expected.to_a, actual.to_a
-    assert_equal expected.to_s, actual.to_s
-
-    assert actual.eql?(expected)
-    assert expected.eql?(actual)
   end
 
   test "should not fail if home is not set in environment" do

@@ -8,5 +8,4 @@ module Sprockets
   class FileNotFound            < Error; end
   class FileOutsidePaths        < Error; end
   class NotImplementedError     < Error; end
-  class UnserializeError        < Error; end
 end

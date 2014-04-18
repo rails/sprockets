@@ -7,6 +7,7 @@ require 'sprockets/server'
 require 'sprockets/static_asset'
 require 'json'
 require 'pathname'
+require 'securerandom'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -253,7 +254,27 @@ module Sprockets
       options[:bundle] = true unless options.key?(:bundle)
 
       if filename = resolve_all(path.to_s).first
-        build_asset(filename, options)
+        asset_hash = build_asset_hash(filename, options[:bundle])
+
+        if asset = @asset_cache.get(asset_hash[:_id])
+          return asset
+        end
+
+        asset = case asset_hash[:type]
+        when 'bundled'
+          BundledAsset.new(asset_hash.merge(
+            to_a: asset_hash[:required_paths].map { |f|
+              find_asset(f, bundle: false)
+            }
+          ))
+        when 'processed'
+          ProcessedAsset.new(asset_hash)
+        when 'static'
+          StaticAsset.new(asset_hash)
+        end
+
+        @asset_cache.set(asset_hash[:_id], asset)
+        asset
       end
     end
 
@@ -283,24 +304,113 @@ module Sprockets
         raise NotImplementedError
       end
 
-      def build_asset(filename, options)
-        logical_path = logical_path_for(filename)
+      def build_asset_hash(filename, bundle = true)
+        attributes = {
+          _id: SecureRandom.hex,
+          filename: filename,
+          root: root,
+          logical_path: logical_path_for(filename),
+          content_type: content_type_of(filename)
+        }
 
         # If there are any processors to run on the pathname, use
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if attributes_for(filename).processors.any?
-          if options[:bundle] == false
-            circular_call_protection("#{filename}:processed") do
-              ProcessedAsset.new(cached, logical_path, filename)
+          if bundle == false
+            benchmark "Compiled #{attributes[:logical_path]}" do
+              build_processed_asset_hash(attributes)
             end
           else
-            circular_call_protection("#{filename}:bundle") do
-              BundledAsset.new(cached, logical_path, filename)
+            circular_call_protection(filename) do
+              build_bundled_asset_hash(attributes)
             end
           end
         else
-          StaticAsset.new(cached, logical_path, filename)
+          build_static_asset_hash(attributes)
         end
+      end
+
+      def build_processed_asset_hash(asset)
+        encoding = encoding_for_mime_type(asset[:content_type])
+        data = read_unicode_file(asset[:filename], encoding)
+
+        result = process(
+          attributes_for(asset[:filename]).processors,
+          asset[:filename],
+          data
+        )
+
+        asset.merge(
+          type: 'processed',
+          source: result[:data],
+          length: result[:data].bytesize,
+          digest: digest.update(result[:data]).hexdigest,
+          required_paths: (result[:required_paths] + [asset[:filename]]),
+          stubbed_paths: result[:stubbed_paths].to_a,
+          dependency_paths: result[:dependency_paths].to_a,
+          dependency_digest: dependencies_hexdigest(result[:dependency_paths]),
+          mtime: result[:dependency_paths].map { |path| stat(path).mtime }.max.to_i
+        )
+      end
+
+      def build_bundled_asset_hash(asset)
+        required_paths, stubbed_paths = build_asset_hash(asset[:filename], false).values_at(:required_paths, :stubbed_paths)
+        required_paths  = resolve_bundle_dependencies(asset[:filename], required_paths)
+        stubbed_paths   = resolve_bundle_dependencies(asset[:filename], stubbed_paths)
+        required_paths  = required_paths - stubbed_paths
+
+        dependency_paths = Set.new
+        required_asset_hashes = required_paths.map { |filename|
+          build_asset_hash(filename, false)
+        }
+        required_asset_hashes.each do |h|
+          dependency_paths.merge(h[:dependency_paths])
+        end
+
+        source = process(
+          bundle_processors(asset[:content_type]),
+          asset[:filename],
+          required_asset_hashes.map { |h| h[:source] }.join
+        )[:data]
+
+        asset.merge({
+          type: 'bundled',
+          required_paths: required_paths,
+          dependency_paths: dependency_paths.to_a,
+          dependency_digest: dependencies_hexdigest(dependency_paths),
+          mtime: required_asset_hashes.map { |h| h[:mtime] }.max,
+          source: source,
+          length: source.bytesize,
+          digest: digest.update(source).hexdigest
+        })
+      end
+
+      def resolve_bundle_dependencies(filename, paths)
+        assets = Set.new
+
+        paths.each do |path|
+          if path == filename
+            assets << path
+          elsif self.stat(path) && (asset_hash = build_asset_hash(path, true))
+            assets.merge(asset_hash[:required_paths])
+          else
+            raise FileNotFound, "could not find #{path}"
+          end
+        end
+
+        assets.to_a
+      end
+
+      def build_static_asset_hash(asset)
+        stat = self.stat(asset[:filename])
+        asset.merge({
+          type: 'static',
+          length: stat.size,
+          mtime: stat.mtime.to_i,
+          digest: digest.file(asset[:filename]).hexdigest,
+          dependency_digest: dependencies_hexdigest([asset[:filename]]),
+          dependency_paths: [asset[:filename]]
+        })
       end
 
       def circular_call_protection(path)
@@ -313,6 +423,14 @@ module Sprockets
         yield
       ensure
         Thread.current[:sprockets_circular_calls] = nil if reset
+      end
+
+      def benchmark(message)
+        start_time = Time.now.to_f
+        result = yield
+        elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
+        logger.debug "#{message}  (#{elapsed_time}ms)  (pid #{Process.pid})"
+        result
       end
   end
 end

@@ -1,87 +1,17 @@
+require 'fileutils'
 require 'pathname'
-require 'securerandom'
-require 'set'
-require 'time'
+require 'zlib'
 
 module Sprockets
   # `Asset` is the base class for `BundledAsset` and `StaticAsset`.
   class Asset
-    # Internal initializer to load `Asset` from serialized `Hash`.
-    def self.from_hash(environment, hash)
-      return unless hash.is_a?(Hash)
-
-      klass = case hash['class']
-        when 'BundledAsset'
-          BundledAsset
-        when 'ProcessedAsset'
-          ProcessedAsset
-        when 'StaticAsset'
-          StaticAsset
-        else
-          nil
-        end
-
-      if klass
-        asset = klass.allocate
-        asset.init_with(environment, hash)
-        asset
-      end
-    rescue UnserializeError
-      nil
-    end
-
-    attr_reader :cache_key
     attr_reader :logical_path
     attr_reader :content_type
 
-    def initialize(environment, logical_path, filename)
-      raise ArgumentError, "Asset logical path has no extension: #{logical_path}" if File.extname(logical_path) == ""
-
-      @cache_key    = SecureRandom.hex
-      @root         = environment.root
-      @logical_path = logical_path.to_s
-      @filename     = filename
-      @content_type = environment.content_type_of(filename)
-
-      @dependency_digest = environment.dependencies_hexdigest(dependency_paths)
-    end
-
-    # Initialize `Asset` from serialized `Hash`.
-    def init_with(environment, coder)
-      @root = environment.root
-
-      @cache_key    = coder['cache_key']
-      @logical_path = coder['logical_path']
-      @filename     = coder['filename']
-      @content_type = coder['content_type']
-      @digest       = coder['digest']
-
-      if mtime = coder['mtime']
-        @mtime = mtime
+    def initialize(attributes = {})
+      attributes.each do |name, value|
+        instance_variable_set("@#{name}", value)
       end
-
-      if length = coder['length']
-        # Convert length to an `Integer`
-        @length = Integer(length)
-      end
-
-      @dependency_paths  = Set.new(coder['dependency_paths'])
-      @dependency_digest = coder['dependency_digest']
-    end
-
-    # Copy serialized attributes to the coder object
-    def encode_with(coder)
-      coder['cache_key']    = cache_key
-      coder['class']        = self.class.name.sub(/Sprockets::/, '')
-      coder['logical_path'] = logical_path
-      coder['filename']     = filename
-      coder['content_type'] = content_type
-      coder['mtime']        = @mtime
-      coder['length']       = length
-      coder['digest']       = digest
-
-      coder['dependency_paths']  = dependency_paths.to_a
-      coder['dependency_digest'] = dependency_digest
     end
 
     # Public: Returns String path of asset.
@@ -111,7 +41,7 @@ module Sprockets
     # This allows you to link to individual files for debugging
     # purposes.
     def to_a
-      [self]
+      @to_a ||= [self]
     end
 
     # Public: Return `String` of concatenated source.
@@ -217,13 +147,7 @@ module Sprockets
     end
     alias_method :==, :eql?
 
-    protected
-      # Internal: String paths that are marked as dependencies after processing.
-      #
-      # Default to an `Set` with self.
-      def dependency_paths
-        @dependency_paths ||= Set.new([self.filename])
-      end
-      attr_reader :dependency_digest, :required_paths, :stubbed_paths
+    # TODO: Exposed for directive processor and context.
+    attr_reader :dependency_paths
   end
 end
