@@ -83,12 +83,12 @@ module Sprockets
         if value.nil?
           value = yield
           @cache_wrapper.set(expanded_key, value)
-          @fetch_cache.set(expanded_key, value)
           @logger.debug do
             elapsed = "(#{Utils.ms_since(start_time)}ms)"
             "Sprockets Cache miss #{expanded_key}  #{elapsed}"
           end
         end
+        @fetch_cache.set(expanded_key, value)
       end
       value
     end
