@@ -51,5 +51,10 @@ module Sprockets
 
       digest.hexdigest
     end
+
+    def ms_since(start_time)
+      secs = Time.now.to_f - start_time.to_f
+      (secs * 1000).to_i
+    end
   end
 end

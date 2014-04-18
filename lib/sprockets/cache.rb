@@ -45,15 +45,22 @@ module Sprockets
     # releases though.
     VERSION = '3.0'
 
+    def self.default_logger
+      logger = Logger.new($stderr)
+      logger.level = Logger::FATAL
+      logger
+    end
+
     # Internal: Wrap a backend cache store.
     #
     # Always assign a backend cache store instance to Environment#cache= and
     # use Environment#cache to retreive a wrapped interface.
     #
     # cache - A compatible backend cache store instance.
-    def initialize(cache = nil)
+    def initialize(cache = nil, logger = self.class.default_logger)
       @cache_wrapper = get_cache_wrapper(cache)
       @fetch_cache   = Cache::MemoryStore.new(1024)
+      @logger        = logger
     end
 
     # Public: Prefer API to retrieve and set values in the cache store.
@@ -68,6 +75,7 @@ module Sprockets
     #
     # Returns a JSON serializable object.
     def fetch(key)
+      start_time = Time.now
       expanded_key = expand_key(key)
       value = @fetch_cache.get(expanded_key)
       if value.nil?
@@ -76,6 +84,10 @@ module Sprockets
           value = yield
           @cache_wrapper.set(expanded_key, value)
           @fetch_cache.set(expanded_key, value)
+          @logger.debug do
+            elapsed = "(#{Utils.ms_since(start_time)}ms)"
+            "Sprockets Cache miss #{expanded_key}  #{elapsed}"
+          end
         end
       end
       value

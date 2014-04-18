@@ -96,7 +96,7 @@ module Sprockets
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
       expire_cache!
-      @cache = Cache.new(cache)
+      @cache = Cache.new(cache, logger)
     end
 
     def prepend_path(path)
