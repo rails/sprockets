@@ -5,7 +5,6 @@ require 'sprockets/errors'
 require 'sprockets/processed_asset'
 require 'sprockets/server'
 require 'sprockets/static_asset'
-require 'json'
 require 'pathname'
 require 'securerandom'
 
