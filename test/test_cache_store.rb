@@ -62,7 +62,12 @@ end
 
 class TestNullStore < Sprockets::TestCase
   def setup
+    @_store = Sprockets::Cache::NullStore.new
     @store = Sprockets::Cache.new(Sprockets::Cache::NullStore.new)
+  end
+
+  def test_inspect
+    assert_equal "#<Sprockets::Cache::NullStore>", @_store.inspect
   end
 
   include CacheStoreNullTests
@@ -70,7 +75,12 @@ end
 
 class TestMemoryStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache.new(Sprockets::Cache::MemoryStore.new)
+    @_store = Sprockets::Cache::MemoryStore.new
+    @store = Sprockets::Cache.new(@_store)
+  end
+
+  def test_inspect
+    assert_equal "#<Sprockets::Cache::MemoryStore size=0/1000>", @_store.inspect
   end
 
   include CacheStoreTests
@@ -78,7 +88,12 @@ end
 
 class TestZeroMemoryStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache.new(Sprockets::Cache::MemoryStore.new(0))
+    @_store = Sprockets::Cache::MemoryStore.new(0)
+    @store = Sprockets::Cache.new(@_store)
+  end
+
+  def test_inspect
+    assert_equal "#<Sprockets::Cache::MemoryStore size=0/0>", @_store.inspect
   end
 
   include CacheStoreNullTests
@@ -86,7 +101,12 @@ end
 
 class TestFileStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache.new(Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store")))
+    @_store = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store"))
+    @store = Sprockets::Cache.new(@_store)
+  end
+
+  def test_inspect
+    assert_equal "#<Sprockets::Cache::FileStore size=4/1000>", @_store.inspect
   end
 
   include CacheStoreTests
@@ -94,7 +114,12 @@ end
 
 class TestZeroFileStore < Sprockets::TestCase
   def setup
-    @store = Sprockets::Cache.new(Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store-zero"), 0))
+    @_store = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store-zero"), 0)
+    @store = Sprockets::Cache.new(@_store)
+  end
+
+  def test_inspect
+    assert_equal "#<Sprockets::Cache::FileStore size=0/0>", @_store.inspect
   end
 
   include CacheStoreNullTests

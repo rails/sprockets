@@ -34,6 +34,13 @@ module Sprockets
       def set(key, value)
         value
       end
+
+      # Public: Pretty inspect
+      #
+      # Returns String.
+      def inspect
+        "#<#{self.class}>"
+      end
     end
   end
 end

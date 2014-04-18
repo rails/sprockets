@@ -54,6 +54,13 @@ module Sprockets
         @cache.shift if @cache.size > @max_size
         value
       end
+
+      # Public: Pretty inspect
+      #
+      # Returns String.
+      def inspect
+        "#<#{self.class} size=#{@cache.size}/#{@max_size}>"
+      end
     end
   end
 end

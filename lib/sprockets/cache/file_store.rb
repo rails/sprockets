@@ -74,6 +74,13 @@ module Sprockets
         value
       end
 
+      # Public: Pretty inspect
+      #
+      # Returns String.
+      def inspect
+        "#<#{self.class} size=#{@size}/#{@max_size}>"
+      end
+
       private
         def find_caches
           Dir.glob(File.join(@root, '**/*.cache'))
