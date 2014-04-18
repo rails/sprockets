@@ -6,7 +6,6 @@ require 'sprockets/processed_asset'
 require 'sprockets/server'
 require 'sprockets/static_asset'
 require 'pathname'
-require 'securerandom'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -297,7 +296,6 @@ module Sprockets
         end
 
         attributes = {
-          _id: SecureRandom.hex,
           filename: filename,
           root: root,
           logical_path: logical_path_for(filename),
