@@ -24,8 +24,8 @@ class TestCaching < Sprockets::TestCase
     assert asset1
     assert asset2
 
-    assert asset1.equal?(asset2)
-    assert asset2.equal?(asset1)
+    assert asset1.eql?(asset2)
+    assert asset2.eql?(asset1)
   end
 
   test "same cached instance cache objects are equal" do
@@ -37,8 +37,8 @@ class TestCaching < Sprockets::TestCase
     assert asset1
     assert asset2
 
-    assert asset1.equal?(asset2)
-    assert asset2.equal?(asset1)
+    assert asset1.eql?(asset2)
+    assert asset2.eql?(asset1)
   end
 
   test "same environment instance is cached at logical and expanded path" do
@@ -50,8 +50,8 @@ class TestCaching < Sprockets::TestCase
     assert asset1
     assert asset2
 
-    assert asset1.equal?(asset2)
-    assert asset2.equal?(asset1)
+    assert asset1.eql?(asset2)
+    assert asset2.eql?(asset1)
   end
 
   test "same cached instance is cached at logical and expanded path" do
@@ -63,8 +63,8 @@ class TestCaching < Sprockets::TestCase
     assert asset1
     assert asset2
 
-    assert asset1.equal?(asset2)
-    assert asset2.equal?(asset1)
+    assert asset1.eql?(asset2)
+    assert asset2.eql?(asset1)
   end
 
   test "shared cache objects are eql" do
@@ -77,24 +77,6 @@ class TestCaching < Sprockets::TestCase
     assert asset1.eql?(asset2)
     assert asset2.eql?(asset1)
     assert !asset1.equal?(asset2)
-  end
-
-  test "depedencies are cached" do
-    env = @env1
-
-    parent = env['application.js']
-    assert parent
-
-    child1 = parent.to_a[0]
-
-    assert child1
-    assert_equal 'project.js', child1.logical_path
-
-    child2 = env.find_asset(child1.pathname, :bundle => false)
-    assert child2
-
-    assert child1.equal?(child2)
-    assert child2.equal?(child1)
   end
 
   test "proccessed and bundled assets are cached separately" do

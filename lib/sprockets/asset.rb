@@ -41,7 +41,7 @@ module Sprockets
     # This allows you to link to individual files for debugging
     # purposes.
     def to_a
-      @to_a ||= [self]
+      [self]
     end
 
     # Public: Return `String` of concatenated source.

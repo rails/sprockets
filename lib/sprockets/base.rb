@@ -255,25 +255,14 @@ module Sprockets
       if filename = resolve_all(path.to_s).first
         asset_hash = build_asset_hash(filename, options[:bundle])
 
-        if asset = @asset_cache.get(asset_hash[:_id])
-          return asset
-        end
-
-        asset = case asset_hash[:type]
+        case asset_hash[:type]
         when 'bundled'
-          BundledAsset.new(asset_hash.merge(
-            to_a: asset_hash[:required_paths].map { |f|
-              find_asset(f, bundle: false)
-            }
-          ))
+          BundledAsset.new(asset_hash)
         when 'processed'
           ProcessedAsset.new(asset_hash)
         when 'static'
           StaticAsset.new(asset_hash)
         end
-
-        @asset_cache.set(asset_hash[:_id], asset)
-        asset
       end
     end
 
@@ -295,8 +284,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :asset_cache
-
       # Clear cached environment after mutating state. Must be implemented by
       # the subclass.
       def expire_cache!
@@ -375,6 +362,7 @@ module Sprockets
         asset.merge({
           type: 'bundled',
           required_paths: required_paths,
+          required_asset_hashes: required_asset_hashes,
           dependency_paths: dependency_paths.to_a,
           dependency_digest: dependencies_hexdigest(dependency_paths),
           mtime: required_asset_hashes.map { |h| h[:mtime] }.max,

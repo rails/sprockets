@@ -147,7 +147,7 @@ class TestServer < Sprockets::TestCase
     asset_after = @env["application.js"]
     assert asset_after
 
-    assert asset_before.equal?(asset_after)
+    assert asset_before.eql?(asset_after)
   end
 
   test "fingerprint digest sets expiration to the future" do

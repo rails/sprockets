@@ -73,7 +73,6 @@ module Sprockets
       def expire_cache!
         # Clear digest to be recomputed
         @digest = nil
-        @asset_cache = Cache::MemoryStore.new
       end
   end
 end
