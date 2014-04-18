@@ -307,7 +307,7 @@ module Sprockets
               build_processed_asset_hash(attributes)
             end
           else
-            circular_call_protection(filename) do
+            Utils.prevent_circular_calls(filename) do
               build_bundled_asset_hash(attributes)
             end
           end
@@ -398,18 +398,6 @@ module Sprockets
           dependency_digest: dependencies_hexdigest([asset[:filename]]),
           dependency_paths: [asset[:filename]]
         })
-      end
-
-      def circular_call_protection(path)
-        reset = Thread.current[:sprockets_circular_calls].nil?
-        calls = Thread.current[:sprockets_circular_calls] ||= Set.new
-        if calls.include?(path)
-          raise CircularDependencyError, "#{path} has already been required"
-        end
-        calls << path
-        yield
-      ensure
-        Thread.current[:sprockets_circular_calls] = nil if reset
       end
 
       def benchmark(message)
