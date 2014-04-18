@@ -21,7 +21,7 @@ module Sprockets
     #
     def self.call(input)
       data = input[:data]
-      key  = [::Eco::Source::VERSION, VERSION, data]
+      key  = ['EcoTemplate', ::Eco::Source::VERSION, VERSION, data]
       input[:cache].fetch(key) do
         ::Eco.compile(data)
       end

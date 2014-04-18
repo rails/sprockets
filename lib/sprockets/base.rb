@@ -215,7 +215,7 @@ module Sprockets
         # negligently reset thus appearing as if the file hasn't changed on
         # disk. Also, the mtime is only read to the nearest second. Its
         # also possible the file was updated more than once in a given second.
-        cache.fetch("hexdigest:#{path}:#{stat.mtime.to_i}") do
+        cache.fetch(['file_hexdigest', path, stat.mtime.to_i]) do
           if stat.directory?
             # If its a directive, digest the list of filenames
             Digest::SHA1.hexdigest(self.entries(path).join(','))

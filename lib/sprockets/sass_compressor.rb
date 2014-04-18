@@ -24,6 +24,7 @@ module Sprockets
     def initialize(options = {})
       @options = options
       @cache_key = [
+        'SassCompressor',
         ::Sass::VERSION,
         VERSION,
         JSON.generate(options)

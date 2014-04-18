@@ -24,6 +24,7 @@ module Sprockets
     def initialize(options = {})
       @options = options
       @cache_key = [
+        'YUICompressor',
         ::YUI::Compressor::VERSION,
         VERSION,
         JSON.generate(options)

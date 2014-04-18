@@ -14,7 +14,7 @@ module Sprockets
 
     def self.call(input)
       data = input[:data]
-      key  = [::CoffeeScript::Source.version, VERSION, data]
+      key  = ['CoffeeScriptTemplate', ::CoffeeScript::Source.version, VERSION, data]
       input[:cache].fetch(key) do
         ::CoffeeScript.compile(data)
       end

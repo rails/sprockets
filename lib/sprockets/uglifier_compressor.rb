@@ -34,6 +34,7 @@ module Sprockets
       @uglifier = ::Uglifier.new(options)
 
       @cache_key = [
+        'UglifierCompressor',
         ::Uglifier::VERSION,
         VERSION,
         JSON.generate(options)

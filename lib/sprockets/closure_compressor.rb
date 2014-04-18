@@ -24,6 +24,7 @@ module Sprockets
     def initialize(options = {})
       @compiler = ::Closure::Compiler.new(options)
       @cache_key = [
+        'ClosureCompressor',
         ::Closure::VERSION,
         ::Closure::COMPILER_VERSION,
         VERSION,

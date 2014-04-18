@@ -19,7 +19,7 @@ module Sprockets
     #
     def self.call(input)
       data = input[:data]
-      key  = [VERSION, data]
+      key  = ['EjsTemplate', VERSION, data]
       input[:cache].fetch(key) do
         ::EJS.compile(data)
       end
