@@ -106,7 +106,8 @@ class TestFileStore < Sprockets::TestCase
   end
 
   def test_inspect
-    assert_equal "#<Sprockets::Cache::FileStore size=4/1000>", @_store.inspect
+    store = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store-inspect"))
+    assert_equal "#<Sprockets::Cache::FileStore size=0/1000>", store.inspect
   end
 
   include CacheStoreTests
@@ -119,7 +120,8 @@ class TestZeroFileStore < Sprockets::TestCase
   end
 
   def test_inspect
-    assert_equal "#<Sprockets::Cache::FileStore size=0/0>", @_store.inspect
+    store = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, "sprockets-file-store-inspect"), 0)
+    assert_equal "#<Sprockets::Cache::FileStore size=0/0>", store.inspect
   end
 
   include CacheStoreNullTests
