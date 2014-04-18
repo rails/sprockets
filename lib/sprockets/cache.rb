@@ -85,7 +85,7 @@ module Sprockets
           @cache_wrapper.set(expanded_key, value)
           @logger.debug do
             elapsed = "(#{Utils.ms_since(start_time)}ms)"
-            "Sprockets Cache miss #{expanded_key}  #{elapsed}"
+            "Sprockets Cache miss #{peek_key(key)}  #{elapsed}"
           end
         end
         @fetch_cache.set(expanded_key, value)
@@ -135,6 +135,23 @@ module Sprockets
       # Returns a String with a length less than 250 characters.
       def expand_key(key)
         "sprockets/v#{VERSION}/#{Utils.hexdigest(key)}"
+      end
+
+      PEEK_SIZE = 100
+
+      # Internal: Show first 100 characters of cache key for logging purposes.
+      #
+      # Returns a String with a length less than 100 characters.
+      def peek_key(key)
+        if key.is_a?(String)
+          key[0, PEEK_SIZE].inspect
+        elsif key.is_a?(Array)
+          str = []
+          key.each { |k| str << peek_key(k) }
+          str.join(':')[0, PEEK_SIZE]
+        else
+          peek_key(Utils.hexdigest(key))
+        end
       end
 
       def get_cache_wrapper(cache)
