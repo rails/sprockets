@@ -320,25 +320,15 @@ module Sprockets
       end
 
       def build_processed_asset_hash(asset)
-        encoding = encoding_for_mime_type(asset[:content_type])
-        data = read_unicode_file(asset[:filename], encoding)
+        filename  = asset[:filename]
+        encoding  = encoding_for_mime_type(asset[:content_type])
+        data      = read_unicode_file(filename, encoding)
+        processed = process(attributes_for(filename).processors, filename, data)
 
-        result = process(
-          attributes_for(asset[:filename]).processors,
-          asset[:filename],
-          data
-        )
-
-        asset.merge(
+        asset.merge(processed).merge(
           type: 'processed',
-          source: result[:data],
-          length: result[:data].bytesize,
-          digest: digest.update(result[:data]).hexdigest,
-          required_paths: (result[:required_paths] + [asset[:filename]]),
-          stubbed_paths: result[:stubbed_paths].to_a,
-          dependency_paths: result[:dependency_paths].to_a,
-          dependency_digest: dependencies_hexdigest(result[:dependency_paths]),
-          mtime: result[:dependency_paths].map { |path| stat(path).mtime }.max.to_i
+          dependency_digest: dependencies_hexdigest(processed[:dependency_paths]),
+          mtime: processed[:dependency_paths].map { |path| stat(path).mtime }.max.to_i
         )
       end
 
@@ -369,22 +359,17 @@ module Sprockets
           asset_hash
         end
 
-        source = process(
+        asset.merge(process(
           bundle_processors(asset[:content_type]),
           asset[:filename],
           required_asset_hashes.map { |h| h[:source] }.join
-        )[:data]
-
-        asset.merge({
+        )).merge({
           type: 'bundled',
           required_paths: required_paths.to_a,
           required_asset_hashes: required_asset_hashes,
           dependency_paths: dependency_paths.to_a,
           dependency_digest: dependencies_hexdigest(dependency_paths),
-          mtime: required_asset_hashes.map { |h| h[:mtime] }.max,
-          source: source,
-          length: source.bytesize,
-          digest: digest.update(source).hexdigest
+          mtime: required_asset_hashes.map { |h| h[:mtime] }.max
         })
       end
 

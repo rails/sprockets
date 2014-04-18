@@ -190,11 +190,17 @@ module Sprockets
         end
       end
 
+      unless required_paths.include?(filename)
+        required_paths << filename
+      end
+
       {
-        data: data,
+        source: data,
+        length: data.bytesize,
+        digest: digest.update(data).hexdigest, # FIXME: Avoid Env#digest
         required_paths: required_paths,
-        stubbed_paths: stubbed_paths,
-        dependency_paths: dependency_paths
+        stubbed_paths: stubbed_paths.to_a,
+        dependency_paths: dependency_paths.to_a
       }
     end
 

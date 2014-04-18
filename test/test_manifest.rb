@@ -1,6 +1,7 @@
 require 'sprockets_test'
 require 'fileutils'
 require 'tmpdir'
+require 'securerandom'
 
 class TestManifest < Sprockets::TestCase
   def setup
