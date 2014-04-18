@@ -1,4 +1,5 @@
 require 'sprockets/utils'
+require 'logger'
 
 module Sprockets
   # Public: Wrapper interface to backend cache stores. Ensures a consistent API
@@ -122,6 +123,13 @@ module Sprockets
     # Returns the value argument.
     def _set(key, value)
       @cache_wrapper.set(expand_key(key), value)
+    end
+
+    # Public: Pretty inspect
+    #
+    # Returns String.
+    def inspect
+      "#<#{self.class} local=#{@fetch_cache.inspect} store=#{@cache_wrapper.cache.inspect}>"
     end
 
     private
