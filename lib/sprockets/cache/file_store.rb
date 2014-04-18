@@ -1,5 +1,6 @@
 require 'digest/md5'
 require 'fileutils'
+require 'logger'
 
 module Sprockets
   class Cache
@@ -17,15 +18,25 @@ module Sprockets
       # Internal: Default key limit for store.
       DEFAULT_MAX_SIZE = 1000
 
+      # Internal: Default standard error fatal logger.
+      #
+      # Returns a Logger.
+      def self.default_logger
+        logger = Logger.new($stderr)
+        logger.level = Logger::FATAL
+        logger
+      end
+
       # Public: Initialize the cache store.
       #
       # root     - A String path to a directory to persist cached values to.
       # max_size - A Integer of the maximum number of keys the store will hold.
       #            (default: 1000).
-      def initialize(root, max_size = DEFAULT_MAX_SIZE)
+      def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
         @root = root
         @size = find_caches.size
         @max_size = max_size
+        @logger = logger
       end
 
       # Public: Retrieve value from cache.
@@ -87,6 +98,7 @@ module Sprockets
         end
 
         def gc!
+          start_time = Time.now
           caches = find_caches
 
           new_size = @max_size * 0.75
@@ -97,6 +109,12 @@ module Sprockets
           FileUtils.remove(caches[0, num_to_delete], force: true)
 
           @size = find_caches.size
+
+          @logger.warn do
+            secs = Time.now.to_f - start_time.to_f
+            "#{self.class}[#{@root}] garbage collected " +
+              "#{num_to_delete.to_i} files (#{(secs * 1000).to_i}ms)"
+          end
         end
     end
   end
