@@ -291,6 +291,11 @@ module Sprockets
       end
 
       def build_asset_hash(filename, bundle = true)
+        unless self.stat(filename)
+          # FIXME: Shouldn't need this check.
+          raise FileNotFound, "could not find #{filename}"
+        end
+
         attributes = {
           _id: SecureRandom.hex,
           filename: filename,
@@ -340,17 +345,30 @@ module Sprockets
       end
 
       def build_bundled_asset_hash(asset)
-        required_paths, stubbed_paths = build_asset_hash(asset[:filename], false).values_at(:required_paths, :stubbed_paths)
-        required_paths  = resolve_bundle_dependencies(asset[:filename], required_paths)
-        stubbed_paths   = resolve_bundle_dependencies(asset[:filename], stubbed_paths)
-        required_paths  = required_paths - stubbed_paths
+        processed_asset = build_asset_hash(asset[:filename], false)
+
+        bundled_assets = {}
+
+        required_paths = Set.new
+        processed_asset[:required_paths].each do |path|
+          if path == asset[:filename]
+            required_paths << path
+          else
+            asset_hash = bundled_assets[path] ||= build_asset_hash(path, true)
+            required_paths.merge(asset_hash[:required_paths])
+          end
+        end
+
+        processed_asset[:stubbed_paths].each do |path|
+          asset_hash = bundled_assets[path] ||= build_asset_hash(path, true)
+          required_paths.subtract(asset_hash[:required_paths])
+        end
 
         dependency_paths = Set.new
-        required_asset_hashes = required_paths.map { |filename|
-          build_asset_hash(filename, false)
-        }
-        required_asset_hashes.each do |h|
-          dependency_paths.merge(h[:dependency_paths])
+        required_asset_hashes = required_paths.map do |filename|
+          asset_hash = build_asset_hash(filename, false)
+          dependency_paths.merge(asset_hash[:dependency_paths])
+          asset_hash
         end
 
         source = process(
@@ -361,7 +379,7 @@ module Sprockets
 
         asset.merge({
           type: 'bundled',
-          required_paths: required_paths,
+          required_paths: required_paths.to_a,
           required_asset_hashes: required_asset_hashes,
           dependency_paths: dependency_paths.to_a,
           dependency_digest: dependencies_hexdigest(dependency_paths),
@@ -370,22 +388,6 @@ module Sprockets
           length: source.bytesize,
           digest: digest.update(source).hexdigest
         })
-      end
-
-      def resolve_bundle_dependencies(filename, paths)
-        assets = Set.new
-
-        paths.each do |path|
-          if path == filename
-            assets << path
-          elsif self.stat(path) && (asset_hash = build_asset_hash(path, true))
-            assets.merge(asset_hash[:required_paths])
-          else
-            raise FileNotFound, "could not find #{path}"
-          end
-        end
-
-        assets.to_a
       end
 
       def build_static_asset_hash(asset)
