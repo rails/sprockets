@@ -167,9 +167,11 @@ module Sprockets
       #
       # Returns nothing.
       def resolve_all_logical_paths(logical_path, options = {})
-        content_type = options[:content_type]
+        # FIXME: Fix private send call
+        content_type = attributes_for(logical_path).send(:format_content_type)
+        content_type = options[:content_type] if options[:content_type]
+        # FIXME: Inline attributes_for
         extension = attributes_for(logical_path).format_extension
-        content_type_extension = extension_for_mime_type(content_type)
 
         paths = [logical_path]
 
@@ -185,8 +187,10 @@ module Sprockets
         paths << File.join(path_without_extension, "index#{extension}")
 
         @trail.find_all(*paths, options).each do |path|
-          if File.basename(logical_path) != 'bower.json'
-            path = expand_bower_path(path, extension || content_type_extension) || path
+          expand_bower_path(path) do |bower_path|
+            if content_type.nil? || content_type == content_type_of(bower_path)
+              yield bower_path
+            end
           end
 
           if content_type.nil? || content_type == content_type_of(path)

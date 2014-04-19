@@ -5,26 +5,21 @@ module Sprockets
     # Internal: Expand bower.json path to main.
     #
     # filename - String path to bower.json.
-    # extname  - String extension name ".js", ".css".
     #
     # Returns String path to main file. Otherwise returns nil if filename is
     # not a bower.json
-    def expand_bower_path(filename, extname)
+    def expand_bower_path(filename)
       if File.basename(filename) == "bower.json"
         bower = JSON.parse(File.read(filename), create_additions: false)
 
         case bower['main']
         when String
-          main = bower['main']
+          yield File.expand_path("../#{bower['main']}", filename)
         when Array
-          if extname
-            main = bower['main'].find { |fn| extname == File.extname(fn) }
-          else
-            main = bower['main'].first
+          bower['main'].each do |name|
+            yield File.expand_path("../#{name}", filename)
           end
         end
-
-        File.expand_path("../#{main}", filename) if main
       end
     end
   end

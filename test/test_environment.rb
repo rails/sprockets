@@ -200,6 +200,15 @@ module EnvironmentTests
       @env.resolve("qunit", content_type: 'text/css')
     assert_equal fixture_path('default/qunit/qunit.css'),
       @env.resolve("qunit.css", content_type: 'text/css')
+
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env.resolve("rails")
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env.resolve("rails.js")
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env.resolve("rails", content_type: 'application/javascript')
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env.resolve("rails.js", content_type: 'application/javascript')
   end
 
   test "find bundled asset in environment" do
@@ -283,7 +292,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  FILES_IN_PATH = 37
+  FILES_IN_PATH = 39
 
   test "iterate over each logical path" do
     paths = []

@@ -1,0 +1,4 @@
+{
+  "name": "rails",
+  "main": ["./rails.coffee"]
+}
