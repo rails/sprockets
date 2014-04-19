@@ -74,7 +74,7 @@ module Sprockets
     def call(input)
       @environment = input[:environment]
       @filename = input[:filename]
-      @base_path = Pathname.new(@filename).dirname
+      @base_path = File.dirname(@filename)
       @content_type = input[:content_type]
 
       data = input[:data]
@@ -226,13 +226,13 @@ module Sprockets
       #
       def process_require_directory_directive(path = ".")
         if relative?(path)
-          root = @base_path.join(path).expand_path
+          root = File.expand_path(path, @base_path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          @dependency_paths << root.to_s
+          @dependency_paths << root
 
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
@@ -254,13 +254,13 @@ module Sprockets
       #
       def process_require_tree_directive(path = ".")
         if relative?(path)
-          root = @base_path.join(path).expand_path
+          root = File.expand_path(path, @base_path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          @dependency_paths << root.to_s
+          @dependency_paths << root
 
           required_paths = []
           @environment.stat_tree(root).each do |subpath, stat|

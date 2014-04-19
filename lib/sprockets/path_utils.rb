@@ -15,6 +15,22 @@ module Sprockets
     # Include Hike's FileUtils for stat() and entries()
     include Hike::FileUtils
 
+    # Internal: Check if path is absolute or relative.
+    #
+    # path - String path.
+    #
+    # Returns true if path is absolute, otherwise false.
+    if File::ALT_SEPARATOR
+      # On Windows, ALT_SEPARATOR is \
+      def absolute_path?(path)
+        path[0] == File::SEPARATOR || path[0] == File::ALT_SEPARATOR
+      end
+    else
+      def absolute_path?(path)
+        path[0] == File::SEPARATOR
+      end
+    end
+
     # Internal: Stat all the files under a directory.
     #
     # dir - A String directory
