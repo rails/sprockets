@@ -27,6 +27,11 @@ class TestPathUtils < Sprockets::TestCase
     ], entries(FIXTURE_ROOT)
   end
 
+  test "check absolute path" do
+    assert absolute_path?("/foo.rb")
+    refute absolute_path?("foo.rb")
+  end
+
   test "stat directory" do
     assert_equal 24, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first

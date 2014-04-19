@@ -103,7 +103,7 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      if Pathname.new(path).absolute?
+      if absolute_path?(path)
         if filename = resolve_absolute_path(path, options)
           yield filename
         end

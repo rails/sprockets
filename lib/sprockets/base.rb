@@ -124,7 +124,7 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(path, options = {})
-      if Pathname.new(path).absolute?
+      if absolute_path?(path.to_s)
         unless paths.detect { |root| path[root] }
           raise FileOutsidePaths, "#{path} isn't in paths: #{paths.join(', ')}"
         end
