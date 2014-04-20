@@ -41,15 +41,10 @@ module Sprockets
           digest.update obj.class.name
         when Array
           digest.update obj.class.name
-          obj.each do |e|
-            queue << e
-          end
+          queue.concat(obj)
         when Hash
           digest.update obj.class.name
-          obj.sort.each do |k, v|
-            queue << k
-            queue << v
-          end
+          queue.concat(obj.sort)
         else
           raise TypeError, "can't convert #{obj.inspect} into String"
         end
