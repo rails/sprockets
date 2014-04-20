@@ -74,7 +74,7 @@ module Sprockets
     #
     # TODO: Review API and performance
     def logical_path_for(filename)
-      _, path = paths_split(self.paths, filename)
+      _, path = paths_split(paths, filename)
       if path
         engine_extnames = engine_extensions_for(filename)
         path = engine_extnames.inject(path) { |p, ext| p.sub(ext, '') }
@@ -92,7 +92,7 @@ module Sprockets
         path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
         path
       else
-        raise FileOutsidePaths, "#{filename} isn't in paths: #{paths.join(', ')}"
+        raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
       end
     end
 
@@ -132,7 +132,7 @@ module Sprockets
       return to_enum(__method__) unless block_given?
 
       seen = Set.new
-      paths.each do |root|
+      self.paths.each do |root|
         stat_tree(root).each do |filename, stat|
           if stat.file?
             logical_path = logical_path_for(filename)
@@ -159,12 +159,11 @@ module Sprockets
       # Returns String filename or nil
       def resolve_absolute_path(filename, options = {})
         content_type = options[:content_type]
+        root_path, _ = paths_split(self.paths, filename)
 
-        if paths.detect { |path| filename[path] }
-          if stat(filename)
-            if content_type.nil? || content_type == content_type_of(filename)
-              return filename
-            end
+        if root_path && stat(filename)
+          if content_type.nil? || content_type == content_type_of(filename)
+            return filename
           end
         end
       end

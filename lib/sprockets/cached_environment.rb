@@ -54,7 +54,7 @@ module Sprockets
           filename,
           bundle,
           file_hexdigest(filename),
-          paths
+          self.paths
         ]
 
         if hash = cache._get(key)
