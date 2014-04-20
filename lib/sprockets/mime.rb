@@ -19,10 +19,6 @@ module Sprockets
       @mime_types.dup
     end
 
-    def extension_for_mime_type(type)
-      mime_types.key(type)
-    end
-
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
       ext = Sprockets::Utils.normalize_extension(ext)

@@ -93,7 +93,7 @@ module Sprockets
 
       def engine_format_extension
         if content_type = engine_content_type
-          environment.extension_for_mime_type(content_type)
+          environment.mime_types.key(content_type)
         end
       end
   end

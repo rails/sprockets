@@ -209,7 +209,7 @@ module Sprockets
         @trail.append_extension(ext.to_s)
 
         if mime_type = @engine_mime_types[ext.to_s]
-          if format_ext = extension_for_mime_type(mime_type)
+          if format_ext = mime_types.key(mime_type)
             @trail.alias_extension(ext.to_s, format_ext)
           end
         end
