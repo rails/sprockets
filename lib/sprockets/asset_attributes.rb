@@ -53,13 +53,6 @@ module Sprockets
       engine_extensions.map { |ext| @environment.engines(ext) }
     end
 
-    # Returns all processors to run on the path.
-    def processors
-      environment.preprocessors(content_type) +
-        engines.reverse +
-        environment.postprocessors(content_type)
-    end
-
     # Returns the content type for the pathname. Falls back to `application/octet-stream`.
     def content_type
       @content_type ||= begin

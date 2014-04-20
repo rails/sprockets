@@ -290,23 +290,30 @@ module Sprockets
           raise FileNotFound, "could not find #{filename}"
         end
 
+        content_type = content_type_of(filename)
+
         attributes = {
           filename: filename,
           root: root,
           logical_path: logical_path_for(filename),
-          content_type: content_type_of(filename)
+          content_type: content_type
         }
+
+        processed_processors = preprocessors(content_type) +
+          AssetAttributes.new(self, filename).engines.reverse +
+          postprocessors(content_type)
+        bundled_processors = bundle_processors(content_type)
 
         # If there are any processors to run on the pathname, use
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
-        if AssetAttributes.new(self, filename).processors.any?
+        if processed_processors.any? || bundled_processors.any?
           if bundle == false
             benchmark "Compiled #{attributes[:logical_path]}" do
-              build_processed_asset_hash(attributes)
+              build_processed_asset_hash(attributes, processed_processors)
             end
           else
             Utils.prevent_circular_calls(filename) do
-              build_bundled_asset_hash(attributes)
+              build_bundled_asset_hash(attributes, bundled_processors)
             end
           end
         else
@@ -314,11 +321,11 @@ module Sprockets
         end
       end
 
-      def build_processed_asset_hash(asset)
+      def build_processed_asset_hash(asset, processors)
         filename  = asset[:filename]
         encoding  = encoding_for_mime_type(asset[:content_type])
         data      = read_unicode_file(filename, encoding)
-        processed = process(AssetAttributes.new(self, filename).processors, filename, data)
+        processed = process(processors, filename, data)
 
         asset.merge(processed).merge(
           type: 'processed',
@@ -327,7 +334,7 @@ module Sprockets
         )
       end
 
-      def build_bundled_asset_hash(asset)
+      def build_bundled_asset_hash(asset, processors)
         processed_asset = build_asset_hash(asset[:filename], false)
 
         bundled_assets = {}
@@ -355,7 +362,7 @@ module Sprockets
         end
 
         asset.merge(process(
-          bundle_processors(asset[:content_type]),
+          processors,
           asset[:filename],
           required_asset_hashes.map { |h| h[:source] }.join
         )).merge({
