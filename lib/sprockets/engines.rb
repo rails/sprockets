@@ -38,7 +38,6 @@ module Sprockets
     #
     def engines(ext = nil)
       if ext
-        ext = Sprockets::Utils.normalize_extension(ext)
         @engines[ext]
       else
         @engines.dup
