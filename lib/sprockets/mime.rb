@@ -10,7 +10,6 @@ module Sprockets
       if ext.nil?
         Rack::Mime::MIME_TYPES.merge(@mime_types)
       else
-        ext = Sprockets::Utils.normalize_extension(ext)
         @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
       end
     end
