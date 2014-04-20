@@ -1,26 +1,6 @@
 require 'sprockets_test'
 
 class TestAssetAttributes < Sprockets::TestCase
-  test "format extension" do
-    assert_equal nil, pathname("empty").format_extension
-    assert_equal ".js", pathname("gallery.js").format_extension
-    assert_equal ".js", pathname("application.js.coffee").format_extension
-    assert_equal ".js", pathname("project.js.coffee.erb").format_extension
-    assert_equal ".css", pathname("gallery.css.erb").format_extension
-    assert_equal nil, pathname("gallery.erb").format_extension
-    assert_equal nil, pathname("gallery.foo").format_extension
-    assert_equal ".js", pathname("jquery.js").format_extension
-    assert_equal ".js", pathname("jquery.min.js").format_extension
-    assert_equal ".js", pathname("jquery.tmpl.js").format_extension
-    assert_equal ".js", pathname("jquery.tmpl.min.js").format_extension
-    assert_equal ".js", pathname("jquery.csv.js").format_extension
-    assert_equal ".js", pathname("jquery.csv.min.js").format_extension
-
-    env = Sprockets::Environment.new
-    env.register_engine '.ms', Class.new
-    assert_equal nil, Sprockets::AssetAttributes.new(env, "foo.jst.ms").format_extension
-  end
-
   test "engine extensions" do
     assert_equal [], pathname("empty").engine_extensions
     assert_equal [], pathname("gallery.js").engine_extensions

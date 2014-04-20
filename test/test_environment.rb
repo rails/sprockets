@@ -647,6 +647,26 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
+  test "format extension" do
+    assert_equal nil, @env.format_extension_for("empty")
+    assert_equal ".js", @env.format_extension_for("gallery.js")
+    assert_equal ".js", @env.format_extension_for("application.js.coffee")
+    assert_equal ".js", @env.format_extension_for("project.js.coffee.erb")
+    assert_equal ".css", @env.format_extension_for("gallery.css.erb")
+    assert_equal nil, @env.format_extension_for("gallery.erb")
+    assert_equal nil, @env.format_extension_for("gallery.foo")
+    assert_equal ".js", @env.format_extension_for("jquery.js")
+    assert_equal ".js", @env.format_extension_for("jquery.min.js")
+    assert_equal ".js", @env.format_extension_for("jquery.tmpl.js")
+    assert_equal ".js", @env.format_extension_for("jquery.tmpl.min.js")
+    assert_equal ".js", @env.format_extension_for("jquery.csv.js")
+    assert_equal ".js", @env.format_extension_for("jquery.csv.min.js")
+
+    @env = Sprockets::Environment.new
+    @env.register_engine '.ms', Class.new
+    assert_equal nil, @env.format_extension_for("foo.jst.ms")
+  end
+
   test "content type" do
     assert_equal "application/octet-stream",
       @env.content_type_of("empty")

@@ -18,6 +18,21 @@ module Sprockets
       @trail.extensions - @engines.keys
     end
 
+    # Internal: Returns the format extension.
+    #
+    #     "foo.js.coffee"
+    #     # => ".js"
+    #
+    # TODO: Review API and performance
+    def format_extension_for(filename)
+      File.basename(filename).scan(/\.[^.]+/).reverse_each do |ext|
+        if mime_types(ext) && !engines(ext)
+          return ext
+        end
+      end
+      nil
+    end
+
     # Returns an `Array` of `Processor` classes. If a `mime_type`
     # argument is supplied, the processors registered under that
     # extension will be returned.

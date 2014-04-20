@@ -11,17 +11,6 @@ module Sprockets
       @path = path
     end
 
-    # Returns the format extension.
-    #
-    #     "foo.js.coffee"
-    #     # => ".js"
-    #
-    def format_extension
-      extensions.reverse.detect { |ext|
-        @environment.mime_types(ext) && !@environment.engines(ext)
-      }
-    end
-
     # Returns an `Array` of engine extensions.
     #
     #     "foo.js.coffee.erb"
@@ -30,7 +19,7 @@ module Sprockets
     def engine_extensions
       exts = extensions
 
-      if offset = extensions.index(format_extension)
+      if offset = extensions.index(@environment.format_extension_for(@path))
         exts = extensions[offset+1..-1]
       end
 
@@ -40,7 +29,7 @@ module Sprockets
     # Returns the content type for the filename. Falls back to `application/octet-stream`.
     def content_type
       @content_type ||= begin
-        if format_extension.nil?
+        if @environment.format_extension_for(@path).nil?
           engine_content_type || 'application/octet-stream'
         else
           format_content_type ||
@@ -61,7 +50,8 @@ module Sprockets
       end
 
       def format_content_type
-        format_extension && environment.mime_types(format_extension)
+        ext = @environment.format_extension_for(@path)
+        ext && environment.mime_types(ext)
       end
 
       # Returns implicit engine content type.

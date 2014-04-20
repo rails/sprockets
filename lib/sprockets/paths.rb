@@ -76,7 +76,7 @@ module Sprockets
       if path
         attributes = AssetAttributes.new(self, filename)
         path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
-        path = "#{path}#{attributes.send(:engine_format_extension)}" unless attributes.format_extension
+        path = "#{path}#{attributes.send(:engine_format_extension)}" unless format_extension_for(filename)
         extname = File.extname(path)
         path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
         path
@@ -171,7 +171,7 @@ module Sprockets
         # FIXME: Fix private send call
         content_type = attrs.send(:format_content_type)
         content_type = options[:content_type] if options[:content_type]
-        extension = attrs.format_extension
+        extension = format_extension_for(logical_path)
 
         paths = [logical_path]
 
