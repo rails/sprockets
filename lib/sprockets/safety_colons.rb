@@ -9,17 +9,31 @@ module Sprockets
   #
   #     environment.unregister_postprocessor 'application/javascript', Sprockets::SafetyColons
   #
-  module SafetyColons
+  class SafetyColons
     def self.call(input)
-      data = input[:data]
-
-      # If the file is blank or ends in a semicolon, leave it as is
-      if data =~ /\A\s*\Z/m || data =~ /;\s*\Z/m
-        data
-      else
-        # Otherwise, append a semicolon and newline
-        "#{data};\n"
-      end
+      new.call(input)
     end
+
+    def call(input)
+      data = input[:data]
+      missing_semicolon?(data) ? "#{data};\n" : data
+    end
+
+    private
+      def missing_semicolon?(data)
+        i = data.size - 1
+        while i >= 0
+          c = data[i]
+          i -= 1
+          if c == "\n" || c == " " || c == "\t"
+            next
+          elsif c != ";"
+            return true
+          else
+            return false
+          end
+        end
+        false
+      end
   end
 end
