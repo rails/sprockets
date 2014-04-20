@@ -74,7 +74,7 @@ module Sprockets
     #
     # TODO: Review API and performance
     def logical_path_for(filename)
-      _, path = paths_split(paths, filename)
+      _, path = paths_split(self.paths, filename)
       if path
         engine_extnames = engine_extensions_for(filename)
         path = engine_extnames.inject(path) { |p, ext| p.sub(ext, '') }

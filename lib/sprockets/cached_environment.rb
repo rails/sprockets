@@ -31,6 +31,8 @@ module Sprockets
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
+
+      @paths = @trail.paths
     end
 
     # No-op return self as cached environment.
@@ -38,6 +40,9 @@ module Sprockets
       self
     end
     alias_method :index, :cached
+
+    # Override Base#paths to return our cached @paths.
+    attr_reader :paths
 
     protected
       # Cache is immutable, any methods that try to clear the cache
