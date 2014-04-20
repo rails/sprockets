@@ -72,8 +72,8 @@ module Sprockets
     # shaddowed in the path, but is required relatively, its logical
     # path will be incorrect.
     def logical_path_for(filename)
-      if root_path = paths.detect { |path| filename[path] }
-        path = Pathname.new(filename).relative_path_from(Pathname.new(root_path)).to_s
+      _, path = paths_split(self.paths, filename)
+      if path
         attributes = attributes_for(filename)
         path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
         path = "#{path}#{attributes.send(:engine_format_extension)}" unless attributes.format_extension

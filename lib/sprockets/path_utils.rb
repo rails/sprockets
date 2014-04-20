@@ -31,6 +31,22 @@ module Sprockets
       end
     end
 
+    # Internal: Detect root path and base for file in a set of paths.
+    #
+    # paths    - Array of String paths
+    # filename - String path of file expected to be in one of the paths.
+    #
+    # Returns [String root, String path]
+    def paths_split(paths, filename)
+      paths.each do |path|
+        base = "#{path}#{File::SEPARATOR}"
+        if filename.start_with?(base)
+          return path, filename[base.length..-1]
+        end
+      end
+      nil
+    end
+
     # Internal: Stat all the files under a directory.
     #
     # dir - A String directory

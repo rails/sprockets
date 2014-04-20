@@ -32,6 +32,14 @@ class TestPathUtils < Sprockets::TestCase
     refute absolute_path?("foo.rb")
   end
 
+  test "split paths root from base" do
+    assert_equal [fixture_path("default"), "application.js"],
+      paths_split([fixture_path("default")], fixture_path("default/application.js"))
+    assert_equal [fixture_path("default"), "app/application.js"],
+      paths_split([fixture_path("default")], fixture_path("default/app/application.js"))
+    refute paths_split([fixture_path("default")], fixture_path("other/app/application.js"))
+  end
+
   test "stat directory" do
     assert_equal 24, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
