@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'sprockets_test'
 require 'sprockets/safety_colons'
 
