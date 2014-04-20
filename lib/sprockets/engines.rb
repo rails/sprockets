@@ -68,6 +68,21 @@ module Sprockets
       extensions.select { |ext| engines(ext) }
     end
 
+    # Internal: Returns implicit engine content type.
+    #
+    # `.coffee` files carry an implicit `application/javascript`
+    # content type.
+    #
+    # TODO: Review API and performance
+    def engine_content_type_for(filename)
+      engine_extensions_for(filename).each do |ext|
+        if mime_type = @engine_mime_types[ext]
+          return mime_type
+        end
+      end
+      nil
+    end
+
     # Returns an `Array` of engine extension to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }

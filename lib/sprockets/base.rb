@@ -1,4 +1,3 @@
-require 'sprockets/asset_attributes'
 require 'sprockets/bower'
 require 'sprockets/bundled_asset'
 require 'sprockets/errors'
@@ -235,11 +234,6 @@ module Sprockets
       digest = Digest::SHA1.new
       paths.each { |path| digest.update(file_hexdigest(path).to_s) }
       digest.hexdigest
-    end
-
-    # Internal. Return content type of `path`.
-    def content_type_of(path)
-      AssetAttributes.new(self, path).content_type
     end
 
     # Find asset by logical path or expanded path.

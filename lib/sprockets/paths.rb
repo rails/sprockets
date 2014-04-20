@@ -71,12 +71,18 @@ module Sprockets
     # This has some known issues. For an example if a file is
     # shaddowed in the path, but is required relatively, its logical
     # path will be incorrect.
+    #
+    # TODO: Review API and performance
     def logical_path_for(filename)
       _, path = paths_split(self.paths, filename)
       if path
-        attributes = AssetAttributes.new(self, filename)
         path = engine_extensions_for(filename).inject(path) { |p, ext| p.sub(ext, '') }
-        path = "#{path}#{attributes.send(:engine_format_extension)}" unless format_extension_for(filename)
+
+        unless format_extension_for(filename)
+          extname = mime_types.key(engine_content_type_for(filename))
+          path = "#{path}#{extname}"
+        end
+
         extname = File.extname(path)
         path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
         path
@@ -167,16 +173,14 @@ module Sprockets
       #
       # Returns nothing.
       def resolve_all_logical_paths(logical_path, options = {})
-        attrs = AssetAttributes.new(self, logical_path)
-        # FIXME: Fix private send call
-        content_type = attrs.send(:format_content_type)
+        extname = format_extension_for(logical_path)
+        content_type = mime_types(extname) if extname
         content_type = options[:content_type] if options[:content_type]
-        extension = format_extension_for(logical_path)
 
         paths = [logical_path]
 
-        path_without_extension = extension ?
-          logical_path.sub(extension, '') :
+        path_without_extension = extname ?
+          logical_path.sub(extname, '') :
           logical_path
 
         # optimization: bower.json can only be nested one level deep
@@ -184,7 +188,7 @@ module Sprockets
           paths << File.join(path_without_extension, "bower.json")
         end
 
-        paths << File.join(path_without_extension, "index#{extension}")
+        paths << File.join(path_without_extension, "index#{extname}")
 
         @trail.find_all(*paths, options).each do |path|
           expand_bower_path(path) do |bower_path|

@@ -33,6 +33,16 @@ module Sprockets
       nil
     end
 
+    # Internal. Return content type of `path`.
+    def content_type_of(path)
+      if format_extension_for(path).nil?
+        engine_content_type_for(path) || 'application/octet-stream'
+      else
+        format_ext = format_extension_for(path)
+        mime_types(format_ext) || engine_content_type_for(path) || 'application/octet-stream'
+      end
+    end
+
     # Returns an `Array` of `Processor` classes. If a `mime_type`
     # argument is supplied, the processors registered under that
     # extension will be returned.
