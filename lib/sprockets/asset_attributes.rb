@@ -1,16 +1,14 @@
-require 'pathname'
-
 module Sprockets
   # `AssetAttributes` is a wrapper similar to `Pathname` that provides
   # some helper accessors.
   #
   # These methods should be considered internalish.
   class AssetAttributes
-    attr_reader :environment, :pathname
+    attr_reader :environment
 
     def initialize(environment, path)
       @environment = environment
-      @pathname = path.is_a?(Pathname) ? path : Pathname.new(path.to_s)
+      @path = path
     end
 
     # Returns `Array` of extension `String`s.
@@ -19,7 +17,7 @@ module Sprockets
     #     # => [".js", ".coffee"]
     #
     def extensions
-      @extensions ||= @pathname.basename.to_s.scan(/\.[^.]+/)
+      @extensions ||= File.basename(@path).scan(/\.[^.]+/)
     end
 
     # Returns the format extension.
@@ -53,7 +51,7 @@ module Sprockets
       engine_extensions.map { |ext| @environment.engines(ext) }
     end
 
-    # Returns the content type for the pathname. Falls back to `application/octet-stream`.
+    # Returns the content type for the filename. Falls back to `application/octet-stream`.
     def content_type
       @content_type ||= begin
         if format_extension.nil?
