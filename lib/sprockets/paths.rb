@@ -76,11 +76,16 @@ module Sprockets
     def logical_path_for(filename)
       _, path = paths_split(self.paths, filename)
       if path
-        path = engine_extensions_for(filename).inject(path) { |p, ext| p.sub(ext, '') }
+        engine_extnames = engine_extensions_for(filename)
+        path = engine_extnames.inject(path) { |p, ext| p.sub(ext, '') }
 
         unless format_extension_for(filename)
-          extname = mime_types.key(engine_content_type_for(filename))
-          path = "#{path}#{extname}"
+          engine_extnames.each do |eng_ext|
+            if ext = @trail.aliases[eng_ext]
+              path = "#{path}#{ext}"
+              break
+            end
+          end
         end
 
         extname = File.extname(path)

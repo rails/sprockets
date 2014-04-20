@@ -83,7 +83,7 @@ module Sprockets
       nil
     end
 
-    # Returns an `Array` of engine extension to mime types.
+    # Internal: Returns a `Hash` of engine extensions to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }
     def engine_mime_types
