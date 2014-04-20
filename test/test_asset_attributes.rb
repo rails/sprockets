@@ -31,7 +31,7 @@ class TestAssetAttributes < Sprockets::TestCase
 
     env = Sprockets::Environment.new
     env.register_engine '.ms', Class.new
-    assert_equal nil, env.attributes_for("foo.jst.ms").format_extension
+    assert_equal nil, Sprockets::AssetAttributes.new(env, "foo.jst.ms").format_extension
   end
 
   test "engine extensions" do
@@ -52,7 +52,7 @@ class TestAssetAttributes < Sprockets::TestCase
 
     env = Sprockets::Environment.new
     env.register_engine '.ms', Class.new
-    assert_equal [".jst", ".ms"], env.attributes_for("foo.jst.ms").engine_extensions
+    assert_equal [".jst", ".ms"], Sprockets::AssetAttributes.new(env, "foo.jst.ms").engine_extensions
   end
 
   test "content type" do
@@ -74,13 +74,13 @@ class TestAssetAttributes < Sprockets::TestCase
     env = Sprockets::Environment.new
     env.register_engine '.haml', proc {}, mime_type: 'text/html'
     env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
-    assert_equal "application/javascript", env.attributes_for("foo.ngt.haml").content_type
+    assert_equal "application/javascript", Sprockets::AssetAttributes.new(env, "foo.ngt.haml").content_type
   end
 
   private
     def pathname(path)
       env = Sprockets::Environment.new
       env.append_path fixture_path("default")
-      env.attributes_for(path)
+      Sprockets::AssetAttributes.new(env, path)
     end
 end

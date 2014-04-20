@@ -74,7 +74,7 @@ module Sprockets
     def logical_path_for(filename)
       _, path = paths_split(self.paths, filename)
       if path
-        attributes = attributes_for(filename)
+        attributes = AssetAttributes.new(self, filename)
         path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
         path = "#{path}#{attributes.send(:engine_format_extension)}" unless attributes.format_extension
         extname = File.extname(path)
@@ -167,11 +167,11 @@ module Sprockets
       #
       # Returns nothing.
       def resolve_all_logical_paths(logical_path, options = {})
+        attrs = AssetAttributes.new(self, logical_path)
         # FIXME: Fix private send call
-        content_type = attributes_for(logical_path).send(:format_content_type)
+        content_type = attrs.send(:format_content_type)
         content_type = options[:content_type] if options[:content_type]
-        # FIXME: Inline attributes_for
-        extension = attributes_for(logical_path).format_extension
+        extension = attrs.format_extension
 
         paths = [logical_path]
 

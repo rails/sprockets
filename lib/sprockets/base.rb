@@ -237,14 +237,9 @@ module Sprockets
       digest.hexdigest
     end
 
-    # Internal. Return a `AssetAttributes` for `path`.
-    def attributes_for(path)
-      AssetAttributes.new(self, path)
-    end
-
     # Internal. Return content type of `path`.
     def content_type_of(path)
-      attributes_for(path).content_type
+      AssetAttributes.new(self, path).content_type
     end
 
     # Find asset by logical path or expanded path.
@@ -304,7 +299,7 @@ module Sprockets
 
         # If there are any processors to run on the pathname, use
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
-        if attributes_for(filename).processors.any?
+        if AssetAttributes.new(self, filename).processors.any?
           if bundle == false
             benchmark "Compiled #{attributes[:logical_path]}" do
               build_processed_asset_hash(attributes)
@@ -323,7 +318,7 @@ module Sprockets
         filename  = asset[:filename]
         encoding  = encoding_for_mime_type(asset[:content_type])
         data      = read_unicode_file(filename, encoding)
-        processed = process(attributes_for(filename).processors, filename, data)
+        processed = process(AssetAttributes.new(self, filename).processors, filename, data)
 
         asset.merge(processed).merge(
           type: 'processed',
