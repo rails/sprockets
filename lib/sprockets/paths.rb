@@ -159,9 +159,7 @@ module Sprockets
       # Returns String filename or nil
       def resolve_absolute_path(filename, options = {})
         content_type = options[:content_type]
-        root_path, _ = paths_split(self.paths, filename)
-
-        if root_path && stat(filename)
+        if paths_split(self.paths, filename) && stat(filename)
           if content_type.nil? || content_type == content_type_of(filename)
             return filename
           end
