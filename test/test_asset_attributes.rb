@@ -55,28 +55,6 @@ class TestAssetAttributes < Sprockets::TestCase
     assert_equal [".jst", ".ms"], Sprockets::AssetAttributes.new(env, "foo.jst.ms").engine_extensions
   end
 
-  test "content type" do
-    assert_equal "application/octet-stream",
-      pathname("empty").content_type
-    assert_equal "application/javascript",
-      pathname("gallery.js").content_type
-    assert_equal "application/javascript",
-      pathname("application.js.coffee").content_type
-    assert_equal "application/javascript",
-      pathname("project.js.coffee.erb").content_type
-    assert_equal "text/css",
-      pathname("gallery.css.erb").content_type
-    assert_equal "application/javascript",
-      pathname("jquery.tmpl.min.js").content_type
-    assert_equal "application/javascript",
-      pathname("application.coffee").content_type
-
-    env = Sprockets::Environment.new
-    env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
-    assert_equal "application/javascript", Sprockets::AssetAttributes.new(env, "foo.ngt.haml").content_type
-  end
-
   private
     def pathname(path)
       env = Sprockets::Environment.new

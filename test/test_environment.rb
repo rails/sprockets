@@ -646,6 +646,28 @@ class TestEnvironment < Sprockets::TestCase
         "Expected #{logical_path.inspect} to resolve to #{filename}."
     end
   end
+
+  test "content type" do
+    assert_equal "application/octet-stream",
+      @env.content_type_of("empty")
+    assert_equal "application/javascript",
+      @env.content_type_of("gallery.js")
+    assert_equal "application/javascript",
+      @env.content_type_of("application.js.coffee")
+    assert_equal "application/javascript",
+      @env.content_type_of("project.js.coffee.erb")
+    assert_equal "text/css",
+      @env.content_type_of("gallery.css.erb")
+    assert_equal "application/javascript",
+      @env.content_type_of("jquery.tmpl.min.js")
+    assert_equal "application/javascript",
+      @env.content_type_of("application.coffee")
+
+    @env = Sprockets::Environment.new
+    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
+    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
+    assert_equal "application/javascript", @env.content_type_of("foo.ngt.haml")
+  end
 end
 
 class TestCached < Sprockets::TestCase
