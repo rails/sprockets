@@ -24,29 +24,35 @@ module Sprockets
 
     # Internal: Generate a hexdigest for a nested JSON serializable object.
     #
-    # obj    - A JSON serializable object.
-    # digest - Digest instance to modify
+    # obj - A JSON serializable object.
     #
     # Returns a String SHA1 digest of the object.
-    def hexdigest(obj, digest = ::Digest::SHA1.new)
-      case obj
-      when String, Symbol, Integer
-        digest.update "#{obj.class}"
-        digest.update "#{obj}"
-      when TrueClass, FalseClass, NilClass
-        digest.update "#{obj.class}"
-      when Array
-        digest.update "#{obj.class}"
-        obj.each do |e|
-          hexdigest(e, digest)
+    def hexdigest(obj)
+      digest = ::Digest::SHA1.new
+      queue = [obj]
+
+      while queue.length > 0
+        obj = queue.shift
+        case obj
+        when String, Symbol, Integer
+          digest.update obj.class.name
+          digest.update obj.to_s
+        when TrueClass, FalseClass, NilClass
+          digest.update obj.class.name
+        when Array
+          digest.update obj.class.name
+          obj.each do |e|
+            queue << e
+          end
+        when Hash
+          digest.update obj.class.name
+          obj.sort.each do |k, v|
+            queue << k
+            queue << v
+          end
+        else
+          raise TypeError, "can't convert #{obj.inspect} into String"
         end
-      when Hash
-        digest.update "#{obj.class}"
-        obj.map { |(k, v)| hexdigest([k, v]) }.sort.each do |e|
-          digest.update(e)
-        end
-      else
-        raise TypeError, "can't convert #{obj.inspect} into String"
       end
 
       digest.hexdigest
