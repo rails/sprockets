@@ -299,8 +299,9 @@ module Sprockets
           content_type: content_type
         }
 
+        engine_exts = AssetAttributes.new(self, filename).engine_extensions
         processed_processors = preprocessors(content_type) +
-          AssetAttributes.new(self, filename).engines.reverse +
+          engine_exts.map { |ext| engines(ext) }.reverse +
           postprocessors(content_type)
         bundled_processors = bundle_processors(content_type)
 

@@ -46,11 +46,6 @@ module Sprockets
       exts.select { |ext| @environment.engines(ext) }
     end
 
-    # Returns engine classes.
-    def engines
-      engine_extensions.map { |ext| @environment.engines(ext) }
-    end
-
     # Returns the content type for the filename. Falls back to `application/octet-stream`.
     def content_type
       @content_type ||= begin
