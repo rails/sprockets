@@ -75,7 +75,7 @@ module Sprockets
       _, path = paths_split(self.paths, filename)
       if path
         attributes = AssetAttributes.new(self, filename)
-        path = attributes.engine_extensions.inject(path) { |p, ext| p.sub(ext, '') }
+        path = engine_extensions_for(filename).inject(path) { |p, ext| p.sub(ext, '') }
         path = "#{path}#{attributes.send(:engine_format_extension)}" unless format_extension_for(filename)
         extname = File.extname(path)
         path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'

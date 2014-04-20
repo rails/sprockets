@@ -52,6 +52,22 @@ module Sprockets
       @engines.keys
     end
 
+    # Internal: Returns an `Array` of engine extensions.
+    #
+    #     "foo.js.coffee.erb"
+    #     # => [".coffee", ".erb"]
+    #
+    # TODO: Review API and performance
+    def engine_extensions_for(filename)
+      extensions = File.basename(filename).scan(/\.[^.]+/)
+
+      if offset = extensions.index(format_extension_for(filename))
+        extensions = extensions[offset+1..-1]
+      end
+
+      extensions.select { |ext| engines(ext) }
+    end
+
     # Returns an `Array` of engine extension to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }
