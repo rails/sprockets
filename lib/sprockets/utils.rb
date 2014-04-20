@@ -28,29 +28,40 @@ module Sprockets
     #
     # Returns a String SHA1 digest of the object.
     def hexdigest(obj)
-      digest = ::Digest::SHA1.new
+      buf   = ""
       queue = [obj]
 
       while queue.length > 0
         obj = queue.shift
-        case obj
-        when String, Symbol, Integer
-          digest.update obj.class.name
-          digest.update obj.to_s
-        when TrueClass, FalseClass, NilClass
-          digest.update obj.class.name
-        when Array
-          digest.update obj.class.name
+        klass = obj.class
+
+        if klass == String
+          buf << 'String'
+          buf << obj
+        elsif klass == Symbol
+          buf << 'Symbol'
+          buf << obj.to_s
+        elsif klass == Fixnum
+          buf << 'Fixnum'
+          buf << obj.to_s
+        elsif klass == TrueClass
+          buf << 'TrueClass'
+        elsif klass == FalseClass
+          buf << 'FalseClass'
+        elsif klass == NilClass
+          buf << 'NilClass'
+        elsif klass == Array
+          buf << 'Array'
           queue.concat(obj)
-        when Hash
-          digest.update obj.class.name
+        elsif klass == Hash
+          buf << 'Hash'
           queue.concat(obj.sort)
         else
-          raise TypeError, "can't convert #{obj.inspect} into String"
+          raise TypeError, "couldn't digest #{klass}"
         end
       end
 
-      digest.hexdigest
+      ::Digest::SHA1.hexdigest(buf)
     end
 
     # Internal: Halt when recursive circular call is detected.

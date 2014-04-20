@@ -32,7 +32,7 @@ module Sprockets
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
 
-      @paths = @trail.paths
+      @paths = @trail.paths.to_a.freeze
     end
 
     # No-op return self as cached environment.
