@@ -1,19 +1,6 @@
 require 'sprockets_test'
 
 class TestAssetAttributes < Sprockets::TestCase
-  test "extensions" do
-    assert_equal [],
-      pathname("empty").extensions
-    assert_equal [".js"],
-      pathname("gallery.js").extensions
-    assert_equal [".js", ".coffee"],
-      pathname("application.js.coffee").extensions
-    assert_equal [".js", ".coffee", ".erb"],
-      pathname("project.js.coffee.erb").extensions
-    assert_equal [".css", ".erb"],
-      pathname("gallery.css.erb").extensions
-  end
-
   test "format extension" do
     assert_equal nil, pathname("empty").format_extension
     assert_equal ".js", pathname("gallery.js").format_extension

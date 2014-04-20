@@ -11,15 +11,6 @@ module Sprockets
       @path = path
     end
 
-    # Returns `Array` of extension `String`s.
-    #
-    #     "foo.js.coffee"
-    #     # => [".js", ".coffee"]
-    #
-    def extensions
-      @extensions ||= File.basename(@path).scan(/\.[^.]+/)
-    end
-
     # Returns the format extension.
     #
     #     "foo.js.coffee"
@@ -60,6 +51,15 @@ module Sprockets
     end
 
     private
+      # Returns `Array` of extension `String`s.
+      #
+      #     "foo.js.coffee"
+      #     # => [".js", ".coffee"]
+      #
+      def extensions
+        @extensions ||= File.basename(@path).scan(/\.[^.]+/)
+      end
+
       def format_content_type
         format_extension && environment.mime_types(format_extension)
       end
