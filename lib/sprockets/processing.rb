@@ -231,11 +231,11 @@ module Sprockets
 
     private
       def add_engine_to_trail(ext)
-        @trail.append_extension(ext.to_s)
+        @trail.append_extension(ext)
 
-        if mime_type = @engine_mime_types[ext.to_s]
+        if mime_type = @engine_mime_types[ext]
           if format_ext = mime_types.key(mime_type)
-            @trail.alias_extension(ext.to_s, format_ext)
+            @trail.alias_extension(ext, format_ext)
           end
         end
       end

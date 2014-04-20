@@ -152,7 +152,7 @@ module Sprockets
       # Overrides the global behavior to expire the cache
       expire_cache!
       super
-      add_engine_to_trail(ext)
+      add_engine_to_trail(ext.to_s)
     end
 
     def register_preprocessor(mime_type, klass, &block)
