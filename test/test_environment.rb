@@ -40,24 +40,6 @@ module EnvironmentTests
     end
   end
 
-  test "engine extensions" do
-    ["coffee", "erb", "sass", "scss"].each do |ext|
-      assert @env.engine_extensions.include?(".#{ext}")
-    end
-    ["css", "js"].each do |ext|
-      assert !@env.engine_extensions.include?(".#{ext}")
-    end
-  end
-
-  test "format extensions" do
-    ["css", "js"].each do |ext|
-      assert @env.format_extensions.include?(".#{ext}")
-    end
-    ["coffee", "erb", "sass", "scss"].each do |ext|
-      assert !@env.format_extensions.include?(".#{ext}")
-    end
-  end
-
   test "eco templates" do
     asset = @env["goodbye.jst"]
     context = ExecJS.compile(asset.to_s)

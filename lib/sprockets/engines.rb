@@ -44,14 +44,6 @@ module Sprockets
       end
     end
 
-    # Returns an `Array` of engine extension `String`s.
-    #
-    #     environment.engine_extensions
-    #     # => ['.coffee', '.sass', ...]
-    def engine_extensions
-      @engines.keys
-    end
-
     # Internal: Returns a `Hash` of engine extensions to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }

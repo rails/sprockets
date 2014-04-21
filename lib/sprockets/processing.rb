@@ -9,15 +9,6 @@ module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    # Returns an `Array` of format extension `String`s.
-    #
-    #     format_extensions
-    #     # => ['.js', '.css']
-    #
-    def format_extensions
-      @trail.extensions - @engines.keys
-    end
-
     # Internal: Returns the format extension and `Array` of engine extensions.
     #
     #     "foo.js.coffee.erb"
