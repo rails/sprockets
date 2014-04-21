@@ -51,10 +51,9 @@ module Sprockets
     #
     # path - String
     #
-    # Returns an Enumerator of String extnames.
+    # Returns an Array of String extnames.
     def path_reverse_extnames(path)
-      # TODO: Optimize iteration
-      File.basename(path).scan(/\.[^.]+/).reverse.to_enum
+      File.basename(path).scan(/\.[^.]+/).reverse
     end
 
     # Internal: Stat all the files under a directory.
