@@ -112,9 +112,10 @@ module Sprockets
       #     [[1, "require", "foo"], [2, "require", "bar"]]
       #
       def extract_directives(header)
+        processed_header = ""
         directives = []
 
-        header = header.lines.each_with_index.map do |line, index|
+        header.lines.each_with_index do |line, index|
           if directive = line[DIRECTIVE_PATTERN, 1]
             name, *args = Shellwords.shellwords(directive)
             if respond_to?("process_#{name}_directive", true)
@@ -123,10 +124,10 @@ module Sprockets
               line = "\n"
             end
           end
-          line
+          processed_header << line
         end
 
-        return header.join.chomp, directives
+        return processed_header.chomp, directives
       end
 
       # Gathers comment directives in the source and processes them.
