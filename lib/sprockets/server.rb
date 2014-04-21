@@ -65,12 +65,12 @@ module Sprockets
       logger.error "Error compiling asset #{path}:"
       logger.error "#{e.class.name}: #{e.message}"
 
-      case content_type_of(path)
-      when "application/javascript"
+      case File.extname(path)
+      when ".js"
         # Re-throw JavaScript asset exceptions to the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
         return javascript_exception_response(e)
-      when "text/css"
+      when ".css"
         # Display CSS asset exceptions in the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
         return css_exception_response(e)
