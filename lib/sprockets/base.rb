@@ -123,15 +123,13 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(path, options = {})
-      if absolute_path?(path.to_s)
-        unless paths_split(self.paths, path)
-          raise FileOutsidePaths, "#{path} isn't in paths: #{self.paths.join(', ')}"
-        end
-      end
-
       if filename = resolve_all(path, options).first
         filename
       else
+        if absolute_path?(path.to_s) && !paths_split(self.paths, path)
+          raise FileOutsidePaths, "#{path} isn't in paths: #{self.paths.join(', ')}"
+        end
+
         content_type = options[:content_type]
         message = "couldn't find file '#{path}'"
         message << " with content type '#{content_type}'" if content_type
