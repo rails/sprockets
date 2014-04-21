@@ -72,33 +72,31 @@ module Sprockets
     end
 
     def call(input)
-      @environment = input[:environment]
-      @filename = input[:filename]
-      @base_path = File.dirname(@filename)
+      @environment  = input[:environment]
+      @filename     = input[:filename]
+      @base_path    = File.dirname(@filename)
       @content_type = input[:content_type]
 
-      data = input[:data]
-      @header = data[HEADER_PATTERN, 0] || ""
-      @body   = $' || data
+      data   = input[:data]
+      header = data[HEADER_PATTERN, 0] || ""
+      body   = $' || data
       # Ensure body ends in a new line
-      @body  += "\n" if @body != "" && @body !~ /\n\Z/m
-
-      @result = ""
-      @result.force_encoding(@body.encoding)
-
-      @has_written_body = false
+      body  += "\n" if body != "" && body !~ /\n\Z/m
 
       @required_paths   = []
       @stubbed_paths    = Set.new
       @dependency_paths = Set.new
 
-      @processed_header, directives = extract_directives(@header)
-
+      header, directives = extract_directives(header)
       process_directives(directives)
-      process_source
+
+      result = ""
+      result.force_encoding(body.encoding)
+      result << header << "\n" unless header.empty?
+      result << body
 
       {
-        data: @result,
+        data: result,
         required_paths: @required_paths,
         stubbed_paths: @stubbed_paths,
         dependency_paths: @dependency_paths
@@ -164,16 +162,6 @@ module Sprockets
         end
       end
 
-      def process_source
-        unless @has_written_body || @processed_header.empty?
-          @result << @processed_header << "\n"
-        end
-
-        unless @has_written_body
-          @result << @body
-        end
-      end
-
       # The `require` directive functions similar to Ruby's own `require`.
       # It provides a way to declare a dependency on a file in your path
       # and ensures its only loaded once before the source file.
@@ -208,13 +196,10 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        if @has_written_body
+        if @required_paths.include?(@filename)
           raise ArgumentError, "require_self can only be called once per source file"
         end
-
         @required_paths << @filename
-        process_source
-        @has_written_body = true
       end
 
       # `require_directory` requires all the files inside a single
