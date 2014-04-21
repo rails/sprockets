@@ -10,6 +10,10 @@ module Sprockets
       @_block = block
     end
 
+    def call(input)
+      __getobj__.call(input)
+    end
+
     def __getobj__
       @_obj ||= @_block.call
     end
