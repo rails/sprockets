@@ -320,6 +320,7 @@ module Sprockets
         processed = process(
           processors,
           filename,
+          asset[:logical_path],
           asset[:content_type],
           data
         )
@@ -361,6 +362,7 @@ module Sprockets
         asset.merge(process(
           processors,
           asset[:filename],
+          asset[:logical_path],
           asset[:content_type],
           required_asset_hashes.map { |h| h[:source] }.join
         )).merge({

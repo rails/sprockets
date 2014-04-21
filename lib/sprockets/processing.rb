@@ -194,9 +194,7 @@ module Sprockets
     # Internal: Run processors on filename and data.
     #
     # Returns Hash.
-    def process(processors, filename, content_type, data)
-      logical_path = logical_path_for(filename)
-
+    def process(processors, filename, logical_path, content_type, data)
       input = {
         environment: self,
         cache: cache,
