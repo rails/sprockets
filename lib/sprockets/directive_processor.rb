@@ -92,7 +92,9 @@ module Sprockets
       @stubbed_paths    = Set.new
       @dependency_paths = Set.new
 
-      process_directives
+      @processed_header, directives = extract_directives(@header)
+
+      process_directives(directives)
       process_source
 
       {
@@ -103,35 +105,32 @@ module Sprockets
       }
     end
 
-    # Returns the header String with any directives stripped.
-    def processed_header
-      lineno = 0
-      @processed_header ||= @header.lines.map { |line|
-        lineno += 1
-        # Replace directive line with a clean break
-        directives.assoc(lineno) ? "\n" : line
-      }.join.chomp
-    end
-
-    # Returns an Array of directive structures. Each structure
-    # is an Array with the line number as the first element, the
-    # directive name as the second element, followed by any
-    # arguments.
-    #
-    #     [[1, "require", "foo"], [2, "require", "bar"]]
-    #
-    def directives
-      @directives ||= @header.lines.each_with_index.map { |line, index|
-        if directive = line[DIRECTIVE_PATTERN, 1]
-          name, *args = Shellwords.shellwords(directive)
-          if respond_to?("process_#{name}_directive", true)
-            [index + 1, name, *args]
-          end
-        end
-      }.compact
-    end
-
     protected
+      # Returns an Array of directive structures. Each structure
+      # is an Array with the line number as the first element, the
+      # directive name as the second element, followed by any
+      # arguments.
+      #
+      #     [[1, "require", "foo"], [2, "require", "bar"]]
+      #
+      def extract_directives(header)
+        directives = []
+
+        header = header.lines.each_with_index.map do |line, index|
+          if directive = line[DIRECTIVE_PATTERN, 1]
+            name, *args = Shellwords.shellwords(directive)
+            if respond_to?("process_#{name}_directive", true)
+              directives << [index + 1, name, *args]
+              # Replace directive line with a clean break
+              line = "\n"
+            end
+          end
+          line
+        end
+
+        return header.join.chomp, directives
+      end
+
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
       # automatically be available. This makes it easy to extend the
@@ -154,7 +153,7 @@ module Sprockets
       #     env.unregister_processor('text/css', Sprockets::DirectiveProcessor)
       #     env.register_processor('text/css', DirectiveProcessor)
       #
-      def process_directives
+      def process_directives(directives)
         directives.each do |line_number, name, *args|
           begin
             send("process_#{name}_directive", *args)
@@ -166,8 +165,8 @@ module Sprockets
       end
 
       def process_source
-        unless @has_written_body || processed_header.empty?
-          @result << processed_header << "\n"
+        unless @has_written_body || @processed_header.empty?
+          @result << @processed_header << "\n"
         end
 
         unless @has_written_body
