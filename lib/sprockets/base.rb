@@ -288,7 +288,6 @@ module Sprockets
 
         attributes = {
           filename: filename,
-          root: root,
           logical_path: logical_path_for(filename),
           content_type: content_type
         }
