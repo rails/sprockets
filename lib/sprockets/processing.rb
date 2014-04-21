@@ -18,24 +18,36 @@ module Sprockets
       @trail.extensions - @engines.keys
     end
 
-    # Internal: Returns the format extension.
+    # Internal: Returns the format extension and `Array` of engine extensions.
     #
-    #     "foo.js.coffee"
-    #     # => ".js"
+    #     "foo.js.coffee.erb"
+    #     # => { format: ".js",
+    #            engines: [".coffee", ".erb"] }
     #
     # TODO: Review API and performance
-    def format_extension_for(filename)
-      File.basename(filename).scan(/\.[^.]+/).reverse_each do |ext|
-        if mime_types(ext) && !engines(ext)
-          return ext
+    def extensions_for(path)
+      extnames = File.basename(path).scan(/\.[^.]+/)
+
+      format_extname  = nil
+      engine_extnames = []
+
+      extnames.reverse_each do |ext|
+        if engines(ext)
+          engine_extnames << ext
+        elsif mime_types(ext)
+          format_extname = ext
+          break
         end
       end
-      nil
+
+      engine_extnames.reverse!
+
+      { format: format_extname, engines: engine_extnames }
     end
 
     # Internal. Return content type of `path`.
     def content_type_of(path)
-      if format_ext = format_extension_for(path)
+      if format_ext = extensions_for(path)[:format]
         mime_types(format_ext) || engine_content_type_for(path) || 'application/octet-stream'
       else
         engine_content_type_for(path) || 'application/octet-stream'
