@@ -103,6 +103,7 @@ module Sprockets
     # the target asset's dependencies.
     def depend_on_asset(path)
       if asset = @environment.find_asset(resolve(path))
+        # TODO: Expose public api for getting asset's dependency paths
         @_dependency_paths.merge(asset.send(:dependency_paths))
       end
       nil
