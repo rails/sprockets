@@ -300,9 +300,14 @@ module Sprockets
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if processed_processors.any? || bundled_processors.any?
           if bundle == false
-            benchmark "Compiled #{attributes[:logical_path]}" do
-              build_processed_asset_hash(attributes, processed_processors)
+            start = Utils.benchmark_start
+            asset = build_processed_asset_hash(attributes, processed_processors)
+            logger.debug do
+              ms  = "(#{Utils.benchmark_end(start)}ms)"
+              pid = "(pid #{Process.pid})"
+              "Compiled #{attributes[:logical_path]}  #{ms}  #{pid}"
             end
+            asset
           else
             Utils.prevent_circular_calls(filename) do
               build_bundled_asset_hash(attributes, bundled_processors)
@@ -385,14 +390,6 @@ module Sprockets
           dependency_digest: dependencies_hexdigest([asset[:filename]]),
           dependency_paths: [asset[:filename]]
         })
-      end
-
-      def benchmark(message)
-        start_time = Time.now.to_f
-        result = yield
-        elapsed_time = ((Time.now.to_f - start_time) * 1000).to_i
-        logger.debug "#{message}  (#{elapsed_time}ms)  (pid #{Process.pid})"
-        result
       end
   end
 end

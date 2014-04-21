@@ -261,10 +261,12 @@ module Sprockets
       # Basic wrapper around Environment#find_asset. Logs compile time.
       def find_asset(logical_path)
         asset = nil
-        ms = benchmark do
-          asset = environment.find_asset(logical_path)
+        start = Utils.benchmark_start
+        asset = environment.find_asset(logical_path)
+        logger.debug do
+          ms = "(#{Utils.benchmark_end(start)}ms)"
+          "Compiled #{logical_path}  #{ms}"
         end
-        logger.debug "Compiled #{logical_path}  (#{ms}ms)"
         asset
       end
 
@@ -293,12 +295,6 @@ module Sprockets
           logger.level = Logger::FATAL
           logger
         end
-      end
-
-      def benchmark
-        start_time = Time.now.to_f
-        yield
-        ((Time.now.to_f - start_time) * 1000).to_i
       end
   end
 end

@@ -81,9 +81,12 @@ module Sprockets
       Thread.current[:sprockets_circular_calls] = nil if calls.empty?
     end
 
-    def ms_since(start_time)
-      secs = Time.now.to_f - start_time.to_f
-      (secs * 1000).to_i
+    def benchmark_start
+      Time.now.to_f
+    end
+
+    def benchmark_end(start_time)
+      ((Time.now.to_f - start_time) * 1000).to_i
     end
   end
 end
