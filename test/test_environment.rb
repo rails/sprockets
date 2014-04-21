@@ -655,7 +655,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "content type" do
-    assert_equal "application/octet-stream",
+    assert_equal nil,
       @env.content_type_of("empty")
     assert_equal "application/javascript",
       @env.content_type_of("gallery.js")

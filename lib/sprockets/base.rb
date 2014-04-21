@@ -282,7 +282,7 @@ module Sprockets
           raise FileNotFound, "could not find #{filename}"
         end
 
-        content_type = content_type_of(filename)
+        content_type = content_type_of(filename) || 'application/octet-stream'
 
         attributes = {
           filename: filename,

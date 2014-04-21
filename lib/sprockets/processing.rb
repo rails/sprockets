@@ -42,7 +42,7 @@ module Sprockets
       if format_ext = extnames[:format]
         return mime_types(format_ext)
       end
-      engine_content_type_for(extnames[:engines]) || 'application/octet-stream'
+      engine_content_type_for(extnames[:engines])
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`
