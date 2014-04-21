@@ -317,7 +317,12 @@ module Sprockets
         filename  = asset[:filename]
         encoding  = encoding_for_mime_type(asset[:content_type])
         data      = read_unicode_file(filename, encoding)
-        processed = process(processors, filename, data)
+        processed = process(
+          processors,
+          filename,
+          asset[:content_type],
+          data
+        )
 
         asset.merge(processed).merge(
           type: 'processed',
@@ -356,6 +361,7 @@ module Sprockets
         asset.merge(process(
           processors,
           asset[:filename],
+          asset[:content_type],
           required_asset_hashes.map { |h| h[:source] }.join
         )).merge({
           type: 'bundled',
