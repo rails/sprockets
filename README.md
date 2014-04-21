@@ -303,12 +303,6 @@ reference files relative to the location of the current file.
 specified by *path*. If the file is required multiple times, it will
 appear in the bundle only once.
 
-### The `include` Directive ###
-
-`include` *path* works like `require`, but inserts the contents of the
-specified source file even if it has already been included or
-required.
-
 ### The `require_directory` Directive ###
 
 `require_directory` *path* requires all source files of the same
@@ -324,7 +318,7 @@ directory specified by *path*.
 ### The `require_self` Directive ###
 
 `require_self` tells Sprockets to insert the body of the current
-source file before any subsequent `require` or `include` directives.
+source file before any subsequent `require` directives.
 
 ### The `depend_on` Directive ###
 
@@ -365,6 +359,7 @@ submit a pull request.
 **3.0.0**
 
 * Removed builtin support for LESS.
+* Removed include directive support.
 
 **2.12.1** (April 17, 2014)
 
