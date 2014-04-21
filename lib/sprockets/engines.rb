@@ -52,21 +52,6 @@ module Sprockets
       @engines.keys
     end
 
-    # Internal: Returns implicit engine content type.
-    #
-    # `.coffee` files carry an implicit `application/javascript`
-    # content type.
-    #
-    # TODO: Review API and performance
-    def engine_content_type_for(path)
-      extensions_for(path)[:engines].each do |ext|
-        if mime_type = @engine_mime_types[ext]
-          return mime_type
-        end
-      end
-      nil
-    end
-
     # Internal: Returns a `Hash` of engine extensions to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }
@@ -96,6 +81,19 @@ module Sprockets
     end
 
     private
+      # Internal: Returns implicit engine content type.
+      #
+      # `.coffee` files carry an implicit `application/javascript`
+      # content type.
+      def engine_content_type_for(extnames)
+        extnames.each do |extname|
+          if mime_type = @engine_mime_types[extname]
+            return mime_type
+          end
+        end
+        nil
+      end
+
       def deep_copy_hash(hash)
         initial = Hash.new { |h, k| h[k] = [] }
         hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }

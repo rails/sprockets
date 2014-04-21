@@ -46,12 +46,14 @@ module Sprockets
     end
 
     # Internal. Return content type of `path`.
+    #
+    # TODO: Review API and performance
     def content_type_of(path)
-      if format_ext = extensions_for(path)[:format]
-        mime_types(format_ext) || engine_content_type_for(path) || 'application/octet-stream'
-      else
-        engine_content_type_for(path) || 'application/octet-stream'
+      extnames = extensions_for(path)
+      if format_ext = extnames[:format]
+        return mime_types(format_ext)
       end
+      engine_content_type_for(extnames[:engines]) || 'application/octet-stream'
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`
