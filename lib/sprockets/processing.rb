@@ -35,11 +35,10 @@ module Sprockets
 
     # Internal. Return content type of `path`.
     def content_type_of(path)
-      if format_extension_for(path).nil?
-        engine_content_type_for(path) || 'application/octet-stream'
-      else
-        format_ext = format_extension_for(path)
+      if format_ext = format_extension_for(path)
         mime_types(format_ext) || engine_content_type_for(path) || 'application/octet-stream'
+      else
+        engine_content_type_for(path) || 'application/octet-stream'
       end
     end
 

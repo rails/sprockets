@@ -7,10 +7,10 @@ module Sprockets
     #
     # If an `ext` is given, it will lookup the mime type for that extension.
     def mime_types(ext = nil)
-      if ext.nil?
-        Rack::Mime::MIME_TYPES.merge(@mime_types)
-      else
+      if ext
         @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
+      else
+        Rack::Mime::MIME_TYPES.merge(@mime_types)
       end
     end
 
