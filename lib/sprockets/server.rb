@@ -1,5 +1,5 @@
 require 'time'
-require 'uri'
+require 'rack/utils'
 
 module Sprockets
   # `Server` is a concern mixed into `Environment` and
@@ -26,7 +26,7 @@ module Sprockets
       msg = "Served asset #{env['PATH_INFO']} -"
 
       # Extract the path from everything after the leading slash
-      path = unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
       # URLs containing a `".."` are rejected for security reasons.
       if forbidden_request?(path)
@@ -218,20 +218,6 @@ module Sprockets
       #
       def path_fingerprint(path)
         path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
-      end
-
-      # URI.unescape is deprecated on 1.9. We need to use URI::Parser
-      # if its available.
-      if defined? URI::DEFAULT_PARSER
-        def unescape(str)
-          str = URI::DEFAULT_PARSER.unescape(str)
-          str.force_encoding(Encoding.default_internal) if Encoding.default_internal
-          str
-        end
-      else
-        def unescape(str)
-          URI.unescape(str)
-        end
       end
 
       # Helper to quote the assets digest for use as an ETag.
