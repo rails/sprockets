@@ -216,9 +216,9 @@ module Sprockets
           case result
           when Hash
             data = result[:data]
-            Array(result[:required_paths]).each { |p| required_paths << p }
-            Array(result[:stubbed_paths]).each { |p| stubbed_paths << p }
-            Array(result[:dependency_paths]).each { |p| dependency_paths << p }
+            required_paths.concat(Array(result[:required_paths]))
+            stubbed_paths.merge(Array(result[:stubbed_paths]))
+            dependency_paths.merge(Array(result[:dependency_paths]))
           when String
             data = result
           else
