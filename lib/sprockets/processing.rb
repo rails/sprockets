@@ -196,13 +196,11 @@ module Sprockets
     # Returns Hash.
     def process(processors, filename, data)
       logical_path = logical_path_for(filename)
-      root_path, _ = paths_split(self.paths, filename)
 
       input = {
         environment: self,
         cache: cache,
         filename: filename,
-        root_path: root_path,
         logical_path: logical_path.chomp(File.extname(logical_path)),
         content_type: content_type_of(filename),
         data: data

@@ -27,8 +27,10 @@ module Sprockets
       @environment  = input[:environment]
       @root_path    = input[:root_path]
       @logical_path = input[:logical_path]
-      @pathname     = Pathname.new(input[:filename])
+      @filename     = input[:filename]
+      @pathname     = Pathname.new(@filename)
       @content_type = input[:content_type]
+      @root_path, _ = @environment.paths_split(@environment.paths, @filename)
 
       @_required_paths   = []
       @_stubbed_paths    = Set.new
