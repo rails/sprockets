@@ -17,16 +17,14 @@ module Sprockets
     #
     # TODO: Review API and performance
     def extensions_for(path)
-      extnames = File.basename(path).scan(/\.[^.]+/)
-
       format_extname  = nil
       engine_extnames = []
 
-      extnames.reverse_each do |ext|
-        if engines(ext)
-          engine_extnames << ext
-        elsif mime_types(ext)
-          format_extname = ext
+      path_reverse_extnames(path).each do |extname|
+        if engines(extname)
+          engine_extnames << extname
+        elsif mime_types(extname)
+          format_extname = extname
           break
         end
       end

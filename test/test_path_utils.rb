@@ -40,6 +40,16 @@ class TestPathUtils < Sprockets::TestCase
     refute paths_split([fixture_path("default")], fixture_path("other/app/application.js"))
   end
 
+  test "path reverse extensions enumerator" do
+    assert_equal [".txt"], path_reverse_extnames("hello.txt").to_a
+    assert_equal [".txt"], path_reverse_extnames("sub/hello.txt").to_a
+    assert_equal [".txt"], path_reverse_extnames("sub.dir/hello.txt").to_a
+    assert_equal [".js"], path_reverse_extnames("jquery.js").to_a
+    assert_equal [".js", ".min"], path_reverse_extnames("jquery.min.js").to_a
+    assert_equal [".erb", ".js"], path_reverse_extnames("jquery.js.erb").to_a
+    assert_equal [".erb", ".js", ".min"], path_reverse_extnames("jquery.min.js.erb").to_a
+  end
+
   test "stat directory" do
     assert_equal 24, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
