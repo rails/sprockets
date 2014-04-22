@@ -29,8 +29,6 @@ module Sprockets
       if charset
         # If there was a charset, move it to the top
         "@charset \"#{charset}\";#{filtered_data}"
-      else
-        data
       end
     end
   end

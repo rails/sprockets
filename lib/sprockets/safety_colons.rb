@@ -16,7 +16,9 @@ module Sprockets
 
     def call(input)
       data = input[:data]
-      missing_semicolon?(data) ? "#{data};\n" : data
+      if missing_semicolon?(data)
+        data + ";\n"
+      end
     end
 
     private

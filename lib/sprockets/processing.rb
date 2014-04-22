@@ -201,6 +201,8 @@ module Sprockets
         begin
           result = processor.call(input.merge(data: data))
           case result
+          when NilClass
+            # noop
           when Hash
             data = result[:data]
             required_paths.concat(Array(result[:required_paths]))
