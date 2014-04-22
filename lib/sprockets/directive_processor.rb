@@ -36,6 +36,8 @@ module Sprockets
   #     env.register_processor('text/css', MyProcessor)
   #
   class DirectiveProcessor
+    VERSION = '1'
+
     # Directives will only be picked up if they are in the header
     # of the source file. C style (/* */), JavaScript (//), and
     # Ruby (#) comments are supported.
@@ -77,33 +79,33 @@ module Sprockets
       @base_path    = File.dirname(@filename)
       @content_type = input[:content_type]
 
-      data   = input[:data]
-      header = data[HEADER_PATTERN, 0] || ""
-      body   = $' || data
-      # Ensure body ends in a new line
-      body  += "\n" if body != "" && body !~ /\n\Z/m
+      data = input[:data]
+      cache_key = ['DirectiveProcessor', VERSION, data]
+      result = input[:cache].fetch(cache_key) do
+        process_source(data)
+      end
 
-      @required_paths   = []
-      @stubbed_paths    = Set.new
-      @dependency_paths = Set.new
-
-      header, directives = extract_directives(header)
-      process_directives(directives)
-
-      result = ""
-      result.force_encoding(body.encoding)
-      result << header << "\n" unless header.empty?
-      result << body
-
-      {
-        data: result,
-        required_paths: @required_paths,
-        stubbed_paths: @stubbed_paths,
-        dependency_paths: @dependency_paths
-      }
+      data, directives = result.values_at(:data, :directives)
+      process_directives(directives).merge(data: data)
     end
 
     protected
+      def process_source(source)
+        header = source[HEADER_PATTERN, 0] || ""
+        body   = $' || source
+
+        header, directives = extract_directives(header)
+
+        data = ""
+        data.force_encoding(body.encoding)
+        data << header << "\n" unless header.empty?
+        data << body
+        # Ensure body ends in a new line
+        data << "\n" if data.length > 0 && data[-1] != "\n"
+
+        { data: data, directives: directives }
+      end
+
       # Returns an Array of directive structures. Each structure
       # is an Array with the line number as the first element, the
       # directive name as the second element, followed by any
@@ -153,6 +155,10 @@ module Sprockets
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives(directives)
+        @required_paths   = []
+        @stubbed_paths    = Set.new
+        @dependency_paths = Set.new
+
         directives.each do |line_number, name, *args|
           begin
             send("process_#{name}_directive", *args)
@@ -161,6 +167,10 @@ module Sprockets
             raise e
           end
         end
+
+        { required_paths: @required_paths,
+          stubbed_paths: @stubbed_paths,
+          dependency_paths: @dependency_paths }
       end
 
       # The `require` directive functions similar to Ruby's own `require`.
