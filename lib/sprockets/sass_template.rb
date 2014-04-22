@@ -1,4 +1,7 @@
+require 'base64'
+require 'rack/utils'
 require 'sass'
+require 'set'
 
 module Sprockets
   # Template engine class for the SASS/SCSS compiler. Depends on the `sass` gem.
@@ -39,6 +42,8 @@ module Sprockets
     def call(input)
       context = input[:environment].context_class.new(input)
 
+      dependencies = Set.new
+
       options = {
         filename: input[:filename],
         syntax: self.class.syntax,
@@ -46,7 +51,8 @@ module Sprockets
         load_paths: input[:environment].paths,
         sprockets: {
           context: context,
-          environment: input[:environment]
+          environment: input[:environment],
+          dependencies: dependencies
         }
       }
 
@@ -54,11 +60,11 @@ module Sprockets
       css = engine.render
 
       # Track all imported files
-      dependency_paths = engine.dependencies.map do |dependency|
-        dependency.options[:filename]
+      engine.dependencies.map do |dependency|
+        dependencies << dependency.options[:filename]
       end
 
-      context.to_hash.merge(data: css, dependency_paths: dependency_paths)
+      context.to_hash.merge(data: css, dependency_paths: dependencies)
     end
   end
 
@@ -89,74 +95,89 @@ module Sprockets
     end
   end
 
+  # Internal: Functions injected into Sass environment.
   module SassFunctions
     def asset_path(path)
-      Sass::Script::String.new(sprockets_context.asset_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value), :string)
     end
 
     def asset_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.asset_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value) + ")")
     end
 
     def image_path(path)
-      Sass::Script::String.new(sprockets_context.image_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value, type: :image), :string)
     end
 
     def image_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.image_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :image) + ")")
     end
 
     def video_path(path)
-      Sass::Script::String.new(sprockets_context.video_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value, type: :video), :string)
     end
 
     def video_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.video_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :video) + ")")
     end
 
     def audio_path(path)
-      Sass::Script::String.new(sprockets_context.audio_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value, type: :audio), :string)
     end
 
     def audio_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.audio_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :audio) + ")")
     end
 
     def font_path(path)
-      Sass::Script::String.new(sprockets_context.font_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value, type: :font), :string)
     end
 
     def font_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.font_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :font) + ")")
     end
 
     def javascript_path(path)
-      Sass::Script::String.new(sprockets_context.javascript_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value, type: :javascript), :string)
     end
 
     def javascript_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.javascript_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :javascript) + ")")
     end
 
     def stylesheet_path(path)
-      Sass::Script::String.new(sprockets_context.stylesheet_path(path.value), :string)
+      Sass::Script::String.new(sprockets_asset_path(path.value, type: :stylesheet), :string)
     end
 
     def stylesheet_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.stylesheet_path(path.value) + ")")
+      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :stylesheet) + ")")
     end
 
     def asset_data_url(path)
-      Sass::Script::String.new("url(" + sprockets_context.asset_data_uri(path.value) + ")")
+      # TODO: Only find static assets
+      if asset = sprockets_environment.find_asset(path.value)
+        sprockets_dependencies << asset.filename
+        base64 = Base64.strict_encode64(asset.to_s)
+        url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
+        Sass::Script::String.new("url(" + url + ")")
+      end
     end
 
     protected
+      def sprockets_asset_path(path, options = {})
+        sprockets_context.asset_path(path, options)
+      end
+
       def sprockets_context
         options[:sprockets][:context]
       end
 
       def sprockets_environment
         options[:sprockets][:environment]
+      end
+
+      def sprockets_dependencies
+        options[:sprockets][:dependencies]
       end
   end
 end
