@@ -11,13 +11,15 @@ module Sprockets
       new.call(*args)
     end
 
-    def initialize
+    def initialize(options = {})
       unless ::Sass::Script::Functions < Sprockets::SassFunctions
         # Install custom functions. It'd be great if this didn't need to
         # be installed globally, but could be passed into Engine as an
         # option.
         ::Sass::Script::Functions.send :include, Sprockets::SassFunctions
       end
+
+      @cache_version = options[:cache_version]
     end
 
     def call(input)
@@ -26,7 +28,7 @@ module Sprockets
       options = {
         filename: input[:filename],
         syntax: self.class.syntax,
-        cache_store: SassCacheStore.new(input[:cache]),
+        cache_store: SassCacheStore.new(input[:cache], @cache_version),
         load_paths: input[:environment].paths,
         sprockets: {
           context: context,
@@ -56,16 +58,16 @@ module Sprockets
   class SassCacheStore < ::Sass::CacheStores::Base
     VERSION = '1'
 
-    def initialize(cache)
-      @cache = cache
+    def initialize(cache, version)
+      @cache, @version = cache, "#{VERSION}/#{version}"
     end
 
     def _store(key, version, sha, contents)
-      @cache._set("#{VERSION}/#{version}/#{key}/#{sha}", contents)
+      @cache._set("#{@version}/#{version}/#{key}/#{sha}", contents)
     end
 
     def _retrieve(key, version, sha)
-      @cache._get("#{VERSION}/#{version}/#{key}/#{sha}")
+      @cache._get("#{@version}/#{version}/#{key}/#{sha}")
     end
 
     def path_to(key)
