@@ -146,7 +146,7 @@ module Sprockets
     def asset_data_uri(path)
       depend_on_asset(path)
       asset  = environment.find_asset(path)
-      base64 = Base64.encode64(asset.to_s).gsub(/\s+/, "")
+      base64 = Base64.strict_encode64(asset.to_s)
       "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
     end
 
