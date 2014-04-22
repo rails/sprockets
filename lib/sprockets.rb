@@ -25,7 +25,6 @@ module Sprockets
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SafetyColons,            'sprockets/safety_colons'
   autoload :SassCompressor,          'sprockets/sass_compressor'
-  autoload :SassFunctions,           'sprockets/sass_functions'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
   autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
