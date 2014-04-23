@@ -61,6 +61,11 @@ module Sprockets
 
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'
+  register_mime_type 'text/coffeescript', '.coffee'
+  register_mime_type 'text/eco', '.eco'
+  register_mime_type 'text/ejs', '.ejs'
+  register_mime_type 'text/sass', '.sass'
+  register_mime_type 'text/scss', '.scss'
 
   register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
   register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
