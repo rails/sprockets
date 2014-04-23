@@ -223,7 +223,7 @@ module Sprockets
       {
         source: data,
         length: data.bytesize,
-        digest: digest.update(data).hexdigest, # FIXME: Avoid Env#digest
+        digest: digest_class.hexdigest(data),
         required_paths: required_paths,
         stubbed_paths: stubbed_paths.to_a,
         dependency_paths: dependency_paths.to_a

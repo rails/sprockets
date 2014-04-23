@@ -358,6 +358,7 @@ submit a pull request.
 
 **3.0.0**
 
+* Environment#version no longer affects asset digests. Only used for busting the asset cache.
 * Removed builtin support for LESS.
 * Removed include directive support.
 

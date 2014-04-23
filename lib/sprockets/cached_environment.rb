@@ -21,7 +21,6 @@ module Sprockets
       @context_class     = environment.context_class
       @cache             = environment.cache
       @trail             = environment.trail.cached
-      @digest            = environment.digest
       @digest_class      = environment.digest_class
       @version           = environment.version
       @mime_types        = environment.mime_types

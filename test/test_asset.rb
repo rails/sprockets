@@ -15,7 +15,7 @@ module AssetTests
   end
 
   test "digest is source digest" do
-    assert_equal @env.digest.update(@asset.to_s).hexdigest, @asset.digest
+    assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
   end
 
   test "length is source length" do

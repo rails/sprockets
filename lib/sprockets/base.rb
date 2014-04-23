@@ -49,27 +49,6 @@ module Sprockets
       @version = version
     end
 
-    # Returns a `Digest` instance for the `Environment`.
-    #
-    # This value serves two purposes. If two `Environment`s have the
-    # same digest value they can be treated as equal. This is more
-    # useful for comparing environment states between processes rather
-    # than in the same. Two equal `Environment`s can share the same
-    # cached assets.
-    #
-    # The value also provides a seed digest for all `Asset`
-    # digests. Any change in the environment digest will affect all of
-    # its assets.
-    def digest
-      # Compute the initial digest using the implementation class. The
-      # Sprockets release version and custom environment version are
-      # mixed in. So any new releases will affect all your assets.
-      @digest ||= digest_class.new.update(version.to_s)
-
-      # Returned a dupped copy so the caller can safely mutate it with `.update`
-      @digest.dup
-    end
-
     # Get and set `Logger` instance.
     attr_accessor :logger
 
@@ -386,7 +365,7 @@ module Sprockets
           type: 'static',
           length: stat.size,
           mtime: stat.mtime.to_i,
-          digest: digest.file(asset[:filename]).hexdigest,
+          digest: digest_class.file(asset[:filename]).hexdigest,
           dependency_digest: dependencies_hexdigest([asset[:filename]]),
           dependency_paths: [asset[:filename]]
         })

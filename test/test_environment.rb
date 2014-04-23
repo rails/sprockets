@@ -492,25 +492,10 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env.css_compressor
   end
 
-  test "changing digest implementation class" do
-    old_digest = @env.digest
+  test "changing version doesn't affect the assets digest" do
     old_asset_digest = @env["gallery.js"].digest
-
-    @env.digest_class = Digest::MD5
-    @env.version = 'md5'
-
-    assert old_digest != @env.digest
-    assert old_asset_digest != @env["gallery.js"].digest
-  end
-
-  test "changing digest version" do
-    old_digest = @env.digest
-    old_asset_digest = @env["gallery.js"].digest
-
     @env.version = 'v2'
-
-    assert old_digest != @env.digest
-    assert old_asset_digest != @env["gallery.js"].digest
+    assert old_asset_digest == @env["gallery.js"].digest
   end
 
   test "bundled asset is stale if its mtime is updated or deleted" do
