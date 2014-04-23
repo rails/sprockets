@@ -1,7 +1,7 @@
 module Sprockets
   # Public: .jst engine.
   #
-  # Exports server side compliled templates to an object.
+  # Exports server side compiled templates to an object.
   #
   # Name your template "users/show.ejs.jst", "users/new.eco.jst", etc.
   #
