@@ -56,7 +56,7 @@ module Sprockets
         key = [
           'asset-hash',
           VERSION,
-          self.digest.hexdigest, # FIXME: Avoid Env#digest
+          self.version,
           filename,
           bundle,
           file_hexdigest(filename),

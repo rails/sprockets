@@ -497,6 +497,7 @@ class TestEnvironment < Sprockets::TestCase
     old_asset_digest = @env["gallery.js"].digest
 
     @env.digest_class = Digest::MD5
+    @env.version = 'md5'
 
     assert old_digest != @env.digest
     assert old_asset_digest != @env["gallery.js"].digest
