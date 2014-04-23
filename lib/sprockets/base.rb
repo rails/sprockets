@@ -64,7 +64,7 @@ module Sprockets
       # Compute the initial digest using the implementation class. The
       # Sprockets release version and custom environment version are
       # mixed in. So any new releases will affect all your assets.
-      @digest ||= digest_class.new.update(VERSION).update(version.to_s)
+      @digest ||= digest_class.new.update(version.to_s)
 
       # Returned a dupped copy so the caller can safely mutate it with `.update`
       @digest.dup

@@ -55,6 +55,7 @@ module Sprockets
       def build_asset_hash(filename, bundle = true)
         key = [
           'asset-hash',
+          VERSION,
           self.digest.hexdigest, # FIXME: Avoid Env#digest
           filename,
           bundle,
