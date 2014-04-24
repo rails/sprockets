@@ -21,7 +21,8 @@ module Sprockets
       engine_extnames = []
 
       path_reverse_extnames(path).each do |extname|
-        if engines(extname)
+        # TODO: Why just any extname works
+        if @transformers[@mime_types[extname]].any?
           engine_extnames << extname
         elsif mime_types(extname)
           format_extname = extname
@@ -231,12 +232,16 @@ module Sprockets
     end
 
     private
-      def add_engine_to_trail(ext)
-        @trail.append_extension(ext)
+      def sync_transformers_to_trail!
+        @transformers.each do |engine_mime_type, transformers|
+          engine_extname = @mime_types.key(engine_mime_type)
+          next unless engine_extname
 
-        if mime_type = @engine_mime_types[ext]
-          if format_ext = mime_types.key(mime_type)
-            @trail.alias_extension(ext, format_ext)
+          transformers.keys.each do |format_mime_type|
+            format_extname = @mime_types.key(format_mime_type)
+            next unless format_extname
+
+            @trail.alias_extension(engine_extname, format_extname)
           end
         end
       end

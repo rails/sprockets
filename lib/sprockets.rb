@@ -53,7 +53,6 @@ module Sprockets
   @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
   @mime_types        = {}
   @engines           = {}
-  @engine_mime_types = {}
   @transformers      = Hash.new { |h, k| h[k] = {} }
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }

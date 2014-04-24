@@ -124,12 +124,12 @@ module Sprockets
       super
     end
 
-    # Registers a new Engine `klass` for `ext`.
-    def register_engine(ext, klass, options = {})
+    def register_transformer(from, to, processor)
       # Overrides the global behavior to expire the cache
       expire_cache!
       super
-      add_engine_to_trail(ext.to_s)
+      # TODO: Only add new transformer to trail
+      sync_transformers_to_trail!
     end
 
     def register_preprocessor(mime_type, klass, &block)
@@ -271,7 +271,10 @@ module Sprockets
 
         engine_exts = extensions_for(filename)[:engines]
         processed_processors = preprocessors(content_type) +
-          engine_exts.map { |ext| engines(ext) }.reverse +
+          engine_exts.map { |ext|
+            # TODO: Why do we pick the first transformer
+            @transformers[@mime_types[ext]].values.first
+          }.reverse +
           postprocessors(content_type)
         bundled_processors = bundle_processors(content_type)
 

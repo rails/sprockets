@@ -29,8 +29,7 @@ module Sprockets
       @version = ''
 
       @mime_types        = Sprockets.registered_mime_types
-      @engines           = Sprockets.engines
-      @engine_mime_types = Sprockets.engine_mime_types
+      @transformers      = Sprockets.transformers
       @preprocessors     = Sprockets.preprocessors
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors
@@ -40,9 +39,7 @@ module Sprockets
         append_path(path)
       end
 
-      @engines.each do |ext, klass|
-        add_engine_to_trail(ext)
-      end
+      sync_transformers_to_trail!
 
       @mime_types.each do |ext, type|
         @trail.append_extension(ext)

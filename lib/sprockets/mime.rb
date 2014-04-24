@@ -25,11 +25,10 @@ module Sprockets
       @mime_types[ext] = mime_type
     end
 
+    attr_reader :transformers
+
     def register_transformer(from, to, processor)
-      extname = @mime_types.key(from)
-      mime_type = to unless to == "*/*"
-      @engines[extname] = processor
-      @engine_mime_types[extname] = mime_type if mime_type
+      @transformers[from][to] = processor
     end
 
     # Returns the correct encoding for a given mime type, while falling

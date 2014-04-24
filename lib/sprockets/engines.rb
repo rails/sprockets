@@ -26,31 +26,6 @@ module Sprockets
   #     Sprockets.register_engine '.sass', SassTemplate
   #
   module Engines
-    # Returns a `Hash` of `Engine`s registered on the `Environment`.
-    # If an `ext` argument is supplied, the `Engine` associated with
-    # that extension will be returned.
-    #
-    #     environment.engines
-    #     # => {".coffee" => CoffeeScriptTemplate, ".sass" => SassTemplate, ...}
-    #
-    #     environment.engines('.coffee')
-    #     # => CoffeeScriptTemplate
-    #
-    def engines(ext = nil)
-      if ext
-        @engines[ext]
-      else
-        @engines.dup
-      end
-    end
-
-    # Internal: Returns a `Hash` of engine extensions to mime types.
-    #
-    # # => { '.coffee' => 'application/javascript' }
-    def engine_mime_types
-      @engine_mime_types.dup
-    end
-
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
@@ -77,7 +52,9 @@ module Sprockets
       # content type.
       def engine_content_type_for(extnames)
         extnames.each do |extname|
-          if mime_type = @engine_mime_types[extname]
+          mime_type2 = @mime_types[extname]
+          # TODO: Picking the first key doesn't make much sense
+          if mime_type = @transformers[mime_type2].keys.first
             return mime_type
           end
         end
