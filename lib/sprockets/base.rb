@@ -128,8 +128,14 @@ module Sprockets
       # Overrides the global behavior to expire the cache
       expire_cache!
       super
-      # TODO: Only add new transformer to trail
-      sync_transformers_to_trail!
+
+      # TODO: Reverse mime type look is fishy
+      from_ext = @mime_types.key(from)
+      to_ext   = @mime_types.key(to)
+
+      if from_ext && to_ext
+        @trail.alias_extension(from_ext, to_ext)
+      end
     end
 
     def register_preprocessor(mime_type, klass, &block)

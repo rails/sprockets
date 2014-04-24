@@ -232,20 +232,6 @@ module Sprockets
     end
 
     private
-      def sync_transformers_to_trail!
-        @transformers.each do |engine_mime_type, transformers|
-          engine_extname = @mime_types.key(engine_mime_type)
-          next unless engine_extname
-
-          transformers.keys.each do |format_mime_type|
-            format_extname = @mime_types.key(format_mime_type)
-            next unless format_extname
-
-            @trail.alias_extension(engine_extname, format_extname)
-          end
-        end
-      end
-
       def wrap_processor(klass, proc)
         if !proc
           if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
