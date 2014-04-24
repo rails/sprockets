@@ -54,6 +54,7 @@ module Sprockets
   @mime_types        = {}
   @engines           = {}
   @engine_mime_types = {}
+  @transformers      = Hash.new { |h, k| h[k] = {} }
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
   @bundle_processors = Hash.new { |h, k| h[k] = [] }
@@ -61,11 +62,6 @@ module Sprockets
 
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'
-  register_mime_type 'text/coffeescript', '.coffee'
-  register_mime_type 'text/eco', '.eco'
-  register_mime_type 'text/ejs', '.ejs'
-  register_mime_type 'text/sass', '.sass'
-  register_mime_type 'text/scss', '.scss'
 
   register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
   register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
@@ -83,17 +79,24 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProxy.new { YUICompressor }
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', LazyProxy.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
+  register_mime_type 'text/coffeescript', '.coffee'
+  register_transformer 'text/coffeescript', 'application/javascript', LazyProxy.new { CoffeeScriptTemplate }
 
   # JST engines
-  register_engine '.jst',    LazyProxy.new { JstProcessor }, mime_type: 'application/javascript'
-  register_engine '.eco',    LazyProxy.new { EcoTemplate },  mime_type: 'application/javascript'
-  register_engine '.ejs',    LazyProxy.new { EjsTemplate },  mime_type: 'application/javascript'
+  register_mime_type 'application/jst', '.jst'
+  register_mime_type 'text/eco', '.eco'
+  register_mime_type 'text/ejs', '.ejs'
+  register_transformer 'application/jst', 'application/javascript', LazyProxy.new { JstProcessor }
+  register_transformer 'text/eco', 'application/javascript', LazyProxy.new { EcoTemplate }
+  register_transformer 'text/ejs', 'application/javascript', LazyProxy.new { EjsTemplate }
 
   # CSS engines
-  register_engine '.sass',   LazyProxy.new { SassTemplate }, mime_type: 'text/css'
-  register_engine '.scss',   LazyProxy.new { ScssTemplate }, mime_type: 'text/css'
+  register_mime_type 'text/sass', '.sass'
+  register_mime_type 'text/scss', '.scss'
+  register_transformer 'text/sass', 'text/css', LazyProxy.new { SassTemplate }
+  register_transformer 'text/scss', 'text/css', LazyProxy.new { ScssTemplate }
 
   # Other
-  register_engine '.erb',    LazyProxy.new { ERBTemplate }
+  register_mime_type 'application/html+ruby', '.erb'
+  register_transformer 'application/html+ruby', '*/*', LazyProxy.new { ERBTemplate }
 end

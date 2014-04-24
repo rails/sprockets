@@ -657,8 +657,10 @@ class TestEnvironment < Sprockets::TestCase
       @env.content_type_of("application.coffee")
 
     @env = Sprockets::Environment.new
-    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
+    @env.register_mime_type 'sprockets/haml', '.haml'
+    @env.register_mime_type 'sprockets/ngt', '.ngt'
+    @env.register_transformer 'sprockets/haml', 'text/html', proc {}
+    @env.register_transformer 'sprockets/ngt', 'application/javascript', proc {}
     assert_equal "application/javascript", @env.content_type_of("foo.ngt.haml")
   end
 end

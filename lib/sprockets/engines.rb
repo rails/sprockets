@@ -59,17 +59,15 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
-        @engines[ext] = klass
-        if options[:mime_type]
-          @engine_mime_types[ext.to_s] = options[:mime_type]
-        end
-      else
-        @engines[ext] = LegacyTiltProcessor.new(klass)
-        if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          @engine_mime_types[ext.to_s] = klass.default_mime_type
-        end
+      from = registered_mime_types[ext]
+      if from.nil?
+        from = "sprockets/#{ext.sub(/^\./, '')}"
+        register_mime_type(from, ext)
       end
+
+      to = klass.respond_to?(:default_mime_type) && klass.default_mime_type ?
+        klass.default_mime_type : "*/*"
+      register_transformer(from, to, LegacyTiltProcessor.new(klass))
     end
 
     private

@@ -25,6 +25,13 @@ module Sprockets
       @mime_types[ext] = mime_type
     end
 
+    def register_transformer(from, to, processor)
+      extname = @mime_types.key(from)
+      mime_type = to unless to == "*/*"
+      @engines[extname] = processor
+      @engine_mime_types[extname] = mime_type if mime_type
+    end
+
     # Returns the correct encoding for a given mime type, while falling
     # back on the default external encoding, if it exists.
     def encoding_for_mime_type(type)
