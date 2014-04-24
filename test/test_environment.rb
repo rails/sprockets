@@ -593,28 +593,28 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "extensions" do
-    assert_equal({format: nil, engines: []}, @env.extensions_for("empty"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("gallery.js"))
-    assert_equal({format: ".js", engines: [".coffee"]}, @env.extensions_for("application.js.coffee"))
-    assert_equal({format: ".js", engines: [".coffee", ".erb"]}, @env.extensions_for("project.js.coffee.erb"))
-    assert_equal({format: ".css", engines: [".erb"]}, @env.extensions_for("gallery.css.erb"))
-    assert_equal({format: nil, engines: [".erb"]}, @env.extensions_for("gallery.erb"))
-    assert_equal({format: nil, engines: []}, @env.extensions_for("gallery.foo"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("jquery.js"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("jquery.min.js"))
-    assert_equal({format: ".js", engines: [".erb"]}, @env.extensions_for("jquery.js.erb"))
-    assert_equal({format: ".js", engines: [".erb"]}, @env.extensions_for("jquery.min.js.erb"))
-    assert_equal({format: nil, engines: [".coffee"]}, @env.extensions_for("jquery.min.coffee"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("jquery.tmpl.js"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("jquery.tmpl.min.js"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("jquery.csv.js"))
-    assert_equal({format: ".js", engines: []}, @env.extensions_for("jquery.csv.min.js"))
-    assert_equal({format: ".js", engines: [".erb"]}, @env.extensions_for("jquery.csv.min.js.erb"))
-    assert_equal({format: ".js", engines: [".coffee", ".erb"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
+    assert_equal({format: nil, engines: [], mime_types: []}, @env.extensions_for("empty"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("gallery.js"))
+    assert_equal({format: ".js", engines: [".coffee"], mime_types: ["text/coffeescript", "application/javascript"]}, @env.extensions_for("application.js.coffee"))
+    assert_equal({format: ".js", engines: [".coffee", ".erb"], mime_types: ["application/html+ruby", "text/coffeescript", "application/javascript"]}, @env.extensions_for("project.js.coffee.erb"))
+    assert_equal({format: ".css", engines: [".erb"], mime_types: ["application/html+ruby", "text/css"]}, @env.extensions_for("gallery.css.erb"))
+    assert_equal({format: nil, engines: [".erb"], mime_types: ["application/html+ruby"]}, @env.extensions_for("gallery.erb"))
+    assert_equal({format: nil, engines: [], mime_types: []}, @env.extensions_for("gallery.foo"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.js"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.min.js"))
+    assert_equal({format: ".js", engines: [".erb"], mime_types: ["application/html+ruby", "application/javascript"]}, @env.extensions_for("jquery.js.erb"))
+    assert_equal({format: ".js", engines: [".erb"], mime_types: ["application/html+ruby", "application/javascript"]}, @env.extensions_for("jquery.min.js.erb"))
+    assert_equal({format: nil, engines: [".coffee"], mime_types: ["text/coffeescript"]}, @env.extensions_for("jquery.min.coffee"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.tmpl.js"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.tmpl.min.js"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.csv.js"))
+    assert_equal({format: ".js", engines: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.csv.min.js"))
+    assert_equal({format: ".js", engines: [".erb"], mime_types: ["application/html+ruby", "application/javascript"]}, @env.extensions_for("jquery.csv.min.js.erb"))
+    assert_equal({format: ".js", engines: [".coffee", ".erb"], mime_types: ["application/html+ruby", "text/coffeescript", "application/javascript"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
 
     @env = Sprockets::Environment.new
     @env.register_engine '.ms', Class.new
-    assert_equal({format: nil, engines: [".jst", ".ms"]}, @env.extensions_for("foo.jst.ms"))
+    assert_equal({format: nil, engines: [".jst", ".ms"], mime_types: ["sprockets/ms", "application/jst"]}, @env.extensions_for("foo.jst.ms"))
   end
 
   test "content type" do

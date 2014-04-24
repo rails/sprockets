@@ -19,8 +19,11 @@ module Sprockets
     def extensions_for(path)
       format_extname  = nil
       engine_extnames = []
+      mime_types      = []
 
       path_reverse_extnames(path).each do |extname|
+        mime_types << @mime_types[extname] if @mime_types[extname]
+
         # TODO: Why just any extname works
         if @transformers[@mime_types[extname]].any?
           engine_extnames << extname
@@ -32,7 +35,9 @@ module Sprockets
 
       engine_extnames.reverse!
 
-      { format: format_extname, engines: engine_extnames }
+      { format: format_extname,
+        engines: engine_extnames,
+        mime_types: mime_types }
     end
 
     # Internal. Return content type of `path`.
