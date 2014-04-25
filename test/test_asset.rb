@@ -813,6 +813,8 @@ class AssetLogicalPathTest < Sprockets::TestCase
   def logical_path(path)
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
-    @env.find_asset(filename).logical_path
+    silence_warnings do
+      @env.find_asset(filename).logical_path
+    end
   end
 end
