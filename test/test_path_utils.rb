@@ -20,6 +20,7 @@ class TestPathUtils < Sprockets::TestCase
       "encoding",
       "engines",
       "errors",
+      "paths",
       "public",
       "sass",
       "server",

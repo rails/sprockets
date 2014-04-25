@@ -66,40 +66,6 @@ module Sprockets
       @trail.stat(path)
     end
 
-    # Internal: Reverse guess logical path for fully expanded path.
-    #
-    # This has some known issues. For an example if a file is
-    # shaddowed in the path, but is required relatively, its logical
-    # path will be incorrect.
-    #
-    # TODO: Review API and performance
-    # TODO: logical_path only makes sense within the context of a mime type
-    def logical_path_for(filename)
-      _, path = paths_split(self.paths, filename)
-      if path
-        extnames = extensions_for(filename)
-        path = extnames[:engines].inject(path) { |p, ext| p.sub(ext, '') }
-
-        unless extnames[:format]
-          extnames[:mime_types].each do |mime_type|
-            # TODO: Why pick the first mime type
-            if format_mime_type = @transformers[mime_type].keys.first
-              # TODO: Reverse mime type look is fishy
-              format_extname = @mime_types.key(format_mime_type)
-              path = "#{path}#{format_extname}"
-              break
-            end
-          end
-        end
-
-        extname = File.extname(path)
-        path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
-        path
-      else
-        raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
-      end
-    end
-
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
     # and shadowed matches.
@@ -153,6 +119,40 @@ module Sprockets
 
     protected
       attr_reader :trail
+
+      # Internal: Reverse guess logical path for fully expanded path.
+      #
+      # This has some known issues. For an example if a file is
+      # shaddowed in the path, but is required relatively, its logical
+      # path will be incorrect.
+      #
+      # TODO: Review API and performance
+      # TODO: logical_path only makes sense within the context of a mime type
+      def logical_path_for(filename)
+        _, path = paths_split(self.paths, filename)
+        if path
+          extnames = extensions_for(filename)
+          path = extnames[:engines].inject(path) { |p, ext| p.sub(ext, '') }
+
+          unless extnames[:format]
+            extnames[:mime_types].each do |mime_type|
+              # TODO: Why pick the first mime type
+              if format_mime_type = @transformers[mime_type].keys.first
+                # TODO: Reverse mime type look is fishy
+                format_extname = @mime_types.key(format_mime_type)
+                path = "#{path}#{format_extname}"
+                break
+              end
+            end
+          end
+
+          extname = File.extname(path)
+          path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
+          path
+        else
+          raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
+        end
+      end
 
       # Internal: Resolve absolute path to ensure it exists and is in the
       # load path.
