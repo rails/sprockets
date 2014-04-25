@@ -783,3 +783,36 @@ class BundledAssetTest < Sprockets::TestCase
     File.read(resolve(logical_path))
   end
 end
+
+class AssetLogicalPathTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('paths'))
+  end
+
+  test "logical path" do
+    assert_equal "application.js", logical_path("application.js")
+    assert_equal "application.css", logical_path("application.css")
+    assert_equal "jquery.foo.min.js", logical_path("jquery.foo.min.js")
+
+    assert_equal "application.js", logical_path("application.js.erb")
+    assert_equal "application.js", logical_path("application.js.coffee")
+    assert_equal "application.css", logical_path("application.css.scss")
+
+    assert_equal "application.js", logical_path("application.coffee")
+    assert_equal "application.css", logical_path("application.scss")
+    assert_equal "hello.js", logical_path("hello.jst.ejs")
+
+    assert_equal "bower/main.js", logical_path("bower/main.js")
+    assert_equal "bower/bower.json", logical_path("bower/bower.json")
+
+    assert_equal "coffee.js", logical_path("coffee/index.js")
+    assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee")
+  end
+
+  def logical_path(path)
+    filename = fixture_path("paths/#{path}")
+    assert File.exist?(filename), "#{filename} does not exist"
+    @env.find_asset(filename).logical_path
+  end
+end
