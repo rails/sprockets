@@ -73,6 +73,7 @@ module Sprockets
     # path will be incorrect.
     #
     # TODO: Review API and performance
+    # TODO: logical_path only makes sense within the context of a mime type
     def logical_path_for(filename)
       _, path = paths_split(self.paths, filename)
       if path
@@ -80,9 +81,12 @@ module Sprockets
         path = extnames[:engines].inject(path) { |p, ext| p.sub(ext, '') }
 
         unless extnames[:format]
-          extnames[:engines].each do |eng_ext|
-            if ext = @trail.aliases[eng_ext]
-              path = "#{path}#{ext}"
+          extnames[:mime_types].each do |mime_type|
+            # TODO: Why pick the first mime type
+            if format_mime_type = @transformers[mime_type].keys.first
+              # TODO: Reverse mime type look is fishy
+              format_extname = @mime_types.key(format_mime_type)
+              path = "#{path}#{format_extname}"
               break
             end
           end
