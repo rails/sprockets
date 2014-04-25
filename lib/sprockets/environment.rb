@@ -39,20 +39,6 @@ module Sprockets
         append_path(path)
       end
 
-      @transformers.each do |engine_mime_type, transformers|
-        # TODO: Reverse mime type look is fishy
-        engine_extname = @mime_types.key(engine_mime_type)
-        next unless engine_extname
-
-        transformers.keys.each do |format_mime_type|
-          # TODO: Reverse mime type look is fishy
-          format_extname = @mime_types.key(format_mime_type)
-          next unless format_extname
-
-          @trail.alias_extension(engine_extname, format_extname)
-        end
-      end
-
       @mime_types.each do |ext, type|
         @trail.append_extension(ext)
       end

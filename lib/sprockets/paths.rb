@@ -180,10 +180,15 @@ module Sprockets
       # Returns nothing.
       def resolve_all_logical_paths(logical_path, options = {})
         extname = extensions_for(logical_path)[:format]
-        content_type = mime_types(extname) if extname
-        content_type = options[:content_type] if options[:content_type]
+        format_content_type = mime_types(extname) if extname
+        content_type = options[:content_type] || format_content_type
+
+        if format_content_type && format_content_type != content_type
+          return
+        end
 
         paths = [logical_path]
+        paths << logical_path.sub(extname, '') if extname
 
         path_without_extension = extname ?
           logical_path.sub(extname, '') :
