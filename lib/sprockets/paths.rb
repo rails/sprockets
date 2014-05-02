@@ -131,7 +131,10 @@ module Sprockets
         _, path = paths_split(self.paths, filename)
         if path
           extnames = extensions_for(filename)
-          path = extnames[:engines].inject(path) { |p, ext| p.sub(ext, '') }
+
+          # TODO: Strange to trust that engine extnames are always last
+          trim = extnames[:engines].join.length
+          path = path[0...(-trim)] if trim > 0
 
           unless extnames[:format]
             extnames[:engines].each do |eng_ext|
@@ -186,8 +189,8 @@ module Sprockets
         end
 
         paths = [logical_path]
-        # FIXME: Bad extname stripping. What if extname appears twice.
-        paths << logical_path.sub(extname, '') if extname
+        # TODO: Strange to trust that `extname` is always last
+        paths << logical_path[0...(-extname.length)] if extname && extname.length > 0
         path_without_extname = paths.last
 
         # optimization: bower.json can only be nested one level deep
@@ -195,7 +198,7 @@ module Sprockets
           paths << File.join(path_without_extname, "bower.json")
         end
 
-        paths << File.join(path_without_extname, "index#{extname}")
+        paths << File.join(path_without_extname, "index")
 
         @trail.find_all(*paths, options).each do |path|
           expand_bower_path(path) do |bower_path|

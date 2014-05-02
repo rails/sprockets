@@ -808,6 +808,13 @@ class AssetLogicalPathTest < Sprockets::TestCase
 
     assert_equal "coffee.js", logical_path("coffee/index.js")
     assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee")
+
+    assert_equal "jquery.ext.js", logical_path("jquery.ext/index.js")
+    assert_equal "jquery.ext/form.js", logical_path("jquery.ext/form.js")
+
+    assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
+    assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
+    assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
   end
 
   def logical_path(path)
