@@ -249,9 +249,7 @@ module Sprockets
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
         "root=#{root.to_s.inspect}, " +
-        "paths=#{paths.inspect}, " +
-        "digest=#{digest.to_s.inspect}" +
-        ">"
+        "paths=#{paths.inspect}>"
     end
 
     protected
