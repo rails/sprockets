@@ -77,14 +77,14 @@ class TestPerformance < Sprockets::TestCase
   end
 
   test "loading from instance cache" do
-    env = new_environment.cached
+    env = @env.cached
     env["mobile.js"]
     assert_no_redundant_processor_calls
 
     reset_stats!
 
     env["mobile.js"]
-    assert_no_redundant_stat_calls
+    assert_no_stat_calls
     assert_no_processor_calls
   end
 
@@ -100,6 +100,21 @@ class TestPerformance < Sprockets::TestCase
     reset_stats!
 
     env2.cached["mobile.js"]
+    assert_no_redundant_stat_calls
+    assert_no_processor_calls
+  end
+
+  test "load asset by etag" do
+    etag = @env["mobile.js"].etag
+    reset_stats!
+
+    @env.find_asset("mobile.js", if_match: etag)
+    assert_no_redundant_stat_calls
+    assert_no_processor_calls
+
+    reset_stats!
+
+    @env.find_asset("mobile.js", if_match: etag)
     assert_no_redundant_stat_calls
     assert_no_processor_calls
   end
