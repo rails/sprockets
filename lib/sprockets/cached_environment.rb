@@ -50,6 +50,21 @@ module Sprockets
         raise TypeError, "can't modify immutable cached environment"
       end
 
+      def build_asset_hash_for_digest(filename, digest, bundle)
+        key = [
+          'asset-hash',
+          VERSION,
+          self.version,
+          filename,
+          digest,
+          bundle
+        ]
+
+        cache.fetch(key) do
+          super
+        end
+      end
+
       # Cache asset building in memory and in persisted cache.
       def build_asset_hash(filename, bundle = true)
         key = [

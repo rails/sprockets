@@ -218,11 +218,13 @@ module Sprockets
       options[:bundle] = true unless options.key?(:bundle)
 
       if filename = resolve_all(path.to_s).first
-        asset_hash = build_asset_hash(filename, options[:bundle])
-
-        if options[:if_match] && options[:if_match] != asset_hash[:digest]
-          return
+        if options[:if_match]
+          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle])
+        else
+          asset_hash = build_asset_hash(filename, options[:bundle])
         end
+
+        return unless asset_hash
 
         case asset_hash[:type]
         when 'bundled'
@@ -257,6 +259,13 @@ module Sprockets
       # the subclass.
       def expire_cache!
         raise NotImplementedError
+      end
+
+      def build_asset_hash_for_digest(filename, digest, bundle)
+        asset_hash = build_asset_hash(filename, bundle)
+        if asset_hash[:digest] == digest
+          asset_hash
+        end
       end
 
       def build_asset_hash(filename, bundle = true)
