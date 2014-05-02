@@ -39,17 +39,15 @@ module Sprockets
       end
 
       # Look up the asset.
-      asset = find_asset(path, bundle: !body_only?(env))
+      options = {}
+      options[:bundle] = !body_only?(env)
+      options[:if_match] = fingerprint if fingerprint
+      asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
         logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
 
-        # Return a 404 Not Found
-        not_found_response
-
-      # If fingerprint is a mismatch with the requested asset
-      elsif asset && fingerprint && asset.digest != fingerprint
         # Return a 404 Not Found
         not_found_response
 

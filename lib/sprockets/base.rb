@@ -220,6 +220,10 @@ module Sprockets
       if filename = resolve_all(path.to_s).first
         asset_hash = build_asset_hash(filename, options[:bundle])
 
+        if options[:if_match] && options[:if_match] != asset_hash[:digest]
+          return
+        end
+
         case asset_hash[:type]
         when 'bundled'
           BundledAsset.new(asset_hash)

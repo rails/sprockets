@@ -72,6 +72,9 @@ module Sprockets
     # Public: Returns String hexdigest of source.
     attr_reader :digest
 
+    # Pubic: ETag String of Asset.
+    alias_method :etag, :digest
+
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.
     #
