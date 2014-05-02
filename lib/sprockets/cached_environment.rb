@@ -50,8 +50,8 @@ module Sprockets
         raise TypeError, "can't modify immutable cached environment"
       end
 
-      def build_asset_hash_for_digest(filename, digest, bundle)
-        key = [
+      def asset_hash_cache_key(filename, digest, bundle)
+        [
           'asset-hash',
           VERSION,
           self.version,
@@ -59,16 +59,11 @@ module Sprockets
           digest,
           bundle
         ]
-
-        cache.fetch(key) do
-          super
-        end
       end
 
-      # Cache asset building in memory and in persisted cache.
-      def build_asset_hash(filename, bundle = true)
-        key = [
-          'asset-hash',
+      def asset_digest_cache_key(filename, bundle)
+        [
+          'asset-digest',
           VERSION,
           self.version,
           filename,
@@ -76,16 +71,37 @@ module Sprockets
           file_hexdigest(filename),
           self.paths
         ]
+      end
 
-        if hash = cache._get(key)
-          digest, paths = hash.values_at(:dependency_digest, :dependency_paths)
-          if dependencies_hexdigest(paths) == digest
-            return hash
+      def build_asset_hash_for_digest(*args)
+        cache.fetch(asset_hash_cache_key(*args)) do
+          super
+        end
+      end
+
+      # Cache asset building in memory and in persisted cache.
+      def build_asset_hash(filename, bundle = true)
+        digest_key = asset_digest_cache_key(filename, bundle)
+
+        if digest = cache._get(digest_key)
+          hash_key = asset_hash_cache_key(filename, digest, bundle)
+
+          if hash = cache._get(hash_key)
+            digest, paths = hash.values_at(:dependency_digest, :dependency_paths)
+            if dependencies_hexdigest(paths) == digest
+              return hash
+            end
           end
         end
 
         if hash = super
-          cache._set(key, hash)
+          cache._set(digest_key, hash[:digest])
+
+          # Push into asset digest cache
+          hash_key = asset_hash_cache_key(filename, hash[:digest], bundle)
+          # cache._set(hash_key, hash)
+          cache.fetch(hash_key) { hash }
+
           return hash
         end
 

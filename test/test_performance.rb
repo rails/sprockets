@@ -132,12 +132,16 @@ class TestPerformance < Sprockets::TestCase
 
   test "load asset by etag" do
     etag = @env["mobile.js"].etag
+    assert_no_redundant_stat_calls
+    assert_no_redundant_processor_calls
+    assert_no_redundant_cache_set_calls
     reset_stats!
 
     @env.find_asset("mobile.js", if_match: etag)
     assert_no_redundant_stat_calls
     assert_no_processor_calls
-    assert_no_redundant_cache_set_calls
+    assert_no_redundant_cache_get_calls
+    assert_no_cache_set_calls
 
     reset_stats!
 
