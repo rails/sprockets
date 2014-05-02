@@ -135,7 +135,9 @@ module Sprockets
 
           unless extnames[:format]
             extnames[:engines].each do |eng_ext|
-              if ext = @trail.aliases[eng_ext]
+              if eng_mime_type = @engine_mime_types[eng_ext]
+                # FIXME: Reverse mime type lookup is a smell
+                ext = mime_types.key(eng_mime_type)
                 path = "#{path}#{ext}"
                 break
               end
@@ -176,21 +178,24 @@ module Sprockets
       # Returns nothing.
       def resolve_all_logical_paths(logical_path, options = {})
         extname = extensions_for(logical_path)[:format]
-        content_type = mime_types(extname) if extname
-        content_type = options[:content_type] if options[:content_type]
+        format_content_type = mime_types(extname) if extname
+        content_type = options[:content_type] || format_content_type
 
-        paths = [logical_path]
-
-        path_without_extension = extname ?
-          logical_path.sub(extname, '') :
-          logical_path
-
-        # optimization: bower.json can only be nested one level deep
-        if !path_without_extension.index('/')
-          paths << File.join(path_without_extension, "bower.json")
+        if format_content_type && format_content_type != content_type
+          return
         end
 
-        paths << File.join(path_without_extension, "index#{extname}")
+        paths = [logical_path]
+        # FIXME: Bad extname stripping. What if extname appears twice.
+        paths << logical_path.sub(extname, '') if extname
+        path_without_extname = paths.last
+
+        # optimization: bower.json can only be nested one level deep
+        if !path_without_extname.index('/')
+          paths << File.join(path_without_extname, "bower.json")
+        end
+
+        paths << File.join(path_without_extname, "index#{extname}")
 
         @trail.find_all(*paths, options).each do |path|
           expand_bower_path(path) do |bower_path|

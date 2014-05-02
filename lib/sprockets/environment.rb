@@ -41,7 +41,7 @@ module Sprockets
       end
 
       @engines.each do |ext, klass|
-        add_engine_to_trail(ext)
+        @trail.append_extension(ext)
       end
 
       @mime_types.each do |ext, type|

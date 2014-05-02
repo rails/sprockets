@@ -231,16 +231,6 @@ module Sprockets
     end
 
     private
-      def add_engine_to_trail(ext)
-        @trail.append_extension(ext)
-
-        if mime_type = @engine_mime_types[ext]
-          if format_ext = mime_types.key(mime_type)
-            @trail.alias_extension(ext, format_ext)
-          end
-        end
-      end
-
       def wrap_processor(klass, proc)
         if !proc
           if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
