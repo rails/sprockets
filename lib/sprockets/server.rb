@@ -48,6 +48,11 @@ module Sprockets
         # Return a 404 Not Found
         not_found_response
 
+      # If fingerprint is a mismatch with the requested asset
+      elsif asset && fingerprint && asset.digest != fingerprint
+        # Return a 404 Not Found
+        not_found_response
+
       # Check request headers `HTTP_IF_NONE_MATCH` against the asset digest
       elsif etag_match?(asset, env)
         logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
