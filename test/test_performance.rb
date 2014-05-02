@@ -25,6 +25,24 @@ class << Dir
 end
 
 class TestPerformance < Sprockets::TestCase
+  class Cache
+    def initialize
+      @cache = {}
+    end
+
+    def get(key)
+      $cache_get_calls[key] ||= 0
+      $cache_get_calls[key] += 1
+      @cache[key]
+    end
+
+    def set(key, value)
+      $cache_set_calls[key] ||= 0
+      $cache_set_calls[key] += 1
+      @cache[key] = value
+    end
+  end
+
   def setup
     @env = new_environment
     reset_stats!
@@ -34,6 +52,8 @@ class TestPerformance < Sprockets::TestCase
     $file_stat_calls = nil
     $dir_entires_calls = nil
     $processor_calls = nil
+    $cache_get_calls = nil
+    $cache_set_calls = nil
   end
 
   test "simple file" do
@@ -60,20 +80,23 @@ class TestPerformance < Sprockets::TestCase
     assert_no_redundant_processor_calls
   end
 
-  test "loading from cache" do
+  test "loading from backend cache" do
     env1, env2 = new_environment, new_environment
-    cache = {}
+    cache = Cache.new
     env1.cache = cache
     env2.cache = cache
 
     env1["mobile.js"]
     assert_no_redundant_processor_calls
+    assert_no_redundant_cache_set_calls
 
     reset_stats!
 
     env2["mobile.js"]
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_redundant_cache_get_calls
+    assert_no_cache_set_calls
   end
 
   test "loading from instance cache" do
@@ -88,20 +111,23 @@ class TestPerformance < Sprockets::TestCase
     assert_no_processor_calls
   end
 
-  test "loading from shared cache" do
+  test "loading from cached with backend cache" do
     env1, env2 = new_environment, new_environment
-    cache = {}
+    cache = Cache.new
     env1.cache = cache
     env2.cache = cache
 
     env1.cached["mobile.js"]
     assert_no_redundant_processor_calls
+    assert_no_redundant_cache_set_calls
 
     reset_stats!
 
     env2.cached["mobile.js"]
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_redundant_cache_get_calls
+    assert_no_cache_set_calls
   end
 
   test "load asset by etag" do
@@ -111,17 +137,20 @@ class TestPerformance < Sprockets::TestCase
     @env.find_asset("mobile.js", if_match: etag)
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_redundant_cache_set_calls
 
     reset_stats!
 
     @env.find_asset("mobile.js", if_match: etag)
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_redundant_cache_get_calls
+    assert_no_cache_set_calls
   end
 
   def new_environment
-    $processor_calls = {}
     Sprockets::Environment.new(".") do |env|
+      env.cache = Cache.new
       env.append_path(fixture_path('default'))
       env.register_preprocessor 'application/javascript', proc { |input|
         $processor_calls[input[:filename]] ||= 0
@@ -135,6 +164,8 @@ class TestPerformance < Sprockets::TestCase
     $file_stat_calls = {}
     $dir_entires_calls = {}
     $processor_calls = {}
+    $cache_get_calls = {}
+    $cache_set_calls = {}
   end
 
   def assert_no_stat_calls
@@ -166,6 +197,24 @@ class TestPerformance < Sprockets::TestCase
   def assert_no_redundant_processor_calls
     $processor_calls.each do |path, count|
       assert_equal 1, count, "Processor ran on #{path.inspect} #{count} times"
+    end
+  end
+
+  def assert_no_redundant_cache_get_calls
+    $cache_get_calls.each do |key, count|
+      assert_equal 1, count, "cache get #{key.inspect} #{count} times"
+    end
+  end
+
+  def assert_no_cache_set_calls
+    $cache_set_calls.each do |key, count|
+      assert_equal 0, count, "cache set #{key.inspect} #{count} times"
+    end
+  end
+
+  def assert_no_redundant_cache_set_calls
+    $cache_set_calls.each do |key, count|
+      assert_equal 1, count, "cache set #{key.inspect} #{count} times"
     end
   end
 end
