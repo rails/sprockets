@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.files = Dir["README.md", "LICENSE", "lib/**/*.rb"]
   s.executables = ["sprockets"]
 
-  s.add_dependency "hike", "~> 2.1"
   s.add_dependency "rack", "~> 1.0"
 
   s.add_development_dependency "closure-compiler"
