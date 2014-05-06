@@ -303,17 +303,20 @@ module Sprockets
         )
       end
 
-      def expand_asset_deps(paths, self_path, cache)
-        Utils.prevent_circular_calls(self_path) do
-          paths.inject(Set.new) do |deps, dep|
-            if dep == self_path
-              deps.add(dep)
-            else
-              asset = cache[dep] ||= build_asset_hash(dep, false)
-              deps.merge(expand_asset_deps(asset[:required_paths], dep, cache))
-            end
-            deps
+      def expand_asset_deps(paths, self_path, cache, calls = [])
+        if calls.include?(self_path)
+          raise CircularDependencyError, "#{self_path} has already been required"
+        end
+        calls = calls.dup << self_path
+
+        paths.inject(Set.new) do |deps, dep|
+          if dep == self_path
+            deps.add(dep)
+          else
+            asset = cache[dep] ||= build_asset_hash(dep, false)
+            deps.merge(expand_asset_deps(asset[:required_paths], dep, cache, calls))
           end
+          deps
         end
       end
 

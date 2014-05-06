@@ -22,32 +22,4 @@ class TestUtils < Sprockets::TestCase
       hexdigest(Object.new)
     end
   end
-
-  def find(arg)
-    prevent_circular_calls(arg) do
-      if arg.is_a?(Integer)
-        if arg > 0
-          find(arg - 1)
-        else
-          find(10)
-        end
-      elsif arg == :circle
-        find(arg)
-      else
-        arg
-      end
-    end
-  end
-
-  test "prevent circular calls" do
-    assert_equal :foo, find(:foo)
-
-    assert_raises(Sprockets::CircularDependencyError) do
-      find(:circle)
-    end
-
-    assert_raises(Sprockets::CircularDependencyError) do
-      find(9)
-    end
-  end
 end

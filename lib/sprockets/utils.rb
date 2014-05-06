@@ -64,23 +64,6 @@ module Sprockets
       ::Digest::SHA1.hexdigest(buf)
     end
 
-    # Internal: Halt when recursive circular call is detected.
-    #
-    # path - String path to ensure is not required multiple times.
-    #
-    # Raises CircularDependencyError if cycle is detected.
-    def prevent_circular_calls(path)
-      calls = Thread.current[:sprockets_circular_calls] ||= []
-      if calls.include?(path)
-        raise CircularDependencyError, "#{path} has already been required"
-      end
-      calls << path
-      yield
-    ensure
-      calls.pop
-      Thread.current[:sprockets_circular_calls] = nil if calls.empty?
-    end
-
     def benchmark_start
       Time.now.to_f
     end
