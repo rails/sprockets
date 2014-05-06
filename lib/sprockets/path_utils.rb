@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'hike/fileutils'
 require 'pathname'
 require 'sprockets/errors'
 require 'tempfile'
@@ -12,8 +11,32 @@ module Sprockets
   module PathUtils
     extend self
 
-    # Include Hike's FileUtils for stat() and entries()
-    include Hike::FileUtils
+    # Internal: Like `File.stat`.
+    #
+    # path - String file or directory path
+    #
+    # Returns nil if the file does not exist.
+    def stat(path)
+      if File.exist?(path)
+        File.stat(path.to_s)
+      else
+        nil
+      end
+    end
+
+    # Internal: A version of `Dir.entries` that filters out `.` files and `~`
+    # swap files.
+    #
+    # path - String directory path
+    #
+    # Returns an empty `Array` if the directory does not exist.
+    def entries(path)
+      if File.directory?(path)
+        Dir.entries(path).reject { |entry| entry =~ /^\.|~$|^\#.*\#$/ }.sort
+      else
+        []
+      end
+    end
 
     # Internal: Check if path is absolute or relative.
     #
