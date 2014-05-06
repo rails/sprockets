@@ -20,18 +20,23 @@ module Sprockets
       @logger            = environment.logger
       @context_class     = environment.context_class
       @cache             = environment.cache
-      @trail             = environment.trail.cached
       @digest_class      = environment.digest_class
       @version           = environment.version
+      @root              = environment.root
+      @paths             = environment.paths.dup
+      @extensions        = environment.extensions.dup
+      @extension_pattern = environment.extension_pattern
       @mime_types        = environment.mime_types
       @engines           = environment.engines
-      @engine_mime_types = environment.engine_mime_types
+      @engine_mime_types = environment.engine_mime_types.dup
+      @engine_extensions = environment.engine_extensions.dup
       @preprocessors     = environment.preprocessors
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
 
-      @paths = @trail.paths.to_a.freeze
+      @stats    = Hash.new { |h, k| h[k] = _stat(k) }
+      @entries  = Hash.new { |h, k| h[k] = _entries(k) }
     end
 
     # No-op return self as cached environment.
@@ -40,8 +45,17 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Override Base#paths to return our cached @paths.
-    attr_reader :paths
+    # Internal: Cache Environment#entries
+    alias_method :_entries, :entries
+    def entries(path)
+      @entries[path]
+    end
+
+    # Internal: Cache Environment#stat
+    alias_method :_stat, :stat
+    def stat(path)
+      @stats[path]
+    end
 
     protected
       # Cache is immutable, any methods that try to clear the cache

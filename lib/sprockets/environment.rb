@@ -3,7 +3,6 @@ require 'sprockets/context'
 require 'sprockets/cached_environment'
 
 require 'digest/sha1'
-require 'hike'
 require 'logger'
 
 module Sprockets
@@ -14,7 +13,7 @@ module Sprockets
     #     env = Environment.new(Rails.root)
     #
     def initialize(root = ".")
-      @trail = Hike::Trail.new(root)
+      @root = File.expand_path(root)
 
       self.logger = Logger.new($stderr)
       self.logger.level = Logger::FATAL
@@ -28,25 +27,16 @@ module Sprockets
       @digest_class = Digest::SHA1
       @version = ''
 
+      @paths             = Sprockets.paths.dup
+      @extensions        = Sprockets.extensions.dup
       @mime_types        = Sprockets.registered_mime_types
       @engines           = Sprockets.engines
       @engine_mime_types = Sprockets.engine_mime_types
+      @engine_extensions = Sprockets.engine_extensions
       @preprocessors     = Sprockets.preprocessors
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors
       @compressors       = Sprockets.compressors
-
-      Sprockets.paths.each do |path|
-        append_path(path)
-      end
-
-      @engines.each do |ext, klass|
-        @trail.append_extension(ext)
-      end
-
-      @mime_types.each do |ext, type|
-        @trail.append_extension(ext)
-      end
 
       self.cache = Cache::MemoryStore.new
       expire_cache!
@@ -73,6 +63,7 @@ module Sprockets
       def expire_cache!
         # Clear digest to be recomputed
         @digest = nil
+        @extension_pattern = /^(?:#{extensions.map { |e| Regexp.escape(e) }.join('|')})*$/
       end
   end
 end

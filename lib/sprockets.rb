@@ -42,7 +42,6 @@ module Sprockets
   autoload :Utils,                   'sprockets/utils'
 
   # Extend Sprockets module to provide global registry
-  require 'hike'
   require 'sprockets/engines'
   require 'sprockets/mime'
   require 'sprockets/processing'
@@ -50,10 +49,13 @@ module Sprockets
   require 'sprockets/paths'
   extend Engines, Mime, Processing, Compressing, Paths
 
-  @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
+  @root              = File.expand_path('..', __FILE__)
+  @paths             = []
+  @extensions        = []
   @mime_types        = {}
   @engines           = {}
   @engine_mime_types = {}
+  @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
   @bundle_processors = Hash.new { |h, k| h[k] = [] }

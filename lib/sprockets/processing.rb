@@ -19,19 +19,26 @@ module Sprockets
     def extensions_for(path)
       format_extname  = nil
       engine_extnames = []
+      len = path.length
 
       path_reverse_extnames(path).each do |extname|
         if engines(extname)
           engine_extnames << extname
+          len -= extname.length
         elsif mime_types(extname)
           format_extname = extname
+          len -= extname.length
+          break
+        else
           break
         end
       end
 
       engine_extnames.reverse!
 
-      { format: format_extname, engines: engine_extnames }
+      { name: path[0, len],
+        format_extname: format_extname,
+        engine_extnames: engine_extnames }
     end
 
     # Internal. Return content type of `path`.
@@ -39,10 +46,17 @@ module Sprockets
     # TODO: Review API and performance
     def content_type_of(path)
       extnames = extensions_for(path)
-      if format_ext = extnames[:format]
+      if format_ext = extnames[:format_extname]
         return mime_types(format_ext)
       end
-      engine_content_type_for(extnames[:engines])
+      engine_content_type_for(extnames[:engine_extnames])
+    end
+
+    def matches_content_type?(mime_type, path)
+      # TODO: Disallow nil mime type
+      mime_type.nil? ||
+        mime_type == "*/*" ||
+        mime_type == content_type_of(path)
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`

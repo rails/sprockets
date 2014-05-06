@@ -220,7 +220,7 @@ module Sprockets
       #     //= require_directory "./javascripts"
       #
       def process_require_directory_directive(path = ".")
-        if relative?(path)
+        if @environment.relative_path?(path)
           root = File.expand_path(path, @base_path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
@@ -232,7 +232,7 @@ module Sprockets
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
               next
-            elsif stat.file? && @environment.content_type_of(subpath) == @content_type
+            elsif stat.file? && @environment.matches_content_type?(@content_type, subpath)
               @required_paths << subpath
             end
           end
@@ -248,7 +248,7 @@ module Sprockets
       #     //= require_tree "./public"
       #
       def process_require_tree_directive(path = ".")
-        if relative?(path)
+        if @environment.relative_path?(path)
           root = File.expand_path(path, @base_path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
@@ -263,7 +263,7 @@ module Sprockets
               next
             elsif stat.directory?
               @dependency_paths << subpath
-            elsif stat.file? && @environment.content_type_of(subpath) == @content_type
+            elsif stat.file? && @environment.matches_content_type?(@content_type, subpath)
               required_paths << subpath
             end
           end
@@ -323,12 +323,8 @@ module Sprockets
       end
 
     private
-      def relative?(path)
-        path =~ /^\.($|\.?\/)/
-      end
-
       def resolve(path, options = {})
-        @environment.resolve(path, options.merge(base_path: @base_path))
+        @environment.resolve(@environment.normalize_path(path, @filename), options)
       end
   end
 end
