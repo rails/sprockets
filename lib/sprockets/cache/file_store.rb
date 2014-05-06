@@ -50,7 +50,17 @@ module Sprockets
         path = File.join(@root, "#{key}.cache")
 
         if File.exist?(path)
-          value = File.open(path, 'rb') { |f| Marshal.load(f) }
+          value = File.open(path, 'rb') do |f|
+            begin
+              Marshal.load(f)
+            rescue Exception => e
+              @logger.error do
+                "#{self.class}[#{path}] could not be unmarshaled: " +
+                  "#{e.class}: #{e.message}"
+              end
+              nil
+            end
+          end
           FileUtils.touch(path)
           value
         else

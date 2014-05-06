@@ -39,7 +39,10 @@ module Sprockets
       end
 
       # Look up the asset.
-      asset = find_asset(path, bundle: !body_only?(env))
+      options = {}
+      options[:bundle] = !body_only?(env)
+      options[:if_match] = fingerprint if fingerprint
+      asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?

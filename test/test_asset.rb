@@ -562,8 +562,17 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "source paths" do
+    assert_equal ["project-729a810640240adfd653c3d958890cfc4ec0ea84.js"],
+      asset("project.js").source_paths
+    assert_equal ["project-729a810640240adfd653c3d958890cfc4ec0ea84.js",
+                  "users-08ae3439d6c8fe911445a2fb6e07ee1dc12ca599.js",
+                  "application-b5df367abb741cac6526b05a726e9e8d7bd863d2.js"],
+      asset("application.js").source_paths
+  end
+
   test "splatted asset includes itself" do
-    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname).map(&:to_s)
+    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:filename)
   end
 
   test "splatted assets are processed assets" do
@@ -572,7 +581,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "splatted asset with child dependencies" do
     assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
-      asset("application.js").to_a.map(&:pathname).map(&:to_s)
+      asset("application.js").to_a.map(&:filename)
   end
 
   test "bundling joins files with blank line" do
@@ -606,7 +615,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "can't require files outside the load path" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::FileOutsidePaths do
       asset("relative/require_outside_path.js")
     end
   end
@@ -808,6 +817,13 @@ class AssetLogicalPathTest < Sprockets::TestCase
 
     assert_equal "coffee.js", logical_path("coffee/index.js")
     assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee")
+
+    assert_equal "jquery.ext.js", logical_path("jquery.ext/index.js")
+    assert_equal "jquery.ext/form.js", logical_path("jquery.ext/form.js")
+
+    assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
+    assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
+    assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
   end
 
   def logical_path(path)

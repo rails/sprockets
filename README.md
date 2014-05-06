@@ -361,6 +361,7 @@ submit a pull request.
 * Environment#version no longer affects asset digests. Only used for busting the asset cache.
 * Removed builtin support for LESS.
 * Removed include directive support.
+* Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
 
 **2.12.1** (April 17, 2014)
 

@@ -1,6 +1,4 @@
 require 'fileutils'
-require 'hike/fileutils'
-require 'pathname'
 require 'sprockets/errors'
 require 'tempfile'
 
@@ -12,8 +10,32 @@ module Sprockets
   module PathUtils
     extend self
 
-    # Include Hike's FileUtils for stat() and entries()
-    include Hike::FileUtils
+    # Internal: Like `File.stat`.
+    #
+    # path - String file or directory path
+    #
+    # Returns nil if the file does not exist.
+    def stat(path)
+      if File.exist?(path)
+        File.stat(path.to_s)
+      else
+        nil
+      end
+    end
+
+    # Internal: A version of `Dir.entries` that filters out `.` files and `~`
+    # swap files.
+    #
+    # path - String directory path
+    #
+    # Returns an empty `Array` if the directory does not exist.
+    def entries(path)
+      if File.directory?(path)
+        Dir.entries(path).reject { |entry| entry =~ /^\.|~$|^\#.*\#$/ }.sort
+      else
+        []
+      end
+    end
 
     # Internal: Check if path is absolute or relative.
     #
@@ -28,6 +50,36 @@ module Sprockets
     else
       def absolute_path?(path)
         path[0] == File::SEPARATOR
+      end
+    end
+
+    # Internal: Check if path is explicitly relative.
+    # Starts with "./" or "../".
+    #
+    # path - String path.
+    #
+    # Returns true if path is relative, otherwise false.
+    def relative_path?(path)
+      path =~ /^\.\.?($|\/)/ ? true : false
+    end
+
+    # Internal: Expand relative paths given a parent filename as reference.
+    #
+    # Closely related to ES6 Module Loader.normalize.
+    #
+    # path - String logical, absolute or relative path
+    # parent_filename - String path (default: nil)
+    #
+    # Returns expanded String path.
+    def normalize_path(path, parent_filename = nil)
+      if path =~ /^\.\.?\//
+        unless parent_filename
+          raise TypeError, "can't normalize relative path without parent: " +
+            path.inspect
+        end
+        File.expand_path(path, File.dirname(parent_filename))
+      else
+        path
       end
     end
 
@@ -102,7 +154,7 @@ module Sprockets
     #
     # Rreturns String or raises an EncodingError.
     def read_unicode_file(filename, external_encoding = Encoding.default_external)
-      Pathname.new(filename).open("r:#{external_encoding}") do |f|
+      File.open(filename, "r:#{external_encoding}") do |f|
         f.read.tap do |data|
           # Eager validate the file's encoding. In most cases we
           # expect it to be UTF-8 unless `default_external` is set to

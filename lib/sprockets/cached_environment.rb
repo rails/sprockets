@@ -14,15 +14,16 @@ module Sprockets
     def initialize(environment)
       @environment = environment
 
-      @default_external_encoding = environment.default_external_encoding
-
       # Copy environment attributes
       @logger            = environment.logger
       @context_class     = environment.context_class
       @cache             = environment.cache
-      @trail             = environment.trail.cached
       @digest_class      = environment.digest_class
       @version           = environment.version
+      @root              = environment.root
+      @paths             = environment.paths.dup
+      @extensions        = environment.extensions.dup
+      @extension_pattern = environment.extension_pattern
       @mime_types        = environment.mime_types
       @transformers      = environment.transformers
       @preprocessors     = environment.preprocessors
@@ -30,7 +31,8 @@ module Sprockets
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
 
-      @paths = @trail.paths.to_a.freeze
+      @stats    = Hash.new { |h, k| h[k] = _stat(k) }
+      @entries  = Hash.new { |h, k| h[k] = _entries(k) }
     end
 
     # No-op return self as cached environment.
@@ -39,8 +41,17 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Override Base#paths to return our cached @paths.
-    attr_reader :paths
+    # Internal: Cache Environment#entries
+    alias_method :_entries, :entries
+    def entries(path)
+      @entries[path]
+    end
+
+    # Internal: Cache Environment#stat
+    alias_method :_stat, :stat
+    def stat(path)
+      @stats[path]
+    end
 
     protected
       # Cache is immutable, any methods that try to clear the cache
@@ -49,10 +60,20 @@ module Sprockets
         raise TypeError, "can't modify immutable cached environment"
       end
 
-      # Cache asset building in memory and in persisted cache.
-      def build_asset_hash(filename, bundle = true)
-        key = [
+      def asset_hash_cache_key(filename, digest, bundle)
+        [
           'asset-hash',
+          VERSION,
+          self.version,
+          filename,
+          digest,
+          bundle
+        ]
+      end
+
+      def asset_digest_cache_key(filename, bundle)
+        [
+          'asset-digest',
           VERSION,
           self.version,
           filename,
@@ -60,16 +81,37 @@ module Sprockets
           file_hexdigest(filename),
           self.paths
         ]
+      end
 
-        if hash = cache._get(key)
-          digest, paths = hash.values_at(:dependency_digest, :dependency_paths)
-          if dependencies_hexdigest(paths) == digest
-            return hash
+      def build_asset_hash_for_digest(*args)
+        cache.fetch(asset_hash_cache_key(*args)) do
+          super
+        end
+      end
+
+      # Cache asset building in memory and in persisted cache.
+      def build_asset_hash(filename, bundle = true)
+        digest_key = asset_digest_cache_key(filename, bundle)
+
+        if digest = cache._get(digest_key)
+          hash_key = asset_hash_cache_key(filename, digest, bundle)
+
+          if hash = cache._get(hash_key)
+            digest, paths = hash.values_at(:dependency_digest, :dependency_paths)
+            if dependencies_hexdigest(paths) == digest
+              return hash
+            end
           end
         end
 
         if hash = super
-          cache._set(key, hash)
+          cache._set(digest_key, hash[:digest])
+
+          # Push into asset digest cache
+          hash_key = asset_hash_cache_key(filename, hash[:digest], bundle)
+          # cache._set(hash_key, hash)
+          cache.fetch(hash_key) { hash }
+
           return hash
         end
 

@@ -4,33 +4,25 @@ module Sprockets
     #
     # All relative paths are expanded with root as its base. To be
     # useful set this to your applications root directory. (`Rails.root`)
-    def root
-      @trail.root
-    end
+    attr_reader :root
 
     # Returns an `Array` of path `String`s.
     #
     # These paths will be used for asset logical path lookups.
-    #
-    # Note that a copy of the `Array` is returned so mutating will
-    # have no affect on the environment. See `append_path`,
-    # `prepend_path`, and `clear_paths`.
-    def paths
-      @trail.paths.dup
-    end
+    attr_reader :paths
 
     # Prepend a `path` to the `paths` list.
     #
     # Paths at the end of the `Array` have the least priority.
     def prepend_path(path)
-      @trail.prepend_path(path)
+      @paths.unshift(File.expand_path(path, root))
     end
 
     # Append a `path` to the `paths` list.
     #
     # Paths at the beginning of the `Array` have a higher priority.
     def append_path(path)
-      @trail.append_path(path)
+      @paths.push(File.expand_path(path, root))
     end
 
     # Clear all paths and start fresh.
@@ -39,7 +31,7 @@ module Sprockets
     # completely wipe the paths list and reappend them in the order
     # you want.
     def clear_paths
-      @trail.paths.dup.each { |path| @trail.remove_path(path) }
+      @paths.clear
     end
 
     # Returns an `Array` of extensions.
@@ -48,23 +40,9 @@ module Sprockets
     #
     #     # => [".js", ".css", ".coffee", ".sass", ...]
     #
-    def extensions
-      @trail.extensions.dup
-    end
+    attr_reader :extensions
 
-    # Works like `Dir.entries`.
-    #
-    # Subclasses may cache this method.
-    def entries(filename)
-      @trail.entries(filename)
-    end
-
-    # Works like `File.stat`.
-    #
-    # Subclasses may cache this method.
-    def stat(path)
-      @trail.stat(path)
-    end
+    attr_reader :extension_pattern
 
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
@@ -84,12 +62,25 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      if absolute_path?(path)
-        if filename = resolve_absolute_path(path, options)
+      extnames = extensions_for(path)
+      extname = extnames[:format_extname]
+      format_content_type = mime_types(extname) if extname
+      content_type = options[:content_type] || format_content_type
+
+      if format_content_type && format_content_type != content_type
+        return
+      end
+
+      filter_content_type = proc do |filename|
+        if matches_content_type?(content_type, filename)
           yield filename
         end
+      end
+
+      if absolute_path?(path)
+        resolve_absolute_path(path, &filter_content_type)
       else
-        resolve_all_logical_paths(path, options, &block)
+        resolve_all_logical_paths(path, extnames[:name], &filter_content_type)
       end
 
       nil
@@ -118,8 +109,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :trail
-
       # Internal: Reverse guess logical path for fully expanded path.
       #
       # This has some known issues. For an example if a file is
@@ -131,23 +120,25 @@ module Sprockets
       def logical_path_for(filename)
         _, path = paths_split(self.paths, filename)
         if path
-          extnames = extensions_for(filename)
-          path = extnames[:engines].inject(path) { |p, ext| p.sub(ext, '') }
+          extnames = extensions_for(path)
 
-          unless extnames[:format]
+          path = extnames[:name]
+          path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
+
+          if extnames[:format_extname]
+            path += extnames[:format_extname]
+          else
             extnames[:mime_types].each do |mime_type|
               # TODO: Why pick the first mime type
               if format_mime_type = @transformers[mime_type].keys.first
                 # TODO: Reverse mime type look is fishy
                 format_extname = @mime_types.key(format_mime_type)
-                path = "#{path}#{format_extname}"
+                path += format_extname
                 break
               end
             end
           end
 
-          extname = File.extname(path)
-          path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
           path
         else
           raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
@@ -161,16 +152,29 @@ module Sprockets
       # options  - Hash (default: {})
       #
       # Returns String filename or nil
-      def resolve_absolute_path(filename, options = {})
-        content_type = options[:content_type]
-        if paths_split(self.paths, filename) && stat(filename)
-          if content_type.nil? || content_type == content_type_of(filename)
-            return filename
+      def resolve_absolute_path(filename, &block)
+        base_path, logical_path = paths_split(self.paths, filename)
+        if base_path && logical_path
+          dirname, basename = File.split(filename)
+          path_matches(dirname, basename, &block)
+        end
+      end
+
+      def path_matches(dirname, basename)
+        self.entries(dirname).each do |entry|
+          if entry.start_with?(basename)
+            if entry[basename.length..-1] =~ @extension_pattern
+              fn = File.join(dirname, entry)
+              stat = self.stat(fn)
+              if stat && stat.file?
+                yield fn
+              end
+            end
           end
         end
       end
 
-      # Internal: Resolve logical path in trail load paths.
+      # Internal: Resolve logical path in load paths.
       #
       # logical_path - String
       # options      - Hash (default: {})
@@ -178,38 +182,27 @@ module Sprockets
       #   filename - String or nil
       #
       # Returns nothing.
-      def resolve_all_logical_paths(logical_path, options = {})
-        extname = extensions_for(logical_path)[:format]
-        format_content_type = mime_types(extname) if extname
-        content_type = options[:content_type] || format_content_type
-
-        if format_content_type && format_content_type != content_type
-          return
-        end
-
+      def resolve_all_logical_paths(logical_path, path_without_extname)
         paths = [logical_path]
-        paths << logical_path.sub(extname, '') if extname
-
-        path_without_extension = extname ?
-          logical_path.sub(extname, '') :
-          logical_path
+        paths << path_without_extname if path_without_extname != logical_path
 
         # optimization: bower.json can only be nested one level deep
-        if !path_without_extension.index('/')
-          paths << File.join(path_without_extension, "bower.json")
+        if !path_without_extname.index('/')
+          paths << File.join(path_without_extname, "bower.json")
         end
 
-        paths << File.join(path_without_extension, "index#{extname}")
+        paths << File.join(path_without_extname, "index")
 
-        @trail.find_all(*paths, options).each do |path|
-          expand_bower_path(path) do |bower_path|
-            if content_type.nil? || content_type == content_type_of(bower_path)
-              yield bower_path
+        paths.each do |path|
+          dirname, basename = File.split(path)
+          @paths.each do |base_path|
+            path_matches(File.expand_path(dirname, base_path), basename) do |filename|
+              expand_bower_path(filename) do |bower_path|
+                yield bower_path
+              end
+
+              yield filename
             end
-          end
-
-          if content_type.nil? || content_type == content_type_of(path)
-            yield path
           end
         end
       end

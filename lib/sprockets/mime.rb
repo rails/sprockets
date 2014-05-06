@@ -22,6 +22,7 @@ module Sprockets
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
       ext = Sprockets::Utils.normalize_extension(ext)
+      @extensions.push(ext)
       @mime_types[ext] = mime_type
     end
 
@@ -35,7 +36,7 @@ module Sprockets
     # back on the default external encoding, if it exists.
     def encoding_for_mime_type(type)
       encoding = Encoding::BINARY if type =~ %r{^(image|audio|video)/}
-      encoding ||= default_external_encoding
+      encoding ||= Sprockets.default_external_encoding
       encoding
     end
   end

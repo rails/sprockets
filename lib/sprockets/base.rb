@@ -118,52 +118,35 @@ module Sprockets
 
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      @trail.append_extension(ext)
-      super
+      super.tap { expire_cache! }
     end
 
     def register_transformer(from, to, processor)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def register_preprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def unregister_preprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def register_postprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def unregister_postprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def register_bundle_processor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def unregister_bundle_processor(mime_type, klass)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     # Return an `Cached`. Must be implemented by the subclass.
@@ -171,10 +154,6 @@ module Sprockets
       raise NotImplementedError
     end
     alias_method :index, :cached
-
-    # Define `default_external_encoding` accessor on 1.9.
-    # Defaults to UTF-8.
-    attr_accessor :default_external_encoding
 
     # Internal: Compute hexdigest for path.
     #
@@ -216,7 +195,13 @@ module Sprockets
       options[:bundle] = true unless options.key?(:bundle)
 
       if filename = resolve_all(path.to_s).first
-        asset_hash = build_asset_hash(filename, options[:bundle])
+        if options[:if_match]
+          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle])
+        else
+          asset_hash = build_asset_hash(filename, options[:bundle])
+        end
+
+        return unless asset_hash
 
         case asset_hash[:type]
         when 'bundled'
@@ -241,9 +226,7 @@ module Sprockets
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
         "root=#{root.to_s.inspect}, " +
-        "paths=#{paths.inspect}, " +
-        "digest=#{digest.to_s.inspect}" +
-        ">"
+        "paths=#{paths.inspect}>"
     end
 
     protected
@@ -251,6 +234,13 @@ module Sprockets
       # the subclass.
       def expire_cache!
         raise NotImplementedError
+      end
+
+      def build_asset_hash_for_digest(filename, digest, bundle)
+        asset_hash = build_asset_hash(filename, bundle)
+        if asset_hash[:digest] == digest
+          asset_hash
+        end
       end
 
       def build_asset_hash(filename, bundle = true)
@@ -267,7 +257,7 @@ module Sprockets
           content_type: content_type
         }
 
-        engine_exts = extensions_for(filename)[:engines]
+        engine_exts = extensions_for(filename)[:engine_extnames]
         processed_processors = preprocessors(content_type) +
           engine_exts.map { |ext|
             # TODO: Why do we pick the first transformer

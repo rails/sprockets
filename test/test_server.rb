@@ -158,6 +158,11 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
+  test "bad fingerprint digest returns a 404" do
+    get "/assets/application-0000000000000000000000000000000000000000.js"
+    assert_equal 404, last_response.status
+  end
+
   test "missing source" do
     get "/assets/none.js"
     assert_equal 404, last_response.status

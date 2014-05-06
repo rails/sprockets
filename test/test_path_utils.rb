@@ -31,6 +31,38 @@ class TestPathUtils < Sprockets::TestCase
   test "check absolute path" do
     assert absolute_path?("/foo.rb")
     refute absolute_path?("foo.rb")
+    refute absolute_path?("./foo.rb")
+    refute absolute_path?("../foo.rb")
+  end
+
+  test "check relative path" do
+    assert relative_path?(".")
+    assert relative_path?("..")
+    assert relative_path?("./")
+    assert relative_path?("../")
+    assert relative_path?("./foo.rb")
+    assert relative_path?("../foo.rb")
+    refute relative_path?("/foo.rb")
+    refute relative_path?("foo.rb")
+    refute relative_path?(".foo.rb")
+    refute relative_path?("..foo.rb")
+  end
+
+  test "normalize path" do
+    assert_equal "foo", normalize_path("foo")
+    assert_equal "foo/bar", normalize_path("foo/bar")
+    assert_equal "foo/bar/baz", normalize_path("foo/bar/baz")
+
+    assert_equal fixture_path("root/foo/bar/baz"),
+      normalize_path("./foo/bar/baz", fixture_path("root/main"))
+    assert_equal fixture_path("foo/bar"), normalize_path("../foo/bar", fixture_path("root/main"))
+
+    assert_raises TypeError do
+      normalize_path("./foo")
+    end
+    assert_raises TypeError do
+      normalize_path("../foo")
+    end
   end
 
   test "split paths root from base" do

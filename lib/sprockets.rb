@@ -42,7 +42,6 @@ module Sprockets
   autoload :Utils,                   'sprockets/utils'
 
   # Extend Sprockets module to provide global registry
-  require 'hike'
   require 'sprockets/engines'
   require 'sprockets/mime'
   require 'sprockets/processing'
@@ -50,7 +49,9 @@ module Sprockets
   require 'sprockets/paths'
   extend Engines, Mime, Processing, Compressing, Paths
 
-  @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
+  @root              = File.expand_path('..', __FILE__)
+  @paths             = []
+  @extensions        = []
   @mime_types        = {}
   @engines           = {}
   @transformers      = Hash.new { |h, k| h[k] = {} }
@@ -58,6 +59,13 @@ module Sprockets
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
   @bundle_processors = Hash.new { |h, k| h[k] = [] }
   @compressors       = Hash.new { |h, k| h[k] = {} }
+
+  # Define `default_external_encoding` accessor on 1.9.
+  # Defaults to UTF-8.
+  class << self
+    attr_accessor :default_external_encoding
+  end
+  self.default_external_encoding = Encoding::UTF_8
 
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'

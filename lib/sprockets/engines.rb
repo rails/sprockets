@@ -33,6 +33,7 @@ module Sprockets
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
+      @extensions.push(ext)
 
       from = registered_mime_types[ext]
       if from.nil?

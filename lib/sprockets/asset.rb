@@ -33,7 +33,7 @@ module Sprockets
       logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
     end
 
-    # Expand asset into an `Array` of parts.
+    # Deprecated: Expand asset into an `Array` of parts.
     #
     # Appending all of an assets body parts together should give you
     # the asset's contents as a whole.
@@ -71,6 +71,9 @@ module Sprockets
 
     # Public: Returns String hexdigest of source.
     attr_reader :digest
+
+    # Pubic: ETag String of Asset.
+    alias_method :etag, :digest
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.
