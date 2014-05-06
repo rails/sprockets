@@ -38,7 +38,7 @@ module Sprockets
     #
     # Returns true if path is relative, otherwise false.
     def relative_path?(path)
-      path =~ /^\.\.?\//
+      path =~ /^\.\.?($|\/)/ ? true : false
     end
 
     # Internal: Expand relative paths given a parent filename as reference.

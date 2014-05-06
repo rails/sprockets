@@ -220,7 +220,7 @@ module Sprockets
       #     //= require_directory "./javascripts"
       #
       def process_require_directory_directive(path = ".")
-        if relative?(path)
+        if @environment.relative_path?(path)
           root = File.expand_path(path, @base_path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
@@ -248,7 +248,7 @@ module Sprockets
       #     //= require_tree "./public"
       #
       def process_require_tree_directive(path = ".")
-        if relative?(path)
+        if @environment.relative_path?(path)
           root = File.expand_path(path, @base_path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
@@ -323,10 +323,6 @@ module Sprockets
       end
 
     private
-      def relative?(path)
-        path =~ /^\.($|\.?\/)/
-      end
-
       def resolve(path, options = {})
         @environment.resolve(path, options.merge(base_path: @base_path))
       end
