@@ -37,14 +37,6 @@ module Sprockets
       @bundle_processors = Sprockets.bundle_processors
       @compressors       = Sprockets.compressors
 
-      @engines.each do |ext, klass|
-        @extensions.push(Utils.normalize_extension(ext))
-      end
-
-      @mime_types.each do |ext, type|
-        @extensions.push(Utils.normalize_extension(ext))
-      end
-
       self.cache = Cache::MemoryStore.new
       expire_cache!
 

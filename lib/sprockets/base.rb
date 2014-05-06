@@ -121,7 +121,6 @@ module Sprockets
       # Overrides the global behavior to expire the cache
       expire_cache!
       super
-      @extensions.push(Utils.normalize_extension(ext))
     end
 
     # Registers a new Engine `klass` for `ext`.
@@ -129,7 +128,6 @@ module Sprockets
       # Overrides the global behavior to expire the cache
       expire_cache!
       super
-      @extensions.push(Utils.normalize_extension(ext))
     end
 
     def register_preprocessor(mime_type, klass, &block)
