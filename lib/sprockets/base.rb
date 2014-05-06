@@ -156,10 +156,6 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Define `default_external_encoding` accessor on 1.9.
-    # Defaults to UTF-8.
-    attr_accessor :default_external_encoding
-
     # Internal: Compute hexdigest for path.
     #
     # path - String filename or directory path.
