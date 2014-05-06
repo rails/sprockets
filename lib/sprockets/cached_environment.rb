@@ -23,6 +23,7 @@ module Sprockets
       @trail             = environment.trail.cached
       @digest_class      = environment.digest_class
       @version           = environment.version
+      @root              = environment.root
       @paths             = environment.paths.dup
       @extensions        = environment.extensions.dup
       @mime_types        = environment.mime_types

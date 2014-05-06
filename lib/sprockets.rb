@@ -50,6 +50,7 @@ module Sprockets
   require 'sprockets/paths'
   extend Engines, Mime, Processing, Compressing, Paths
 
+  @root              = File.expand_path('..', __FILE__)
   @paths             = []
   @extensions        = []
   @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))

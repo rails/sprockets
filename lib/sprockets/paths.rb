@@ -4,9 +4,7 @@ module Sprockets
     #
     # All relative paths are expanded with root as its base. To be
     # useful set this to your applications root directory. (`Rails.root`)
-    def root
-      @trail.root
-    end
+    attr_reader :root
 
     # Returns an `Array` of path `String`s.
     #

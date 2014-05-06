@@ -14,7 +14,8 @@ module Sprockets
     #     env = Environment.new(Rails.root)
     #
     def initialize(root = ".")
-      @trail = Hike::Trail.new(root)
+      @root = File.expand_path(root)
+      @trail = Hike::Trail.new(@root)
 
       self.logger = Logger.new($stderr)
       self.logger.level = Logger::FATAL
