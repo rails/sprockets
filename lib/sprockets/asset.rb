@@ -33,7 +33,7 @@ module Sprockets
       logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
     end
 
-    # Expand asset into an `Array` of parts.
+    # Deprecated: Expand asset into an `Array` of parts.
     #
     # Appending all of an assets body parts together should give you
     # the asset's contents as a whole.

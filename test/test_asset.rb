@@ -562,8 +562,17 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "source paths" do
+    assert_equal ["project-729a810640240adfd653c3d958890cfc4ec0ea84.js"],
+      asset("project.js").source_paths
+    assert_equal ["project-729a810640240adfd653c3d958890cfc4ec0ea84.js",
+                  "users-08ae3439d6c8fe911445a2fb6e07ee1dc12ca599.js",
+                  "application-b5df367abb741cac6526b05a726e9e8d7bd863d2.js"],
+      asset("application.js").source_paths
+  end
+
   test "splatted asset includes itself" do
-    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:pathname).map(&:to_s)
+    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:filename)
   end
 
   test "splatted assets are processed assets" do
@@ -572,7 +581,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "splatted asset with child dependencies" do
     assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
-      asset("application.js").to_a.map(&:pathname).map(&:to_s)
+      asset("application.js").to_a.map(&:filename)
   end
 
   test "bundling joins files with blank line" do
