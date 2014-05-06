@@ -154,7 +154,6 @@ module Sprockets
     end
 
     def asset_data_url(path)
-      # TODO: Only find static assets
       if asset = sprockets_environment.find_asset(path.value)
         sprockets_dependencies << asset.filename
         base64 = Base64.strict_encode64(asset.to_s)
