@@ -32,6 +32,7 @@ module Sprockets
       @mime_types        = Sprockets.registered_mime_types
       @engines           = Sprockets.engines
       @engine_mime_types = Sprockets.engine_mime_types
+      @engine_extensions = Sprockets.engine_extensions
       @preprocessors     = Sprockets.preprocessors
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors

@@ -27,7 +27,8 @@ module Sprockets
       @extensions        = environment.extensions.dup
       @mime_types        = environment.mime_types
       @engines           = environment.engines
-      @engine_mime_types = environment.engine_mime_types
+      @engine_mime_types = environment.engine_mime_types.dup
+      @engine_extensions = environment.engine_extensions.dup
       @preprocessors     = environment.preprocessors
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors

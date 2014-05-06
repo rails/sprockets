@@ -47,9 +47,12 @@ module Sprockets
     # Internal: Returns a `Hash` of engine extensions to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }
-    def engine_mime_types
-      @engine_mime_types.dup
-    end
+    attr_reader :engine_mime_types
+
+    # Internal: Returns a `Hash` of engine extensions to format extensions.
+    #
+    # # => { '.coffee' => '.js' }
+    attr_reader :engine_extensions
 
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
@@ -63,12 +66,16 @@ module Sprockets
       if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
         @engines[ext] = klass
         if options[:mime_type]
-          @engine_mime_types[ext.to_s] = options[:mime_type]
+          engine_mime_types[ext.to_s] = options[:mime_type]
+          # FIXME: Reverse mime type lookup is a smell
+          engine_extensions[ext.to_s] = mime_types.key(options[:mime_type])
         end
       else
         @engines[ext] = LegacyTiltProcessor.new(klass)
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          @engine_mime_types[ext.to_s] = klass.default_mime_type
+          engine_mime_types[ext.to_s] = klass.default_mime_type
+          # FIXME: Reverse mime type lookup is a smell
+          engine_extensions[ext.to_s] = mime_types.key(klass.default_mime_type)
         end
       end
     end
@@ -80,7 +87,7 @@ module Sprockets
       # content type.
       def engine_content_type_for(extnames)
         extnames.each do |extname|
-          if mime_type = @engine_mime_types[extname]
+          if mime_type = engine_mime_types[extname]
             return mime_type
           end
         end

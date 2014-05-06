@@ -55,6 +55,7 @@ module Sprockets
   @mime_types        = {}
   @engines           = {}
   @engine_mime_types = {}
+  @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
   @bundle_processors = Hash.new { |h, k| h[k] = [] }
