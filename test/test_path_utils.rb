@@ -33,6 +33,23 @@ class TestPathUtils < Sprockets::TestCase
     refute absolute_path?("foo.rb")
   end
 
+  test "normalize path" do
+    assert_equal "foo", normalize_path("foo")
+    assert_equal "foo/bar", normalize_path("foo/bar")
+    assert_equal "foo/bar/baz", normalize_path("foo/bar/baz")
+
+    assert_equal fixture_path("root/foo/bar/baz"),
+      normalize_path("./foo/bar/baz", fixture_path("root/main"))
+    assert_equal fixture_path("foo/bar"), normalize_path("../foo/bar", fixture_path("root/main"))
+
+    assert_raises TypeError do
+      normalize_path("./foo")
+    end
+    assert_raises TypeError do
+      normalize_path("../foo")
+    end
+  end
+
   test "split paths root from base" do
     assert_equal [fixture_path("default"), "application.js"],
       paths_split([fixture_path("default")], fixture_path("default/application.js"))
