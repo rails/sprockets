@@ -31,6 +31,15 @@ class TestPathUtils < Sprockets::TestCase
   test "check absolute path" do
     assert absolute_path?("/foo.rb")
     refute absolute_path?("foo.rb")
+    refute absolute_path?("./foo.rb")
+    refute absolute_path?("../foo.rb")
+  end
+
+  test "check relative path" do
+    assert relative_path?("./foo.rb")
+    assert relative_path?("../foo.rb")
+    refute relative_path?("/foo.rb")
+    refute relative_path?("foo.rb")
   end
 
   test "normalize path" do

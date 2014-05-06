@@ -31,6 +31,16 @@ module Sprockets
       end
     end
 
+    # Internal: Check if path is explicitly relative.
+    # Starts with "./" or "../".
+    #
+    # path - String path.
+    #
+    # Returns true if path is relative, otherwise false.
+    def relative_path?(path)
+      path =~ /^\.\.?\//
+    end
+
     # Internal: Expand relative paths given a parent filename as reference.
     #
     # Closely related to ES6 Module Loader.normalize.
