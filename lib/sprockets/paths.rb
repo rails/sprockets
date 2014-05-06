@@ -42,6 +42,8 @@ module Sprockets
     #
     attr_reader :extensions
 
+    attr_reader :extension_pattern
+
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
     # and shadowed matches.
@@ -155,16 +157,14 @@ module Sprockets
       end
 
       def path_matches(dirname, basename)
-        basename_re = Regexp.escape(basename)
-        extension_pattern = @extensions.map { |e| Regexp.escape(e) }.join("|")
-        pattern = /^#{basename_re}(?:#{extension_pattern})*$/
-
         self.entries(dirname).each do |entry|
-          if entry =~ pattern
-            fn = File.join(dirname, entry)
-            stat = self.stat(fn)
-            if stat && stat.file?
-              yield fn
+          if entry.start_with?(basename)
+            if entry[basename.length..-1] =~ @extension_pattern
+              fn = File.join(dirname, entry)
+              stat = self.stat(fn)
+              if stat && stat.file?
+                yield fn
+              end
             end
           end
         end

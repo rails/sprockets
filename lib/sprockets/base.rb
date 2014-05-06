@@ -118,52 +118,36 @@ module Sprockets
 
     # Register a new mime type.
     def register_mime_type(mime_type, ext)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     # Registers a new Engine `klass` for `ext`.
     def register_engine(ext, klass, options = {})
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def register_preprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def unregister_preprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def register_postprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def unregister_postprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def register_bundle_processor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     def unregister_bundle_processor(mime_type, klass)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
+      super.tap { expire_cache! }
     end
 
     # Return an `Cached`. Must be implemented by the subclass.
