@@ -33,8 +33,8 @@ module Sprockets
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
 
-      @stats    = Hash.new { |h, k| h[k] = PathUtils.stat(k) }
-      @entries  = Hash.new { |h, k| h[k] = PathUtils.entries(k) }
+      @stats    = Hash.new { |h, k| h[k] = _stat(k) }
+      @entries  = Hash.new { |h, k| h[k] = _entries(k) }
     end
 
     # No-op return self as cached environment.
@@ -44,11 +44,13 @@ module Sprockets
     alias_method :index, :cached
 
     # Internal: Cache Environment#entries
+    alias_method :_entries, :entries
     def entries(path)
       @entries[path]
     end
 
     # Internal: Cache Environment#stat
+    alias_method :_stat, :stat
     def stat(path)
       @stats[path]
     end
