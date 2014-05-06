@@ -33,6 +33,9 @@ module Sprockets
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
+
+      @stats    = Hash.new { |h, k| h[k] = PathUtils.stat(k) }
+      @entries  = Hash.new { |h, k| h[k] = PathUtils.entries(k) }
     end
 
     # No-op return self as cached environment.
@@ -41,8 +44,15 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Override Base#paths to return our cached @paths.
-    attr_reader :paths
+    # Internal: Cache Environment#entries
+    def entries(path)
+      @entries[path]
+    end
+
+    # Internal: Cache Environment#stat
+    def stat(path)
+      @stats[path]
+    end
 
     protected
       # Cache is immutable, any methods that try to clear the cache

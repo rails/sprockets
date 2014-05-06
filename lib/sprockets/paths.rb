@@ -42,20 +42,6 @@ module Sprockets
     #
     attr_reader :extensions
 
-    # Works like `Dir.entries`.
-    #
-    # Subclasses may cache this method.
-    def entries(filename)
-      @trail.entries(filename)
-    end
-
-    # Works like `File.stat`.
-    #
-    # Subclasses may cache this method.
-    def stat(path)
-      @trail.stat(path)
-    end
-
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
     # and shadowed matches.
