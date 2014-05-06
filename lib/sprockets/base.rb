@@ -277,9 +277,7 @@ module Sprockets
             end
             asset
           else
-            Utils.prevent_circular_calls(filename) do
-              build_bundled_asset_hash(attributes, bundled_processors)
-            end
+            build_bundled_asset_hash(attributes, bundled_processors)
           end
         else
           build_static_asset_hash(attributes)
@@ -305,29 +303,32 @@ module Sprockets
         )
       end
 
-      def build_bundled_asset_hash(asset, processors)
-        processed_asset = build_asset_hash(asset[:filename], false)
-
-        bundled_assets = {}
-
-        required_paths = Set.new
-        processed_asset[:required_paths].each do |path|
-          if path == asset[:filename]
-            required_paths << path
-          else
-            asset_hash = bundled_assets[path] ||= build_asset_hash(path, true)
-            required_paths.merge(asset_hash[:required_paths])
+      def expand_asset_deps(paths, self_path, cache)
+        Utils.prevent_circular_calls(self_path) do
+          paths.inject(Set.new) do |deps, dep|
+            if dep == self_path
+              deps.add(dep)
+            else
+              asset = cache[dep] ||= build_asset_hash(dep, false)
+              deps.merge(expand_asset_deps(asset[:required_paths], dep, cache))
+            end
+            deps
           end
         end
+      end
 
-        processed_asset[:stubbed_paths].each do |path|
-          asset_hash = bundled_assets[path] ||= build_asset_hash(path, true)
-          required_paths.subtract(asset_hash[:required_paths])
-        end
+      def build_bundled_asset_hash(asset, processors)
+        filename = asset[:filename]
+        processed_asset = build_asset_hash(filename, false)
+
+        cache = {}
+        required_paths = expand_asset_deps(processed_asset[:required_paths], filename, cache)
+        stubbed_paths  = expand_asset_deps(processed_asset[:stubbed_paths], filename, cache)
+        required_paths.subtract(stubbed_paths)
 
         dependency_paths = Set.new
-        required_asset_hashes = required_paths.map do |filename|
-          asset_hash = build_asset_hash(filename, false)
+        required_asset_hashes = required_paths.map do |path|
+          asset_hash = build_asset_hash(path, false)
           dependency_paths.merge(asset_hash[:dependency_paths])
           asset_hash
         end
