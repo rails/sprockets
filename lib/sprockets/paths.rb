@@ -157,14 +157,13 @@ module Sprockets
       end
 
       def path_matches(dirname, basename)
-        matches = self.entries(dirname)
         basename_re = Regexp.escape(basename)
         extension_pattern = @extensions.map { |e| Regexp.escape(e) }.join("|")
         pattern = /^#{basename_re}(?:#{extension_pattern})*$/
 
-        matches.each do |path|
-          if path =~ pattern
-            fn = File.join(dirname, path)
+        self.entries(dirname).each do |entry|
+          if entry =~ pattern
+            fn = File.join(dirname, entry)
             stat = self.stat(fn)
             if stat && stat.file?
               yield fn
