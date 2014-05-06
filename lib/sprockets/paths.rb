@@ -128,7 +128,7 @@ module Sprockets
             extnames[:engine_extnames].each do |eng_ext|
               if eng_mime_type = @engine_mime_types[eng_ext]
                 # FIXME: Reverse mime type lookup is a smell
-                path += mime_types.key(eng_mime_type)
+                path += @mime_types.key(eng_mime_type)
                 break
               end
             end
