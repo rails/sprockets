@@ -48,9 +48,7 @@ module Sprockets
     #
     #     # => [".js", ".css", ".coffee", ".sass", ...]
     #
-    def extensions
-      @trail.extensions.dup
-    end
+    attr_reader :extensions
 
     # Works like `Dir.entries`.
     #
@@ -185,7 +183,7 @@ module Sprockets
       def path_matches(dirname, basename)
         matches = self.entries(dirname)
         basename_re = Regexp.escape(basename)
-        extension_pattern = @trail.extensions.map { |e| Regexp.escape(e) }.join("|")
+        extension_pattern = @extensions.map { |e| Regexp.escape(e) }.join("|")
         pattern = /^#{basename_re}(?:#{extension_pattern})*$/
 
         matches.each do |path|

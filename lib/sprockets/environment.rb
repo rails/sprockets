@@ -28,6 +28,7 @@ module Sprockets
       @digest_class = Digest::SHA1
       @version = ''
 
+      @extensions        = []
       @mime_types        = Sprockets.registered_mime_types
       @engines           = Sprockets.engines
       @engine_mime_types = Sprockets.engine_mime_types
@@ -41,11 +42,11 @@ module Sprockets
       end
 
       @engines.each do |ext, klass|
-        @trail.append_extension(ext)
+        @extensions.push(Utils.normalize_extension(ext))
       end
 
       @mime_types.each do |ext, type|
-        @trail.append_extension(ext)
+        @extensions.push(Utils.normalize_extension(ext))
       end
 
       self.cache = Cache::MemoryStore.new

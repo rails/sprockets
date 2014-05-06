@@ -120,8 +120,8 @@ module Sprockets
     def register_mime_type(mime_type, ext)
       # Overrides the global behavior to expire the cache
       expire_cache!
-      @trail.append_extension(ext)
       super
+      @extensions.push(Utils.normalize_extension(ext))
     end
 
     # Registers a new Engine `klass` for `ext`.
@@ -129,7 +129,7 @@ module Sprockets
       # Overrides the global behavior to expire the cache
       expire_cache!
       super
-      @trail.append_extension(ext.to_s)
+      @extensions.push(Utils.normalize_extension(ext))
     end
 
     def register_preprocessor(mime_type, klass, &block)
