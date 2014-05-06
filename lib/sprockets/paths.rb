@@ -106,8 +106,6 @@ module Sprockets
     end
 
     protected
-      attr_reader :trail
-
       # Internal: Reverse guess logical path for fully expanded path.
       #
       # This has some known issues. For an example if a file is
@@ -175,7 +173,7 @@ module Sprockets
         end
       end
 
-      # Internal: Resolve logical path in trail load paths.
+      # Internal: Resolve logical path in load paths.
       #
       # logical_path - String
       # options      - Hash (default: {})

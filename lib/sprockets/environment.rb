@@ -3,7 +3,6 @@ require 'sprockets/context'
 require 'sprockets/cached_environment'
 
 require 'digest/sha1'
-require 'hike'
 require 'logger'
 
 module Sprockets
@@ -15,7 +14,6 @@ module Sprockets
     #
     def initialize(root = ".")
       @root = File.expand_path(root)
-      @trail = Hike::Trail.new(@root)
 
       self.logger = Logger.new($stderr)
       self.logger.level = Logger::FATAL

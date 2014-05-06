@@ -20,7 +20,6 @@ module Sprockets
       @logger            = environment.logger
       @context_class     = environment.context_class
       @cache             = environment.cache
-      @trail             = environment.trail.cached
       @digest_class      = environment.digest_class
       @version           = environment.version
       @root              = environment.root
