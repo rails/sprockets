@@ -100,8 +100,6 @@ module Sprockets
 
       if absolute_path?(path)
         resolve_absolute_path(path, &filter_content_type)
-      elsif relative_path?(path)
-        resolve_relative_path(path, options[:base_path], &filter_content_type)
       else
         resolve_all_logical_paths(path, &filter_content_type)
       end
@@ -182,10 +180,6 @@ module Sprockets
           dirname, basename = File.split(filename)
           path_matches(dirname, basename, &block)
         end
-      end
-
-      def resolve_relative_path(path, base_path, &block)
-        resolve_absolute_path(File.expand_path(path, base_path), &block)
       end
 
       def path_matches(dirname, basename)

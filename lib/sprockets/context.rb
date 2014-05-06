@@ -78,8 +78,8 @@ module Sprockets
     #     # => "/path/to/app/javascripts/bar.js"
     #
     def resolve(path, options = {})
-      options = {base_path: self.pathname.dirname}.merge(options)
       options[:content_type] = self.content_type if options[:content_type] == :self
+      path = environment.normalize_path(path, @filename)
       environment.resolve(path, options)
     end
 

@@ -324,7 +324,7 @@ module Sprockets
 
     private
       def resolve(path, options = {})
-        @environment.resolve(path, options.merge(base_path: @base_path))
+        @environment.resolve(@environment.normalize_path(path, @filename), options)
       end
   end
 end

@@ -606,7 +606,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "can't require files outside the load path" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::FileOutsidePaths do
       asset("relative/require_outside_path.js")
     end
   end
