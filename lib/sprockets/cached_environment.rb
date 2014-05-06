@@ -23,6 +23,7 @@ module Sprockets
       @trail             = environment.trail.cached
       @digest_class      = environment.digest_class
       @version           = environment.version
+      @paths             = environment.paths.dup
       @extensions        = environment.extensions.dup
       @mime_types        = environment.mime_types
       @engines           = environment.engines
@@ -31,8 +32,6 @@ module Sprockets
       @postprocessors    = environment.postprocessors
       @bundle_processors = environment.bundle_processors
       @compressors       = environment.compressors
-
-      @paths = @trail.paths.to_a.freeze
     end
 
     # No-op return self as cached environment.

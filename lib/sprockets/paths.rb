@@ -11,26 +11,20 @@ module Sprockets
     # Returns an `Array` of path `String`s.
     #
     # These paths will be used for asset logical path lookups.
-    #
-    # Note that a copy of the `Array` is returned so mutating will
-    # have no affect on the environment. See `append_path`,
-    # `prepend_path`, and `clear_paths`.
-    def paths
-      @trail.paths.dup
-    end
+    attr_reader :paths
 
     # Prepend a `path` to the `paths` list.
     #
     # Paths at the end of the `Array` have the least priority.
     def prepend_path(path)
-      @trail.prepend_path(path)
+      @paths.unshift(File.expand_path(path, root))
     end
 
     # Append a `path` to the `paths` list.
     #
     # Paths at the beginning of the `Array` have a higher priority.
     def append_path(path)
-      @trail.append_path(path)
+      @paths.push(File.expand_path(path, root))
     end
 
     # Clear all paths and start fresh.
@@ -39,7 +33,7 @@ module Sprockets
     # completely wipe the paths list and reappend them in the order
     # you want.
     def clear_paths
-      @trail.paths.dup.each { |path| @trail.remove_path(path) }
+      @paths.clear
     end
 
     # Returns an `Array` of extensions.
@@ -222,7 +216,7 @@ module Sprockets
 
         paths.each do |path|
           dirname, basename = File.split(path)
-          @trail.paths.each do |base_path|
+          @paths.each do |base_path|
             path_matches(File.expand_path(dirname, base_path), basename) do |filename|
               expand_bower_path(filename) do |bower_path|
                 yield bower_path

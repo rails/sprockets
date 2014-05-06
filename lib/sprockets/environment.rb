@@ -28,7 +28,8 @@ module Sprockets
       @digest_class = Digest::SHA1
       @version = ''
 
-      @extensions        = []
+      @paths             = Sprockets.paths.dup
+      @extensions        = Sprockets.extensions.dup
       @mime_types        = Sprockets.registered_mime_types
       @engines           = Sprockets.engines
       @engine_mime_types = Sprockets.engine_mime_types
@@ -36,10 +37,6 @@ module Sprockets
       @postprocessors    = Sprockets.postprocessors
       @bundle_processors = Sprockets.bundle_processors
       @compressors       = Sprockets.compressors
-
-      Sprockets.paths.each do |path|
-        append_path(path)
-      end
 
       @engines.each do |ext, klass|
         @extensions.push(Utils.normalize_extension(ext))
