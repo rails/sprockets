@@ -45,6 +45,13 @@ module Sprockets
       engine_content_type_for(extnames[:engines])
     end
 
+    def matches_content_type?(mime_type, path)
+      # TODO: Disallow nil mime type
+      mime_type.nil? ||
+        mime_type == "*/*" ||
+        mime_type == content_type_of(path)
+    end
+
     # Returns an `Array` of `Processor` classes. If a `mime_type`
     # argument is supplied, the processors registered under that
     # extension will be returned.

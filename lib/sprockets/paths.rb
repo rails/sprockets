@@ -69,7 +69,7 @@ module Sprockets
       end
 
       filter_content_type = proc do |filename|
-        if content_type.nil? || content_type == content_type_of(filename)
+        if matches_content_type?(content_type, filename)
           yield filename
         end
       end
