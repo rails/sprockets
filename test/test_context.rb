@@ -114,8 +114,8 @@ class TestCustomProcessor < Sprockets::TestCase
     end
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
-      @env["sprite.css.embed"].to_s.lines.to_a[0..1].join
-    assert_equal 58240, @env["sprite.css.embed"].length
+      @env["sprite2.css"].to_s.lines.to_a[0..1].join
+    assert_equal 58240, @env["sprite2.css"].length
   end
 
   test "resolve with content type" do

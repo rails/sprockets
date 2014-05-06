@@ -60,7 +60,8 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      extname = extensions_for(path)[:format]
+      extnames = extensions_for(path)
+      extname = extnames[:format_extname]
       format_content_type = mime_types(extname) if extname
       content_type = options[:content_type] || format_content_type
 
@@ -77,7 +78,7 @@ module Sprockets
       if absolute_path?(path)
         resolve_absolute_path(path, &filter_content_type)
       else
-        resolve_all_logical_paths(path, &filter_content_type)
+        resolve_all_logical_paths(path, extnames[:name], &filter_content_type)
       end
 
       nil
@@ -116,25 +117,23 @@ module Sprockets
       def logical_path_for(filename)
         _, path = paths_split(self.paths, filename)
         if path
-          extnames = extensions_for(filename)
+          extnames = extensions_for(path)
 
-          # TODO: Strange to trust that engine extnames are always last
-          trim = extnames[:engines].join.length
-          path = path[0...(-trim)] if trim > 0
+          path = extnames[:name]
+          path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
 
-          unless extnames[:format]
-            extnames[:engines].each do |eng_ext|
+          if extnames[:format_extname]
+            path += extnames[:format_extname]
+          else
+            extnames[:engine_extnames].each do |eng_ext|
               if eng_mime_type = @engine_mime_types[eng_ext]
                 # FIXME: Reverse mime type lookup is a smell
-                ext = mime_types.key(eng_mime_type)
-                path = "#{path}#{ext}"
+                path += mime_types.key(eng_mime_type)
                 break
               end
             end
           end
 
-          extname = File.extname(path)
-          path = path.sub(/\/index\./, '.') if File.basename(path, extname) == 'index'
           path
         else
           raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
@@ -180,13 +179,9 @@ module Sprockets
       #   filename - String or nil
       #
       # Returns nothing.
-      def resolve_all_logical_paths(logical_path)
-        extname = extensions_for(logical_path)[:format]
-
+      def resolve_all_logical_paths(logical_path, path_without_extname)
         paths = [logical_path]
-        # TODO: Strange to trust that `extname` is always last
-        paths << logical_path[0...(-extname.length)] if extname && extname.length > 0
-        path_without_extname = paths.last
+        paths << path_without_extname if path_without_extname != logical_path
 
         # optimization: bower.json can only be nested one level deep
         if !path_without_extname.index('/')
