@@ -704,16 +704,13 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal "var Foo = {};\n\n\n\n", asset("stub/application").to_s
   end
 
-  test "circular require raises an error" do
-    assert_raises(Sprockets::CircularDependencyError) do
-      asset("circle/a.js")
-    end
-    assert_raises(Sprockets::CircularDependencyError) do
-      asset("circle/b.js")
-    end
-    assert_raises(Sprockets::CircularDependencyError) do
-      asset("circle/c.js")
-    end
+  test "resolves circular requires" do
+    assert_equal "var A;\nvar C;\nvar B;\n",
+      asset("circle/a.js").to_s
+    assert_equal "var B;\nvar A;\nvar C;\n",
+      asset("circle/b.js").to_s
+    assert_equal "var C;\nvar B;\nvar A;\n",
+      asset("circle/c.js").to_s
   end
 
   test "unknown directives are ignored" do

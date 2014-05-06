@@ -33,7 +33,6 @@ module Sprockets
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
-  autoload :CircularDependencyError, 'sprockets/errors'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'

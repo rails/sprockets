@@ -303,21 +303,26 @@ module Sprockets
         )
       end
 
-      def expand_asset_deps(paths, self_path, cache, calls = [])
-        if calls.include?(self_path)
-          raise CircularDependencyError, "#{self_path} has already been required"
-        end
-        calls = calls.dup << self_path
+      def expand_asset_deps(paths, path, cache)
+        stack = []
+        stack.concat(paths.reverse)
 
-        paths.inject(Set.new) do |deps, dep|
-          if dep == self_path
-            deps.add(dep)
+        deps = Set.new
+
+        seen = Set.new
+        seen.add(path)
+
+        while path = stack.pop
+          if seen.include?(path)
+            deps.add(path)
           else
-            asset = cache[dep] ||= build_asset_hash(dep, false)
-            deps.merge(expand_asset_deps(asset[:required_paths], dep, cache, calls))
+            asset = cache[path] ||= build_asset_hash(path, false)
+            stack.concat(asset[:required_paths].reverse)
+            seen.add(path)
           end
-          deps
         end
+
+        deps
       end
 
       def build_bundled_asset_hash(asset, processors)
@@ -325,6 +330,8 @@ module Sprockets
         processed_asset = build_asset_hash(filename, false)
 
         cache = {}
+        cache[filename] = processed_asset
+
         required_paths = expand_asset_deps(processed_asset[:required_paths], filename, cache)
         stubbed_paths  = expand_asset_deps(processed_asset[:stubbed_paths], filename, cache)
         required_paths.subtract(stubbed_paths)
