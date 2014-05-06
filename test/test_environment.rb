@@ -84,6 +84,26 @@ module EnvironmentTests
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
       @env.resolve(fixture_path('default/jquery.tmpl.min.js'))
 
+    assert_equal fixture_path('default/gallery.css.erb'),
+      @env.resolve(fixture_path('default/gallery'))
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/gallery'), content_type: 'application/javascript')
+    assert_equal fixture_path('default/coffee/foo.coffee'),
+      @env.resolve(fixture_path('default/coffee/foo'))
+    assert_equal fixture_path('default/jquery.tmpl.min.js'),
+      @env.resolve(fixture_path('default/jquery.tmpl.min'))
+    assert_equal fixture_path('default/gallery.css.erb'),
+      @env.resolve(fixture_path('default/gallery.css'))
+    assert_equal fixture_path('default/gallery.css.erb'),
+      @env.resolve(fixture_path('default/gallery'), content_type: 'text/css')
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/jquery.tmpl'))
+    end
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/jquery'))
+    end
+
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
     assert_equal fixture_path('default/coffee/foo.coffee'),

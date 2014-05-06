@@ -84,12 +84,26 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      if absolute_path?(path)
-        if filename = resolve_absolute_path(path, options)
+      extname = extensions_for(path)[:format]
+      format_content_type = mime_types(extname) if extname
+      content_type = options[:content_type] ||= format_content_type
+
+      if format_content_type && format_content_type != content_type
+        return
+      end
+
+      filter_content_type = proc do |filename|
+        if content_type.nil? || content_type == content_type_of(filename)
           yield filename
         end
+      end
+
+      if absolute_path?(path)
+        resolve_absolute_path(path, &filter_content_type)
+      elsif relative_path?(path)
+        resolve_relative_path(path, options[:base_path], &filter_content_type)
       else
-        resolve_all_logical_paths(path, options, &block)
+        resolve_all_logical_paths(path, &filter_content_type)
       end
 
       nil
@@ -162,11 +176,31 @@ module Sprockets
       # options  - Hash (default: {})
       #
       # Returns String filename or nil
-      def resolve_absolute_path(filename, options = {})
-        content_type = options[:content_type]
-        if paths_split(self.paths, filename) && stat(filename)
-          if content_type.nil? || content_type == content_type_of(filename)
-            return filename
+      def resolve_absolute_path(filename, &block)
+        base_path, logical_path = paths_split(self.paths, filename)
+        if base_path && logical_path
+          dirname, basename = File.split(filename)
+          path_matches(dirname, basename, &block)
+        end
+      end
+
+      def resolve_relative_path(path, base_path, &block)
+        resolve_absolute_path(File.expand_path(path, base_path), &block)
+      end
+
+      def path_matches(dirname, basename)
+        matches = self.entries(dirname)
+        basename_re = Regexp.escape(basename)
+        extension_pattern = @trail.extensions.map { |e| Regexp.escape(e) }.join("|")
+        pattern = /^#{basename_re}(?:#{extension_pattern})*$/
+
+        matches.each do |path|
+          if path =~ pattern
+            fn = File.join(dirname, path)
+            stat = self.stat(fn)
+            if stat && stat.file?
+              yield fn
+            end
           end
         end
       end
@@ -179,14 +213,8 @@ module Sprockets
       #   filename - String or nil
       #
       # Returns nothing.
-      def resolve_all_logical_paths(logical_path, options = {})
+      def resolve_all_logical_paths(logical_path)
         extname = extensions_for(logical_path)[:format]
-        format_content_type = mime_types(extname) if extname
-        content_type = options[:content_type] || format_content_type
-
-        if format_content_type && format_content_type != content_type
-          return
-        end
 
         paths = [logical_path]
         # TODO: Strange to trust that `extname` is always last
@@ -200,15 +228,16 @@ module Sprockets
 
         paths << File.join(path_without_extname, "index")
 
-        @trail.find_all(*paths, options).each do |path|
-          expand_bower_path(path) do |bower_path|
-            if content_type.nil? || content_type == content_type_of(bower_path)
-              yield bower_path
-            end
-          end
+        paths.each do |path|
+          dirname, basename = File.split(path)
+          @trail.paths.each do |base_path|
+            path_matches(File.expand_path(dirname, base_path), basename) do |filename|
+              expand_bower_path(filename) do |bower_path|
+                yield bower_path
+              end
 
-          if content_type.nil? || content_type == content_type_of(path)
-            yield path
+              yield filename
+            end
           end
         end
       end
