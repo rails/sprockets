@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'pathname'
 require 'sprockets/errors'
 require 'tempfile'
 
@@ -155,7 +154,7 @@ module Sprockets
     #
     # Rreturns String or raises an EncodingError.
     def read_unicode_file(filename, external_encoding = Encoding.default_external)
-      Pathname.new(filename).open("r:#{external_encoding}") do |f|
+      File.open(filename, "r:#{external_encoding}") do |f|
         f.read.tap do |data|
           # Eager validate the file's encoding. In most cases we
           # expect it to be UTF-8 unless `default_external` is set to
