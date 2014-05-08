@@ -86,7 +86,12 @@ module Sprockets
       end
 
       data, directives = result.values_at(:data, :directives)
-      process_directives(directives).merge(data: data)
+      metadata = process_directives(directives)
+
+      { data: data,
+        required_paths: Set.new(input[:metadata][:required_paths]) | metadata[:required_paths],
+        stubbed_paths: Set.new(input[:metadata][:stubbed_paths]) | metadata[:stubbed_paths],
+        dependency_paths: Set.new(input[:metadata][:dependency_paths]) | metadata[:dependency_paths] }
     end
 
     protected
@@ -155,7 +160,7 @@ module Sprockets
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives(directives)
-        @required_paths   = []
+        @required_paths   = Set.new
         @stubbed_paths    = Set.new
         @dependency_paths = Set.new
 

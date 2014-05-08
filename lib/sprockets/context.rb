@@ -25,6 +25,7 @@ module Sprockets
 
     def initialize(input)
       @environment  = input[:environment]
+      @metadata     = input[:metadata]
       @root_path    = input[:root_path]
       @logical_path = input[:logical_path]
       @filename     = input[:filename]
@@ -32,16 +33,16 @@ module Sprockets
       @content_type = input[:content_type]
       @root_path, _ = @environment.paths_split(@environment.paths, @filename)
 
-      @_required_paths   = []
+      @_required_paths   = Set.new
       @_stubbed_paths    = Set.new
       @_dependency_paths = Set.new
     end
 
     def to_hash
       {
-        required_paths: @_required_paths,
-        stubbed_paths: @_stubbed_paths,
-        dependency_paths: @_dependency_paths
+        required_paths: Set.new(@metadata[:required_paths]) | @_required_paths,
+        stubbed_paths: Set.new(@metadata[:stubbed_paths]) | @_stubbed_paths,
+        dependency_paths: Set.new(@metadata[:dependency_paths]) | @_dependency_paths
       }
     end
 

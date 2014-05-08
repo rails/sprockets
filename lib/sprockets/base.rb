@@ -314,7 +314,7 @@ module Sprockets
           mtime: stat.mtime.to_i,
           digest: digest_class.file(asset[:filename]).hexdigest,
           metadata: {
-            dependency_paths: [asset[:filename]],
+            dependency_paths: Set.new([asset[:filename]]),
             dependency_digest: dependencies_hexdigest([asset[:filename]]),
           }
         })

@@ -1,3 +1,5 @@
+require 'set'
+
 module Sprockets
   class Bundle
     def self.call(input)
@@ -13,8 +15,8 @@ module Sprockets
       cache = {}
       cache[filename] = processed_asset
 
-      required_paths = expand_asset_deps(env, processed_asset[:metadata][:required_paths], filename, cache)
-      stubbed_paths  = expand_asset_deps(env, processed_asset[:metadata][:stubbed_paths], filename, cache)
+      required_paths = expand_asset_deps(env, Array(processed_asset[:metadata][:required_paths]), filename, cache)
+      stubbed_paths  = expand_asset_deps(env, Array(processed_asset[:metadata][:stubbed_paths]), filename, cache)
       required_paths.subtract(stubbed_paths)
 
       dependency_paths = Set.new
@@ -28,7 +30,7 @@ module Sprockets
 
       { data: data,
         required_asset_hashes: required_asset_hashes,
-        dependency_paths: dependency_paths.to_a }
+        dependency_paths: dependency_paths }
     end
 
     def expand_asset_deps(env, paths, path, cache)
@@ -45,7 +47,7 @@ module Sprockets
           deps.add(path)
         else
           asset = cache[path] ||= env.send(:build_asset_hash, path, false)
-          stack.concat(asset[:metadata][:required_paths].reverse)
+          stack.concat(Array(asset[:metadata][:required_paths]).reverse)
           seen.add(path)
         end
       end
