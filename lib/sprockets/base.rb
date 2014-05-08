@@ -351,7 +351,6 @@ module Sprockets
           required_asset_hashes.map { |h| h[:source] }.join
         )).merge({
           type: 'bundled',
-          required_paths: required_paths.to_a,
           required_asset_hashes: required_asset_hashes,
           dependency_paths: dependency_paths.to_a,
           dependency_digest: dependencies_hexdigest(dependency_paths),
