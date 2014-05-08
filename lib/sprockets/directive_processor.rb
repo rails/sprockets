@@ -86,12 +86,17 @@ module Sprockets
       end
 
       data, directives = result.values_at(:data, :directives)
-      metadata = process_directives(directives)
+
+      @required_paths   = Set.new(input[:metadata][:required_paths])
+      @stubbed_paths    = Set.new(input[:metadata][:stubbed_paths])
+      @dependency_paths = Set.new(input[:metadata][:dependency_paths])
+
+      process_directives(directives)
 
       { data: data,
-        required_paths: Set.new(input[:metadata][:required_paths]) | metadata[:required_paths],
-        stubbed_paths: Set.new(input[:metadata][:stubbed_paths]) | metadata[:stubbed_paths],
-        dependency_paths: Set.new(input[:metadata][:dependency_paths]) | metadata[:dependency_paths] }
+        required_paths: @required_paths,
+        stubbed_paths: @stubbed_paths,
+        dependency_paths: @dependency_paths }
     end
 
     protected
@@ -160,10 +165,6 @@ module Sprockets
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives(directives)
-        @required_paths   = Set.new
-        @stubbed_paths    = Set.new
-        @dependency_paths = Set.new
-
         directives.each do |line_number, name, *args|
           begin
             send("process_#{name}_directive", *args)
@@ -172,10 +173,6 @@ module Sprockets
             raise e
           end
         end
-
-        { required_paths: @required_paths,
-          stubbed_paths: @stubbed_paths,
-          dependency_paths: @dependency_paths }
       end
 
       # The `require` directive functions similar to Ruby's own `require`.
