@@ -269,7 +269,7 @@ module Sprockets
         if processed_processors.any? || bundled_processors.any?
           if bundle == false
             start = Utils.benchmark_start
-            asset = build_processed_asset_hash(attributes, processed_processors)
+            asset = build_processed_asset_hash('processed', attributes, processed_processors)
             logger.debug do
               ms  = "(#{Utils.benchmark_end(start)}ms)"
               pid = "(pid #{Process.pid})"
@@ -277,14 +277,14 @@ module Sprockets
             end
             asset
           else
-            build_bundled_asset_hash(attributes, bundled_processors)
+            build_processed_asset_hash('bundled', attributes, bundled_processors)
           end
         else
           build_static_asset_hash(attributes)
         end
       end
 
-      def build_processed_asset_hash(asset, processors)
+      def build_processed_asset_hash(type, asset, processors)
         filename = asset[:filename]
         encoding = encoding_for_mime_type(asset[:content_type])
         data     = read_unicode_file(filename, encoding)
@@ -298,30 +298,10 @@ module Sprockets
         )
 
         asset.merge(processed).merge(
-          type: 'processed',
+          type: type,
           dependency_digest: dependencies_hexdigest(processed[:dependency_paths]),
           mtime: processed[:dependency_paths].map { |path| stat(path).mtime }.max.to_i
         )
-      end
-
-      def build_bundled_asset_hash(asset, processors)
-        filename = asset[:filename]
-        encoding = encoding_for_mime_type(asset[:content_type])
-        data     = read_unicode_file(filename, encoding)
-
-        processed = process(
-          processors,
-          asset[:filename],
-          asset[:logical_path],
-          asset[:content_type],
-          data
-        )
-
-        asset.merge(processed).merge({
-          type: 'bundled',
-          dependency_digest: dependencies_hexdigest(processed[:dependency_paths]),
-          mtime: processed[:dependency_paths].map { |path| stat(path).mtime }.max.to_i
-        })
       end
 
       def build_static_asset_hash(asset)
