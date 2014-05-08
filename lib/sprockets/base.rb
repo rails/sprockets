@@ -338,7 +338,7 @@ module Sprockets
 
         dependency_paths = Set.new
         required_asset_hashes = required_paths.map do |path|
-          asset_hash = build_asset_hash(path, false)
+          asset_hash = cache[path]
           dependency_paths.merge(asset_hash[:dependency_paths])
           asset_hash
         end
