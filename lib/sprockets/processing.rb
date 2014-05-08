@@ -210,6 +210,7 @@ module Sprockets
       required_paths   = []
       stubbed_paths    = Set.new
       dependency_paths = Set.new([filename])
+      required_asset_hashes = []
 
       processors.each do |processor|
         begin
@@ -220,6 +221,7 @@ module Sprockets
           when Hash
             data = result[:data]
             required_paths.concat(Array(result[:required_paths]))
+            required_asset_hashes.concat(Array(result[:required_asset_hashes]))
             stubbed_paths.merge(Array(result[:stubbed_paths]))
             dependency_paths.merge(Array(result[:dependency_paths]))
           when String
@@ -239,6 +241,7 @@ module Sprockets
         length: data.bytesize,
         digest: digest_class.hexdigest(data),
         required_paths: required_paths,
+        required_asset_hashes: required_asset_hashes,
         stubbed_paths: stubbed_paths.to_a,
         dependency_paths: dependency_paths.to_a
       }
