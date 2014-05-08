@@ -297,11 +297,13 @@ module Sprockets
           data
         )
 
-        asset.merge(processed).merge(
+        asset.merge(processed).merge({
           type: type,
-          dependency_digest: dependencies_hexdigest(processed[:dependency_paths]),
-          mtime: processed[:dependency_paths].map { |path| stat(path).mtime }.max.to_i
-        )
+          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime }.max.to_i,
+          metadata: processed[:metadata].merge(
+            dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
+          )
+        })
       end
 
       def build_static_asset_hash(asset)
@@ -311,8 +313,10 @@ module Sprockets
           length: stat.size,
           mtime: stat.mtime.to_i,
           digest: digest_class.file(asset[:filename]).hexdigest,
-          dependency_digest: dependencies_hexdigest([asset[:filename]]),
-          dependency_paths: [asset[:filename]]
+          metadata: {
+            dependency_paths: [asset[:filename]],
+            dependency_digest: dependencies_hexdigest([asset[:filename]]),
+          }
         })
       end
   end

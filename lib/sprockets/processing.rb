@@ -240,10 +240,12 @@ module Sprockets
         source: data,
         length: data.bytesize,
         digest: digest_class.hexdigest(data),
-        required_paths: required_paths,
-        required_asset_hashes: required_asset_hashes,
-        stubbed_paths: stubbed_paths.to_a,
-        dependency_paths: dependency_paths.to_a
+        metadata: {
+          required_paths: required_paths,
+          required_asset_hashes: required_asset_hashes,
+          stubbed_paths: stubbed_paths.to_a,
+          dependency_paths: dependency_paths.to_a
+        }
       }
     end
 

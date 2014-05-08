@@ -9,7 +9,7 @@ module Sprockets
     #
     # Returns Array of ProcessedAssets.
     def to_a
-      @required_asset_hashes.map do |hash|
+      metadata[:required_asset_hashes].map do |hash|
         ProcessedAsset.new(hash)
       end
     end

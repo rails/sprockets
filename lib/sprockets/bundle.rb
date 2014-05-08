@@ -13,14 +13,14 @@ module Sprockets
       cache = {}
       cache[filename] = processed_asset
 
-      required_paths = expand_asset_deps(env, processed_asset[:required_paths], filename, cache)
-      stubbed_paths  = expand_asset_deps(env, processed_asset[:stubbed_paths], filename, cache)
+      required_paths = expand_asset_deps(env, processed_asset[:metadata][:required_paths], filename, cache)
+      stubbed_paths  = expand_asset_deps(env, processed_asset[:metadata][:stubbed_paths], filename, cache)
       required_paths.subtract(stubbed_paths)
 
       dependency_paths = Set.new
       required_asset_hashes = required_paths.map do |path|
         asset_hash = cache[path]
-        dependency_paths.merge(asset_hash[:dependency_paths])
+        dependency_paths.merge(asset_hash[:metadata][:dependency_paths])
         asset_hash
       end
 
@@ -45,7 +45,7 @@ module Sprockets
           deps.add(path)
         else
           asset = cache[path] ||= env.send(:build_asset_hash, path, false)
-          stack.concat(asset[:required_paths].reverse)
+          stack.concat(asset[:metadata][:required_paths].reverse)
           seen.add(path)
         end
       end

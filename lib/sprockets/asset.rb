@@ -14,6 +14,15 @@ module Sprockets
       end
     end
 
+    # Public: Metadata accumulated from pipeline process.
+    #
+    # The API status of the keys is dependent on the pipeline processors
+    # itself. So some values maybe considered public and others internal.
+    # See the pipeline proccessor documentation itself.
+    #
+    # Returns Hash.
+    attr_reader :metadata
+
     # Public: Returns String path of asset.
     attr_reader :filename
 
@@ -149,8 +158,5 @@ module Sprockets
         other.digest == self.digest
     end
     alias_method :==, :eql?
-
-    # TODO: Exposed for directive processor and context.
-    attr_reader :dependency_paths
   end
 end
