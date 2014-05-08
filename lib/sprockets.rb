@@ -14,6 +14,7 @@ module Sprockets
   autoload :StaticAsset,             'sprockets/static_asset'
 
   # Processing
+  autoload :Bundle,                  'sprockets/bundle'
   autoload :CharsetNormalizer,       'sprockets/charset_normalizer'
   autoload :ClosureCompressor,       'sprockets/closure_compressor'
   autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
@@ -75,6 +76,8 @@ module Sprockets
 
   register_postprocessor 'application/javascript', LazyProxy.new { SafetyColons }
 
+  register_bundle_processor 'application/javascript', LazyProxy.new { Bundle }
+  register_bundle_processor 'text/css', LazyProxy.new { Bundle }
   register_bundle_processor 'text/css', LazyProxy.new { CharsetNormalizer }
 
   register_compressor 'text/css', :sass, LazyProxy.new { SassCompressor }
