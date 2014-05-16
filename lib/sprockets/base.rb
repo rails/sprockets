@@ -261,17 +261,14 @@ module Sprockets
         bundled_processors = bundle_processors(content_type)
 
         if processed_processors.any? || bundled_processors.any?
-          if bundle == false
-            build_processed_asset_hash('processed', attributes, processed_processors)
-          else
-            build_processed_asset_hash('bundled', attributes, bundled_processors)
-          end
+          processors = bundle ? bundled_processors : processed_processors
+          build_processed_asset_hash(attributes, processors)
         else
           build_static_asset_hash(attributes)
         end
       end
 
-      def build_processed_asset_hash(type, asset, processors)
+      def build_processed_asset_hash(asset, processors)
         filename = asset[:filename]
         encoding = encoding_for_mime_type(asset[:content_type])
         data     = read_unicode_file(filename, encoding)
@@ -285,7 +282,6 @@ module Sprockets
         )
 
         asset.merge(processed).merge({
-          type: type,
           mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime }.max.to_i,
           metadata: processed[:metadata].merge(
             dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
