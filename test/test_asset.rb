@@ -261,10 +261,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
   end
 
-  test "class" do
-    assert_kind_of Sprockets::ProcessedAsset, @asset
-  end
-
   test "content type" do
     assert_equal "application/javascript", @asset.content_type
   end
@@ -573,10 +569,6 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "splatted asset includes itself" do
     assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:filename)
-  end
-
-  test "splatted assets are processed assets" do
-    assert asset("project.js").to_a.all? { |a| a.is_a?(Sprockets::ProcessedAsset) }
   end
 
   test "splatted asset with child dependencies" do

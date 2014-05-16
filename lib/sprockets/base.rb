@@ -1,7 +1,7 @@
+require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/bundled_asset'
 require 'sprockets/errors'
-require 'sprockets/processed_asset'
 require 'sprockets/server'
 require 'sprockets/static_asset'
 require 'pathname'
@@ -207,10 +207,10 @@ module Sprockets
         case asset_hash[:type]
         when 'bundled'
           BundledAsset.new(asset_hash)
-        when 'processed'
-          ProcessedAsset.new(asset_hash)
         when 'static'
           StaticAsset.new(asset_hash)
+        else
+          Asset.new(asset_hash)
         end
       end
     end

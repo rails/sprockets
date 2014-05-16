@@ -7,10 +7,10 @@ module Sprockets
     # redundant. The common use case is to relink to the assets anyway.
     # #source_paths provides that reference.
     #
-    # Returns Array of ProcessedAssets.
+    # Returns Array of Assets.
     def to_a
       metadata[:required_asset_hashes].map do |hash|
-        ProcessedAsset.new(hash)
+        Asset.new(hash)
       end
     end
 
