@@ -307,7 +307,6 @@ module Sprockets
       #
       def process_depend_on_asset_directive(path)
         if asset = @environment.find_asset(resolve(path))
-          # TODO: Expose public api for getting asset's dependency paths
           @dependency_paths.merge(asset.metadata[:dependency_paths])
         end
       end
