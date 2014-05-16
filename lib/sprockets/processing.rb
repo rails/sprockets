@@ -229,10 +229,6 @@ module Sprockets
       end
 
       # TODO: Add to set in Bundle
-      metadata[:required_paths] ||= Set.new
-      metadata[:required_paths] << filename
-
-      # TODO: Add to set in Bundle
       metadata[:dependency_paths] ||= Set.new
       metadata[:dependency_paths] << filename
 

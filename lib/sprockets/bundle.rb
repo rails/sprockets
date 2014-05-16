@@ -15,7 +15,7 @@ module Sprockets
       cache = {}
       cache[filename] = processed_asset
 
-      required_paths = expand_asset_deps(env, Array(processed_asset[:metadata][:required_paths]), filename, cache)
+      required_paths = expand_asset_deps(env, Array(processed_asset[:metadata][:required_paths]) + [filename], filename, cache)
       stubbed_paths  = expand_asset_deps(env, Array(processed_asset[:metadata][:stubbed_paths]), filename, cache)
       required_paths.subtract(stubbed_paths)
 
@@ -47,6 +47,7 @@ module Sprockets
           deps.add(path)
         else
           asset = cache[path] ||= env.send(:build_asset_hash, path, false)
+          stack.push(path)
           stack.concat(Array(asset[:metadata][:required_paths]).reverse)
           seen.add(path)
         end
