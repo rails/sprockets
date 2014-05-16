@@ -268,14 +268,7 @@ module Sprockets
         # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if processed_processors.any? || bundled_processors.any?
           if bundle == false
-            start = Utils.benchmark_start
-            asset = build_processed_asset_hash('processed', attributes, processed_processors)
-            logger.debug do
-              ms  = "(#{Utils.benchmark_end(start)}ms)"
-              pid = "(pid #{Process.pid})"
-              "Compiled #{attributes[:logical_path]}  #{ms}  #{pid}"
-            end
-            asset
+            build_processed_asset_hash('processed', attributes, processed_processors)
           else
             build_processed_asset_hash('bundled', attributes, bundled_processors)
           end
