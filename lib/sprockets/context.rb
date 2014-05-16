@@ -33,15 +33,15 @@ module Sprockets
       @content_type = input[:content_type]
       @root_path, _ = @environment.paths_split(@environment.paths, @filename)
 
-      @_required_paths   = Set.new(@metadata[:required_paths])
-      @_stubbed_paths    = Set.new(@metadata[:stubbed_paths])
-      @_dependency_paths = Set.new(@metadata[:dependency_paths])
+      @required_paths   = Set.new(@metadata[:required_paths])
+      @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
+      @dependency_paths = Set.new(@metadata[:dependency_paths])
     end
 
     def metadata
-      { required_paths: @_required_paths,
-        stubbed_paths: @_stubbed_paths,
-        dependency_paths: @_dependency_paths }
+      { required_paths: @required_paths,
+        stubbed_paths: @stubbed_paths,
+        dependency_paths: @dependency_paths }
     end
 
     # Returns the environment path that contains the file.
@@ -89,7 +89,7 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      @_dependency_paths << resolve(path).to_s
+      @dependency_paths << resolve(path).to_s
       nil
     end
 
@@ -102,8 +102,7 @@ module Sprockets
     # the target asset's dependencies.
     def depend_on_asset(path)
       if asset = @environment.find_asset(resolve(path))
-        # TODO: Expose public api for getting asset's dependency paths
-        @_dependency_paths.merge(asset.metadata[:dependency_paths])
+        @dependency_paths.merge(asset.metadata[:dependency_paths])
       end
       nil
     end
@@ -120,7 +119,7 @@ module Sprockets
     def require_asset(path)
       pathname = resolve(path, content_type: :self)
       depend_on_asset(pathname)
-      @_required_paths << pathname.to_s
+      @required_paths << pathname.to_s
       nil
     end
 
@@ -128,7 +127,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @_stubbed_paths << resolve(path, content_type: :self).to_s
+      @stubbed_paths << resolve(path, content_type: :self).to_s
       nil
     end
 
