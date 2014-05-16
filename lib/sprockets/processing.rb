@@ -228,10 +228,6 @@ module Sprockets
         end
       end
 
-      # TODO: Add to set in Bundle
-      metadata[:dependency_paths] ||= Set.new
-      metadata[:dependency_paths] << filename
-
       {
         source: data,
         length: data.bytesize,
