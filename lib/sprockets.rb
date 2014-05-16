@@ -9,7 +9,6 @@ module Sprockets
 
   # Assets
   autoload :Asset,                   'sprockets/asset'
-  autoload :BundledAsset,            'sprockets/bundled_asset'
   autoload :StaticAsset,             'sprockets/static_asset'
 
   # Processing

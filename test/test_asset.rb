@@ -318,10 +318,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal @asset, @env[@asset.logical_path]
   end
 
-  test "class" do
-    assert_kind_of Sprockets::BundledAsset, @asset
-  end
-
   test "content type" do
     assert_equal "application/javascript", @asset.content_type
   end

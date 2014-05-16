@@ -1,9 +1,7 @@
 require 'sprockets/asset'
 require 'sprockets/bower'
-require 'sprockets/bundled_asset'
 require 'sprockets/errors'
 require 'sprockets/server'
-require 'sprockets/static_asset'
 require 'pathname'
 
 module Sprockets
@@ -205,8 +203,6 @@ module Sprockets
         return unless asset_hash
 
         case asset_hash[:type]
-        when 'bundled'
-          BundledAsset.new(asset_hash)
         when 'static'
           StaticAsset.new(asset_hash)
         else
@@ -264,8 +260,6 @@ module Sprockets
           postprocessors(content_type)
         bundled_processors = bundle_processors(content_type)
 
-        # If there are any processors to run on the pathname, use
-        # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
         if processed_processors.any? || bundled_processors.any?
           if bundle == false
             build_processed_asset_hash('processed', attributes, processed_processors)

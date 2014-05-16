@@ -3,7 +3,6 @@ require 'pathname'
 require 'zlib'
 
 module Sprockets
-  # `Asset` is the base class for `BundledAsset` and `StaticAsset`.
   class Asset
     attr_reader :logical_path
     attr_reader :content_type
@@ -49,8 +48,25 @@ module Sprockets
     #
     # This allows you to link to individual files for debugging
     # purposes.
+    #
+    # Use Asset#source_paths instead. Keeping a full copy of the bundle's
+    # processed assets in memory (and in cache) is expensive and redundant. The
+    # common use case is to relink to the assets anyway. #source_paths provides
+    # that reference.
+    #
+    # Returns Array of Assets.
     def to_a
-      [self]
+      if metadata.key?(:required_asset_hashes)
+        metadata[:required_asset_hashes].map do |hash|
+          Asset.new(hash)
+        end
+      else
+        [self]
+      end
+    end
+
+    def source_paths
+      to_a.map(&:digest_path)
     end
 
     # Public: Return `String` of concatenated source.
