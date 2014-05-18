@@ -2,14 +2,11 @@ require 'sprockets/version'
 
 module Sprockets
   # Environment
-  autoload :Base,                    'sprockets/base'
-  autoload :Environment,             'sprockets/environment'
-  autoload :CachedEnvironment,       'sprockets/cached_environment'
-  autoload :Manifest,                'sprockets/manifest'
-
-  # Assets
   autoload :Asset,                   'sprockets/asset'
-  autoload :StaticAsset,             'sprockets/static_asset'
+  autoload :Base,                    'sprockets/base'
+  autoload :CachedEnvironment,       'sprockets/cached_environment'
+  autoload :Environment,             'sprockets/environment'
+  autoload :Manifest,                'sprockets/manifest'
 
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
