@@ -8,9 +8,17 @@ module Sprockets
     attr_reader :content_type
 
     def initialize(attributes = {})
+      @attributes = attributes
       attributes.each do |name, value|
         instance_variable_set("@#{name}", value)
       end
+    end
+
+    # Internal: Return all internal instance variables as a hash.
+    #
+    # Returns a Hash.
+    def to_hash
+      @attributes
     end
 
     # Public: Metadata accumulated from pipeline process.

@@ -10,20 +10,20 @@ module Sprockets
       env = input[:environment]
       filename = input[:filename]
 
-      processed_asset = env.send(:build_asset_hash, filename, false)
+      processed_asset = env.find_asset(filename, bundle: false)
 
       cache = {}
       cache[filename] = processed_asset
 
-      required_paths = expand_asset_deps(env, Array(processed_asset[:metadata][:required_paths]) + [filename], filename, cache)
-      stubbed_paths  = expand_asset_deps(env, Array(processed_asset[:metadata][:stubbed_paths]), filename, cache)
+      required_paths = expand_asset_deps(env, Array(processed_asset.metadata[:required_paths]) + [filename], filename, cache)
+      stubbed_paths  = expand_asset_deps(env, Array(processed_asset.metadata[:stubbed_paths]), filename, cache)
       required_paths.subtract(stubbed_paths)
 
       dependency_paths = Set.new
       required_asset_hashes = required_paths.map do |path|
-        asset_hash = cache[path]
-        dependency_paths.merge(asset_hash[:metadata][:dependency_paths])
-        asset_hash
+        asset = cache[path]
+        dependency_paths.merge(asset.metadata[:dependency_paths])
+        asset.to_hash
       end
 
       data = required_asset_hashes.map { |h| h[:source] }.join
@@ -46,9 +46,12 @@ module Sprockets
         if seen.include?(path)
           deps.add(path)
         else
-          asset = cache[path] ||= env.send(:build_asset_hash, path, false)
+          unless asset = cache[path] ||= env.find_asset(path, bundle: false)
+            raise FileNotFound, "could not find #{path}"
+          end
+
           stack.push(path)
-          stack.concat(Array(asset[:metadata][:required_paths]).reverse)
+          stack.concat(Array(asset.metadata[:required_paths]).reverse)
           seen.add(path)
         end
       end

@@ -241,11 +241,6 @@ module Sprockets
       end
 
       def build_asset_hash(filename, bundle = true)
-        unless self.stat(filename)
-          # FIXME: Shouldn't need this check.
-          raise FileNotFound, "could not find #{filename}"
-        end
-
         content_type = content_type_of(filename) || 'application/octet-stream'
 
         attributes = {
