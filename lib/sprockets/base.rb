@@ -200,14 +200,7 @@ module Sprockets
           asset_hash = build_asset_hash(filename, options[:bundle])
         end
 
-        return unless asset_hash
-
-        case asset_hash[:type]
-        when 'static'
-          StaticAsset.new(asset_hash)
-        else
-          Asset.new(asset_hash)
-        end
+        Asset.new(asset_hash) if asset_hash
       end
     end
 
@@ -290,7 +283,6 @@ module Sprockets
       def build_static_asset_hash(asset)
         stat = self.stat(asset[:filename])
         asset.merge({
-          type: 'static',
           length: stat.size,
           mtime: stat.mtime.to_i,
           digest: digest_class.file(asset[:filename]).hexdigest,

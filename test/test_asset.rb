@@ -166,10 +166,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal @asset, @env[@asset.logical_path]
   end
 
-  test "class" do
-    assert_kind_of Sprockets::StaticAsset, @asset
-  end
-
   test "content type" do
     assert_equal "image/png", @asset.content_type
   end
