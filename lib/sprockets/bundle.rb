@@ -20,7 +20,9 @@ module Sprockets
       env = input[:environment]
       filename = input[:filename]
 
-      cache = {}
+      cache = Hash.new do |h, path|
+        h[path] = env.find_asset(path, bundle: false)
+      end
 
       required_paths = expand_required_paths(env, cache, [filename])
       stubbed_paths  = expand_required_paths(env, cache, Array(cache[filename].metadata[:stubbed_paths]))
@@ -49,7 +51,7 @@ module Sprockets
           if seen.include?(path)
             deps.add(path)
           else
-            unless asset = cache[path] ||= env.find_asset(path, bundle: false)
+            unless asset = cache[path]
               raise FileNotFound, "could not find #{path}"
             end
             stack.push(path)
