@@ -27,8 +27,8 @@ module Sprockets
       cache = {}
       cache[filename] = processed_asset
 
-      required_paths = expand_asset_deps(env, Array(processed_asset.metadata[:required_paths]) + [filename], filename, cache)
-      stubbed_paths  = expand_asset_deps(env, Array(processed_asset.metadata[:stubbed_paths]), filename, cache)
+      required_paths = expand_required_paths(env, Array(processed_asset.metadata[:required_paths]) + [filename], filename, cache)
+      stubbed_paths  = expand_required_paths(env, Array(processed_asset.metadata[:stubbed_paths]), filename, cache)
       required_paths.subtract(stubbed_paths)
 
       dependency_paths = required_paths.inject(Set.new) do |set, path|
@@ -47,30 +47,31 @@ module Sprockets
         dependency_paths: dependency_paths }
     end
 
-    def expand_asset_deps(env, paths, path, cache)
-      stack = []
-      stack.concat(paths.reverse)
+    private
+      def expand_required_paths(env, paths, path, cache)
+        stack = []
+        stack.concat(paths.reverse)
 
-      deps = Set.new
+        deps = Set.new
 
-      seen = Set.new
-      seen.add(path)
+        seen = Set.new
+        seen.add(path)
 
-      while path = stack.pop
-        if seen.include?(path)
-          deps.add(path)
-        else
-          unless asset = cache[path] ||= env.find_asset(path, bundle: false)
-            raise FileNotFound, "could not find #{path}"
+        while path = stack.pop
+          if seen.include?(path)
+            deps.add(path)
+          else
+            unless asset = cache[path] ||= env.find_asset(path, bundle: false)
+              raise FileNotFound, "could not find #{path}"
+            end
+
+            stack.push(path)
+            stack.concat(Array(asset.metadata[:required_paths]).reverse)
+            seen.add(path)
           end
-
-          stack.push(path)
-          stack.concat(Array(asset.metadata[:required_paths]).reverse)
-          seen.add(path)
         end
-      end
 
-      deps
-    end
+        deps
+      end
   end
 end
