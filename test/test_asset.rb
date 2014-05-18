@@ -186,10 +186,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal [@asset], @asset.to_a
   end
 
-  test "to path" do
-    assert_equal fixture_path('asset/POW.png'), @asset.to_path
-  end
-
   test "asset is fresh if its mtime is changed but its contents is the same" do
     filename = fixture_path('asset/test-POW.png')
 

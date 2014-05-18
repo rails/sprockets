@@ -12,9 +12,6 @@ module Sprockets
       pathname.open('rb') { |f| f.read }
     end
 
-    # Implemented for Rack SendFile support.
-    alias_method :to_path, :filename
-
     # Save asset to disk.
     def write_to(filename, options = {})
       # Gzip contents if filename has '.gz'
