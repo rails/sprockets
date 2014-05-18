@@ -1,6 +1,16 @@
 require 'set'
 
 module Sprockets
+  # Public: Bundle processor takes a single file asset and prepends all the
+  # `:required_paths` to the contents.
+  #
+  # Uses pipeline metadata:
+  #
+  #   :required_paths - Ordered Set of asset filenames to prepend
+  #   :stubbed_paths  - Set of asset filenames to substract from the
+  #                     required path set.
+  #
+  # Also see DirectiveProcessor.
   class Bundle
     def self.call(input)
       new.call(input)
