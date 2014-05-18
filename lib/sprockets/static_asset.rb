@@ -6,12 +6,6 @@ module Sprockets
   # any processing or concatenation. These are typical images and
   # other binary files.
   class StaticAsset < Asset
-    # Returns file contents as its `source`.
-    def source
-      # File is read everytime to avoid memory bloat of large binary files
-      pathname.open('rb') { |f| f.read }
-    end
-
     # Save asset to disk.
     def write_to(filename, options = {})
       # Gzip contents if filename has '.gz'

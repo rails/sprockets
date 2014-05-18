@@ -80,7 +80,14 @@ module Sprockets
     # Public: Return `String` of concatenated source.
     #
     # Returns String.
-    attr_reader :source
+    def source
+      if defined? @source
+        @source
+      else
+        # File is read everytime to avoid memory bloat of large binary files
+        File.open(filename, 'rb') { |f| f.read }
+      end
+    end
 
     # Public: Alias for #source.
     #
