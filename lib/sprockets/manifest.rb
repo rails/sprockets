@@ -184,7 +184,7 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
-            asset.write_to "#{target}.gz" if asset.is_a?(BundledAsset)
+            asset.write_to "#{target}.gz" if !asset.is_a?(StaticAsset)
           end
 
           filenames << filename
