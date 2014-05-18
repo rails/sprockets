@@ -10,7 +10,9 @@ module Sprockets
       env = input[:environment]
       filename = input[:filename]
 
-      processed_asset = env.find_asset(filename, bundle: false)
+      unless processed_asset = env.find_asset(filename, bundle: false)
+        raise FileNotFound, "could not find #{filename}"
+      end
 
       cache = {}
       cache[filename] = processed_asset
