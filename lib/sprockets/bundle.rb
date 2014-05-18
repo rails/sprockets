@@ -21,14 +21,16 @@ module Sprockets
       stubbed_paths  = expand_asset_deps(env, Array(processed_asset.metadata[:stubbed_paths]), filename, cache)
       required_paths.subtract(stubbed_paths)
 
-      dependency_paths = Set.new
-      required_asset_hashes = required_paths.map do |path|
-        asset = cache[path]
-        dependency_paths.merge(asset.metadata[:dependency_paths])
-        asset.to_hash
+      dependency_paths = required_paths.inject(Set.new) do |set, path|
+        set.merge(cache[path].metadata[:dependency_paths])
       end
 
-      data = required_asset_hashes.map { |h| h[:source] }.join
+      data = required_paths.map { |path| cache[path].to_s }.join
+
+      # Deprecated: For Asset#to_a
+      required_asset_hashes = required_paths.map do |path|
+        cache[path].to_hash
+      end
 
       { data: data,
         required_asset_hashes: required_asset_hashes,
