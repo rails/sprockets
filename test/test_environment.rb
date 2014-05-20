@@ -616,24 +616,6 @@ class TestEnvironment < Sprockets::TestCase
         "Expected #{logical_path.inspect} to resolve to #{filename}."
     end
   end
-
-  test "extensions" do
-    assert_equal({name: "gallery", content_type: "text/css", format_extname: ".css", engine_extnames: [".erb"]}, @env.extensions_for("gallery.css.erb"))
-    assert_equal({name: "gallery", content_type: nil, format_extname: nil, engine_extnames: [".erb"]}, @env.extensions_for("gallery.erb"))
-    assert_equal({name: "gallery.foo", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("gallery.foo"))
-    assert_equal({name: "jquery", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.js"))
-    assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.min.js"))
-    assert_equal({name: "jquery", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.js.erb"))
-    assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.min.js.erb"))
-    assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: nil, engine_extnames: [".coffee"]}, @env.extensions_for("jquery.min.coffee"))
-    assert_equal({name: "jquery.tmpl", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.js"))
-    assert_equal({name: "jquery.csv", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.js"))
-    assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.min.js"))
-    assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.csv.min.js.erb"))
-    assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
-    assert_equal({name: "jquery.js.min", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("jquery.js.min"))
-    assert_equal({name: "sprite.css.embed", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("sprite.css.embed"))
-  end
 end
 
 class TestCached < Sprockets::TestCase
