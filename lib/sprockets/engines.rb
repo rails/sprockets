@@ -61,7 +61,6 @@ module Sprockets
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @extensions.push(ext)
 
       if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
         @engines[ext] = klass

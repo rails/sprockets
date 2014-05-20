@@ -34,14 +34,6 @@ module Sprockets
       @paths.clear
     end
 
-    # Returns an `Array` of extensions.
-    #
-    # These extensions maybe omitted from logical path searches.
-    #
-    #     # => [".js", ".css", ".coffee", ".sass", ...]
-    #
-    attr_reader :extensions
-
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
     # and shadowed matches.

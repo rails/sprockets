@@ -34,12 +34,6 @@ module EnvironmentTests
     Sprockets.clear_paths
   end
 
-  test "extensions" do
-    ["coffee", "erb", "sass", "scss", "css", "js"].each do |ext|
-      assert @env.extensions.to_a.include?(".#{ext}"), "'.#{ext}' not in #{@env.extensions.inspect}"
-    end
-  end
-
   test "eco templates" do
     asset = @env["goodbye.jst"]
     context = ExecJS.compile(asset.to_s)
@@ -573,16 +567,6 @@ class TestEnvironment < Sprockets::TestCase
 
     e1.context_class.instance_method(:foo)
     assert_raises(NameError) { e2.context_class.instance_method(:foo) }
-  end
-
-  test "registering engine adds to the environments extensions" do
-    assert !@env.engines[".foo"]
-    assert !@env.extensions.include?(".foo")
-
-    @env.register_engine ".foo", Sprockets::ERBTemplate
-
-    assert @env.engines[".foo"]
-    assert @env.extensions.include?(".foo")
   end
 
   test "seperate engines for each instance" do

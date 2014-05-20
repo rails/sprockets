@@ -46,7 +46,6 @@ module Sprockets
 
   @root              = File.expand_path('..', __FILE__)
   @paths             = []
-  @extensions        = []
   @mime_types        = {}
   @engines           = {}
   @engine_mime_types = {}
