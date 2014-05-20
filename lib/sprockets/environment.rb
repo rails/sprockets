@@ -61,6 +61,7 @@ module Sprockets
       def expire_cache!
         # Clear digest to be recomputed
         @digest = nil
+        @extension_pattern = /^(?:#{extensions.map { |e| Regexp.escape(e) }.join('|')})*$/
       end
   end
 end
