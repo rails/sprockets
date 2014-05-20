@@ -618,30 +618,30 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "extensions" do
-    assert_equal({name: "empty", format_extname: nil, engine_extnames: []}, @env.extensions_for("empty"))
-    assert_equal({name: "gallery", format_extname: ".js", engine_extnames: []}, @env.extensions_for("gallery.js"))
-    assert_equal({name: "application", format_extname: ".js", engine_extnames: [".coffee"]}, @env.extensions_for("application.js.coffee"))
-    assert_equal({name: "project", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("project.js.coffee.erb"))
-    assert_equal({name: "gallery", format_extname: ".css", engine_extnames: [".erb"]}, @env.extensions_for("gallery.css.erb"))
-    assert_equal({name: "gallery", format_extname: nil, engine_extnames: [".erb"]}, @env.extensions_for("gallery.erb"))
-    assert_equal({name: "gallery.foo", format_extname: nil, engine_extnames: []}, @env.extensions_for("gallery.foo"))
-    assert_equal({name: "jquery", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.js"))
-    assert_equal({name: "jquery.min", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.min.js"))
-    assert_equal({name: "jquery", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.js.erb"))
-    assert_equal({name: "jquery.min", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.min.js.erb"))
-    assert_equal({name: "jquery.min", format_extname: nil, engine_extnames: [".coffee"]}, @env.extensions_for("jquery.min.coffee"))
-    assert_equal({name: "jquery.tmpl", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.js"))
-    assert_equal({name: "jquery.tmpl.min", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.min.js"))
-    assert_equal({name: "jquery.csv", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.js"))
-    assert_equal({name: "jquery.csv.min", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.min.js"))
-    assert_equal({name: "jquery.csv.min", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.csv.min.js.erb"))
-    assert_equal({name: "jquery.csv.min", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
-    assert_equal({name: "jquery.js.min", format_extname: nil, engine_extnames: []}, @env.extensions_for("jquery.js.min"))
-    assert_equal({name: "sprite.css.embed", format_extname: nil, engine_extnames: []}, @env.extensions_for("sprite.css.embed"))
+    assert_equal({name: "empty", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("empty"))
+    assert_equal({name: "gallery", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("gallery.js"))
+    assert_equal({name: "application", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee"]}, @env.extensions_for("application.js.coffee"))
+    assert_equal({name: "project", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("project.js.coffee.erb"))
+    assert_equal({name: "gallery", content_type: "text/css", format_extname: ".css", engine_extnames: [".erb"]}, @env.extensions_for("gallery.css.erb"))
+    assert_equal({name: "gallery", content_type: nil, format_extname: nil, engine_extnames: [".erb"]}, @env.extensions_for("gallery.erb"))
+    assert_equal({name: "gallery.foo", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("gallery.foo"))
+    assert_equal({name: "jquery", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.js"))
+    assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.min.js"))
+    assert_equal({name: "jquery", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.js.erb"))
+    assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.min.js.erb"))
+    assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: nil, engine_extnames: [".coffee"]}, @env.extensions_for("jquery.min.coffee"))
+    assert_equal({name: "jquery.tmpl", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.js"))
+    assert_equal({name: "jquery.tmpl.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.min.js"))
+    assert_equal({name: "jquery.csv", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.js"))
+    assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.min.js"))
+    assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.csv.min.js.erb"))
+    assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
+    assert_equal({name: "jquery.js.min", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("jquery.js.min"))
+    assert_equal({name: "sprite.css.embed", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("sprite.css.embed"))
 
     @env = Sprockets::Environment.new
     @env.register_engine '.ms', Class.new
-    assert_equal({name: "foo", format_extname: nil, engine_extnames: [".jst", ".ms"]}, @env.extensions_for("foo.jst.ms"))
+    assert_equal({name: "foo", content_type: "application/javascript", format_extname: nil, engine_extnames: [".jst", ".ms"]}, @env.extensions_for("foo.jst.ms"))
   end
 
   test "content type" do

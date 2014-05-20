@@ -36,7 +36,11 @@ module Sprockets
 
       engine_extnames.reverse!
 
+      content_type = format_extname ? mime_types(format_extname) :
+        engine_content_type_for(engine_extnames)
+
       { name: path[0, len],
+        content_type: content_type,
         format_extname: format_extname,
         engine_extnames: engine_extnames }
     end
