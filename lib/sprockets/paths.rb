@@ -147,9 +147,11 @@ module Sprockets
       end
 
       def path_matches(dirname, basename)
+        # TODO: Review performance
         basename_extnames = extensions_for(basename)
 
         self.entries(dirname).each do |entry|
+          # TODO: Review performance
           entry_extnames = extensions_for(entry)
 
           if basename_extnames[:name] == entry_extnames[:name] &&
