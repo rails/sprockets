@@ -45,22 +45,11 @@ module Sprockets
         engine_extnames: engine_extnames }
     end
 
-    # Internal. Return content type of `path`.
-    #
-    # TODO: Review API and performance
-    def content_type_of(path)
-      extnames = extensions_for(path)
-      if format_ext = extnames[:format_extname]
-        return mime_types(format_ext)
-      end
-      engine_content_type_for(extnames[:engine_extnames])
-    end
-
     def matches_content_type?(mime_type, path)
       # TODO: Disallow nil mime type
       mime_type.nil? ||
         mime_type == "*/*" ||
-        mime_type == content_type_of(path)
+        mime_type == extensions_for(path)[:content_type]
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`

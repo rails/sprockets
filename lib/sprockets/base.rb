@@ -234,7 +234,7 @@ module Sprockets
       end
 
       def build_asset_hash(filename, bundle = true)
-        content_type = content_type_of(filename) || 'application/octet-stream'
+        content_type = extensions_for(filename)[:content_type] || 'application/octet-stream'
 
         attributes = {
           filename: filename,

@@ -618,10 +618,6 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "extensions" do
-    assert_equal({name: "empty", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("empty"))
-    assert_equal({name: "gallery", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("gallery.js"))
-    assert_equal({name: "application", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee"]}, @env.extensions_for("application.js.coffee"))
-    assert_equal({name: "project", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("project.js.coffee.erb"))
     assert_equal({name: "gallery", content_type: "text/css", format_extname: ".css", engine_extnames: [".erb"]}, @env.extensions_for("gallery.css.erb"))
     assert_equal({name: "gallery", content_type: nil, format_extname: nil, engine_extnames: [".erb"]}, @env.extensions_for("gallery.erb"))
     assert_equal({name: "gallery.foo", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("gallery.foo"))
@@ -631,39 +627,12 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.min.js.erb"))
     assert_equal({name: "jquery.min", content_type: "application/javascript", format_extname: nil, engine_extnames: [".coffee"]}, @env.extensions_for("jquery.min.coffee"))
     assert_equal({name: "jquery.tmpl", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.js"))
-    assert_equal({name: "jquery.tmpl.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.tmpl.min.js"))
     assert_equal({name: "jquery.csv", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.js"))
     assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: []}, @env.extensions_for("jquery.csv.min.js"))
     assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".erb"]}, @env.extensions_for("jquery.csv.min.js.erb"))
     assert_equal({name: "jquery.csv.min", content_type: "application/javascript", format_extname: ".js", engine_extnames: [".coffee", ".erb"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
     assert_equal({name: "jquery.js.min", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("jquery.js.min"))
     assert_equal({name: "sprite.css.embed", content_type: nil, format_extname: nil, engine_extnames: []}, @env.extensions_for("sprite.css.embed"))
-
-    @env = Sprockets::Environment.new
-    @env.register_engine '.ms', Class.new
-    assert_equal({name: "foo", content_type: "application/javascript", format_extname: nil, engine_extnames: [".jst", ".ms"]}, @env.extensions_for("foo.jst.ms"))
-  end
-
-  test "content type" do
-    assert_equal nil,
-      @env.content_type_of("empty")
-    assert_equal "application/javascript",
-      @env.content_type_of("gallery.js")
-    assert_equal "application/javascript",
-      @env.content_type_of("application.js.coffee")
-    assert_equal "application/javascript",
-      @env.content_type_of("project.js.coffee.erb")
-    assert_equal "text/css",
-      @env.content_type_of("gallery.css.erb")
-    assert_equal "application/javascript",
-      @env.content_type_of("jquery.tmpl.min.js")
-    assert_equal "application/javascript",
-      @env.content_type_of("application.coffee")
-
-    @env = Sprockets::Environment.new
-    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
-    assert_equal "application/javascript", @env.content_type_of("foo.ngt.haml")
   end
 end
 

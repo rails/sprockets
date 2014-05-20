@@ -777,6 +777,8 @@ class AssetLogicalPathTest < Sprockets::TestCase
   end
 
   test "logical path" do
+    assert_equal "empty", logical_path("empty")
+
     assert_equal "application.js", logical_path("application.js")
     assert_equal "application.css", logical_path("application.css")
     assert_equal "jquery.foo.min.js", logical_path("jquery.foo.min.js")
@@ -784,6 +786,9 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "application.js", logical_path("application.js.erb")
     assert_equal "application.js", logical_path("application.js.coffee")
     assert_equal "application.css", logical_path("application.css.scss")
+    assert_equal "project.js", logical_path("project.js.coffee.erb")
+    assert_equal "gallery.css", logical_path("gallery.css.erb")
+    assert_equal "jquery.tmpl.min.js", logical_path("jquery.tmpl.min.js")
 
     assert_equal "application.js", logical_path("application.coffee")
     assert_equal "application.css", logical_path("application.scss")
@@ -801,6 +806,10 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
     assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
     assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
+
+    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
+    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
+    assert_equal "foo.js", logical_path("foo.ngt.haml")
   end
 
   def logical_path(path)
@@ -808,6 +817,57 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
       @env.find_asset(filename).logical_path
+    end
+  end
+end
+
+class AssetContentTypeTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('paths'))
+  end
+
+  test "content type" do
+    assert_equal "application/octet-stream", content_type("empty")
+
+    assert_equal "application/javascript", content_type("application.js")
+    assert_equal "text/css", content_type("application.css")
+    assert_equal "application/javascript", content_type("jquery.foo.min.js")
+
+    assert_equal "application/javascript", content_type("application.js.erb")
+    assert_equal "application/javascript", content_type("application.js.coffee")
+    assert_equal "text/css", content_type("application.css.scss")
+    assert_equal "application/javascript", content_type("project.js.coffee.erb")
+    assert_equal "text/css", content_type("gallery.css.erb")
+    assert_equal "application/javascript", content_type("jquery.tmpl.min.js")
+
+    assert_equal "application/javascript", content_type("application.coffee")
+    assert_equal "text/css", content_type("application.scss")
+    assert_equal "application/javascript", content_type("hello.jst.ejs")
+
+    assert_equal "application/javascript", content_type("bower/main.js")
+    assert_equal "application/json", content_type("bower/bower.json")
+
+    assert_equal "application/javascript", content_type("coffee/index.js")
+    assert_equal "application/javascript", content_type("coffee/foo.coffee")
+
+    assert_equal "application/javascript", content_type("jquery.ext/index.js")
+    assert_equal "application/javascript", content_type("jquery.ext/form.js")
+
+    assert_equal "application/javascript", content_type("all.coffee/plain.js")
+    assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
+    assert_equal "application/javascript", content_type("all.coffee/index.coffee")
+
+    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
+    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
+    assert_equal "application/javascript", content_type("foo.ngt.haml")
+  end
+
+  def content_type(path)
+    filename = fixture_path("paths/#{path}")
+    assert File.exist?(filename), "#{filename} does not exist"
+    silence_warnings do
+      @env.find_asset(filename).content_type
     end
   end
 end
