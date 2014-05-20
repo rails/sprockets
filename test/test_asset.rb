@@ -166,10 +166,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal @asset, @env[@asset.logical_path]
   end
 
-  test "class" do
-    assert_kind_of Sprockets::StaticAsset, @asset
-  end
-
   test "content type" do
     assert_equal "image/png", @asset.content_type
   end
@@ -184,10 +180,6 @@ class StaticAssetTest < Sprockets::TestCase
 
   test "splat" do
     assert_equal [@asset], @asset.to_a
-  end
-
-  test "to path" do
-    assert_equal fixture_path('asset/POW.png'), @asset.to_path
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
@@ -261,10 +253,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
   end
 
-  test "class" do
-    assert_kind_of Sprockets::ProcessedAsset, @asset
-  end
-
   test "content type" do
     assert_equal "application/javascript", @asset.content_type
   end
@@ -320,10 +308,6 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "logical path can find itself" do
     assert_equal @asset, @env[@asset.logical_path]
-  end
-
-  test "class" do
-    assert_kind_of Sprockets::BundledAsset, @asset
   end
 
   test "content type" do
@@ -575,10 +559,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:filename)
   end
 
-  test "splatted assets are processed assets" do
-    assert asset("project.js").to_a.all? { |a| a.is_a?(Sprockets::ProcessedAsset) }
-  end
-
   test "splatted asset with child dependencies" do
     assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
       asset("application.js").to_a.map(&:filename)
@@ -704,16 +684,13 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal "var Foo = {};\n\n\n\n", asset("stub/application").to_s
   end
 
-  test "circular require raises an error" do
-    assert_raises(Sprockets::CircularDependencyError) do
-      asset("circle/a.js")
-    end
-    assert_raises(Sprockets::CircularDependencyError) do
-      asset("circle/b.js")
-    end
-    assert_raises(Sprockets::CircularDependencyError) do
-      asset("circle/c.js")
-    end
+  test "resolves circular requires" do
+    assert_equal "var A;\nvar C;\nvar B;\n",
+      asset("circle/a.js").to_s
+    assert_equal "var B;\nvar A;\nvar C;\n",
+      asset("circle/b.js").to_s
+    assert_equal "var C;\nvar B;\nvar A;\n",
+      asset("circle/c.js").to_s
   end
 
   test "unknown directives are ignored" do

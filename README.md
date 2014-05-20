@@ -362,6 +362,7 @@ submit a pull request.
 * Removed builtin support for LESS.
 * Removed include directive support.
 * Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
+* Support circular dependencies. For parity with ES6 modules.
 
 **2.12.1** (April 17, 2014)
 
