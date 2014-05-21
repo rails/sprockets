@@ -108,8 +108,7 @@ module Sprockets
       def logical_path_for(filename)
         _, path = paths_split(self.paths, filename)
         if path
-          name, extname, _ = parse_path_extnames(path)
-          path = name
+          path, extname, _ = parse_path_extnames(path)
           path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
           path += extname if extname
           path
