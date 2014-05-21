@@ -17,5 +17,12 @@ module Sprockets
       encoding ||= Sprockets.default_external_encoding
       encoding
     end
+
+    def matches_content_type?(mime_type, path)
+      # TODO: Disallow nil mime type
+      mime_type.nil? ||
+        mime_type == "*/*" ||
+        mime_type == mime_types[parse_path_extnames(path)[1]]
+    end
   end
 end
