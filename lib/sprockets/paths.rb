@@ -107,14 +107,10 @@ module Sprockets
       # TODO: Review API and performance
       def logical_path_for(filename)
         _, path = paths_split(self.paths, filename)
-        if path
-          path, extname, _ = parse_path_extnames(path)
-          path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
-          path += extname if extname
-          path
-        else
-          raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
-        end
+        path, extname, _ = parse_path_extnames(path)
+        path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
+        path += extname if extname
+        path
       end
 
       # Internal: Resolve absolute path to ensure it exists and is in the
