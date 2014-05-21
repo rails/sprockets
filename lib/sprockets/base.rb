@@ -234,24 +234,24 @@ module Sprockets
       end
 
       def build_asset_hash(filename, bundle = true)
-        extnames = extensions_for(filename)
+        attributes = attributes_for(filename)
 
-        attributes = {
+        asset = {
           filename: filename,
           logical_path: logical_path_for(filename),
-          content_type: extnames[:content_type] || 'application/octet-stream'
+          content_type: attributes[:content_type] || 'application/octet-stream'
         }
 
-        processed_processors = preprocessors(attributes[:content_type]) +
-          extnames[:engine_extnames].map { |ext| engines(ext) }.reverse +
-          postprocessors(attributes[:content_type])
-        bundled_processors = bundle_processors(attributes[:content_type])
+        processed_processors = preprocessors(asset[:content_type]) +
+          attributes[:engine_extnames].map { |ext| engines(ext) }.reverse +
+          postprocessors(asset[:content_type])
+        bundled_processors = bundle_processors(asset[:content_type])
 
         if processed_processors.any? || bundled_processors.any?
           processors = bundle ? bundled_processors : processed_processors
-          build_processed_asset_hash(attributes, processors)
+          build_processed_asset_hash(asset, processors)
         else
-          build_static_asset_hash(attributes)
+          build_static_asset_hash(asset)
         end
       end
 

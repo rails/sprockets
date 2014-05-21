@@ -52,8 +52,8 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      extnames = extensions_for(path)
-      format_content_type = extnames[:content_type]
+      attributes = attributes_for(path)
+      format_content_type = attributes[:content_type]
       content_type = options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
@@ -69,7 +69,7 @@ module Sprockets
       if absolute_path?(path)
         resolve_absolute_path(path, &filter_content_type)
       else
-        resolve_all_logical_paths(path, extnames[:name], &filter_content_type)
+        resolve_all_logical_paths(path, attributes[:name], &filter_content_type)
       end
 
       nil
@@ -108,15 +108,15 @@ module Sprockets
       def logical_path_for(filename)
         _, path = paths_split(self.paths, filename)
         if path
-          extnames = extensions_for(path)
+          attributes = attributes_for(path)
 
-          path = extnames[:name]
+          path = attributes[:name]
           path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
 
-          if extnames[:format_extname]
-            path += extnames[:format_extname]
+          if attributes[:format_extname]
+            path += attributes[:format_extname]
           else
-            extnames[:engine_extnames].each do |ext|
+            attributes[:engine_extnames].each do |ext|
               if ext = engine_extensions[ext]
                 path += ext
                 break
@@ -147,14 +147,14 @@ module Sprockets
 
       def path_matches(dirname, basename)
         # TODO: Review performance
-        basename_extnames = extensions_for(basename)
+        basename_attributes = attributes_for(basename)
 
         self.entries(dirname).each do |entry|
           # TODO: Review performance
-          entry_extnames = extensions_for(entry)
+          entry_attributes = attributes_for(entry)
 
-          if basename_extnames[:name] == entry_extnames[:name] &&
-              (basename_extnames[:content_type].nil? || basename_extnames[:content_type] == entry_extnames[:content_type])
+          if basename_attributes[:name] == entry_attributes[:name] &&
+              (basename_attributes[:content_type].nil? || basename_attributes[:content_type] == entry_attributes[:content_type])
             fn = File.join(dirname, entry)
             stat = self.stat(fn)
             if stat && stat.file?

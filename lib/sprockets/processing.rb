@@ -13,7 +13,7 @@ module Sprockets
       # TODO: Disallow nil mime type
       mime_type.nil? ||
         mime_type == "*/*" ||
-        mime_type == extensions_for(path)[:content_type]
+        mime_type == attributes_for(path)[:content_type]
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`
@@ -215,7 +215,7 @@ module Sprockets
       #            engines: [".coffee", ".erb"] }
       #
       # TODO: Review API and performance
-      def extensions_for(path)
+      def attributes_for(path)
         content_type    = nil
         format_extname  = nil
         engine_extnames = []
