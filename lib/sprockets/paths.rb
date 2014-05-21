@@ -53,8 +53,7 @@ module Sprockets
       path = path.to_s
 
       extnames = extensions_for(path)
-      extname = extnames[:format_extname]
-      format_content_type = mime_types(extname) if extname
+      format_content_type = extnames[:content_type]
       content_type = options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
