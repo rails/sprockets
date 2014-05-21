@@ -109,21 +109,9 @@ module Sprockets
         _, path = paths_split(self.paths, filename)
         if path
           attributes = attributes_for(path)
-
           path = attributes[:name]
           path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
-
-          if attributes[:format_extname]
-            path += attributes[:format_extname]
-          else
-            attributes[:engine_extnames].each do |ext|
-              if ext = engine_extensions[ext]
-                path += ext
-                break
-              end
-            end
-          end
-
+          path += attributes[:extname] if attributes[:extname]
           path
         else
           raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
