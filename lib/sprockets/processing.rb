@@ -222,7 +222,7 @@ module Sprockets
         len = path.length
 
         path_reverse_extnames(path).each do |extname|
-          if engines(extname)
+          if engines[extname]
             engine_extnames << extname
             content_type = engine_mime_types[extname]
             len -= extname.length

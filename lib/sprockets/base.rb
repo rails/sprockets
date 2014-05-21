@@ -243,7 +243,7 @@ module Sprockets
         }
 
         processed_processors = preprocessors(asset[:content_type]) +
-          attributes[:engine_extnames].map { |ext| engines(ext) }.reverse +
+          attributes[:engine_extnames].map { |ext| engines[ext] }.reverse +
           postprocessors(asset[:content_type])
         bundled_processors = bundle_processors(asset[:content_type])
 

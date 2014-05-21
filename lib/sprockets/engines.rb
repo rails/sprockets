@@ -33,16 +33,7 @@ module Sprockets
     #     environment.engines
     #     # => {".coffee" => CoffeeScriptTemplate, ".sass" => SassTemplate, ...}
     #
-    #     environment.engines('.coffee')
-    #     # => CoffeeScriptTemplate
-    #
-    def engines(ext = nil)
-      if ext
-        @engines[ext]
-      else
-        @engines.dup
-      end
-    end
+    attr_reader :engines
 
     # Internal: Returns a `Hash` of engine extensions to mime types.
     #
