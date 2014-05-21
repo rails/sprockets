@@ -216,19 +216,16 @@ module Sprockets
       #
       # TODO: Review API and performance
       def attributes_for(path)
-        content_type    = nil
         format_extname  = nil
         engine_extnames = []
         len = path.length
 
         path_reverse_extnames(path).each do |extname|
           if engines.key?(extname)
-            content_type = engine_mime_types[extname]
             format_extname = engine_extensions[extname]
             engine_extnames << extname
             len -= extname.length
-          elsif mime_type = mime_types[extname]
-            content_type = mime_type
+          elsif mime_types.key?(extname)
             format_extname = extname
             len -= extname.length
             break
@@ -240,7 +237,7 @@ module Sprockets
         engine_extnames.reverse!
 
         { name: path[0, len],
-          content_type: content_type,
+          content_type: mime_types[format_extname],
           extname: format_extname,
           engine_extnames: engine_extnames }
       end

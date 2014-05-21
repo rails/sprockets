@@ -49,7 +49,6 @@ module Sprockets
   @paths             = []
   @mime_types        = Rack::Mime::MIME_TYPES.dup
   @engines           = {}
-  @engine_mime_types = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
