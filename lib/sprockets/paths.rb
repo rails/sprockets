@@ -52,6 +52,7 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
+      # TODO: Review performance
       name, extname, _ = parse_path_extnames(path)
       format_content_type = mime_types[extname]
       content_type = options[:content_type] || format_content_type
@@ -60,16 +61,10 @@ module Sprockets
         return
       end
 
-      filter_content_type = proc do |filename|
-        if matches_content_type?(content_type, filename)
-          yield filename
-        end
-      end
-
       if absolute_path?(path)
-        resolve_absolute_path(path, &filter_content_type)
+        resolve_absolute_path(path, content_type, &block)
       else
-        resolve_all_logical_paths(path, name, &filter_content_type)
+        resolve_all_logical_paths(path, name, content_type, &block)
       end
 
       nil
@@ -120,30 +115,29 @@ module Sprockets
       # options  - Hash (default: {})
       #
       # Returns String filename or nil
-      def resolve_absolute_path(filename, &block)
+      def resolve_absolute_path(filename, content_type, &block)
         base_path, logical_path = paths_split(self.paths, filename)
         if base_path && logical_path
           dirname, basename = File.split(filename)
-          path_matches(dirname, basename, &block)
+          # TODO: Review performance
+          basename_name = parse_path_extnames(basename)[0]
+          path_matches(dirname, basename_name) do |fn, mime_type|
+            if content_type.nil? || content_type == mime_type
+              yield fn
+            end
+          end
         end
       end
 
       def path_matches(dirname, basename)
-        # TODO: Review performance
-        basename_name, basename_extname, _ = parse_path_extnames(basename)
-        basename_content_type = mime_types[basename_extname]
-
         self.entries(dirname).each do |entry|
           # TODO: Review performance
-          entry_name, entry_extname, _ = parse_path_extnames(entry)
-          entry_content_type = mime_types[entry_extname]
-
-          if basename_name == entry_name &&
-              (basename_content_type.nil? || basename_content_type == entry_content_type)
+          name, extname, _ = parse_path_extnames(entry)
+          if basename == name
             fn = File.join(dirname, entry)
             stat = self.stat(fn)
             if stat && stat.file?
-              yield fn
+              yield fn, mime_types[extname]
             end
           end
         end
@@ -157,7 +151,7 @@ module Sprockets
       #   filename - String or nil
       #
       # Returns nothing.
-      def resolve_all_logical_paths(logical_path, path_without_extname)
+      def resolve_all_logical_paths(logical_path, path_without_extname, content_type)
         paths = [logical_path]
         paths << path_without_extname if path_without_extname != logical_path
 
@@ -170,13 +164,26 @@ module Sprockets
 
         paths.each do |path|
           dirname, basename = File.split(path)
+
+          # TODO: Review performance
+          basename_name, basename_extname, _ = parse_path_extnames(basename)
+          basename_content_type = mime_types[basename_extname]
+
           @paths.each do |base_path|
-            path_matches(File.expand_path(dirname, base_path), basename) do |filename|
+            path_matches(File.expand_path(dirname, base_path), basename_name) do |filename, mime_type|
+              next if basename_content_type && basename_content_type != mime_type
+
               expand_bower_path(filename) do |bower_path|
-                yield bower_path
+                # TODO: Review performance
+                bower_extname = parse_path_extnames(bower_path)[1]
+                if content_type.nil? || content_type == mime_types[bower_extname]
+                  yield bower_path
+                end
               end
 
-              yield filename
+              if content_type.nil? || content_type == mime_type
+                yield filename
+              end
             end
           end
         end

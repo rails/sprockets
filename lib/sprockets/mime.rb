@@ -22,6 +22,7 @@ module Sprockets
       # TODO: Disallow nil mime type
       mime_type.nil? ||
         mime_type == "*/*" ||
+        # TODO: Review performance
         mime_type == mime_types[parse_path_extnames(path)[1]]
     end
   end
