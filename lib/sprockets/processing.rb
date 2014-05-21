@@ -13,7 +13,7 @@ module Sprockets
       # TODO: Disallow nil mime type
       mime_type.nil? ||
         mime_type == "*/*" ||
-        mime_type == mime_types[attributes_for(path)[:extname]]
+        mime_type == mime_types[parse_path_extnames(path)[1]]
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`
@@ -215,7 +215,7 @@ module Sprockets
       #            engines: [".coffee", ".erb"] }
       #
       # TODO: Review API and performance
-      def attributes_for(path)
+      def parse_path_extnames(path)
         format_extname  = nil
         engine_extnames = []
         len = path.length
@@ -234,11 +234,10 @@ module Sprockets
           end
         end
 
+        name = path[0, len]
         engine_extnames.reverse!
 
-        { name: path[0, len],
-          extname: format_extname,
-          engine_extnames: engine_extnames }
+        return [name, format_extname, engine_extnames]
       end
   end
 end

@@ -52,8 +52,8 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      attributes = attributes_for(path)
-      format_content_type = mime_types[attributes[:extname]]
+      name, extname, _ = parse_path_extnames(path)
+      format_content_type = mime_types[extname]
       content_type = options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
@@ -69,7 +69,7 @@ module Sprockets
       if absolute_path?(path)
         resolve_absolute_path(path, &filter_content_type)
       else
-        resolve_all_logical_paths(path, attributes[:name], &filter_content_type)
+        resolve_all_logical_paths(path, name, &filter_content_type)
       end
 
       nil
@@ -108,10 +108,10 @@ module Sprockets
       def logical_path_for(filename)
         _, path = paths_split(self.paths, filename)
         if path
-          attributes = attributes_for(path)
-          path = attributes[:name]
+          name, extname, _ = parse_path_extnames(path)
+          path = name
           path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
-          path += attributes[:extname] if attributes[:extname]
+          path += extname if extname
           path
         else
           raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
@@ -135,15 +135,15 @@ module Sprockets
 
       def path_matches(dirname, basename)
         # TODO: Review performance
-        basename_attributes = attributes_for(basename)
-        basename_content_type = mime_types[basename_attributes[:extname]]
+        basename_name, basename_extname, _ = parse_path_extnames(basename)
+        basename_content_type = mime_types[basename_extname]
 
         self.entries(dirname).each do |entry|
           # TODO: Review performance
-          entry_attributes = attributes_for(entry)
-          entry_content_type = mime_types[entry_attributes[:extname]]
+          entry_name, entry_extname, _ = parse_path_extnames(entry)
+          entry_content_type = mime_types[entry_extname]
 
-          if basename_attributes[:name] == entry_attributes[:name] &&
+          if basename_name == entry_name &&
               (basename_content_type.nil? || basename_content_type == entry_content_type)
             fn = File.join(dirname, entry)
             stat = self.stat(fn)
