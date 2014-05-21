@@ -80,19 +80,6 @@ module Sprockets
     end
 
     private
-      # Internal: Returns implicit engine content type.
-      #
-      # `.coffee` files carry an implicit `application/javascript`
-      # content type.
-      def engine_content_type_for(extnames)
-        extnames.each do |extname|
-          if mime_type = engine_mime_types[extname]
-            return mime_type
-          end
-        end
-        nil
-      end
-
       def deep_copy_hash(hash)
         initial = Hash.new { |h, k| h[k] = [] }
         hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }
