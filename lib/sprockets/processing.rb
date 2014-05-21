@@ -226,9 +226,9 @@ module Sprockets
             engine_extnames << extname
             content_type = engine_mime_types[extname]
             len -= extname.length
-          elsif mime_types(extname)
+          elsif mime_type = mime_types(extname)
             format_extname = extname
-            content_type = mime_types(extname)
+            content_type = mime_type
             len -= extname.length
             break
           else
