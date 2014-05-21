@@ -52,9 +52,9 @@ module EnvironmentTests
   end
 
   test "lookup mime type" do
-    assert_equal "application/javascript", @env.mime_types(".js")
-    assert_equal "text/css", @env.mime_types(".css")
-    assert_equal nil, @env.mime_types(".foo")
+    assert_equal "application/javascript", @env.mime_types[".js"]
+    assert_equal "text/css", @env.mime_types[".css"]
+    assert_equal nil, @env.mime_types[".foo"]
   end
 
   test "lookup bundle processors" do
@@ -367,9 +367,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register mime type" do
-    assert !@env.mime_types("jst")
+    assert !@env.mime_types[".jst"]
     @env.register_mime_type("application/javascript", "jst")
-    assert_equal "application/javascript", @env.mime_types(".jst")
+    assert_equal "application/javascript", @env.mime_types[".jst"]
   end
 
   test "register bundle processor" do
@@ -628,9 +628,9 @@ class TestCached < Sprockets::TestCase
     env.register_mime_type "application/javascript", ".jst"
     cached = env.cached
 
-    assert_equal "application/javascript", cached.mime_types(".jst")
+    assert_equal "application/javascript", cached.mime_types[".jst"]
     env.register_mime_type nil, ".jst"
-    assert_equal "application/javascript", cached.mime_types(".jst")
+    assert_equal "application/javascript", cached.mime_types[".jst"]
   end
 
   test "does not allow new bundle processors to be added" do
