@@ -13,7 +13,7 @@ module Sprockets
       # TODO: Disallow nil mime type
       mime_type.nil? ||
         mime_type == "*/*" ||
-        mime_type == attributes_for(path)[:content_type]
+        mime_type == mime_types[attributes_for(path)[:extname]]
     end
 
     # Returns an `Array` of `Processor` classes. If a `mime_type`
@@ -237,7 +237,6 @@ module Sprockets
         engine_extnames.reverse!
 
         { name: path[0, len],
-          content_type: mime_types[format_extname],
           extname: format_extname,
           engine_extnames: engine_extnames }
       end

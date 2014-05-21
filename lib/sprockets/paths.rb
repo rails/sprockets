@@ -53,7 +53,7 @@ module Sprockets
       path = path.to_s
 
       attributes = attributes_for(path)
-      format_content_type = attributes[:content_type]
+      format_content_type = mime_types[attributes[:extname]]
       content_type = options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
@@ -136,13 +136,15 @@ module Sprockets
       def path_matches(dirname, basename)
         # TODO: Review performance
         basename_attributes = attributes_for(basename)
+        basename_content_type = mime_types[basename_attributes[:extname]]
 
         self.entries(dirname).each do |entry|
           # TODO: Review performance
           entry_attributes = attributes_for(entry)
+          entry_content_type = mime_types[entry_attributes[:extname]]
 
           if basename_attributes[:name] == entry_attributes[:name] &&
-              (basename_attributes[:content_type].nil? || basename_attributes[:content_type] == entry_attributes[:content_type])
+              (basename_content_type.nil? || basename_content_type == entry_content_type)
             fn = File.join(dirname, entry)
             stat = self.stat(fn)
             if stat && stat.file?
