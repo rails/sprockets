@@ -91,6 +91,14 @@ module EnvironmentTests
     assert_equal fixture_path('default/gallery.css.erb'),
       @env.resolve(fixture_path('default/gallery'), content_type: 'text/css')
 
+    assert_equal fixture_path('default/manifest.js.yml'),
+      @env.resolve(fixture_path('default/manifest.js.yml'))
+    assert_equal fixture_path('default/manifest.js.yml'),
+      @env.resolve(fixture_path('default/manifest.js.yml'), content_type: 'text/yaml')
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve(fixture_path('default/manifest.js.yml'), content_type: 'application/javascript')
+    end
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve(fixture_path('default/jquery.tmpl'))
     end
@@ -137,6 +145,8 @@ module EnvironmentTests
       @env.resolve("jquery.tmpl.min")
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
       @env.resolve("jquery.tmpl.min.js")
+    assert_equal fixture_path('default/manifest.js.yml'),
+      @env.resolve('manifest.js.yml')
 
     refute @env.resolve_all("null").first
     assert_raises(Sprockets::FileNotFound) do
@@ -159,6 +169,12 @@ module EnvironmentTests
       @env.resolve("jquery.tmpl.min", content_type: 'application/javascript')
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
       @env.resolve("jquery.tmpl.min.js", content_type: 'application/javascript')
+    assert_equal fixture_path('default/manifest.js.yml'),
+      @env.resolve('manifest.js.yml', content_type: 'text/yaml')
+
+    assert_raises(Sprockets::FileNotFound) do
+      @env.resolve('manifest.js.yml', content_type: 'application/javascript')
+    end
 
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("gallery.js", content_type: "text/css")
@@ -292,7 +308,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  FILES_IN_PATH = 39
+  FILES_IN_PATH = 40
 
   test "iterate over each logical path" do
     paths = []

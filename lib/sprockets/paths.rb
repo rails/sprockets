@@ -62,9 +62,9 @@ module Sprockets
       end
 
       if absolute_path?(path)
-        resolve_absolute_path(path, content_type, &block)
+        resolve_absolute_path(path, name, extname, content_type, &block)
       else
-        resolve_all_logical_paths(path, name, content_type, &block)
+        resolve_all_logical_paths(name, extname, content_type, &block)
       end
 
       nil
@@ -115,16 +115,11 @@ module Sprockets
       # options  - Hash (default: {})
       #
       # Returns String filename or nil
-      def resolve_absolute_path(filename, content_type, &block)
-        base_path, logical_path = paths_split(self.paths, filename)
-        if base_path && logical_path
-          dirname, basename = File.split(filename)
-          # TODO: Review performance
-          basename_name = parse_path_extnames(basename)[0]
-          path_matches(dirname, basename_name) do |fn, mime_type|
-            if content_type.nil? || content_type == mime_type
-              yield fn
-            end
+      def resolve_absolute_path(filename, name, extname, content_type, &block)
+        return unless paths_split(self.paths, filename)
+        path_matches(File.dirname(filename), File.basename(name)) do |fn, mime_type|
+          if content_type.nil? || content_type == mime_type
+            yield fn
           end
         end
       end
@@ -151,39 +146,41 @@ module Sprockets
       #   filename - String or nil
       #
       # Returns nothing.
-      def resolve_all_logical_paths(logical_path, path_without_extname, content_type)
-        paths = [logical_path]
-        paths << path_without_extname if path_without_extname != logical_path
+      def resolve_all_logical_paths(name, extname, content_type, &block)
+        dirname, basename = File.split(name)
 
-        # optimization: bower.json can only be nested one level deep
-        if !path_without_extname.index('/')
-          paths << File.join(path_without_extname, "bower.json")
+        if extname
+          resolve_logical_paths(dirname, basename, content_type, content_type, &block)
         end
 
-        paths << File.join(path_without_extname, "index")
+        # TODO: Review performance
+        basename_, extname_, _ = parse_path_extnames(basename)
+        content_type_ = mime_types[extname_]
+        resolve_logical_paths(dirname, basename_, content_type, content_type_, &block)
 
-        paths.each do |path|
-          dirname, basename = File.split(path)
+        # optimization: bower.json can only be nested one level deep
+        if !name.index('/')
+          resolve_logical_paths(name, "bower", content_type, "application/json", &block)
+        end
 
-          # TODO: Review performance
-          basename_name, basename_extname, _ = parse_path_extnames(basename)
-          basename_content_type = mime_types[basename_extname]
+        resolve_logical_paths(name, "index", content_type, nil, &block)
+      end
 
-          @paths.each do |base_path|
-            path_matches(File.expand_path(dirname, base_path), basename_name) do |filename, mime_type|
-              next if basename_content_type && basename_content_type != mime_type
+      def resolve_logical_paths(dirname, basename, content_type, content_type2, &block)
+        @paths.each do |base_path|
+          path_matches(File.expand_path(dirname, base_path), basename) do |filename, mime_type|
+            next if content_type2 && content_type2 != mime_type
 
-              expand_bower_path(filename) do |bower_path|
-                # TODO: Review performance
-                bower_extname = parse_path_extnames(bower_path)[1]
-                if content_type.nil? || content_type == mime_types[bower_extname]
-                  yield bower_path
-                end
+            expand_bower_path(filename) do |bower_path|
+              # TODO: Review performance
+              bower_extname = parse_path_extnames(bower_path)[1]
+              if content_type.nil? || content_type == mime_types[bower_extname]
+                yield bower_path
               end
+            end
 
-              if content_type.nil? || content_type == mime_type
-                yield filename
-              end
+            if content_type.nil? || content_type == mime_type
+              yield filename
             end
           end
         end
