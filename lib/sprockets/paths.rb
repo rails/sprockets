@@ -118,6 +118,13 @@ module Sprockets
       # Returns String filename or nil
       def resolve_absolute_path(filename, name, extname, content_type, &block)
         return unless paths_split(self.paths, filename)
+
+        # TODO: Review for correctness
+        stat = self.stat(filename)
+        if stat && stat.file?
+          yield filename
+        end
+
         path_matches(File.dirname(filename), File.basename(name), content_type, &block)
       end
 

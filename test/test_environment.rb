@@ -606,6 +606,25 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
   end
 
+  test "verify all absolute paths" do
+    env = new_environment
+    Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
+      unless %w( . ..).include?(dir)
+        env.append_path(fixture_path(dir))
+      end
+    end
+
+    # TODO: Expose environment helper for this
+    env.paths.each do |root|
+      env.stat_tree(root).each do |filename, stat|
+        next unless stat.file?
+
+        assert_equal filename, env.resolve_all(filename).first,
+          "Expected #{filename.inspect} to resolve to itself"
+      end
+    end
+  end
+
   test "verify all logical paths" do
     env = new_environment
     Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
@@ -616,7 +635,7 @@ class TestEnvironment < Sprockets::TestCase
 
     env.logical_paths.each do |logical_path, filename|
       assert_equal filename, env.resolve_all(logical_path).first,
-        "Expected #{logical_path.inspect} to resolve to #{filename}."
+        "Expected #{logical_path.inspect} to resolve to #{filename}"
     end
   end
 end
