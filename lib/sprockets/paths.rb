@@ -159,7 +159,10 @@ module Sprockets
               # TODO: Review performance
               bower_extname = parse_path_extnames(bower_path)[1]
               if content_type.nil? || content_type == mime_types[bower_extname]
-                yield bower_path
+                stat = self.stat(bower_path)
+                if stat && stat.file?
+                  yield bower_path
+                end
               end
             end
           end

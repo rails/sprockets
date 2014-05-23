@@ -219,6 +219,9 @@ module EnvironmentTests
       @env.resolve("rails", content_type: 'application/javascript')
     assert_equal fixture_path('default/rails/rails.coffee'),
       @env.resolve("rails.js", content_type: 'application/javascript')
+
+    assert_equal fixture_path('default/requirejs/require.js'),
+      @env.resolve("requirejs.js", content_type: 'application/javascript')
   end
 
   test "find bundled asset in environment" do
@@ -308,7 +311,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  FILES_IN_PATH = 40
+  FILES_IN_PATH = 42
 
   test "iterate over each logical path" do
     paths = []
