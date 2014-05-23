@@ -22,11 +22,8 @@ module Sprockets
       @version           = environment.version
       @root              = environment.root
       @paths             = environment.paths.dup
-      @extensions        = environment.extensions.dup
-      @extension_pattern = environment.extension_pattern
-      @mime_types        = environment.mime_types
-      @engines           = environment.engines
-      @engine_mime_types = environment.engine_mime_types.dup
+      @mime_types        = environment.mime_types.dup
+      @engines           = environment.engines.dup
       @engine_extensions = environment.engine_extensions.dup
       @preprocessors     = environment.preprocessors
       @postprocessors    = environment.postprocessors

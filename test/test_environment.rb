@@ -219,6 +219,9 @@ module EnvironmentTests
       @env.resolve("rails", content_type: 'application/javascript')
     assert_equal fixture_path('default/rails/rails.coffee'),
       @env.resolve("rails.js", content_type: 'application/javascript')
+
+    assert_equal fixture_path('default/requirejs/require.js'),
+      @env.resolve("requirejs.js", content_type: 'application/javascript')
   end
 
   test "find bundled asset in environment" do

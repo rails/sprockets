@@ -26,10 +26,8 @@ module Sprockets
       @version = ''
 
       @paths             = Sprockets.paths.dup
-      @extensions        = Sprockets.extensions.dup
-      @mime_types        = Sprockets.registered_mime_types
-      @engines           = Sprockets.engines
-      @engine_mime_types = Sprockets.engine_mime_types
+      @mime_types        = Sprockets.mime_types.dup
+      @engines           = Sprockets.engines.dup
       @engine_extensions = Sprockets.engine_extensions
       @preprocessors     = Sprockets.preprocessors
       @postprocessors    = Sprockets.postprocessors
@@ -61,7 +59,6 @@ module Sprockets
       def expire_cache!
         # Clear digest to be recomputed
         @digest = nil
-        @extension_pattern = /^(?:#{extensions.map { |e| Regexp.escape(e) }.join('|')})*$/
       end
   end
 end

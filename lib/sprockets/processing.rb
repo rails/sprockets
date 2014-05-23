@@ -9,56 +9,6 @@ module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    # Internal: Returns the format extension and `Array` of engine extensions.
-    #
-    #     "foo.js.coffee.erb"
-    #     # => { format: ".js",
-    #            engines: [".coffee", ".erb"] }
-    #
-    # TODO: Review API and performance
-    def extensions_for(path)
-      format_extname  = nil
-      engine_extnames = []
-      len = path.length
-
-      path_reverse_extnames(path).each do |extname|
-        if engines(extname)
-          engine_extnames << extname
-          len -= extname.length
-        elsif mime_types(extname)
-          format_extname = extname
-          len -= extname.length
-          break
-        else
-          break
-        end
-      end
-
-      engine_extnames.reverse!
-
-      { name: path[0, len],
-        format_extname: format_extname,
-        engine_extnames: engine_extnames }
-    end
-
-    # Internal. Return content type of `path`.
-    #
-    # TODO: Review API and performance
-    def content_type_of(path)
-      extnames = extensions_for(path)
-      if format_ext = extnames[:format_extname]
-        return mime_types(format_ext)
-      end
-      engine_content_type_for(extnames[:engine_extnames])
-    end
-
-    def matches_content_type?(mime_type, path)
-      # TODO: Disallow nil mime type
-      mime_type.nil? ||
-        mime_type == "*/*" ||
-        mime_type == content_type_of(path)
-    end
-
     # Returns an `Array` of `Processor` classes. If a `mime_type`
     # argument is supplied, the processors registered under that
     # extension will be returned.

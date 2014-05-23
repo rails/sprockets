@@ -42,14 +42,13 @@ module Sprockets
   require 'sprockets/processing'
   require 'sprockets/compressing'
   require 'sprockets/paths'
+  require 'rack/mime'
   extend Engines, Mime, Processing, Compressing, Paths
 
   @root              = File.expand_path('..', __FILE__)
   @paths             = []
-  @extensions        = []
-  @mime_types        = {}
+  @mime_types        = Rack::Mime::MIME_TYPES.dup
   @engines           = {}
-  @engine_mime_types = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }

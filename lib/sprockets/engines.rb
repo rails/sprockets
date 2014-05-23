@@ -33,21 +33,7 @@ module Sprockets
     #     environment.engines
     #     # => {".coffee" => CoffeeScriptTemplate, ".sass" => SassTemplate, ...}
     #
-    #     environment.engines('.coffee')
-    #     # => CoffeeScriptTemplate
-    #
-    def engines(ext = nil)
-      if ext
-        @engines[ext]
-      else
-        @engines.dup
-      end
-    end
-
-    # Internal: Returns a `Hash` of engine extensions to mime types.
-    #
-    # # => { '.coffee' => 'application/javascript' }
-    attr_reader :engine_mime_types
+    attr_reader :engines
 
     # Internal: Returns a `Hash` of engine extensions to format extensions.
     #
@@ -61,19 +47,16 @@ module Sprockets
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @extensions.push(ext)
 
       if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
         @engines[ext] = klass
         if options[:mime_type]
-          engine_mime_types[ext.to_s] = options[:mime_type]
           # FIXME: Reverse mime type lookup is a smell
           engine_extensions[ext.to_s] = mime_types.key(options[:mime_type])
         end
       else
         @engines[ext] = LegacyTiltProcessor.new(klass)
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          engine_mime_types[ext.to_s] = klass.default_mime_type
           # FIXME: Reverse mime type lookup is a smell
           engine_extensions[ext.to_s] = mime_types.key(klass.default_mime_type)
         end
@@ -81,19 +64,6 @@ module Sprockets
     end
 
     private
-      # Internal: Returns implicit engine content type.
-      #
-      # `.coffee` files carry an implicit `application/javascript`
-      # content type.
-      def engine_content_type_for(extnames)
-        extnames.each do |extname|
-          if mime_type = engine_mime_types[extname]
-            return mime_type
-          end
-        end
-        nil
-      end
-
       def deep_copy_hash(hash)
         initial = Hash.new { |h, k| h[k] = [] }
         hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }
