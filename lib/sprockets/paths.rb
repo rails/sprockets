@@ -101,6 +101,7 @@ module Sprockets
       #
       # TODO: Review API and performance
       def logical_path_for(filename)
+        # TODO: Review performance
         _, path = paths_split(self.paths, filename)
         path, extname, _ = parse_path_extnames(path)
         path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
@@ -117,22 +118,18 @@ module Sprockets
       # Returns String filename or nil
       def resolve_absolute_path(filename, name, extname, content_type, &block)
         return unless paths_split(self.paths, filename)
-        path_matches(File.dirname(filename), File.basename(name)) do |fn, mime_type|
-          if content_type.nil? || content_type == mime_type
-            yield fn
-          end
-        end
+        path_matches(File.dirname(filename), File.basename(name), content_type, &block)
       end
 
-      def path_matches(dirname, basename)
+      def path_matches(dirname, basename, content_type)
         self.entries(dirname).each do |entry|
           # TODO: Review performance
           name, extname, _ = parse_path_extnames(entry)
-          if basename == name
+          if basename == name && (content_type.nil? || content_type == mime_types[extname])
             fn = File.join(dirname, entry)
             stat = self.stat(fn)
             if stat && stat.file?
-              yield fn, mime_types[extname]
+              yield fn
             end
           end
         end
@@ -150,24 +147,14 @@ module Sprockets
         dirname, basename = File.split(name)
 
         if extname
-          resolve_logical_paths(dirname, "#{basename}#{extname}", content_type, content_type, &block)
+          resolve_logical_paths(dirname, "#{basename}#{extname}", content_type, &block)
         end
 
-        resolve_logical_paths(dirname, basename, content_type, content_type, &block)
+        resolve_logical_paths(dirname, basename, content_type, &block)
 
-        # optimization: bower.json can only be nested one level deep
+        # bower.json can only be nested one level deep
         if !name.index('/')
-          resolve_logical_paths(name, "bower", content_type, "application/json", &block)
-        end
-
-        resolve_logical_paths(name, "index", content_type, nil, &block)
-      end
-
-      def resolve_logical_paths(dirname, basename, content_type, content_type2, &block)
-        @paths.each do |base_path|
-          path_matches(File.expand_path(dirname, base_path), basename) do |filename, mime_type|
-            next if content_type2 && content_type2 != mime_type
-
+          resolve_logical_paths(name, "bower", "application/json") do |filename|
             expand_bower_path(filename) do |bower_path|
               # TODO: Review performance
               bower_extname = parse_path_extnames(bower_path)[1]
@@ -175,11 +162,15 @@ module Sprockets
                 yield bower_path
               end
             end
-
-            if content_type.nil? || content_type == mime_type
-              yield filename
-            end
           end
+        end
+
+        resolve_logical_paths(name, "index", content_type, &block)
+      end
+
+      def resolve_logical_paths(dirname, basename, content_type, &block)
+        @paths.each do |base_path|
+          path_matches(File.expand_path(dirname, base_path), basename, content_type, &block)
         end
       end
 
