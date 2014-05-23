@@ -150,13 +150,10 @@ module Sprockets
         dirname, basename = File.split(name)
 
         if extname
-          resolve_logical_paths(dirname, basename, content_type, content_type, &block)
+          resolve_logical_paths(dirname, "#{basename}#{extname}", content_type, content_type, &block)
         end
 
-        # TODO: Review performance
-        basename_, extname_, _ = parse_path_extnames(basename)
-        content_type_ = mime_types[extname_]
-        resolve_logical_paths(dirname, basename_, content_type, content_type_, &block)
+        resolve_logical_paths(dirname, basename, content_type, content_type, &block)
 
         # optimization: bower.json can only be nested one level deep
         if !name.index('/')
