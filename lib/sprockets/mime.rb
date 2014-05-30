@@ -1,32 +1,5 @@
 module Sprockets
   module Mime
-    MIME_TYPES = {
-      ".css"       => "text/css",
-      ".eot"       => "application/vnd.ms-fontobject",
-      ".erb"       => "application/x-html+ruby",
-      ".gif"       => "image/gif",
-      ".gz"        => "application/x-gzip",
-      ".htm"       => "text/html",
-      ".html"      => "text/html",
-      ".jpeg"      => "image/jpeg",
-      ".jpg"       => "image/jpeg",
-      ".js"        => "application/javascript",
-      ".json"      => "application/json",
-      ".png"       => "image/png",
-      ".rb"        => "application/x-ruby",
-      ".svg"       => "image/svg+xml",
-      ".tar"       => "application/x-tar",
-      ".text"      => "text/plain",
-      ".tif"       => "image/tiff",
-      ".tiff"      => "image/tiff",
-      ".ttf"       => "application/x-font-ttf",
-      ".txt"       => "text/plain",
-      ".woff"      => "application/x-font-woff",
-      ".yaml"      => "text/yaml",
-      ".yml"       => "text/yaml",
-      ".zip"       => "application/zip"
-    }
-
     # Returns a `Hash` of mime types registered on the environment and those
     # part of `Rack::Mime`.
     attr_reader :mime_types
