@@ -2,6 +2,23 @@
 require "sprockets_test"
 
 class EncodingTest < Sprockets::TestCase
+  include Sprockets::Encoding
+
+  test "read unicode" do
+    assert_equal "var foo = \"bar\";\n",
+      read_unicode_file(fixture_path('encoding/ascii.js'))
+    assert_equal "var snowman = \"☃\";",
+      read_unicode_file(fixture_path('encoding/utf8.js'))
+    assert_equal "var snowman = \"☃\";",
+      read_unicode_file(fixture_path('encoding/utf8_bom.js'))
+
+    assert_raises Sprockets::EncodingError do
+      read_unicode_file(fixture_path('encoding/utf16.js'))
+    end
+  end
+end
+
+class AssetEncodingTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.append_path(fixture_path('encoding'))

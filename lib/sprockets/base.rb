@@ -258,7 +258,7 @@ module Sprockets
       def build_processed_asset_hash(asset, processors)
         filename = asset[:filename]
         encoding = encoding_for_mime_type(asset[:content_type])
-        data     = read_unicode_file(filename, encoding)
+        data     = Encoding.read_unicode_file(filename, encoding)
 
         processed = process(
           processors,

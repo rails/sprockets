@@ -101,19 +101,6 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a
   end
 
-  test "read unicode" do
-    assert_equal "var foo = \"bar\";\n",
-      read_unicode_file(fixture_path('encoding/ascii.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf8.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf8_bom.js'))
-
-    assert_raises Sprockets::EncodingError do
-      read_unicode_file(fixture_path('encoding/utf16.js'))
-    end
-  end
-
   test "atomic write without errors" do
     filename = "atomic.file"
     begin
