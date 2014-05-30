@@ -40,7 +40,7 @@ module Sprockets
     # Returns the correct encoding for a given mime type, while falling
     # back on the default external encoding, if it exists.
     def encoding_for_mime_type(type)
-      encoding = Encoding::BINARY if type =~ %r{^(image|audio|video)/}
+      encoding = ::Encoding::BINARY if type =~ %r{^(image|audio|video)/}
       encoding ||= Sprockets.default_external_encoding
       encoding
     end

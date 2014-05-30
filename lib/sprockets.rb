@@ -30,6 +30,7 @@ module Sprockets
   autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
+  autoload :Encoding,                'sprockets/encoding'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
   autoload :LazyProxy,               'sprockets/lazy_proxy'
@@ -59,7 +60,7 @@ module Sprockets
   class << self
     attr_accessor :default_external_encoding
   end
-  self.default_external_encoding = Encoding::UTF_8
+  self.default_external_encoding = ::Encoding::UTF_8
 
   register_mime_type 'text/css', '.css'
   register_mime_type 'application/javascript', '.js'
