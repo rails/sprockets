@@ -5,9 +5,19 @@ module Sprockets
     attr_reader :mime_types
 
     # Register a new mime type.
-    def register_mime_type(mime_type, ext)
-      ext = Sprockets::Utils.normalize_extension(ext)
-      @mime_types[ext] = mime_type
+    def register_mime_type(mime_type, options = {})
+      # Legacy extension argument, will be removed from 4.x
+      if options.is_a?(String)
+        options = { extensions: [options] }
+      end
+
+      extnames = Array(options[:extensions]).map { |extname|
+        Sprockets::Utils.normalize_extension(extname)
+      }
+
+      extnames.each do |extname|
+        @mime_types[extname] = mime_type
+      end
     end
 
     # Returns the correct encoding for a given mime type, while falling

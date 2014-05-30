@@ -63,28 +63,23 @@ module Sprockets
   self.default_external_encoding = ::Encoding::UTF_8
 
   # Common asset text types
-  register_mime_type 'application/javascript', '.js'
-  register_mime_type 'application/json', '.json'
-  register_mime_type 'text/css', '.css'
-  register_mime_type 'text/html', '.htm'
-  register_mime_type 'text/html', '.html'
-  register_mime_type 'text/plain', '.text'
-  register_mime_type 'text/plain', '.txt'
-  register_mime_type 'text/yaml', '.yaml'
-  register_mime_type 'text/yaml', '.yml'
+  register_mime_type 'application/javascript', extensions: ['.js']
+  register_mime_type 'application/json', extensions: ['.json']
+  register_mime_type 'text/css', extensions: ['.css']
+  register_mime_type 'text/html', extensions: ['.html', '.htm']
+  register_mime_type 'text/plain', extensions: ['.txt', '.text']
+  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml']
 
   # Common asset binary types
-  register_mime_type 'application/vnd.ms-fontobject', '.eot'
-  register_mime_type 'application/x-font-ttf', '.ttf'
-  register_mime_type 'application/x-font-woff', '.woff'
-  register_mime_type 'application/x-ruby', '.rb'
-  register_mime_type 'image/gif', '.gif'
-  register_mime_type 'image/jpeg', '.jpeg'
-  register_mime_type 'image/jpeg', '.jpg'
-  register_mime_type 'image/png', '.png'
-  register_mime_type 'image/svg+xml', '.svg'
-  register_mime_type 'image/tiff', '.tif'
-  register_mime_type 'image/tiff', '.tiff'
+  register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
+  register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
+  register_mime_type 'application/x-font-woff', extensions: ['.woff']
+  register_mime_type 'application/x-ruby', extensions: ['.rb']
+  register_mime_type 'image/gif', extensions: ['.gif']
+  register_mime_type 'image/jpeg', extensions: ['.jpg', '.jpeg']
+  register_mime_type 'image/png', extensions: ['.png']
+  register_mime_type 'image/svg+xml', extensions: ['.svg']
+  register_mime_type 'image/tiff', extensions: ['.tiff', '.tif']
 
   register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
   register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
