@@ -63,23 +63,23 @@ module Sprockets
   self.default_external_encoding = ::Encoding::UTF_8
 
   # Common asset text types
-  register_mime_type 'application/javascript', extensions: ['.js']
-  register_mime_type 'application/json', extensions: ['.json']
-  register_mime_type 'text/css', extensions: ['.css']
-  register_mime_type 'text/html', extensions: ['.html', '.htm']
-  register_mime_type 'text/plain', extensions: ['.txt', '.text']
-  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml']
+  register_mime_type 'application/javascript', type: :text, extensions: ['.js']
+  register_mime_type 'application/json', type: :text, extensions: ['.json']
+  register_mime_type 'text/css', type: :text, extensions: ['.css']
+  register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
+  register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
+  register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml']
 
   # Common asset binary types
-  register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
-  register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
-  register_mime_type 'application/x-font-woff', extensions: ['.woff']
-  register_mime_type 'application/x-ruby', extensions: ['.rb']
-  register_mime_type 'image/gif', extensions: ['.gif']
-  register_mime_type 'image/jpeg', extensions: ['.jpg', '.jpeg']
-  register_mime_type 'image/png', extensions: ['.png']
-  register_mime_type 'image/svg+xml', extensions: ['.svg']
-  register_mime_type 'image/tiff', extensions: ['.tiff', '.tif']
+  register_mime_type 'application/vnd.ms-fontobject', type: :binary, extensions: ['.eot']
+  register_mime_type 'application/x-font-ttf', type: :binary, extensions: ['.ttf']
+  register_mime_type 'application/x-font-woff', type: :binary, extensions: ['.woff']
+  register_mime_type 'application/x-ruby', type: :binary, extensions: ['.rb']
+  register_mime_type 'image/gif', type: :binary, extensions: ['.gif']
+  register_mime_type 'image/jpeg', type: :binary, extensions: ['.jpg', '.jpeg']
+  register_mime_type 'image/png', type: :binary, extensions: ['.png']
+  register_mime_type 'image/svg+xml', type: :binary, extensions: ['.svg']
+  register_mime_type 'image/tiff', type: :binary, extensions: ['.tiff', '.tif']
 
   register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
   register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
