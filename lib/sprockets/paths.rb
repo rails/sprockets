@@ -54,7 +54,7 @@ module Sprockets
 
       # TODO: Review performance
       name, extname, _ = parse_path_extnames(path)
-      format_content_type = mime_types[extname]
+      format_content_type = mime_type_for_extname(extname)
       content_type = options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
@@ -132,7 +132,7 @@ module Sprockets
         self.entries(dirname).each do |entry|
           # TODO: Review performance
           name, extname, _ = parse_path_extnames(entry)
-          if basename == name && (content_type.nil? || content_type == mime_types[extname])
+          if basename == name && (content_type.nil? || content_type == mime_type_for_extname(extname))
             fn = File.join(dirname, entry)
             stat = self.stat(fn)
             if stat && stat.file?
@@ -165,7 +165,7 @@ module Sprockets
             expand_bower_path(filename) do |bower_path|
               # TODO: Review performance
               bower_extname = parse_path_extnames(bower_path)[1]
-              if content_type.nil? || content_type == mime_types[bower_extname]
+              if content_type.nil? || content_type == mime_type_for_extname(bower_extname)
                 stat = self.stat(bower_path)
                 if stat && stat.file?
                   yield bower_path
@@ -201,7 +201,7 @@ module Sprockets
             format_extname = engine_extensions[extname]
             engine_extnames << extname
             len -= extname.length
-          elsif mime_types.key?(extname)
+          elsif mime_type_for_extname(extname)
             format_extname = extname
             len -= extname.length
             break

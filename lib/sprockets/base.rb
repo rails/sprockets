@@ -239,7 +239,7 @@ module Sprockets
         asset = {
           filename: filename,
           logical_path: logical_path_for(filename),
-          content_type: mime_types.fetch(extname, 'application/octet-stream')
+          content_type: mime_type_for_extname(extname) || 'application/octet-stream'
         }
 
         processed_processors = preprocessors(asset[:content_type]) +

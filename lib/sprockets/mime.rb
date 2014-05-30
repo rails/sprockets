@@ -25,6 +25,10 @@ module Sprockets
       end
     end
 
+    def mime_type_for_extname(extname)
+      @mime_types[extname] # || 'application/octet-stream'
+    end
+
     # Returns the correct encoding for a given mime type, while falling
     # back on the default external encoding, if it exists.
     def encoding_for_mime_type(type)
@@ -38,7 +42,7 @@ module Sprockets
       mime_type.nil? ||
         mime_type == "*/*" ||
         # TODO: Review performance
-        mime_type == mime_types[parse_path_extnames(path)[1]]
+        mime_type == mime_type_for_extname(parse_path_extnames(path)[1])
     end
   end
 end
