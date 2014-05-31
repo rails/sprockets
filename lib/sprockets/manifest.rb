@@ -184,8 +184,8 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
-            # TODO: Needs an api to check if content type is text or binary
-            if environment.encoding_for_mime_type(asset.content_type) != ::Encoding::BINARY
+            # TODO: Needs a better api to check if content type is text or binary
+            if environment.mime_type_decoders[asset.content_type]
               asset.write_to "#{target}.gz"
             end
           end

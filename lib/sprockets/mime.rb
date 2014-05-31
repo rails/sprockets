@@ -35,13 +35,6 @@ module Sprockets
       @mime_types[extname] # || 'application/octet-stream'
     end
 
-    # Returns the correct encoding for a given mime type, while falling
-    # back on the default external encoding, if it exists.
-    def encoding_for_mime_type(type)
-      encoding = ::Encoding::BINARY if type =~ %r{^(image|audio|video)/}
-      encoding
-    end
-
     def matches_content_type?(mime_type, path)
       # TODO: Disallow nil mime type
       mime_type.nil? ||
