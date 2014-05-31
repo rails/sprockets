@@ -54,17 +54,6 @@ class EncodingTest < Sprockets::TestCase
     assert_equal ::Encoding::UTF_32BE, str.encoding
     assert_equal 72, str.bytesize
   end
-
-  test "read unicode" do
-    assert_equal "var foo = \"bar\";\n",
-      read_unicode_file(fixture_path('encoding/ascii.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf8.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf8_bom.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf16le.js'))
-  end
 end
 
 class AssetEncodingTest < Sprockets::TestCase

@@ -257,8 +257,20 @@ module Sprockets
 
       def build_processed_asset_hash(asset, processors)
         filename = asset[:filename]
+
         encoding = encoding_for_mime_type(asset[:content_type])
-        data     = Encoding.read_unicode_file(filename, encoding)
+        data     = File.open(filename, 'rb') { |f| f.read }
+        data     = Encoding.decode_unicode_bom(data) # Only if Unicode
+
+        # Default external
+        if data.encoding == ::Encoding::BINARY
+          data = data.force_encoding(encoding)
+        end
+
+        # Default internal
+        unless data.encoding == ::Encoding::BINARY
+          data = data.encode(::Encoding::UTF_8)
+        end
 
         processed = process(
           processors,
