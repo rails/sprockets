@@ -1,5 +1,14 @@
 module Sprockets
   module Mime
+    # Pubic: Mapping of MIME type Strings to properties Hash.
+    #
+    # key   - MIME Type String
+    # value - Hash
+    #   type       - :text or :binary
+    #   extensions - Array of extnames
+    #   decoder    - Proc to decode binary content
+    #
+    # Returns Hash.
     attr_reader :mime_types
 
     attr_reader :mime_exts
