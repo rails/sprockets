@@ -260,7 +260,12 @@ module Sprockets
 
         encoding = encoding_for_mime_type(asset[:content_type])
         data     = File.open(filename, 'rb') { |f| f.read }
-        data     = Encoding.decode_unicode_bom(data) # Only if Unicode
+
+        if asset[:content_type] == 'text/css'
+          data = Encoding.decode_css_charset(data)
+        else # unicode
+          data = Encoding.decode_unicode_bom(data)
+        end
 
         # Default external
         if data.encoding == ::Encoding::BINARY

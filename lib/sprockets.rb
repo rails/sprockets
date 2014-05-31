@@ -10,7 +10,6 @@ module Sprockets
 
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
-  autoload :CharsetNormalizer,       'sprockets/charset_normalizer'
   autoload :ClosureCompressor,       'sprockets/closure_compressor'
   autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
   autoload :Context,                 'sprockets/context'
@@ -88,7 +87,6 @@ module Sprockets
 
   register_bundle_processor 'application/javascript', LazyProxy.new { Bundle }
   register_bundle_processor 'text/css', LazyProxy.new { Bundle }
-  register_bundle_processor 'text/css', LazyProxy.new { CharsetNormalizer }
 
   register_compressor 'text/css', :sass, LazyProxy.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProxy.new { SassCompressor }

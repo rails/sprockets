@@ -59,7 +59,7 @@ module EnvironmentTests
 
   test "lookup bundle processors" do
     assert_equal 1, @env.bundle_processors('application/javascript').size
-    assert_equal 2, @env.bundle_processors('text/css').size
+    assert_equal 1, @env.bundle_processors('text/css').size
   end
 
   test "lookup compressors" do
