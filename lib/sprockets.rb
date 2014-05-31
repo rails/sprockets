@@ -18,7 +18,6 @@ module Sprockets
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
   autoload :JstProcessor,            'sprockets/jst_processor'
-  autoload :SafetyColons,            'sprockets/safety_colons'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
@@ -76,8 +75,6 @@ module Sprockets
 
   register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
   register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
-
-  register_postprocessor 'application/javascript', LazyProxy.new { SafetyColons }
 
   register_bundle_processor 'application/javascript', LazyProxy.new { Bundle }
   register_bundle_processor 'text/css', LazyProxy.new { Bundle }
