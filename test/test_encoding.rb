@@ -73,7 +73,7 @@ class EncodingTest < Sprockets::TestCase
     str = File.open(fixture_path('encoding/utf8-charset.css'), 'rb') { |f| f.read }
     assert_equal ::Encoding::BINARY, str.encoding
     assert_equal 38, str.bytesize
-    str = decode_css_charset(str)
+    str = decode_css(str)
     assert_equal ::Encoding::UTF_8, str.encoding
     assert_equal 21, str.bytesize
     assert_equal "\n\nh1 { color: red; }\n", str.encode(::Encoding::UTF_8)
@@ -81,7 +81,7 @@ class EncodingTest < Sprockets::TestCase
     str = File.open(fixture_path('encoding/utf8-charset.css'), 'rb') { |f| f.read }
     str.force_encoding(::Encoding::UTF_8)
     assert_equal 38, str.bytesize
-    str = decode_css_charset(str)
+    str = decode_css(str)
     assert_equal ::Encoding::UTF_8, str.encoding
     assert_equal 21, str.bytesize
     assert_equal "\n\nh1 { color: red; }\n", str.encode(::Encoding::UTF_8)
@@ -89,7 +89,7 @@ class EncodingTest < Sprockets::TestCase
     str = File.open(fixture_path('encoding/utf16le-charset.css'), 'rb') { |f| f.read }
     assert_equal ::Encoding::BINARY, str.encoding
     assert_equal 82, str.bytesize
-    str = decode_css_charset(str)
+    str = decode_css(str)
     assert_equal ::Encoding::UTF_16LE, str.encoding
     assert_equal 42, str.bytesize
     assert_equal "\n\nh1 { color: red; }\n", str.encode(::Encoding::UTF_8)
@@ -97,7 +97,7 @@ class EncodingTest < Sprockets::TestCase
     str = File.open(fixture_path('encoding/utf16le-charset.css'), 'rb') { |f| f.read }
     str.force_encoding(::Encoding::UTF_16LE)
     assert_equal 82, str.bytesize
-    str = decode_css_charset(str)
+    str = decode_css(str)
     assert_equal ::Encoding::UTF_16LE, str.encoding
     assert_equal 42, str.bytesize
     assert_equal "\n\nh1 { color: red; }\n", str.encode(::Encoding::UTF_8)

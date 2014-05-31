@@ -58,7 +58,7 @@ module Sprockets
   register_mime_type 'application/javascript', type: :text, extensions: ['.js'], decoder: Encoding.method(:decode_unicode)
   register_mime_type 'application/json', type: :text, extensions: ['.json'], decoder: Encoding.method(:decode_unicode)
   register_mime_type 'application/x-ruby', type: :text, extensions: ['.rb'], decoder: Encoding.method(:decode_unicode)
-  register_mime_type 'text/css', type: :text, extensions: ['.css'], decoder: Encoding.method(:decode_css_charset)
+  register_mime_type 'text/css', type: :text, extensions: ['.css'], decoder: Encoding.method(:decode_css)
   register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
   register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
   register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml'], decoder: Encoding.method(:decode_unicode)

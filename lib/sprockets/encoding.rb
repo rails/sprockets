@@ -77,7 +77,7 @@ module Sprockets
     # str - String.
     #
     # Returns a encoded String.
-    def decode_css_charset(str)
+    def decode_css(str)
       str = decode_unicode_bom(str)
 
       state = :start
