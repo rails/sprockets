@@ -29,6 +29,7 @@ module Sprockets
 
       @mime_types[mime_type] = {}
       @mime_types[mime_type][:type] = type
+      @mime_types[mime_type][:extensions] = extnames
       @mime_types[mime_type][:decoder] = decoder if decoder
       @mime_types[mime_type]
     end
