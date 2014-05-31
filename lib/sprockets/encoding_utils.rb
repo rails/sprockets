@@ -55,7 +55,7 @@ module Sprockets
     # Returns UTF 8/16/32 encoded String without BOM or the original String if
     # no BOM was present.
     def decode_unicode_bom(str)
-      bom_bytes = str.byteslice(0, 4).bytes
+      bom_bytes = str.byteslice(0, 4).bytes.to_a
 
       BOM.each do |encoding, bytes|
         if bom_bytes[0, bytes.size] == bytes
