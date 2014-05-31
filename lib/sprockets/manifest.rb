@@ -184,10 +184,9 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
-            # TODO: Needs a better api to check if content type is text or binary
-            if environment.mime_type_decoders[asset.content_type]
-              asset.write_to "#{target}.gz"
-            end
+
+            type = environment.mime_types[asset.content_type]
+            asset.write_to "#{target}.gz" if type && type[:type] == :text
           end
 
           filenames << filename

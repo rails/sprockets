@@ -260,8 +260,9 @@ module Sprockets
 
         data = File.open(filename, 'rb') { |f| f.read }
 
-        if decoder = mime_type_decoders[asset[:content_type]]
-          data = decoder.call(data).encode(::Encoding::UTF_8)
+        if type = mime_types[asset[:content_type]]
+          data = type[:decoder].call(data) if type[:decoder]
+          data = data.encode(::Encoding::UTF_8) if type[:type] == :text
         end
 
         processed = process(

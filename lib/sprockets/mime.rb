@@ -1,10 +1,8 @@
 module Sprockets
   module Mime
-    # Returns a `Hash` of mime types registered on the environment and those
-    # part of `Rack::Mime`.
     attr_reader :mime_types
 
-    attr_reader :mime_type_decoders
+    attr_reader :mime_exts
 
     # Register a new mime type.
     def register_mime_type(mime_type, options = {})
@@ -26,13 +24,17 @@ module Sprockets
       decoder ||= Encoding.method(:decode) if type == :text
 
       extnames.each do |extname|
-        @mime_types[extname] = mime_type
-        @mime_type_decoders[mime_type] = decoder
+        @mime_exts[extname] = mime_type
       end
+
+      @mime_types[mime_type] = {}
+      @mime_types[mime_type][:type] = type
+      @mime_types[mime_type][:decoder] = decoder if decoder
+      @mime_types[mime_type]
     end
 
     def mime_type_for_extname(extname)
-      @mime_types[extname] # || 'application/octet-stream'
+      @mime_exts[extname] # || 'application/octet-stream'
     end
 
     def matches_content_type?(mime_type, path)

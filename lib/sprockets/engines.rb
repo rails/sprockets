@@ -52,13 +52,13 @@ module Sprockets
         @engines[ext] = klass
         if options[:mime_type]
           # FIXME: Reverse mime type lookup is a smell
-          engine_extensions[ext.to_s] = mime_types.key(options[:mime_type])
+          engine_extensions[ext.to_s] = mime_exts.key(options[:mime_type])
         end
       else
         @engines[ext] = LegacyTiltProcessor.new(klass)
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
           # FIXME: Reverse mime type lookup is a smell
-          engine_extensions[ext.to_s] = mime_types.key(klass.default_mime_type)
+          engine_extensions[ext.to_s] = mime_exts.key(klass.default_mime_type)
         end
       end
     end

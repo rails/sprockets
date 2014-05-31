@@ -23,7 +23,7 @@ module Sprockets
       @root              = environment.root
       @paths             = environment.paths.dup
       @mime_types        = environment.mime_types.dup
-      @mime_type_decoders = environment.mime_type_decoders.dup
+      @mime_exts         = environment.mime_exts.dup
       @engines           = environment.engines.dup
       @engine_extensions = environment.engine_extensions.dup
       @preprocessors     = environment.preprocessors
