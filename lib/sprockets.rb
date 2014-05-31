@@ -47,6 +47,7 @@ module Sprockets
   @root              = File.expand_path('..', __FILE__)
   @paths             = []
   @mime_types        = {}
+  @mime_type_decoders = {}
   @engines           = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
@@ -62,12 +63,12 @@ module Sprockets
   self.default_external_encoding = ::Encoding::UTF_8
 
   # Common asset text types
-  register_mime_type 'application/javascript', type: :text, extensions: ['.js']
-  register_mime_type 'application/json', type: :text, extensions: ['.json']
-  register_mime_type 'text/css', type: :text, extensions: ['.css']
+  register_mime_type 'application/javascript', type: :text, extensions: ['.js'], decoder: Encoding.method(:decode_unicode)
+  register_mime_type 'application/json', type: :text, extensions: ['.json'], decoder: Encoding.method(:decode_unicode)
+  register_mime_type 'text/css', type: :text, extensions: ['.css'], decoder: Encoding.method(:decode_css_charset)
   register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
   register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
-  register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml']
+  register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml'], decoder: Encoding.method(:decode_unicode)
 
   # Common asset binary types
   register_mime_type 'application/vnd.ms-fontobject', type: :binary, extensions: ['.eot']

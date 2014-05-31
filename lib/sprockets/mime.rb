@@ -4,6 +4,8 @@ module Sprockets
     # part of `Rack::Mime`.
     attr_reader :mime_types
 
+    attr_reader :mime_type_decoders
+
     # Register a new mime type.
     def register_mime_type(mime_type, options = {})
       # Legacy extension argument, will be removed from 4.x
@@ -20,8 +22,12 @@ module Sprockets
         raise ArgumentError, "type must be :binary or :text"
       end
 
+      decoder = options[:decoder]
+      decoder ||= Encoding.method(:decode) if type == :text
+
       extnames.each do |extname|
         @mime_types[extname] = mime_type
+        @mime_type_decoders[mime_type] = decoder
       end
     end
 

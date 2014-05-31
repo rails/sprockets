@@ -258,23 +258,10 @@ module Sprockets
       def build_processed_asset_hash(asset, processors)
         filename = asset[:filename]
 
-        encoding = encoding_for_mime_type(asset[:content_type])
-        data     = File.open(filename, 'rb') { |f| f.read }
+        data = File.open(filename, 'rb') { |f| f.read }
 
-        if asset[:content_type] == 'text/css'
-          data = Encoding.decode_css_charset(data)
-        else # unicode
-          data = Encoding.decode_unicode_bom(data)
-        end
-
-        # Default external
-        if data.encoding == ::Encoding::BINARY
-          data = data.force_encoding(encoding)
-        end
-
-        # Default internal
-        unless data.encoding == ::Encoding::BINARY
-          data = data.encode(::Encoding::UTF_8)
+        if decoder = mime_type_decoders[asset[:content_type]]
+          data = decoder.call(data).encode(::Encoding::UTF_8)
         end
 
         processed = process(

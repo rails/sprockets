@@ -11,6 +11,43 @@ module Sprockets
       ::Encoding::UTF_16BE => [0xFE, 0xFF]
     }
 
+    # Public: Basic string decoder.
+    #
+    # Attempts to parse any Unicode BOM otherwise falls back to the
+    # environment's external encoding.
+    #
+    # str - ASCII-8BIT encoded String
+    #
+    # Returns encoded String.
+    def decode(str)
+      str = decode_unicode_bom(str)
+
+      # Fallback to UTF-8
+      if str.encoding == ::Encoding::BINARY
+        str.force_encoding(::Encoding.default_external)
+      end
+
+      str
+    end
+
+    # Public: Decode Unicode string.
+    #
+    # Attempts to parse Unicode BOM and falls back to UTF-8.
+    #
+    # str - ASCII-8BIT encoded String
+    #
+    # Returns encoded String.
+    def decode_unicode(str)
+      str = decode_unicode_bom(str)
+
+      # Fallback to UTF-8
+      if str.encoding == ::Encoding::BINARY
+        str.force_encoding(::Encoding::UTF_8)
+      end
+
+      str
+    end
+
     # Public: Decode and strip BOM from possible unicode string.
     #
     # str - ASCII-8BIT encoded String
@@ -36,8 +73,7 @@ module Sprockets
     #
     # str - String.
     #
-    # Returns a encoded String if @charset was present, otherwise the original
-    # String.
+    # Returns a encoded String.
     def decode_css_charset(str)
       str = decode_unicode_bom(str)
 
@@ -90,6 +126,11 @@ module Sprockets
         len = "@charset \"#{name}\";".encode(encoding).size
         str.slice!(0, len)
         str
+      end
+
+      # Fallback to UTF-8
+      if str.encoding == ::Encoding::BINARY
+        str.force_encoding(::Encoding::UTF_8)
       end
 
       str
