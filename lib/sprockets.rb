@@ -73,11 +73,11 @@ module Sprockets
   register_mime_type 'image/svg+xml', type: :binary, extensions: ['.svg']
   register_mime_type 'image/tiff', type: :binary, extensions: ['.tiff', '.tif']
 
-  register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
-  register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
+  register_preprocessor 'text/css', DirectiveProcessor
+  register_preprocessor 'application/javascript', DirectiveProcessor
 
-  register_bundle_processor 'application/javascript', LazyProxy.new { Bundle }
-  register_bundle_processor 'text/css', LazyProxy.new { Bundle }
+  register_bundle_processor 'application/javascript', Bundle
+  register_bundle_processor 'text/css', Bundle
 
   register_compressor 'text/css', :sass, LazyProxy.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProxy.new { SassCompressor }
