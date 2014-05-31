@@ -29,5 +29,70 @@ module Sprockets
 
       return str
     end
+
+    CHARSET_START = [0x40, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x20, 0x22]
+
+    # Public: Decode and strip @charset from CSS style sheet.
+    #
+    # str - String.
+    #
+    # Returns a encoded String if @charset was present, otherwise the original
+    # String.
+    def decode_css_charset(str)
+      str = decode_unicode_bom(str)
+
+      state = :start
+      i, len = 0, 0
+      encoding_bytes = []
+
+      str.each_byte do |byte|
+        len += 1
+        next if byte == 0x0
+
+        case state
+        when :start
+          if byte == CHARSET_START[i]
+            state = :charset
+            i += 1
+          else
+            break
+          end
+        when :charset
+          if byte == CHARSET_START[i]
+            i += 1
+            if i == CHARSET_START.size
+              state = :encoding
+            end
+          else
+            state = nil
+          end
+        when :encoding
+          if byte == 0x22
+            state = :quote
+          else
+            encoding_bytes << byte
+          end
+        when :quote
+          if byte == 0x3B
+            state = :success
+            break
+          end
+        else
+          break
+        end
+      end
+
+      if state == :success
+        name = encoding_bytes.pack('C*')
+        encoding = ::Encoding.find(name)
+        str = str.dup
+        str.force_encoding(encoding)
+        len = "@charset \"#{name}\";".encode(encoding).size
+        str.slice!(0, len)
+        str
+      end
+
+      str
+    end
   end
 end
