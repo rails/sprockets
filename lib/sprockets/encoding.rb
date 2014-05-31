@@ -60,6 +60,7 @@ module Sprockets
       BOM.each do |encoding, bytes|
         if bom_bytes[0, bytes.size] == bytes
           str = str.dup
+          str.force_encoding(::Encoding::BINARY)
           str.slice!(0, bytes.size)
           str.force_encoding(encoding)
           return str

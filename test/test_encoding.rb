@@ -26,8 +26,22 @@ class EncodingTest < Sprockets::TestCase
     assert_equal ::Encoding::UTF_8, str.encoding
     assert_equal 20, str.bytesize
 
+    str = File.open(fixture_path('encoding/utf8_bom.js'), 'rb') { |f| f.read }
+    str.force_encoding(::Encoding::UTF_8)
+    assert_equal 23, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_8, str.encoding
+    assert_equal 20, str.bytesize
+
     str = File.open(fixture_path('encoding/utf16le.js'), 'rb') { |f| f.read }
     assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 38, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_16LE, str.encoding
+    assert_equal 36, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf16le.js'), 'rb') { |f| f.read }
+    str.force_encoding(::Encoding::UTF_16LE)
     assert_equal 38, str.bytesize
     str = decode_unicode_bom(str)
     assert_equal ::Encoding::UTF_16LE, str.encoding
