@@ -57,6 +57,7 @@ module Sprockets
   # Common asset text types
   register_mime_type 'application/javascript', type: :text, extensions: ['.js'], decoder: Encoding.method(:decode_unicode)
   register_mime_type 'application/json', type: :text, extensions: ['.json'], decoder: Encoding.method(:decode_unicode)
+  register_mime_type 'application/x-ruby', type: :text, extensions: ['.rb'], decoder: Encoding.method(:decode_unicode)
   register_mime_type 'text/css', type: :text, extensions: ['.css'], decoder: Encoding.method(:decode_css_charset)
   register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
   register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
@@ -66,7 +67,6 @@ module Sprockets
   register_mime_type 'application/vnd.ms-fontobject', type: :binary, extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', type: :binary, extensions: ['.ttf']
   register_mime_type 'application/x-font-woff', type: :binary, extensions: ['.woff']
-  register_mime_type 'application/x-ruby', type: :binary, extensions: ['.rb']
   register_mime_type 'image/gif', type: :binary, extensions: ['.gif']
   register_mime_type 'image/jpeg', type: :binary, extensions: ['.jpg', '.jpeg']
   register_mime_type 'image/png', type: :binary, extensions: ['.png']
