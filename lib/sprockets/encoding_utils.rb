@@ -70,8 +70,6 @@ module Sprockets
       return str
     end
 
-    CHARSET_START = [0x40, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x20, 0x22]
-
     # Public: Decode and strip @charset from CSS style sheet.
     #
     # str - String.
@@ -80,49 +78,7 @@ module Sprockets
     def decode_css(str)
       str = decode_unicode_bom(str)
 
-      state = :start
-      i, len = 0, 0
-      encoding_bytes = []
-
-      str.each_byte do |byte|
-        len += 1
-        next if byte == 0x0
-
-        case state
-        when :start
-          if byte == CHARSET_START[i]
-            state = :charset
-            i += 1
-          else
-            break
-          end
-        when :charset
-          if byte == CHARSET_START[i]
-            i += 1
-            if i == CHARSET_START.size
-              state = :encoding
-            end
-          else
-            state = nil
-          end
-        when :encoding
-          if byte == 0x22
-            state = :quote
-          else
-            encoding_bytes << byte
-          end
-        when :quote
-          if byte == 0x3B
-            state = :success
-            break
-          end
-        else
-          break
-        end
-      end
-
-      if state == :success
-        name = encoding_bytes.pack('C*')
+      if name = scan_css_charset(str)
         encoding = Encoding.find(name)
         str = str.dup
         str.force_encoding(encoding)
@@ -137,6 +93,47 @@ module Sprockets
       end
 
       str
+    end
+
+    # Internal: @charset bytes
+    CHARSET_START = [0x40, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x20, 0x22]
+
+    # Internal: Scan binary CSS string for @charset encoding name.
+    #
+    # str - ASCII-8BIT encoded String
+    #
+    # Returns encoding String name or nil.
+    def scan_css_charset(str)
+      name = nil
+      ascii_bytes = Enumerator.new do |y|
+        str.each_byte do |byte|
+          # Halt on line breaks
+          break if byte == 0x0A || byte == 0x0D
+          y << byte if 0x0 < byte && byte <= 0xFF
+        end
+      end
+
+      buf = []
+      loop do
+        buf << ascii_bytes.next
+        break if buf.size == CHARSET_START.size
+      end
+
+      if buf == CHARSET_START
+        buf = []
+        loop do
+          byte = ascii_bytes.next
+
+          if byte == 0x22 && ascii_bytes.peek == 0x3B
+            name = buf.pack('C*')
+            break
+          else
+            buf << byte
+          end
+        end
+      end
+
+      name
     end
   end
 end
