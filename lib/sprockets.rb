@@ -55,13 +55,6 @@ module Sprockets
   @bundle_processors = Hash.new { |h, k| h[k] = [] }
   @compressors       = Hash.new { |h, k| h[k] = {} }
 
-  # Define `default_external_encoding` accessor on 1.9.
-  # Defaults to UTF-8.
-  class << self
-    attr_accessor :default_external_encoding
-  end
-  self.default_external_encoding = ::Encoding::UTF_8
-
   # Common asset text types
   register_mime_type 'application/javascript', type: :text, extensions: ['.js'], decoder: Encoding.method(:decode_unicode)
   register_mime_type 'application/json', type: :text, extensions: ['.json'], decoder: Encoding.method(:decode_unicode)
