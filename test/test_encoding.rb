@@ -4,6 +4,57 @@ require "sprockets_test"
 class EncodingTest < Sprockets::TestCase
   include Sprockets::Encoding
 
+  test "decode unicode bom" do
+    str = File.open(fixture_path('encoding/ascii.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 17, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 17, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf8.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 20, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 20, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf8_bom.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 23, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_8, str.encoding
+    assert_equal 20, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf16le.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 38, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_16LE, str.encoding
+    assert_equal 36, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf16be.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 38, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_16BE, str.encoding
+    assert_equal 36, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf32le.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 76, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_32LE, str.encoding
+    assert_equal 72, str.bytesize
+
+    str = File.open(fixture_path('encoding/utf32be.js'), 'rb') { |f| f.read }
+    assert_equal ::Encoding::BINARY, str.encoding
+    assert_equal 76, str.bytesize
+    str = decode_unicode_bom(str)
+    assert_equal ::Encoding::UTF_32BE, str.encoding
+    assert_equal 72, str.bytesize
+  end
+
   test "read unicode" do
     assert_equal "var foo = \"bar\";\n",
       read_unicode_file(fixture_path('encoding/ascii.js'))
@@ -11,10 +62,8 @@ class EncodingTest < Sprockets::TestCase
       read_unicode_file(fixture_path('encoding/utf8.js'))
     assert_equal "var snowman = \"☃\";",
       read_unicode_file(fixture_path('encoding/utf8_bom.js'))
-
-    assert_raises Sprockets::EncodingError do
-      read_unicode_file(fixture_path('encoding/utf16.js'))
-    end
+    assert_equal "var snowman = \"☃\";",
+      read_unicode_file(fixture_path('encoding/utf16le.js'))
   end
 end
 
@@ -27,39 +76,39 @@ class AssetEncodingTest < Sprockets::TestCase
   test "read ASCII asset" do
     data = @env['ascii.js'].to_s
     assert_equal "var foo = \"bar\";\n", data
-    assert_equal ::Encoding.find('UTF-8'), data.encoding
+    assert_equal ::Encoding::UTF_8, data.encoding
   end
 
   test "read UTF-8 asset" do
     data = @env['utf8.js'].to_s
     assert_equal "var snowman = \"☃\";\n", data
-    assert_equal ::Encoding.find('UTF-8'), data.encoding
+    assert_equal ::Encoding::UTF_8, data.encoding
   end
 
   test "read UTF-8 asset with BOM" do
     data = @env['utf8_bom.js'].to_s
-    assert_equal "var snowman = \"☃\";\n", data.encode("UTF-8")
-    assert_equal ::Encoding.find('UTF-8'), data.encoding
+    assert_equal "var snowman = \"☃\";\n", data
+    assert_equal ::Encoding::UTF_8, data.encoding
   end
 
   test "read UTF-16 asset" do
-    assert_raises Sprockets::EncodingError do
-      @env['utf16.js'].to_s
-    end
+    data = @env['utf16le.js'].to_s
+    assert_equal "var snowman = \"☃\";\n", data
+    assert_equal ::Encoding::UTF_8, data.encoding
   end
 
   test "read ASCII + UTF-8 concatation asset" do
     data = @env['ascii_utf8.js'].to_s
     assert_equal "var foo = \"bar\";\nvar snowman = \"\342\230\203\";\n\n\n",
       data
-    assert_equal ::Encoding.find('UTF-8'), data.encoding
+    assert_equal ::Encoding::UTF_8, data.encoding
   end
 
   test "read static BINARY asset" do
     data = @env['binary.png'].to_s
     assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00".force_encoding("BINARY"),
       data[0..10]
-    assert_equal ::Encoding.find('BINARY'), data.encoding
+    assert_equal ::Encoding::BINARY, data.encoding
   end
 
   test "read processed BINARY asset" do
@@ -67,6 +116,6 @@ class AssetEncodingTest < Sprockets::TestCase
     data = @env['binary.png'].to_s
     assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00".force_encoding("BINARY"),
       data[0..10]
-    assert_equal ::Encoding.find('BINARY'), data.encoding
+    assert_equal ::Encoding::BINARY, data.encoding
   end
 end

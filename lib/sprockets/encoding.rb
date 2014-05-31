@@ -2,31 +2,40 @@ module Sprockets
   module Encoding
     extend self
 
-    # Define UTF-8 BOM pattern matcher.
-    # Avoid using a Regexp literal because it inheirts the files
-    # encoding and we want to avoid syntax errors in other interpreters.
-    UTF8_BOM_PATTERN = Regexp.new("\\A\uFEFF".encode('utf-8'))
-
     # Internal: Read unicode file respecting BOM.
     #
-    # Returns String or raises an EncodingError.
+    # Returns String.
     def read_unicode_file(filename, external_encoding = ::Encoding.default_external)
-      File.open(filename, "r:#{external_encoding}") do |f|
-        f.read.tap do |data|
-          # Eager validate the file's encoding. In most cases we
-          # expect it to be UTF-8 unless `default_external` is set to
-          # something else. An error is usually raised if the file is
-          # saved as UTF-16 when we expected UTF-8.
-          if !data.valid_encoding?
-            raise EncodingError, "#{filename} has a invalid " +
-              "#{data.encoding} byte sequence"
-
-            # If the file is UTF-8 and theres a BOM, strip it for safe concatenation.
-          elsif data.encoding.name == "UTF-8" && data =~ UTF8_BOM_PATTERN
-            data.sub!(UTF8_BOM_PATTERN, "")
-          end
+      File.open(filename, "rb") do |f|
+        data = f.read
+        data = decode_unicode_bom(data)
+        if data.encoding == ::Encoding::BINARY
+          data.force_encoding(external_encoding)
+        else
+          data.encode(external_encoding)
         end
       end
+    end
+
+    BOM = {
+      ::Encoding::UTF_32LE => [0xFF, 0xFE, 0x00, 0x00],
+      ::Encoding::UTF_32BE => [0x00, 0x00, 0xFE, 0xFF],
+      ::Encoding::UTF_8    => [0xEF, 0xBB, 0xBF],
+      ::Encoding::UTF_16LE => [0xFF, 0xFE],
+      ::Encoding::UTF_16BE => [0xFE, 0xFF]
+    }
+
+    def decode_unicode_bom(str)
+      BOM.each do |encoding, bytes|
+        if str.bytes[0, bytes.size] == bytes
+          str = str.dup
+          str.slice!(0, bytes.size)
+          str.force_encoding(encoding)
+          return str
+        end
+      end
+
+      return str
     end
   end
 end
