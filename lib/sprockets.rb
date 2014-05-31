@@ -28,7 +28,7 @@ module Sprockets
   autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
-  autoload :Encoding,                'sprockets/encoding'
+  autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
   autoload :LazyProxy,               'sprockets/lazy_proxy'
@@ -55,13 +55,13 @@ module Sprockets
   @compressors       = Hash.new { |h, k| h[k] = {} }
 
   # Common asset text types
-  register_mime_type 'application/javascript', type: :text, extensions: ['.js'], decoder: Encoding.method(:decode_unicode)
-  register_mime_type 'application/json', type: :text, extensions: ['.json'], decoder: Encoding.method(:decode_unicode)
-  register_mime_type 'application/x-ruby', type: :text, extensions: ['.rb'], decoder: Encoding.method(:decode_unicode)
-  register_mime_type 'text/css', type: :text, extensions: ['.css'], decoder: Encoding.method(:decode_css)
+  register_mime_type 'application/javascript', type: :text, extensions: ['.js'], decoder: EncodingUtils.method(:decode_unicode)
+  register_mime_type 'application/json', type: :text, extensions: ['.json'], decoder: EncodingUtils.method(:decode_unicode)
+  register_mime_type 'application/x-ruby', type: :text, extensions: ['.rb'], decoder: EncodingUtils.method(:decode_unicode)
+  register_mime_type 'text/css', type: :text, extensions: ['.css'], decoder: EncodingUtils.method(:decode_css)
   register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
   register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
-  register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml'], decoder: Encoding.method(:decode_unicode)
+  register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml'], decoder: EncodingUtils.method(:decode_unicode)
 
   # Common asset binary types
   register_mime_type 'application/vnd.ms-fontobject', type: :binary, extensions: ['.eot']

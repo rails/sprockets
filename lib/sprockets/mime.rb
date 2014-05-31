@@ -1,3 +1,5 @@
+require 'sprockets/encoding_utils'
+
 module Sprockets
   module Mime
     # Pubic: Mapping of MIME type Strings to properties Hash.
@@ -30,7 +32,7 @@ module Sprockets
       end
 
       decoder = options[:decoder]
-      decoder ||= Encoding.method(:decode) if type == :text
+      decoder ||= EncodingUtils.method(:decode) if type == :text
 
       extnames.each do |extname|
         @mime_exts[extname] = mime_type

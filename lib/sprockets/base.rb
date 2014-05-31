@@ -262,7 +262,7 @@ module Sprockets
 
         if type = mime_types[asset[:content_type]]
           data = type[:decoder].call(data) if type[:decoder]
-          data = data.encode(::Encoding::UTF_8) if type[:type] == :text
+          data = data.encode(Encoding::UTF_8) if type[:type] == :text
         end
 
         processed = process(

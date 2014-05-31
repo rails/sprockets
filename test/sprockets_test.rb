@@ -8,8 +8,8 @@ require "ejs"
 require "erb"
 
 old_verbose, $VERBOSE = $VERBOSE, false
-::Encoding.default_external = 'UTF-8'
-::Encoding.default_internal = 'UTF-8'
+Encoding.default_external = 'UTF-8'
+Encoding.default_internal = 'UTF-8'
 $VERBOSE = old_verbose
 
 class Sprockets::TestCase < MiniTest::Test
