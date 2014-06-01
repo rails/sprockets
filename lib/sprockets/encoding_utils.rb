@@ -22,6 +22,11 @@ module Sprockets
     def detect(str)
       str = detect_unicode_bom(str)
 
+      # Attempt Charlock detection
+      if str.encoding == Encoding::BINARY
+        charlock_detect(str)
+      end
+
       # Fallback to UTF-8
       if str.encoding == Encoding::BINARY
         str.force_encoding(Encoding.default_external)
@@ -32,6 +37,21 @@ module Sprockets
 
     # Public: Alias for EncodingUtils.detect_unicode
     DETECT = method(:detect)
+
+    # Internal: Use Charlock Holmes to detect encoding.
+    #
+    # To enable this code path, require 'charlock_holmes'
+    #
+    # Returns encoded String.
+    def charlock_detect(str)
+      if defined? CharlockHolmes::EncodingDetector
+        if detected = CharlockHolmes::EncodingDetector.detect(str)
+          str.force_encoding(detected[:encoding]) if detected[:encoding]
+        end
+      end
+
+      str
+    end
 
     # Public: Detect Unicode string.
     #
