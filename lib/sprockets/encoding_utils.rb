@@ -11,7 +11,7 @@ module Sprockets
       Encoding::UTF_16BE => [0xFE, 0xFF]
     }
 
-    # Public: Basic string decoder.
+    # Public: Basic string detecter.
     #
     # Attempts to parse any Unicode BOM otherwise falls back to the
     # environment's external encoding.
@@ -19,8 +19,8 @@ module Sprockets
     # str - ASCII-8BIT encoded String
     #
     # Returns encoded String.
-    def decode(str)
-      str = decode_unicode_bom(str)
+    def detect(str)
+      str = detect_unicode_bom(str)
 
       # Fallback to UTF-8
       if str.encoding == Encoding::BINARY
@@ -30,15 +30,18 @@ module Sprockets
       str
     end
 
-    # Public: Decode Unicode string.
+    # Public: Alias for EncodingUtils.detect_unicode
+    DETECT = method(:detect)
+
+    # Public: Detect Unicode string.
     #
     # Attempts to parse Unicode BOM and falls back to UTF-8.
     #
     # str - ASCII-8BIT encoded String
     #
     # Returns encoded String.
-    def decode_unicode(str)
-      str = decode_unicode_bom(str)
+    def detect_unicode(str)
+      str = detect_unicode_bom(str)
 
       # Fallback to UTF-8
       if str.encoding == Encoding::BINARY
@@ -48,13 +51,16 @@ module Sprockets
       str
     end
 
-    # Public: Decode and strip BOM from possible unicode string.
+    # Public: Alias for EncodingUtils.detect_unicode
+    DETECT_UNICODE = method(:detect_unicode)
+
+    # Public: Detect and strip BOM from possible unicode string.
     #
     # str - ASCII-8BIT encoded String
     #
     # Returns UTF 8/16/32 encoded String without BOM or the original String if
     # no BOM was present.
-    def decode_unicode_bom(str)
+    def detect_unicode_bom(str)
       bom_bytes = str.byteslice(0, 4).bytes.to_a
 
       BOM.each do |encoding, bytes|
@@ -70,13 +76,13 @@ module Sprockets
       return str
     end
 
-    # Public: Decode and strip @charset from CSS style sheet.
+    # Public: Detect and strip @charset from CSS style sheet.
     #
     # str - String.
     #
     # Returns a encoded String.
-    def decode_css(str)
-      str = decode_unicode_bom(str)
+    def detect_css(str)
+      str = detect_unicode_bom(str)
 
       if name = scan_css_charset(str)
         encoding = Encoding.find(name)
@@ -94,6 +100,9 @@ module Sprockets
 
       str
     end
+
+    # Public: Alias for EncodingUtils.detect_css
+    DETECT_CSS = method(:detect_css)
 
     # Internal: @charset bytes
     CHARSET_START = [0x40, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x20, 0x22]

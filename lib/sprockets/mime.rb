@@ -8,7 +8,7 @@ module Sprockets
     # value - Hash
     #   type       - :text or :binary
     #   extensions - Array of extnames
-    #   decoder    - Proc to decode binary content
+    #   charset    - Default Encoding or function to detect encoding
     #
     # Returns Hash.
     attr_reader :mime_types
@@ -31,8 +31,8 @@ module Sprockets
         raise ArgumentError, "type must be :binary or :text"
       end
 
-      decoder = options[:decoder]
-      decoder ||= EncodingUtils.method(:decode) if type == :text
+      charset = options[:charset]
+      charset ||= EncodingUtils::DETECT if type == :text
 
       extnames.each do |extname|
         @mime_exts[extname] = mime_type
@@ -41,7 +41,7 @@ module Sprockets
       @mime_types[mime_type] = {}
       @mime_types[mime_type][:type] = type
       @mime_types[mime_type][:extensions] = extnames
-      @mime_types[mime_type][:decoder] = decoder if decoder
+      @mime_types[mime_type][:charset] = charset if charset
       @mime_types[mime_type]
     end
 
