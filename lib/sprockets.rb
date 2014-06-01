@@ -57,7 +57,6 @@ module Sprockets
   # Common asset text types
   register_mime_type 'application/javascript', type: :text, extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'application/json', type: :text, extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
-  register_mime_type 'application/x-ruby', type: :text, extensions: ['.rb'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'text/css', type: :text, extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
   register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
   register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
