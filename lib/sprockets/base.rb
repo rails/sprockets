@@ -114,37 +114,35 @@ module Sprockets
       end
     end
 
-    # Register a new mime type.
-    def register_mime_type(mime_type, ext)
+    def register_mime_type(*args)
       super.tap { expire_cache! }
     end
 
-    # Registers a new Engine `klass` for `ext`.
-    def register_engine(ext, klass, options = {})
+    def register_engine(*args)
       super.tap { expire_cache! }
     end
 
-    def register_preprocessor(mime_type, klass, &block)
+    def register_preprocessor(*args)
       super.tap { expire_cache! }
     end
 
-    def unregister_preprocessor(mime_type, klass)
+    def unregister_preprocessor(*args)
       super.tap { expire_cache! }
     end
 
-    def register_postprocessor(mime_type, klass, &block)
+    def register_postprocessor(*args)
       super.tap { expire_cache! }
     end
 
-    def unregister_postprocessor(mime_type, klass)
+    def unregister_postprocessor(*args)
       super.tap { expire_cache! }
     end
 
-    def register_bundle_processor(mime_type, klass, &block)
+    def register_bundle_processor(*args)
       super.tap { expire_cache! }
     end
 
-    def unregister_bundle_processor(mime_type, klass)
+    def unregister_bundle_processor(*args)
       super.tap { expire_cache! }
     end
 
