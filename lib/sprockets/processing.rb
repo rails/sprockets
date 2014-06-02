@@ -180,6 +180,7 @@ module Sprockets
 
       {
         source: data,
+        encoding: data.encoding,
         length: data.bytesize,
         digest: digest_class.hexdigest(data),
         metadata: metadata

@@ -288,6 +288,7 @@ module Sprockets
       def build_static_asset_hash(asset)
         stat = self.stat(asset[:filename])
         asset.merge({
+          encoding: Encoding::BINARY,
           length: stat.size,
           mtime: stat.mtime.to_i,
           digest: digest_class.file(asset[:filename]).hexdigest,

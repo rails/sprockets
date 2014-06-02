@@ -99,9 +99,7 @@ module Sprockets
     # Public: Get encoding of source.
     #
     # Returns an Encoding.
-    def encoding
-      source.encoding
-    end
+    attr_reader :encoding
 
     # Public: Returns Integer length of source.
     attr_reader :length
