@@ -159,7 +159,7 @@ module Sprockets
           }
         CSS
 
-        [ 200, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+        [ 200, { "Content-Type" => "text/css; charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string
@@ -196,6 +196,11 @@ module Sprockets
           # Set content type and length headers
           headers["Content-Type"]   = asset.content_type
           headers["Content-Length"] = length.to_s
+
+          # Set charset param for text/* mime types
+          if asset.content_type.start_with?("text/") && asset.encoding != Encoding::BINARY
+            headers["Content-Type"] += "; charset=#{asset.encoding.name.downcase}"
+          end
 
           # Set caching headers
           headers["Cache-Control"]  = "public"

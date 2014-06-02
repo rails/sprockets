@@ -66,6 +66,9 @@ class TestServer < Sprockets::TestCase
   test "serve source with content type headers" do
     get "/assets/application.js"
     assert_equal "application/javascript", last_response.headers['Content-Type']
+
+    get "/assets/bootstrap.css"
+    assert_equal "text/css; charset=utf-8", last_response.headers['Content-Type']
   end
 
   test "serve source with etag headers" do
