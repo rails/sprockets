@@ -603,13 +603,9 @@ class TestEnvironment < Sprockets::TestCase
     end
 
     # TODO: Expose environment helper for this
-    env.paths.each do |root|
-      env.stat_tree(root).each do |filename, stat|
-        next unless stat.file?
-
-        assert_equal filename, env.resolve_all(filename).first,
-          "Expected #{filename.inspect} to resolve to itself"
-      end
+    env.each_file.each do |filename|
+      assert_equal filename, env.resolve_all(filename).first,
+        "Expected #{filename.inspect} to resolve to itself"
     end
   end
 
