@@ -6,7 +6,6 @@ module Sprockets
     #
     # key   - MIME Type String
     # value - Hash
-    #   type       - :text or :binary
     #   extensions - Array of extnames
     #   charset    - Default Encoding or function to detect encoding
     #
