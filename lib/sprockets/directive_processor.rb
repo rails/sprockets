@@ -234,7 +234,8 @@ module Sprockets
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
               next
-            elsif stat.file? && @environment.matches_content_type?(@content_type, subpath)
+            elsif stat.file? && @environment.match_mime_type?(@content_type,
+                                  @environment.mime_type_for_filename(subpath))
               @required_paths << subpath
             end
           end
@@ -265,7 +266,8 @@ module Sprockets
               next
             elsif stat.directory?
               @dependency_paths << subpath
-            elsif stat.file? && @environment.matches_content_type?(@content_type, subpath)
+            elsif stat.file? && @environment.match_mime_type?(@content_type,
+                                  @environment.mime_type_for_filename(subpath))
               required_paths << subpath
             end
           end
