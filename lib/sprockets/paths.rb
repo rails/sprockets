@@ -108,14 +108,7 @@ module Sprockets
 
     protected
       # Internal: Reverse guess logical path for fully expanded path.
-      #
-      # This has some known issues. For an example if a file is
-      # shaddowed in the path, but is required relatively, its logical
-      # path will be incorrect.
-      #
-      # TODO: Review API and performance
       def logical_path_for(filename)
-        # TODO: Review performance
         _, path = paths_split(self.paths, filename)
         path, extname, _ = parse_path_extnames(path)
         path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
