@@ -294,10 +294,6 @@ class ProcessedAssetTest < Sprockets::TestCase
   def asset(logical_path)
     @env.find_asset(logical_path, :bundle => @bundle)
   end
-
-  def resolve(logical_path)
-    @env.resolve(logical_path)
-  end
 end
 
 class BundledAssetTest < Sprockets::TestCase
@@ -549,7 +545,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring the same file multiple times has no effect" do
-    assert_equal read("project.js")+"\n\n\n", asset("multiple.js").to_s
+    assert_equal read("asset/project.js.erb")+"\n\n\n", asset("multiple.js").to_s
   end
 
   test "requiring a file of a different format raises an exception" do
@@ -568,11 +564,11 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "splatted asset includes itself" do
-    assert_equal [resolve("project.js")], asset("project.js").to_a.map(&:filename)
+    assert_equal [fixture_path("asset/project.js.erb")], asset("project.js").to_a.map(&:filename)
   end
 
   test "splatted asset with child dependencies" do
-    assert_equal [resolve("project.js"), resolve("users.js"), resolve("application.js")],
+    assert_equal [fixture_path("asset/project.js.erb"), fixture_path("asset/users.js.erb"), fixture_path("asset/application.js")],
       asset("application.js").to_a.map(&:filename)
   end
 
@@ -586,23 +582,23 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "processing a source file with no engine extensions" do
-    assert_equal read("users.js"), asset("noengine.js").to_s
+    assert_equal read("asset/users.js.erb"), asset("noengine.js").to_s
   end
 
   test "processing a source file with one engine extension" do
-    assert_equal read("users.js"), asset("oneengine.js").to_s
+    assert_equal read("asset/users.js.erb"), asset("oneengine.js").to_s
   end
 
   test "processing a source file with multiple engine extensions" do
-    assert_equal read("users.js"),  asset("multipleengine.js").to_s
+    assert_equal read("asset/users.js.erb"),  asset("multipleengine.js").to_s
   end
 
   test "processing a source file with unknown extensions" do
-    assert_equal read("users.js") + "var jQuery;\n\n\n", asset("unknownexts.min.js").to_s
+    assert_equal read("asset/users.js.erb") + "var jQuery;\n\n\n", asset("unknownexts.min.js").to_s
   end
 
   test "requiring a file with a relative path" do
-    assert_equal read("project.js") + "\n",
+    assert_equal read("asset/project.js.erb") + "\n",
       asset("relative/require.js").to_s
   end
 
@@ -711,7 +707,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "__FILE__ is properly set in templates" do
-    assert_equal %(var filename = "#{resolve("filename.js")}";\n),
+    assert_equal %(var filename = "#{fixture_path("asset/filename.js.erb")}";\n),
       asset("filename.js").to_s
   end
 
@@ -773,12 +769,8 @@ class BundledAssetTest < Sprockets::TestCase
     @env.find_asset(logical_path, :bundle => @bundle)
   end
 
-  def resolve(logical_path)
-    @env.resolve(logical_path)
-  end
-
   def read(logical_path)
-    File.read(resolve(logical_path))
+    File.read(fixture_path(logical_path))
   end
 end
 
