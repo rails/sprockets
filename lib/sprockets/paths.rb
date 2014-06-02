@@ -47,6 +47,8 @@ module Sprockets
           end
         end
       end
+
+      nil
     end
 
     # Public: Finds the expanded real path for a given logical path by searching
@@ -92,15 +94,11 @@ module Sprockets
       return to_enum(__method__) unless block_given?
 
       seen = Set.new
-      self.paths.each do |root|
-        stat_tree(root).each do |filename, stat|
-          if stat.file?
-            logical_path = logical_path_for(filename)
-            if !seen.include?(logical_path)
-              yield logical_path, filename
-              seen << logical_path
-            end
-          end
+      each_file do |filename|
+        logical_path = logical_path_for(filename)
+        if !seen.include?(logical_path)
+          yield logical_path, filename
+          seen << logical_path
         end
       end
 
