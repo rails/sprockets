@@ -105,7 +105,7 @@ module Sprockets
     #
     # Returns an Array of String extnames.
     def path_reverse_extnames(path)
-      File.basename(path).scan(/\.[^.]+/).reverse
+      File.basename(path).scan(/\.[^.]+/).reverse!
     end
 
     # Internal: Stat all the files under a directory.
