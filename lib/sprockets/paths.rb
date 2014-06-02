@@ -104,6 +104,7 @@ module Sprockets
 
       nil
     end
+    alias_method :each_logical_path, :logical_paths
 
     protected
       # Internal: Reverse guess logical path for fully expanded path.
