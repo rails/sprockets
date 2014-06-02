@@ -602,7 +602,6 @@ class TestEnvironment < Sprockets::TestCase
       end
     end
 
-    # TODO: Expose environment helper for this
     env.each_file.each do |filename|
       assert_equal filename, env.resolve_all(filename).first,
         "Expected #{filename.inspect} to resolve to itself"
