@@ -260,16 +260,17 @@ module Sprockets
 
         data = File.open(filename, 'rb') { |f| f.read }
 
-        if type = mime_types[asset[:content_type]]
-          data = type[:charset].call(data) if type[:charset]
-          data = data.encode(Encoding::UTF_8) if type[:type] == :text
+        content_type = asset[:content_type]
+        mime_type = mime_types[content_type]
+        if mime_type && mime_type[:charset]
+          data = mime_type[:charset].call(data).encode(Encoding::UTF_8)
         end
 
         processed = process(
           processors,
           filename,
           asset[:logical_path],
-          asset[:content_type],
+          content_type,
           data
         )
 
