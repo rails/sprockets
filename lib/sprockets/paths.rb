@@ -192,7 +192,7 @@ module Sprockets
         path_extnames(path).reverse_each do |extname|
           if engines.key?(extname)
             format_extname = engine_extensions[extname]
-            engine_extnames << extname
+            engine_extnames.unshift(extname)
             len -= extname.length
           elsif mime_exts.key?(extname)
             format_extname = extname
@@ -204,8 +204,6 @@ module Sprockets
         end
 
         name = path[0, len]
-        engine_extnames.reverse!
-
         return [name, format_extname, engine_extnames]
       end
   end
