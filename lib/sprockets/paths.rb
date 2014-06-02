@@ -163,20 +163,18 @@ module Sprockets
 
           path_matches(path_dirname, basename, content_type, &block)
 
-          # bower.json can only be nested one level deep
-          if !name.index('/')
-            filename = File.join(path_name, "bower.json")
-            if self.stat(filename)
-              expand_bower_path(filename) do |bower_path|
-                if has_asset?(bower_path, accept: content_type)
-                  yield bower_path
-                end
-              end
+          resolve_alternates(base_path, name).each do |filename|
+            if has_asset?(filename, accept: content_type)
+              yield filename
             end
           end
 
           path_matches(path_name, "index", content_type, &block)
         end
+      end
+
+      def resolve_alternates(base_path, logical_name)
+        []
       end
 
       # Internal: Returns the format extension and `Array` of engine extensions.

@@ -8,7 +8,8 @@ module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
     include PathUtils
-    include Paths, Bower, Mime, Processing, Compressing, Engines, Server
+    include Paths, Mime, Processing, Compressing, Engines, Server
+    include Bower
 
     # Returns a `Digest` implementation class.
     #
