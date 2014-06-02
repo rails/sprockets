@@ -163,4 +163,11 @@ class AssetEncodingTest < Sprockets::TestCase
       data[0..10]
     assert_equal Encoding::BINARY, data.encoding
   end
+
+  test "read css asset with charset" do
+    expected = "\n\nh1 { color: red; }\n"
+    assert_equal expected, @env['utf8-charset.css'].to_s
+    assert_equal expected, @env['utf16le-charset.css'].to_s
+    assert_equal expected, @env['utf16le-bom-charset.css'].to_s
+  end
 end
