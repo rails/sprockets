@@ -164,5 +164,29 @@ module Sprockets
 
       name
     end
+
+    # Public: Detect charset from HTML document. Defaults to ISO-8859-1.
+    #
+    # str - String.
+    #
+    # Returns a encoded String.
+    def detect_html(str)
+      str = detect_unicode_bom(str)
+
+      # Attempt Charlock detection
+      if str.encoding == Encoding::BINARY
+        charlock_detect(str)
+      end
+
+      # Fallback to ISO-8859-1
+      if str.encoding == Encoding::BINARY
+        str.force_encoding(Encoding::ISO_8859_1)
+      end
+
+      str
+    end
+
+    # Public: Alias for EncodingUtils.detect_html
+    DETECT_HTML = method(:detect_html)
   end
 end

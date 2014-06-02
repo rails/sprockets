@@ -58,7 +58,7 @@ module Sprockets
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
-  register_mime_type 'text/html', extensions: ['.html', '.htm']
+  register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
   register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: EncodingUtils::DETECT_UNICODE
 
