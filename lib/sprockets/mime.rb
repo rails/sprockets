@@ -29,19 +29,11 @@ module Sprockets
       charset = options[:charset]
       charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
 
-      type = options[:type]
-      type ||= options[:charset] ? :text : :binary
-
-      unless type == :binary || type == :text
-        raise ArgumentError, "type must be :binary or :text"
-      end
-
       extnames.each do |extname|
         @mime_exts[extname] = mime_type
       end
 
       @mime_types[mime_type] = {}
-      @mime_types[mime_type][:type] = type
       @mime_types[mime_type][:extensions] = extnames
       @mime_types[mime_type][:charset] = charset if charset
       @mime_types[mime_type]

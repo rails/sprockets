@@ -185,8 +185,8 @@ module Sprockets
             logger.info "Writing #{target}"
             asset.write_to target
 
-            type = environment.mime_types[asset.content_type]
-            asset.write_to "#{target}.gz" if type && type[:type] == :text
+            mime_type = environment.mime_types[asset.content_type]
+            asset.write_to "#{target}.gz" if mime_type && mime_type[:charset]
           end
 
           filenames << filename
