@@ -51,15 +51,9 @@ module EnvironmentTests
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
   end
 
-  test "lookup mime type" do
-    assert_equal "application/javascript", @env.mime_types[".js"]
-    assert_equal "text/css", @env.mime_types[".css"]
-    assert_equal nil, @env.mime_types[".foo"]
-  end
-
   test "lookup bundle processors" do
     assert_equal 1, @env.bundle_processors('application/javascript').size
-    assert_equal 2, @env.bundle_processors('text/css').size
+    assert_equal 1, @env.bundle_processors('text/css').size
   end
 
   test "lookup compressors" do
@@ -385,12 +379,6 @@ class TestEnvironment < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
   end
 
-  test "register mime type" do
-    assert !@env.mime_types[".jst"]
-    @env.register_mime_type("application/javascript", "jst")
-    assert_equal "application/javascript", @env.mime_types[".jst"]
-  end
-
   test "register bundle processor" do
     old_size = @env.bundle_processors('text/css').size
     @env.register_bundle_processor 'text/css', WhitespaceProcessor
@@ -659,16 +647,6 @@ class TestCached < Sprockets::TestCase
     assert_raises TypeError do
       @env.register_mime_type "application/javascript", ".jst"
     end
-  end
-
-  test "change in environment mime types does not affect cache" do
-    env = Sprockets::Environment.new(".")
-    env.register_mime_type "application/javascript", ".jst"
-    cached = env.cached
-
-    assert_equal "application/javascript", cached.mime_types[".jst"]
-    env.register_mime_type nil, ".jst"
-    assert_equal "application/javascript", cached.mime_types[".jst"]
   end
 
   test "does not allow new bundle processors to be added" do

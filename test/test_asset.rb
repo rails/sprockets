@@ -736,7 +736,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "multiple charset defintions are stripped from css bundle" do
-    assert_equal "@charset \"UTF-8\";\n.foo {}\n\n.bar {}\n\n\n", asset("charset.css").to_s
+    assert_equal "\n.foo {}\n\n.bar {}\n\n\n", asset("charset.css").to_s
   end
 
   test "appends missing semicolons" do

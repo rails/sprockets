@@ -239,7 +239,7 @@ module Sprockets
         asset = {
           filename: filename,
           logical_path: logical_path_for(filename),
-          content_type: mime_types.fetch(extname, 'application/octet-stream')
+          content_type: mime_type_for_extname(extname) || 'application/octet-stream'
         }
 
         processed_processors = preprocessors(asset[:content_type]) +
@@ -257,14 +257,20 @@ module Sprockets
 
       def build_processed_asset_hash(asset, processors)
         filename = asset[:filename]
-        encoding = encoding_for_mime_type(asset[:content_type])
-        data     = read_unicode_file(filename, encoding)
+
+        data = File.open(filename, 'rb') { |f| f.read }
+
+        content_type = asset[:content_type]
+        mime_type = mime_types[content_type]
+        if mime_type && mime_type[:charset]
+          data = mime_type[:charset].call(data).encode(Encoding::UTF_8)
+        end
 
         processed = process(
           processors,
           filename,
           asset[:logical_path],
-          asset[:content_type],
+          content_type,
           data
         )
 

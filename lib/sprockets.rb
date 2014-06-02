@@ -10,7 +10,6 @@ module Sprockets
 
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
-  autoload :CharsetNormalizer,       'sprockets/charset_normalizer'
   autoload :ClosureCompressor,       'sprockets/closure_compressor'
   autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
   autoload :Context,                 'sprockets/context'
@@ -19,7 +18,6 @@ module Sprockets
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
   autoload :JstProcessor,            'sprockets/jst_processor'
-  autoload :SafetyColons,            'sprockets/safety_colons'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
@@ -30,6 +28,7 @@ module Sprockets
   autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
+  autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
   autoload :LazyProxy,               'sprockets/lazy_proxy'
@@ -42,12 +41,12 @@ module Sprockets
   require 'sprockets/processing'
   require 'sprockets/compressing'
   require 'sprockets/paths'
-  require 'rack/mime'
   extend Engines, Mime, Processing, Compressing, Paths
 
   @root              = File.expand_path('..', __FILE__)
   @paths             = []
-  @mime_types        = Rack::Mime::MIME_TYPES.dup
+  @mime_types        = {}
+  @mime_exts         = {}
   @engines           = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
@@ -55,24 +54,45 @@ module Sprockets
   @bundle_processors = Hash.new { |h, k| h[k] = [] }
   @compressors       = Hash.new { |h, k| h[k] = {} }
 
-  # Define `default_external_encoding` accessor on 1.9.
-  # Defaults to UTF-8.
-  class << self
-    attr_accessor :default_external_encoding
-  end
-  self.default_external_encoding = Encoding::UTF_8
+  # Common asset text types
+  register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
+  register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
+  register_mime_type 'text/plain', extensions: ['.txt', '.text']
+  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: EncodingUtils::DETECT_UNICODE
 
-  register_mime_type 'text/css', '.css'
-  register_mime_type 'application/javascript', '.js'
+  # Common image types
+  register_mime_type 'image/x-icon', extensions: ['.ico']
+  register_mime_type 'image/bmp', extensions: ['.bmp']
+  register_mime_type 'image/gif', extensions: ['.gif']
+  register_mime_type 'image/webp', extensions: ['.webp']
+  register_mime_type 'image/png', extensions: ['.png']
+  register_mime_type 'image/jpeg', extensions: ['.jpg', '.jpeg']
+  register_mime_type 'image/tiff', extensions: ['.tiff', '.tif']
+  register_mime_type 'image/svg+xml', extensions: ['.svg']
 
-  register_preprocessor 'text/css',               LazyProxy.new { DirectiveProcessor }
-  register_preprocessor 'application/javascript', LazyProxy.new { DirectiveProcessor }
+  # Common audio/video types
+  register_mime_type 'video/webm', extensions: ['.webm']
+  register_mime_type 'audio/basic', extensions: ['.snd', '.au']
+  register_mime_type 'audio/aiff', extensions: ['.aiff']
+  register_mime_type 'audio/mpeg', extensions: ['.mp3', '.mp2', '.m2a', '.m3a']
+  register_mime_type 'application/ogg', extensions: ['.ogx']
+  register_mime_type 'audio/midi', extensions: ['.midi', '.mid']
+  register_mime_type 'video/avi', extensions: ['.avi']
+  register_mime_type 'audio/wave', extensions: ['.wav', '.wave']
+  register_mime_type 'video/mp4', extensions: ['.mp4', '.m4v']
 
-  register_postprocessor 'application/javascript', LazyProxy.new { SafetyColons }
+  # Common font types
+  register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
+  register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
+  register_mime_type 'application/x-font-woff', extensions: ['.woff']
 
-  register_bundle_processor 'application/javascript', LazyProxy.new { Bundle }
-  register_bundle_processor 'text/css', LazyProxy.new { Bundle }
-  register_bundle_processor 'text/css', LazyProxy.new { CharsetNormalizer }
+  register_preprocessor 'text/css', DirectiveProcessor
+  register_preprocessor 'application/javascript', DirectiveProcessor
+
+  register_bundle_processor 'application/javascript', Bundle
+  register_bundle_processor 'text/css', Bundle
 
   register_compressor 'text/css', :sass, LazyProxy.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProxy.new { SassCompressor }

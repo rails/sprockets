@@ -32,7 +32,7 @@ module Sprockets
         set.merge(assets[path].metadata[:dependency_paths])
       end
 
-      data = required_paths.map { |path| assets[path].to_s }.join
+      data = join_assets(required_paths.map { |path| assets[path].to_s }, input[:content_type])
 
       # Deprecated: For Asset#to_a
       required_asset_hashes = required_paths.map { |path| assets[path].to_hash }
@@ -61,6 +61,37 @@ module Sprockets
         end
 
         deps
+      end
+
+      def join_assets(ary, content_type)
+        case content_type
+        when 'application/javascript'
+          ary.map { |data|
+            if missing_semicolon?(data)
+              data + ";\n"
+            else
+              data
+            end
+          }.join
+        else
+          ary.join
+        end
+      end
+
+      def missing_semicolon?(data)
+        i = data.size - 1
+        while i >= 0
+          c = data[i]
+          i -= 1
+          if c == "\n" || c == " " || c == "\t"
+            next
+          elsif c != ";"
+            return true
+          else
+            return false
+          end
+        end
+        false
       end
   end
 end

@@ -27,6 +27,7 @@ module Sprockets
 
       @paths             = Sprockets.paths.dup
       @mime_types        = Sprockets.mime_types.dup
+      @mime_exts         = Sprockets.mime_exts.dup
       @engines           = Sprockets.engines.dup
       @engine_extensions = Sprockets.engine_extensions
       @preprocessors     = Sprockets.preprocessors

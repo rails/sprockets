@@ -51,14 +51,14 @@ module Sprockets
       if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
         @engines[ext] = klass
         if options[:mime_type]
-          # FIXME: Reverse mime type lookup is a smell
-          engine_extensions[ext.to_s] = mime_types.key(options[:mime_type])
+          # TODO: Choosing first mime type extension is arbitrary
+          engine_extensions[ext.to_s] = mime_types[options[:mime_type]][:extensions].first
         end
       else
         @engines[ext] = LegacyTiltProcessor.new(klass)
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          # FIXME: Reverse mime type lookup is a smell
-          engine_extensions[ext.to_s] = mime_types.key(klass.default_mime_type)
+          # TODO: Choosing first mime type extension is arbitrary
+          engine_extensions[ext.to_s] = mime_types[klass.default_mime_type][:extensions].first
         end
       end
     end

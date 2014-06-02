@@ -58,11 +58,11 @@ module Sprockets
 
     # Registers a new Postprocessor `klass` for `mime_type`.
     #
-    #     register_postprocessor 'text/css', Sprockets::CharsetNormalizer
+    #     register_postprocessor 'application/javascript', Sprockets::DirectiveProcessor
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_postprocessor 'text/css', :my_processor do |context, data|
+    #     register_postprocessor 'application/javascript', :my_processor do |context, data|
     #       data.gsub(...)
     #     end
     #
@@ -118,11 +118,11 @@ module Sprockets
 
     # Registers a new Bundle Processor `klass` for `mime_type`.
     #
-    #     register_bundle_processor  'text/css', Sprockets::CharsetNormalizer
+    #     register_bundle_processor  'application/javascript', Sprockets::DirectiveProcessor
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_bundle_processor 'text/css', :my_processor do |context, data|
+    #     register_bundle_processor 'application/javascript', :my_processor do |context, data|
     #       data.gsub(...)
     #     end
     #
@@ -132,7 +132,7 @@ module Sprockets
 
     # Remove Bundle Processor `klass` for `mime_type`.
     #
-    #     unregister_bundle_processor 'text/css', Sprockets::CharsetNormalizer
+    #     unregister_bundle_processor 'application/javascript', Sprockets::DirectiveProcessor
     #
     def unregister_bundle_processor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)

@@ -1,21 +1,45 @@
+require 'sprockets/encoding_utils'
+
 module Sprockets
   module Mime
-    # Returns a `Hash` of mime types registered on the environment and those
-    # part of `Rack::Mime`.
+    # Pubic: Mapping of MIME type Strings to properties Hash.
+    #
+    # key   - MIME Type String
+    # value - Hash
+    #   extensions - Array of extnames
+    #   charset    - Default Encoding or function to detect encoding
+    #
+    # Returns Hash.
     attr_reader :mime_types
 
+    attr_reader :mime_exts
+
     # Register a new mime type.
-    def register_mime_type(mime_type, ext)
-      ext = Sprockets::Utils.normalize_extension(ext)
-      @mime_types[ext] = mime_type
+    def register_mime_type(mime_type, options = {})
+      # Legacy extension argument, will be removed from 4.x
+      if options.is_a?(String)
+        options = { extensions: [options] }
+      end
+
+      extnames = Array(options[:extensions]).map { |extname|
+        Sprockets::Utils.normalize_extension(extname)
+      }
+
+      charset = options[:charset]
+      charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
+
+      extnames.each do |extname|
+        @mime_exts[extname] = mime_type
+      end
+
+      @mime_types[mime_type] = {}
+      @mime_types[mime_type][:extensions] = extnames
+      @mime_types[mime_type][:charset] = charset if charset
+      @mime_types[mime_type]
     end
 
-    # Returns the correct encoding for a given mime type, while falling
-    # back on the default external encoding, if it exists.
-    def encoding_for_mime_type(type)
-      encoding = Encoding::BINARY if type =~ %r{^(image|audio|video)/}
-      encoding ||= Sprockets.default_external_encoding
-      encoding
+    def mime_type_for_extname(extname)
+      @mime_exts[extname] # || 'application/octet-stream'
     end
 
     def matches_content_type?(mime_type, path)
@@ -23,7 +47,7 @@ module Sprockets
       mime_type.nil? ||
         mime_type == "*/*" ||
         # TODO: Review performance
-        mime_type == mime_types[parse_path_extnames(path)[1]]
+        mime_type == mime_type_for_extname(parse_path_extnames(path)[1])
     end
   end
 end
