@@ -26,13 +26,15 @@ module Sprockets
         Sprockets::Utils.normalize_extension(extname)
       }
 
-      type = options[:type] || :binary
+      charset = options[:charset]
+      charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
+
+      type = options[:type]
+      type ||= options[:charset] ? :text : :binary
+
       unless type == :binary || type == :text
         raise ArgumentError, "type must be :binary or :text"
       end
-
-      charset = options[:charset]
-      charset ||= EncodingUtils::DETECT if type == :text
 
       extnames.each do |extname|
         @mime_exts[extname] = mime_type

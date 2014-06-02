@@ -55,38 +55,38 @@ module Sprockets
   @compressors       = Hash.new { |h, k| h[k] = {} }
 
   # Common asset text types
-  register_mime_type 'application/javascript', type: :text, extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
-  register_mime_type 'application/json', type: :text, extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
-  register_mime_type 'text/css', type: :text, extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
-  register_mime_type 'text/html', type: :text, extensions: ['.html', '.htm']
-  register_mime_type 'text/plain', type: :text, extensions: ['.txt', '.text']
-  register_mime_type 'text/yaml', type: :text, extensions: ['.yml', '.yaml'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
+  register_mime_type 'text/html', extensions: ['.html', '.htm']
+  register_mime_type 'text/plain', extensions: ['.txt', '.text']
+  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: EncodingUtils::DETECT_UNICODE
 
   # Common image types
-  register_mime_type 'image/x-icon', type: :binary, extensions: ['.ico']
-  register_mime_type 'image/bmp', type: :binary, extensions: ['.bmp']
-  register_mime_type 'image/gif', type: :binary, extensions: ['.gif']
-  register_mime_type 'image/webp', type: :binary, extensions: ['.webp']
-  register_mime_type 'image/png', type: :binary, extensions: ['.png']
-  register_mime_type 'image/jpeg', type: :binary, extensions: ['.jpg', '.jpeg']
-  register_mime_type 'image/tiff', type: :binary, extensions: ['.tiff', '.tif']
-  register_mime_type 'image/svg+xml', type: :binary, extensions: ['.svg']
+  register_mime_type 'image/x-icon', extensions: ['.ico']
+  register_mime_type 'image/bmp', extensions: ['.bmp']
+  register_mime_type 'image/gif', extensions: ['.gif']
+  register_mime_type 'image/webp', extensions: ['.webp']
+  register_mime_type 'image/png', extensions: ['.png']
+  register_mime_type 'image/jpeg', extensions: ['.jpg', '.jpeg']
+  register_mime_type 'image/tiff', extensions: ['.tiff', '.tif']
+  register_mime_type 'image/svg+xml', extensions: ['.svg']
 
   # Common audio/video types
-  register_mime_type 'video/webm', type: :binary, extensions: ['.webm']
-  register_mime_type 'audio/basic', type: :binary, extensions: ['.snd', '.au']
-  register_mime_type 'audio/aiff', type: :binary, extensions: ['.aiff']
-  register_mime_type 'audio/mpeg', type: :binary, extensions: ['.mp3', '.mp2', '.m2a', '.m3a']
-  register_mime_type 'application/ogg', type: :binary, extensions: ['.ogx']
-  register_mime_type 'audio/midi', type: :binary, extensions: ['.midi', '.mid']
-  register_mime_type 'video/avi', type: :binary, extensions: ['.avi']
-  register_mime_type 'audio/wave', type: :binary, extensions: ['.wav', '.wave']
-  register_mime_type 'video/mp4', type: :binary, extensions: ['.mp4', '.m4v']
+  register_mime_type 'video/webm', extensions: ['.webm']
+  register_mime_type 'audio/basic', extensions: ['.snd', '.au']
+  register_mime_type 'audio/aiff', extensions: ['.aiff']
+  register_mime_type 'audio/mpeg', extensions: ['.mp3', '.mp2', '.m2a', '.m3a']
+  register_mime_type 'application/ogg', extensions: ['.ogx']
+  register_mime_type 'audio/midi', extensions: ['.midi', '.mid']
+  register_mime_type 'video/avi', extensions: ['.avi']
+  register_mime_type 'audio/wave', extensions: ['.wav', '.wave']
+  register_mime_type 'video/mp4', extensions: ['.mp4', '.m4v']
 
   # Common font types
-  register_mime_type 'application/vnd.ms-fontobject', type: :binary, extensions: ['.eot']
-  register_mime_type 'application/x-font-ttf', type: :binary, extensions: ['.ttf']
-  register_mime_type 'application/x-font-woff', type: :binary, extensions: ['.woff']
+  register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
+  register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
+  register_mime_type 'application/x-font-woff', extensions: ['.woff']
 
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
