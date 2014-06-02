@@ -189,7 +189,7 @@ module Sprockets
         engine_extnames = []
         len = path.length
 
-        path_reverse_extnames(path).each do |extname|
+        path_extnames(path).reverse_each do |extname|
           if engines.key?(extname)
             format_extname = engine_extensions[extname]
             engine_extnames << extname

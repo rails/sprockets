@@ -73,14 +73,14 @@ class TestPathUtils < Sprockets::TestCase
     refute paths_split([fixture_path("default")], fixture_path("other/app/application.js"))
   end
 
-  test "path reverse extensions enumerator" do
-    assert_equal [".txt"], path_reverse_extnames("hello.txt").to_a
-    assert_equal [".txt"], path_reverse_extnames("sub/hello.txt").to_a
-    assert_equal [".txt"], path_reverse_extnames("sub.dir/hello.txt").to_a
-    assert_equal [".js"], path_reverse_extnames("jquery.js").to_a
-    assert_equal [".js", ".min"], path_reverse_extnames("jquery.min.js").to_a
-    assert_equal [".erb", ".js"], path_reverse_extnames("jquery.js.erb").to_a
-    assert_equal [".erb", ".js", ".min"], path_reverse_extnames("jquery.min.js.erb").to_a
+  test "path extensions" do
+    assert_equal [".txt"], path_extnames("hello.txt")
+    assert_equal [".txt"], path_extnames("sub/hello.txt")
+    assert_equal [".txt"], path_extnames("sub.dir/hello.txt")
+    assert_equal [".js"], path_extnames("jquery.js")
+    assert_equal [".min", ".js"], path_extnames("jquery.min.js")
+    assert_equal [".js", ".erb"], path_extnames("jquery.js.erb")
+    assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
   test "stat directory" do

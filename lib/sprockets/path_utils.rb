@@ -99,13 +99,13 @@ module Sprockets
       nil
     end
 
-    # Internal: Enumerate over a path's extensions in reverse order.
+    # Internal: Get path's extensions.
     #
     # path - String
     #
     # Returns an Array of String extnames.
-    def path_reverse_extnames(path)
-      File.basename(path).scan(/\.[^.]+/).reverse!
+    def path_extnames(path)
+      File.basename(path).scan(/\.[^.]+/)
     end
 
     # Internal: Stat all the files under a directory.
