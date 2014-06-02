@@ -96,6 +96,13 @@ module Sprockets
       source
     end
 
+    # Public: Get encoding of source.
+    #
+    # Returns an Encoding.
+    def encoding
+      source.encoding
+    end
+
     # Public: Returns Integer length of source.
     attr_reader :length
     alias_method :bytesize, :length
