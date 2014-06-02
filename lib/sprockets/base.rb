@@ -187,6 +187,24 @@ module Sprockets
       digest.hexdigest
     end
 
+    # Experimental: Check if environment has asset.
+    #
+    # Acts similar to `find_asset(path) ? true : false` but does not build the
+    # entire asset.
+    #
+    # Returns true or false.
+    def has_asset?(filename, options = {})
+      stat = self.stat(filename)
+      return false unless stat && stat.file?
+
+      accept = options[:accept] || '*/*'
+
+      # TODO: Review performance
+      extname = parse_path_extnames(filename)[1]
+      mime_type = mime_type_for_extname(extname)
+      match_mime_type?(mime_type, accept)
+    end
+
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
       options[:bundle] = true unless options.key?(:bundle)
@@ -237,7 +255,7 @@ module Sprockets
         asset = {
           filename: filename,
           logical_path: logical_path_for(filename),
-          content_type: mime_type_for_extname(extname) || 'application/octet-stream'
+          content_type: mime_type_for_extname(extname)
         }
 
         processed_processors = preprocessors(asset[:content_type]) +

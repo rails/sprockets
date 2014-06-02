@@ -39,12 +39,7 @@ module Sprockets
     end
 
     def mime_type_for_extname(extname)
-      @mime_exts[extname] # || 'application/octet-stream'
-    end
-
-    def mime_type_for_filename(filename)
-      # TODO: Review performance
-      @mime_exts[parse_path_extnames(filename)[1]]
+      @mime_exts.fetch(extname) { 'application/octet-stream' }
     end
 
     # Public: Test mime type against mime range.

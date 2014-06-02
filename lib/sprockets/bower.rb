@@ -9,16 +9,14 @@ module Sprockets
     # Returns String path to main file. Otherwise returns nil if filename is
     # not a bower.json
     def expand_bower_path(filename)
-      if File.basename(filename) == "bower.json"
-        bower = JSON.parse(File.read(filename), create_additions: false)
+      bower = JSON.parse(File.read(filename), create_additions: false)
 
-        case bower['main']
-        when String
-          yield File.expand_path("../#{bower['main']}", filename)
-        when Array
-          bower['main'].each do |name|
-            yield File.expand_path("../#{name}", filename)
-          end
+      case bower['main']
+      when String
+        yield File.expand_path("../#{bower['main']}", filename)
+      when Array
+        bower['main'].each do |name|
+          yield File.expand_path("../#{name}", filename)
         end
       end
     end
