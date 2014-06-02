@@ -2,7 +2,10 @@ require 'json'
 
 module Sprockets
   module Bower
-    POSSIBLE_BOWER_JSONS = ['bower.json']
+    # Internal: All supported bower.json files.
+    #
+    # https://github.com/bower/json/blob/0.4.0/lib/json.js#L7
+    POSSIBLE_BOWER_JSONS = ['bower.json', 'component.json', '.bower.json']
 
     # Internal: Override resolve_alternates to install bower.json behavior.
     #
