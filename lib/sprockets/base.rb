@@ -168,6 +168,8 @@ module Sprockets
 
     # Experimental: Check if environment has asset.
     #
+    # TODO: Finalize API.
+    #
     # Acts similar to `find_asset(path) ? true : false` but does not build the
     # entire asset.
     #
@@ -186,9 +188,19 @@ module Sprockets
 
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
+      path = path.to_s
       options[:bundle] = true unless options.key?(:bundle)
 
-      if filename = resolve_all(path.to_s).first
+      if absolute_path?(path)
+        filename = path
+
+        stat = self.stat(filename)
+        return nil unless stat && stat.file?
+      else
+        filename = resolve_all(path, content_type: options[:accept]).first
+      end
+
+      if filename
         if options[:if_match]
           asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle])
         else

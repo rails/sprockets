@@ -62,15 +62,49 @@ module Sprockets
       if filename = resolve_all(path, options).first
         filename
       else
-        if absolute_path?(path.to_s) && !paths_split(self.paths, path)
-          raise FileOutsidePaths, "#{path} isn't in paths: #{self.paths.join(', ')}"
-        end
-
         content_type = options[:content_type]
         message = "couldn't find file '#{path}'"
         message << " with content type '#{content_type}'" if content_type
         raise FileNotFound, message
       end
+    end
+
+    def resolve_under_base_path(base_path, logical_path, options = {})
+      if !self.paths.include?(base_path.to_s)
+        raise FileOutsidePaths, "#{base_path} isn't in paths: #{self.paths.join(', ')}"
+      end
+
+      if filename = resolve_all_under_base_path(base_path, logical_path, options).first
+        filename
+      else
+        content_type = options[:content_type]
+        message = "couldn't find file '#{logical_path}' under '#{base_path}'"
+        message << " with content type '#{content_type}'" if content_type
+        raise FileNotFound, message
+      end
+    end
+
+    def resolve_all_under_base_path(base_path, logical_path, options = {}, &block)
+      return to_enum(__method__, base_path, logical_path, options) unless block_given?
+
+      # TODO: Review performance
+      logical_name, extname, _ = parse_path_extnames(logical_path)
+      logical_basename = File.basename(logical_name)
+
+      format_content_type = mime_type_for_extname(extname) if extname
+      content_type = options[:content_type] || format_content_type
+
+      if format_content_type && format_content_type != content_type
+        return
+      end
+
+      path_matches(base_path, logical_name, logical_basename, extname) do |filename|
+        if has_asset?(filename, accept: content_type)
+          yield filename
+        end
+      end
+
+      nil
     end
 
     # Public: Finds the expanded real path for a given logical path by searching
@@ -92,7 +126,8 @@ module Sprockets
       path = path.to_s
 
       # TODO: Review performance
-      name, extname, _ = parse_path_extnames(path)
+      logical_name, extname, _ = parse_path_extnames(path)
+      logical_basename = File.basename(logical_name)
       format_content_type = mime_type_for_extname(extname) if extname
       content_type = options[:content_type] || format_content_type
 
@@ -100,10 +135,12 @@ module Sprockets
         return
       end
 
-      if absolute_path?(path)
-        resolve_absolute_path(path, name, extname, content_type, &block)
-      else
-        resolve_all_logical_paths(name, extname, content_type, &block)
+      @paths.each do |base_path|
+        path_matches(base_path, logical_name, logical_basename, extname) do |filename|
+          if has_asset?(filename, accept: content_type)
+            yield filename
+          end
+        end
       end
 
       nil
@@ -138,72 +175,25 @@ module Sprockets
         path
       end
 
-      # Internal: Resolve absolute path to ensure it exists and is in the
-      # load path.
-      #
-      # filename - String
-      # options  - Hash (default: {})
-      #
-      # Returns String filename or nil
-      def resolve_absolute_path(filename, name, extname, content_type, &block)
-        return unless paths_split(self.paths, filename)
-
-        # TODO: Review for correctness
-        stat = self.stat(filename)
-        if stat && stat.file?
-          yield filename
-        end
-
-        path_matches(File.dirname(filename), File.basename(name), content_type, &block)
+      def path_matches(base_path, logical_name, logical_basename, extname, &block)
+        dirname = File.dirname(File.join(base_path, logical_name))
+        dirname_matches(dirname, "#{logical_basename}#{extname}", &block) if extname
+        dirname_matches(dirname, logical_basename, &block)
+        resolve_alternates(base_path, logical_name, &block)
+        dirname_matches(File.join(base_path, logical_name), "index", &block)
       end
 
-      def path_matches(dirname, basename, content_type)
+      def dirname_matches(dirname, basename)
         self.entries(dirname).each do |entry|
           # TODO: Review performance
           name = parse_path_extnames(entry)[0]
           if basename == name
-            filename = File.join(dirname, entry)
-            if has_asset?(filename, accept: content_type)
-              yield filename
-            end
+            yield File.join(dirname, entry)
           end
-        end
-      end
-
-      # Internal: Resolve logical path in load paths.
-      #
-      # logical_path - String
-      # options      - Hash (default: {})
-      # block
-      #   filename - String or nil
-      #
-      # Returns nothing.
-      def resolve_all_logical_paths(name, extname, content_type, &block)
-        dirname, basename = File.split(name)
-        basename_extname = "#{basename}#{extname}" if extname
-
-        @paths.each do |base_path|
-          path_dirname = File.expand_path(dirname, base_path)
-          path_name    = File.expand_path(name, base_path)
-
-          if basename_extname
-            path_matches(path_dirname, basename_extname, content_type, &block)
-          end
-
-          path_matches(path_dirname, basename, content_type, &block)
-
-          resolve_alternates(base_path, name).each do |filename|
-            if has_asset?(filename, accept: content_type)
-              yield filename
-            end
-          end
-
-          path_matches(path_name, "index", content_type, &block)
         end
       end
 
       def resolve_alternates(base_path, logical_name)
-        []
       end
 
       # Internal: Returns the format extension and `Array` of engine extensions.

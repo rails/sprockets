@@ -64,70 +64,6 @@ module EnvironmentTests
     assert_equal 'Sprockets::UglifierCompressor', @env.compressors['application/javascript'][:uglifier].name
   end
 
-  test "resolve absolute path in environment" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'))
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo.coffee'))
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min.js'))
-
-    assert_equal fixture_path('default/gallery.css.erb'),
-      @env.resolve(fixture_path('default/gallery'))
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery'), content_type: 'application/javascript')
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo'))
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min'))
-    assert_equal fixture_path('default/gallery.css.erb'),
-      @env.resolve(fixture_path('default/gallery.css'))
-    assert_equal fixture_path('default/gallery.css.erb'),
-      @env.resolve(fixture_path('default/gallery'), content_type: 'text/css')
-
-    assert_equal fixture_path('default/manifest.js.yml'),
-      @env.resolve(fixture_path('default/manifest.js.yml'))
-    assert_equal fixture_path('default/manifest.js.yml'),
-      @env.resolve(fixture_path('default/manifest.js.yml'), content_type: 'text/yaml')
-
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/manifest.js.yml'), content_type: 'application/javascript')
-    end
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/jquery.tmpl'))
-    end
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/jquery'))
-    end
-
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
-
-    refute @env.resolve_all("/bin/sh").first
-    assert_raises(Sprockets::FileOutsidePaths) do
-      @env.resolve("/bin/sh")
-    end
-
-    refute @env.resolve_all(fixture_path('default/gallery.js'), content_type: 'text/css').first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
-    end
-
-    refute @env.resolve_all(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css').first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css')
-    end
-
-    refute @env.resolve_all(fixture_path('default/gallery.foo')).first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/gallery.foo'))
-    end
-  end
-
   test "resolve in environment" do
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js")
@@ -175,47 +111,59 @@ module EnvironmentTests
     end
   end
 
-  test "resolve bower special case" do
+  test "explicit bower.json access returns json file" do
     assert_equal fixture_path('default/bower/bower.json'),
-      @env.resolve("bower/bower.json")
+      @env["bower/bower.json"].filename
+  end
+
+  test "find default bower main" do
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower")
+      @env["bower"].filename
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env["qunit"].filename
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env["rails"].filename
+  end
+
+  test "find bower main by format extension" do
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js")
-    assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower", content_type: 'application/javascript')
-    assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js", content_type: 'application/javascript')
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("bower.css", content_type: 'text/css')
-    end
+      @env["bower.js"].filename
+      refute @env.find_asset("bower.css")
 
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit")
-    assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js")
-    assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit", content_type: 'application/javascript')
-    assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js", content_type: 'application/javascript')
+      @env["qunit.js"].filename
     assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css")
-    assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit", content_type: 'text/css')
-    assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css", content_type: 'text/css')
+      @env["qunit.css"].filename
 
     assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails")
-    assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails.js")
-    assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails", content_type: 'application/javascript')
-    assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails.js", content_type: 'application/javascript')
+      @env["rails.js"].filename
 
     assert_equal fixture_path('default/requirejs/require.js'),
-      @env.resolve("requirejs.js", content_type: 'application/javascript')
+      @env.find_asset("requirejs.js").filename
+  end
+
+  test "find bower main by content type" do
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.find_asset("bower", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.find_asset("bower.js", accept: 'application/javascript').filename
+
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.find_asset("qunit", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.find_asset("qunit.js", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.find_asset("qunit", accept: 'text/css').filename
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.find_asset("qunit.css", accept: 'text/css').filename
+
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env.find_asset("rails", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env.find_asset("rails.js", accept: 'application/javascript').filename
+
+    assert_equal fixture_path('default/requirejs/require.js'),
+      @env.find_asset("requirejs.js", accept: 'application/javascript').filename
   end
 
   test "find bundled asset in environment" do
@@ -592,20 +540,6 @@ class TestEnvironment < Sprockets::TestCase
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
-  end
-
-  test "verify all absolute paths" do
-    env = new_environment
-    Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
-      unless %w( . ..).include?(dir)
-        env.append_path(fixture_path(dir))
-      end
-    end
-
-    env.each_file.each do |filename|
-      assert_equal filename, env.resolve_all(filename).first,
-        "Expected #{filename.inspect} to resolve to itself"
-    end
   end
 
   test "verify all logical paths" do

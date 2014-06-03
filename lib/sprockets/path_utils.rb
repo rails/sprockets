@@ -63,26 +63,6 @@ module Sprockets
       path =~ /^\.\.?($|\/)/ ? true : false
     end
 
-    # Internal: Expand relative paths given a parent filename as reference.
-    #
-    # Closely related to ES6 Module Loader.normalize.
-    #
-    # path - String logical, absolute or relative path
-    # parent_filename - String path (default: nil)
-    #
-    # Returns expanded String path.
-    def normalize_path(path, parent_filename = nil)
-      if path =~ /^\.\.?\//
-        unless parent_filename
-          raise TypeError, "can't normalize relative path without parent: " +
-            path.inspect
-        end
-        File.expand_path(path, File.dirname(parent_filename))
-      else
-        path
-      end
-    end
-
     # Internal: Detect root path and base for file in a set of paths.
     #
     # paths    - Array of String paths

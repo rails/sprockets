@@ -26,11 +26,12 @@ module Sprockets
     def initialize(input)
       @environment  = input[:environment]
       @metadata     = input[:metadata]
-      @root_path    = input[:root_path]
       @logical_path = input[:logical_path]
       @filename     = input[:filename]
+      @dirname      = File.dirname(@filename)
       @pathname     = Pathname.new(@filename)
       @content_type = input[:content_type]
+      # TODO: Include :root_path in input
       @root_path, _ = @environment.paths_split(@environment.paths, @filename)
 
       @required_paths   = Set.new(@metadata[:required_paths])
@@ -78,8 +79,17 @@ module Sprockets
     #
     def resolve(path, options = {})
       options[:content_type] = self.content_type if options[:content_type] == :self
-      path = environment.normalize_path(path, @filename)
-      environment.resolve(path, options)
+
+      if environment.absolute_path?(path)
+        path
+      elsif path =~ /^\.\.?\//
+        path = File.expand_path(path, @dirname)
+        base_path, logical_path = environment.paths_split(environment.paths, path)
+        # TODO: Always scope to input[:base_path]
+        environment.resolve_under_base_path(base_path, logical_path, options)
+      else
+        environment.resolve(path, options)
+      end
     end
 
     # `depend_on` allows you to state a dependency on a file without

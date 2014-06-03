@@ -76,7 +76,7 @@ module Sprockets
     def call(input)
       @environment  = input[:environment]
       @filename     = input[:filename]
-      @base_path    = File.dirname(@filename)
+      @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
 
       data = input[:data]
@@ -194,8 +194,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        filename = resolve(path, content_type: @content_type)
-        @required_paths << filename
+        @required_paths << resolve(path, content_type: @content_type)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -223,7 +222,7 @@ module Sprockets
       #
       def process_require_directory_directive(path = ".")
         if @environment.relative_path?(path)
-          root = File.expand_path(path, @base_path)
+          root = File.expand_path(path, @dirname)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
@@ -251,7 +250,7 @@ module Sprockets
       #
       def process_require_tree_directive(path = ".")
         if @environment.relative_path?(path)
-          root = File.expand_path(path, @base_path)
+          root = File.expand_path(path, @dirname)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
@@ -325,7 +324,16 @@ module Sprockets
 
     private
       def resolve(path, options = {})
-        @environment.resolve(@environment.normalize_path(path, @filename), options)
+        if @environment.absolute_path?(path)
+          raise FileOutsidePaths, "can't require absolute file '#{path}'"
+        elsif path =~ /^\.\.?\//
+          path = File.expand_path(path, @dirname)
+          base_path, logical_path = @environment.paths_split(@environment.paths, path)
+          # TODO: Always scope to input[:base_path]
+          @environment.resolve_under_base_path(base_path, logical_path, options)
+        else
+          @environment.resolve(path, options)
+        end
       end
   end
 end
