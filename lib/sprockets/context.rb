@@ -26,13 +26,12 @@ module Sprockets
     def initialize(input)
       @environment  = input[:environment]
       @metadata     = input[:metadata]
+      @load_path    = input[:load_path]
       @logical_path = input[:logical_path]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
       @pathname     = Pathname.new(@filename)
       @content_type = input[:content_type]
-      # TODO: Include :root_path in input
-      @root_path, _ = @environment.paths_split(@environment.paths, @filename)
 
       @required_paths   = Set.new(@metadata[:required_paths])
       @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
@@ -48,9 +47,10 @@ module Sprockets
     # Returns the environment path that contains the file.
     #
     # If `app/javascripts` and `app/stylesheets` are in your path, and
-    # current file is `app/javascripts/foo/bar.js`, `root_path` would
+    # current file is `app/javascripts/foo/bar.js`, `load_path` would
     # return `app/javascripts`.
-    attr_reader :root_path
+    attr_reader :load_path
+    alias_method :root_path, :load_path
 
     # Returns logical path without any file extensions.
     #
@@ -84,9 +84,11 @@ module Sprockets
         path
       elsif environment.relative_path?(path)
         path = File.expand_path(path, @dirname)
-        load_path, logical_path = environment.paths_split(environment.paths, path)
-        # TODO: Always scope to input[:load_path]
-        environment.resolve_under_load_path(load_path, logical_path, options)
+        if logical_path = @environment.split_subpath(load_path, path)
+          environment.resolve_in_load_path(load_path, logical_path, options)
+        else
+          raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
+        end
       else
         environment.resolve(path, options)
       end

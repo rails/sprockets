@@ -238,9 +238,12 @@ module Sprockets
       end
 
       def build_asset_hash(filename, bundle = true)
+        # TODO: Validate load_path
+        load_path, _ = paths_split(self.paths, filename)
         _, extname, engine_extnames = parse_path_extnames(filename)
 
         asset = {
+          load_path: load_path,
           filename: filename,
           logical_path: logical_path_for(filename),
           content_type: mime_type_for_extname(extname)
@@ -273,6 +276,7 @@ module Sprockets
         processed = process(
           processors,
           filename,
+          asset[:load_path],
           asset[:logical_path],
           content_type,
           data

@@ -76,6 +76,22 @@ module Sprockets
       path =~ /^\.\.?($|\/)/ ? true : false
     end
 
+    # Internal: Get relative path for root path and subpath.
+    #
+    # path    - String path
+    # subpath - String subpath of path
+    #
+    # Returns relative String path if subpath is a subpath of path, or nil if
+    # subpath is outside of path.
+    def split_subpath(path, subpath)
+      path = File.join(path, '')
+      if subpath.start_with?(path)
+        subpath[path.length..-1]
+      else
+        nil
+      end
+    end
+
     # Internal: Detect root path and base for file in a set of paths.
     #
     # paths    - Array of String paths
@@ -84,9 +100,8 @@ module Sprockets
     # Returns [String root, String path]
     def paths_split(paths, filename)
       paths.each do |path|
-        base = "#{path}#{File::SEPARATOR}"
-        if filename.start_with?(base)
-          return path, filename[base.length..-1]
+        if subpath = split_subpath(path, filename)
+          return path, subpath
         end
       end
       nil

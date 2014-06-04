@@ -75,6 +75,7 @@ module Sprockets
 
     def call(input)
       @environment  = input[:environment]
+      @load_path    = input[:load_path]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
@@ -329,16 +330,13 @@ module Sprockets
 
       def resolve(path, options = {})
         if @environment.absolute_path?(path)
-          raise FileOutsidePaths, "can't require absolute file '#{path}'"
+          raise FileOutsidePaths, "can't require absolute file: #{path}"
         elsif @environment.relative_path?(path)
           path = expand_relative_path(path)
-          # TODO: Always scope to input[:load_path]
-          file_load_path = @environment.paths_split(@environment.paths, @filename)[0]
-          load_path, logical_path = @environment.paths_split(@environment.paths, path)
-          if file_load_path == load_path
-            @environment.resolve_under_load_path(load_path, logical_path, options)
+          if logical_path = @environment.split_subpath(@load_path, path)
+            @environment.resolve_in_load_path(@load_path, logical_path, options)
           else
-            raise FileOutsidePaths, "#{path} isn't under path: #{file_load_path}"
+            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
           end
         else
           @environment.resolve(path, options)

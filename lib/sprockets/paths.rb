@@ -69,7 +69,7 @@ module Sprockets
       end
     end
 
-    def resolve_under_load_path(load_path, logical_path, options = {})
+    def resolve_in_load_path(load_path, logical_path, options = {})
       if !self.paths.include?(load_path.to_s)
         raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
       end

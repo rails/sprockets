@@ -53,6 +53,16 @@ class TestPathUtils < Sprockets::TestCase
     refute relative_path?("..foo.rb")
   end
 
+  test "split subpath from root path" do
+    assert_equal "application.js",
+      split_subpath(fixture_path("default"), fixture_path("default/application.js"))
+    assert_equal "application.js",
+      split_subpath(fixture_path("default") + "/", fixture_path("default/application.js"))
+    assert_equal "app/application.js",
+      split_subpath(fixture_path("default"), fixture_path("default/app/application.js"))
+    refute split_subpath(fixture_path("default"), fixture_path("other/app/application.js"))
+  end
+
   test "split paths root from base" do
     assert_equal [fixture_path("default"), "application.js"],
       paths_split([fixture_path("default")], fixture_path("default/application.js"))
