@@ -84,31 +84,26 @@ module EnvironmentTests
     end
   end
 
-  test "resolve content type in environment" do
+  test "find asset with accept type" do
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
+      @env.find_asset("gallery.js").filename
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js", content_type: "application/javascript")
+      @env.find_asset("gallery.js", accept: "application/javascript").filename
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery", content_type: "application/javascript")
+      @env.find_asset("gallery", accept: "application/javascript").filename
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve('coffee/foo', content_type: 'application/javascript')
+      @env.find_asset('coffee/foo', accept: 'application/javascript').filename
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve('coffee/foo.coffee', content_type: 'application/javascript')
+      @env.find_asset('coffee/foo.coffee', accept: 'application/javascript').filename
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min", content_type: 'application/javascript')
+      @env.find_asset("jquery.tmpl.min", accept: 'application/javascript').filename
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js", content_type: 'application/javascript')
+      @env.find_asset("jquery.tmpl.min.js", accept: 'application/javascript').filename
     assert_equal fixture_path('default/manifest.js.yml'),
-      @env.resolve('manifest.js.yml', content_type: 'text/yaml')
+      @env.find_asset('manifest.js.yml', accept: 'text/yaml').filename
 
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve('manifest.js.yml', content_type: 'application/javascript')
-    end
-
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("gallery.js", content_type: "text/css")
-    end
+    refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
+    refute @env.find_asset("gallery.js", accept: "text/css")
   end
 
   test "explicit bower.json access returns json file" do

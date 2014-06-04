@@ -194,7 +194,7 @@ module Sprockets
         filename = path
         return nil unless file?(filename)
       else
-        filename = resolve_all(path, content_type: options[:accept]).first
+        filename = resolve_all(path, accept: options[:accept]).first
       end
 
       if filename

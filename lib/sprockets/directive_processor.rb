@@ -195,7 +195,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required_paths << resolve(path, content_type: @content_type)
+        @required_paths << resolve(path, accept: @content_type)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -320,7 +320,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_paths << resolve(path, content_type: @content_type)
+        @stubbed_paths << resolve(path, accept: @content_type)
       end
 
     private

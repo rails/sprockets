@@ -129,7 +129,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      pathname = resolve(path, content_type: :self)
+      pathname = resolve(path, accept: @content_type)
       depend_on_asset(pathname)
       @required_paths << pathname.to_s
       nil
@@ -139,7 +139,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed_paths << resolve(path, content_type: :self).to_s
+      @stubbed_paths << resolve(path, accept: @content_type).to_s
       nil
     end
 

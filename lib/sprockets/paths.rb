@@ -62,7 +62,7 @@ module Sprockets
       if filename = resolve_all(path, options).first
         filename
       else
-        content_type = options[:content_type]
+        content_type = options[:accept] || options[:content_type]
         message = "couldn't find file '#{path}'"
         message << " with content type '#{content_type}'" if content_type
         raise FileNotFound, message
@@ -77,7 +77,7 @@ module Sprockets
       if filename = resolve_all_under_load_path(load_path, logical_path, options).first
         filename
       else
-        content_type = options[:content_type]
+        content_type = options[:accept] || options[:content_type]
         message = "couldn't find file '#{logical_path}' under '#{load_path}'"
         message << " with content type '#{content_type}'" if content_type
         raise FileNotFound, message
@@ -92,7 +92,7 @@ module Sprockets
       logical_basename = File.basename(logical_name)
 
       format_content_type = mime_type_for_extname(extname) if extname
-      content_type = options[:content_type] || format_content_type
+      content_type = options[:accept] || options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
         return
@@ -129,7 +129,7 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
       format_content_type = mime_type_for_extname(extname) if extname
-      content_type = options[:content_type] || format_content_type
+      content_type = options[:accept] || options[:content_type] || format_content_type
 
       if format_content_type && format_content_type != content_type
         return
