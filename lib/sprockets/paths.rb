@@ -153,11 +153,17 @@ module Sprockets
       return to_enum(__method__) unless block_given?
 
       seen = Set.new
-      each_file do |filename|
-        logical_path = logical_path_for(filename)
-        if !seen.include?(logical_path)
-          yield logical_path, filename
-          seen << logical_path
+
+      self.paths.each do |load_path|
+        stat_tree(load_path).each do |filename, stat|
+          next unless stat.file?
+
+          logical_path = split_subpath(load_path, filename)
+          logical_path = normalize_logical_path(logical_path)
+          if !seen.include?(logical_path)
+            yield logical_path, filename
+            seen << logical_path
+          end
         end
       end
 
@@ -166,10 +172,8 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
-      # Internal: Reverse guess logical path for fully expanded path.
-      def logical_path_for(filename)
-        _, path = paths_split(self.paths, filename)
-        path, extname, _ = parse_path_extnames(path)
+      def normalize_logical_path(logical_path)
+        path, extname, _ = parse_path_extnames(logical_path)
         path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
         path += extname if extname
         path

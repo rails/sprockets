@@ -239,13 +239,13 @@ module Sprockets
 
       def build_asset_hash(filename, bundle = true)
         # TODO: Validate load_path
-        load_path, _ = paths_split(self.paths, filename)
+        load_path, logical_path = paths_split(self.paths, filename)
         _, extname, engine_extnames = parse_path_extnames(filename)
 
         asset = {
           load_path: load_path,
           filename: filename,
-          logical_path: logical_path_for(filename),
+          logical_path: normalize_logical_path(logical_path),
           content_type: mime_type_for_extname(extname)
         }
 
