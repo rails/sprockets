@@ -26,7 +26,7 @@ module Sprockets
           filename  = filenames.detect { |fn| (stat = self.stat(fn)) && stat.file? }
 
           if filename
-            read_bower_main(filename, &block)
+            read_bower_main(dirname, filename, &block)
           end
         end
       end
@@ -36,18 +36,19 @@ module Sprockets
 
     # Internal: Read bower.json's main directive.
     #
+    # dirname  - String path to component directory.
     # filename - String path to bower.json.
     #
     # Returns nothing.
-    def read_bower_main(filename, &block)
+    def read_bower_main(dirname, filename)
       bower = JSON.parse(File.read(filename), create_additions: false)
 
       case bower['main']
       when String
-        yield File.expand_path("../#{bower['main']}", filename)
+        yield File.expand_path(bower['main'], dirname)
       when Array
         bower['main'].each do |name|
-          yield File.expand_path("../#{name}", filename)
+          yield File.expand_path(name, dirname)
         end
       end
     end
