@@ -222,7 +222,7 @@ module Sprockets
       #
       def process_require_directory_directive(path = ".")
         if @environment.relative_path?(path)
-          root = File.expand_path(path, @dirname)
+          root = expand_relative_path(path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
@@ -250,7 +250,7 @@ module Sprockets
       #
       def process_require_tree_directive(path = ".")
         if @environment.relative_path?(path)
-          root = File.expand_path(path, @dirname)
+          root = expand_relative_path(path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
@@ -323,11 +323,15 @@ module Sprockets
       end
 
     private
+      def expand_relative_path(path)
+        File.expand_path(path, @dirname)
+      end
+
       def resolve(path, options = {})
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file '#{path}'"
         elsif @environment.relative_path?(path)
-          path = File.expand_path(path, @dirname)
+          path = expand_relative_path(path)
           base_path, logical_path = @environment.paths_split(@environment.paths, path)
           # TODO: Always scope to input[:base_path]
           @environment.resolve_under_base_path(base_path, logical_path, options)
