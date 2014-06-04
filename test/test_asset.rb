@@ -603,8 +603,19 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "can't require files outside the load path" do
+    assert !@env.paths.include?(fixture_path("default")), @env.paths.inspect
+
     assert_raises Sprockets::FileOutsidePaths do
       asset("relative/require_outside_path.js")
+    end
+  end
+
+  test "can't require files in another load path" do
+    @env.append_path(fixture_path("default"))
+    assert @env.paths.include?(fixture_path("default")), @env.paths.inspect
+
+    assert_raises Sprockets::FileOutsidePaths do
+      asset("relative/require_other_load_path.js")
     end
   end
 

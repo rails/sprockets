@@ -332,9 +332,14 @@ module Sprockets
           raise FileOutsidePaths, "can't require absolute file '#{path}'"
         elsif @environment.relative_path?(path)
           path = expand_relative_path(path)
-          base_path, logical_path = @environment.paths_split(@environment.paths, path)
           # TODO: Always scope to input[:base_path]
-          @environment.resolve_under_base_path(base_path, logical_path, options)
+          file_base_path = @environment.paths_split(@environment.paths, @filename)[0]
+          base_path, logical_path = @environment.paths_split(@environment.paths, path)
+          if file_base_path == base_path
+            @environment.resolve_under_base_path(base_path, logical_path, options)
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{file_base_path}"
+          end
         else
           @environment.resolve(path, options)
         end
