@@ -175,8 +175,7 @@ module Sprockets
     #
     # Returns true or false.
     def has_asset?(filename, options = {})
-      stat = self.stat(filename)
-      return false unless stat && stat.file?
+      return false unless file?(filename)
 
       accept = options[:accept] || '*/*'
 
@@ -193,9 +192,7 @@ module Sprockets
 
       if absolute_path?(path)
         filename = path
-
-        stat = self.stat(filename)
-        return nil unless stat && stat.file?
+        return nil unless file?(filename)
       else
         filename = resolve_all(path, content_type: options[:accept]).first
       end

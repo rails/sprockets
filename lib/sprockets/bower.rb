@@ -23,7 +23,7 @@ module Sprockets
 
         if stat && stat.directory?
           filenames = POSSIBLE_BOWER_JSONS.map { |basename| File.join(dirname, basename) }
-          filename  = filenames.detect { |fn| (stat = self.stat(fn)) && stat.file? }
+          filename  = filenames.detect { |fn| self.file?(fn) }
 
           if filename
             read_bower_main(dirname, filename, &block)

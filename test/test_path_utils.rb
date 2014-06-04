@@ -10,6 +10,11 @@ class TestPathUtils < Sprockets::TestCase
     refute stat("/tmp/sprockets/missingfile")
   end
 
+  test "file?" do
+    assert_equal true, file?(File.join(FIXTURE_ROOT, 'default', 'hello.txt'))
+    assert_equal false, file?(FIXTURE_ROOT)
+  end
+
   test "entries" do
     assert_equal [
       "asset",

@@ -23,6 +23,19 @@ module Sprockets
       end
     end
 
+    # Internal: Like `File.file?`.
+    #
+    # path - String file path.
+    #
+    # Returns true path exists and is a file.
+    def file?(path)
+      if stat = self.stat(path)
+        stat.file?
+      else
+        false
+      end
+    end
+
     # Internal: A version of `Dir.entries` that filters out `.` files and `~`
     # swap files.
     #
