@@ -69,23 +69,23 @@ module Sprockets
       end
     end
 
-    def resolve_under_base_path(base_path, logical_path, options = {})
-      if !self.paths.include?(base_path.to_s)
-        raise FileOutsidePaths, "#{base_path} isn't in paths: #{self.paths.join(', ')}"
+    def resolve_under_load_path(load_path, logical_path, options = {})
+      if !self.paths.include?(load_path.to_s)
+        raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
       end
 
-      if filename = resolve_all_under_base_path(base_path, logical_path, options).first
+      if filename = resolve_all_under_load_path(load_path, logical_path, options).first
         filename
       else
         content_type = options[:content_type]
-        message = "couldn't find file '#{logical_path}' under '#{base_path}'"
+        message = "couldn't find file '#{logical_path}' under '#{load_path}'"
         message << " with content type '#{content_type}'" if content_type
         raise FileNotFound, message
       end
     end
 
-    def resolve_all_under_base_path(base_path, logical_path, options = {}, &block)
-      return to_enum(__method__, base_path, logical_path, options) unless block_given?
+    def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
+      return to_enum(__method__, load_path, logical_path, options) unless block_given?
 
       # TODO: Review performance
       logical_name, extname, _ = parse_path_extnames(logical_path)
@@ -98,7 +98,7 @@ module Sprockets
         return
       end
 
-      path_matches(base_path, logical_name, logical_basename, extname) do |filename|
+      path_matches(load_path, logical_name, logical_basename, extname) do |filename|
         if has_asset?(filename, accept: content_type)
           yield filename
         end
@@ -135,8 +135,8 @@ module Sprockets
         return
       end
 
-      @paths.each do |base_path|
-        path_matches(base_path, logical_name, logical_basename, extname) do |filename|
+      @paths.each do |load_path|
+        path_matches(load_path, logical_name, logical_basename, extname) do |filename|
           if has_asset?(filename, accept: content_type)
             yield filename
           end
@@ -175,12 +175,12 @@ module Sprockets
         path
       end
 
-      def path_matches(base_path, logical_name, logical_basename, extname, &block)
-        dirname = File.dirname(File.join(base_path, logical_name))
+      def path_matches(load_path, logical_name, logical_basename, extname, &block)
+        dirname = File.dirname(File.join(load_path, logical_name))
         dirname_matches(dirname, "#{logical_basename}#{extname}", &block) if extname
         dirname_matches(dirname, logical_basename, &block)
-        resolve_alternates(base_path, logical_name, &block)
-        dirname_matches(File.join(base_path, logical_name), "index", &block)
+        resolve_alternates(load_path, logical_name, &block)
+        dirname_matches(File.join(load_path, logical_name), "index", &block)
       end
 
       def dirname_matches(dirname, basename)
@@ -193,7 +193,7 @@ module Sprockets
         end
       end
 
-      def resolve_alternates(base_path, logical_name)
+      def resolve_alternates(load_path, logical_name)
       end
 
       # Internal: Returns the format extension and `Array` of engine extensions.

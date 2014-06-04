@@ -84,9 +84,9 @@ module Sprockets
         path
       elsif environment.relative_path?(path)
         path = File.expand_path(path, @dirname)
-        base_path, logical_path = environment.paths_split(environment.paths, path)
-        # TODO: Always scope to input[:base_path]
-        environment.resolve_under_base_path(base_path, logical_path, options)
+        load_path, logical_path = environment.paths_split(environment.paths, path)
+        # TODO: Always scope to input[:load_path]
+        environment.resolve_under_load_path(load_path, logical_path, options)
       else
         environment.resolve(path, options)
       end

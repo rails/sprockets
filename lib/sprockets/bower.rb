@@ -9,16 +9,16 @@ module Sprockets
 
     # Internal: Override resolve_alternates to install bower.json behavior.
     #
-    # base_path    - String environment path
+    # load_path    - String environment path
     # logical_path - String path relative to base
     #
     # Returns nothing.
-    def resolve_alternates(base_path, logical_path, &block)
+    def resolve_alternates(load_path, logical_path, &block)
       super
 
       # bower.json can only be nested one level deep
       if !logical_path.index('/')
-        dirname = File.join(base_path, logical_path)
+        dirname = File.join(load_path, logical_path)
         stat    = self.stat(dirname)
 
         if stat && stat.directory?
