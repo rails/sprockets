@@ -82,7 +82,7 @@ module Sprockets
 
       if environment.absolute_path?(path)
         path
-      elsif path =~ /^\.\.?\//
+      elsif environment.relative_path?(path)
         path = File.expand_path(path, @dirname)
         base_path, logical_path = environment.paths_split(environment.paths, path)
         # TODO: Always scope to input[:base_path]
