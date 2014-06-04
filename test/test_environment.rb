@@ -85,25 +85,42 @@ module EnvironmentTests
   end
 
   test "find asset with accept type" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.find_asset("gallery.js").filename
-    assert_equal fixture_path('default/gallery.js'),
-      @env.find_asset("gallery.js", accept: "application/javascript").filename
-    assert_equal fixture_path('default/gallery.js'),
-      @env.find_asset("gallery", accept: "application/javascript").filename
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.find_asset('coffee/foo', accept: 'application/javascript').filename
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.find_asset('coffee/foo.coffee', accept: 'application/javascript').filename
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.find_asset("jquery.tmpl.min", accept: 'application/javascript').filename
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.find_asset("jquery.tmpl.min.js", accept: 'application/javascript').filename
-    assert_equal fixture_path('default/manifest.js.yml'),
-      @env.find_asset('manifest.js.yml', accept: 'text/yaml').filename
+    assert asset = @env.find_asset("gallery.js", accept: '*/*')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery", accept: 'application/javascript')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery", accept: 'application/javascript, text/css')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery.js", accept: 'application/javascript')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery", accept: 'text/css, application/javascript')
+    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+
+    assert asset = @env.find_asset("coffee/foo", accept: "application/javascript")
+    assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
+
+    assert asset = @env.find_asset("coffee/foo.coffee", accept: "application/javascript")
+    assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
+
+    assert asset = @env.find_asset("jquery.tmpl.min", accept: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'), asset.filename
+
+    assert asset = @env.find_asset("jquery.tmpl.min.js", accept: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'), asset.filename
+
+    assert asset = @env.find_asset('manifest.js.yml', accept: 'text/yaml')
+    assert_equal fixture_path('default/manifest.js.yml'), asset.filename
+
+    assert asset = @env.find_asset('manifest.js.yml', accept: 'text/css, */*')
+    assert_equal fixture_path('default/manifest.js.yml'), asset.filename
+
+    refute @env.find_asset("gallery.js", accept: "text/css")
 
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
-    refute @env.find_asset("gallery.js", accept: "text/css")
   end
 
   test "explicit bower.json access returns json file" do

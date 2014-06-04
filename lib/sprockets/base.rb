@@ -177,12 +177,12 @@ module Sprockets
     def has_asset?(filename, options = {})
       return false unless file?(filename)
 
-      accept = options[:accept] || '*/*'
+      accepts = (options[:accept] || '*/*').split(/\s*,\s*/)
 
       # TODO: Review performance
       extname = parse_path_extnames(filename)[1]
       mime_type = mime_type_for_extname(extname)
-      match_mime_type?(mime_type, accept)
+      accepts.any? { |accept| match_mime_type?(mime_type, accept) }
     end
 
     # Find asset by logical path or expanded path.

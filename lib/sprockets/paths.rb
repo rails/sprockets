@@ -62,9 +62,9 @@ module Sprockets
       if filename = resolve_all(path, options).first
         filename
       else
-        content_type = options[:accept] || options[:content_type]
+        accept = options[:accept] || options[:content_type]
         message = "couldn't find file '#{path}'"
-        message << " with content type '#{content_type}'" if content_type
+        message << " with content type '#{accept}'" if accept
         raise FileNotFound, message
       end
     end
@@ -77,9 +77,9 @@ module Sprockets
       if filename = resolve_all_under_load_path(load_path, logical_path, options).first
         filename
       else
-        content_type = options[:accept] || options[:content_type]
+        accept = options[:accept] || options[:content_type]
         message = "couldn't find file '#{logical_path}' under '#{load_path}'"
-        message << " with content type '#{content_type}'" if content_type
+        message << " with content type '#{accept}'" if accept
         raise FileNotFound, message
       end
     end
@@ -91,16 +91,11 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(logical_path)
       logical_basename = File.basename(logical_name)
 
-      format_content_type = mime_type_for_extname(extname) if extname
-      content_type = options[:accept] || options[:content_type] || format_content_type
-
-      if format_content_type && format_content_type != content_type
-        return
-      end
-
-      path_matches(load_path, logical_name, logical_basename, extname) do |filename|
-        if has_asset?(filename, accept: content_type)
-          yield filename
+      resolve_accept_options(extname, options).each do |accept|
+        path_matches(load_path, logical_name, logical_basename, extname) do |filename|
+          if has_asset?(filename, accept: accept)
+            yield filename
+          end
         end
       end
 
@@ -128,17 +123,13 @@ module Sprockets
       # TODO: Review performance
       logical_name, extname, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
-      format_content_type = mime_type_for_extname(extname) if extname
-      content_type = options[:accept] || options[:content_type] || format_content_type
 
-      if format_content_type && format_content_type != content_type
-        return
-      end
-
-      @paths.each do |load_path|
-        path_matches(load_path, logical_name, logical_basename, extname) do |filename|
-          if has_asset?(filename, accept: content_type)
-            yield filename
+      resolve_accept_options(extname, options).each do |accept|
+        @paths.each do |load_path|
+          path_matches(load_path, logical_name, logical_basename, extname) do |filename|
+            if has_asset?(filename, accept: accept)
+              yield filename
+            end
           end
         end
       end
@@ -174,6 +165,35 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
+      def resolve_accept_options(extname, options)
+        accepts = []
+
+        if types = options[:accept]
+          accepts += types.split(/\s*,\s*/)
+        end
+
+        # Deprecated :content_type option
+        if type = options[:content_type]
+          accepts << type
+        end
+
+        if extname
+          type = mime_type_for_extname(extname)
+
+          if accepts.empty? || accepts.any? { |accept| match_mime_type?(type, accept) }
+            accepts.unshift(type)
+          else
+            return []
+          end
+        end
+
+        if accepts.empty?
+          accepts << '*/*'
+        end
+
+        accepts
+      end
+
       # TODO: Should logical path normalization still be supported?
       def normalize_logical_path(path, extname)
         dirname, basename = File.split(path)
