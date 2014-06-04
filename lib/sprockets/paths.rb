@@ -173,6 +173,7 @@ module Sprockets
 
     protected
       def normalize_logical_path(logical_path)
+        # TODO: Review performance
         path, extname, _ = parse_path_extnames(logical_path)
         path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
         path += extname if extname
