@@ -175,7 +175,8 @@ module Sprockets
 
     protected
       def normalize_logical_path(path, extname)
-        path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
+        dirname, basename = File.split(path)
+        path = dirname if basename == 'index'
         path += extname if extname
         path
       end

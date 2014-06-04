@@ -195,6 +195,10 @@ module EnvironmentTests
     assert_equal ".c {}\n.d {}\n/*\n\n */\n\n", @env["mobile.css"].to_s
   end
 
+  test "ignore index.min.js in directory" do
+    refute @env["mobile-min.js"]
+  end
+
   test "find bower.json in directory" do
     assert_equal "var bower;\n", @env["bower.js"].to_s
   end
@@ -253,7 +257,14 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  FILES_IN_PATH = 42
+  test "xxxmobile index logical path shorthand" do
+    assert_equal "mobile.js",
+      @env[fixture_path("default/mobile/index.js")].logical_path
+    assert_equal "mobile-min/index.min.js",
+      @env[fixture_path("default/mobile-min/index.min.js")].logical_path
+  end
+
+  FILES_IN_PATH = 43
 
   test "iterate over each logical path" do
     paths = []
