@@ -174,6 +174,7 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
+      # TODO: Should logical path normalization still be supported?
       def normalize_logical_path(path, extname)
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'

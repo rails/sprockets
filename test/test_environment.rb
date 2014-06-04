@@ -242,6 +242,12 @@ module EnvironmentTests
     end
   end
 
+  test "asset filename outside of load paths" do
+    assert_raises Sprockets::FileOutsidePaths do
+      @env["/bin/sh"]
+    end
+  end
+
   test "asset with missing absolute depend_on raises an exception" do
     assert_raises Sprockets::FileOutsidePaths do
       @env["missing_absolute_depend_on.js"]
