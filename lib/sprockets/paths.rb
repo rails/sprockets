@@ -158,11 +158,13 @@ module Sprockets
         stat_tree(load_path).each do |filename, stat|
           next unless stat.file?
 
-          logical_path = split_subpath(load_path, filename)
-          logical_path = normalize_logical_path(logical_path)
-          if !seen.include?(logical_path)
-            yield logical_path, filename
-            seen << logical_path
+          path = split_subpath(load_path, filename)
+          path, extname, _ = parse_path_extnames(path)
+          path = normalize_logical_path(path, extname)
+
+          if !seen.include?(path)
+            yield path, filename
+            seen << path
           end
         end
       end
@@ -172,9 +174,7 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
-      def normalize_logical_path(logical_path)
-        # TODO: Review performance
-        path, extname, _ = parse_path_extnames(logical_path)
+      def normalize_logical_path(path, extname)
         path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
         path += extname if extname
         path
