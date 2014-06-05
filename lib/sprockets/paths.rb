@@ -59,14 +59,14 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(path, options = {})
-      if filename = resolve_all(path, options).first
-        filename
-      else
-        accept = options[:accept] || options[:content_type]
-        message = "couldn't find file '#{path}'"
-        message << " with content type '#{accept}'" if accept
-        raise FileNotFound, message
+      resolve_all(path, options) do |filename|
+        return filename
       end
+
+      accept = options[:accept] || options[:content_type]
+      message = "couldn't find file '#{path}'"
+      message << " with content type '#{accept}'" if accept
+      raise FileNotFound, message
     end
 
     def resolve_in_load_path(load_path, logical_path, options = {})
@@ -74,14 +74,14 @@ module Sprockets
         raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
       end
 
-      if filename = resolve_all_under_load_path(load_path, logical_path, options).first
-        filename
-      else
-        accept = options[:accept] || options[:content_type]
-        message = "couldn't find file '#{logical_path}' under '#{load_path}'"
-        message << " with content type '#{accept}'" if accept
-        raise FileNotFound, message
+      resolve_all_under_load_path(load_path, logical_path, options) do |filename|
+        return filename
       end
+
+      accept = options[:accept] || options[:content_type]
+      message = "couldn't find file '#{logical_path}' under '#{load_path}'"
+      message << " with content type '#{accept}'" if accept
+      raise FileNotFound, message
     end
 
     def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
