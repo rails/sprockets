@@ -26,10 +26,10 @@ module Sprockets
       @mime_exts         = environment.mime_exts.dup
       @engines           = environment.engines.dup
       @engine_extensions = environment.engine_extensions.dup
-      @preprocessors     = environment.preprocessors
-      @postprocessors    = environment.postprocessors
-      @bundle_processors = environment.bundle_processors
-      @compressors       = environment.compressors
+      @preprocessors     = deep_copy_hash(environment.preprocessors)
+      @postprocessors    = deep_copy_hash(environment.postprocessors)
+      @bundle_processors = deep_copy_hash(environment.bundle_processors)
+      @compressors       = deep_copy_hash(environment.compressors)
 
       @stats    = Hash.new { |h, k| h[k] = _stat(k) }
       @entries  = Hash.new { |h, k| h[k] = _entries(k) }

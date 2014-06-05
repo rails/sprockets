@@ -31,7 +31,7 @@ module Sprockets
   autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
-  autoload :LazyProxy,               'sprockets/lazy_proxy'
+  autoload :LazyProcessor,           'sprockets/lazy_processor'
   autoload :PathUtils,               'sprockets/path_utils'
   autoload :Utils,                   'sprockets/utils'
 
@@ -94,26 +94,26 @@ module Sprockets
   register_bundle_processor 'application/javascript', Bundle
   register_bundle_processor 'text/css', Bundle
 
-  register_compressor 'text/css', :sass, LazyProxy.new { SassCompressor }
-  register_compressor 'text/css', :scss, LazyProxy.new { SassCompressor }
-  register_compressor 'text/css', :yui, LazyProxy.new { YUICompressor }
-  register_compressor 'application/javascript', :closure, LazyProxy.new { ClosureCompressor }
-  register_compressor 'application/javascript', :uglifier, LazyProxy.new { UglifierCompressor }
-  register_compressor 'application/javascript', :uglify, LazyProxy.new { UglifierCompressor }
-  register_compressor 'application/javascript', :yui, LazyProxy.new { YUICompressor }
+  register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
+  register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
+  register_compressor 'text/css', :yui, LazyProcessor.new { YUICompressor }
+  register_compressor 'application/javascript', :closure, LazyProcessor.new { ClosureCompressor }
+  register_compressor 'application/javascript', :uglifier, LazyProcessor.new { UglifierCompressor }
+  register_compressor 'application/javascript', :uglify, LazyProcessor.new { UglifierCompressor }
+  register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', LazyProxy.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
+  register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
-  register_engine '.jst',    LazyProxy.new { JstProcessor }, mime_type: 'application/javascript'
-  register_engine '.eco',    LazyProxy.new { EcoTemplate },  mime_type: 'application/javascript'
-  register_engine '.ejs',    LazyProxy.new { EjsTemplate },  mime_type: 'application/javascript'
+  register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
+  register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
-  register_engine '.sass',   LazyProxy.new { SassTemplate }, mime_type: 'text/css'
-  register_engine '.scss',   LazyProxy.new { ScssTemplate }, mime_type: 'text/css'
+  register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
+  register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 
   # Other
-  register_engine '.erb',    LazyProxy.new { ERBTemplate }
+  register_engine '.erb',    LazyProcessor.new { ERBTemplate }
 end

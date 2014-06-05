@@ -1,5 +1,5 @@
 require 'sprockets/engines'
-require 'sprockets/lazy_proxy'
+require 'sprockets/lazy_processor'
 require 'sprockets/legacy_proc_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
@@ -9,36 +9,32 @@ module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    # Returns an `Array` of `Processor` classes. If a `mime_type`
-    # argument is supplied, the processors registered under that
-    # extension will be returned.
-    #
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
+    attr_reader :preprocessors
+
+    # Internal: Find and load preprocessors by mime type.
     #
-    # All `Processor`s must follow the `Template` interface. It is
-    # recommended to subclass `Template`.
-    def preprocessors(mime_type = nil)
-      if mime_type
-        @preprocessors[mime_type].dup
-      else
-        deep_copy_hash(@preprocessors)
+    # mime_type - String MIME type.
+    #
+    # Returns Array of Procs.
+    def unwrap_preprocessors(mime_type)
+      @preprocessors[mime_type].map do |processor|
+        unwrap_processor(processor)
       end
     end
 
-    # Returns an `Array` of `Processor` classes. If a `mime_type`
-    # argument is supplied, the processors registered under that
-    # extension will be returned.
-    #
     # Postprocessors are ran after Preprocessors and Engine processors.
+    attr_reader :postprocessors
+
+    # Internal: Find and load postprocessors by mime type.
     #
-    # All `Processor`s must follow the `Template` interface. It is
-    # recommended to subclass `Template`.
-    def postprocessors(mime_type = nil)
-      if mime_type
-        @postprocessors[mime_type].dup
-      else
-        deep_copy_hash(@postprocessors)
+    # mime_type - String MIME type.
+    #
+    # Returns Array of Procs.
+    def unwrap_postprocessors(mime_type)
+      @postprocessors[mime_type].map do |processor|
+        unwrap_processor(processor)
       end
     end
 
@@ -99,20 +95,18 @@ module Sprockets
       @postprocessors[mime_type].delete(klass)
     end
 
-    # Returns an `Array` of `Processor` classes. If a `mime_type`
-    # argument is supplied, the processors registered under that
-    # extension will be returned.
-    #
     # Bundle Processors are ran on concatenated assets rather than
     # individual files.
+    attr_reader :bundle_processors
+
+    # Internal: Find and load bundle processors by mime type.
     #
-    # All `Processor`s must follow the `Template` interface. It is
-    # recommended to subclass `Template`.
-    def bundle_processors(mime_type = nil)
-      if mime_type
-        @bundle_processors[mime_type].dup
-      else
-        deep_copy_hash(@bundle_processors)
+    # mime_type - String MIME type.
+    #
+    # Returns Array of Procs.
+    def unwrap_bundle_processors(mime_type)
+      @bundle_processors[mime_type].map do |processor|
+        unwrap_processor(processor)
       end
     end
 
@@ -191,7 +185,7 @@ module Sprockets
     private
       def wrap_processor(klass, proc)
         if !proc
-          if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
+          if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
             klass
           else
             LegacyTiltProcessor.new(klass)
@@ -201,6 +195,10 @@ module Sprockets
         else
           proc
         end
+      end
+
+      def unwrap_processor(processor)
+        processor.respond_to?(:unwrap) ? processor.unwrap : processor
       end
   end
 end

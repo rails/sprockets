@@ -253,13 +253,14 @@ module Sprockets
           content_type: mime_type_for_extname(extname)
         }
 
-        processed_processors = preprocessors(asset[:content_type]) +
-          engine_extnames.map { |ext| engines[ext] }.reverse +
-          postprocessors(asset[:content_type])
-        bundled_processors = bundle_processors(asset[:content_type])
+        processed_processors = unwrap_preprocessors(asset[:content_type]) +
+          unwrap_engines(engine_extnames).reverse +
+          unwrap_postprocessors(asset[:content_type])
+        bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
         if processed_processors.any? || bundled_processors.any?
           processors = bundle ? bundled_processors : processed_processors
+          # processors
           build_processed_asset_hash(asset, processors)
         else
           build_static_asset_hash(asset)

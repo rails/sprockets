@@ -30,10 +30,10 @@ module Sprockets
       @mime_exts         = Sprockets.mime_exts.dup
       @engines           = Sprockets.engines.dup
       @engine_extensions = Sprockets.engine_extensions
-      @preprocessors     = Sprockets.preprocessors
-      @postprocessors    = Sprockets.postprocessors
-      @bundle_processors = Sprockets.bundle_processors
-      @compressors       = Sprockets.compressors
+      @preprocessors     = deep_copy_hash(Sprockets.preprocessors)
+      @postprocessors    = deep_copy_hash(Sprockets.postprocessors)
+      @bundle_processors = deep_copy_hash(Sprockets.bundle_processors)
+      @compressors       = deep_copy_hash(Sprockets.compressors)
 
       self.cache = Cache::MemoryStore.new
       expire_cache!

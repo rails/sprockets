@@ -1,4 +1,4 @@
-require 'sprockets/lazy_proxy'
+require 'sprockets/lazy_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
@@ -40,6 +40,19 @@ module Sprockets
     # # => { '.coffee' => '.js' }
     attr_reader :engine_extensions
 
+    # Internal: Find and load engines by extension.
+    #
+    # extnames - Array of String extnames
+    #
+    # Returns Array of Procs.
+    def unwrap_engines(extnames)
+      extnames.map { |ext|
+        engines[ext]
+      }.map { |engine|
+        unwrap_processor(engine)
+      }
+    end
+
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
@@ -48,7 +61,7 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
+      if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
         @engines[ext] = klass
         if options[:mime_type]
           engine_extensions[ext.to_s] = mime_types[options[:mime_type]][:extensions].first
