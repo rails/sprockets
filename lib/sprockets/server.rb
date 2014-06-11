@@ -194,6 +194,9 @@ module Sprockets
         if coding == "gzip"
           body = CodingUtils.gzip(asset)
           length = body.length
+        elsif coding == "deflate"
+          body = CodingUtils.deflate(asset)
+          length = body.length
         else
           body = asset
           length = asset.length

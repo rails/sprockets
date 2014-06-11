@@ -53,7 +53,16 @@ class TestServer < Sprockets::TestCase
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
-    assert_equal "\u001F\x8B", last_response.body[0, 2]
+    assert_equal [31, 139, 8, 0], last_response.body.bytes[0, 4]
+  end
+
+  test "serve deflate'd source file" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'deflate'
+    assert_equal 200, last_response.status
+    assert_equal "deflate", last_response.headers['Content-Encoding']
+    assert_equal "11", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal [43, 75, 44, 82], last_response.body.bytes[0, 4]
   end
 
   test "serve single source file from cached environment" do
