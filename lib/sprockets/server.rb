@@ -192,12 +192,7 @@ module Sprockets
         coding, _ = req.accept_encoding.first
 
         if coding == "gzip"
-          body = StringIO.new("")
-          gz = Zlib::GzipWriter.new(body, Zlib::BEST_COMPRESSION)
-          gz.mtime = asset.mtime.to_i
-          gz.write asset.to_s
-          gz.finish
-          body.rewind
+          body = CodingUtils.gzip(asset)
           length = body.length
         else
           body = asset

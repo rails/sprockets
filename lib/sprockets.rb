@@ -27,6 +27,7 @@ module Sprockets
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
+  autoload :CodingUtils,             'sprockets/coding_utils'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'

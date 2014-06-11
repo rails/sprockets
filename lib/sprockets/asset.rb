@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'pathname'
-require 'zlib'
 
 module Sprockets
   class Asset
@@ -157,11 +156,7 @@ module Sprockets
 
       PathUtils.atomic_write(filename) do |f|
         if options[:compress]
-          # Run contents through `Zlib`
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime.to_i
-          gz.write to_s
-          gz.close
+          f.write CodingUtils.gzip(self)
         else
           # Write out as is
           f.write to_s
