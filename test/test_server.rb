@@ -34,14 +34,26 @@ class TestServer < Sprockets::TestCase
 
   test "serve single source file" do
     get "/assets/foo.js"
+    assert_equal 200, last_response.status
+    assert_equal "9", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
     assert_equal "var foo;\n", last_response.body
   end
 
   test "serve single source file body" do
     get "/assets/foo.js?body=1"
     assert_equal 200, last_response.status
-    assert_equal "var foo;\n", last_response.body
     assert_equal "9", last_response.headers['Content-Length']
+    assert_equal "var foo;\n", last_response.body
+  end
+
+  test "serve gzip'd source file" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    assert_equal "29", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal "\u001F\x8B", last_response.body[0, 2]
   end
 
   test "serve single source file from cached environment" do

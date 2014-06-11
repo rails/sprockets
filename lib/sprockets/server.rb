@@ -188,11 +188,32 @@ module Sprockets
 
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        [ 200, headers(env, asset, asset.length), asset ]
+        req = Rack::Request.new(env)
+        coding, _ = req.accept_encoding.first
+
+        if coding == "gzip"
+          body = StringIO.new("")
+          gz = Zlib::GzipWriter.new(body, Zlib::BEST_COMPRESSION)
+          gz.mtime = asset.mtime.to_i
+          gz.write asset.to_s
+          gz.finish
+          body.rewind
+          length = body.length
+        else
+          body = asset
+          length = asset.length
+        end
+
+        [ 200, headers(env, asset, length, coding), body ]
       end
 
-      def headers(env, asset, length)
+      def headers(env, asset, length, encoding = nil)
         Hash.new.tap do |headers|
+          # Set content encoding
+          if encoding
+            headers["Content-Encoding"] = encoding
+          end
+
           # Set content length header
           headers["Content-Length"] = length.to_s
 
@@ -219,6 +240,8 @@ module Sprockets
           else
             headers["Cache-Control"] << ", must-revalidate"
           end
+
+          headers["Vary"] = "Accept-Encoding"
         end
       end
 
