@@ -27,7 +27,7 @@ module Sprockets
       @environment  = input[:environment]
       @metadata     = input[:metadata]
       @load_path    = input[:load_path]
-      @logical_path = input[:logical_path]
+      @logical_path = input[:name]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
       @pathname     = Pathname.new(@filename)

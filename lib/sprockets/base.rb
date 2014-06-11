@@ -251,6 +251,7 @@ module Sprockets
           load_path: load_path,
           filename: filename,
           logical_path: logical_path,
+          name: logical_path.chomp(extname)
         }
         asset[:content_type] = mime_type if mime_type
 
@@ -283,7 +284,7 @@ module Sprockets
           processors,
           filename,
           asset[:load_path],
-          asset[:logical_path],
+          asset[:name],
           content_type,
           data
         )
