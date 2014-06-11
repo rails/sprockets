@@ -174,6 +174,14 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal "image/png", @asset.content_type
   end
 
+  test "encoding is binary" do
+    assert_equal Encoding::BINARY, @asset.encoding
+  end
+
+  test "charset is nil" do
+    assert_equal nil, @asset.charset
+  end
+
   test "length" do
     assert_equal 42917, @asset.length
   end
@@ -269,6 +277,10 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal Encoding::UTF_8, @asset.encoding
   end
 
+  test "charset is UTF-8" do
+    assert_equal 'utf-8', @asset.charset
+  end
+
   test "splat" do
     assert_equal [@asset], @asset.to_a
   end
@@ -324,6 +336,10 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "encoding is UTF-8" do
     assert_equal Encoding::UTF_8, @asset.encoding
+  end
+
+  test "charset is UTF-8" do
+    assert_equal 'utf-8', @asset.charset
   end
 
   test "to_s" do

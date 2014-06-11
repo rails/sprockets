@@ -199,8 +199,8 @@ module Sprockets
           # Set content type header
           if type = asset.content_type
             # Set charset param for text/* mime types
-            if type.start_with?("text/") && asset.encoding != Encoding::BINARY
-              type += "; charset=#{asset.encoding.name.downcase}"
+            if type.start_with?("text/") && asset.charset
+              type += "; charset=#{asset.charset}"
             end
             headers["Content-Type"] = type
           end

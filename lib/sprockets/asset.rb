@@ -103,6 +103,15 @@ module Sprockets
     # Returns an Encoding.
     attr_reader :encoding
 
+    # Public: Get charset of source.
+    #
+    # Returns an String charset name or nil if binary.
+    def charset
+      if encoding != Encoding::BINARY
+        encoding.name.downcase
+      end
+    end
+
     # Public: Returns Integer length of source.
     attr_reader :length
     alias_method :bytesize, :length
