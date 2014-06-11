@@ -5,7 +5,6 @@ require 'zlib'
 module Sprockets
   class Asset
     attr_reader :logical_path
-    attr_reader :content_type
 
     def initialize(attributes = {})
       @attributes = attributes
@@ -48,6 +47,9 @@ module Sprockets
     def digest_path
       logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
     end
+
+    # Public: Returns String MIME type of asset. Returns nil if type is unknown.
+    attr_reader :content_type
 
     # Deprecated: Expand asset into an `Array` of parts.
     #

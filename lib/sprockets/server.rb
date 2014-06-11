@@ -193,13 +193,16 @@ module Sprockets
 
       def headers(env, asset, length)
         Hash.new.tap do |headers|
-          # Set content type and length headers
-          headers["Content-Type"]   = asset.content_type
+          # Set content length header
           headers["Content-Length"] = length.to_s
 
-          # Set charset param for text/* mime types
-          if asset.content_type.start_with?("text/") && asset.encoding != Encoding::BINARY
-            headers["Content-Type"] += "; charset=#{asset.encoding.name.downcase}"
+          # Set content type header
+          if type = asset.content_type
+            # Set charset param for text/* mime types
+            if type.start_with?("text/") && asset.encoding != Encoding::BINARY
+              type += "; charset=#{asset.encoding.name.downcase}"
+            end
+            headers["Content-Type"] = type
           end
 
           # Set caching headers

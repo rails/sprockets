@@ -177,9 +177,7 @@ module Sprockets
           accepts << type
         end
 
-        if extname
-          type = mime_type_for_extname(extname)
-
+        if extname && (type = mime_exts[extname])
           if accepts.empty? || accepts.any? { |accept| match_mime_type?(type, accept) }
             accepts.unshift(type)
           else

@@ -181,8 +181,8 @@ module Sprockets
 
       # TODO: Review performance
       extname = parse_path_extnames(filename)[1]
-      mime_type = mime_type_for_extname(extname)
-      accepts.any? { |accept| match_mime_type?(mime_type, accept) }
+      mime_type = mime_exts[extname]
+      mime_type.nil? || accepts.any? { |accept| match_mime_type?(mime_type, accept) }
     end
 
     # Find asset by logical path or expanded path.
@@ -245,13 +245,14 @@ module Sprockets
 
         logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path, extname)
+        mime_type = mime_exts[extname]
 
         asset = {
           load_path: load_path,
           filename: filename,
           logical_path: logical_path,
-          content_type: mime_type_for_extname(extname)
         }
+        asset[:content_type] = mime_type if mime_type
 
         processed_processors = unwrap_preprocessors(asset[:content_type]) +
           unwrap_engines(engine_extnames).reverse +

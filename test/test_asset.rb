@@ -859,7 +859,7 @@ class AssetContentTypeTest < Sprockets::TestCase
   end
 
   test "content type" do
-    assert_equal "application/octet-stream", content_type("empty")
+    assert_equal nil, content_type("empty")
 
     assert_equal "application/javascript", content_type("application.js")
     assert_equal "text/css", content_type("application.css")
@@ -870,8 +870,8 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("project.js.coffee.erb")
 
     assert_equal "text/css", content_type("store.css.erb")
-    assert_equal "application/octet-stream", content_type("store.foo")
-    assert_equal "application/octet-stream", content_type("files.erb")
+    assert_equal nil, content_type("store.foo")
+    assert_equal nil, content_type("files.erb")
 
     assert_equal "application/javascript", content_type("application.coffee")
     assert_equal "text/css", content_type("application.scss")
@@ -894,13 +894,13 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("jquery.ext/form.js")
     assert_equal "application/javascript", content_type("jquery-coffee.min.coffee")
     assert_equal "application/javascript", content_type("jquery-custom.min.js.erb")
-    assert_equal "application/octet-stream", content_type("jquery.js.min")
+    assert_equal nil, content_type("jquery.js.min")
 
     assert_equal "application/javascript", content_type("all.coffee/plain.js")
     assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
     assert_equal "application/javascript", content_type("all.coffee/index.coffee")
 
-    assert_equal "application/octet-stream", content_type("sprite.css.embed")
+    assert_equal nil, content_type("sprite.css.embed")
 
     @env.register_engine '.haml', proc {}, mime_type: 'text/html'
     @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'

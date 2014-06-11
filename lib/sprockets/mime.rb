@@ -38,10 +38,6 @@ module Sprockets
       @mime_types[mime_type]
     end
 
-    def mime_type_for_extname(extname)
-      @mime_exts.fetch(extname) { 'application/octet-stream' }
-    end
-
     # Public: Test mime type against mime range.
     #
     #    match_mime_type?('text/html', 'text/*') => true
