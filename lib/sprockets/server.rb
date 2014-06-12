@@ -192,11 +192,11 @@ module Sprockets
         coding, _ = req.accept_encoding.first
 
         if coding == "gzip"
-          body = CodingUtils.gzip(asset)
-          length = body.length
+          body = [ CodingUtils.gzip(asset) ]
+          length = body.first.bytesize
         elsif coding == "deflate"
-          body = CodingUtils.deflate(asset)
-          length = body.length
+          body = [ CodingUtils.deflate(asset) ]
+          length = body.first.bytesize
         else
           body = asset
           length = asset.length
