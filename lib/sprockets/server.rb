@@ -191,11 +191,8 @@ module Sprockets
         req = Rack::Request.new(env)
         coding, _ = req.accept_encoding.first
 
-        if coding == "gzip"
-          body = [ CodingUtils.gzip(asset) ]
-          length = body.first.bytesize
-        elsif coding == "deflate"
-          body = [ CodingUtils.deflate(asset) ]
+        if coding && (encoder = content_codings[coding.to_sym])
+          body = [encoder.call(asset)]
           length = body.first.bytesize
         else
           body = asset

@@ -48,6 +48,7 @@ module Sprockets
   @paths             = []
   @mime_types        = {}
   @mime_exts         = {}
+  @content_codings   = {}
   @engines           = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
@@ -88,6 +89,11 @@ module Sprockets
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/x-font-woff', extensions: ['.woff']
+
+  register_content_coding :deflate, CodingUtils::DEFLATE
+  register_content_coding :gzip, CodingUtils::GZIP
+  register_content_coding :identity, CodingUtils::IDENTITY
+  register_content_coding :base64, CodingUtils::BASE64
 
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
