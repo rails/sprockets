@@ -178,15 +178,24 @@ module Sprockets
           assets[asset.logical_path] = asset.digest_path
 
           target = File.join(dir, asset.digest_path)
+          mime_type = environment.mime_types[asset.content_type]
+          gzip = mime_type && mime_type[:charset]
 
           if File.exist?(target)
             logger.debug "Skipping #{target}, already exists"
           else
             logger.info "Writing #{target}"
             asset.write_to target
+          end
 
-            mime_type = environment.mime_types[asset.content_type]
-            asset.write_to "#{target}.gz" if mime_type && mime_type[:charset]
+          gziped_target = "#{target}.gz"
+
+          if File.exist?(gziped_target)
+            logger.debug "Skipping #{gziped_target}, already exists"
+          elsif gzip
+            logger.info "Writing #{gziped_target}"
+            gziped_asset = find_asset(filename, 'gzip')
+            gziped_asset.write_to gziped_target
           end
 
           filenames << filename
@@ -261,10 +270,10 @@ module Sprockets
       end
 
       # Basic wrapper around Environment#find_asset. Logs compile time.
-      def find_asset(logical_path)
+      def find_asset(logical_path, encoding = nil)
         asset = nil
         start = Utils.benchmark_start
-        asset = environment.find_asset(logical_path)
+        asset = environment.find_asset(logical_path, accept_encoding: encoding)
         logger.debug do
           ms = "(#{Utils.benchmark_end(start)}ms)"
           "Compiled #{logical_path}  #{ms}"

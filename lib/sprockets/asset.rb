@@ -145,23 +145,13 @@ module Sprockets
     # Public: Save asset to disk.
     #
     # filename - String target
-    # options  - Hash
-    #   compress - Boolean to write out .gz file
     #
     # Returns nothing.
-    def write_to(filename, options = {})
-      # Gzip contents if filename has '.gz'
-      options[:compress] ||= File.extname(filename) == '.gz'
-
+    def write_to(filename)
       FileUtils.mkdir_p File.dirname(filename)
 
       PathUtils.atomic_write(filename) do |f|
-        if options[:compress]
-          f.write CodingUtils.gzip(self)
-        else
-          # Write out as is
-          f.write to_s
-        end
+        f.write source
       end
 
       # Set mtime correctly
