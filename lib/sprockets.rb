@@ -92,7 +92,6 @@ module Sprockets
 
   register_content_coding :deflate, CodingUtils::DEFLATE
   register_content_coding :gzip, CodingUtils::GZIP
-  register_content_coding :identity, CodingUtils::IDENTITY
   register_content_coding :base64, CodingUtils::BASE64
 
   register_preprocessor 'text/css', DirectiveProcessor

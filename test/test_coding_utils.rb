@@ -15,10 +15,6 @@ class CodingUtilsTest < Sprockets::TestCase
     assert_equal [31, 139, 8, 0], output.bytes[0, 4]
   end
 
-  test "identity" do
-    assert_equal "foobar", identity(["foo", "bar"])
-  end
-
   test "base64" do
     assert_equal "Zm9vYmFy", base64(["foo", "bar"])
   end

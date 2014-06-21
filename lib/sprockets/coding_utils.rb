@@ -41,27 +41,15 @@ module Sprockets
     # Public: Alias for CodingUtils.gzip
     GZIP = method(:gzip)
 
-    # Public: Return enumerable data stream as is.
-    #
-    # enum - Enumerable of String data
-    #
-    # Returns String
-    def identity(enum)
-      io = StringIO.new
-      enum.each { |chunk| io << chunk }
-      io.string
-    end
-
-    # Public: Alias for CodingUtils.identity
-    IDENTITY = method(:identity)
-
     # Public: Use base64 to encode enumerable data stream.
     #
     # enum - Enumerable of String data
     #
     # Returns a encoded String
     def base64(enum)
-      Base64.strict_encode64(identity(enum))
+      io = StringIO.new
+      enum.each { |chunk| io << chunk }
+      Base64.strict_encode64(io.string)
     end
 
     # Public: Alias for CodingUtils.base64
