@@ -61,13 +61,14 @@ module Sprockets
         raise TypeError, "can't modify immutable cached environment"
       end
 
-      def asset_hash_cache_key(filename, digest, bundle)
+      def asset_hash_cache_key(filename, digest, bundle, accept_encoding)
         [
           'asset-hash',
           VERSION,
           self.version,
           filename,
           digest,
+          accept_encoding,
           bundle
         ]
       end
@@ -91,11 +92,11 @@ module Sprockets
       end
 
       # Cache asset building in memory and in persisted cache.
-      def build_asset_hash(filename, bundle = true)
+      def build_asset_hash(filename, bundle, accept_encoding)
         digest_key = asset_digest_cache_key(filename, bundle)
 
         if digest = cache._get(digest_key)
-          hash_key = asset_hash_cache_key(filename, digest, bundle)
+          hash_key = asset_hash_cache_key(filename, digest, bundle, accept_encoding)
 
           if hash = cache._get(hash_key)
             digest, paths = hash[:metadata].values_at(:dependency_digest, :dependency_paths)
@@ -109,7 +110,7 @@ module Sprockets
           cache._set(digest_key, hash[:digest])
 
           # Push into asset digest cache
-          hash_key = asset_hash_cache_key(filename, hash[:digest], bundle)
+          hash_key = asset_hash_cache_key(filename, hash[:digest], bundle, accept_encoding)
           # cache._set(hash_key, hash)
           cache.fetch(hash_key) { hash }
 

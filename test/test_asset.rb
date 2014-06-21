@@ -26,10 +26,6 @@ module AssetTests
     assert_equal @asset.to_s.bytesize, @asset.bytesize
   end
 
-  test "encoding is source encoding" do
-    assert_equal @asset.to_s.encoding, @asset.encoding
-  end
-
   test "splat asset" do
     assert_kind_of Array, @asset.to_a
   end
@@ -174,10 +170,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal "image/png", @asset.content_type
   end
 
-  test "encoding is binary" do
-    assert_equal Encoding::BINARY, @asset.encoding
-  end
-
   test "charset is nil" do
     assert_equal nil, @asset.charset
   end
@@ -273,10 +265,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal 69, @asset.length
   end
 
-  test "encoding is UTF-8" do
-    assert_equal Encoding::UTF_8, @asset.encoding
-  end
-
   test "charset is UTF-8" do
     assert_equal 'utf-8', @asset.charset
   end
@@ -332,10 +320,6 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "length" do
     assert_equal 159, @asset.length
-  end
-
-  test "encoding is UTF-8" do
-    assert_equal Encoding::UTF_8, @asset.encoding
   end
 
   test "charset is UTF-8" do

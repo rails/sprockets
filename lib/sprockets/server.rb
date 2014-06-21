@@ -42,6 +42,7 @@ module Sprockets
       options = {}
       options[:bundle] = !body_only?(env)
       options[:if_match] = fingerprint if fingerprint
+      options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING'] if env['HTTP_ACCEPT_ENCODING']
       asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
@@ -188,25 +189,14 @@ module Sprockets
 
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        req = Rack::Request.new(env)
-        coding, _ = req.accept_encoding.first
-
-        if coding && (encoder = content_codings[coding.to_sym])
-          body = [encoder.call(asset)]
-          length = body.first.bytesize
-        else
-          body = asset
-          length = asset.length
-        end
-
-        [ 200, headers(env, asset, length, coding), body ]
+        [ 200, headers(env, asset, asset.length), asset ]
       end
 
-      def headers(env, asset, length, encoding = nil)
+      def headers(env, asset, length)
         Hash.new.tap do |headers|
           # Set content encoding
-          if encoding
-            headers["Content-Encoding"] = encoding
+          if asset.encoding
+            headers["Content-Encoding"] = asset.encoding
           end
 
           # Set content length header

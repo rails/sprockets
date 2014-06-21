@@ -199,9 +199,9 @@ module Sprockets
 
       if filename
         if options[:if_match]
-          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle])
+          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle], options[:accept_encoding])
         else
-          asset_hash = build_asset_hash(filename, options[:bundle])
+          asset_hash = build_asset_hash(filename, options[:bundle], options[:accept_encoding])
         end
 
         Asset.new(asset_hash) if asset_hash
@@ -230,14 +230,14 @@ module Sprockets
         raise NotImplementedError
       end
 
-      def build_asset_hash_for_digest(filename, digest, bundle)
-        asset_hash = build_asset_hash(filename, bundle)
+      def build_asset_hash_for_digest(filename, digest, bundle, accept_encoding)
+        asset_hash = build_asset_hash(filename, bundle, accept_encoding)
         if asset_hash[:digest] == digest
           asset_hash
         end
       end
 
-      def build_asset_hash(filename, bundle = true)
+      def build_asset_hash(filename, bundle, accept_encoding)
         load_path, logical_path = paths_split(self.paths, filename)
         unless load_path
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
@@ -262,6 +262,13 @@ module Sprockets
 
         if processed_processors.any? || bundled_processors.any?
           processors = bundle ? bundled_processors : processed_processors
+
+          if accept_encoding && (encoder = content_codings[accept_encoding.to_sym])
+            processors << lambda do |input|
+              { data: encoder.call([input[:data]]), encoding: accept_encoding }
+            end
+          end
+
           # processors
           build_processed_asset_hash(asset, processors)
         else

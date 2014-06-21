@@ -97,19 +97,20 @@ module Sprockets
       source
     end
 
-    # Public: Get encoding of source.
+    # Public: HTTP encoding for Asset, "deflate", "gzip", etc.
     #
-    # Returns an Encoding.
-    attr_reader :encoding
+    # Note: This is not the Ruby Encoding of the source. See Asset#charset.
+    #
+    # Returns a String or nil if encoding is "identity".
+    # TODO: Move to attr_reader
+    def encoding
+      metadata[:encoding]
+    end
 
     # Public: Get charset of source.
     #
-    # Returns an String charset name or nil if binary.
-    def charset
-      if encoding != Encoding::BINARY
-        encoding.name.downcase
-      end
-    end
+    # Returns a String charset name or nil if binary.
+    attr_reader :charset
 
     # Public: Returns Integer length of source.
     attr_reader :length
