@@ -188,20 +188,24 @@ module Sprockets
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
       path = path.to_s
+      options = options.dup
       options[:bundle] = true unless options.key?(:bundle)
+      accept = options.delete(:accept)
+      if_match = options.delete(:if_match)
 
       if absolute_path?(path)
         filename = path
         return nil unless file?(filename)
       else
-        filename = resolve_all(path, accept: options[:accept]).first
+        filename = resolve_all(path, accept: accept).first
       end
 
       if filename
-        if options[:if_match]
-          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle], options[:accept_encoding])
+        options = { bundle: options[:bundle], accept_encoding: options[:accept_encoding] }
+        if if_match
+          asset_hash = build_asset_hash_for_digest(filename, if_match, options)
         else
-          asset_hash = build_asset_hash(filename, options[:bundle], options[:accept_encoding])
+          asset_hash = build_asset_hash(filename, options)
         end
 
         Asset.new(asset_hash) if asset_hash
@@ -230,14 +234,14 @@ module Sprockets
         raise NotImplementedError
       end
 
-      def build_asset_hash_for_digest(filename, digest, bundle, accept_encoding)
-        asset_hash = build_asset_hash(filename, bundle, accept_encoding)
+      def build_asset_hash_for_digest(filename, digest, options)
+        asset_hash = build_asset_hash(filename, options)
         if asset_hash[:digest] == digest
           asset_hash
         end
       end
 
-      def build_asset_hash(filename, bundle, accept_encoding)
+      def build_asset_hash(filename, options)
         load_path, logical_path = paths_split(self.paths, filename)
         unless load_path
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
@@ -261,15 +265,14 @@ module Sprockets
         bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
         if processed_processors.any? || bundled_processors.any?
-          processors = bundle ? bundled_processors : processed_processors
+          processors = options[:bundle] ? bundled_processors : processed_processors
 
-          if accept_encoding && (encoder = content_codings[accept_encoding.to_sym])
+          if options[:accept_encoding] && (encoder = content_codings[options[:accept_encoding].to_sym])
             processors << lambda do |input|
-              { data: encoder.call([input[:data]]), encoding: accept_encoding }
+              { data: encoder.call([input[:data]]), encoding: options[:accept_encoding] }
             end
           end
 
-          # processors
           build_processed_asset_hash(asset, processors)
         else
           build_static_asset_hash(asset)
