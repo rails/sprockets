@@ -37,24 +37,20 @@ module Sprockets
   autoload :Utils,                   'sprockets/utils'
 
   # Extend Sprockets module to provide global registry
-  require 'sprockets/engines'
-  require 'sprockets/mime'
-  require 'sprockets/processing'
-  require 'sprockets/compressing'
-  require 'sprockets/paths'
-  extend Engines, Mime, Processing, Compressing, Paths
+  require 'sprockets/configuration'
+  extend Configuration
 
-  @root              = File.expand_path('..', __FILE__)
-  @paths             = []
-  @mime_types        = {}
-  @mime_exts         = {}
-  @encodings         = {}
-  @engines           = {}
-  @engine_extensions = {}
-  @preprocessors     = Hash.new { |h, k| h[k] = [] }
-  @postprocessors    = Hash.new { |h, k| h[k] = [] }
-  @bundle_processors = Hash.new { |h, k| h[k] = [] }
-  @compressors       = Hash.new { |h, k| h[k] = {} }
+  @root              = File.expand_path('..', __FILE__).freeze
+  @paths             = [].freeze
+  @mime_types        = {}.freeze
+  @mime_exts         = {}.freeze
+  @encodings         = {}.freeze
+  @engines           = {}.freeze
+  @engine_extensions = {}.freeze
+  @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
+  @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
+  @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
+  @compressors       = Hash.new { |h, k| {}.freeze }.freeze
 
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE

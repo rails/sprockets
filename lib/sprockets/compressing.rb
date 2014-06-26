@@ -5,7 +5,10 @@ module Sprockets
     attr_reader :compressors
 
     def register_compressor(mime_type, sym, klass)
-      @compressors[mime_type][sym] = klass
+      mutate_hash_config(:compressors, mime_type) do |compressors|
+        compressors[sym] = klass
+        compressors
+      end
     end
 
     # Return CSS compressor or nil if none is set
