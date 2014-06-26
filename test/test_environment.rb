@@ -226,6 +226,13 @@ module EnvironmentTests
     assert_equal 38, asset.length
   end
 
+  test "find base64 asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "base64")
+    assert_equal 'base64', asset.encoding
+    assert_equal "dmFyIEdh", asset.to_s[0, 8]
+    assert_equal 24, asset.length
+  end
+
   test "find asset by etag" do
     asset = @env.find_asset("gallery.js")
     assert @env.find_asset("gallery.js", if_match: asset.etag)

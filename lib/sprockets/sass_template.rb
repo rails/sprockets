@@ -1,4 +1,3 @@
-require 'base64'
 require 'rack/utils'
 require 'sass'
 require 'set'
@@ -152,10 +151,9 @@ module Sprockets
     end
 
     def asset_data_url(path)
-      if asset = sprockets_environment.find_asset(path.value)
+      if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
         sprockets_dependencies << asset.filename
-        base64 = Base64.strict_encode64(asset.to_s)
-        url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
+        url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
         Sass::Script::String.new("url(" + url + ")")
       end
     end
