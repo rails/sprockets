@@ -51,6 +51,7 @@ module Sprockets
     def register_preprocessor(mime_type, klass, &block)
       mutate_hash_config(:preprocessors, mime_type) do |processors|
         processors.push(wrap_processor(klass, block))
+        processors
       end
     end
 
@@ -68,6 +69,7 @@ module Sprockets
       proc ||= block
       mutate_hash_config(:postprocessors, mime_type) do |processors|
         processors.push(wrap_processor(klass, proc))
+        processors
       end
     end
 
@@ -84,6 +86,7 @@ module Sprockets
 
       mutate_hash_config(:preprocessors, mime_type) do |processors|
         processors.delete(klass)
+        processors
       end
     end
 
@@ -100,6 +103,7 @@ module Sprockets
 
       mutate_hash_config(:postprocessors, mime_type) do |processors|
         processors.delete(klass)
+        processors
       end
     end
 
@@ -131,6 +135,7 @@ module Sprockets
     def register_bundle_processor(mime_type, klass, &block)
       mutate_hash_config(:bundle_processors, mime_type) do |processors|
         processors.push(wrap_processor(klass, block))
+        processors
       end
     end
 
@@ -147,6 +152,7 @@ module Sprockets
 
       mutate_hash_config(:bundle_processors, mime_type) do |processors|
         processors.delete(klass)
+        processors
       end
     end
 

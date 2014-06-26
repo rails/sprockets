@@ -22,16 +22,15 @@ module Sprockets
 
     private
       def mutate_config(sym)
-        obj = self.instance_variable_get("@#{sym}").dup
-        yield obj
+        obj = yield self.instance_variable_get("@#{sym}").dup
         self.instance_variable_set("@#{sym}", obj.freeze)
       end
 
       def mutate_hash_config(sym, key)
         mutate_config(sym) do |hash|
-          obj = hash[key].dup
-          yield obj
+          obj = yield hash[key].dup
           hash[key] = obj.freeze
+          hash
         end
       end
   end

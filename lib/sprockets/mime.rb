@@ -32,13 +32,13 @@ module Sprockets
         extnames.each do |extname|
           mime_exts[extname] = mime_type
         end
+        mime_exts
       end
 
       mutate_config(:mime_types) do |mime_types|
-        mime_types[mime_type] = {}
-        mime_types[mime_type][:extensions] = extnames
-        mime_types[mime_type][:charset] = charset if charset
-        mime_types[mime_type]
+        type = { extensions: extnames }
+        type[:charset] = charset if charset
+        mime_types.merge(mime_type => type)
       end
     end
 

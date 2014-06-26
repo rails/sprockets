@@ -7,6 +7,7 @@ module Sprockets
     def register_compressor(mime_type, sym, klass)
       mutate_hash_config(:compressors, mime_type) do |compressors|
         compressors[sym] = klass
+        compressors
       end
     end
 

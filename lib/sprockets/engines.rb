@@ -62,17 +62,21 @@ module Sprockets
       ext = Sprockets::Utils.normalize_extension(ext)
 
       if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
-        mutate_config(:engines) { |engines| engines[ext] = klass }
+        mutate_config(:engines) do |engines|
+          engines.merge(ext => klass)
+        end
         if options[:mime_type]
           mutate_config(:engine_extensions) do |engine_extensions|
-            engine_extensions[ext.to_s] = mime_types[options[:mime_type]][:extensions].first
+            engine_extensions.merge(ext.to_s => mime_types[options[:mime_type]][:extensions].first)
           end
         end
       else
-        mutate_config(:engines) { |engines| engines[ext] = LegacyTiltProcessor.new(klass) }
+        mutate_config(:engines) do |engines|
+          engines.merge(ext => LegacyTiltProcessor.new(klass))
+        end
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
           mutate_config(:engine_extensions) do |engine_extensions|
-            engine_extensions[ext.to_s] = mime_types[klass.default_mime_type][:extensions].first
+            engine_extensions.merge(ext.to_s => mime_types[klass.default_mime_type][:extensions].first)
           end
         end
       end
