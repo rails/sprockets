@@ -215,16 +215,8 @@ module Sprockets
           unwrap_postprocessors(asset[:content_type])
         bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
-        available_encodings = encodings.keys + ["identity"]
-        encoding = find_best_q_match(options[:accept_encoding], available_encodings)
-
         processors = options[:bundle] ? bundled_processors : processed_processors
-
-        if encoder = self.encodings[encoding]
-          processors << lambda do |input|
-            { data: encoder.call([input[:data]]), encoding: encoding }
-          end
-        end
+        processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
           build_processed_asset_hash(asset, processors)

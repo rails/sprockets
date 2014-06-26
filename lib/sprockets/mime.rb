@@ -51,5 +51,18 @@ module Sprockets
         encodings.merge(name.to_s => encode)
       end
     end
+
+    def unwrap_encoding_processors(accept_encodings)
+      available_encodings = self.encodings.keys + ['identity']
+      encoding = find_best_q_match(accept_encodings, available_encodings)
+
+      processors = []
+      if encoder = self.encodings[encoding]
+        processors << lambda do |input|
+          { data: encoder.call([input[:data]]), encoding: encoding }
+        end
+      end
+      processors
+    end
   end
 end
