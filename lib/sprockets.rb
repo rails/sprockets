@@ -36,12 +36,13 @@ module Sprockets
   autoload :Utils,                   'sprockets/utils'
 
   # Extend Sprockets module to provide global registry
+  require 'sprockets/configuration'
   require 'sprockets/engines'
   require 'sprockets/mime'
   require 'sprockets/processing'
   require 'sprockets/compressing'
   require 'sprockets/paths'
-  extend Engines, Mime, Processing, Compressing, Paths
+  extend Configuration, Engines, Mime, Processing, Compressing, Paths
 
   @root              = File.expand_path('..', __FILE__).freeze
   @paths             = [].freeze
