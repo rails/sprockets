@@ -76,28 +76,6 @@ module Sprockets
       @cache = Cache.new(cache, logger)
     end
 
-    def prepend_path(path)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def append_path(path)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def clear_paths
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def register_mime_type(*args)
-      super.tap { expire_cache! }
-    end
-
     def register_engine(*args)
       super.tap { expire_cache! }
     end
@@ -313,6 +291,11 @@ module Sprockets
             dependency_digest: dependencies_hexdigest([asset[:filename]]),
           }
         })
+      end
+
+    private
+      def mutate_config(*args)
+        super.tap { expire_cache! }
       end
   end
 end

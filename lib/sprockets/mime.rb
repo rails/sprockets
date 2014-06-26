@@ -28,18 +28,18 @@ module Sprockets
       charset = options[:charset]
       charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
 
-      @mime_exts = @mime_exts.dup
-      extnames.each do |extname|
-        @mime_exts[extname] = mime_type
+      mutate_config(:mime_exts) do |mime_exts|
+        extnames.each do |extname|
+          mime_exts[extname] = mime_type
+        end
       end
-      @mime_exts.freeze
 
-      @mime_types = @mime_types.dup
-      @mime_types[mime_type] = {}
-      @mime_types[mime_type][:extensions] = extnames
-      @mime_types[mime_type][:charset] = charset if charset
-      @mime_types[mime_type]
-      @mime_types.freeze
+      mutate_config(:mime_types) do |mime_types|
+        mime_types[mime_type] = {}
+        mime_types[mime_type][:extensions] = extnames
+        mime_types[mime_type][:charset] = charset if charset
+        mime_types[mime_type]
+      end
     end
 
     # Public: Test mime type against mime range.
