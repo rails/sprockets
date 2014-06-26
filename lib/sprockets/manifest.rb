@@ -184,9 +184,6 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
-
-            mime_type = environment.mime_types[asset.content_type]
-            asset.write_to "#{target}.gz" if mime_type && mime_type[:charset]
           end
 
           filenames << filename
@@ -204,7 +201,6 @@ module Sprockets
     #
     def remove(filename)
       path = File.join(dir, filename)
-      gzip = "#{path}.gz"
       logical_path = files[filename]['logical_path']
 
       if assets[logical_path] == filename
@@ -213,7 +209,6 @@ module Sprockets
 
       files.delete(filename)
       FileUtils.rm(path) if File.exist?(path)
-      FileUtils.rm(gzip) if File.exist?(gzip)
 
       save
 

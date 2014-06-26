@@ -1,4 +1,3 @@
-require 'base64'
 require 'pathname'
 require 'rack/utils'
 require 'set'
@@ -155,9 +154,8 @@ module Sprockets
     #
     def asset_data_uri(path)
       depend_on_asset(path)
-      asset  = environment.find_asset(path)
-      base64 = Base64.strict_encode64(asset.to_s)
-      "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
+      asset = environment.find_asset(path, accept_encoding: 'base64')
+      "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
     end
 
     # Expands logical path to full url to asset.

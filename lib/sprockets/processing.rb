@@ -193,7 +193,7 @@ module Sprockets
 
       {
         source: data,
-        encoding: data.encoding,
+        charset: data.encoding.name.downcase,
         length: data.bytesize,
         digest: digest_class.hexdigest(data),
         metadata: metadata

@@ -31,6 +31,7 @@ module Sprockets
   autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
+  autoload :HTTPUtils,               'sprockets/http_utils'
   autoload :LazyProcessor,           'sprockets/lazy_processor'
   autoload :PathUtils,               'sprockets/path_utils'
   autoload :Utils,                   'sprockets/utils'
@@ -43,6 +44,7 @@ module Sprockets
   @paths             = [].freeze
   @mime_types        = {}.freeze
   @mime_exts         = {}.freeze
+  @encodings         = {}.freeze
   @engines           = {}.freeze
   @engine_extensions = {}.freeze
   @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
@@ -83,6 +85,11 @@ module Sprockets
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/x-font-woff', extensions: ['.woff']
+
+  # HTTP content encodings
+  register_encoding :deflate, EncodingUtils::DEFLATE
+  register_encoding :gzip,    EncodingUtils::GZIP
+  register_encoding :base64,  EncodingUtils::BASE64
 
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor

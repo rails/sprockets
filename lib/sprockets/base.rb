@@ -7,7 +7,7 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils
+    include PathUtils, HTTPUtils
     include Configuration
     include Server
     include Bower
@@ -139,20 +139,24 @@ module Sprockets
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
       path = path.to_s
+      options = options.dup
       options[:bundle] = true unless options.key?(:bundle)
+      accept = options.delete(:accept)
+      if_match = options.delete(:if_match)
 
       if absolute_path?(path)
         filename = path
         return nil unless file?(filename)
       else
-        filename = resolve_all(path, accept: options[:accept]).first
+        filename = resolve_all(path, accept: accept).first
       end
 
       if filename
-        if options[:if_match]
-          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle])
+        options = { bundle: options[:bundle], accept_encoding: options[:accept_encoding] }
+        if if_match
+          asset_hash = build_asset_hash_for_digest(filename, if_match, options)
         else
-          asset_hash = build_asset_hash(filename, options[:bundle])
+          asset_hash = build_asset_hash(filename, options)
         end
 
         Asset.new(asset_hash) if asset_hash
@@ -181,14 +185,14 @@ module Sprockets
         raise NotImplementedError
       end
 
-      def build_asset_hash_for_digest(filename, digest, bundle)
-        asset_hash = build_asset_hash(filename, bundle)
+      def build_asset_hash_for_digest(filename, digest, options)
+        asset_hash = build_asset_hash(filename, options)
         if asset_hash[:digest] == digest
           asset_hash
         end
       end
 
-      def build_asset_hash(filename, bundle = true)
+      def build_asset_hash(filename, options)
         load_path, logical_path = paths_split(self.paths, filename)
         unless load_path
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
@@ -211,9 +215,10 @@ module Sprockets
           unwrap_postprocessors(asset[:content_type])
         bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
-        if processed_processors.any? || bundled_processors.any?
-          processors = bundle ? bundled_processors : processed_processors
-          # processors
+        processors = options[:bundle] ? bundled_processors : processed_processors
+        processors += unwrap_encoding_processors(options[:accept_encoding])
+
+        if processors.any?
           build_processed_asset_hash(asset, processors)
         else
           build_static_asset_hash(asset)

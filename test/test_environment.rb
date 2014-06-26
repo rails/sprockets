@@ -212,6 +212,27 @@ module EnvironmentTests
     assert_equal ".qunit {}\n", @env["qunit.css"].to_s
   end
 
+  test "find deflate asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
+    assert_equal 'deflate', asset.encoding
+    assert_equal [43, 75, 44, 82, 112, 79, 204, 201], asset.to_s.bytes.take(8)
+    assert_equal 20, asset.length
+  end
+
+  test "find gzipped asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "gzip")
+    assert_equal 'gzip', asset.encoding
+    assert_equal [31, 139, 8, 0], asset.to_s.bytes.take(4)
+    assert_equal 38, asset.length
+  end
+
+  test "find base64 asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "base64")
+    assert_equal 'base64', asset.encoding
+    assert_equal "dmFyIEdh", asset.to_s[0, 8]
+    assert_equal 24, asset.length
+  end
+
   test "find asset by etag" do
     asset = @env.find_asset("gallery.js")
     assert @env.find_asset("gallery.js", if_match: asset.etag)

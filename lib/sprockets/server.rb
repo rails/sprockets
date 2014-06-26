@@ -42,6 +42,7 @@ module Sprockets
       options = {}
       options[:bundle] = !body_only?(env)
       options[:if_match] = fingerprint if fingerprint
+      options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING'] if env['HTTP_ACCEPT_ENCODING']
       asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
@@ -193,6 +194,11 @@ module Sprockets
 
       def headers(env, asset, length)
         Hash.new.tap do |headers|
+          # Set content encoding
+          if asset.encoding
+            headers["Content-Encoding"] = asset.encoding
+          end
+
           # Set content length header
           headers["Content-Length"] = length.to_s
 
@@ -219,6 +225,8 @@ module Sprockets
           else
             headers["Cache-Control"] << ", must-revalidate"
           end
+
+          headers["Vary"] = "Accept-Encoding"
         end
       end
 

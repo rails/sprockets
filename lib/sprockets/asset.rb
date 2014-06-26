@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'pathname'
-require 'zlib'
 
 module Sprockets
   class Asset
@@ -98,19 +97,20 @@ module Sprockets
       source
     end
 
-    # Public: Get encoding of source.
+    # Public: HTTP encoding for Asset, "deflate", "gzip", etc.
     #
-    # Returns an Encoding.
-    attr_reader :encoding
+    # Note: This is not the Ruby Encoding of the source. See Asset#charset.
+    #
+    # Returns a String or nil if encoding is "identity".
+    # TODO: Move to attr_reader
+    def encoding
+      metadata[:encoding]
+    end
 
     # Public: Get charset of source.
     #
-    # Returns an String charset name or nil if binary.
-    def charset
-      if encoding != Encoding::BINARY
-        encoding.name.downcase
-      end
-    end
+    # Returns a String charset name or nil if binary.
+    attr_reader :charset
 
     # Public: Returns Integer length of source.
     attr_reader :length
@@ -145,27 +145,13 @@ module Sprockets
     # Public: Save asset to disk.
     #
     # filename - String target
-    # options  - Hash
-    #   compress - Boolean to write out .gz file
     #
     # Returns nothing.
-    def write_to(filename, options = {})
-      # Gzip contents if filename has '.gz'
-      options[:compress] ||= File.extname(filename) == '.gz'
-
+    def write_to(filename)
       FileUtils.mkdir_p File.dirname(filename)
 
       PathUtils.atomic_write(filename) do |f|
-        if options[:compress]
-          # Run contents through `Zlib`
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime.to_i
-          gz.write to_s
-          gz.close
-        else
-          # Write out as is
-          f.write to_s
-        end
+        f.write source
       end
 
       # Set mtime correctly

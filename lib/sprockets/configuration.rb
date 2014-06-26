@@ -12,6 +12,7 @@ module Sprockets
       @paths             = parent.paths
       @mime_types        = parent.mime_types
       @mime_exts         = parent.mime_exts
+      @encodings         = parent.encodings
       @engines           = parent.engines
       @engine_extensions = parent.engine_extensions
       @preprocessors     = parent.preprocessors
