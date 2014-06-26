@@ -27,7 +27,6 @@ module Sprockets
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
-  autoload :CodingUtils,             'sprockets/coding_utils'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
@@ -87,9 +86,9 @@ module Sprockets
   register_mime_type 'application/x-font-woff', extensions: ['.woff']
 
   # HTTP content encodings
-  register_encoding :deflate, CodingUtils::DEFLATE
-  register_encoding :gzip,    CodingUtils::GZIP
-  register_encoding :base64,  CodingUtils::BASE64
+  register_encoding :deflate, EncodingUtils::DEFLATE
+  register_encoding :gzip,    EncodingUtils::GZIP
+  register_encoding :base64,  EncodingUtils::BASE64
 
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor

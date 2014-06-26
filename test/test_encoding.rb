@@ -171,3 +171,23 @@ class AssetEncodingTest < Sprockets::TestCase
     assert_equal expected, @env['utf16le-bom-charset.css'].to_s
   end
 end
+
+class BinaryEncodingUtilsTest < Sprockets::TestCase
+  include Sprockets::EncodingUtils
+
+  test "deflate" do
+    output = deflate(["foo", "bar"])
+    assert_equal 8, output.length
+    assert_equal [75, 203, 207, 79, 74, 44, 2, 0], output.bytes[0, 8]
+  end
+
+  test "gzip" do
+    output = gzip(["foo", "bar"])
+    # assert_equal 26, output.length
+    assert_equal [31, 139, 8, 0], output.bytes[0, 4]
+  end
+
+  test "base64" do
+    assert_equal "Zm9vYmFy", base64(["foo", "bar"])
+  end
+end
