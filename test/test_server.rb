@@ -65,6 +65,15 @@ class TestServer < Sprockets::TestCase
     assert_equal [43, 75, 44, 82], last_response.body.bytes[0, 4]
   end
 
+  test "serve gzip'd static file" do
+    get "/assets/hello.txt", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    assert_equal "53", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal [31, 139, 8, 0], last_response.body.bytes[0, 4]
+  end
+
   test "ignore unknown encoding and fallback to gzip" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'sdch, gzip'
     assert_equal 200, last_response.status
