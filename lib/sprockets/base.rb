@@ -9,7 +9,7 @@ module Sprockets
   class Base
     include PathUtils
     include Configuration
-    include Paths, Mime, Processing, Compressing, Engines, Server
+    include Server
     include Bower
 
     # Returns a `Digest` implementation class.
