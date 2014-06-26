@@ -21,15 +21,8 @@ module Sprockets
       @digest_class      = environment.digest_class
       @version           = environment.version
       @root              = environment.root
-      @paths             = environment.paths
-      @mime_types        = environment.mime_types
-      @mime_exts         = environment.mime_exts
-      @engines           = environment.engines
-      @engine_extensions = environment.engine_extensions
-      @preprocessors     = deep_copy_hash(environment.preprocessors)
-      @postprocessors    = deep_copy_hash(environment.postprocessors)
-      @bundle_processors = deep_copy_hash(environment.bundle_processors)
-      @compressors       = deep_copy_hash(environment.compressors)
+
+      initialize_configuration(environment)
 
       @stats    = Hash.new { |h, k| h[k] = _stat(k) }
       @entries  = Hash.new { |h, k| h[k] = _entries(k) }

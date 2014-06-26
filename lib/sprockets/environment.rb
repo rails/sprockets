@@ -25,15 +25,7 @@ module Sprockets
       @digest_class = Digest::SHA1
       @version = ''
 
-      @paths             = Sprockets.paths
-      @mime_types        = Sprockets.mime_types
-      @mime_exts         = Sprockets.mime_exts
-      @engines           = Sprockets.engines
-      @engine_extensions = Sprockets.engine_extensions
-      @preprocessors     = deep_copy_hash(Sprockets.preprocessors)
-      @postprocessors    = deep_copy_hash(Sprockets.postprocessors)
-      @bundle_processors = deep_copy_hash(Sprockets.bundle_processors)
-      @compressors       = deep_copy_hash(Sprockets.compressors)
+      initialize_configuration(Sprockets)
 
       self.cache = Cache::MemoryStore.new
       expire_cache!
