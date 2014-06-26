@@ -61,7 +61,6 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      @engines, @engine_extensions = @engines.dup, @engine_extensions.dup
       if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
         mutate_config(:engines) { |engines| engines[ext] = klass }
         if options[:mime_type]

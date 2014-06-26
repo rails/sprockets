@@ -76,34 +76,6 @@ module Sprockets
       @cache = Cache.new(cache, logger)
     end
 
-    def register_engine(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_preprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_preprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_postprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_postprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_bundle_processor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_bundle_processor(*args)
-      super.tap { expire_cache! }
-    end
-
     # Return an `Cached`. Must be implemented by the subclass.
     def cached
       raise NotImplementedError

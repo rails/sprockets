@@ -14,10 +14,10 @@ module Sprockets
       @mime_exts         = parent.mime_exts
       @engines           = parent.engines
       @engine_extensions = parent.engine_extensions
-      @preprocessors     = deep_copy_hash(parent.preprocessors)
-      @postprocessors    = deep_copy_hash(parent.postprocessors)
-      @bundle_processors = deep_copy_hash(parent.bundle_processors)
-      @compressors       = deep_copy_hash(parent.compressors)
+      @preprocessors     = parent.preprocessors
+      @postprocessors    = parent.postprocessors
+      @bundle_processors = parent.bundle_processors
+      @compressors       = parent.compressors
     end
 
     private
@@ -27,9 +27,12 @@ module Sprockets
         self.instance_variable_set("@#{sym}", obj.freeze)
       end
 
-      def deep_copy_hash(hash)
-        initial = Hash.new { |h, k| h[k] = [] }
-        hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }
+      def mutate_hash_config(sym, key)
+        mutate_config(sym) do |hash|
+          obj = hash[key].dup
+          yield obj
+          hash[key] = obj.freeze
+        end
       end
   end
 end

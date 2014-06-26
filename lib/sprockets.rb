@@ -45,10 +45,10 @@ module Sprockets
   @mime_exts         = {}.freeze
   @engines           = {}.freeze
   @engine_extensions = {}.freeze
-  @preprocessors     = Hash.new { |h, k| h[k] = [] }
-  @postprocessors    = Hash.new { |h, k| h[k] = [] }
-  @bundle_processors = Hash.new { |h, k| h[k] = [] }
-  @compressors       = Hash.new { |h, k| h[k] = {} }
+  @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
+  @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
+  @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
+  @compressors       = Hash.new { |h, k| {}.freeze }.freeze
 
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
