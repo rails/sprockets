@@ -47,8 +47,8 @@ module Sprockets
   @paths             = [].freeze
   @mime_types        = {}.freeze
   @mime_exts         = {}.freeze
-  @engines           = {}
-  @engine_extensions = {}
+  @engines           = {}.freeze
+  @engine_extensions = {}.freeze
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
   @postprocessors    = Hash.new { |h, k| h[k] = [] }
   @bundle_processors = Hash.new { |h, k| h[k] = [] }

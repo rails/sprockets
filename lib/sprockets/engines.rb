@@ -61,17 +61,20 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
+      @engines, @engine_extensions = @engines.dup, @engine_extensions.dup
       if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
         @engines[ext] = klass
         if options[:mime_type]
-          engine_extensions[ext.to_s] = mime_types[options[:mime_type]][:extensions].first
+          @engine_extensions[ext.to_s] = mime_types[options[:mime_type]][:extensions].first
         end
       else
         @engines[ext] = LegacyTiltProcessor.new(klass)
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          engine_extensions[ext.to_s] = mime_types[klass.default_mime_type][:extensions].first
+          @engine_extensions[ext.to_s] = mime_types[klass.default_mime_type][:extensions].first
         end
       end
+      @engine_extensions.freeze
+      @engines.freeze
     end
 
     private

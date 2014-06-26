@@ -28,7 +28,7 @@ module Sprockets
       @paths             = Sprockets.paths
       @mime_types        = Sprockets.mime_types
       @mime_exts         = Sprockets.mime_exts
-      @engines           = Sprockets.engines.dup
+      @engines           = Sprockets.engines
       @engine_extensions = Sprockets.engine_extensions
       @preprocessors     = deep_copy_hash(Sprockets.preprocessors)
       @postprocessors    = deep_copy_hash(Sprockets.postprocessors)
