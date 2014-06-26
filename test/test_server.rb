@@ -53,7 +53,7 @@ class TestServer < Sprockets::TestCase
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
-    assert_equal [31, 139, 8, 0], last_response.body.bytes[0, 4]
+    assert_equal [31, 139, 8, 0], last_response.body.bytes.take(4)
   end
 
   test "serve deflate'd source file" do
@@ -62,7 +62,7 @@ class TestServer < Sprockets::TestCase
     assert_equal "deflate", last_response.headers['Content-Encoding']
     assert_equal "11", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
-    assert_equal [43, 75, 44, 82], last_response.body.bytes[0, 4]
+    assert_equal [43, 75, 44, 82], last_response.body.bytes.take(4)
   end
 
   test "serve gzip'd static file" do
@@ -71,7 +71,7 @@ class TestServer < Sprockets::TestCase
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "53", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
-    assert_equal [31, 139, 8, 0], last_response.body.bytes[0, 4]
+    assert_equal [31, 139, 8, 0], last_response.body.bytes.take(4)
   end
 
   test "ignore unknown encoding and fallback to gzip" do
@@ -80,7 +80,7 @@ class TestServer < Sprockets::TestCase
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
-    assert_equal [31, 139, 8, 0], last_response.body.bytes[0, 4]
+    assert_equal [31, 139, 8, 0], last_response.body.bytes.take(4)
   end
 
   test "ignore unknown encoding and fallback to identity" do
