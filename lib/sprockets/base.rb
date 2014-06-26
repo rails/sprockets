@@ -267,7 +267,7 @@ module Sprockets
         if processed_processors.any? || bundled_processors.any?
           processors = options[:bundle] ? bundled_processors : processed_processors
 
-          if options[:accept_encoding] && (encoder = content_codings[options[:accept_encoding].to_sym])
+          if options[:accept_encoding] && (encoder = encodings[options[:accept_encoding].to_sym])
             processors << lambda do |input|
               { data: encoder.call([input[:data]]), encoding: options[:accept_encoding] }
             end

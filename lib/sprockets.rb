@@ -48,7 +48,7 @@ module Sprockets
   @paths             = []
   @mime_types        = {}
   @mime_exts         = {}
-  @content_codings   = {}
+  @encodings         = {}
   @engines           = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
@@ -90,9 +90,10 @@ module Sprockets
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/x-font-woff', extensions: ['.woff']
 
-  register_content_coding :deflate, CodingUtils::DEFLATE
-  register_content_coding :gzip, CodingUtils::GZIP
-  register_content_coding :base64, CodingUtils::BASE64
+  # HTTP content encodings
+  register_encoding :deflate, CodingUtils::DEFLATE
+  register_encoding :gzip,    CodingUtils::GZIP
+  register_encoding :base64,  CodingUtils::BASE64
 
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor

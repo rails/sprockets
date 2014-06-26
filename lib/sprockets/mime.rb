@@ -52,10 +52,10 @@ module Sprockets
       (m1 == '*' || v1 == m1) && (m2.nil? || m2 == '*' || m2 == v2)
     end
 
-    attr_reader :content_codings
+    attr_reader :encodings
 
-    def register_content_coding(name, encode)
-      content_codings[name] = encode
+    def register_encoding(name, encode)
+      encodings[name] = encode
     end
   end
 end
