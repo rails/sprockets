@@ -21,7 +21,7 @@ module Sprockets
       @digest_class      = environment.digest_class
       @version           = environment.version
       @root              = environment.root
-      @paths             = environment.paths.dup
+      @paths             = environment.paths
       @mime_types        = environment.mime_types.dup
       @mime_exts         = environment.mime_exts.dup
       @engines           = environment.engines.dup

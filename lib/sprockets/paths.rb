@@ -15,14 +15,16 @@ module Sprockets
     #
     # Paths at the end of the `Array` have the least priority.
     def prepend_path(path)
-      @paths.unshift(File.expand_path(path, root))
+      path   = File.expand_path(path, root).dup.freeze
+      @paths = @paths.dup.unshift(path).freeze
     end
 
     # Append a `path` to the `paths` list.
     #
     # Paths at the beginning of the `Array` have a higher priority.
     def append_path(path)
-      @paths.push(File.expand_path(path, root))
+      path   = File.expand_path(path, root).dup.freeze
+      @paths = @paths.dup.push(path).freeze
     end
 
     # Clear all paths and start fresh.
@@ -31,7 +33,7 @@ module Sprockets
     # completely wipe the paths list and reappend them in the order
     # you want.
     def clear_paths
-      @paths.clear
+      @paths = [].freeze
     end
 
     # Public: Iterate over every file under all load paths.

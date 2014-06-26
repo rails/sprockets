@@ -43,8 +43,8 @@ module Sprockets
   require 'sprockets/paths'
   extend Engines, Mime, Processing, Compressing, Paths
 
-  @root              = File.expand_path('..', __FILE__)
-  @paths             = []
+  @root              = File.expand_path('..', __FILE__).freeze
+  @paths             = [].freeze
   @mime_types        = {}
   @mime_exts         = {}
   @engines           = {}

@@ -25,7 +25,7 @@ module Sprockets
       @digest_class = Digest::SHA1
       @version = ''
 
-      @paths             = Sprockets.paths.dup
+      @paths             = Sprockets.paths
       @mime_types        = Sprockets.mime_types.dup
       @mime_exts         = Sprockets.mime_exts.dup
       @engines           = Sprockets.engines.dup
