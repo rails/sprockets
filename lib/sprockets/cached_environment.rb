@@ -12,8 +12,6 @@ module Sprockets
   # `Environment#cached`.
   class CachedEnvironment < Base
     def initialize(environment)
-      @environment = environment
-
       # Copy environment attributes
       @logger        = environment.logger
       @context_class = environment.context_class
