@@ -12,24 +12,15 @@ module Sprockets
   # `Environment#cached`.
   class CachedEnvironment < Base
     def initialize(environment)
-      @environment = environment
-
       # Copy environment attributes
-      @logger            = environment.logger
-      @context_class     = environment.context_class
-      @cache             = environment.cache
-      @digest_class      = environment.digest_class
-      @version           = environment.version
-      @root              = environment.root
-      @paths             = environment.paths.dup
-      @mime_types        = environment.mime_types.dup
-      @mime_exts         = environment.mime_exts.dup
-      @engines           = environment.engines.dup
-      @engine_extensions = environment.engine_extensions.dup
-      @preprocessors     = deep_copy_hash(environment.preprocessors)
-      @postprocessors    = deep_copy_hash(environment.postprocessors)
-      @bundle_processors = deep_copy_hash(environment.bundle_processors)
-      @compressors       = deep_copy_hash(environment.compressors)
+      @logger        = environment.logger
+      @context_class = environment.context_class
+      @cache         = environment.cache
+      @digest_class  = environment.digest_class
+      @version       = environment.version
+      @root          = environment.root
+
+      initialize_configuration(environment)
 
       @stats    = Hash.new { |h, k| h[k] = _stat(k) }
       @entries  = Hash.new { |h, k| h[k] = _entries(k) }

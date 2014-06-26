@@ -15,14 +15,20 @@ module Sprockets
     #
     # Paths at the end of the `Array` have the least priority.
     def prepend_path(path)
-      @paths.unshift(File.expand_path(path, root))
+      mutate_config(:paths) do |paths|
+        path = File.expand_path(path, root).dup.freeze
+        paths.unshift(path)
+      end
     end
 
     # Append a `path` to the `paths` list.
     #
     # Paths at the beginning of the `Array` have a higher priority.
     def append_path(path)
-      @paths.push(File.expand_path(path, root))
+      mutate_config(:paths) do |paths|
+        path = File.expand_path(path, root).dup.freeze
+        paths.push(path)
+      end
     end
 
     # Clear all paths and start fresh.
@@ -31,7 +37,9 @@ module Sprockets
     # completely wipe the paths list and reappend them in the order
     # you want.
     def clear_paths
-      @paths.clear
+      mutate_config(:paths) do |paths|
+        paths.clear
+      end
     end
 
     # Public: Iterate over every file under all load paths.
@@ -125,7 +133,7 @@ module Sprockets
       logical_basename = File.basename(logical_name)
 
       resolve_accept_options(extname, options).each do |accept|
-        @paths.each do |load_path|
+        self.paths.each do |load_path|
           path_matches(load_path, logical_name, logical_basename, extname) do |filename|
             if has_asset?(filename, accept: accept)
               yield filename

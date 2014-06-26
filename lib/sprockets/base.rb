@@ -8,7 +8,8 @@ module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
     include PathUtils
-    include Paths, Mime, Processing, Compressing, Engines, Server
+    include Configuration
+    include Server
     include Bower
 
     # Returns a `Digest` implementation class.
@@ -73,56 +74,6 @@ module Sprockets
     def cache=(cache)
       expire_cache!
       @cache = Cache.new(cache, logger)
-    end
-
-    def prepend_path(path)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def append_path(path)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def clear_paths
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def register_mime_type(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_engine(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_preprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_preprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_postprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_postprocessor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def register_bundle_processor(*args)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_bundle_processor(*args)
-      super.tap { expire_cache! }
     end
 
     # Return an `Cached`. Must be implemented by the subclass.
@@ -312,6 +263,11 @@ module Sprockets
             dependency_digest: dependencies_hexdigest([asset[:filename]]),
           }
         })
+      end
+
+    private
+      def mutate_config(*args)
+        super.tap { expire_cache! }
       end
   end
 end

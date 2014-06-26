@@ -19,7 +19,7 @@ module Sprockets
     #
     # Returns Array of Procs.
     def unwrap_preprocessors(mime_type)
-      @preprocessors[mime_type].map do |processor|
+      preprocessors[mime_type].map do |processor|
         unwrap_processor(processor)
       end
     end
@@ -33,7 +33,7 @@ module Sprockets
     #
     # Returns Array of Procs.
     def unwrap_postprocessors(mime_type)
-      @postprocessors[mime_type].map do |processor|
+      postprocessors[mime_type].map do |processor|
         unwrap_processor(processor)
       end
     end
@@ -49,7 +49,10 @@ module Sprockets
     #     end
     #
     def register_preprocessor(mime_type, klass, &block)
-      @preprocessors[mime_type].push(wrap_processor(klass, block))
+      mutate_hash_config(:preprocessors, mime_type) do |processors|
+        processors.push(wrap_processor(klass, block))
+        processors
+      end
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
@@ -64,7 +67,10 @@ module Sprockets
     #
     def register_postprocessor(mime_type, klass, proc = nil, &block)
       proc ||= block
-      @postprocessors[mime_type].push(wrap_processor(klass, proc))
+      mutate_hash_config(:postprocessors, mime_type) do |processors|
+        processors.push(wrap_processor(klass, proc))
+        processors
+      end
     end
 
     # Remove Preprocessor `klass` for `mime_type`.
@@ -73,12 +79,15 @@ module Sprockets
     #
     def unregister_preprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @preprocessors[mime_type].detect { |cls|
+        klass = preprocessors[mime_type].detect { |cls|
           cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
-      @preprocessors[mime_type].delete(klass)
+      mutate_hash_config(:preprocessors, mime_type) do |processors|
+        processors.delete(klass)
+        processors
+      end
     end
 
     # Remove Postprocessor `klass` for `mime_type`.
@@ -87,12 +96,15 @@ module Sprockets
     #
     def unregister_postprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @postprocessors[mime_type].detect { |cls|
+        klass = postprocessors[mime_type].detect { |cls|
           cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
-      @postprocessors[mime_type].delete(klass)
+      mutate_hash_config(:postprocessors, mime_type) do |processors|
+        processors.delete(klass)
+        processors
+      end
     end
 
     # Bundle Processors are ran on concatenated assets rather than
@@ -105,7 +117,7 @@ module Sprockets
     #
     # Returns Array of Procs.
     def unwrap_bundle_processors(mime_type)
-      @bundle_processors[mime_type].map do |processor|
+      bundle_processors[mime_type].map do |processor|
         unwrap_processor(processor)
       end
     end
@@ -121,7 +133,10 @@ module Sprockets
     #     end
     #
     def register_bundle_processor(mime_type, klass, &block)
-      @bundle_processors[mime_type].push(wrap_processor(klass, block))
+      mutate_hash_config(:bundle_processors, mime_type) do |processors|
+        processors.push(wrap_processor(klass, block))
+        processors
+      end
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
@@ -130,12 +145,15 @@ module Sprockets
     #
     def unregister_bundle_processor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @bundle_processors[mime_type].detect { |cls|
+        klass = bundle_processors[mime_type].detect { |cls|
           cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
-      @bundle_processors[mime_type].delete(klass)
+      mutate_hash_config(:bundle_processors, mime_type) do |processors|
+        processors.delete(klass)
+        processors
+      end
     end
 
     # Internal: Run processors on filename and data.
