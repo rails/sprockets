@@ -15,12 +15,12 @@ module Sprockets
       @environment = environment
 
       # Copy environment attributes
-      @logger            = environment.logger
-      @context_class     = environment.context_class
-      @cache             = environment.cache
-      @digest_class      = environment.digest_class
-      @version           = environment.version
-      @root              = environment.root
+      @logger        = environment.logger
+      @context_class = environment.context_class
+      @cache         = environment.cache
+      @digest_class  = environment.digest_class
+      @version       = environment.version
+      @root          = environment.root
 
       initialize_configuration(environment)
 
