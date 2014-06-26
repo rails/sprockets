@@ -31,6 +31,7 @@ module Sprockets
   autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
+  autoload :HTTPUtils,               'sprockets/http_utils'
   autoload :LazyProcessor,           'sprockets/lazy_processor'
   autoload :PathUtils,               'sprockets/path_utils'
   autoload :Utils,                   'sprockets/utils'

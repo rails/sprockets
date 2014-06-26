@@ -2,6 +2,8 @@ require 'sprockets/encoding_utils'
 
 module Sprockets
   module Mime
+    include HTTPUtils
+
     # Pubic: Mapping of MIME type Strings to properties Hash.
     #
     # key   - MIME Type String
@@ -42,25 +44,11 @@ module Sprockets
       end
     end
 
-    # Public: Test mime type against mime range.
-    #
-    #    match_mime_type?('text/html', 'text/*') => true
-    #    match_mime_type?('text/plain', '*') => true
-    #    match_mime_type?('text/html', 'application/json') => false
-    #
-    # Returns true if the given value is a mime match for the given mime match
-    # specification, false otherwise.
-    def match_mime_type?(value, matcher)
-      v1, v2 = value.split('/', 2)
-      m1, m2 = matcher.split('/', 2)
-      (m1 == '*' || v1 == m1) && (m2.nil? || m2 == '*' || m2 == v2)
-    end
-
     attr_reader :encodings
 
     def register_encoding(name, encode)
       mutate_config(:encodings) do |encodings|
-        encodings.merge(name => encode)
+        encodings.merge(name.to_s => encode)
       end
     end
   end

@@ -7,7 +7,7 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils
+    include PathUtils, HTTPUtils
     include Configuration
     include Server
     include Bower
@@ -218,9 +218,12 @@ module Sprockets
         if processed_processors.any? || bundled_processors.any?
           processors = options[:bundle] ? bundled_processors : processed_processors
 
-          if options[:accept_encoding] && (encoder = encodings[options[:accept_encoding].to_sym])
+          available_encodings = encodings.keys + ["identity"]
+          encoding = find_best_q_match(options[:accept_encoding], available_encodings)
+
+          if encoder = self.encodings[encoding]
             processors << lambda do |input|
-              { data: encoder.call([input[:data]]), encoding: options[:accept_encoding] }
+              { data: encoder.call([input[:data]]), encoding: encoding }
             end
           end
 
