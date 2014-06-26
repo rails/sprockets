@@ -45,8 +45,8 @@ module Sprockets
 
   @root              = File.expand_path('..', __FILE__).freeze
   @paths             = [].freeze
-  @mime_types        = {}
-  @mime_exts         = {}
+  @mime_types        = {}.freeze
+  @mime_exts         = {}.freeze
   @engines           = {}
   @engine_extensions = {}
   @preprocessors     = Hash.new { |h, k| h[k] = [] }
