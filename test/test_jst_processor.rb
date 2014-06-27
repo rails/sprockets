@@ -4,7 +4,7 @@ require 'sprockets/jst_processor'
 class TestJstProcessor < Sprockets::TestCase
   test "export js template in JST" do
     input = {
-      logical_path: 'users/show',
+      name: 'users/show',
       content_type: 'application/javascript',
       data: "function(obj) {\n  return 'Hello, '+obj.name;\n}",
       cache: Sprockets::Cache.new
@@ -20,7 +20,7 @@ class TestJstProcessor < Sprockets::TestCase
 
   test "export js template in TEMPLATES" do
     input = {
-      logical_path: 'users/show',
+      name: 'users/show',
       content_type: 'application/javascript',
       data: "function(obj) {\n  return 'Hello, '+obj.name;\n}",
       cache: Sprockets::Cache.new

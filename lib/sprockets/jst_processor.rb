@@ -3,7 +3,7 @@ module Sprockets
   #
   # Exports server side compiled templates to an object.
   #
-  # Name your template "users/show.ejs.jst", "users/new.eco.jst", etc.
+  # Name your template "users/show.jst.ejs", "users/new.jst.eco", etc.
   #
   # To accept the default options
   #
@@ -32,7 +32,7 @@ module Sprockets
 
     def call(input)
       data = input[:data].gsub(/$(.)/m, "\\1  ").strip
-      key = input[:logical_path]
+      key  = input[:name]
       <<-JST
 (function() { #{@namespace} || (#{@namespace} = {}); #{@namespace}[#{key.inspect}] = #{data};
 }).call(this);

@@ -10,6 +10,11 @@ class TestPathUtils < Sprockets::TestCase
     refute stat("/tmp/sprockets/missingfile")
   end
 
+  test "file?" do
+    assert_equal true, file?(File.join(FIXTURE_ROOT, 'default', 'hello.txt'))
+    assert_equal false, file?(FIXTURE_ROOT)
+  end
+
   test "entries" do
     assert_equal [
       "asset",
@@ -48,21 +53,14 @@ class TestPathUtils < Sprockets::TestCase
     refute relative_path?("..foo.rb")
   end
 
-  test "normalize path" do
-    assert_equal "foo", normalize_path("foo")
-    assert_equal "foo/bar", normalize_path("foo/bar")
-    assert_equal "foo/bar/baz", normalize_path("foo/bar/baz")
-
-    assert_equal fixture_path("root/foo/bar/baz"),
-      normalize_path("./foo/bar/baz", fixture_path("root/main"))
-    assert_equal fixture_path("foo/bar"), normalize_path("../foo/bar", fixture_path("root/main"))
-
-    assert_raises TypeError do
-      normalize_path("./foo")
-    end
-    assert_raises TypeError do
-      normalize_path("../foo")
-    end
+  test "split subpath from root path" do
+    assert_equal "application.js",
+      split_subpath(fixture_path("default"), fixture_path("default/application.js"))
+    assert_equal "application.js",
+      split_subpath(fixture_path("default") + "/", fixture_path("default/application.js"))
+    assert_equal "app/application.js",
+      split_subpath(fixture_path("default"), fixture_path("default/app/application.js"))
+    refute split_subpath(fixture_path("default"), fixture_path("other/app/application.js"))
   end
 
   test "split paths root from base" do
@@ -73,18 +71,18 @@ class TestPathUtils < Sprockets::TestCase
     refute paths_split([fixture_path("default")], fixture_path("other/app/application.js"))
   end
 
-  test "path reverse extensions enumerator" do
-    assert_equal [".txt"], path_reverse_extnames("hello.txt").to_a
-    assert_equal [".txt"], path_reverse_extnames("sub/hello.txt").to_a
-    assert_equal [".txt"], path_reverse_extnames("sub.dir/hello.txt").to_a
-    assert_equal [".js"], path_reverse_extnames("jquery.js").to_a
-    assert_equal [".js", ".min"], path_reverse_extnames("jquery.min.js").to_a
-    assert_equal [".erb", ".js"], path_reverse_extnames("jquery.js.erb").to_a
-    assert_equal [".erb", ".js", ".min"], path_reverse_extnames("jquery.min.js.erb").to_a
+  test "path extensions" do
+    assert_equal [".txt"], path_extnames("hello.txt")
+    assert_equal [".txt"], path_extnames("sub/hello.txt")
+    assert_equal [".txt"], path_extnames("sub.dir/hello.txt")
+    assert_equal [".js"], path_extnames("jquery.js")
+    assert_equal [".min", ".js"], path_extnames("jquery.min.js")
+    assert_equal [".js", ".erb"], path_extnames("jquery.js.erb")
+    assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
   test "stat directory" do
-    assert_equal 24, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
+    assert_equal 27, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
     assert_equal fixture_path("default/app"), path
     assert_kind_of File::Stat, stat
@@ -93,25 +91,12 @@ class TestPathUtils < Sprockets::TestCase
   end
 
   test "stat tree" do
-    assert_equal 47, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
+    assert_equal 53, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first
     assert_equal fixture_path("default/app"), path
     assert_kind_of File::Stat, stat
 
     assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a
-  end
-
-  test "read unicode" do
-    assert_equal "var foo = \"bar\";\n",
-      read_unicode_file(fixture_path('encoding/ascii.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf8.js'))
-    assert_equal "var snowman = \"☃\";",
-      read_unicode_file(fixture_path('encoding/utf8_bom.js'))
-
-    assert_raises Sprockets::EncodingError do
-      read_unicode_file(fixture_path('encoding/utf16.js'))
-    end
   end
 
   test "atomic write without errors" do

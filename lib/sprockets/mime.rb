@@ -1,43 +1,68 @@
-require 'rack/mime'
+require 'sprockets/encoding_utils'
 
 module Sprockets
   module Mime
-    # Returns a `Hash` of registered mime types registered on the
-    # environment and those part of `Rack::Mime`.
+    include HTTPUtils
+
+    # Pubic: Mapping of MIME type Strings to properties Hash.
     #
-    # If an `ext` is given, it will lookup the mime type for that extension.
-    def mime_types(ext = nil)
-      if ext
-        @mime_types[ext] || Rack::Mime::MIME_TYPES[ext]
-      else
-        Rack::Mime::MIME_TYPES.merge(@mime_types)
+    # key   - MIME Type String
+    # value - Hash
+    #   extensions - Array of extnames
+    #   charset    - Default Encoding or function to detect encoding
+    #
+    # Returns Hash.
+    attr_reader :mime_types
+
+    attr_reader :mime_exts
+
+    # Register a new mime type.
+    def register_mime_type(mime_type, options = {})
+      # Legacy extension argument, will be removed from 4.x
+      if options.is_a?(String)
+        options = { extensions: [options] }
+      end
+
+      extnames = Array(options[:extensions]).map { |extname|
+        Sprockets::Utils.normalize_extension(extname)
+      }
+
+      charset = options[:charset]
+      charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
+
+      mutate_config(:mime_exts) do |mime_exts|
+        extnames.each do |extname|
+          mime_exts[extname] = mime_type
+        end
+        mime_exts
+      end
+
+      mutate_config(:mime_types) do |mime_types|
+        type = { extensions: extnames }
+        type[:charset] = charset if charset
+        mime_types.merge(mime_type => type)
       end
     end
 
-    # Returns a `Hash` of explicitly registered mime types.
-    def registered_mime_types
-      @mime_types.dup
+    attr_reader :encodings
+
+    def register_encoding(name, encode)
+      mutate_config(:encodings) do |encodings|
+        encodings.merge(name.to_s => encode)
+      end
     end
 
-    # Register a new mime type.
-    def register_mime_type(mime_type, ext)
-      ext = Sprockets::Utils.normalize_extension(ext)
-      @extensions.push(ext)
-      @mime_types[ext] = mime_type
-    end
+    def unwrap_encoding_processors(accept_encodings)
+      available_encodings = self.encodings.keys + ['identity']
+      encoding = find_best_q_match(accept_encodings, available_encodings)
 
-    attr_reader :transformers
-
-    def register_transformer(from, to, processor)
-      @transformers[from][to] = processor
-    end
-
-    # Returns the correct encoding for a given mime type, while falling
-    # back on the default external encoding, if it exists.
-    def encoding_for_mime_type(type)
-      encoding = Encoding::BINARY if type =~ %r{^(image|audio|video)/}
-      encoding ||= Sprockets.default_external_encoding
-      encoding
+      processors = []
+      if encoder = self.encodings[encoding]
+        processors << lambda do |input|
+          { data: encoder.call([input[:data]]), encoding: encoding }
+        end
+      end
+      processors
     end
   end
 end

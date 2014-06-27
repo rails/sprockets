@@ -1,4 +1,3 @@
-require 'base64'
 require 'pathname'
 require 'rack/utils'
 require 'set'
@@ -26,12 +25,12 @@ module Sprockets
     def initialize(input)
       @environment  = input[:environment]
       @metadata     = input[:metadata]
-      @root_path    = input[:root_path]
-      @logical_path = input[:logical_path]
+      @load_path    = input[:load_path]
+      @logical_path = input[:name]
       @filename     = input[:filename]
+      @dirname      = File.dirname(@filename)
       @pathname     = Pathname.new(@filename)
       @content_type = input[:content_type]
-      @root_path, _ = @environment.paths_split(@environment.paths, @filename)
 
       @required_paths   = Set.new(@metadata[:required_paths])
       @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
@@ -47,9 +46,10 @@ module Sprockets
     # Returns the environment path that contains the file.
     #
     # If `app/javascripts` and `app/stylesheets` are in your path, and
-    # current file is `app/javascripts/foo/bar.js`, `root_path` would
+    # current file is `app/javascripts/foo/bar.js`, `load_path` would
     # return `app/javascripts`.
-    attr_reader :root_path
+    attr_reader :load_path
+    alias_method :root_path, :load_path
 
     # Returns logical path without any file extensions.
     #
@@ -78,8 +78,19 @@ module Sprockets
     #
     def resolve(path, options = {})
       options[:content_type] = self.content_type if options[:content_type] == :self
-      path = environment.normalize_path(path, @filename)
-      environment.resolve(path, options)
+
+      if environment.absolute_path?(path)
+        path
+      elsif environment.relative_path?(path)
+        path = File.expand_path(path, @dirname)
+        if logical_path = @environment.split_subpath(load_path, path)
+          environment.resolve_in_load_path(load_path, logical_path, options)
+        else
+          raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
+        end
+      else
+        environment.resolve(path, options)
+      end
     end
 
     # `depend_on` allows you to state a dependency on a file without
@@ -117,7 +128,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      pathname = resolve(path, content_type: :self)
+      pathname = resolve(path, accept: @content_type)
       depend_on_asset(pathname)
       @required_paths << pathname.to_s
       nil
@@ -127,7 +138,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed_paths << resolve(path, content_type: :self).to_s
+      @stubbed_paths << resolve(path, accept: @content_type).to_s
       nil
     end
 
@@ -143,9 +154,8 @@ module Sprockets
     #
     def asset_data_uri(path)
       depend_on_asset(path)
-      asset  = environment.find_asset(path)
-      base64 = Base64.strict_encode64(asset.to_s)
-      "data:#{asset.content_type};base64,#{Rack::Utils.escape(base64)}"
+      asset = environment.find_asset(path, accept_encoding: 'base64')
+      "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
     end
 
     # Expands logical path to full url to asset.

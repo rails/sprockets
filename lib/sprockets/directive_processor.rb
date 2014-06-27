@@ -75,8 +75,9 @@ module Sprockets
 
     def call(input)
       @environment  = input[:environment]
+      @load_path    = input[:load_path]
       @filename     = input[:filename]
-      @base_path    = File.dirname(@filename)
+      @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
 
       data = input[:data]
@@ -194,8 +195,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        filename = resolve(path, content_type: @content_type)
-        @required_paths << filename
+        @required_paths << resolve(path, accept: @content_type)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -223,7 +223,7 @@ module Sprockets
       #
       def process_require_directory_directive(path = ".")
         if @environment.relative_path?(path)
-          root = File.expand_path(path, @base_path)
+          root = expand_relative_path(path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
@@ -234,7 +234,7 @@ module Sprockets
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
               next
-            elsif stat.file? && @environment.matches_content_type?(@content_type, subpath)
+            elsif @environment.has_asset?(subpath, accept: @content_type)
               @required_paths << subpath
             end
           end
@@ -251,7 +251,7 @@ module Sprockets
       #
       def process_require_tree_directive(path = ".")
         if @environment.relative_path?(path)
-          root = File.expand_path(path, @base_path)
+          root = expand_relative_path(path)
 
           unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
@@ -265,7 +265,7 @@ module Sprockets
               next
             elsif stat.directory?
               @dependency_paths << subpath
-            elsif stat.file? && @environment.matches_content_type?(@content_type, subpath)
+            elsif @environment.has_asset?(subpath, accept: @content_type)
               required_paths << subpath
             end
           end
@@ -291,7 +291,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << resolve(path)
+        @dependency_paths << resolve(path, accept: "#{@content_type}, */*")
       end
 
       # Allows you to state a dependency on an asset without including
@@ -306,7 +306,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.find_asset(resolve(path))
+        if asset = @environment.find_asset(resolve(path, accept: "#{@content_type}, */*"))
           @dependency_paths.merge(asset.metadata[:dependency_paths])
         end
       end
@@ -320,12 +320,27 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_paths << resolve(path, content_type: @content_type)
+        @stubbed_paths << resolve(path, accept: @content_type)
       end
 
     private
+      def expand_relative_path(path)
+        File.expand_path(path, @dirname)
+      end
+
       def resolve(path, options = {})
-        @environment.resolve(@environment.normalize_path(path, @filename), options)
+        if @environment.absolute_path?(path)
+          raise FileOutsidePaths, "can't require absolute file: #{path}"
+        elsif @environment.relative_path?(path)
+          path = expand_relative_path(path)
+          if logical_path = @environment.split_subpath(@load_path, path)
+            @environment.resolve_in_load_path(@load_path, logical_path, options)
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
+          end
+        else
+          @environment.resolve(path, options)
+        end
       end
   end
 end

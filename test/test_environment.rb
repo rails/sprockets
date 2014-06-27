@@ -34,12 +34,6 @@ module EnvironmentTests
     Sprockets.clear_paths
   end
 
-  test "extensions" do
-    ["coffee", "erb", "sass", "scss", "css", "js"].each do |ext|
-      assert @env.extensions.to_a.include?(".#{ext}"), "'.#{ext}' not in #{@env.extensions.inspect}"
-    end
-  end
-
   test "eco templates" do
     asset = @env["goodbye.jst"]
     context = ExecJS.compile(asset.to_s)
@@ -57,79 +51,9 @@ module EnvironmentTests
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
   end
 
-  test "lookup mime type" do
-    assert_equal "application/javascript", @env.mime_types(".js")
-    assert_equal "text/css", @env.mime_types(".css")
-    assert_equal nil, @env.mime_types(".foo")
-  end
-
   test "lookup bundle processors" do
-    assert_equal 1, @env.bundle_processors('application/javascript').size
-    assert_equal 2, @env.bundle_processors('text/css').size
-  end
-
-  test "lookup compressors" do
-    silence_warnings do
-      require 'sprockets/sass_compressor'
-    end
-    assert_equal 'Sprockets::SassCompressor', @env.compressors['text/css'][:sass].name
-    assert_equal 'Sprockets::UglifierCompressor', @env.compressors['application/javascript'][:uglifier].name
-  end
-
-  test "resolve absolute path in environment" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'))
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo.coffee'))
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min.js'))
-
-    assert_equal fixture_path('default/gallery.css.erb'),
-      @env.resolve(fixture_path('default/gallery'))
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery'), content_type: 'application/javascript')
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo'))
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min'))
-    assert_equal fixture_path('default/gallery.css.erb'),
-      @env.resolve(fixture_path('default/gallery.css'))
-    assert_equal fixture_path('default/gallery.css.erb'),
-      @env.resolve(fixture_path('default/gallery'), content_type: 'text/css')
-
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/jquery.tmpl'))
-    end
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/jquery'))
-    end
-
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'), content_type: 'application/javascript')
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'application/javascript')
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve(fixture_path('default/jquery.tmpl.min.js'), content_type: 'application/javascript')
-
-    refute @env.resolve_all("/bin/sh").first
-    assert_raises(Sprockets::FileOutsidePaths) do
-      @env.resolve("/bin/sh")
-    end
-
-    refute @env.resolve_all(fixture_path('default/gallery.js'), content_type: 'text/css').first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/gallery.js'), content_type: 'text/css')
-    end
-
-    refute @env.resolve_all(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css').first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/coffee/foo.coffee'), content_type: 'text/css')
-    end
-
-    refute @env.resolve_all(fixture_path('default/gallery.foo')).first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve(fixture_path('default/gallery.foo'))
-    end
+    assert_equal 1, @env.bundle_processors['application/javascript'].size
+    assert_equal 1, @env.bundle_processors['text/css'].size
   end
 
   test "resolve in environment" do
@@ -143,6 +67,8 @@ module EnvironmentTests
       @env.resolve("jquery.tmpl.min")
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
       @env.resolve("jquery.tmpl.min.js")
+    assert_equal fixture_path('default/manifest.js.yml'),
+      @env.resolve('manifest.js.yml')
 
     refute @env.resolve_all("null").first
     assert_raises(Sprockets::FileNotFound) do
@@ -150,65 +76,98 @@ module EnvironmentTests
     end
   end
 
-  test "resolve content type in environment" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js", content_type: "application/javascript")
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery", content_type: "application/javascript")
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve('coffee/foo', content_type: 'application/javascript')
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve('coffee/foo.coffee', content_type: 'application/javascript')
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min", content_type: 'application/javascript')
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js", content_type: 'application/javascript')
+  test "find asset with accept type" do
+    assert asset = @env.find_asset("gallery.js", accept: '*/*')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
 
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("gallery.js", content_type: "text/css")
-    end
+    assert asset = @env.find_asset("gallery", accept: 'application/javascript')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery", accept: 'application/javascript, text/css')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery.js", accept: 'application/javascript')
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+
+    assert asset = @env.find_asset("gallery", accept: 'text/css, application/javascript')
+    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+
+    assert asset = @env.find_asset("coffee/foo", accept: "application/javascript")
+    assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
+
+    assert asset = @env.find_asset("coffee/foo.coffee", accept: "application/javascript")
+    assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
+
+    assert asset = @env.find_asset("jquery.tmpl.min", accept: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'), asset.filename
+
+    assert asset = @env.find_asset("jquery.tmpl.min.js", accept: 'application/javascript')
+    assert_equal fixture_path('default/jquery.tmpl.min.js'), asset.filename
+
+    assert asset = @env.find_asset('manifest.js.yml', accept: 'text/yaml')
+    assert_equal fixture_path('default/manifest.js.yml'), asset.filename
+
+    assert asset = @env.find_asset('manifest.js.yml', accept: 'text/css, */*')
+    assert_equal fixture_path('default/manifest.js.yml'), asset.filename
+
+    refute @env.find_asset("gallery.js", accept: "text/css")
+
+    refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
 
-  test "resolve bower special case" do
+  test "explicit bower.json access returns json file" do
     assert_equal fixture_path('default/bower/bower.json'),
-      @env.resolve("bower/bower.json")
+      @env["bower/bower.json"].filename
+  end
+
+  test "find default bower main" do
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower")
+      @env["bower"].filename
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env["qunit"].filename
+    assert_equal fixture_path('default/rails/rails.coffee'),
+      @env["rails"].filename
+  end
+
+  test "find bower main by format extension" do
     assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js")
-    assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower", content_type: 'application/javascript')
-    assert_equal fixture_path('default/bower/main.js'),
-      @env.resolve("bower.js", content_type: 'application/javascript')
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("bower.css", content_type: 'text/css')
-    end
+      @env["bower.js"].filename
+      refute @env.find_asset("bower.css")
 
     assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit")
-    assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js")
-    assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit", content_type: 'application/javascript')
-    assert_equal fixture_path('default/qunit/qunit.js'),
-      @env.resolve("qunit.js", content_type: 'application/javascript')
+      @env["qunit.js"].filename
     assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css")
-    assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit", content_type: 'text/css')
-    assert_equal fixture_path('default/qunit/qunit.css'),
-      @env.resolve("qunit.css", content_type: 'text/css')
+      @env["qunit.css"].filename
 
     assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails")
+      @env["rails.js"].filename
+
+    assert_equal fixture_path('default/requirejs/require.js'),
+      @env.find_asset("requirejs.js").filename
+  end
+
+  test "find bower main by content type" do
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.find_asset("bower", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/bower/main.js'),
+      @env.find_asset("bower.js", accept: 'application/javascript').filename
+
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.find_asset("qunit", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/qunit/qunit.js'),
+      @env.find_asset("qunit.js", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.find_asset("qunit", accept: 'text/css').filename
+    assert_equal fixture_path('default/qunit/qunit.css'),
+      @env.find_asset("qunit.css", accept: 'text/css').filename
+
     assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails.js")
+      @env.find_asset("rails", accept: 'application/javascript').filename
     assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails", content_type: 'application/javascript')
-    assert_equal fixture_path('default/rails/rails.coffee'),
-      @env.resolve("rails.js", content_type: 'application/javascript')
+      @env.find_asset("rails.js", accept: 'application/javascript').filename
+
+    assert_equal fixture_path('default/requirejs/require.js'),
+      @env.find_asset("requirejs.js", accept: 'application/javascript').filename
   end
 
   test "find bundled asset in environment" do
@@ -240,6 +199,10 @@ module EnvironmentTests
     assert_equal ".c {}\n.d {}\n/*\n\n */\n\n", @env["mobile.css"].to_s
   end
 
+  test "ignore index.min.js in directory" do
+    refute @env["mobile-min.js"]
+  end
+
   test "find bower.json in directory" do
     assert_equal "var bower;\n", @env["bower.js"].to_s
   end
@@ -247,6 +210,27 @@ module EnvironmentTests
   test "find multiple bower.json in directory" do
     assert_equal "var qunit;\n", @env["qunit.js"].to_s
     assert_equal ".qunit {}\n", @env["qunit.css"].to_s
+  end
+
+  test "find deflate asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
+    assert_equal 'deflate', asset.encoding
+    assert_equal [43, 75, 44, 82, 112, 79, 204, 201], asset.to_s.bytes.take(8)
+    assert_equal 20, asset.length
+  end
+
+  test "find gzipped asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "gzip")
+    assert_equal 'gzip', asset.encoding
+    assert_equal [31, 139, 8, 0], asset.to_s.bytes.take(4)
+    assert_equal 38, asset.length
+  end
+
+  test "find base64 asset" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "base64")
+    assert_equal 'base64', asset.encoding
+    assert_equal "dmFyIEdh", asset.to_s[0, 8]
+    assert_equal 24, asset.length
   end
 
   test "find asset by etag" do
@@ -283,6 +267,12 @@ module EnvironmentTests
     end
   end
 
+  test "asset filename outside of load paths" do
+    assert_raises Sprockets::FileOutsidePaths do
+      @env["/bin/sh"]
+    end
+  end
+
   test "asset with missing absolute depend_on raises an exception" do
     assert_raises Sprockets::FileOutsidePaths do
       @env["missing_absolute_depend_on.js"]
@@ -298,7 +288,14 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  FILES_IN_PATH = 39
+  test "xxxmobile index logical path shorthand" do
+    assert_equal "mobile.js",
+      @env[fixture_path("default/mobile/index.js")].logical_path
+    assert_equal "mobile-min/index.min.js",
+      @env[fixture_path("default/mobile-min/index.min.js")].logical_path
+  end
+
+  FILES_IN_PATH = 43
 
   test "iterate over each logical path" do
     paths = []
@@ -372,16 +369,10 @@ class TestEnvironment < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
   end
 
-  test "register mime type" do
-    assert !@env.mime_types("jst")
-    @env.register_mime_type("application/javascript", "jst")
-    assert_equal "application/javascript", @env.mime_types(".jst")
-  end
-
   test "register bundle processor" do
-    old_size = @env.bundle_processors('text/css').size
+    old_size = @env.bundle_processors['text/css'].size
     @env.register_bundle_processor 'text/css', WhitespaceProcessor
-    assert_equal old_size+1, @env.bundle_processors('text/css').size
+    assert_equal old_size+1, @env.bundle_processors['text/css'].size
   end
 
   test "register compressor" do
@@ -391,55 +382,55 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register global block preprocessor" do
-    old_size = new_environment.preprocessors('text/css').size
+    old_size = new_environment.preprocessors['text/css'].size
     Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.preprocessors('text/css').size
+    assert_equal old_size+1, new_environment.preprocessors['text/css'].size
     Sprockets.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.preprocessors('text/css').size
+    assert_equal old_size, new_environment.preprocessors['text/css'].size
   end
 
   test "unregister custom block preprocessor" do
-    old_size = @env.preprocessors('text/css').size
+    old_size = @env.preprocessors['text/css'].size
     @env.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.preprocessors('text/css').size
+    assert_equal old_size+1, @env.preprocessors['text/css'].size
     @env.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, @env.preprocessors('text/css').size
+    assert_equal old_size, @env.preprocessors['text/css'].size
   end
 
   test "unregister custom block postprocessor" do
-    old_size = @env.postprocessors('text/css').size
+    old_size = @env.postprocessors['text/css'].size
     @env.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.postprocessors('text/css').size
+    assert_equal old_size+1, @env.postprocessors['text/css'].size
     @env.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, @env.postprocessors('text/css').size
+    assert_equal old_size, @env.postprocessors['text/css'].size
   end
 
   test "register global block postprocessor" do
-    old_size = new_environment.postprocessors('text/css').size
+    old_size = new_environment.postprocessors['text/css'].size
     Sprockets.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.postprocessors('text/css').size
+    assert_equal old_size+1, new_environment.postprocessors['text/css'].size
     Sprockets.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.postprocessors('text/css').size
+    assert_equal old_size, new_environment.postprocessors['text/css'].size
   end
 
   test "unregister custom block bundle processor" do
-    old_size = @env.bundle_processors('text/css').size
+    old_size = @env.bundle_processors['text/css'].size
     @env.register_bundle_processor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.bundle_processors('text/css').size
+    assert_equal old_size+1, @env.bundle_processors['text/css'].size
     @env.unregister_bundle_processor('text/css', :foo)
-    assert_equal old_size, @env.bundle_processors('text/css').size
+    assert_equal old_size, @env.bundle_processors['text/css'].size
   end
 
   test "register global bundle processor" do
-    old_size = Sprockets.bundle_processors('text/css').size
+    old_size = Sprockets.bundle_processors['text/css'].size
     Sprockets.register_bundle_processor 'text/css', WhitespaceProcessor
-    assert_equal old_size+1, Sprockets.bundle_processors('text/css').size
+    assert_equal old_size+1, Sprockets.bundle_processors['text/css'].size
 
     env = new_environment
-    assert_equal old_size+1, env.bundle_processors('text/css').size
+    assert_equal old_size+1, env.bundle_processors['text/css'].size
 
     Sprockets.unregister_bundle_processor 'text/css', WhitespaceProcessor
-    assert_equal old_size, Sprockets.bundle_processors('text/css').size
+    assert_equal old_size, Sprockets.bundle_processors['text/css'].size
   end
 
   test "setting css compressor to nil clears current compressor" do
@@ -590,59 +581,8 @@ class TestEnvironment < Sprockets::TestCase
 
     env.logical_paths.each do |logical_path, filename|
       assert_equal filename, env.resolve_all(logical_path).first,
-        "Expected #{logical_path.inspect} to resolve to #{filename}."
+        "Expected #{logical_path.inspect} to resolve to #{filename}"
     end
-  end
-
-  test "extensions" do
-    assert_equal({name: "empty", format_extname: nil, engine_extnames: [], mime_types: []}, @env.extensions_for("empty"))
-    assert_equal({name: "gallery", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("gallery.js"))
-    assert_equal({name: "application", format_extname: ".js", engine_extnames: [".coffee"], mime_types: ["text/coffeescript", "application/javascript"]}, @env.extensions_for("application.js.coffee"))
-    assert_equal({name: "project", format_extname: ".js", engine_extnames: [".coffee", ".erb"], mime_types: ["application/html+ruby", "text/coffeescript", "application/javascript"]}, @env.extensions_for("project.js.coffee.erb"))
-    assert_equal({name: "gallery", format_extname: ".css", engine_extnames: [".erb"], mime_types: ["application/html+ruby", "text/css"]}, @env.extensions_for("gallery.css.erb"))
-    assert_equal({name: "gallery", format_extname: nil, engine_extnames: [".erb"], mime_types: ["application/html+ruby"]}, @env.extensions_for("gallery.erb"))
-    assert_equal({name: "gallery.foo", format_extname: nil, engine_extnames: [], mime_types: []}, @env.extensions_for("gallery.foo"))
-    assert_equal({name: "jquery", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.js"))
-    assert_equal({name: "jquery.min", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.min.js"))
-    assert_equal({name: "jquery", format_extname: ".js", engine_extnames: [".erb"], mime_types: ["application/html+ruby", "application/javascript"]}, @env.extensions_for("jquery.js.erb"))
-    assert_equal({name: "jquery.min", format_extname: ".js", engine_extnames: [".erb"], mime_types: ["application/html+ruby", "application/javascript"]}, @env.extensions_for("jquery.min.js.erb"))
-    assert_equal({name: "jquery.min", format_extname: nil, engine_extnames: [".coffee"], mime_types: ["text/coffeescript"]}, @env.extensions_for("jquery.min.coffee"))
-    assert_equal({name: "jquery.tmpl", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.tmpl.js"))
-    assert_equal({name: "jquery.tmpl.min", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.tmpl.min.js"))
-    assert_equal({name: "jquery.csv", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.csv.js"))
-    assert_equal({name: "jquery.csv.min", format_extname: ".js", engine_extnames: [], mime_types: ["application/javascript"]}, @env.extensions_for("jquery.csv.min.js"))
-    assert_equal({name: "jquery.csv.min", format_extname: ".js", engine_extnames: [".erb"], mime_types: ["application/html+ruby", "application/javascript"]}, @env.extensions_for("jquery.csv.min.js.erb"))
-    assert_equal({name: "jquery.csv.min", format_extname: ".js", engine_extnames: [".coffee", ".erb"], mime_types: ["application/html+ruby", "text/coffeescript", "application/javascript"]}, @env.extensions_for("jquery.csv.min.js.coffee.erb"))
-    assert_equal({name: "jquery.js.min", format_extname: nil, engine_extnames: [], mime_types: []}, @env.extensions_for("jquery.js.min"))
-    assert_equal({name: "sprite.css.embed", format_extname: nil, engine_extnames: [], mime_types: []}, @env.extensions_for("sprite.css.embed"))
-
-    @env = Sprockets::Environment.new
-    @env.register_engine '.ms', Class.new
-    assert_equal({name: "foo", format_extname: nil, engine_extnames: [".jst", ".ms"], mime_types: ["sprockets/ms", "application/jst"]}, @env.extensions_for("foo.jst.ms"))
-  end
-
-  test "content type" do
-    assert_equal nil,
-      @env.content_type_of("empty")
-    assert_equal "application/javascript",
-      @env.content_type_of("gallery.js")
-    assert_equal "application/javascript",
-      @env.content_type_of("application.js.coffee")
-    assert_equal "application/javascript",
-      @env.content_type_of("project.js.coffee.erb")
-    assert_equal "text/css",
-      @env.content_type_of("gallery.css.erb")
-    assert_equal "application/javascript",
-      @env.content_type_of("jquery.tmpl.min.js")
-    assert_equal "application/javascript",
-      @env.content_type_of("application.coffee")
-
-    @env = Sprockets::Environment.new
-    @env.register_mime_type 'sprockets/haml', '.haml'
-    @env.register_mime_type 'sprockets/ngt', '.ngt'
-    @env.register_transformer 'sprockets/haml', 'text/html', proc {}
-    @env.register_transformer 'sprockets/ngt', 'application/javascript', proc {}
-    assert_equal "application/javascript", @env.content_type_of("foo.ngt.haml")
   end
 end
 
@@ -667,16 +607,6 @@ class TestCached < Sprockets::TestCase
     end
   end
 
-  test "change in environment mime types does not affect cache" do
-    env = Sprockets::Environment.new(".")
-    env.register_mime_type "application/javascript", ".jst"
-    cached = env.cached
-
-    assert_equal "application/javascript", cached.mime_types(".jst")
-    env.register_mime_type nil, ".jst"
-    assert_equal "application/javascript", cached.mime_types(".jst")
-  end
-
   test "does not allow new bundle processors to be added" do
     assert_raises TypeError do
       @env.register_bundle_processor 'text/css', WhitespaceProcessor
@@ -693,9 +623,9 @@ class TestCached < Sprockets::TestCase
     env = Sprockets::Environment.new(".")
     cached = env.cached
 
-    assert !cached.bundle_processors('text/css').include?(WhitespaceProcessor)
+    assert !cached.bundle_processors['text/css'].include?(WhitespaceProcessor)
     env.register_bundle_processor 'text/css', WhitespaceProcessor
-    assert !cached.bundle_processors('text/css').include?(WhitespaceProcessor)
+    assert !cached.bundle_processors['text/css'].include?(WhitespaceProcessor)
   end
 
   test "does not allow css compressor to be changed" do

@@ -42,6 +42,7 @@ module Sprockets
       options = {}
       options[:bundle] = !body_only?(env)
       options[:if_match] = fingerprint if fingerprint
+      options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING'] if env['HTTP_ACCEPT_ENCODING']
       asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
@@ -159,7 +160,7 @@ module Sprockets
           }
         CSS
 
-        [ 200, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+        [ 200, { "Content-Type" => "text/css; charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string
@@ -193,9 +194,22 @@ module Sprockets
 
       def headers(env, asset, length)
         Hash.new.tap do |headers|
-          # Set content type and length headers
-          headers["Content-Type"]   = asset.content_type
+          # Set content encoding
+          if asset.encoding
+            headers["Content-Encoding"] = asset.encoding
+          end
+
+          # Set content length header
           headers["Content-Length"] = length.to_s
+
+          # Set content type header
+          if type = asset.content_type
+            # Set charset param for text/* mime types
+            if type.start_with?("text/") && asset.charset
+              type += "; charset=#{asset.charset}"
+            end
+            headers["Content-Type"] = type
+          end
 
           # Set caching headers
           headers["Cache-Control"]  = "public"
@@ -211,6 +225,8 @@ module Sprockets
           else
             headers["Cache-Control"] << ", must-revalidate"
           end
+
+          headers["Vary"] = "Accept-Encoding"
         end
       end
 

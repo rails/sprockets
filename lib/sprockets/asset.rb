@@ -1,11 +1,9 @@
 require 'fileutils'
 require 'pathname'
-require 'zlib'
 
 module Sprockets
   class Asset
     attr_reader :logical_path
-    attr_reader :content_type
 
     def initialize(attributes = {})
       @attributes = attributes
@@ -48,6 +46,9 @@ module Sprockets
     def digest_path
       logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
     end
+
+    # Public: Returns String MIME type of asset. Returns nil if type is unknown.
+    attr_reader :content_type
 
     # Deprecated: Expand asset into an `Array` of parts.
     #
@@ -96,6 +97,21 @@ module Sprockets
       source
     end
 
+    # Public: HTTP encoding for Asset, "deflate", "gzip", etc.
+    #
+    # Note: This is not the Ruby Encoding of the source. See Asset#charset.
+    #
+    # Returns a String or nil if encoding is "identity".
+    # TODO: Move to attr_reader
+    def encoding
+      metadata[:encoding]
+    end
+
+    # Public: Get charset of source.
+    #
+    # Returns a String charset name or nil if binary.
+    attr_reader :charset
+
     # Public: Returns Integer length of source.
     attr_reader :length
     alias_method :bytesize, :length
@@ -129,27 +145,13 @@ module Sprockets
     # Public: Save asset to disk.
     #
     # filename - String target
-    # options  - Hash
-    #   compress - Boolean to write out .gz file
     #
     # Returns nothing.
-    def write_to(filename, options = {})
-      # Gzip contents if filename has '.gz'
-      options[:compress] ||= File.extname(filename) == '.gz'
-
+    def write_to(filename)
       FileUtils.mkdir_p File.dirname(filename)
 
       PathUtils.atomic_write(filename) do |f|
-        if options[:compress]
-          # Run contents through `Zlib`
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime.to_i
-          gz.write to_s
-          gz.close
-        else
-          # Write out as is
-          f.write to_s
-        end
+        f.write source
       end
 
       # Set mtime correctly

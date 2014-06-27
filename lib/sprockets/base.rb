@@ -7,8 +7,10 @@ require 'pathname'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils
-    include Paths, Bower, Mime, Processing, Compressing, Engines, Server
+    include PathUtils, HTTPUtils
+    include Configuration
+    include Server
+    include Bower
 
     # Returns a `Digest` implementation class.
     #
@@ -74,79 +76,6 @@ module Sprockets
       @cache = Cache.new(cache, logger)
     end
 
-    def prepend_path(path)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def append_path(path)
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    def clear_paths
-      # Overrides the global behavior to expire the cache
-      expire_cache!
-      super
-    end
-
-    # Finds the expanded real path for a given logical path by
-    # searching the environment's paths.
-    #
-    #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js.coffee"
-    #
-    # A `FileNotFound` exception is raised if the file does not exist.
-    def resolve(path, options = {})
-      if filename = resolve_all(path, options).first
-        filename
-      else
-        if absolute_path?(path.to_s) && !paths_split(self.paths, path)
-          raise FileOutsidePaths, "#{path} isn't in paths: #{self.paths.join(', ')}"
-        end
-
-        content_type = options[:content_type]
-        message = "couldn't find file '#{path}'"
-        message << " with content type '#{content_type}'" if content_type
-        raise FileNotFound, message
-      end
-    end
-
-    # Register a new mime type.
-    def register_mime_type(mime_type, ext)
-      super.tap { expire_cache! }
-    end
-
-    def register_transformer(from, to, processor)
-      super.tap { expire_cache! }
-    end
-
-    def register_preprocessor(mime_type, klass, &block)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_preprocessor(mime_type, klass)
-      super.tap { expire_cache! }
-    end
-
-    def register_postprocessor(mime_type, klass, &block)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_postprocessor(mime_type, klass)
-      super.tap { expire_cache! }
-    end
-
-    def register_bundle_processor(mime_type, klass, &block)
-      super.tap { expire_cache! }
-    end
-
-    def unregister_bundle_processor(mime_type, klass)
-      super.tap { expire_cache! }
-    end
-
     # Return an `Cached`. Must be implemented by the subclass.
     def cached
       raise NotImplementedError
@@ -188,15 +117,46 @@ module Sprockets
       digest.hexdigest
     end
 
+    # Experimental: Check if environment has asset.
+    #
+    # TODO: Finalize API.
+    #
+    # Acts similar to `find_asset(path) ? true : false` but does not build the
+    # entire asset.
+    #
+    # Returns true or false.
+    def has_asset?(filename, options = {})
+      return false unless file?(filename)
+
+      accepts = (options[:accept] || '*/*').split(/\s*,\s*/)
+
+      # TODO: Review performance
+      extname = parse_path_extnames(filename)[1]
+      mime_type = mime_exts[extname]
+      mime_type.nil? || accepts.any? { |accept| match_mime_type?(mime_type, accept) }
+    end
+
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
+      path = path.to_s
+      options = options.dup
       options[:bundle] = true unless options.key?(:bundle)
+      accept = options.delete(:accept)
+      if_match = options.delete(:if_match)
 
-      if filename = resolve_all(path.to_s).first
-        if options[:if_match]
-          asset_hash = build_asset_hash_for_digest(filename, options[:if_match], options[:bundle])
+      if absolute_path?(path)
+        filename = path
+        return nil unless file?(filename)
+      else
+        filename = resolve_all(path, accept: accept).first
+      end
+
+      if filename
+        options = { bundle: options[:bundle], accept_encoding: options[:accept_encoding] }
+        if if_match
+          asset_hash = build_asset_hash_for_digest(filename, if_match, options)
         else
-          asset_hash = build_asset_hash(filename, options[:bundle])
+          asset_hash = build_asset_hash(filename, options)
         end
 
         Asset.new(asset_hash) if asset_hash
@@ -225,49 +185,63 @@ module Sprockets
         raise NotImplementedError
       end
 
-      def build_asset_hash_for_digest(filename, digest, bundle)
-        asset_hash = build_asset_hash(filename, bundle)
+      def build_asset_hash_for_digest(filename, digest, options)
+        asset_hash = build_asset_hash(filename, options)
         if asset_hash[:digest] == digest
           asset_hash
         end
       end
 
-      def build_asset_hash(filename, bundle = true)
-        content_type = content_type_of(filename) || 'application/octet-stream'
+      def build_asset_hash(filename, options)
+        load_path, logical_path = paths_split(self.paths, filename)
+        unless load_path
+          raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
+        end
 
-        attributes = {
+        logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
+        logical_path = normalize_logical_path(logical_path, extname)
+        mime_type = mime_exts[extname]
+
+        asset = {
+          load_path: load_path,
           filename: filename,
-          logical_path: logical_path_for(filename),
-          content_type: content_type
+          logical_path: logical_path,
+          name: logical_path.chomp(extname)
         }
+        asset[:content_type] = mime_type if mime_type
 
-        engine_exts = extensions_for(filename)[:engine_extnames]
-        processed_processors = preprocessors(content_type) +
-          engine_exts.map { |ext|
-            # TODO: Why do we pick the first transformer
-            @transformers[@mime_types[ext]].values.first
-          }.reverse +
-          postprocessors(content_type)
-        bundled_processors = bundle_processors(content_type)
+        processed_processors = unwrap_preprocessors(asset[:content_type]) +
+          unwrap_engines(engine_extnames).reverse +
+          unwrap_postprocessors(asset[:content_type])
+        bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
-        if processed_processors.any? || bundled_processors.any?
-          processors = bundle ? bundled_processors : processed_processors
-          build_processed_asset_hash(attributes, processors)
+        processors = options[:bundle] ? bundled_processors : processed_processors
+        processors += unwrap_encoding_processors(options[:accept_encoding])
+
+        if processors.any?
+          build_processed_asset_hash(asset, processors)
         else
-          build_static_asset_hash(attributes)
+          build_static_asset_hash(asset)
         end
       end
 
       def build_processed_asset_hash(asset, processors)
         filename = asset[:filename]
-        encoding = encoding_for_mime_type(asset[:content_type])
-        data     = read_unicode_file(filename, encoding)
+
+        data = File.open(filename, 'rb') { |f| f.read }
+
+        content_type = asset[:content_type]
+        mime_type = mime_types[content_type]
+        if mime_type && mime_type[:charset]
+          data = mime_type[:charset].call(data).encode(Encoding::UTF_8)
+        end
 
         processed = process(
           processors,
           filename,
-          asset[:logical_path],
-          asset[:content_type],
+          asset[:load_path],
+          asset[:name],
+          content_type,
           data
         )
 
@@ -285,6 +259,7 @@ module Sprockets
       def build_static_asset_hash(asset)
         stat = self.stat(asset[:filename])
         asset.merge({
+          encoding: Encoding::BINARY,
           length: stat.size,
           mtime: stat.mtime.to_i,
           digest: digest_class.file(asset[:filename]).hexdigest,
@@ -293,6 +268,11 @@ module Sprockets
             dependency_digest: dependencies_hexdigest([asset[:filename]]),
           }
         })
+      end
+
+    private
+      def mutate_config(*args)
+        super.tap { expire_cache! }
       end
   end
 end

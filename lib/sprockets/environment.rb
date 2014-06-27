@@ -25,14 +25,7 @@ module Sprockets
       @digest_class = Digest::SHA1
       @version = ''
 
-      @paths             = Sprockets.paths.dup
-      @extensions        = Sprockets.extensions.dup
-      @mime_types        = Sprockets.registered_mime_types
-      @transformers      = Sprockets.transformers
-      @preprocessors     = Sprockets.preprocessors
-      @postprocessors    = Sprockets.postprocessors
-      @bundle_processors = Sprockets.bundle_processors
-      @compressors       = Sprockets.compressors
+      initialize_configuration(Sprockets)
 
       self.cache = Cache::MemoryStore.new
       expire_cache!
@@ -59,7 +52,6 @@ module Sprockets
       def expire_cache!
         # Clear digest to be recomputed
         @digest = nil
-        @extension_pattern = /^(?:#{extensions.map { |e| Regexp.escape(e) }.join('|')})*$/
       end
   end
 end

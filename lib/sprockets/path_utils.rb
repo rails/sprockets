@@ -23,6 +23,19 @@ module Sprockets
       end
     end
 
+    # Internal: Like `File.file?`.
+    #
+    # path - String file path.
+    #
+    # Returns true path exists and is a file.
+    def file?(path)
+      if stat = self.stat(path)
+        stat.file?
+      else
+        false
+      end
+    end
+
     # Internal: A version of `Dir.entries` that filters out `.` files and `~`
     # swap files.
     #
@@ -63,23 +76,19 @@ module Sprockets
       path =~ /^\.\.?($|\/)/ ? true : false
     end
 
-    # Internal: Expand relative paths given a parent filename as reference.
+    # Internal: Get relative path for root path and subpath.
     #
-    # Closely related to ES6 Module Loader.normalize.
+    # path    - String path
+    # subpath - String subpath of path
     #
-    # path - String logical, absolute or relative path
-    # parent_filename - String path (default: nil)
-    #
-    # Returns expanded String path.
-    def normalize_path(path, parent_filename = nil)
-      if path =~ /^\.\.?\//
-        unless parent_filename
-          raise TypeError, "can't normalize relative path without parent: " +
-            path.inspect
-        end
-        File.expand_path(path, File.dirname(parent_filename))
+    # Returns relative String path if subpath is a subpath of path, or nil if
+    # subpath is outside of path.
+    def split_subpath(path, subpath)
+      path = File.join(path, '')
+      if subpath.start_with?(path)
+        subpath[path.length..-1]
       else
-        path
+        nil
       end
     end
 
@@ -91,21 +100,20 @@ module Sprockets
     # Returns [String root, String path]
     def paths_split(paths, filename)
       paths.each do |path|
-        base = "#{path}#{File::SEPARATOR}"
-        if filename.start_with?(base)
-          return path, filename[base.length..-1]
+        if subpath = split_subpath(path, filename)
+          return path, subpath
         end
       end
       nil
     end
 
-    # Internal: Enumerate over a path's extensions in reverse order.
+    # Internal: Get path's extensions.
     #
     # path - String
     #
     # Returns an Array of String extnames.
-    def path_reverse_extnames(path)
-      File.basename(path).scan(/\.[^.]+/).reverse
+    def path_extnames(path)
+      File.basename(path).scan(/\.[^.]+/)
     end
 
     # Internal: Stat all the files under a directory.
@@ -143,33 +151,6 @@ module Sprockets
       end
 
       nil
-    end
-
-    # Define UTF-8 BOM pattern matcher.
-    # Avoid using a Regexp literal because it inheirts the files
-    # encoding and we want to avoid syntax errors in other interpreters.
-    UTF8_BOM_PATTERN = Regexp.new("\\A\uFEFF".encode('utf-8'))
-
-    # Internal: Read unicode file respecting BOM.
-    #
-    # Returns String or raises an EncodingError.
-    def read_unicode_file(filename, external_encoding = Encoding.default_external)
-      File.open(filename, "r:#{external_encoding}") do |f|
-        f.read.tap do |data|
-          # Eager validate the file's encoding. In most cases we
-          # expect it to be UTF-8 unless `default_external` is set to
-          # something else. An error is usually raised if the file is
-          # saved as UTF-16 when we expected UTF-8.
-          if !data.valid_encoding?
-            raise EncodingError, "#{filename} has a invalid " +
-              "#{data.encoding} byte sequence"
-
-            # If the file is UTF-8 and theres a BOM, strip it for safe concatenation.
-          elsif data.encoding.name == "UTF-8" && data =~ UTF8_BOM_PATTERN
-            data.sub!(UTF8_BOM_PATTERN, "")
-          end
-        end
-      end
     end
 
     # Internal: Write to a file atomically. Useful for situations where you

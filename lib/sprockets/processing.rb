@@ -1,5 +1,5 @@
 require 'sprockets/engines'
-require 'sprockets/lazy_proxy'
+require 'sprockets/lazy_processor'
 require 'sprockets/legacy_proc_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
@@ -9,91 +9,32 @@ module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    # Internal: Returns the format extension and `Array` of engine extensions.
-    #
-    #     "foo.js.coffee.erb"
-    #     # => { format: ".js",
-    #            engines: [".coffee", ".erb"] }
-    #
-    # TODO: Review API and performance
-    def extensions_for(path)
-      format_extname  = nil
-      engine_extnames = []
-      mime_types      = []
-      len = path.length
-
-      path_reverse_extnames(path).each do |extname|
-        mime_types << @mime_types[extname] if @mime_types[extname]
-
-        # TODO: Why just any extname works
-        if @transformers[@mime_types[extname]].any?
-          engine_extnames << extname
-          len -= extname.length
-        elsif mime_types(extname)
-          format_extname = extname
-          len -= extname.length
-          break
-        else
-          break
-        end
-      end
-
-      engine_extnames.reverse!
-
-      { name: path[0, len],
-        format_extname: format_extname,
-        engine_extnames: engine_extnames,
-        mime_types: mime_types }
-    end
-
-    # Internal. Return content type of `path`.
-    #
-    # TODO: Review API and performance
-    def content_type_of(path)
-      extnames = extensions_for(path)
-      if format_ext = extnames[:format_extname]
-        return mime_types(format_ext)
-      end
-      engine_content_type_for(extnames[:engine_extnames])
-    end
-
-    def matches_content_type?(mime_type, path)
-      # TODO: Disallow nil mime type
-      mime_type.nil? ||
-        mime_type == "*/*" ||
-        mime_type == content_type_of(path)
-    end
-
-    # Returns an `Array` of `Processor` classes. If a `mime_type`
-    # argument is supplied, the processors registered under that
-    # extension will be returned.
-    #
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
+    attr_reader :preprocessors
+
+    # Internal: Find and load preprocessors by mime type.
     #
-    # All `Processor`s must follow the `Template` interface. It is
-    # recommended to subclass `Template`.
-    def preprocessors(mime_type = nil)
-      if mime_type
-        @preprocessors[mime_type].dup
-      else
-        deep_copy_hash(@preprocessors)
+    # mime_type - String MIME type.
+    #
+    # Returns Array of Procs.
+    def unwrap_preprocessors(mime_type)
+      preprocessors[mime_type].map do |processor|
+        unwrap_processor(processor)
       end
     end
 
-    # Returns an `Array` of `Processor` classes. If a `mime_type`
-    # argument is supplied, the processors registered under that
-    # extension will be returned.
-    #
     # Postprocessors are ran after Preprocessors and Engine processors.
+    attr_reader :postprocessors
+
+    # Internal: Find and load postprocessors by mime type.
     #
-    # All `Processor`s must follow the `Template` interface. It is
-    # recommended to subclass `Template`.
-    def postprocessors(mime_type = nil)
-      if mime_type
-        @postprocessors[mime_type].dup
-      else
-        deep_copy_hash(@postprocessors)
+    # mime_type - String MIME type.
+    #
+    # Returns Array of Procs.
+    def unwrap_postprocessors(mime_type)
+      postprocessors[mime_type].map do |processor|
+        unwrap_processor(processor)
       end
     end
 
@@ -108,22 +49,28 @@ module Sprockets
     #     end
     #
     def register_preprocessor(mime_type, klass, &block)
-      @preprocessors[mime_type].push(wrap_processor(klass, block))
+      mutate_hash_config(:preprocessors, mime_type) do |processors|
+        processors.push(wrap_processor(klass, block))
+        processors
+      end
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
     #
-    #     register_postprocessor 'text/css', Sprockets::CharsetNormalizer
+    #     register_postprocessor 'application/javascript', Sprockets::DirectiveProcessor
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_postprocessor 'text/css', :my_processor do |context, data|
+    #     register_postprocessor 'application/javascript', :my_processor do |context, data|
     #       data.gsub(...)
     #     end
     #
     def register_postprocessor(mime_type, klass, proc = nil, &block)
       proc ||= block
-      @postprocessors[mime_type].push(wrap_processor(klass, proc))
+      mutate_hash_config(:postprocessors, mime_type) do |processors|
+        processors.push(wrap_processor(klass, proc))
+        processors
+      end
     end
 
     # Remove Preprocessor `klass` for `mime_type`.
@@ -132,12 +79,15 @@ module Sprockets
     #
     def unregister_preprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @preprocessors[mime_type].detect { |cls|
+        klass = preprocessors[mime_type].detect { |cls|
           cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
-      @preprocessors[mime_type].delete(klass)
+      mutate_hash_config(:preprocessors, mime_type) do |processors|
+        processors.delete(klass)
+        processors
+      end
     end
 
     # Remove Postprocessor `klass` for `mime_type`.
@@ -146,70 +96,78 @@ module Sprockets
     #
     def unregister_postprocessor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @postprocessors[mime_type].detect { |cls|
+        klass = postprocessors[mime_type].detect { |cls|
           cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
-      @postprocessors[mime_type].delete(klass)
+      mutate_hash_config(:postprocessors, mime_type) do |processors|
+        processors.delete(klass)
+        processors
+      end
     end
 
-    # Returns an `Array` of `Processor` classes. If a `mime_type`
-    # argument is supplied, the processors registered under that
-    # extension will be returned.
-    #
     # Bundle Processors are ran on concatenated assets rather than
     # individual files.
+    attr_reader :bundle_processors
+
+    # Internal: Find and load bundle processors by mime type.
     #
-    # All `Processor`s must follow the `Template` interface. It is
-    # recommended to subclass `Template`.
-    def bundle_processors(mime_type = nil)
-      if mime_type
-        @bundle_processors[mime_type].dup
-      else
-        deep_copy_hash(@bundle_processors)
+    # mime_type - String MIME type.
+    #
+    # Returns Array of Procs.
+    def unwrap_bundle_processors(mime_type)
+      bundle_processors[mime_type].map do |processor|
+        unwrap_processor(processor)
       end
     end
 
     # Registers a new Bundle Processor `klass` for `mime_type`.
     #
-    #     register_bundle_processor  'text/css', Sprockets::CharsetNormalizer
+    #     register_bundle_processor  'application/javascript', Sprockets::DirectiveProcessor
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_bundle_processor 'text/css', :my_processor do |context, data|
+    #     register_bundle_processor 'application/javascript', :my_processor do |context, data|
     #       data.gsub(...)
     #     end
     #
     def register_bundle_processor(mime_type, klass, &block)
-      @bundle_processors[mime_type].push(wrap_processor(klass, block))
+      mutate_hash_config(:bundle_processors, mime_type) do |processors|
+        processors.push(wrap_processor(klass, block))
+        processors
+      end
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
     #
-    #     unregister_bundle_processor 'text/css', Sprockets::CharsetNormalizer
+    #     unregister_bundle_processor 'application/javascript', Sprockets::DirectiveProcessor
     #
     def unregister_bundle_processor(mime_type, klass)
       if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = @bundle_processors[mime_type].detect { |cls|
+        klass = bundle_processors[mime_type].detect { |cls|
           cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
         }
       end
 
-      @bundle_processors[mime_type].delete(klass)
+      mutate_hash_config(:bundle_processors, mime_type) do |processors|
+        processors.delete(klass)
+        processors
+      end
     end
 
     # Internal: Run processors on filename and data.
     #
     # Returns Hash.
-    def process(processors, filename, logical_path, content_type, data)
+    def process(processors, filename, load_path, name, content_type, data)
       metadata = {}
 
       input = {
         environment: self,
         cache: cache,
         filename: filename,
-        logical_path: logical_path.chomp(File.extname(logical_path)),
+        load_path: load_path,
+        name: name,
         content_type: content_type,
         data: data,
         metadata: metadata
@@ -235,6 +193,7 @@ module Sprockets
 
       {
         source: data,
+        charset: data.encoding.name.downcase,
         length: data.bytesize,
         digest: digest_class.hexdigest(data),
         metadata: metadata
@@ -244,7 +203,7 @@ module Sprockets
     private
       def wrap_processor(klass, proc)
         if !proc
-          if klass.class == Sprockets::LazyProxy || klass.respond_to?(:call)
+          if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
             klass
           else
             LegacyTiltProcessor.new(klass)
@@ -254,6 +213,10 @@ module Sprockets
         else
           proc
         end
+      end
+
+      def unwrap_processor(processor)
+        processor.respond_to?(:unwrap) ? processor.unwrap : processor
       end
   end
 end

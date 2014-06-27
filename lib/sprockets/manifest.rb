@@ -184,10 +184,6 @@ module Sprockets
           else
             logger.info "Writing #{target}"
             asset.write_to target
-            # TODO: Needs an api to check if content type is text or binary
-            if environment.encoding_for_mime_type(asset.content_type) != Encoding::BINARY
-              asset.write_to "#{target}.gz"
-            end
           end
 
           filenames << filename
@@ -205,7 +201,6 @@ module Sprockets
     #
     def remove(filename)
       path = File.join(dir, filename)
-      gzip = "#{path}.gz"
       logical_path = files[filename]['logical_path']
 
       if assets[logical_path] == filename
@@ -214,7 +209,6 @@ module Sprockets
 
       files.delete(filename)
       FileUtils.rm(path) if File.exist?(path)
-      FileUtils.rm(gzip) if File.exist?(gzip)
 
       save
 

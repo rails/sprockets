@@ -15,14 +15,20 @@ module Sprockets
     #
     # Paths at the end of the `Array` have the least priority.
     def prepend_path(path)
-      @paths.unshift(File.expand_path(path, root))
+      mutate_config(:paths) do |paths|
+        path = File.expand_path(path, root).dup.freeze
+        paths.unshift(path)
+      end
     end
 
     # Append a `path` to the `paths` list.
     #
     # Paths at the beginning of the `Array` have a higher priority.
     def append_path(path)
-      @paths.push(File.expand_path(path, root))
+      mutate_config(:paths) do |paths|
+        path = File.expand_path(path, root).dup.freeze
+        paths.push(path)
+      end
     end
 
     # Clear all paths and start fresh.
@@ -31,18 +37,78 @@ module Sprockets
     # completely wipe the paths list and reappend them in the order
     # you want.
     def clear_paths
-      @paths.clear
+      mutate_config(:paths) do |paths|
+        paths.clear
+      end
     end
 
-    # Returns an `Array` of extensions.
+    # Public: Iterate over every file under all load paths.
     #
-    # These extensions maybe omitted from logical path searches.
-    #
-    #     # => [".js", ".css", ".coffee", ".sass", ...]
-    #
-    attr_reader :extensions
+    # Returns Enumerator if no block is given.
+    def each_file
+      return to_enum(__method__) unless block_given?
 
-    attr_reader :extension_pattern
+      paths.each do |root|
+        stat_tree(root).each do |filename, stat|
+          if stat.file?
+            yield filename
+          end
+        end
+      end
+
+      nil
+    end
+
+    # Finds the expanded real path for a given logical path by
+    # searching the environment's paths.
+    #
+    #     resolve("application.js")
+    #     # => "/path/to/app/javascripts/application.js.coffee"
+    #
+    # A `FileNotFound` exception is raised if the file does not exist.
+    def resolve(path, options = {})
+      resolve_all(path, options) do |filename|
+        return filename
+      end
+
+      accept = options[:accept] || options[:content_type]
+      message = "couldn't find file '#{path}'"
+      message << " with content type '#{accept}'" if accept
+      raise FileNotFound, message
+    end
+
+    def resolve_in_load_path(load_path, logical_path, options = {})
+      if !self.paths.include?(load_path.to_s)
+        raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
+      end
+
+      resolve_all_under_load_path(load_path, logical_path, options) do |filename|
+        return filename
+      end
+
+      accept = options[:accept] || options[:content_type]
+      message = "couldn't find file '#{logical_path}' under '#{load_path}'"
+      message << " with content type '#{accept}'" if accept
+      raise FileNotFound, message
+    end
+
+    def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
+      return to_enum(__method__, load_path, logical_path, options) unless block_given?
+
+      # TODO: Review performance
+      logical_name, extname, _ = parse_path_extnames(logical_path)
+      logical_basename = File.basename(logical_name)
+
+      resolve_accept_options(extname, options).each do |accept|
+        path_matches(load_path, logical_name, logical_basename, extname) do |filename|
+          if has_asset?(filename, accept: accept)
+            yield filename
+          end
+        end
+      end
+
+      nil
+    end
 
     # Public: Finds the expanded real path for a given logical path by searching
     # the environment's paths. Includes all matching paths including fallbacks
@@ -62,25 +128,18 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      extnames = extensions_for(path)
-      extname = extnames[:format_extname]
-      format_content_type = mime_types(extname) if extname
-      content_type = options[:content_type] || format_content_type
+      # TODO: Review performance
+      logical_name, extname, _ = parse_path_extnames(path)
+      logical_basename = File.basename(logical_name)
 
-      if format_content_type && format_content_type != content_type
-        return
-      end
-
-      filter_content_type = proc do |filename|
-        if matches_content_type?(content_type, filename)
-          yield filename
+      resolve_accept_options(extname, options).each do |accept|
+        self.paths.each do |load_path|
+          path_matches(load_path, logical_name, logical_basename, extname) do |filename|
+            if has_asset?(filename, accept: accept)
+              yield filename
+            end
+          end
         end
-      end
-
-      if absolute_path?(path)
-        resolve_absolute_path(path, &filter_content_type)
-      else
-        resolve_all_logical_paths(path, extnames[:name], &filter_content_type)
       end
 
       nil
@@ -93,118 +152,114 @@ module Sprockets
       return to_enum(__method__) unless block_given?
 
       seen = Set.new
-      self.paths.each do |root|
-        stat_tree(root).each do |filename, stat|
-          if stat.file?
-            logical_path = logical_path_for(filename)
-            if !seen.include?(logical_path)
-              yield logical_path, filename
-              seen << logical_path
-            end
+
+      self.paths.each do |load_path|
+        stat_tree(load_path).each do |filename, stat|
+          next unless stat.file?
+
+          path = split_subpath(load_path, filename)
+          path, extname, _ = parse_path_extnames(path)
+          path = normalize_logical_path(path, extname)
+
+          if !seen.include?(path)
+            yield path, filename
+            seen << path
           end
         end
       end
 
       nil
     end
+    alias_method :each_logical_path, :logical_paths
 
     protected
-      # Internal: Reverse guess logical path for fully expanded path.
+      def resolve_accept_options(extname, options)
+        accepts = []
+
+        if types = options[:accept]
+          accepts += types.split(/\s*,\s*/)
+        end
+
+        # Deprecated :content_type option
+        if type = options[:content_type]
+          accepts << type
+        end
+
+        if extname && (type = mime_exts[extname])
+          if accepts.empty? || accepts.any? { |accept| match_mime_type?(type, accept) }
+            accepts.unshift(type)
+          else
+            return []
+          end
+        end
+
+        if accepts.empty?
+          accepts << '*/*'
+        end
+
+        accepts
+      end
+
+      # TODO: Should logical path normalization still be supported?
+      def normalize_logical_path(path, extname)
+        dirname, basename = File.split(path)
+        path = dirname if basename == 'index'
+        path += extname if extname
+        path
+      end
+
+      def path_matches(load_path, logical_name, logical_basename, extname, &block)
+        dirname = File.dirname(File.join(load_path, logical_name))
+        dirname_matches(dirname, "#{logical_basename}#{extname}", &block) if extname
+        dirname_matches(dirname, logical_basename, &block)
+        resolve_alternates(load_path, logical_name, &block)
+        dirname_matches(File.join(load_path, logical_name), "index", &block)
+      end
+
+      def dirname_matches(dirname, basename)
+        self.entries(dirname).each do |entry|
+          # TODO: Review performance
+          name = parse_path_extnames(entry)[0]
+          if basename == name
+            yield File.join(dirname, entry)
+          end
+        end
+      end
+
+      def resolve_alternates(load_path, logical_name)
+      end
+
+      # Internal: Returns the format extension and `Array` of engine extensions.
       #
-      # This has some known issues. For an example if a file is
-      # shaddowed in the path, but is required relatively, its logical
-      # path will be incorrect.
+      #     "foo.js.coffee.erb"
+      #     # => { format: ".js",
+      #            engines: [".coffee", ".erb"] }
       #
       # TODO: Review API and performance
       # TODO: logical_path only makes sense within the context of a mime type
-      def logical_path_for(filename)
-        _, path = paths_split(self.paths, filename)
-        if path
-          extnames = extensions_for(path)
+      def parse_path_extnames(path)
+        format_extname  = nil
+        engine_extnames = []
+        len = path.length
 
-          path = extnames[:name]
-          path = path.sub(/\/index$/, '') if File.basename(path) == 'index'
-
-          if extnames[:format_extname]
-            path += extnames[:format_extname]
+        path_extnames(path).reverse_each do |extname|
+          if transformers[mime_exts[extname]].any?
+            # TODO: Why pick the first mime type
+            format_mime_type = transformers[mime_exts[extname]].keys.first
+            format_extname = mime_exts.key(format_mime_type)
+            engine_extnames.unshift(extname)
+            len -= extname.length
+          elsif mime_exts.key?(extname)
+            format_extname = extname
+            len -= extname.length
+            break
           else
-            extnames[:mime_types].each do |mime_type|
-              # TODO: Why pick the first mime type
-              if format_mime_type = @transformers[mime_type].keys.first
-                # TODO: Reverse mime type look is fishy
-                format_extname = @mime_types.key(format_mime_type)
-                path += format_extname
-                break
-              end
-            end
-          end
-
-          path
-        else
-          raise FileOutsidePaths, "#{filename} isn't in paths: #{self.paths.join(', ')}"
-        end
-      end
-
-      # Internal: Resolve absolute path to ensure it exists and is in the
-      # load path.
-      #
-      # filename - String
-      # options  - Hash (default: {})
-      #
-      # Returns String filename or nil
-      def resolve_absolute_path(filename, &block)
-        base_path, logical_path = paths_split(self.paths, filename)
-        if base_path && logical_path
-          dirname, basename = File.split(filename)
-          path_matches(dirname, basename, &block)
-        end
-      end
-
-      def path_matches(dirname, basename)
-        self.entries(dirname).each do |entry|
-          if entry.start_with?(basename)
-            if entry[basename.length..-1] =~ @extension_pattern
-              fn = File.join(dirname, entry)
-              stat = self.stat(fn)
-              if stat && stat.file?
-                yield fn
-              end
-            end
+            break
           end
         end
-      end
 
-      # Internal: Resolve logical path in load paths.
-      #
-      # logical_path - String
-      # options      - Hash (default: {})
-      # block
-      #   filename - String or nil
-      #
-      # Returns nothing.
-      def resolve_all_logical_paths(logical_path, path_without_extname)
-        paths = [logical_path]
-        paths << path_without_extname if path_without_extname != logical_path
-
-        # optimization: bower.json can only be nested one level deep
-        if !path_without_extname.index('/')
-          paths << File.join(path_without_extname, "bower.json")
-        end
-
-        paths << File.join(path_without_extname, "index")
-
-        paths.each do |path|
-          dirname, basename = File.split(path)
-          @paths.each do |base_path|
-            path_matches(File.expand_path(dirname, base_path), basename) do |filename|
-              expand_bower_path(filename) do |bower_path|
-                yield bower_path
-              end
-
-              yield filename
-            end
-          end
-        end
+        name = path[0, len]
+        return [name, format_extname, engine_extnames]
       end
   end
 end

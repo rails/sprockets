@@ -1,4 +1,4 @@
-require 'sprockets/lazy_proxy'
+require 'sprockets/lazy_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
@@ -26,6 +26,28 @@ module Sprockets
   #     Sprockets.register_engine '.sass', SassTemplate
   #
   module Engines
+    attr_reader :transformers
+
+    def register_transformer(from, to, processor)
+      mutate_hash_config(:transformers, from) do |transformers|
+        transformers.merge(to => processor)
+      end
+    end
+
+    # Internal: Find and load engines by extension.
+    #
+    # extnames - Array of String extnames
+    #
+    # Returns Array of Procs.
+    def unwrap_engines(extnames)
+      extnames.map { |ext|
+        # TODO: Why just any extname works
+        transformers[mime_exts[ext]].values.first
+      }.map { |engine|
+        unwrap_processor(engine)
+      }
+    end
+
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
@@ -33,38 +55,16 @@ module Sprockets
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @extensions.push(ext)
 
-      from = registered_mime_types[ext]
+      from = mime_exts[ext]
       if from.nil?
         from = "sprockets/#{ext.sub(/^\./, '')}"
-        register_mime_type(from, ext)
+        register_mime_type(from, extensions: [ext])
       end
 
       to = klass.respond_to?(:default_mime_type) && klass.default_mime_type ?
         klass.default_mime_type : "*/*"
       register_transformer(from, to, LegacyTiltProcessor.new(klass))
     end
-
-    private
-      # Internal: Returns implicit engine content type.
-      #
-      # `.coffee` files carry an implicit `application/javascript`
-      # content type.
-      def engine_content_type_for(extnames)
-        extnames.each do |extname|
-          mime_type2 = @mime_types[extname]
-          # TODO: Picking the first key doesn't make much sense
-          if mime_type = @transformers[mime_type2].keys.first
-            return mime_type
-          end
-        end
-        nil
-      end
-
-      def deep_copy_hash(hash)
-        initial = Hash.new { |h, k| h[k] = [] }
-        hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }
-      end
   end
 end
