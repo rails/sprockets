@@ -217,6 +217,7 @@ module EnvironmentTests
     assert_equal 'deflate', asset.encoding
     assert_equal [43, 75, 44, 82, 112, 79, 204, 201], asset.to_s.bytes.take(8)
     assert_equal 20, asset.length
+    assert_equal "cc7336c29eab6a34b0b36f486bb52a31cb63dac0", asset.digest
   end
 
   test "find gzipped asset" do
@@ -224,6 +225,7 @@ module EnvironmentTests
     assert_equal 'gzip', asset.encoding
     assert_equal [31, 139, 8, 0], asset.to_s.bytes.take(4)
     assert_equal 38, asset.length
+    assert_equal "3eba6cbc64c8593e0a693e1c32a7681ca36b2b32", asset.digest
   end
 
   test "find base64 asset" do
@@ -231,6 +233,7 @@ module EnvironmentTests
     assert_equal 'base64', asset.encoding
     assert_equal "dmFyIEdh", asset.to_s[0, 8]
     assert_equal 24, asset.length
+    assert_equal "6a6306c32b6a3028f3c41c36dfbabc343605417d", asset.digest
   end
 
   test "find asset by etag" do
