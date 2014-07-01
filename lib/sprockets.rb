@@ -84,7 +84,7 @@ module Sprockets
   # Common font types
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
-  register_mime_type 'application/x-font-woff', extensions: ['.woff']
+  register_mime_type 'application/font-woff', extensions: ['.woff']
 
   # HTTP content encodings
   register_encoding :deflate, EncodingUtils::DEFLATE
