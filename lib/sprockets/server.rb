@@ -184,7 +184,7 @@ module Sprockets
 
       # Returns a 304 Not Modified response tuple
       def not_modified_response(asset, env)
-        [ 304, {}, [] ]
+        [ 304, cache_headers(env, asset), [] ]
       end
 
       # Returns a 200 OK response tuple
@@ -192,42 +192,49 @@ module Sprockets
         [ 200, headers(env, asset, asset.length), asset ]
       end
 
-      def headers(env, asset, length)
-        Hash.new.tap do |headers|
-          # Set content encoding
-          if asset.encoding
-            headers["Content-Encoding"] = asset.encoding
-          end
+      def cache_headers(env, asset)
+        headers = {}
 
-          # Set content length header
-          headers["Content-Length"] = length.to_s
+        # Set caching headers
+        headers["Cache-Control"]  = "public"
+        headers["Last-Modified"]  = asset.mtime.httpdate
+        headers["ETag"]           = etag(asset)
 
-          # Set content type header
-          if type = asset.content_type
-            # Set charset param for text/* mime types
-            if type.start_with?("text/") && asset.charset
-              type += "; charset=#{asset.charset}"
-            end
-            headers["Content-Type"] = type
-          end
+        # If the request url contains a fingerprint, set a long
+        # expires on the response
+        if path_fingerprint(env["PATH_INFO"])
+          headers["Cache-Control"] << ", max-age=31536000"
 
-          # Set caching headers
-          headers["Cache-Control"]  = "public"
-          headers["Last-Modified"]  = asset.mtime.httpdate
-          headers["ETag"]           = etag(asset)
-
-          # If the request url contains a fingerprint, set a long
-          # expires on the response
-          if path_fingerprint(env["PATH_INFO"])
-            headers["Cache-Control"] << ", max-age=31536000"
-
-          # Otherwise set `must-revalidate` since the asset could be modified.
-          else
-            headers["Cache-Control"] << ", must-revalidate"
-          end
-
-          headers["Vary"] = "Accept-Encoding"
+        # Otherwise set `must-revalidate` since the asset could be modified.
+        else
+          headers["Cache-Control"] << ", must-revalidate"
         end
+
+        headers["Vary"] = "Accept-Encoding"
+        headers
+      end
+
+      def headers(env, asset, length)
+        headers = {}
+
+        # Set content encoding
+        if asset.encoding
+          headers["Content-Encoding"] = asset.encoding
+        end
+
+        # Set content length header
+        headers["Content-Length"] = length.to_s
+
+        # Set content type header
+        if type = asset.content_type
+          # Set charset param for text/* mime types
+          if type.start_with?("text/") && asset.charset
+            type += "; charset=#{asset.charset}"
+          end
+          headers["Content-Type"] = type
+        end
+
+        headers.merge(cache_headers(env, asset))
       end
 
       # Gets digest fingerprint.

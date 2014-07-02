@@ -176,16 +176,28 @@ class TestServer < Sprockets::TestCase
   end
 
   test "not modified partial response when etags match" do
-    get "/assets/application.js?body=1"
+    get "/assets/application.js"
     assert_equal 200, last_response.status
-    etag = last_response.headers['ETag']
+    etag, last_modified, cache_control, expires, vary = last_response.headers.values_at(
+      'ETag', 'Last-Modified', 'Cache-Control', 'Expires', 'Vary'
+    )
 
-    get "/assets/application.js?body=1", {},
+    get "/assets/application.js", {},
       'HTTP_IF_NONE_MATCH' => etag
 
     assert_equal 304, last_response.status
-    assert_equal nil, last_response.headers['Content-Type']
-    assert_equal nil, last_response.headers['Content-Length']
+
+    # Allow 304 headers
+    assert_equal cache_control, last_response.headers['Cache-Control']
+    assert_equal etag, last_response.headers['ETag']
+    assert_equal last_modified, last_response.headers['Last-Modified']
+    assert_equal expires, last_response.headers['Expires']
+    assert_equal vary, last_response.headers['Vary']
+
+    # Disallowed 304 headers
+    refute last_response.headers['Content-Type']
+    refute last_response.headers['Content-Length']
+    refute last_response.headers['Content-Encoding']
   end
 
   test "if sources didnt change the server shouldnt rebundle" do
