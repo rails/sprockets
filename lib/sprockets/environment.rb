@@ -50,8 +50,6 @@ module Sprockets
 
     protected
       def expire_cache!
-        # Clear digest to be recomputed
-        @digest = nil
       end
   end
 end
