@@ -96,6 +96,18 @@ class TestServer < Sprockets::TestCase
     assert_equal "var foo;\n", last_response.body
   end
 
+  test "content encoded etag is distinct from unencoded etag" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'identity'
+    assert_equal 200, last_response.status
+    refute last_response.headers['Content-Encoding']
+    assert etag = last_response.headers['ETag']
+
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    refute_equal etag, last_response.headers['ETag']
+  end
+
   test "serve single source file from cached environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
