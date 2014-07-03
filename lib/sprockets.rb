@@ -51,6 +51,7 @@ module Sprockets
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
+  @context_class     = Context
 
   require 'logger'
   self.logger = Logger.new($stderr)

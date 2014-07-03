@@ -14,9 +14,6 @@ module Sprockets
     def initialize(root = ".")
       @root = File.expand_path(root)
 
-      # Create a safe `Context` subclass to mutate
-      @context_class = Class.new(Context)
-
       # Set the default digest
       @digest_class = Digest::SHA1
       @version = ''

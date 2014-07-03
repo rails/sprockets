@@ -10,6 +10,7 @@ module Sprockets
 
     def initialize_configuration(parent)
       @logger            = parent.logger
+      @context_class     = Class.new(parent.context_class)
       @paths             = parent.paths
       @mime_types        = parent.mime_types
       @mime_exts         = parent.mime_exts
@@ -24,6 +25,17 @@ module Sprockets
 
     # Get and set `Logger` instance.
     attr_accessor :logger
+
+    # Deprecated: Get `Context` class.
+    #
+    # This class maybe mutated and mixed in with custom helpers.
+    #
+    #     environment.context_class.instance_eval do
+    #       include MyHelpers
+    #       def asset_url; end
+    #     end
+    #
+    attr_reader :context_class
 
     private
       def mutate_config(sym)

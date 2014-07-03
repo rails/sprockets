@@ -47,17 +47,6 @@ module Sprockets
       @version = version
     end
 
-    # Get `Context` class.
-    #
-    # This class maybe mutated and mixed in with custom helpers.
-    #
-    #     environment.context_class.instance_eval do
-    #       include MyHelpers
-    #       def asset_url; end
-    #     end
-    #
-    attr_reader :context_class
-
     # Get persistent cache store
     attr_reader :cache
 
