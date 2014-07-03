@@ -50,6 +50,7 @@ class TestServer < Sprockets::TestCase
   test "serve gzip'd source file" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
     assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -59,6 +60,7 @@ class TestServer < Sprockets::TestCase
   test "serve deflate'd source file" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'deflate'
     assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
     assert_equal "deflate", last_response.headers['Content-Encoding']
     assert_equal "11", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -68,6 +70,7 @@ class TestServer < Sprockets::TestCase
   test "serve gzip'd static file" do
     get "/assets/hello.txt", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
     assert_equal 200, last_response.status
+    assert_equal "text/plain; charset=utf-8", last_response.headers['Content-Type']
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "53", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -77,6 +80,7 @@ class TestServer < Sprockets::TestCase
   test "ignore unknown encoding and fallback to gzip" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'sdch, gzip'
     assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
