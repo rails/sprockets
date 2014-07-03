@@ -13,6 +13,7 @@ module Sprockets
       @version           = parent.version
       @digest_class      = parent.digest_class
       @context_class     = Class.new(parent.context_class)
+      @root              = parent.root
       @paths             = parent.paths
       @mime_types        = parent.mime_types
       @mime_exts         = parent.mime_exts

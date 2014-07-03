@@ -10,10 +10,8 @@ module Sprockets
     #     env = Environment.new(Rails.root)
     #
     def initialize(root = ".")
-      @root = File.expand_path(root)
-
       initialize_configuration(Sprockets)
-
+      @root = File.expand_path(root)
       self.cache = Cache::MemoryStore.new
 
       yield self if block_given?
