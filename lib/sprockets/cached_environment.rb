@@ -12,11 +12,9 @@ module Sprockets
   # `Environment#cached`.
   class CachedEnvironment < Base
     def initialize(environment)
-      # Copy environment attributes
-      @cache         = environment.cache
-
       initialize_configuration(environment)
 
+      @cache    = environment.cache
       @stats    = Hash.new { |h, k| h[k] = _stat(k) }
       @entries  = Hash.new { |h, k| h[k] = _entries(k) }
     end
