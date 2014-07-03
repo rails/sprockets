@@ -638,19 +638,19 @@ class TestCached < Sprockets::TestCase
   end
 
   test "does not allow new mime types to be added" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.register_mime_type "application/javascript", ".jst"
     end
   end
 
   test "does not allow new bundle processors to be added" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.register_bundle_processor 'text/css', WhitespaceProcessor
     end
   end
 
   test "does not allow bundle processors to be removed" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.unregister_bundle_processor 'text/css', WhitespaceProcessor
     end
   end
@@ -665,13 +665,13 @@ class TestCached < Sprockets::TestCase
   end
 
   test "does not allow css compressor to be changed" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.css_compressor = WhitespaceCompressor
     end
   end
 
   test "does not allow js compressor to be changed" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.js_compressor = WhitespaceCompressor
     end
   end

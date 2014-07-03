@@ -24,7 +24,6 @@ module Sprockets
     #     environment.digest_class = Digest::MD5
     #
     def digest_class=(klass)
-      expire_cache!
       @digest_class = klass
     end
 
@@ -45,7 +44,6 @@ module Sprockets
     #     environment.version = '2.0'
     #
     def version=(version)
-      expire_cache!
       @version = version
     end
 
@@ -72,7 +70,6 @@ module Sprockets
     # setters. Either `get(key)`/`set(key, value)`,
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
-      expire_cache!
       @cache = Cache.new(cache, logger)
     end
 
@@ -179,12 +176,6 @@ module Sprockets
     end
 
     protected
-      # Clear cached environment after mutating state. Must be implemented by
-      # the subclass.
-      def expire_cache!
-        raise NotImplementedError
-      end
-
       def build_asset_hash_for_digest(filename, digest, options)
         asset_hash = build_asset_hash(filename, options)
         if asset_hash[:digest] == digest
@@ -268,11 +259,6 @@ module Sprockets
             dependency_digest: dependencies_hexdigest([asset[:filename]]),
           }
         })
-      end
-
-    private
-      def mutate_config(*args)
-        super.tap { expire_cache! }
       end
   end
 end

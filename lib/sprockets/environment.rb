@@ -28,7 +28,6 @@ module Sprockets
       initialize_configuration(Sprockets)
 
       self.cache = Cache::MemoryStore.new
-      expire_cache!
 
       yield self if block_given?
     end
@@ -47,9 +46,5 @@ module Sprockets
     def find_asset(path, options = {})
       cached.find_asset(path, options)
     end
-
-    protected
-      def expire_cache!
-      end
   end
 end

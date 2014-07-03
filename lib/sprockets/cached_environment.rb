@@ -45,12 +45,6 @@ module Sprockets
     end
 
     protected
-      # Cache is immutable, any methods that try to clear the cache
-      # should bomb.
-      def expire_cache!
-        raise TypeError, "can't modify immutable cached environment"
-      end
-
       def asset_hash_cache_key(filename, digest, options)
         [
           'asset-hash',
@@ -107,6 +101,13 @@ module Sprockets
         end
 
         nil
+      end
+
+    private
+      # Cache is immutable, any methods that try to clear the cache
+      # should bomb.
+      def mutate_config(*args)
+        raise RuntimeError, "can't modify immutable cached environment"
       end
   end
 end
