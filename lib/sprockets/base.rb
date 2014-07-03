@@ -12,21 +12,6 @@ module Sprockets
     include Server
     include Bower
 
-    # Returns a `Digest` implementation class.
-    #
-    # Defaults to `Digest::SHA1`.
-    attr_reader :digest_class
-
-    # Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::SHA1` or
-    # `Digest::MD5`.
-    #
-    #     environment.digest_class = Digest::MD5
-    #
-    def digest_class=(klass)
-      @digest_class = klass
-    end
-
     # The `Environment#version` is a custom value used for manually
     # expiring all asset caches.
     #

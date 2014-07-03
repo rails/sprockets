@@ -2,8 +2,6 @@ require 'sprockets/base'
 require 'sprockets/context'
 require 'sprockets/cached_environment'
 
-require 'digest/sha1'
-
 module Sprockets
   class Environment < Base
     # `Environment` should initialized with your application's root
@@ -14,8 +12,6 @@ module Sprockets
     def initialize(root = ".")
       @root = File.expand_path(root)
 
-      # Set the default digest
-      @digest_class = Digest::SHA1
       @version = ''
 
       initialize_configuration(Sprockets)

@@ -10,6 +10,7 @@ module Sprockets
 
     def initialize_configuration(parent)
       @logger            = parent.logger
+      @digest_class      = parent.digest_class
       @context_class     = Class.new(parent.context_class)
       @paths             = parent.paths
       @mime_types        = parent.mime_types
@@ -25,6 +26,21 @@ module Sprockets
 
     # Get and set `Logger` instance.
     attr_accessor :logger
+
+    # Returns a `Digest` implementation class.
+    #
+    # Defaults to `Digest::SHA1`.
+    attr_reader :digest_class
+
+    # Assign a `Digest` implementation class. This maybe any Ruby
+    # `Digest::` implementation such as `Digest::SHA1` or
+    # `Digest::MD5`.
+    #
+    #     environment.digest_class = Digest::MD5
+    #
+    def digest_class=(klass)
+      @digest_class = klass
+    end
 
     # Deprecated: Get `Context` class.
     #

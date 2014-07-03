@@ -14,7 +14,6 @@ module Sprockets
     def initialize(environment)
       # Copy environment attributes
       @cache         = environment.cache
-      @digest_class  = environment.digest_class
       @version       = environment.version
       @root          = environment.root
 

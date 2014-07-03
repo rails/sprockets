@@ -53,6 +53,10 @@ module Sprockets
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
   @context_class     = Context
 
+  # Set the default digest
+  require 'digest/sha1'
+  self.digest_class = Digest::SHA1
+
   require 'logger'
   self.logger = Logger.new($stderr)
   self.logger.level = Logger::FATAL
