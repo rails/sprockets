@@ -212,6 +212,26 @@ module EnvironmentTests
     assert_equal ".qunit {}\n", @env["qunit.css"].to_s
   end
 
+  test "find erb assets" do
+    assert asset = @env.find_asset("erb/a")
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("erb/b")
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("erb/c")
+    assert_equal "application/javascript", asset.content_type
+
+    assert asset = @env.find_asset("erb/d")
+    assert_equal "text/css", asset.content_type
+
+    assert asset = @env.find_asset("erb/e")
+    assert_equal "text/html", asset.content_type
+
+    assert asset = @env.find_asset("erb/f")
+    assert_equal "text/yaml", asset.content_type
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
@@ -298,7 +318,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path
   end
 
-  FILES_IN_PATH = 43
+  FILES_IN_PATH = 49
 
   test "iterate over each logical path" do
     paths = []

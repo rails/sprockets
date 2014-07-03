@@ -82,7 +82,7 @@ class TestPathUtils < Sprockets::TestCase
   end
 
   test "stat directory" do
-    assert_equal 27, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
+    assert_equal 28, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
     assert_equal fixture_path("default/app"), path
     assert_kind_of File::Stat, stat
@@ -91,7 +91,7 @@ class TestPathUtils < Sprockets::TestCase
   end
 
   test "stat tree" do
-    assert_equal 53, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
+    assert_equal 60, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first
     assert_equal fixture_path("default/app"), path
     assert_kind_of File::Stat, stat

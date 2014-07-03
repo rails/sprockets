@@ -118,5 +118,5 @@ module Sprockets
   register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 
   # Other
-  register_engine '.erb',    LazyProcessor.new { ERBTemplate }
+  register_engine '.erb',    LazyProcessor.new { ERBTemplate }, mime_type: 'text/plain'
 end
