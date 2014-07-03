@@ -81,8 +81,10 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
+  FILES_IN_DEFAULT = Dir["#{FIXTURE_ROOT}/default/*"].size
+
   test "stat directory" do
-    assert_equal 28, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
+    assert_equal FILES_IN_DEFAULT, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
     assert_equal fixture_path("default/app"), path
     assert_kind_of File::Stat, stat
@@ -90,8 +92,11 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
   end
 
+  SYMLINKS_UNDER_DEFAULT = 6
+  FILES_UNDER_DEFAULT = Dir["#{FIXTURE_ROOT}/default/**/*"].size + SYMLINKS_UNDER_DEFAULT
+
   test "stat tree" do
-    assert_equal 60, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
+    assert_equal FILES_UNDER_DEFAULT, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
     path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first
     assert_equal fixture_path("default/app"), path
     assert_kind_of File::Stat, stat
