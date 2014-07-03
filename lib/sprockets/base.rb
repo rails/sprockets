@@ -47,9 +47,6 @@ module Sprockets
       @version = version
     end
 
-    # Get and set `Logger` instance.
-    attr_accessor :logger
-
     # Get `Context` class.
     #
     # This class maybe mutated and mixed in with custom helpers.

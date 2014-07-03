@@ -52,6 +52,10 @@ module Sprockets
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
 
+  require 'logger'
+  self.logger = Logger.new($stderr)
+  self.logger.level = Logger::FATAL
+
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE

@@ -3,7 +3,6 @@ require 'sprockets/context'
 require 'sprockets/cached_environment'
 
 require 'digest/sha1'
-require 'logger'
 
 module Sprockets
   class Environment < Base
@@ -14,9 +13,6 @@ module Sprockets
     #
     def initialize(root = ".")
       @root = File.expand_path(root)
-
-      self.logger = Logger.new($stderr)
-      self.logger.level = Logger::FATAL
 
       # Create a safe `Context` subclass to mutate
       @context_class = Class.new(Context)

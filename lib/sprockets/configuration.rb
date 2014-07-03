@@ -9,6 +9,7 @@ module Sprockets
     include Paths, Mime, Engines, Processing, Compressing
 
     def initialize_configuration(parent)
+      @logger            = parent.logger
       @paths             = parent.paths
       @mime_types        = parent.mime_types
       @mime_exts         = parent.mime_exts
@@ -20,6 +21,9 @@ module Sprockets
       @bundle_processors = parent.bundle_processors
       @compressors       = parent.compressors
     end
+
+    # Get and set `Logger` instance.
+    attr_accessor :logger
 
     private
       def mutate_config(sym)
