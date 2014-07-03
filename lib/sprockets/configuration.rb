@@ -10,6 +10,7 @@ module Sprockets
 
     def initialize_configuration(parent)
       @logger            = parent.logger
+      @version           = parent.version
       @digest_class      = parent.digest_class
       @context_class     = Class.new(parent.context_class)
       @paths             = parent.paths
@@ -26,6 +27,26 @@ module Sprockets
 
     # Get and set `Logger` instance.
     attr_accessor :logger
+
+    # The `Environment#version` is a custom value used for manually
+    # expiring all asset caches.
+    #
+    # Sprockets is able to track most file and directory changes and
+    # will take care of expiring the cache for you. However, its
+    # impossible to know when any custom helpers change that you mix
+    # into the `Context`.
+    #
+    # It would be wise to increment this value anytime you make a
+    # configuration change to the `Environment` object.
+    attr_reader :version
+
+    # Assign an environment version.
+    #
+    #     environment.version = '2.0'
+    #
+    def version=(version)
+      mutate_config(:version) { version.dup }
+    end
 
     # Returns a `Digest` implementation class.
     #

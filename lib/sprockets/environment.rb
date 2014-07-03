@@ -12,8 +12,6 @@ module Sprockets
     def initialize(root = ".")
       @root = File.expand_path(root)
 
-      @version = ''
-
       initialize_configuration(Sprockets)
 
       self.cache = Cache::MemoryStore.new

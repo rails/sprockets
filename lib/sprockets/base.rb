@@ -12,26 +12,6 @@ module Sprockets
     include Server
     include Bower
 
-    # The `Environment#version` is a custom value used for manually
-    # expiring all asset caches.
-    #
-    # Sprockets is able to track most file and directory changes and
-    # will take care of expiring the cache for you. However, its
-    # impossible to know when any custom helpers change that you mix
-    # into the `Context`.
-    #
-    # It would be wise to increment this value anytime you make a
-    # configuration change to the `Environment` object.
-    attr_reader :version
-
-    # Assign an environment version.
-    #
-    #     environment.version = '2.0'
-    #
-    def version=(version)
-      @version = version
-    end
-
     # Get persistent cache store
     attr_reader :cache
 

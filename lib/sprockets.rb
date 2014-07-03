@@ -52,14 +52,15 @@ module Sprockets
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
   @context_class     = Context
+  @version           = ''
 
   # Set the default digest
   require 'digest/sha1'
-  self.digest_class = Digest::SHA1
+  @digest_class = Digest::SHA1
 
   require 'logger'
-  self.logger = Logger.new($stderr)
-  self.logger.level = Logger::FATAL
+  @logger = Logger.new($stderr)
+  @logger.level = Logger::FATAL
 
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
