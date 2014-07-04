@@ -220,15 +220,23 @@ module Sprockets
     # Cleanup old assets in the compile directory. By default it will
     # keep the latest version plus 2 backups.
     def clean(keep = 2)
-      self.assets.keys.each do |logical_path|
-        # Get assets sorted by ctime, newest first
-        assets = backups_for(logical_path)
+      asset_versions = files.group_by { |_, attrs| attrs['logical_path'] }
+
+      asset_versions.each do |logical_path, versions|
+        current = assets[logical_path]
+
+        backups = versions.reject { |path, _|
+          path == current
+        }.sort_by { |_, attrs|
+          # Sort by timestamp
+          Time.parse(attrs['mtime'])
+        }.reverse
 
         # Keep the last N backups
-        assets = assets[keep..-1] || []
+        backups = backups[keep..-1] || []
 
         # Remove old assets
-        assets.each { |path, _| remove(path) }
+        backups.each { |path, _| remove(path) }
       end
     end
 
@@ -240,21 +248,6 @@ module Sprockets
     end
 
     protected
-      # Finds all the backup assets for a logical path. The latest
-      # version is always excluded. The return array is sorted by the
-      # assets mtime in descending order (Newest to oldest).
-      def backups_for(logical_path)
-        files.select { |filename, attrs|
-          # Matching logical paths
-          attrs['logical_path'] == logical_path &&
-            # Excluding whatever asset is the current
-            assets[logical_path] != filename
-        }.sort_by { |filename, attrs|
-          # Sort by timestamp
-          Time.parse(attrs['mtime'])
-        }.reverse
-      end
-
       # Basic wrapper around Environment#find_asset. Logs compile time.
       def find_asset(logical_path)
         asset = nil
