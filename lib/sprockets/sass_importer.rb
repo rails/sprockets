@@ -3,7 +3,7 @@ require 'sass'
 module Sprockets
   # This custom importer that tracks all imported filenames during
   # compile.
-  class SassImporter < Sass::Importers::Filesystem
+  class SassImporter < ::Sass::Importers::Filesystem
     attr_reader :imported_filenames
 
     def initialize(*args)
