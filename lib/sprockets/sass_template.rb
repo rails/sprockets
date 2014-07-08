@@ -28,13 +28,6 @@ module Sprockets
     #                   change after code changes are made to Sass Functions.
     #
     def initialize(options = {})
-      unless ::Sass::Script::Functions < SassFunctions
-        # Install custom functions. It'd be great if this didn't need to
-        # be installed globally, but could be passed into Engine as an
-        # option.
-        ::Sass::Script::Functions.send :include, SassFunctions
-      end
-
       @cache_version = options[:cache_version]
     end
 
@@ -54,7 +47,9 @@ module Sprockets
       }
 
       engine = ::Sass::Engine.new(input[:data], options)
-      css = engine.render
+      css = SassFunctions.with(::Sass::Script::Functions) do
+        engine.render
+      end
 
       # Track all imported files
       engine.dependencies.map do |dependency|
@@ -94,6 +89,33 @@ module Sprockets
 
   # Internal: Functions injected into Sass environment.
   module SassFunctions
+    # Internal: Inject into target module for the duration of the block.
+    #
+    # mod - Module
+    #
+    # Returns result of block.
+    def self.with(mod)
+      old_methods = {}
+
+      self.instance_methods.each do |sym|
+        method = self.instance_method(sym)
+        if mod.method_defined?(sym)
+          old_methods[sym] = mod.instance_method(sym)
+        end
+        mod.send(:define_method, sym, method)
+      end
+
+      yield
+    ensure
+      self.instance_methods.each do |sym|
+        mod.send(:undef_method, sym)
+      end
+      old_methods.each do |sym, method|
+        mod.send(:define_method, sym, method)
+      end
+    end
+
+    # Public
     def asset_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value), :string)
     end

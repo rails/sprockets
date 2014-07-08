@@ -1,18 +1,53 @@
 require 'sprockets_test'
 
+silence_warnings do
+  require 'sass'
+end
+
 class TestBaseSass < Sprockets::TestCase
   CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
   COMPASS_PATH = File.join(FIXTURE_ROOT, 'compass')
 
-  def setup
-    silence_warnings do
-      require 'sass'
-    end
-  end
-
   def teardown
     FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
+  end
+end
+
+class TestNoSassFunction < TestBaseSass
+  module ::Sass::Script::Functions
+    def javascript_path(path)
+      Sass::Script::String.new("/js/#{path.value}", :string)
+    end
+
+    module Compass
+      def stylesheet_path(path)
+        Sass::Script::String.new("/css/#{path.value}", :string)
+      end
+    end
+    include Compass
+  end
+
+  test "aren't included globally" do
+    silence_warnings do
+      filename = fixture_path('sass/paths.scss')
+      assert data = File.read(filename)
+      engine = ::Sass::Engine.new(data, {
+        filename: filename,
+        syntax: :scss
+      })
+
+      assert_equal <<-EOS, engine.render
+div {
+  url: url(asset-path("foo.svg"));
+  url: url(image-path("foo.png"));
+  url: url(video-path("foo.mov"));
+  url: url(audio-path("foo.mp3"));
+  url: url(font-path("foo.woff"));
+  url: url("/js/foo.js");
+  url: url("/css/foo.css"); }
+      EOS
+    end
   end
 end
 
