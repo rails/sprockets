@@ -27,8 +27,13 @@ module Sprockets
     #   cache_version - String custom cache version. Used to force a cache
     #                   change after code changes are made to Sass Functions.
     #
-    def initialize(options = {})
+    def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
+
+      @functions = Module.new
+      @functions.send(:include, SassFunctions)
+      @functions.send(:include, options[:functions]) if options[:functions]
+      @functions.class_eval(&block) if block_given?
     end
 
     def call(input)
@@ -47,7 +52,8 @@ module Sprockets
       }
 
       engine = ::Sass::Engine.new(input[:data], options)
-      css = SassFunctions.with(::Sass::Script::Functions) do
+      raise unless ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
+      css = extend_module(::Sass::Script::Functions, @functions) do
         engine.render
       end
 
@@ -58,6 +64,33 @@ module Sprockets
 
       context.metadata.merge(data: css)
     end
+
+    private
+      # Internal: Inject into target module for the duration of the block.
+      #
+      # mod - Module
+      #
+      # Returns result of block.
+      def extend_module(base, mod)
+        old_methods = {}
+
+        mod.instance_methods.each do |sym|
+          method = mod.instance_method(sym)
+          if base.method_defined?(sym)
+            old_methods[sym] = base.instance_method(sym)
+          end
+          base.send(:define_method, sym, method)
+        end
+
+        yield
+      ensure
+        mod.instance_methods.each do |sym|
+          base.send(:undef_method, sym)
+        end
+        old_methods.each do |sym, method|
+          base.send(:define_method, sym, method)
+        end
+      end
   end
 
   class ScssTemplate < SassTemplate
@@ -88,101 +121,78 @@ module Sprockets
   end
 
   # Internal: Functions injected into Sass environment.
+  #
+  # Extending this module is not a public API.
   module SassFunctions
-    # Internal: Inject into target module for the duration of the block.
-    #
-    # mod - Module
-    #
-    # Returns result of block.
-    def self.with(mod)
-      old_methods = {}
-
-      self.instance_methods.each do |sym|
-        method = self.instance_method(sym)
-        if mod.method_defined?(sym)
-          old_methods[sym] = mod.instance_method(sym)
-        end
-        mod.send(:define_method, sym, method)
-      end
-
-      yield
-    ensure
-      self.instance_methods.each do |sym|
-        mod.send(:undef_method, sym)
-      end
-      old_methods.each do |sym, method|
-        mod.send(:define_method, sym, method)
-      end
+    # Public
+    def asset_path(path, options = {})
+      # raise NotImplementedError
+      ::Sass::Script::String.new(sprockets_context.asset_path(path.value, options), :string)
     end
 
     # Public
-    def asset_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value), :string)
-    end
-
-    # Public
-    def asset_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value) + ")")
+    def asset_url(path, options = {})
+      ::Sass::Script::String.new("url(#{asset_path(path, options).value})")
     end
 
     # Public
     def image_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value, type: :image), :string)
+      asset_path(path, type: :image)
     end
 
     # Public
     def image_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :image) + ")")
+      asset_url(path, type: :image)
     end
 
     # Public
     def video_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value, type: :video), :string)
+      asset_path(path, type: :video)
     end
 
     # Public
     def video_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :video) + ")")
+      asset_url(path, type: :video)
     end
 
     # Public
     def audio_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value, type: :audio), :string)
+      asset_path(path, type: :audio)
     end
 
     # Public
     def audio_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :audio) + ")")
+      asset_url(path, type: :audio)
     end
 
     # Public
     def font_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value, type: :font), :string)
+      asset_path(path, type: :font)
     end
 
     # Public
     def font_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :font) + ")")
+      asset_url(path, type: :font)
     end
 
     # Public
     def javascript_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value, type: :javascript), :string)
+      asset_path(path, type: :javascript)
     end
 
     # Public
     def javascript_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :javascript) + ")")
+      asset_url(path, type: :javascript)
     end
 
     # Public
     def stylesheet_path(path)
-      Sass::Script::String.new(sprockets_asset_path(path.value, type: :stylesheet), :string)
+      asset_path(path, type: :stylesheet)
     end
 
     # Public
     def stylesheet_url(path)
-      Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :stylesheet) + ")")
+      asset_url(path, type: :stylesheet)
     end
 
     # Public
@@ -190,16 +200,11 @@ module Sprockets
       if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
         sprockets_dependencies << asset.filename
         url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
-        Sass::Script::String.new("url(" + url + ")")
+        ::Sass::Script::String.new("url(" + url + ")")
       end
     end
 
     protected
-      # Internal
-      def sprockets_asset_path(path, options = {})
-        sprockets_context.asset_path(path, options)
-      end
-
       # Internal
       def sprockets_context
         options[:sprockets][:context]

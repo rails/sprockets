@@ -9,6 +9,7 @@ class TestBaseSass < Sprockets::TestCase
   COMPASS_PATH = File.join(FIXTURE_ROOT, 'compass')
 
   def teardown
+    refute ::Sass::Script::Functions.instance_methods.include?(:asset_path)
     FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
@@ -17,12 +18,12 @@ end
 class TestNoSassFunction < TestBaseSass
   module ::Sass::Script::Functions
     def javascript_path(path)
-      Sass::Script::String.new("/js/#{path.value}", :string)
+      ::Sass::Script::String.new("/js/#{path.value}", :string)
     end
 
     module Compass
       def stylesheet_path(path)
-        Sass::Script::String.new("/css/#{path.value}", :string)
+        ::Sass::Script::String.new("/css/#{path.value}", :string)
       end
     end
     include Compass
@@ -30,12 +31,18 @@ class TestNoSassFunction < TestBaseSass
 
   test "aren't included globally" do
     silence_warnings do
+      assert ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
+      assert ::Sass::Script::Functions.instance_methods.include?(:stylesheet_path)
+
       filename = fixture_path('sass/paths.scss')
       assert data = File.read(filename)
       engine = ::Sass::Engine.new(data, {
         filename: filename,
         syntax: :scss
       })
+
+      assert ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
+      assert ::Sass::Script::Functions.instance_methods.include?(:stylesheet_path)
 
       assert_equal <<-EOS, engine.render
 div {
@@ -267,12 +274,17 @@ end
 class TestSassFunctions < TestSprocketsSass
   def setup
     super
+    define_asset_path
+  end
 
-    @env.context_class.class_eval do
+  def define_asset_path
+    engine = Sprockets::ScssTemplate.new do
       def asset_path(path, options = {})
-        "/#{path}"
+        Sass::Script::String.new("/#{path.value}", :string)
       end
     end
+
+    @env.register_engine('.scss', engine)
   end
 
   test "path functions" do
@@ -306,5 +318,15 @@ div {
 div {
   url: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAMAAAAoyzS7AAAABlBMVEUFO2sAAADPfNHpAAAACklEQVQIW2NgAAAAAgABYkBPaAAAAABJRU5ErkJggg%3D%3D); }
     EOS
+  end
+end
+
+class TestLegacySassFunctions < TestSassFunctions
+  def define_asset_path
+    @env.context_class.class_eval do
+      def asset_path(path, options = {})
+        "/#{path}"
+      end
+    end
   end
 end
