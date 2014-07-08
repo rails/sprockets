@@ -98,58 +98,72 @@ module Sprockets
       Sass::Script::String.new(sprockets_asset_path(path.value), :string)
     end
 
+    # Public
     def asset_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value) + ")")
     end
 
+    # Public
     def image_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value, type: :image), :string)
     end
 
+    # Public
     def image_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :image) + ")")
     end
 
+    # Public
     def video_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value, type: :video), :string)
     end
 
+    # Public
     def video_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :video) + ")")
     end
 
+    # Public
     def audio_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value, type: :audio), :string)
     end
 
+    # Public
     def audio_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :audio) + ")")
     end
 
+    # Public
     def font_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value, type: :font), :string)
     end
 
+    # Public
     def font_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :font) + ")")
     end
 
+    # Public
     def javascript_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value, type: :javascript), :string)
     end
 
+    # Public
     def javascript_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :javascript) + ")")
     end
 
+    # Public
     def stylesheet_path(path)
       Sass::Script::String.new(sprockets_asset_path(path.value, type: :stylesheet), :string)
     end
 
+    # Public
     def stylesheet_url(path)
       Sass::Script::String.new("url(" + sprockets_asset_path(path.value, type: :stylesheet) + ")")
     end
 
+    # Public
     def asset_data_url(path)
       if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
         sprockets_dependencies << asset.filename
@@ -159,18 +173,22 @@ module Sprockets
     end
 
     protected
+      # Internal
       def sprockets_asset_path(path, options = {})
         sprockets_context.asset_path(path, options)
       end
 
+      # Internal
       def sprockets_context
         options[:sprockets][:context]
       end
 
+      # Internal
       def sprockets_environment
         options[:sprockets][:environment]
       end
 
+      # Internal
       def sprockets_dependencies
         options[:sprockets][:dependencies]
       end
