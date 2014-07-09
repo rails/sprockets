@@ -50,6 +50,7 @@ class TestServer < Sprockets::TestCase
   test "serve gzip'd source file" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
     assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -59,6 +60,7 @@ class TestServer < Sprockets::TestCase
   test "serve deflate'd source file" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'deflate'
     assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
     assert_equal "deflate", last_response.headers['Content-Encoding']
     assert_equal "11", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -68,6 +70,7 @@ class TestServer < Sprockets::TestCase
   test "serve gzip'd static file" do
     get "/assets/hello.txt", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
     assert_equal 200, last_response.status
+    assert_equal "text/plain; charset=utf-8", last_response.headers['Content-Type']
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "53", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -77,6 +80,7 @@ class TestServer < Sprockets::TestCase
   test "ignore unknown encoding and fallback to gzip" do
     get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'sdch, gzip'
     assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
     assert_equal "gzip", last_response.headers['Content-Encoding']
     assert_equal "29", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
@@ -90,6 +94,18 @@ class TestServer < Sprockets::TestCase
     assert_equal "9", last_response.headers['Content-Length']
     assert_equal "Accept-Encoding", last_response.headers['Vary']
     assert_equal "var foo;\n", last_response.body
+  end
+
+  test "content encoded etag is distinct from unencoded etag" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'identity'
+    assert_equal 200, last_response.status
+    refute last_response.headers['Content-Encoding']
+    assert etag = last_response.headers['ETag']
+
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    refute_equal etag, last_response.headers['ETag']
   end
 
   test "serve single source file from cached environment" do
@@ -176,16 +192,28 @@ class TestServer < Sprockets::TestCase
   end
 
   test "not modified partial response when etags match" do
-    get "/assets/application.js?body=1"
+    get "/assets/application.js"
     assert_equal 200, last_response.status
-    etag = last_response.headers['ETag']
+    etag, last_modified, cache_control, expires, vary = last_response.headers.values_at(
+      'ETag', 'Last-Modified', 'Cache-Control', 'Expires', 'Vary'
+    )
 
-    get "/assets/application.js?body=1", {},
+    get "/assets/application.js", {},
       'HTTP_IF_NONE_MATCH' => etag
 
     assert_equal 304, last_response.status
-    assert_equal nil, last_response.headers['Content-Type']
-    assert_equal nil, last_response.headers['Content-Length']
+
+    # Allow 304 headers
+    assert_equal cache_control, last_response.headers['Cache-Control']
+    assert_equal etag, last_response.headers['ETag']
+    assert_equal last_modified, last_response.headers['Last-Modified']
+    assert_equal expires, last_response.headers['Expires']
+    assert_equal vary, last_response.headers['Vary']
+
+    # Disallowed 304 headers
+    refute last_response.headers['Content-Type']
+    refute last_response.headers['Content-Length']
+    refute last_response.headers['Content-Encoding']
   end
 
   test "if sources didnt change the server shouldnt rebundle" do

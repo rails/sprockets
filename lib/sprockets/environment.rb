@@ -1,9 +1,5 @@
 require 'sprockets/base'
-require 'sprockets/context'
 require 'sprockets/cached_environment'
-
-require 'digest/sha1'
-require 'logger'
 
 module Sprockets
   class Environment < Base
@@ -13,23 +9,9 @@ module Sprockets
     #     env = Environment.new(Rails.root)
     #
     def initialize(root = ".")
-      @root = File.expand_path(root)
-
-      self.logger = Logger.new($stderr)
-      self.logger.level = Logger::FATAL
-
-      # Create a safe `Context` subclass to mutate
-      @context_class = Class.new(Context)
-
-      # Set the default digest
-      @digest_class = Digest::SHA1
-      @version = ''
-
       initialize_configuration(Sprockets)
-
+      @root = File.expand_path(root)
       self.cache = Cache::MemoryStore.new
-      expire_cache!
-
       yield self if block_given?
     end
 
@@ -47,11 +29,5 @@ module Sprockets
     def find_asset(path, options = {})
       cached.find_asset(path, options)
     end
-
-    protected
-      def expire_cache!
-        # Clear digest to be recomputed
-        @digest = nil
-      end
   end
 end

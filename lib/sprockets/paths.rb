@@ -99,7 +99,9 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(logical_path)
       logical_basename = File.basename(logical_name)
 
-      resolve_accept_options(extname, options).each do |accept|
+      accepts = parse_accept_options(extname, options[:accept], options[:content_type])
+
+      accepts.each do |accept|
         path_matches(load_path, logical_name, logical_basename, extname) do |filename|
           if has_asset?(filename, accept: accept)
             yield filename
@@ -132,8 +134,10 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
 
-      resolve_accept_options(extname, options).each do |accept|
-        self.paths.each do |load_path|
+      accepts = parse_accept_options(extname, options[:accept], options[:content_type])
+
+      self.paths.each do |load_path|
+        accepts.each do |accept|
           path_matches(load_path, logical_name, logical_basename, extname) do |filename|
             if has_asset?(filename, accept: accept)
               yield filename
@@ -173,17 +177,12 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
-      def resolve_accept_options(extname, options)
+      def parse_accept_options(extname, types, type = nil)
         accepts = []
-
-        if types = options[:accept]
-          accepts += types.split(/\s*,\s*/)
-        end
+        accepts += types.split(/\s*,\s*/) if types
 
         # Deprecated :content_type option
-        if type = options[:content_type]
-          accepts << type
-        end
+        accepts << type if type
 
         if extname && (type = mime_exts[extname])
           if accepts.empty? || accepts.any? { |accept| match_mime_type?(type, accept) }

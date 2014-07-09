@@ -12,16 +12,9 @@ module Sprockets
   # `Environment#cached`.
   class CachedEnvironment < Base
     def initialize(environment)
-      # Copy environment attributes
-      @logger        = environment.logger
-      @context_class = environment.context_class
-      @cache         = environment.cache
-      @digest_class  = environment.digest_class
-      @version       = environment.version
-      @root          = environment.root
-
       initialize_configuration(environment)
 
+      @cache    = environment.cache
       @stats    = Hash.new { |h, k| h[k] = _stat(k) }
       @entries  = Hash.new { |h, k| h[k] = _entries(k) }
     end
@@ -45,12 +38,6 @@ module Sprockets
     end
 
     protected
-      # Cache is immutable, any methods that try to clear the cache
-      # should bomb.
-      def expire_cache!
-        raise TypeError, "can't modify immutable cached environment"
-      end
-
       def asset_hash_cache_key(filename, digest, options)
         [
           'asset-hash',
@@ -107,6 +94,13 @@ module Sprockets
         end
 
         nil
+      end
+
+    private
+      # Cache is immutable, any methods that try to clear the cache
+      # should bomb.
+      def mutate_config(*args)
+        raise RuntimeError, "can't modify immutable cached environment"
       end
   end
 end

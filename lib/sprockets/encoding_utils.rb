@@ -35,6 +35,7 @@ module Sprockets
     def gzip(enum)
       io = StringIO.new
       gz = Zlib::GzipWriter.new(io, Zlib::BEST_COMPRESSION)
+      gz.mtime = 1
       enum.each { |chunk| gz << chunk }
       gz.finish
       io.string

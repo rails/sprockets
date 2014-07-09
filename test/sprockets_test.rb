@@ -12,6 +12,13 @@ Encoding.default_external = 'UTF-8'
 Encoding.default_internal = 'UTF-8'
 $VERBOSE = old_verbose
 
+def silence_warnings
+  old_verbose, $VERBOSE = $VERBOSE, false
+  yield
+ensure
+  $VERBOSE = old_verbose
+end
+
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
 
@@ -29,13 +36,6 @@ class Sprockets::TestCase < MiniTest::Test
     else
       File.join(FIXTURE_ROOT, path)
     end
-  end
-
-  def silence_warnings
-    old_verbose, $VERBOSE = $VERBOSE, false
-    yield
-  ensure
-    $VERBOSE = old_verbose
   end
 
   def sandbox(*paths)

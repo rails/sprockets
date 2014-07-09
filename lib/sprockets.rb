@@ -50,6 +50,16 @@ module Sprockets
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
+  @context_class     = Context
+  @version           = ''
+
+  # Set the default digest
+  require 'digest/sha1'
+  @digest_class = Digest::SHA1
+
+  require 'logger'
+  @logger = Logger.new($stderr)
+  @logger.level = Logger::FATAL
 
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
@@ -83,7 +93,7 @@ module Sprockets
   # Common font types
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
-  register_mime_type 'application/x-font-woff', extensions: ['.woff']
+  register_mime_type 'application/font-woff', extensions: ['.woff']
 
   # HTTP content encodings
   register_encoding :deflate, EncodingUtils::DEFLATE
@@ -124,5 +134,5 @@ module Sprockets
 
   # Other
   register_mime_type 'application/html+ruby', '.erb'
-  register_transformer 'application/html+ruby', '*/*', LazyProcessor.new { ERBTemplate }
+  register_transformer 'application/html+ruby', 'text/plain', LazyProcessor.new { ERBTemplate }
 end

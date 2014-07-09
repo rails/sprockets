@@ -56,26 +56,6 @@ module EnvironmentTests
     assert_equal 1, @env.bundle_processors['text/css'].size
   end
 
-  test "resolve in environment" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js"))
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve("coffee/foo.js")
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min")
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js")
-    assert_equal fixture_path('default/manifest.js.yml'),
-      @env.resolve('manifest.js.yml')
-
-    refute @env.resolve_all("null").first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("null")
-    end
-  end
-
   test "find asset with accept type" do
     assert asset = @env.find_asset("gallery.js", accept: '*/*')
     assert_equal fixture_path('default/gallery.js'), asset.filename
@@ -212,11 +192,32 @@ module EnvironmentTests
     assert_equal ".qunit {}\n", @env["qunit.css"].to_s
   end
 
+  test "find erb assets" do
+    assert asset = @env.find_asset("erb/a")
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("erb/b")
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("erb/c")
+    assert_equal "application/javascript", asset.content_type
+
+    assert asset = @env.find_asset("erb/d")
+    assert_equal "text/css", asset.content_type
+
+    assert asset = @env.find_asset("erb/e")
+    assert_equal "text/html", asset.content_type
+
+    assert asset = @env.find_asset("erb/f")
+    assert_equal "text/yaml", asset.content_type
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
     assert_equal [43, 75, 44, 82, 112, 79, 204, 201], asset.to_s.bytes.take(8)
     assert_equal 20, asset.length
+    assert_equal "cc7336c29eab6a34b0b36f486bb52a31cb63dac0", asset.digest
   end
 
   test "find gzipped asset" do
@@ -224,6 +225,7 @@ module EnvironmentTests
     assert_equal 'gzip', asset.encoding
     assert_equal [31, 139, 8, 0], asset.to_s.bytes.take(4)
     assert_equal 38, asset.length
+    assert_equal "3eba6cbc64c8593e0a693e1c32a7681ca36b2b32", asset.digest
   end
 
   test "find base64 asset" do
@@ -231,6 +233,7 @@ module EnvironmentTests
     assert_equal 'base64', asset.encoding
     assert_equal "dmFyIEdh", asset.to_s[0, 8]
     assert_equal 24, asset.length
+    assert_equal "6a6306c32b6a3028f3c41c36dfbabc343605417d", asset.digest
   end
 
   test "find asset by etag" do
@@ -295,7 +298,7 @@ module EnvironmentTests
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path
   end
 
-  FILES_IN_PATH = 43
+  FILES_IN_PATH = 49
 
   test "iterate over each logical path" do
     paths = []
@@ -570,20 +573,6 @@ class TestEnvironment < Sprockets::TestCase
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
   end
-
-  test "verify all logical paths" do
-    env = new_environment
-    Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
-      unless %w( . ..).include?(dir)
-        env.append_path(fixture_path(dir))
-      end
-    end
-
-    env.logical_paths.each do |logical_path, filename|
-      assert_equal filename, env.resolve_all(logical_path).first,
-        "Expected #{logical_path.inspect} to resolve to #{filename}"
-    end
-  end
 end
 
 class TestCached < Sprockets::TestCase
@@ -602,19 +591,19 @@ class TestCached < Sprockets::TestCase
   end
 
   test "does not allow new mime types to be added" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.register_mime_type "application/javascript", ".jst"
     end
   end
 
   test "does not allow new bundle processors to be added" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.register_bundle_processor 'text/css', WhitespaceProcessor
     end
   end
 
   test "does not allow bundle processors to be removed" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.unregister_bundle_processor 'text/css', WhitespaceProcessor
     end
   end
@@ -629,13 +618,13 @@ class TestCached < Sprockets::TestCase
   end
 
   test "does not allow css compressor to be changed" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.css_compressor = WhitespaceCompressor
     end
   end
 
   test "does not allow js compressor to be changed" do
-    assert_raises TypeError do
+    assert_raises RuntimeError do
       @env.js_compressor = WhitespaceCompressor
     end
   end

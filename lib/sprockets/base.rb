@@ -12,57 +12,6 @@ module Sprockets
     include Server
     include Bower
 
-    # Returns a `Digest` implementation class.
-    #
-    # Defaults to `Digest::SHA1`.
-    attr_reader :digest_class
-
-    # Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::SHA1` or
-    # `Digest::MD5`.
-    #
-    #     environment.digest_class = Digest::MD5
-    #
-    def digest_class=(klass)
-      expire_cache!
-      @digest_class = klass
-    end
-
-    # The `Environment#version` is a custom value used for manually
-    # expiring all asset caches.
-    #
-    # Sprockets is able to track most file and directory changes and
-    # will take care of expiring the cache for you. However, its
-    # impossible to know when any custom helpers change that you mix
-    # into the `Context`.
-    #
-    # It would be wise to increment this value anytime you make a
-    # configuration change to the `Environment` object.
-    attr_reader :version
-
-    # Assign an environment version.
-    #
-    #     environment.version = '2.0'
-    #
-    def version=(version)
-      expire_cache!
-      @version = version
-    end
-
-    # Get and set `Logger` instance.
-    attr_accessor :logger
-
-    # Get `Context` class.
-    #
-    # This class maybe mutated and mixed in with custom helpers.
-    #
-    #     environment.context_class.instance_eval do
-    #       include MyHelpers
-    #       def asset_url; end
-    #     end
-    #
-    attr_reader :context_class
-
     # Get persistent cache store
     attr_reader :cache
 
@@ -72,7 +21,6 @@ module Sprockets
     # setters. Either `get(key)`/`set(key, value)`,
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
-      expire_cache!
       @cache = Cache.new(cache, logger)
     end
 
@@ -179,12 +127,6 @@ module Sprockets
     end
 
     protected
-      # Clear cached environment after mutating state. Must be implemented by
-      # the subclass.
-      def expire_cache!
-        raise NotImplementedError
-      end
-
       def build_asset_hash_for_digest(filename, digest, options)
         asset_hash = build_asset_hash(filename, options)
         if asset_hash[:digest] == digest
@@ -268,11 +210,6 @@ module Sprockets
             dependency_digest: dependencies_hexdigest([asset[:filename]]),
           }
         })
-      end
-
-    private
-      def mutate_config(*args)
-        super.tap { expire_cache! }
       end
   end
 end
