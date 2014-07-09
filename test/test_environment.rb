@@ -569,19 +569,6 @@ class TestEnvironment < Sprockets::TestCase
     assert_raises(NameError) { e2.context_class.instance_method(:foo) }
   end
 
-  test "seperate engines for each instance" do
-    e1 = new_environment
-    e2 = new_environment
-
-    assert_nil e1.engines[".foo"]
-    assert_nil e2.engines[".foo"]
-
-    e1.register_engine ".foo", Sprockets::ERBTemplate
-
-    assert e1.engines[".foo"]
-    assert_nil e2.engines[".foo"]
-  end
-
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
@@ -640,18 +627,5 @@ class TestCached < Sprockets::TestCase
     assert_raises RuntimeError do
       @env.js_compressor = WhitespaceCompressor
     end
-  end
-
-  test "change in environment engines does not affect cache" do
-    env = Sprockets::Environment.new
-    cached = env.cached
-
-    assert_nil env.engines[".foo"]
-    assert_nil cached.engines[".foo"]
-
-    env.register_engine ".foo", Sprockets::ERBTemplate
-
-    assert env.engines[".foo"]
-    assert_nil cached.engines[".foo"]
   end
 end
