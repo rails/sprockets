@@ -27,6 +27,7 @@ class TestPathUtils < Sprockets::TestCase
       "errors",
       "paths",
       "public",
+      "resolve",
       "sass",
       "server",
       "symlink"

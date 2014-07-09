@@ -56,26 +56,6 @@ module EnvironmentTests
     assert_equal 1, @env.bundle_processors['text/css'].size
   end
 
-  test "resolve in environment" do
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js"))
-    assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve("coffee/foo.js")
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min")
-    assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js")
-    assert_equal fixture_path('default/manifest.js.yml'),
-      @env.resolve('manifest.js.yml')
-
-    refute @env.resolve_all("null").first
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("null")
-    end
-  end
-
   test "find asset with accept type" do
     assert asset = @env.find_asset("gallery.js", accept: '*/*')
     assert_equal fixture_path('default/gallery.js'), asset.filename
@@ -605,20 +585,6 @@ class TestEnvironment < Sprockets::TestCase
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
-  end
-
-  test "verify all logical paths" do
-    env = new_environment
-    Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
-      unless %w( . ..).include?(dir)
-        env.append_path(fixture_path(dir))
-      end
-    end
-
-    env.logical_paths.each do |logical_path, filename|
-      assert_equal filename, env.resolve_all(logical_path).first,
-        "Expected #{logical_path.inspect} to resolve to #{filename}"
-    end
   end
 end
 
