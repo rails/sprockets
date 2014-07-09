@@ -29,10 +29,11 @@ module Sprockets
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
 
-      @functions = Module.new
-      @functions.send(:include, Functions)
-      @functions.send(:include, options[:functions]) if options[:functions]
-      @functions.class_eval(&block) if block_given?
+      @functions = Module.new do
+        include Functions
+        include options[:functions] if options[:functions]
+        class_eval(&block) if block_given?
+      end
     end
 
     def call(input)
