@@ -31,7 +31,7 @@ module Sprockets
       @cache_version = options[:cache_version]
 
       @functions = Module.new
-      @functions.send(:include, SassFunctions)
+      @functions.send(:include, Functions)
       @functions.send(:include, options[:functions]) if options[:functions]
       @functions.class_eval(&block) if block_given?
     end
@@ -42,7 +42,7 @@ module Sprockets
       options = {
         filename: input[:filename],
         syntax: self.class.syntax,
-        cache_store: SassCacheStore.new(input[:cache], @cache_version),
+        cache_store: CacheStore.new(input[:cache], @cache_version),
         load_paths: input[:environment].paths,
         sprockets: {
           context: context,
