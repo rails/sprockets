@@ -1,6 +1,5 @@
 require 'rack/utils'
 require 'sass'
-require 'set'
 
 module Sprockets
   # Template engine class for the SASS/SCSS compiler. Depends on the `sass` gem.
@@ -221,20 +220,28 @@ module Sprockets
       end
 
       protected
-        # Internal
-        def sprockets_context
-          options[:sprockets][:context]
-        end
-
-        # Internal
+        # Public: The Environment.
+        #
+        # Returns Sprockets::Environment.
         def sprockets_environment
           options[:sprockets][:environment]
         end
 
-        # Internal
+        # Public: Mutatable set dependency paths.
+        #
+        # Returns a Set.
         def sprockets_dependencies
           options[:sprockets][:dependencies]
         end
+
+        # Deprecated: Get the Context instance. Use APIs on
+        # sprockets_environment or sprockets_dependencies directly.
+        #
+        # Returns a Context instance.
+        def sprockets_context
+          options[:sprockets][:context]
+        end
+
     end
 
     # Internal: Cache wrapper for Sprockets cache adapter.
