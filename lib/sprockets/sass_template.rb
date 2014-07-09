@@ -65,82 +65,153 @@ module Sprockets
       context.metadata.merge(data: css)
     end
 
-    # Internal: Functions injected into Sass environment.
+    # Public: Functions injected into Sass context during Sprockets evaluation.
     #
-    # Extending this module is not a public API.
+    # This module may be extended to add global functionality to all Sprockets
+    # Sass environments. Though, scoping your functions to just your environment
+    # is preferred.
+    #
+    # module Sprockets::SassTemplate::Functions
+    #   def asset_path(path, options = {})
+    #   end
+    # end
+    #
     module Functions
-      # Public
+      # Public: Generate a url for asset path.
+      #
+      # Default implementation is deprecated. Currently defaults to
+      # Context#asset_path.
+      #
+      # Will raise NotImplementedError in the future. Users should provide their
+      # own base implementation.
+      #
+      # Returns a Sass::Script::String.
       def asset_path(path, options = {})
-        # raise NotImplementedError
         ::Sass::Script::String.new(sprockets_context.asset_path(path.value, options), :string)
       end
 
-      # Public
+      # Public: Generate a asset url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def asset_url(path, options = {})
         ::Sass::Script::String.new("url(#{asset_path(path, options).value})")
       end
 
-      # Public
+      # Public: Generate url for image path.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def image_path(path)
         asset_path(path, type: :image)
       end
 
-      # Public
+      # Public: Generate a image url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def image_url(path)
         asset_url(path, type: :image)
       end
 
-      # Public
+      # Public: Generate url for video path.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def video_path(path)
         asset_path(path, type: :video)
       end
 
-      # Public
+      # Public: Generate a video url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def video_url(path)
         asset_url(path, type: :video)
       end
 
-      # Public
+      # Public: Generate url for audio path.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def audio_path(path)
         asset_path(path, type: :audio)
       end
 
-      # Public
+      # Public: Generate a audio url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def audio_url(path)
         asset_url(path, type: :audio)
       end
 
-      # Public
+      # Public: Generate url for font path.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def font_path(path)
         asset_path(path, type: :font)
       end
 
-      # Public
+      # Public: Generate a font url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def font_url(path)
         asset_url(path, type: :font)
       end
 
-      # Public
+      # Public: Generate url for javascript path.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def javascript_path(path)
         asset_path(path, type: :javascript)
       end
 
-      # Public
+      # Public: Generate a javascript url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def javascript_url(path)
         asset_url(path, type: :javascript)
       end
 
-      # Public
+      # Public: Generate url for stylesheet path.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def stylesheet_path(path)
         asset_path(path, type: :stylesheet)
       end
 
-      # Public
+      # Public: Generate a stylesheet url() link.
+      #
+      # path - Sass::Script::String URL path
+      #
+      # Returns a Sass::Script::String.
       def stylesheet_url(path)
         asset_url(path, type: :stylesheet)
       end
 
-      # Public
+      # Public: Generate a data URI for asset path.
+      #
+      # path - Sass::Script::String logical asset path
+      #
+      # Returns a Sass::Script::String.
       def asset_data_url(path)
         if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
           sprockets_dependencies << asset.filename
