@@ -26,7 +26,7 @@ class StringTemplate
 end
 
 class TestEngines < Sprockets::TestCase
-  test "registering a global engine" do
+  test "registering engine" do
     env = new_environment
     env.register_engine ".alert", AlertTemplate
     asset = env["hello.alert"]
