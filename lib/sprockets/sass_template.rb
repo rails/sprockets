@@ -64,6 +64,128 @@ module Sprockets
 
       context.metadata.merge(data: css)
     end
+
+    # Internal: Functions injected into Sass environment.
+    #
+    # Extending this module is not a public API.
+    module Functions
+      # Public
+      def asset_path(path, options = {})
+        # raise NotImplementedError
+        ::Sass::Script::String.new(sprockets_context.asset_path(path.value, options), :string)
+      end
+
+      # Public
+      def asset_url(path, options = {})
+        ::Sass::Script::String.new("url(#{asset_path(path, options).value})")
+      end
+
+      # Public
+      def image_path(path)
+        asset_path(path, type: :image)
+      end
+
+      # Public
+      def image_url(path)
+        asset_url(path, type: :image)
+      end
+
+      # Public
+      def video_path(path)
+        asset_path(path, type: :video)
+      end
+
+      # Public
+      def video_url(path)
+        asset_url(path, type: :video)
+      end
+
+      # Public
+      def audio_path(path)
+        asset_path(path, type: :audio)
+      end
+
+      # Public
+      def audio_url(path)
+        asset_url(path, type: :audio)
+      end
+
+      # Public
+      def font_path(path)
+        asset_path(path, type: :font)
+      end
+
+      # Public
+      def font_url(path)
+        asset_url(path, type: :font)
+      end
+
+      # Public
+      def javascript_path(path)
+        asset_path(path, type: :javascript)
+      end
+
+      # Public
+      def javascript_url(path)
+        asset_url(path, type: :javascript)
+      end
+
+      # Public
+      def stylesheet_path(path)
+        asset_path(path, type: :stylesheet)
+      end
+
+      # Public
+      def stylesheet_url(path)
+        asset_url(path, type: :stylesheet)
+      end
+
+      # Public
+      def asset_data_url(path)
+        if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
+          sprockets_dependencies << asset.filename
+          url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
+          ::Sass::Script::String.new("url(" + url + ")")
+        end
+      end
+
+      protected
+        # Internal
+        def sprockets_context
+          options[:sprockets][:context]
+        end
+
+        # Internal
+        def sprockets_environment
+          options[:sprockets][:environment]
+        end
+
+        # Internal
+        def sprockets_dependencies
+          options[:sprockets][:dependencies]
+        end
+    end
+
+    # Internal: Cache wrapper for Sprockets cache adapter.
+    class CacheStore < ::Sass::CacheStores::Base
+      VERSION = '1'
+
+      def initialize(cache, version)
+        @cache, @version = cache, "#{VERSION}/#{version}"
+      end
+
+      def _store(key, version, sha, contents)
+        @cache._set("#{@version}/#{version}/#{key}/#{sha}", contents)
+      end
+
+      def _retrieve(key, version, sha)
+        @cache._get("#{@version}/#{version}/#{key}/#{sha}")
+      end
+
+      def path_to(key)
+        key
+      end
+    end
   end
 
   class ScssTemplate < SassTemplate
@@ -72,125 +194,9 @@ module Sprockets
     end
   end
 
-  # Internal: Cache wrapper for Sprockets cache adapter.
-  class SassCacheStore < ::Sass::CacheStores::Base
-    VERSION = '1'
+  # Deprecated: Use Sprockets::SassTemplate::Functions instead.
+  SassFunctions = SassTemplate::Functions
 
-    def initialize(cache, version)
-      @cache, @version = cache, "#{VERSION}/#{version}"
-    end
-
-    def _store(key, version, sha, contents)
-      @cache._set("#{@version}/#{version}/#{key}/#{sha}", contents)
-    end
-
-    def _retrieve(key, version, sha)
-      @cache._get("#{@version}/#{version}/#{key}/#{sha}")
-    end
-
-    def path_to(key)
-      key
-    end
-  end
-
-  # Internal: Functions injected into Sass environment.
-  #
-  # Extending this module is not a public API.
-  module SassFunctions
-    # Public
-    def asset_path(path, options = {})
-      # raise NotImplementedError
-      ::Sass::Script::String.new(sprockets_context.asset_path(path.value, options), :string)
-    end
-
-    # Public
-    def asset_url(path, options = {})
-      ::Sass::Script::String.new("url(#{asset_path(path, options).value})")
-    end
-
-    # Public
-    def image_path(path)
-      asset_path(path, type: :image)
-    end
-
-    # Public
-    def image_url(path)
-      asset_url(path, type: :image)
-    end
-
-    # Public
-    def video_path(path)
-      asset_path(path, type: :video)
-    end
-
-    # Public
-    def video_url(path)
-      asset_url(path, type: :video)
-    end
-
-    # Public
-    def audio_path(path)
-      asset_path(path, type: :audio)
-    end
-
-    # Public
-    def audio_url(path)
-      asset_url(path, type: :audio)
-    end
-
-    # Public
-    def font_path(path)
-      asset_path(path, type: :font)
-    end
-
-    # Public
-    def font_url(path)
-      asset_url(path, type: :font)
-    end
-
-    # Public
-    def javascript_path(path)
-      asset_path(path, type: :javascript)
-    end
-
-    # Public
-    def javascript_url(path)
-      asset_url(path, type: :javascript)
-    end
-
-    # Public
-    def stylesheet_path(path)
-      asset_path(path, type: :stylesheet)
-    end
-
-    # Public
-    def stylesheet_url(path)
-      asset_url(path, type: :stylesheet)
-    end
-
-    # Public
-    def asset_data_url(path)
-      if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
-        sprockets_dependencies << asset.filename
-        url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
-        ::Sass::Script::String.new("url(" + url + ")")
-      end
-    end
-
-    protected
-      # Internal
-      def sprockets_context
-        options[:sprockets][:context]
-      end
-
-      # Internal
-      def sprockets_environment
-        options[:sprockets][:environment]
-      end
-
-      # Internal
-      def sprockets_dependencies
-        options[:sprockets][:dependencies]
-      end
-  end
+  # Deprecated: Use Sprockets::SassTemplate::CacheStore instead.
+  SassCacheStore = SassTemplate::CacheStore
 end
