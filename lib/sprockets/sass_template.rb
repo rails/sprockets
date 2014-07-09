@@ -52,7 +52,7 @@ module Sprockets
       }
 
       engine = ::Sass::Engine.new(input[:data], options)
-      raise unless ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
+
       css = Utils.module_include(::Sass::Script::Functions, @functions) do
         engine.render
       end
