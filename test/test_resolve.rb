@@ -27,6 +27,21 @@ class TestResolve < Sprockets::TestCase
     end
   end
 
+  test "resolve accept type list before paths" do
+    @env.append_path(fixture_path('resolve/javascripts'))
+    @env.append_path(fixture_path('resolve/stylesheets'))
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: 'application/javascript')
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo', accept: 'text/css')
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: 'application/javascript, text/css')
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: 'text/css, application/javascript')
+  end
+
   test "verify all logical paths" do
     Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
       unless %w( . ..).include?(dir)
