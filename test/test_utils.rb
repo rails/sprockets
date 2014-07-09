@@ -22,4 +22,63 @@ class TestUtils < Sprockets::TestCase
       hexdigest(Object.new)
     end
   end
+
+  module Functions
+    module InstanceMethods
+      def bar
+        2
+      end
+    end
+    include InstanceMethods
+
+    def foo
+      1
+    end
+  end
+
+  module ScopedFunctions
+    def foo
+      7
+    end
+
+    def bar
+      8
+    end
+
+    def baz
+      9
+    end
+  end
+
+  class Context
+    include Functions
+  end
+
+  test "module include" do
+    context = Context.new
+
+    assert context.respond_to?(:foo)
+    assert context.respond_to?(:bar)
+    refute context.respond_to?(:baz)
+
+    assert_equal 1, context.foo
+    assert_equal 2, context.bar
+
+    module_include(Functions, ScopedFunctions) do
+      assert context.respond_to?(:foo)
+      assert context.respond_to?(:bar)
+      assert context.respond_to?(:baz)
+
+      assert_equal 7, context.foo
+      assert_equal 8, context.bar
+      assert_equal 9, context.baz
+    end
+
+    assert context.respond_to?(:foo)
+    assert context.respond_to?(:bar)
+    refute context.respond_to?(:baz)
+
+    assert_equal 1, context.foo
+    assert_equal 2, context.bar
+  end
 end

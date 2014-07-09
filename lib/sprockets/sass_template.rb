@@ -53,7 +53,7 @@ module Sprockets
 
       engine = ::Sass::Engine.new(input[:data], options)
       raise unless ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
-      css = extend_module(::Sass::Script::Functions, @functions) do
+      css = Utils.module_include(::Sass::Script::Functions, @functions) do
         engine.render
       end
 
@@ -64,33 +64,6 @@ module Sprockets
 
       context.metadata.merge(data: css)
     end
-
-    private
-      # Internal: Inject into target module for the duration of the block.
-      #
-      # mod - Module
-      #
-      # Returns result of block.
-      def extend_module(base, mod)
-        old_methods = {}
-
-        mod.instance_methods.each do |sym|
-          method = mod.instance_method(sym)
-          if base.method_defined?(sym)
-            old_methods[sym] = base.instance_method(sym)
-          end
-          base.send(:define_method, sym, method)
-        end
-
-        yield
-      ensure
-        mod.instance_methods.each do |sym|
-          base.send(:undef_method, sym)
-        end
-        old_methods.each do |sym, method|
-          base.send(:define_method, sym, method)
-        end
-      end
   end
 
   class ScssTemplate < SassTemplate
