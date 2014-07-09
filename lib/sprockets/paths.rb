@@ -132,8 +132,8 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
 
-      resolve_accept_options(extname, options).each do |accept|
-        self.paths.each do |load_path|
+      self.paths.each do |load_path|
+        resolve_accept_options(extname, options).each do |accept|
           path_matches(load_path, logical_name, logical_basename, extname) do |filename|
             if has_asset?(filename, accept: accept)
               yield filename
