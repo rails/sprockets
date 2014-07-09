@@ -50,6 +50,16 @@ class TestUtils < Sprockets::TestCase
     end
   end
 
+  module OtherScopedFunctions
+    def bar
+      3
+    end
+
+    def baz
+      4
+    end
+  end
+
   class Context
     include Functions
   end
@@ -72,6 +82,23 @@ class TestUtils < Sprockets::TestCase
       assert_equal 7, context.foo
       assert_equal 8, context.bar
       assert_equal 9, context.baz
+    end
+
+    assert context.respond_to?(:foo)
+    assert context.respond_to?(:bar)
+    refute context.respond_to?(:baz)
+
+    assert_equal 1, context.foo
+    assert_equal 2, context.bar
+
+    module_include(Functions, OtherScopedFunctions) do
+      assert context.respond_to?(:foo)
+      assert context.respond_to?(:bar)
+      assert context.respond_to?(:baz)
+
+      assert_equal 1, context.foo
+      assert_equal 3, context.bar
+      assert_equal 4, context.baz
     end
 
     assert context.respond_to?(:foo)
