@@ -41,8 +41,16 @@ module Sprockets
       # Look up the asset.
       options = {}
       options[:bundle] = !body_only?(env)
-      options[:if_match] = fingerprint if fingerprint
-      options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING'] if env['HTTP_ACCEPT_ENCODING']
+
+      if fingerprint
+        options[:if_match] = fingerprint
+      elsif env['HTTP_ACCEPT_ENCODING']
+        # Accept-Encoding negotiation is only enabled for non-fingerprinted
+        # assets. Avoids the "Apache ETag gzip" bug. Just Google it.
+        # https://issues.apache.org/bugzilla/show_bug.cgi?id=39727
+        options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING']
+      end
+
       asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
@@ -196,9 +204,9 @@ module Sprockets
         headers = {}
 
         # Set caching headers
-        headers["Cache-Control"]  = "public"
-        headers["Last-Modified"]  = asset.mtime.httpdate
-        headers["ETag"]           = etag(asset)
+        headers["Cache-Control"] = "public"
+        headers["Last-Modified"] = asset.mtime.httpdate
+        headers["ETag"]          = etag(asset)
 
         # If the request url contains a fingerprint, set a long
         # expires on the response
@@ -208,9 +216,9 @@ module Sprockets
         # Otherwise set `must-revalidate` since the asset could be modified.
         else
           headers["Cache-Control"] << ", must-revalidate"
+          headers["Vary"] = "Accept-Encoding"
         end
 
-        headers["Vary"] = "Accept-Encoding"
         headers
       end
 
