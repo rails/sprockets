@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'sprockets/errors'
 require 'tempfile'
 
 module Sprockets
