@@ -59,7 +59,7 @@ module Sprockets
 
       accepts = parse_accept_options(extname, options[:accept])
 
-      accepts.each do |accept|
+      accepts.each do |accept, _|
         path_matches(load_path, logical_name, logical_basename, extname) do |filename|
           if has_asset?(filename, accept: accept)
             yield filename
@@ -95,7 +95,7 @@ module Sprockets
       accepts = parse_accept_options(extname, options[:accept])
 
       self.paths.each do |load_path|
-        accepts.each do |accept|
+        accepts.each do |accept, _|
           path_matches(load_path, logical_name, logical_basename, extname) do |filename|
             if has_asset?(filename, accept: accept)
               yield filename
@@ -137,18 +137,18 @@ module Sprockets
     protected
       def parse_accept_options(extname, types)
         accepts = []
-        accepts += types.split(/\s*,\s*/) if types
+        accepts += parse_q_values(types) if types
 
         if extname && (type = mime_exts[extname])
-          if accepts.empty? || accepts.any? { |accept| match_mime_type?(type, accept) }
-            accepts.unshift(type)
+          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(type, accept) }
+            accepts.unshift([type, 1.0])
           else
             return []
           end
         end
 
         if accepts.empty?
-          accepts << '*/*'
+          accepts << ['*/*', 1.0]
         end
 
         accepts
