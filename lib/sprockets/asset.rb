@@ -102,7 +102,6 @@ module Sprockets
     # Note: This is not the Ruby Encoding of the source. See Asset#charset.
     #
     # Returns a String or nil if encoding is "identity".
-    # TODO: Move to attr_reader
     def encoding
       metadata[:encoding]
     end
