@@ -69,8 +69,6 @@ module Sprockets
 
     # Experimental: Check if environment has asset.
     #
-    # TODO: Finalize API.
-    #
     # Acts similar to `find_asset(path) ? true : false` but does not build the
     # entire asset.
     #
@@ -80,7 +78,6 @@ module Sprockets
 
       accepts = options[:accept] || '*/*'
 
-      # TODO: Review performance
       extname = parse_path_extnames(filename)[1]
       if mime_type = mime_exts[extname]
         accepts = parse_q_values(accepts)

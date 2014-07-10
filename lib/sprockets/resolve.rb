@@ -53,7 +53,6 @@ module Sprockets
     def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
       return to_enum(__method__, load_path, logical_path, options) unless block_given?
 
-      # TODO: Review performance
       logical_name, extname, _ = parse_path_extnames(logical_path)
       logical_basename = File.basename(logical_name)
 
@@ -88,7 +87,6 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      # TODO: Review performance
       logical_name, extname, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
 
@@ -154,7 +152,6 @@ module Sprockets
         accepts
       end
 
-      # TODO: Should logical path normalization still be supported?
       def normalize_logical_path(path, extname)
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'
@@ -172,7 +169,6 @@ module Sprockets
 
       def dirname_matches(dirname, basename)
         self.entries(dirname).each do |entry|
-          # TODO: Review performance
           name = parse_path_extnames(entry)[0]
           if basename == name
             yield File.join(dirname, entry)
@@ -189,7 +185,6 @@ module Sprockets
       #     # => { format: ".js",
       #            engines: [".coffee", ".erb"] }
       #
-      # TODO: Review API and performance
       def parse_path_extnames(path)
         format_extname  = nil
         engine_extnames = []
