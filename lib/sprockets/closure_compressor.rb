@@ -1,5 +1,4 @@
 require 'closure-compiler'
-require 'json'
 
 module Sprockets
   # Public: Closure Compiler minifier.
@@ -28,7 +27,7 @@ module Sprockets
         ::Closure::VERSION,
         ::Closure::COMPILER_VERSION,
         VERSION,
-        JSON.generate(options)
+        options
       ]
     end
 
