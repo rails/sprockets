@@ -20,8 +20,10 @@ module Sprockets
       env = input[:environment]
       filename = input[:filename]
 
+      type = input[:content_type]
+
       assets = Hash.new do |h, path|
-        h[path] = env.find_asset(path, bundle: false)
+        h[path] = env.find_asset(path, bundle: false, accept: type)
       end
 
       required_paths = expand_required_paths(env, assets, [filename])

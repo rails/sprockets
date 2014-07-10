@@ -91,6 +91,7 @@ module EnvironmentTests
     assert_equal fixture_path('default/manifest.js.yml'), asset.filename
 
     refute @env.find_asset("gallery.js", accept: "text/css")
+    refute @env.find_asset(fixture_path('default/gallery.js'), accept: "text/css")
 
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
