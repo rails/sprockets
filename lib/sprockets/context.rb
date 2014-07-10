@@ -78,6 +78,7 @@ module Sprockets
     #
     def resolve(path, options = {})
       options[:content_type] = self.content_type if options[:content_type] == :self
+      options[:accept] = options.delete(:content_type)
 
       if environment.absolute_path?(path)
         path
