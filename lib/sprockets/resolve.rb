@@ -29,7 +29,7 @@ module Sprockets
         return filename
       end
 
-      accept = options[:accept] || options[:content_type]
+      accept = options[:accept]
       message = "couldn't find file '#{path}'"
       message << " with content type '#{accept}'" if accept
       raise FileNotFound, message
@@ -44,7 +44,7 @@ module Sprockets
         return filename
       end
 
-      accept = options[:accept] || options[:content_type]
+      accept = options[:accept]
       message = "couldn't find file '#{logical_path}' under '#{load_path}'"
       message << " with content type '#{accept}'" if accept
       raise FileNotFound, message
@@ -57,7 +57,7 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(logical_path)
       logical_basename = File.basename(logical_name)
 
-      accepts = parse_accept_options(extname, options[:accept], options[:content_type])
+      accepts = parse_accept_options(extname, options[:accept])
 
       accepts.each do |accept|
         path_matches(load_path, logical_name, logical_basename, extname) do |filename|
@@ -92,7 +92,7 @@ module Sprockets
       logical_name, extname, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
 
-      accepts = parse_accept_options(extname, options[:accept], options[:content_type])
+      accepts = parse_accept_options(extname, options[:accept])
 
       self.paths.each do |load_path|
         accepts.each do |accept|
@@ -135,12 +135,9 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
-      def parse_accept_options(extname, types, type = nil)
+      def parse_accept_options(extname, types)
         accepts = []
         accepts += types.split(/\s*,\s*/) if types
-
-        # Deprecated :content_type option
-        accepts << type if type
 
         if extname && (type = mime_exts[extname])
           if accepts.empty? || accepts.any? { |accept| match_mime_type?(type, accept) }
