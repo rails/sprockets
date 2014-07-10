@@ -1,5 +1,4 @@
 require 'coffee_script'
-require 'json'
 
 module Sprockets
   # Template engine class for the CoffeeScript compiler.
