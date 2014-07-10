@@ -1,4 +1,3 @@
-require 'json'
 require 'uglifier'
 
 module Sprockets
@@ -37,7 +36,7 @@ module Sprockets
         'UglifierCompressor',
         ::Uglifier::VERSION,
         VERSION,
-        JSON.generate(options)
+        options
       ]
     end
 
