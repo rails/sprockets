@@ -31,7 +31,7 @@ module Sprockets
 
       accept = options[:accept]
       message = "couldn't find file '#{path}'"
-      message << " with content type '#{accept}'" if accept
+      message << " with type '#{accept}'" if accept
       raise FileNotFound, message
     end
 
@@ -46,7 +46,7 @@ module Sprockets
 
       accept = options[:accept]
       message = "couldn't find file '#{logical_path}' under '#{load_path}'"
-      message << " with content type '#{accept}'" if accept
+      message << " with type '#{accept}'" if accept
       raise FileNotFound, message
     end
 
