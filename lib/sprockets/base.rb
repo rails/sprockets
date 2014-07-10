@@ -1,6 +1,7 @@
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/errors'
+require 'sprockets/resolve'
 require 'sprockets/server'
 require 'pathname'
 
@@ -10,6 +11,7 @@ module Sprockets
     include PathUtils, HTTPUtils
     include Configuration
     include Server
+    include Resolve
     include Bower
 
     # Get persistent cache store
