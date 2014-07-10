@@ -121,7 +121,7 @@ module Sprockets
     #
     # Returns Time.
     def mtime
-      Time.at(@mtime.to_i)
+      Time.at(@mtime)
     end
 
     # Public: Returns String hexdigest of source.

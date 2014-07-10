@@ -194,7 +194,7 @@ module Sprockets
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([filename])
 
         asset.merge(processed).merge({
-          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime }.max.to_i,
+          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
             dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
           )
