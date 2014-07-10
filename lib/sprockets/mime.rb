@@ -4,7 +4,7 @@ module Sprockets
   module Mime
     include HTTPUtils
 
-    # Pubic: Mapping of MIME type Strings to properties Hash.
+    # Public: Mapping of MIME type Strings to properties Hash.
     #
     # key   - MIME Type String
     # value - Hash
@@ -14,9 +14,29 @@ module Sprockets
     # Returns Hash.
     attr_reader :mime_types
 
+    # Internal: Mapping of MIME extension Strings to MIME type Strings.
+    #
+    # Used for internal fast lookup purposes.
+    #
+    # Examples:
+    #
+    #   mime_exts['.js'] #=> 'application/javascript'
+    #
+    # key   - MIME extension String
+    # value - MIME Type String
+    #
+    # Returns Hash.
     attr_reader :mime_exts
 
-    # Register a new mime type.
+    # Public: Register a new mime type.
+    #
+    # mime_type - String MIME Type
+    # options - Hash
+    #   extensions: Array of String extnames
+    #   charset: Proc/Method that detects the charset of a file.
+    #            See EncodingUtils.
+    #
+    # Returns nothing.
     def register_mime_type(mime_type, options = {})
       # Legacy extension argument, will be removed from 4.x
       if options.is_a?(String)
@@ -44,25 +64,48 @@ module Sprockets
       end
     end
 
+    # Public: Mapping of supported HTTP Content/Transfer encodings
+    #
+    # key   - String name
+    # value - Method/Proc to encode data
+    #
+    # Returns Hash.
     attr_reader :encodings
 
+    # Public: Register a new encoding.
+    #
+    # Examples
+    #
+    #   register_encoding :gzip, EncodingUtils::GZIP
+    #
+    # key    - String name
+    # encode - Method/Proc to encode data
+    #
+    # Returns nothing.
     def register_encoding(name, encode)
       mutate_config(:encodings) do |encodings|
         encodings.merge(name.to_s => encode)
       end
     end
 
-    def unwrap_encoding_processors(accept_encodings)
-      available_encodings = self.encodings.keys + ['identity']
-      encoding = find_best_q_match(accept_encodings, available_encodings)
+    private
+      # Internal: Get a postprocessor to perform the first available accept
+      # encoding.
+      #
+      # accept_encoding - String Accept-Encoding header value.
+      #
+      # Returns an Array of Processors.
+      def unwrap_encoding_processors(accept_encodings)
+        available_encodings = self.encodings.keys + ['identity']
+        encoding = find_best_q_match(accept_encodings, available_encodings)
 
-      processors = []
-      if encoder = self.encodings[encoding]
-        processors << lambda do |input|
-          { data: encoder.call([input[:data]]), encoding: encoding }
+        processors = []
+        if encoder = self.encodings[encoding]
+          processors << lambda do |input|
+            { data: encoder.call([input[:data]]), encoding: encoding }
+          end
         end
+        processors
       end
-      processors
-    end
   end
 end
