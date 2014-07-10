@@ -1,7 +1,5 @@
-require 'pathname'
 require 'set'
 require 'shellwords'
-require 'yaml'
 
 module Sprockets
   # The `DirectiveProcessor` is responsible for parsing and evaluating
