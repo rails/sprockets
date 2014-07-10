@@ -133,6 +133,6 @@ module Sprockets
   register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssTemplate }
 
   # Other
-  register_mime_type 'application/html+ruby', '.erb'
-  register_transformer 'application/html+ruby', 'text/plain', LazyProcessor.new { ERBTemplate }
+  register_mime_type 'text/plain+ruby', '.erb'
+  register_transformer 'text/plain+ruby', 'text/plain', LazyProcessor.new { ERBTemplate }
 end
