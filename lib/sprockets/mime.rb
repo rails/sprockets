@@ -102,7 +102,7 @@ module Sprockets
         processors = []
         if encoder = self.encodings[encoding]
           processors << lambda do |input|
-            { data: encoder.call([input[:data]]), encoding: encoding }
+            { data: encoder.call(input[:data]), encoding: encoding }
           end
         end
         processors
