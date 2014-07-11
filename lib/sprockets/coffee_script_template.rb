@@ -19,7 +19,7 @@ module Sprockets
       key  = ['CoffeeScriptTemplate', SOURCE_VERSION, VERSION, data]
 
       result = input[:cache].fetch(key) do
-        ::CoffeeScript.compile(data, sourceMap: true)
+        ::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:name]])
       end
 
       if input[:map]
