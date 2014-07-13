@@ -44,6 +44,8 @@ module Sprockets
 
       if fingerprint
         options[:if_match] = fingerprint
+      elsif env['HTTP_IF_MATCH']
+        options[:if_match] = env['HTTP_IF_MATCH'][/^"(\w+)"$/, 1]
       elsif env['HTTP_ACCEPT_ENCODING']
         # Accept-Encoding negotiation is only enabled for non-fingerprinted
         # assets. Avoids the "Apache ETag gzip" bug. Just Google it.

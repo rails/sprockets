@@ -204,7 +204,7 @@ class TestServer < Sprockets::TestCase
     assert_equal time_before_touching, time_after_touching
   end
 
-  test "not modified partial response when etags match" do
+  test "not modified partial response when if-none-match etags match" do
     get "/assets/application.js"
     assert_equal 200, last_response.status
     etag, last_modified, cache_control, expires, vary = last_response.headers.values_at(
@@ -227,6 +227,46 @@ class TestServer < Sprockets::TestCase
     refute last_response.headers['Content-Type']
     refute last_response.headers['Content-Length']
     refute last_response.headers['Content-Encoding']
+  end
+
+  test "response when if-none-match etags don't match" do
+    get "/assets/application.js", {},
+      'HTTP_IF_NONE_MATCH' => "nope"
+
+    assert_equal 200, last_response.status
+    assert_equal '"6413e7ce345409919a84538cb5577e2cd17bb72f"', last_response.headers['ETag']
+    assert_equal '52', last_response.headers['Content-Length']
+  end
+
+  test "not found with if-none-match" do
+    get "/assets/missing.js", {},
+      'HTTP_IF_NONE_MATCH' => '"000"'
+    assert_equal 404, last_response.status
+  end
+
+  test "ok partial response when if-match etags match" do
+    get "/assets/application.js"
+    assert_equal 200, last_response.status
+    etag = last_response.headers['ETag']
+
+    get "/assets/application.js", {},
+      'HTTP_IF_MATCH' => etag
+
+    assert_equal 200, last_response.status
+    assert_equal '"6413e7ce345409919a84538cb5577e2cd17bb72f"', last_response.headers['ETag']
+    assert_equal '52', last_response.headers['Content-Length']
+  end
+
+  test "precondition failed with if-match is a mismatch" do
+    get "/assets/application.js", {},
+      'HTTP_IF_MATCH' => '"000"'
+    assert_equal 412, last_response.status
+  end
+
+  test "not found with if-match" do
+    get "/assets/missing.js", {},
+      'HTTP_IF_MATCH' => '"000"'
+    assert_equal 404, last_response.status
   end
 
   test "if sources didnt change the server shouldnt rebundle" do
