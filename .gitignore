@@ -1,8 +1,8 @@
-Gemfile.lock
-README.html
+.bundle
+*.rbc
 doc
 docs
+Gemfile.lock
 pkg
+README.html
 tmp
-*.rbc
-.bundle

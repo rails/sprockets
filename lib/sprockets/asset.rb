@@ -5,6 +5,14 @@ module Sprockets
   class Asset
     attr_reader :logical_path
 
+    # Private: Intialize Asset wrapper from attributes Hash.
+    #
+    # Asset wrappers should not be initialized directly, only
+    # Environment#find_asset should vend them.
+    #
+    # attributes - Hash of ivars
+    #
+    # Returns Asset.
     def initialize(attributes = {})
       @attributes = attributes
       attributes.each do |name, value|
@@ -74,6 +82,19 @@ module Sprockets
       end
     end
 
+    # Public: Array of required processed assets.
+    #
+    # This allows you to link to individual files for debugging
+    # purposes.
+    #
+    # Examples
+    #
+    #   asset.source_paths #=>
+    #   ["jquery-729a810640240adfd653c3d958890cfc4ec0ea84.js",
+    #    "users-08ae3439d6c8fe911445a2fb6e07ee1dc12ca599.js",
+    #    "application-b5df367abb741cac6526b05a726e9e8d7bd863d2.js"]
+    #
+    # Returns an Array of String digest paths.
     def source_paths
       to_a.map(&:digest_path)
     end
@@ -102,7 +123,6 @@ module Sprockets
     # Note: This is not the Ruby Encoding of the source. See Asset#charset.
     #
     # Returns a String or nil if encoding is "identity".
-    # TODO: Move to attr_reader
     def encoding
       metadata[:encoding]
     end
@@ -122,7 +142,7 @@ module Sprockets
     #
     # Returns Time.
     def mtime
-      Time.at(@mtime.to_i)
+      Time.at(@mtime)
     end
 
     # Public: Returns String hexdigest of source.

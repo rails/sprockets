@@ -1,5 +1,4 @@
 require 'coffee_script'
-require 'json'
 require 'source_map'
 
 module Sprockets

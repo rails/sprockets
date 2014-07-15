@@ -1,5 +1,4 @@
 require 'eco'
-require 'json'
 
 module Sprockets
   # Template engine class for the Eco compiler. Depends on the `eco` gem.

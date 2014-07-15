@@ -176,18 +176,18 @@ class BinaryEncodingUtilsTest < Sprockets::TestCase
   include Sprockets::EncodingUtils
 
   test "deflate" do
-    output = deflate(["foo", "bar"])
+    output = deflate("foobar")
     assert_equal 8, output.length
     assert_equal [75, 203, 207, 79, 74, 44, 2, 0], output.bytes.take(8)
   end
 
   test "gzip" do
-    output = gzip(["foo", "bar"])
+    output = gzip("foobar")
     assert_equal 26, output.length
     assert_equal [31, 139, 8, 0, 1, 0, 0, 0], output.bytes.take(8)
   end
 
   test "base64" do
-    assert_equal "Zm9vYmFy", base64(["foo", "bar"])
+    assert_equal "Zm9vYmFy", base64("foobar")
   end
 end
