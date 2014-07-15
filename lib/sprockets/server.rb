@@ -1,9 +1,9 @@
 require 'time'
-require 'uri'
+require 'rack/utils'
 
 module Sprockets
   # `Server` is a concern mixed into `Environment` and
-  # `Index` that provides a Rack compatible `call`
+  # `CachedEnvironment` that provides a Rack compatible `call`
   # interface and url generation helpers.
   module Server
     # `call` implements the Rack 1.x specification which accepts an
@@ -25,13 +25,8 @@ module Sprockets
 
       msg = "Served asset #{env['PATH_INFO']} -"
 
-      # Mark session as "skipped" so no `Set-Cookie` header is set
-      env['rack.session.options'] ||= {}
-      env['rack.session.options'][:defer] = true
-      env['rack.session.options'][:skip] = true
-
       # Extract the path from everything after the leading slash
-      path = unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
       # URLs containing a `".."` are rejected for security reasons.
       if forbidden_request?(path)
@@ -43,13 +38,20 @@ module Sprockets
         path = path.sub("-#{fingerprint}", '')
       end
 
-      if File.extname(path) == '.map'
-        source_map = true
-        path = path.chomp('.map')
+      # Look up the asset.
+      options = {}
+      options[:bundle] = !body_only?(env)
+
+      if fingerprint
+        options[:if_match] = fingerprint
+      elsif env['HTTP_ACCEPT_ENCODING']
+        # Accept-Encoding negotiation is only enabled for non-fingerprinted
+        # assets. Avoids the "Apache ETag gzip" bug. Just Google it.
+        # https://issues.apache.org/bugzilla/show_bug.cgi?id=39727
+        options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING']
       end
 
-      # Look up the asset.
-      asset = find_asset(path, :bundle => !body_only?(env), :source => source_only?(env))
+      asset = find_asset(path, options)
 
       # `find_asset` returns nil if the asset doesn't exist
       if asset.nil?
@@ -57,10 +59,6 @@ module Sprockets
 
         # Return a 404 Not Found
         not_found_response
-
-      # Serve Source Map for asset
-      elsif source_map
-        source_map_response(asset, env)
 
       # Check request headers `HTTP_IF_NONE_MATCH` against the asset digest
       elsif etag_match?(asset, env)
@@ -79,12 +77,12 @@ module Sprockets
       logger.error "Error compiling asset #{path}:"
       logger.error "#{e.class.name}: #{e.message}"
 
-      case content_type_of(path)
-      when "application/javascript"
+      case File.extname(path)
+      when ".js"
         # Re-throw JavaScript asset exceptions to the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
         return javascript_exception_response(e)
-      when "text/css"
+      when ".css"
         # Display CSS asset exceptions in the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
         return css_exception_response(e)
@@ -115,9 +113,9 @@ module Sprockets
       # Returns a JavaScript response that re-throws a Ruby exception
       # in the browser
       def javascript_exception_response(exception)
-        err  = "#{exception.class.name}: #{exception.message}"
+        err  = "#{exception.class.name}: #{exception.message}\n  (in #{exception.backtrace[0]})"
         body = "throw Error(#{err.inspect})"
-        [ 200, { "Content-Type" => "application/javascript", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
+        [ 200, { "Content-Type" => "application/javascript", "Content-Length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Returns a CSS response that hides all elements on the page and
@@ -170,7 +168,7 @@ module Sprockets
           }
         CSS
 
-        [ 200, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => Rack::Utils.bytesize(body).to_s }, [ body ] ]
+        [ 200, { "Content-Type" => "text/css; charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string
@@ -192,14 +190,9 @@ module Sprockets
         env["QUERY_STRING"].to_s =~ /body=(1|t)/
       end
 
-      # Test if `?source=1` or `source=true` query param is set
-      def source_only?(env)
-        env["QUERY_STRING"].to_s =~ /source=(1|t)/
-      end
-
       # Returns a 304 Not Modified response tuple
       def not_modified_response(asset, env)
-        [ 304, {}, [] ]
+        [ 304, cache_headers(env, asset), [] ]
       end
 
       # Returns a 200 OK response tuple
@@ -207,37 +200,49 @@ module Sprockets
         [ 200, headers(env, asset, asset.length), asset ]
       end
 
-      def source_map_response(asset, env)
-        # TODO: Fix SourceMap::Map#to_json
-        [ 200, {'Content-Type' => 'application/json'}, [asset.map.as_json.to_json] ]
+      def cache_headers(env, asset)
+        headers = {}
+
+        # Set caching headers
+        headers["Cache-Control"] = "public"
+        headers["Last-Modified"] = asset.mtime.httpdate
+        headers["ETag"]          = etag(asset)
+
+        # If the request url contains a fingerprint, set a long
+        # expires on the response
+        if path_fingerprint(env["PATH_INFO"])
+          headers["Cache-Control"] << ", max-age=31536000"
+
+        # Otherwise set `must-revalidate` since the asset could be modified.
+        else
+          headers["Cache-Control"] << ", must-revalidate"
+          headers["Vary"] = "Accept-Encoding"
+        end
+
+        headers
       end
 
       def headers(env, asset, length)
-        Hash.new.tap do |headers|
-          # Set content type and length headers
-          headers["Content-Type"]   = asset.content_type
-          headers["Content-Length"] = length.to_s
+        headers = {}
 
-          # Source Map
-          if asset.is_a?(BundledAsset)
-            headers["X-SourceMap"] = "#{env["SCRIPT_NAME"]}#{env["PATH_INFO"]}.map"
-          end
-
-          # Set caching headers
-          headers["Cache-Control"]  = "public"
-          headers["Last-Modified"]  = asset.mtime.httpdate
-          headers["ETag"]           = etag(asset)
-
-          # If the request url contains a fingerprint, set a long
-          # expires on the response
-          if path_fingerprint(env["PATH_INFO"])
-            headers["Cache-Control"] << ", max-age=31536000"
-
-          # Otherwise set `must-revalidate` since the asset could be modified.
-          else
-            headers["Cache-Control"] << ", must-revalidate"
-          end
+        # Set content encoding
+        if asset.encoding
+          headers["Content-Encoding"] = asset.encoding
         end
+
+        # Set content length header
+        headers["Content-Length"] = length.to_s
+
+        # Set content type header
+        if type = asset.content_type
+          # Set charset param for text/* mime types
+          if type.start_with?("text/") && asset.charset
+            type += "; charset=#{asset.charset}"
+          end
+          headers["Content-Type"] = type
+        end
+
+        headers.merge(cache_headers(env, asset))
       end
 
       # Gets digest fingerprint.
@@ -247,20 +252,6 @@ module Sprockets
       #
       def path_fingerprint(path)
         path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
-      end
-
-      # URI.unescape is deprecated on 1.9. We need to use URI::Parser
-      # if its available.
-      if defined? URI::DEFAULT_PARSER
-        def unescape(str)
-          str = URI::DEFAULT_PARSER.unescape(str)
-          str.force_encoding(Encoding.default_internal) if Encoding.default_internal
-          str
-        end
-      else
-        def unescape(str)
-          URI.unescape(str)
-        end
       end
 
       # Helper to quote the assets digest for use as an ETag.

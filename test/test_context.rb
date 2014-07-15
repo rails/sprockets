@@ -1,5 +1,4 @@
 require 'sprockets_test'
-require 'tilt'
 require 'yaml'
 
 class TestContext < Sprockets::TestCase
@@ -8,9 +7,9 @@ class TestContext < Sprockets::TestCase
     @env.append_path(fixture_path('context'))
   end
 
-  test "context environment is indexed" do
+  test "context environment is cached" do
     instances = @env["environment.js"].to_s.split("\n")
-    assert_match "Sprockets::Index", instances[0]
+    assert_match "Sprockets::CachedEnvironment", instances[0]
     assert_equal instances[0], instances[1]
   end
 
@@ -56,17 +55,15 @@ class TestCustomProcessor < Sprockets::TestCase
     @env.append_path(fixture_path('context'))
   end
 
-  class YamlProcessor < Tilt::Template
-    def initialize_engine
-      require 'yaml'
+  require 'yaml'
+  class YamlProcessor
+    def initialize(file, &block)
+      @data = block.call
     end
 
-    def prepare
-      @manifest = YAML.load(data)
-    end
-
-    def evaluate(context, locals)
-      @manifest['require'].each do |logical_path|
+    def render(context)
+      manifest = YAML.load(@data)
+      manifest['require'].each do |logical_path|
         context.require_asset(logical_path)
       end
       ""
@@ -79,15 +76,14 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
   end
 
-  class DataUriProcessor < Tilt::Template
-    def initialize_engine
-      require 'base64'
+  require 'base64'
+  class DataUriProcessor
+    def initialize(file, &block)
+      @data = block.call
     end
 
-    def prepare
-    end
-
-    def evaluate(context, locals)
+    def render(context)
+      data = @data
       data.gsub(/url\(\"(.+?)\"\)/) do
         path = context.resolve($1)
         context.depend_on(path)
@@ -118,15 +114,14 @@ class TestCustomProcessor < Sprockets::TestCase
     end
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
-      @env["sprite.css.embed"].to_s.lines.to_a[0..1].join
-    assert_equal 58240, @env["sprite.css.embed"].length
+      @env["sprite2.css"].to_s.lines.to_a[0..1].join
+    assert_equal 58240, @env["sprite2.css"].length
   end
 
   test "resolve with content type" do
     assert_equal [fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
-     fixture_path("context/foo.js"),
-     "foo.js is 'application/javascript', not 'text/css';"
-    ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
+     fixture_path("context/foo.js")
+    ].join(",\n") + ";", @env["resolve_content_type.js"].to_s.strip
   end
 end

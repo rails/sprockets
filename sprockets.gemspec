@@ -11,14 +11,12 @@ Gem::Specification.new do |s|
   s.files = Dir["README.md", "LICENSE", "lib/**/*.rb"]
   s.executables = ["sprockets"]
 
-  s.add_dependency "hike", "~> 1.2"
   s.add_dependency "rack", "~> 1.0"
   s.add_dependency "sourcemap"
-  s.add_dependency "tilt", ["~> 1.1", "!= 1.3.0"]
 
   s.add_development_dependency "closure-compiler"
-  s.add_development_dependency "coffee-script", "~> 2.0"
   s.add_development_dependency "coffee-script-source", "~> 1.2"
+  s.add_development_dependency "coffee-script", "~> 2.0"
   s.add_development_dependency "eco", "~> 1.0"
   s.add_development_dependency "ejs", "~> 1.0"
   s.add_development_dependency "execjs", "~> 2.0"
@@ -30,12 +28,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency "uglifier"
   s.add_development_dependency "yui-compressor"
 
-  s.required_ruby_version = '>= 1.9.2'
+  s.required_ruby_version = '>= 1.9.3'
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
-  s.homepage = "http://getsprockets.org/"
+  s.homepage = "https://github.com/sstephenson/sprockets"
   s.rubyforge_project = "sprockets"
-
-  s.required_ruby_version = '>= 1.9.3'
 end

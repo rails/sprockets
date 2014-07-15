@@ -23,7 +23,7 @@ class TestServer < Sprockets::TestCase
       end
 
       map "/cached/javascripts" do
-        run env.index
+        run env.cached
       end
     end
   end
@@ -34,31 +34,94 @@ class TestServer < Sprockets::TestCase
 
   test "serve single source file" do
     get "/assets/foo.js"
+    assert_equal 200, last_response.status
+    assert_equal "9", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
     assert_equal "var foo;\n", last_response.body
   end
 
   test "serve single source file body" do
     get "/assets/foo.js?body=1"
     assert_equal 200, last_response.status
-    assert_equal "var foo;\n", last_response.body
     assert_equal "9", last_response.headers['Content-Length']
-  end
-
-  test "serve single source file original source" do
-    get "/assets/foo.js?source=1"
-    assert_equal 200, last_response.status
     assert_equal "var foo;\n", last_response.body
-    assert_equal "9", last_response.headers['Content-Length']
   end
 
-  test "serve source map file" do
-    get "/assets/foo.js.map"
+  test "serve gzip'd source file" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
     assert_equal 200, last_response.status
-    assert_match %r{version}, last_response.body
-    assert_equal "application/json", last_response.headers['Content-Type']
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    assert_equal "29", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal [31, 139, 8, 0], last_response.body.bytes.take(4)
   end
 
-  test "serve single source file from indexed environment" do
+  test "serve deflate'd source file" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'deflate'
+    assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "deflate", last_response.headers['Content-Encoding']
+    assert_equal "11", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal [43, 75, 44, 82], last_response.body.bytes.take(4)
+  end
+
+  test "serve gzip'd static file" do
+    get "/assets/hello.txt", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "text/plain; charset=utf-8", last_response.headers['Content-Type']
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    assert_equal "53", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal [31, 139, 8, 0], last_response.body.bytes.take(4)
+  end
+
+  test "ignore unknown encoding and fallback to gzip" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'sdch, gzip'
+    assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    assert_equal "29", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal [31, 139, 8, 0], last_response.body.bytes.take(4)
+  end
+
+  test "ignore unknown encoding and fallback to identity" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'sdch, identity, gzip'
+    assert_equal 200, last_response.status
+    assert_equal nil, last_response.headers['Content-Encoding']
+    assert_equal "9", last_response.headers['Content-Length']
+    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal "var foo;\n", last_response.body
+  end
+
+  test "content encoded etag is distinct from unencoded etag" do
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'identity'
+    assert_equal 200, last_response.status
+    refute last_response.headers['Content-Encoding']
+    assert etag = last_response.headers['ETag']
+
+    get "/assets/foo.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "gzip", last_response.headers['Content-Encoding']
+    refute_equal etag, last_response.headers['ETag']
+  end
+
+  test "ignores accept encoding when url is fingerprinted" do
+    get "/assets/foo.js"
+    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+
+    get "/assets/foo-#{digest}.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "9", last_response.headers['Content-Length']
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+    refute last_response.headers['Content-Encoding']
+    refute last_response.headers['Vary']
+  end
+
+  test "serve single source file from cached environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
   end
@@ -77,17 +140,12 @@ class TestServer < Sprockets::TestCase
     assert_equal "43", last_response.headers['Content-Length']
   end
 
-  test "serve source file source that has dependencies" do
-    get "/assets/application.js?source=true"
-    assert_equal 200, last_response.status
-    assert_equal "// =require \"foo\"\n\n(function() {\n  application.boot();\n})();\n",
-      last_response.body
-    assert_equal "61", last_response.headers['Content-Length']
-  end
-
   test "serve source with content type headers" do
     get "/assets/application.js"
     assert_equal "application/javascript", last_response.headers['Content-Type']
+
+    get "/assets/bootstrap.css"
+    assert_equal "text/css; charset=utf-8", last_response.headers['Content-Type']
   end
 
   test "serve source with etag headers" do
@@ -124,7 +182,7 @@ class TestServer < Sprockets::TestCase
     end
   end
 
-  test "file updates do not update last modified header for indexed environments" do
+  test "file updates do not update last modified header for cached environments" do
     time = Time.now
     path = fixture_path "server/app/javascripts/foo.js"
     File.utime(time, time, path)
@@ -143,21 +201,32 @@ class TestServer < Sprockets::TestCase
     get "/cached/javascripts/application.js"
     time_after_touching = last_response.headers['Last-Modified']
 
-    # TODO: CI doesn't like this
-    # assert_equal time_before_touching, time_after_touching
+    assert_equal time_before_touching, time_after_touching
   end
 
   test "not modified partial response when etags match" do
-    get "/assets/application.js?body=1"
+    get "/assets/application.js"
     assert_equal 200, last_response.status
-    etag = last_response.headers['ETag']
+    etag, last_modified, cache_control, expires, vary = last_response.headers.values_at(
+      'ETag', 'Last-Modified', 'Cache-Control', 'Expires', 'Vary'
+    )
 
-    get "/assets/application.js?body=1", {},
+    get "/assets/application.js", {},
       'HTTP_IF_NONE_MATCH' => etag
 
     assert_equal 304, last_response.status
-    assert_equal nil, last_response.headers['Content-Type']
-    assert_equal nil, last_response.headers['Content-Length']
+
+    # Allow 304 headers
+    assert_equal cache_control, last_response.headers['Cache-Control']
+    assert_equal etag, last_response.headers['ETag']
+    assert_equal last_modified, last_response.headers['Last-Modified']
+    assert_equal expires, last_response.headers['Expires']
+    assert_equal vary, last_response.headers['Vary']
+
+    # Disallowed 304 headers
+    refute last_response.headers['Content-Type']
+    refute last_response.headers['Content-Length']
+    refute last_response.headers['Content-Encoding']
   end
 
   test "if sources didnt change the server shouldnt rebundle" do
@@ -169,7 +238,7 @@ class TestServer < Sprockets::TestCase
     asset_after = @env["application.js"]
     assert asset_after
 
-    assert asset_before.equal?(asset_after)
+    assert asset_before.eql?(asset_after)
   end
 
   test "fingerprint digest sets expiration to the future" do
@@ -181,6 +250,11 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
+  test "bad fingerprint digest returns a 404" do
+    get "/assets/application-0000000000000000000000000000000000000000.js"
+    assert_equal 404, last_response.status
+  end
+
   test "missing source" do
     get "/assets/none.js"
     assert_equal 404, last_response.status
@@ -190,7 +264,7 @@ class TestServer < Sprockets::TestCase
   test "re-throw JS exceptions in the browser" do
     get "/assets/missing_require.js"
     assert_equal 200, last_response.status
-    assert_equal "throw Error(\"Sprockets::FileNotFound: couldn't find file 'notfound'\\n  (in #{fixture_path("server/vendor/javascripts/missing_require.js")}:1)\")", last_response.body
+    assert_equal "throw Error(\"Sprockets::FileNotFound: couldn't find file 'notfound' with type 'application/javascript'\\n  (in #{fixture_path("server/vendor/javascripts/missing_require.js")}:1)\")", last_response.body
   end
 
   test "display CSS exceptions in the browser" do

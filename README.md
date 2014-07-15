@@ -3,7 +3,7 @@
 Sprockets is a Ruby library for compiling and serving web assets.
 It features declarative dependency management for JavaScript and CSS
 assets, as well as a powerful preprocessor pipeline that allows you to
-write assets in languages like CoffeeScript, Sass, SCSS and LESS.
+write assets in languages like CoffeeScript, Sass and SCSS.
 
 # Installation #
 
@@ -13,7 +13,7 @@ Install Sprockets from RubyGems:
 
 Or include it in your project's `Gemfile` with Bundler:
 
-    gem 'sprockets', '~> 2.0'
+    gem 'sprockets', '~> 3.0'
 
 # Understanding the Sprockets Environment #
 
@@ -139,6 +139,15 @@ filename. For example, a CSS file written in SCSS might have the name
 `layout.css.scss`, while a JavaScript file written in CoffeeScript
 might have the name `dialog.js.coffee`.
 
+## Minifying Assets ##
+
+Several JavaScript and CSS minifiers are available through shorthand.
+
+``` ruby
+environment.js_compressor  = :uglify
+environment.css_compressor = :scss
+```
+
 ## Styling with Sass and SCSS ##
 
 [Sass](http://sass-lang.com/) is a language that compiles to CSS and
@@ -151,19 +160,6 @@ to write CSS assets in Sprockets.
 Sprockets supports both Sass syntaxes. For the original
 whitespace-sensitive syntax, use the extension `.css.sass`. For the
 new SCSS syntax, use the extension `.css.scss`.
-
-## Styling with LESS ##
-
-[LESS](http://lesscss.org/) extends CSS with dynamic behavior such as
-variables, mixins, operations and functions.
-
-If the `less` gem is available to your application, you can use LESS
-to write CSS assets in Sprockets. Note that the LESS compiler is
-written in JavaScript and the `less` gem (on MRI) uses `therubyracer`
-which embeds the V8 JavaScript runtime in Ruby, while on JRuby you're
-going to need `therubyrhino` gem installed.
-
-To write CSS assets with LESS, use the extension `.css.less`.
 
 ## Scripting with CoffeeScript ##
 
@@ -237,7 +233,7 @@ include:
   database, in a JavaScript asset via JSON
 - embedding version constants loaded from another file
 
-See the [Helper Methods](#FIXME) section for more information about
+See the [Helper Methods](lib/sprockets/context.rb) section for more information about
 interacting with `Sprockets::Context` instances via ERB.
 
 ### String Interpolation Syntax ###
@@ -307,12 +303,6 @@ reference files relative to the location of the current file.
 specified by *path*. If the file is required multiple times, it will
 appear in the bundle only once.
 
-### The `include` Directive ###
-
-`include` *path* works like `require`, but inserts the contents of the
-specified source file even if it has already been included or
-required.
-
 ### The `require_directory` Directive ###
 
 `require_directory` *path* requires all source files of the same
@@ -328,7 +318,7 @@ directory specified by *path*.
 ### The `require_self` Directive ###
 
 `require_self` tells Sprockets to insert the body of the current
-source file before any subsequent `require` or `include` directives.
+source file before any subsequent `require` directives.
 
 ### The `depend_on` Directive ###
 
@@ -339,14 +329,14 @@ asset's cache in response to a change in another file.
 ### The `depend_on_asset` Directive ###
 
 `depend_on_asset` *path* works like `depend_on`, but operates
-recursively reading the the file and following the directives found.
+recursively reading the file and following the directives found.
 
 ### The `stub` Directive ###
 
 `stub` *path* allows dependency to be excluded from the asset bundle.
 The *path* must be a valid asset and may or may not already be part
-of the bundle. Once stubbed, it is blacklisted and can't be brought
-back by any other `require`.
+of the bundle. `stub` should only be used at the top level bundle, not
+within any subdependencies.
 
 # Development #
 
@@ -365,6 +355,30 @@ the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
 ## Version History ##
+
+**3.0.0**
+
+* MIME Types now accept charset custom charset detecters. Improves support for UTF-16/32 files.
+* Environment#version no longer affects asset digests. Only used for busting the asset cache.
+* Removed builtin support for LESS.
+* Removed include directive support.
+* Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
+* Support circular dependencies. For parity with ES6 modules.
+
+**2.12.1** (April 17, 2014)
+
+* Fix making manifest target directory when its different than the output directory.
+
+**2.12.0** (March 13, 2014)
+
+* Avoid context reference in SassImporter hack so its Marshallable. Fixes
+ issues with Sass 3.3.x.
+
+**2.11.0** (February 19, 2014)
+
+* Cache store must now be an LRU implementation.
+* Default digest changed to SHA1. To continue using MD5.
+  `env.digest_class = Digest::MD5`.
 
 **2.10.0** (May 24, 2013)
 
@@ -398,7 +412,7 @@ submit a pull request.
 
 **2.8.0** (October 16, 2012)
 
-* Allow manifest location to be seperated from output directory
+* Allow manifest location to be separated from output directory
 * Pass logical path and absolute path to each_logical_path iterator
 
 **2.7.0** (October 10, 2012)
@@ -471,7 +485,7 @@ submit a pull request.
 
 **2.1.2** (November 20, 2011)
 
-* Disabled If-Modified-Since server checks. Fixes some browser caching issues when serving the asset body only. If-None-Match caching is sufficent.
+* Disabled If-Modified-Since server checks. Fixes some browser caching issues when serving the asset body only. If-None-Match caching is sufficient.
 
 **2.1.1** (November 18, 2011)
 
@@ -504,9 +518,9 @@ submit a pull request.
 
 # License #
 
-Copyright &copy; 2011 Sam Stephenson <<sstephenson@gmail.com>>
+Copyright &copy; 2014 Sam Stephenson <<sstephenson@gmail.com>>
 
-Copyright &copy; 2011 Joshua Peek <<josh@joshpeek.com>>
+Copyright &copy; 2014 Joshua Peek <<josh@joshpeek.com>>
 
 Sprockets is distributed under an MIT-style license. See LICENSE for
 details.

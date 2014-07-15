@@ -1,41 +1,82 @@
 require 'sprockets_test'
 
-class TestTiltSass < Sprockets::TestCase
+silence_warnings do
+  require 'sass'
+end
+
+class TestBaseSass < Sprockets::TestCase
   CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
   COMPASS_PATH = File.join(FIXTURE_ROOT, 'compass')
 
-  class SassTemplate < Tilt::SassTemplate
-    def sass_options
-      options.merge({:filename => eval_file, :line => line, :syntax => :sass, :load_paths => [COMPASS_PATH]})
+  def teardown
+    refute ::Sass::Script::Functions.instance_methods.include?(:asset_path)
+    FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
+    assert !File.exist?(CACHE_PATH)
+  end
+end
+
+class TestNoSassFunction < TestBaseSass
+  module ::Sass::Script::Functions
+    def javascript_path(path)
+      ::Sass::Script::String.new("/js/#{path.value}", :string)
     end
+
+    module Compass
+      def stylesheet_path(path)
+        ::Sass::Script::String.new("/css/#{path.value}", :string)
+      end
+    end
+    include Compass
   end
 
-  class ScssTemplate < Tilt::ScssTemplate
-    def sass_options
-      options.merge({:filename => eval_file, :line => line, :syntax => :scss, :load_paths => [COMPASS_PATH]})
-    end
-  end
-
-  def setup
+  test "aren't included globally" do
     silence_warnings do
-      require 'sass'
+      assert ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
+      assert ::Sass::Script::Functions.instance_methods.include?(:stylesheet_path)
+
+      filename = fixture_path('sass/paths.scss')
+      assert data = File.read(filename)
+      engine = ::Sass::Engine.new(data, {
+        filename: filename,
+        syntax: :scss
+      })
+
+      assert ::Sass::Script::Functions.instance_methods.include?(:javascript_path)
+      assert ::Sass::Script::Functions.instance_methods.include?(:stylesheet_path)
+
+      assert_equal <<-EOS, engine.render
+div {
+  url: url(asset-path("foo.svg"));
+  url: url(image-path("foo.png"));
+  url: url(video-path("foo.mov"));
+  url: url(audio-path("foo.mp3"));
+  url: url(font-path("foo.woff"));
+  url: url("/js/foo.js");
+  url: url("/css/foo.css"); }
+      EOS
+    end
+  end
+end
+
+class TestSprocketsSass < TestBaseSass
+  def setup
+    super
+
+    @env = Sprockets::Environment.new(".") do |env|
+      env.cache = {}
+      env.append_path(fixture_path('.'))
+      env.append_path(fixture_path('compass'))
     end
   end
 
   def teardown
-    FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
 
   def render(path)
     path = fixture_path(path)
     silence_warnings do
-      case File.extname(path)
-      when '.sass'
-        SassTemplate.new(path).render
-      when '.scss', '.css'
-        ScssTemplate.new(path).render
-      end
+      @env[path].to_s
     end
   end
 
@@ -201,43 +242,31 @@ a:link {
     EOS
   end
 
-  def silence_warnings
-    old_verbose, $VERBOSE = $VERBOSE, false
-    yield
-  ensure
-    $VERBOSE = old_verbose
-  end
-end
-
-class TestSprocketsSass < TestTiltSass
-  def setup
-    super
-
-    @env = Sprockets::Environment.new(".") do |env|
-      env.cache = {}
-      env.append_path(fixture_path('.'))
-      env.append_path(fixture_path('compass'))
-    end
-  end
-
-  def teardown
-    assert !File.exist?(CACHE_PATH)
-  end
-
-  def render(path)
-    path = fixture_path(path)
-    silence_warnings do
-      @env[path].to_s
+  test "raise sass error with line number" do
+    begin
+      ::Sass::Util.silence_sass_warnings do
+        render('sass/error.sass')
+      end
+      flunk
+    rescue Sass::SyntaxError => error
+      assert error.message.include?("invalid")
+      trace = error.backtrace[0]
+      assert trace.include?("error.sass")
+      assert trace.include?(":5")
     end
   end
 end
 
-class TestSassCompressor < TestTiltSass
+class TestSassCompressor < TestBaseSass
   test "compress css" do
     silence_warnings do
       uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
       compressed   = "p{margin:0;padding:0}\n"
-      assert_equal compressed, Sprockets::SassCompressor.new { uncompressed }.render
+      input = {
+        data: uncompressed,
+        cache: Sprockets::Cache.new
+      }
+      assert_equal compressed, Sprockets::SassCompressor.call(input)
     end
   end
 end
@@ -245,12 +274,17 @@ end
 class TestSassFunctions < TestSprocketsSass
   def setup
     super
+    define_asset_path
+  end
 
-    @env.context_class.class_eval do
+  def define_asset_path
+    engine = Sprockets::ScssTemplate.new do
       def asset_path(path, options = {})
-        "/#{path}"
+        Sass::Script::String.new("/#{path.value}", :string)
       end
     end
+
+    @env.register_engine('.scss', engine)
   end
 
   test "path functions" do
@@ -277,5 +311,22 @@ div {
   url: url(/foo.js);
   url: url(/foo.css); }
     EOS
+  end
+
+  test "data-url function" do
+    assert_equal <<-EOS, render('sass/data_url.scss')
+div {
+  url: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAMAAAAoyzS7AAAABlBMVEUFO2sAAADPfNHpAAAACklEQVQIW2NgAAAAAgABYkBPaAAAAABJRU5ErkJggg%3D%3D); }
+    EOS
+  end
+end
+
+class TestLegacySassFunctions < TestSassFunctions
+  def define_asset_path
+    @env.context_class.class_eval do
+      def asset_path(path, options = {})
+        "/#{path}"
+      end
+    end
   end
 end

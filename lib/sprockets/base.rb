@@ -1,89 +1,18 @@
-require 'sprockets/asset_attributes'
-require 'sprockets/bundled_asset'
-require 'sprockets/caching'
+require 'sprockets/asset'
+require 'sprockets/bower'
 require 'sprockets/errors'
-require 'sprockets/processed_asset'
+require 'sprockets/resolve'
 require 'sprockets/server'
-require 'sprockets/static_asset'
-require 'json'
 require 'pathname'
 
 module Sprockets
-  # `Base` class for `Environment` and `Index`.
+  # `Base` class for `Environment` and `Cached`.
   class Base
-    include Caching, Paths, Mime, Processing, Compressing, Engines, Server
-
-    # Returns a `Digest` implementation class.
-    #
-    # Defaults to `Digest::MD5`.
-    attr_reader :digest_class
-
-    # Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::MD5` or
-    # `Digest::SHA1`.
-    #
-    #     environment.digest_class = Digest::SHA1
-    #
-    def digest_class=(klass)
-      expire_index!
-      @digest_class = klass
-    end
-
-    # The `Environment#version` is a custom value used for manually
-    # expiring all asset caches.
-    #
-    # Sprockets is able to track most file and directory changes and
-    # will take care of expiring the cache for you. However, its
-    # impossible to know when any custom helpers change that you mix
-    # into the `Context`.
-    #
-    # It would be wise to increment this value anytime you make a
-    # configuration change to the `Environment` object.
-    attr_reader :version
-
-    # Assign an environment version.
-    #
-    #     environment.version = '2.0'
-    #
-    def version=(version)
-      expire_index!
-      @version = version
-    end
-
-    # Returns a `Digest` instance for the `Environment`.
-    #
-    # This value serves two purposes. If two `Environment`s have the
-    # same digest value they can be treated as equal. This is more
-    # useful for comparing environment states between processes rather
-    # than in the same. Two equal `Environment`s can share the same
-    # cached assets.
-    #
-    # The value also provides a seed digest for all `Asset`
-    # digests. Any change in the environment digest will affect all of
-    # its assets.
-    def digest
-      # Compute the initial digest using the implementation class. The
-      # Sprockets release version and custom environment version are
-      # mixed in. So any new releases will affect all your assets.
-      @digest ||= digest_class.new.update(VERSION).update(version.to_s)
-
-      # Returned a dupped copy so the caller can safely mutate it with `.update`
-      @digest.dup
-    end
-
-    # Get and set `Logger` instance.
-    attr_accessor :logger
-
-    # Get `Context` class.
-    #
-    # This class maybe mutated and mixed in with custom helpers.
-    #
-    #     environment.context_class.instance_eval do
-    #       include MyHelpers
-    #       def asset_url; end
-    #     end
-    #
-    attr_reader :context_class
+    include PathUtils, HTTPUtils
+    include Configuration
+    include Server
+    include Resolve
+    include Bower
 
     # Get persistent cache store
     attr_reader :cache
@@ -94,198 +23,98 @@ module Sprockets
     # setters. Either `get(key)`/`set(key, value)`,
     # `[key]`/`[key]=value`, `read(key)`/`write(key, value)`.
     def cache=(cache)
-      expire_index!
-      @cache = cache
-      @cache_adapter = make_cache_adapter(cache)
+      @cache = Cache.new(cache, logger)
     end
 
-    def prepend_path(path)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def append_path(path)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def clear_paths
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    # Finds the expanded real path for a given logical path by
-    # searching the environment's paths.
-    #
-    #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js.coffee"
-    #
-    # A `FileNotFound` exception is raised if the file does not exist.
-    def resolve(logical_path, options = {})
-      # If a block is given, preform an iterable search
-      if block_given?
-        args = attributes_for(logical_path).search_paths + [options]
-        @trail.find(*args) do |path|
-          pathname = Pathname.new(path)
-          if %w( bower.json component.json ).include?(pathname.basename.to_s)
-            bower = json_decode(pathname.read)
-            case bower['main']
-            when String
-              yield pathname.dirname.join(bower['main'])
-            when Array
-              extname = File.extname(logical_path)
-              bower['main'].each do |fn|
-                if extname == "" || extname == File.extname(fn)
-                  yield pathname.dirname.join(fn)
-                end
-              end
-            end
-          else
-            yield pathname
-          end
-        end
-      else
-        resolve(logical_path, options) do |pathname|
-          return pathname
-        end
-        raise FileNotFound, "couldn't find file '#{logical_path}'"
-      end
-    end
-
-    # Register a new mime type.
-    def register_mime_type(mime_type, ext)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      @trail.append_extension(ext)
-      super
-    end
-
-    # Registers a new Engine `klass` for `ext`.
-    def register_engine(ext, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      add_engine_to_trail(ext, klass)
-      super
-    end
-
-    def register_preprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def unregister_preprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def register_postprocessor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def unregister_postprocessor(mime_type, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def register_bundle_processor(mime_type, klass, &block)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    def unregister_bundle_processor(mime_type, klass)
-      # Overrides the global behavior to expire the index
-      expire_index!
-      super
-    end
-
-    # Return an `Index`. Must be implemented by the subclass.
-    def index
+    # Return an `Cached`. Must be implemented by the subclass.
+    def cached
       raise NotImplementedError
     end
+    alias_method :index, :cached
 
-    if defined? Encoding.default_external
-      # Define `default_external_encoding` accessor on 1.9.
-      # Defaults to UTF-8.
-      attr_accessor :default_external_encoding
-    end
-
-    # Works like `Dir.entries`.
+    # Internal: Compute hexdigest for path.
     #
-    # Subclasses may cache this method.
-    def entries(pathname)
-      @trail.entries(pathname)
-    end
-
-    # Works like `File.stat`.
+    # path - String filename or directory path.
     #
-    # Subclasses may cache this method.
-    def stat(path)
-      @trail.stat(path)
-    end
-
-    # Read and compute digest of filename.
-    #
-    # Subclasses may cache this method.
-    def file_digest(path)
+    # Returns a String SHA1 hexdigest or nil.
+    def file_hexdigest(path)
       if stat = self.stat(path)
-        # If its a file, digest the contents
-        if stat.file?
-          digest.file(path.to_s)
-
-        # If its a directive, digest the list of filenames
-        elsif stat.directory?
-          contents = self.entries(path).join(',')
-          digest.update(contents)
+        # Caveat: Digests are cached by the path's current mtime. Its possible
+        # for a files contents to have changed and its mtime to have been
+        # negligently reset thus appearing as if the file hasn't changed on
+        # disk. Also, the mtime is only read to the nearest second. Its
+        # also possible the file was updated more than once in a given second.
+        cache.fetch(['file_hexdigest', path, stat.mtime.to_i]) do
+          if stat.directory?
+            # If its a directive, digest the list of filenames
+            Digest::SHA1.hexdigest(self.entries(path).join(','))
+          elsif stat.file?
+            # If its a file, digest the contents
+            Digest::SHA1.file(path.to_s).hexdigest
+          end
         end
       end
     end
 
-    # Internal. Return a `AssetAttributes` for `path`.
-    def attributes_for(path)
-      AssetAttributes.new(self, path)
+    # Internal: Compute hexdigest for a set of paths.
+    #
+    # paths - Array of filename or directory paths.
+    #
+    # Returns a String SHA1 hexdigest.
+    def dependencies_hexdigest(paths)
+      digest = Digest::SHA1.new
+      paths.each { |path| digest.update(file_hexdigest(path).to_s) }
+      digest.hexdigest
     end
 
-    # Internal. Return content type of `path`.
-    def content_type_of(path)
-      attributes_for(path).content_type
+    # Experimental: Check if environment has asset.
+    #
+    # TODO: Finalize API.
+    #
+    # Acts similar to `find_asset(path) ? true : false` but does not build the
+    # entire asset.
+    #
+    # Returns true or false.
+    def has_asset?(filename, options = {})
+      return false unless file?(filename)
+
+      accepts = options[:accept] || '*/*'
+
+      # TODO: Review performance
+      extname = parse_path_extnames(filename)[1]
+      if mime_type = mime_exts[extname]
+        accepts = parse_q_values(accepts)
+        accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
+      else
+        accepts == '*/*'
+      end
     end
 
     # Find asset by logical path or expanded path.
     def find_asset(path, options = {})
-      logical_path = path
-      pathname     = Pathname.new(path)
+      path = path.to_s
+      options = options.dup
+      options[:bundle] = true unless options.key?(:bundle)
+      accept = options.delete(:accept)
+      if_match = options.delete(:if_match)
 
-      if pathname.absolute?
-        return unless stat(pathname)
-        logical_path = attributes_for(pathname).logical_path
+      if absolute_path?(path) && has_asset?(path, accept: accept)
+        filename = path
+        return nil unless file?(filename)
       else
-        begin
-          pathname = resolve(logical_path)
-
-          # If logical path is missing a mime type extension, append
-          # the absolute path extname so it has one.
-          #
-          # Ensures some consistency between finding "foo/bar" vs
-          # "foo/bar.js".
-          if File.extname(logical_path) == ""
-            expanded_logical_path = attributes_for(pathname).logical_path
-            logical_path += File.extname(expanded_logical_path)
-          end
-        rescue FileNotFound
-          return nil
-        end
+        filename = resolve_all(path, accept: accept).first
       end
 
-      build_asset(logical_path, pathname, options)
+      if filename
+        options = { bundle: options[:bundle], accept_encoding: options[:accept_encoding] }
+        if if_match
+          asset_hash = build_asset_hash_for_digest(filename, if_match, options)
+        else
+          asset_hash = build_asset_hash(filename, options)
+        end
+
+        Asset.new(asset_hash) if asset_hash
+      end
     end
 
     # Preferred `find_asset` shorthand.
@@ -296,154 +125,97 @@ module Sprockets
       find_asset(*args)
     end
 
-    def each_entry(root, &block)
-      return to_enum(__method__, root) unless block_given?
-      root = Pathname.new(root) unless root.is_a?(Pathname)
-
-      paths = []
-      entries(root).sort.each do |filename|
-        path = root.join(filename)
-        paths << path
-
-        if stat(path).directory?
-          each_entry(path) do |subpath|
-            paths << subpath
-          end
-        end
-      end
-
-      paths.sort_by(&:to_s).each(&block)
-
-      nil
-    end
-
-    def each_file
-      return to_enum(__method__) unless block_given?
-      paths.each do |root|
-        each_entry(root) do |path|
-          if !stat(path).directory?
-            yield path
-          end
-        end
-      end
-      nil
-    end
-
-    def each_logical_path(*args, &block)
-      return to_enum(__method__, *args) unless block_given?
-      filters = args.flatten
-      files = {}
-      each_file do |filename|
-        if logical_path = logical_path_for_filename(filename, filters)
-          unless files[logical_path]
-            if block.arity == 2
-              yield logical_path, filename.to_s
-            else
-              yield logical_path
-            end
-          end
-
-          files[logical_path] = true
-        end
-      end
-      nil
-    end
-
     # Pretty inspect
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
         "root=#{root.to_s.inspect}, " +
-        "paths=#{paths.inspect}, " +
-        "digest=#{digest.to_s.inspect}" +
-        ">"
+        "paths=#{paths.inspect}>"
     end
 
     protected
-      # Clear index after mutating state. Must be implemented by the subclass.
-      def expire_index!
-        raise NotImplementedError
+      def build_asset_hash_for_digest(filename, digest, options)
+        asset_hash = build_asset_hash(filename, options)
+        if asset_hash[:digest] == digest
+          asset_hash
+        end
       end
 
-      def build_asset(logical_path, pathname, options)
-        pathname = Pathname.new(pathname)
+      def build_asset_hash(filename, options)
+        load_path, logical_path = paths_split(self.paths, filename)
+        unless load_path
+          raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
+        end
 
-        # If there are any processors to run on the pathname, use
-        # `BundledAsset`. Otherwise use `StaticAsset` and treat is as binary.
-        if attributes_for(pathname).processors.any?
-          if options[:source]
-            StaticAsset.new(index, logical_path, pathname)
-          elsif options[:bundle] == false
-            circular_call_protection(pathname.to_s) do
-              ProcessedAsset.new(index, logical_path, pathname)
-            end
-          else
-            BundledAsset.new(index, logical_path, pathname)
-          end
+        logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
+        logical_path = normalize_logical_path(logical_path, extname)
+        mime_type = mime_exts[extname]
+
+        asset = {
+          load_path: load_path,
+          filename: filename,
+          logical_path: logical_path,
+          name: logical_path.chomp(extname)
+        }
+        asset[:content_type] = mime_type if mime_type
+
+        processed_processors = unwrap_preprocessors(asset[:content_type]) +
+          unwrap_engines(engine_extnames).reverse +
+          unwrap_postprocessors(asset[:content_type])
+        bundled_processors = unwrap_bundle_processors(asset[:content_type])
+
+        processors = options[:bundle] ? bundled_processors : processed_processors
+        processors += unwrap_encoding_processors(options[:accept_encoding])
+
+        if processors.any?
+          build_processed_asset_hash(asset, processors)
         else
-          StaticAsset.new(index, logical_path, pathname)
+          build_static_asset_hash(asset)
         end
       end
 
-      def cache_key_for(path, options)
-        if options[:source]
-          "#{path}:source"
-        elsif options[:bundle]
-          "#{path}:bundle"
-        else
-          "#{path}:processed"
+      def build_processed_asset_hash(asset, processors)
+        filename = asset[:filename]
+
+        data = File.open(filename, 'rb') { |f| f.read }
+
+        content_type = asset[:content_type]
+        mime_type = mime_types[content_type]
+        if mime_type && mime_type[:charset]
+          data = mime_type[:charset].call(data).encode(Encoding::UTF_8)
         end
+
+        processed = process(
+          processors,
+          filename,
+          asset[:load_path],
+          asset[:name],
+          content_type,
+          data
+        )
+
+        # Ensure originally read file is marked as a dependency
+        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([filename])
+
+        asset.merge(processed).merge({
+          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime }.max.to_i,
+          metadata: processed[:metadata].merge(
+            dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
+          )
+        })
       end
 
-      def circular_call_protection(path)
-        reset = Thread.current[:sprockets_circular_calls].nil?
-        calls = Thread.current[:sprockets_circular_calls] ||= Set.new
-        if calls.include?(path)
-          raise CircularDependencyError, "#{path} has already been required"
-        end
-        calls << path
-        yield
-      ensure
-        Thread.current[:sprockets_circular_calls] = nil if reset
-      end
-
-      def logical_path_for_filename(filename, filters)
-        logical_path = attributes_for(filename).logical_path.to_s
-
-        if matches_filter(filters, logical_path, filename)
-          return logical_path
-        end
-
-        # If filename is an index file, retest with alias
-        if File.basename(logical_path)[/[^\.]+/, 0] == 'index'
-          path = logical_path.sub(/\/index\./, '.')
-          if matches_filter(filters, path, filename)
-            return path
-          end
-        end
-
-        nil
-      end
-
-      def matches_filter(filters, logical_path, filename)
-        return true if filters.empty?
-
-        filters.any? do |filter|
-          if filter.is_a?(Regexp)
-            filter.match(logical_path)
-          elsif filter.respond_to?(:call)
-            if filter.arity == 1
-              filter.call(logical_path)
-            else
-              filter.call(logical_path, filename.to_s)
-            end
-          else
-            File.fnmatch(filter.to_s, logical_path)
-          end
-        end
-      end
-
-      def json_decode(obj)
-        JSON.parse(obj, create_additions: false)
+      def build_static_asset_hash(asset)
+        stat = self.stat(asset[:filename])
+        asset.merge({
+          encoding: Encoding::BINARY,
+          length: stat.size,
+          mtime: stat.mtime.to_i,
+          digest: digest_class.file(asset[:filename]).hexdigest,
+          metadata: {
+            dependency_paths: Set.new([asset[:filename]]),
+            dependency_digest: dependencies_hexdigest([asset[:filename]]),
+          }
+        })
       end
   end
 end

@@ -1,12 +1,21 @@
 require "minitest/autorun"
 require "sprockets"
-require "tilt"
 require "fileutils"
 
-if defined? Encoding
+require "coffee_script"
+require "eco"
+require "ejs"
+require "erb"
+
+old_verbose, $VERBOSE = $VERBOSE, false
+Encoding.default_external = 'UTF-8'
+Encoding.default_internal = 'UTF-8'
+$VERBOSE = old_verbose
+
+def silence_warnings
   old_verbose, $VERBOSE = $VERBOSE, false
-  Encoding.default_external = 'UTF-8'
-  Encoding.default_internal = 'UTF-8'
+  yield
+ensure
   $VERBOSE = old_verbose
 end
 

@@ -1,6 +1,6 @@
 require 'pathname'
+require 'set'
 require 'shellwords'
-require 'tilt'
 require 'yaml'
 
 module Sprockets
@@ -20,10 +20,9 @@ module Sprockets
   #      *= require "baz"
   #      */
   #
-  # The Processor is implemented as a `Tilt::Template` and is loosely
-  # coupled to Sprockets. This makes it possible to disable or modify
-  # the processor to do whatever you'd like. You could add your own
-  # custom directives or invent your own directive syntax.
+  # This makes it possible to disable or modify the processor to do whatever
+  # you'd like. You could add your own custom directives or invent your own
+  # directive syntax.
   #
   # `Environment#processors` includes `DirectiveProcessor` by default.
   #
@@ -36,7 +35,9 @@ module Sprockets
   #
   #     env.register_processor('text/css', MyProcessor)
   #
-  class DirectiveProcessor < Tilt::Template
+  class DirectiveProcessor
+    VERSION = '1'
+
     # Directives will only be picked up if they are in the header
     # of the source file. C style (/* */), JavaScript (//), and
     # Ruby (#) comments are supported.
@@ -68,76 +69,79 @@ module Sprockets
       ^ \W* = \s* (\w+.*?) (\*\/)? $
     /x
 
-    attr_reader :pathname
-    attr_reader :header, :body
-
-    def prepare
-      @pathname = Pathname.new(file)
-
-      @header = data[HEADER_PATTERN, 0] || ""
-      @body   = $' || data
-      # Ensure body ends in a new line
-      @body  += "\n" if @body != "" && @body !~ /\n\Z/m
-
-      @included_pathnames = []
-      @compat             = false
+    def self.call(input)
+      new.call(input)
     end
 
-    # Implemented for Tilt#render.
-    #
-    # `context` is a `Context` instance with methods that allow you to
-    # access the environment and append to the bundle. See `Context`
-    # for the complete API.
-    def evaluate(context, locals, &block)
-      @context = context
+    def call(input)
+      @environment  = input[:environment]
+      @load_path    = input[:load_path]
+      @filename     = input[:filename]
+      @dirname      = File.dirname(@filename)
+      @content_type = input[:content_type]
 
-      @result = ""
-      @result.force_encoding(body.encoding) if body.respond_to?(:encoding)
+      data = input[:data]
+      cache_key = ['DirectiveProcessor', VERSION, data]
+      result = input[:cache].fetch(cache_key) do
+        process_source(data)
+      end
 
-      @has_written_body = false
+      data, directives = result.values_at(:data, :directives)
 
-      process_directives
-      process_source
+      @required_paths   = Set.new(input[:metadata][:required_paths])
+      @stubbed_paths    = Set.new(input[:metadata][:stubbed_paths])
+      @dependency_paths = Set.new(input[:metadata][:dependency_paths])
 
-      @result
-    end
+      process_directives(directives)
 
-    # Returns the header String with any directives stripped.
-    def processed_header
-      lineno = 0
-      @processed_header ||= header.lines.map { |line|
-        lineno += 1
-        # Replace directive line with a clean break
-        directives.assoc(lineno) ? "\n" : line
-      }.join.chomp
-    end
-
-    # Returns the source String with any directives stripped.
-    def processed_source
-      @processed_source ||= processed_header + body
-    end
-
-    # Returns an Array of directive structures. Each structure
-    # is an Array with the line number as the first element, the
-    # directive name as the second element, followed by any
-    # arguments.
-    #
-    #     [[1, "require", "foo"], [2, "require", "bar"]]
-    #
-    def directives
-      @directives ||= header.lines.each_with_index.map { |line, index|
-        if directive = line[DIRECTIVE_PATTERN, 1]
-          name, *args = Shellwords.shellwords(directive)
-          if respond_to?("process_#{name}_directive", true)
-            [index + 1, name, *args]
-          end
-        end
-      }.compact
+      { data: data,
+        required_paths: @required_paths,
+        stubbed_paths: @stubbed_paths,
+        dependency_paths: @dependency_paths }
     end
 
     protected
-      attr_reader :included_pathnames
-      attr_reader :context
+      def process_source(source)
+        header = source[HEADER_PATTERN, 0] || ""
+        body   = $' || source
+
+        header, directives = extract_directives(header)
+
+        data = ""
+        data.force_encoding(body.encoding)
+        data << header << "\n" unless header.empty?
+        data << body
+        # Ensure body ends in a new line
+        data << "\n" if data.length > 0 && data[-1] != "\n"
+
+        { data: data, directives: directives }
+      end
+
+      # Returns an Array of directive structures. Each structure
+      # is an Array with the line number as the first element, the
+      # directive name as the second element, followed by any
+      # arguments.
+      #
+      #     [[1, "require", "foo"], [2, "require", "bar"]]
+      #
+      def extract_directives(header)
+        processed_header = ""
+        directives = []
+
+        header.lines.each_with_index do |line, index|
+          if directive = line[DIRECTIVE_PATTERN, 1]
+            name, *args = Shellwords.shellwords(directive)
+            if respond_to?("process_#{name}_directive", true)
+              directives << [index + 1, name, *args]
+              # Replace directive line with a clean break
+              line = "\n"
+            end
+          end
+          processed_header << line
+        end
+
+        return processed_header.chomp, directives
+      end
 
       # Gathers comment directives in the source and processes them.
       # Any directive method matching `process_*_directive` will
@@ -161,29 +165,14 @@ module Sprockets
       #     env.unregister_processor('text/css', Sprockets::DirectiveProcessor)
       #     env.register_processor('text/css', DirectiveProcessor)
       #
-      def process_directives
+      def process_directives(directives)
         directives.each do |line_number, name, *args|
-          context.__LINE__ = line_number
-          send("process_#{name}_directive", *args)
-          context.__LINE__ = nil
-        end
-      end
-
-      def process_source
-        unless @has_written_body || processed_header.empty?
-          @result << processed_header << "\n"
-        end
-
-        included_pathnames.each do |pathname|
-          @result << context.evaluate(pathname)
-        end
-
-        unless @has_written_body
-          @result << body
-        end
-
-        if compat? && constants.any?
-          @result.gsub!(/<%=(.*?)%>/) { constants[$1.strip] }
+          begin
+            send("process_#{name}_directive", *args)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
         end
       end
 
@@ -206,22 +195,13 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        if @compat
-          if path =~ /<([^>]+)>/
-            path = $1
-          else
-            path = "./#{path}" unless relative?(path)
-          end
-        end
-
-        context.require_asset(path)
+        @required_paths << resolve(path, accept: @content_type)
       end
 
-      # `require_self` causes the body of the current file to be
-      # inserted before any subsequent `require` or `include`
-      # directives. Useful in CSS files, where it's common for the
-      # index file to contain global styles that need to be defined
-      # before other dependencies are loaded.
+      # `require_self` causes the body of the current file to be inserted
+      # before any subsequent `require` directives. Useful in CSS files, where
+      # it's common for the index file to contain global styles that need to
+      # be defined before other dependencies are loaded.
       #
       #     /*= require "reset"
       #      *= require_self
@@ -229,26 +209,10 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        if @has_written_body
+        if @required_paths.include?(@filename)
           raise ArgumentError, "require_self can only be called once per source file"
         end
-
-        context.require_asset(pathname)
-        process_source
-        included_pathnames.clear
-        @has_written_body = true
-      end
-
-      # The `include` directive works similar to `require` but
-      # inserts the contents of the dependency even if it already
-      # has been required.
-      #
-      #     //= include "header"
-      #
-      def process_include_directive(path)
-        pathname = context.resolve(path)
-        context.depend_on_asset(pathname)
-        included_pathnames << pathname
+        @required_paths << @filename
       end
 
       # `require_directory` requires all the files inside a single
@@ -258,21 +222,20 @@ module Sprockets
       #     //= require_directory "./javascripts"
       #
       def process_require_directory_directive(path = ".")
-        if relative?(path)
-          root = pathname.dirname.join(path).expand_path
+        if @environment.relative_path?(path)
+          root = expand_relative_path(path)
 
-          unless (stats = stat(root)) && stats.directory?
+          unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          context.depend_on(root)
+          @dependency_paths << root
 
-          entries(root).each do |pathname|
-            pathname = root.join(pathname)
-            if pathname.to_s == self.file
+          @environment.stat_directory(root).each do |subpath, stat|
+            if subpath == @filename
               next
-            elsif context.asset_requirable?(pathname)
-              context.require_asset(pathname)
+            elsif @environment.has_asset?(subpath, accept: @content_type)
+              @required_paths << subpath
             end
           end
         else
@@ -287,23 +250,27 @@ module Sprockets
       #     //= require_tree "./public"
       #
       def process_require_tree_directive(path = ".")
-        if relative?(path)
-          root = pathname.dirname.join(path).expand_path
+        if @environment.relative_path?(path)
+          root = expand_relative_path(path)
 
-          unless (stats = stat(root)) && stats.directory?
+          unless (stats = @environment.stat(root)) && stats.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          context.depend_on(root)
+          @dependency_paths << root
 
-          each_entry(root) do |pathname|
-            if pathname.to_s == self.file
+          required_paths = []
+          @environment.stat_tree(root).each do |subpath, stat|
+            if subpath == @filename
               next
-            elsif stat(pathname).directory?
-              context.depend_on(pathname)
-            elsif context.asset_requirable?(pathname)
-              context.require_asset(pathname)
+            elsif stat.directory?
+              @dependency_paths << subpath
+            elsif @environment.has_asset?(subpath, accept: @content_type)
+              required_paths << subpath
             end
+          end
+          required_paths.sort_by(&:to_s).each do |filename|
+            @required_paths << filename
           end
         else
           # The path must be relative and start with a `./`.
@@ -324,7 +291,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        context.depend_on(path)
+        @dependency_paths << resolve(path, accept: "#{@content_type}, */*")
       end
 
       # Allows you to state a dependency on an asset without including
@@ -339,7 +306,9 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        context.depend_on_asset(path)
+        if asset = @environment.find_asset(resolve(path, accept: "#{@content_type}, */*"))
+          @dependency_paths.merge(asset.metadata[:dependency_paths])
+        end
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -351,58 +320,27 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        context.stub_asset(path)
-      end
-
-      # Enable Sprockets 1.x compat mode.
-      #
-      # Makes it possible to use the same JavaScript source
-      # file in both Sprockets 1 and 2.
-      #
-      #     //= compat
-      #
-      def process_compat_directive
-        @compat = true
-      end
-
-      # Checks if Sprockets 1.x compat mode enabled
-      def compat?
-        @compat
-      end
-
-      # Sprockets 1.x allowed for constant interpolation if a
-      # constants.yml was present. This is only available if
-      # compat mode is on.
-      def constants
-        if compat?
-          pathname = Pathname.new(context.root_path).join("constants.yml")
-          stat(pathname) ? YAML.load_file(pathname) : {}
-        else
-          {}
-        end
-      end
-
-      # `provide` is stubbed out for Sprockets 1.x compat.
-      # Mutating the path when an asset is being built is
-      # not permitted.
-      def process_provide_directive(path)
+        @stubbed_paths << resolve(path, accept: @content_type)
       end
 
     private
-      def relative?(path)
-        path =~ /^\.($|\.?\/)/
+      def expand_relative_path(path)
+        File.expand_path(path, @dirname)
       end
 
-      def stat(path)
-        context.environment.stat(path)
-      end
-
-      def entries(path)
-        context.environment.entries(path)
-      end
-
-      def each_entry(root, &block)
-        context.environment.each_entry(root, &block)
+      def resolve(path, options = {})
+        if @environment.absolute_path?(path)
+          raise FileOutsidePaths, "can't require absolute file: #{path}"
+        elsif @environment.relative_path?(path)
+          path = expand_relative_path(path)
+          if logical_path = @environment.split_subpath(@load_path, path)
+            @environment.resolve_in_load_path(@load_path, logical_path, options)
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
+          end
+        else
+          @environment.resolve(path, options)
+        end
       end
   end
 end

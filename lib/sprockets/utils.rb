@@ -1,29 +1,9 @@
+require 'digest/sha1'
+
 module Sprockets
   # `Utils`, we didn't know where else to put it!
   module Utils
-    # Define UTF-8 BOM pattern matcher.
-    # Avoid using a Regexp literal because it inheirts the files
-    # encoding and we want to avoid syntax errors in other interpreters.
-    UTF8_BOM_PATTERN = Regexp.new("\\A\uFEFF".encode('utf-8'))
-
-    def self.read_unicode(pathname, external_encoding = Encoding.default_external)
-      pathname.open("r:#{external_encoding}") do |f|
-        f.read.tap do |data|
-          # Eager validate the file's encoding. In most cases we
-          # expect it to be UTF-8 unless `default_external` is set to
-          # something else. An error is usually raised if the file is
-          # saved as UTF-16 when we expected UTF-8.
-          if !data.valid_encoding?
-            raise EncodingError, "#{pathname} has a invalid " +
-              "#{data.encoding} byte sequence"
-
-            # If the file is UTF-8 and theres a BOM, strip it for safe concatenation.
-          elsif data.encoding.name == "UTF-8" && data =~ UTF8_BOM_PATTERN
-            data.sub!(UTF8_BOM_PATTERN, "")
-          end
-        end
-      end
-    end
+    extend self
 
     # Prepends a leading "." to an extension if its missing.
     #
@@ -33,13 +13,105 @@ module Sprockets
     #     normalize_extension(".css")
     #     # => ".css"
     #
-    def self.normalize_extension(extension)
+    def normalize_extension(extension)
       extension = extension.to_s
       if extension[/^\./]
         extension
       else
         ".#{extension}"
       end
+    end
+
+    # Internal: Feature detect if UnboundMethods can #bind to any Object or
+    # just Objects that share the same super class.
+    # Basically if RUBY_VERSION >= 2.
+    UNBOUND_METHODS_BIND_TO_ANY_OBJECT = begin
+      foo = Module.new { def bar; end }
+      foo.instance_method(:bar).bind(Object.new)
+      true
+    rescue TypeError
+      false
+    end
+
+    # Internal: Inject into target module for the duration of the block.
+    #
+    # mod - Module
+    #
+    # Returns result of block.
+    def module_include(base, mod)
+      old_methods = {}
+
+      mod.instance_methods.each do |sym|
+        old_methods[sym] = base.instance_method(sym) if base.method_defined?(sym)
+      end
+
+      unless UNBOUND_METHODS_BIND_TO_ANY_OBJECT
+        base.send(:include, mod) unless base < mod
+      end
+
+      mod.instance_methods.each do |sym|
+        method = mod.instance_method(sym)
+        base.send(:define_method, sym, method)
+      end
+
+      yield
+    ensure
+      mod.instance_methods.each do |sym|
+        base.send(:undef_method, sym) if base.method_defined?(sym)
+      end
+      old_methods.each do |sym, method|
+        base.send(:define_method, sym, method)
+      end
+    end
+
+    # Internal: Generate a hexdigest for a nested JSON serializable object.
+    #
+    # obj - A JSON serializable object.
+    #
+    # Returns a String SHA1 digest of the object.
+    def hexdigest(obj)
+      digest = Digest::SHA1.new
+      queue  = [obj]
+
+      while queue.length > 0
+        obj = queue.shift
+        klass = obj.class
+
+        if klass == String
+          digest << 'String'
+          digest << obj
+        elsif klass == Symbol
+          digest << 'Symbol'
+          digest << obj.to_s
+        elsif klass == Fixnum
+          digest << 'Fixnum'
+          digest << obj.to_s
+        elsif klass == TrueClass
+          digest << 'TrueClass'
+        elsif klass == FalseClass
+          digest << 'FalseClass'
+        elsif klass == NilClass
+          digest << 'NilClass'
+        elsif klass == Array
+          digest << 'Array'
+          queue.concat(obj)
+        elsif klass == Hash
+          digest << 'Hash'
+          queue.concat(obj.sort)
+        else
+          raise TypeError, "couldn't digest #{klass}"
+        end
+      end
+
+      digest.hexdigest
+    end
+
+    def benchmark_start
+      Time.now.to_f
+    end
+
+    def benchmark_end(start_time)
+      ((Time.now.to_f - start_time) * 1000).to_i
     end
   end
 end

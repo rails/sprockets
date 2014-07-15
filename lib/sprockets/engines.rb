@@ -1,8 +1,6 @@
-require 'sprockets/eco_template'
-require 'sprockets/ejs_template'
-require 'sprockets/jst_processor'
+require 'sprockets/lazy_processor'
+require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
-require 'tilt'
 
 module Sprockets
   # `Engines` provides a global and `Environment` instance registry.
@@ -15,8 +13,8 @@ module Sprockets
   # left. `application.js.coffee.erb` will first run `ERBTemplate`
   # then `CoffeeScriptTemplate`.
   #
-  # All `Engine`s must follow the `Tilt::Template` interface. It is
-  # recommended to subclass `Tilt::Template`.
+  # All `Engine`s must follow the `Template` interface. It is
+  # recommended to subclass `Template`.
   #
   # Its recommended that you register engine changes on your local
   # `Environment` instance.
@@ -35,24 +33,24 @@ module Sprockets
     #     environment.engines
     #     # => {".coffee" => CoffeeScriptTemplate, ".sass" => SassTemplate, ...}
     #
-    #     environment.engines('.coffee')
-    #     # => CoffeeScriptTemplate
-    #
-    def engines(ext = nil)
-      if ext
-        ext = Sprockets::Utils.normalize_extension(ext)
-        @engines[ext]
-      else
-        @engines.dup
-      end
-    end
+    attr_reader :engines
 
-    # Returns an `Array` of engine extension `String`s.
+    # Internal: Returns a `Hash` of engine extensions to format extensions.
     #
-    #     environment.engine_extensions
-    #     # => ['.coffee', '.sass', ...]
-    def engine_extensions
-      @engines.keys
+    # # => { '.coffee' => '.js' }
+    attr_reader :engine_extensions
+
+    # Internal: Find and load engines by extension.
+    #
+    # extnames - Array of String extnames
+    #
+    # Returns Array of Procs.
+    def unwrap_engines(extnames)
+      extnames.map { |ext|
+        engines[ext]
+      }.map { |engine|
+        unwrap_processor(engine)
+      }
     end
 
     # Registers a new Engine `klass` for `ext`. If the `ext` already
@@ -60,15 +58,28 @@ module Sprockets
     #
     #     environment.register_engine '.coffee', CoffeeScriptTemplate
     #
-    def register_engine(ext, klass)
+    def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
-      @engines[ext] = klass
-    end
 
-    private
-      def deep_copy_hash(hash)
-        initial = Hash.new { |h, k| h[k] = [] }
-        hash.each_with_object(initial) { |(k, a),h| h[k] = a.dup }
+      if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
+        mutate_config(:engines) do |engines|
+          engines.merge(ext => klass)
+        end
+        if options[:mime_type]
+          mutate_config(:engine_extensions) do |engine_extensions|
+            engine_extensions.merge(ext.to_s => mime_types[options[:mime_type]][:extensions].first)
+          end
+        end
+      else
+        mutate_config(:engines) do |engines|
+          engines.merge(ext => LegacyTiltProcessor.new(klass))
+        end
+        if klass.respond_to?(:default_mime_type) && klass.default_mime_type
+          mutate_config(:engine_extensions) do |engine_extensions|
+            engine_extensions.merge(ext.to_s => mime_types[klass.default_mime_type][:extensions].first)
+          end
+        end
       end
+    end
   end
 end

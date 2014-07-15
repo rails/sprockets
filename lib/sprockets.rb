@@ -2,107 +2,131 @@ require 'sprockets/version'
 
 module Sprockets
   # Environment
-  autoload :Base,                    "sprockets/base"
-  autoload :Environment,             "sprockets/environment"
-  autoload :Index,                   "sprockets/index"
-  autoload :Manifest,                "sprockets/manifest"
-
-  # Assets
-  autoload :Asset,                   "sprockets/asset"
-  autoload :BundledAsset,            "sprockets/bundled_asset"
-  autoload :ProcessedAsset,          "sprockets/processed_asset"
-  autoload :StaticAsset,             "sprockets/static_asset"
+  autoload :Asset,                   'sprockets/asset'
+  autoload :Base,                    'sprockets/base'
+  autoload :CachedEnvironment,       'sprockets/cached_environment'
+  autoload :Environment,             'sprockets/environment'
+  autoload :Manifest,                'sprockets/manifest'
 
   # Processing
-  autoload :Context,                 "sprockets/context"
-  autoload :EcoTemplate,             "sprockets/eco_template"
-  autoload :EjsTemplate,             "sprockets/ejs_template"
-  autoload :JstProcessor,            "sprockets/jst_processor"
-  autoload :Processor,               "sprockets/processor"
-  autoload :SassCacheStore,          "sprockets/sass_cache_store"
-  autoload :SassFunctions,           "sprockets/sass_functions"
-  autoload :SassImporter,            "sprockets/sass_importer"
-  autoload :SassTemplate,            "sprockets/sass_template"
-  autoload :ScssTemplate,            "sprockets/scss_template"
+  autoload :Bundle,                  'sprockets/bundle'
+  autoload :ClosureCompressor,       'sprockets/closure_compressor'
+  autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
+  autoload :Context,                 'sprockets/context'
+  autoload :DirectiveProcessor,      'sprockets/directive_processor'
+  autoload :EcoTemplate,             'sprockets/eco_template'
+  autoload :EjsTemplate,             'sprockets/ejs_template'
+  autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :JstProcessor,            'sprockets/jst_processor'
+  autoload :SassCompressor,          'sprockets/sass_compressor'
+  autoload :SassTemplate,            'sprockets/sass_template'
+  autoload :ScssTemplate,            'sprockets/sass_template'
+  autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
+  autoload :YUICompressor,           'sprockets/yui_compressor'
 
   # Internal utilities
-  autoload :ArgumentError,           "sprockets/errors"
-  autoload :AssetAttributes,         "sprockets/asset_attributes"
-  autoload :CircularDependencyError, "sprockets/errors"
-  autoload :ContentTypeMismatch,     "sprockets/errors"
-  autoload :EngineError,             "sprockets/errors"
-  autoload :Error,                   "sprockets/errors"
-  autoload :FileNotFound,            "sprockets/errors"
-  autoload :Utils,                   "sprockets/utils"
-
-  module Cache
-    autoload :FileStore, "sprockets/cache/file_store"
-  end
+  autoload :ArgumentError,           'sprockets/errors'
+  autoload :Cache,                   'sprockets/cache'
+  autoload :ContentTypeMismatch,     'sprockets/errors'
+  autoload :EncodingUtils,           'sprockets/encoding_utils'
+  autoload :Error,                   'sprockets/errors'
+  autoload :FileNotFound,            'sprockets/errors'
+  autoload :HTTPUtils,               'sprockets/http_utils'
+  autoload :LazyProcessor,           'sprockets/lazy_processor'
+  autoload :PathUtils,               'sprockets/path_utils'
+  autoload :Utils,                   'sprockets/utils'
 
   # Extend Sprockets module to provide global registry
-  require 'hike'
-  require 'sprockets/engines'
-  require 'sprockets/mime'
-  require 'sprockets/processing'
-  require 'sprockets/compressing'
-  require 'sprockets/paths'
-  extend Engines, Mime, Processing, Compressing, Paths
+  require 'sprockets/configuration'
+  extend Configuration
 
-  @trail             = Hike::Trail.new(File.expand_path('..', __FILE__))
-  @mime_types        = {}
-  @engines           = {}
-  @preprocessors     = Hash.new { |h, k| h[k] = [] }
-  @postprocessors    = Hash.new { |h, k| h[k] = [] }
-  @bundle_processors = Hash.new { |h, k| h[k] = [] }
-  @compressors       = Hash.new { |h, k| h[k] = {} }
+  @root              = File.expand_path('..', __FILE__).freeze
+  @paths             = [].freeze
+  @mime_types        = {}.freeze
+  @mime_exts         = {}.freeze
+  @encodings         = {}.freeze
+  @engines           = {}.freeze
+  @engine_extensions = {}.freeze
+  @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
+  @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
+  @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
+  @compressors       = Hash.new { |h, k| {}.freeze }.freeze
+  @context_class     = Context
+  @version           = ''
 
-  register_mime_type 'text/css', '.css'
-  register_mime_type 'application/javascript', '.js'
+  # Set the default digest
+  require 'digest/sha1'
+  @digest_class = Digest::SHA1
 
-  require 'sprockets/directive_processor'
-  register_preprocessor 'text/css',               DirectiveProcessor
+  require 'logger'
+  @logger = Logger.new($stderr)
+  @logger.level = Logger::FATAL
+
+  # Common asset text types
+  register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
+  register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
+  register_mime_type 'text/plain', extensions: ['.txt', '.text']
+  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: EncodingUtils::DETECT_UNICODE
+
+  # Common image types
+  register_mime_type 'image/x-icon', extensions: ['.ico']
+  register_mime_type 'image/bmp', extensions: ['.bmp']
+  register_mime_type 'image/gif', extensions: ['.gif']
+  register_mime_type 'image/webp', extensions: ['.webp']
+  register_mime_type 'image/png', extensions: ['.png']
+  register_mime_type 'image/jpeg', extensions: ['.jpg', '.jpeg']
+  register_mime_type 'image/tiff', extensions: ['.tiff', '.tif']
+  register_mime_type 'image/svg+xml', extensions: ['.svg']
+
+  # Common audio/video types
+  register_mime_type 'video/webm', extensions: ['.webm']
+  register_mime_type 'audio/basic', extensions: ['.snd', '.au']
+  register_mime_type 'audio/aiff', extensions: ['.aiff']
+  register_mime_type 'audio/mpeg', extensions: ['.mp3', '.mp2', '.m2a', '.m3a']
+  register_mime_type 'application/ogg', extensions: ['.ogx']
+  register_mime_type 'audio/midi', extensions: ['.midi', '.mid']
+  register_mime_type 'video/avi', extensions: ['.avi']
+  register_mime_type 'audio/wave', extensions: ['.wav', '.wave']
+  register_mime_type 'video/mp4', extensions: ['.mp4', '.m4v']
+
+  # Common font types
+  register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
+  register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
+  register_mime_type 'application/font-woff', extensions: ['.woff']
+
+  # HTTP content encodings
+  register_encoding :deflate, EncodingUtils::DEFLATE
+  register_encoding :gzip,    EncodingUtils::GZIP
+  register_encoding :base64,  EncodingUtils::BASE64
+
+  register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
-  require 'sprockets/safety_colons'
-  register_postprocessor 'application/javascript', SafetyColons
+  register_bundle_processor 'application/javascript', Bundle
+  register_bundle_processor 'text/css', Bundle
 
-  require 'sprockets/charset_normalizer'
-  register_bundle_processor 'text/css', CharsetNormalizer
-
-  require 'sprockets/sass_compressor'
-  register_compressor 'text/css', :sass, SassCompressor
-  register_compressor 'text/css', :scss, SassCompressor
-
-  require 'sprockets/yui_compressor'
-  register_compressor 'text/css', :yui, YUICompressor
-
-  require 'sprockets/closure_compressor'
-  register_compressor 'application/javascript', :closure, ClosureCompressor
-
-  require 'sprockets/uglifier_compressor'
-  register_compressor 'application/javascript', :uglifier, UglifierCompressor
-  register_compressor 'application/javascript', :uglify, UglifierCompressor
-
-  require 'sprockets/yui_compressor'
-  register_compressor 'application/javascript', :yui, YUICompressor
-
-  # Cherry pick the default Tilt engines that make sense for
-  # Sprockets. We don't need ones that only generate html like HAML.
+  register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
+  register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
+  register_compressor 'text/css', :yui, LazyProcessor.new { YUICompressor }
+  register_compressor 'application/javascript', :closure, LazyProcessor.new { ClosureCompressor }
+  register_compressor 'application/javascript', :uglifier, LazyProcessor.new { UglifierCompressor }
+  register_compressor 'application/javascript', :uglify, LazyProcessor.new { UglifierCompressor }
+  register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', Tilt::CoffeeScriptTemplate
+  register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
-  register_engine '.jst',    JstProcessor
-  register_engine '.eco',    EcoTemplate
-  register_engine '.ejs',    EjsTemplate
+  register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
+  register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
-  register_engine '.less',   Tilt::LessTemplate
-  register_engine '.sass',   SassTemplate
-  register_engine '.scss',   ScssTemplate
+  register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
+  register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 
   # Other
-  register_engine '.erb',    Tilt::ERBTemplate
-  register_engine '.str',    Tilt::StringTemplate
+  register_engine '.erb',    LazyProcessor.new { ERBTemplate }, mime_type: 'text/plain'
 end

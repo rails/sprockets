@@ -1,28 +1,61 @@
-require 'tilt'
+require 'json'
+require 'uglifier'
 
 module Sprockets
-  class UglifierCompressor < Tilt::Template
-    self.default_mime_type = 'application/javascript'
+  # Public: Uglifier/Uglify compressor.
+  #
+  # To accept the default options
+  #
+  #     environment.register_bundle_processor 'application/javascript',
+  #       Sprockets::UglifierCompressor
+  #
+  # Or to pass options to the Uglifier class.
+  #
+  #     environment.register_bundle_processor 'application/javascript',
+  #       Sprockets::UglifierCompressor.new(comments: :copyright)
+  #
+  class UglifierCompressor
+    VERSION = '2'
 
-    def self.engine_initialized?
-      defined?(::Uglifier)
+    def self.call(*args)
+      new.call(*args)
     end
 
-    def initialize_engine
-      require_template_library 'uglifier'
-    end
-
-    def prepare
-    end
-
-    def evaluate(context, locals, &block)
+    def initialize(options = {})
       # Feature detect Uglifier 2.0 option support
       if Uglifier::DEFAULTS[:copyright]
         # Uglifier < 2.x
-        Uglifier.new(:copyright => false).compile(data)
+        options[:copyright] ||= false
       else
         # Uglifier >= 2.x
-        Uglifier.new(:comments => :none).compile(data)
+        options[:copyright] ||= :none
+      end
+
+      @uglifier = ::Uglifier.new(options)
+
+      @cache_key = [
+        'UglifierCompressor',
+        ::Uglifier::VERSION,
+        VERSION,
+        JSON.generate(options)
+      ]
+    end
+
+    def call(input)
+      data = input[:data]
+
+      js, map = input[:cache].fetch(@cache_key + [data]) do
+        @uglifier.compile_with_map(data)
+      end
+
+      if input[:metadata][:map]
+        minified = SourceMap::Map.from_json(map)
+        original = input[:metadata][:map]
+        combined = original | minified
+        { data: js,
+          map: combined }
+      else
+        js
       end
     end
   end

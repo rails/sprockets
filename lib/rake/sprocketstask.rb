@@ -37,10 +37,11 @@ module Rake
     end
     attr_writer :environment
 
-    # Returns cached indexed environment
-    def index
-      @index ||= environment.index if environment
+    # Returns cached cached environment
+    def cached
+      @cached ||= environment.cached if environment
     end
+    alias_method :index, :cached
 
     # `Manifest` instance used for already compiled assets.
     #
@@ -97,7 +98,7 @@ module Rake
     def initialize(name = :assets)
       @name         = name
       @environment  = lambda { Sprockets::Environment.new(Dir.pwd) }
-      @manifest     = lambda { Sprockets::Manifest.new(index, output) }
+      @manifest     = lambda { Sprockets::Manifest.new(cached, output) }
       @logger       = Logger.new($stderr)
       @logger.level = Logger::INFO
       @keep         = 2

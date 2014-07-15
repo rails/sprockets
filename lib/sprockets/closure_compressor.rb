@@ -1,22 +1,41 @@
-require 'tilt'
+require 'closure-compiler'
+require 'json'
 
 module Sprockets
-  class ClosureCompressor < Tilt::Template
-    self.default_mime_type = 'application/javascript'
+  # Public: Closure Compiler minifier.
+  #
+  # To accept the default options
+  #
+  #     environment.register_bundle_processor 'application/javascript',
+  #       Sprockets::ClosureCompressor
+  #
+  # Or to pass options to the Closure::Compiler class.
+  #
+  #     environment.register_bundle_processor 'application/javascript',
+  #       Sprockets::ClosureCompressor.new({ ... })
+  #
+  class ClosureCompressor
+    VERSION = '1'
 
-    def self.engine_initialized?
-      defined?(::Closure::Compiler)
+    def self.call(*args)
+      new.call(*args)
     end
 
-    def initialize_engine
-      require_template_library 'closure-compiler'
+    def initialize(options = {})
+      @compiler = ::Closure::Compiler.new(options)
+      @cache_key = [
+        'ClosureCompressor',
+        ::Closure::VERSION,
+        ::Closure::COMPILER_VERSION,
+        VERSION,
+        JSON.generate(options)
+      ]
     end
 
-    def prepare
-    end
-
-    def evaluate(context, locals, &block)
-      Closure::Compiler.new.compile(data)
+    def call(input)
+      input[:cache].fetch(@cache_key + [input[:data]]) do
+        @compiler.compile(input[:data])
+      end
     end
   end
 end
