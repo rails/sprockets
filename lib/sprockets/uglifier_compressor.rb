@@ -48,12 +48,15 @@ module Sprockets
         @uglifier.compile_with_map(data)
       end
 
-      minified = SourceMap::Map.from_json(map)
-      original = input[:metadata][:map]
-      combined = original | minified
-
-      { data: js,
-        map: combined }
+      if input[:metadata][:map]
+        minified = SourceMap::Map.from_json(map)
+        original = input[:metadata][:map]
+        combined = original | minified
+        { data: js,
+          map: combined }
+      else
+        js
+      end
     end
   end
 end
