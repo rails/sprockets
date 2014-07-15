@@ -30,6 +30,7 @@ class TestPathUtils < Sprockets::TestCase
       "resolve",
       "sass",
       "server",
+      "source-maps",
       "symlink"
     ], entries(FIXTURE_ROOT)
   end

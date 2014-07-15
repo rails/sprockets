@@ -39,9 +39,18 @@ module Sprockets
       # Deprecated: For Asset#to_a
       required_asset_hashes = required_paths.map { |path| assets[path].to_hash }
 
+      combined = SourceMap::Map.new
+      required_asset_hashes.each do |hash|
+        map = hash[:metadata][:map] || SourceMap::Map.new([
+          SourceMap::Mapping.new(hash[:name], SourceMap::Offset.new(0, 0), SourceMap::Offset.new(0, 0))
+        ])
+        combined = combined + map
+      end
+
       { data: data,
         required_asset_hashes: required_asset_hashes,
-        dependency_paths: dependency_paths }
+        dependency_paths: dependency_paths,
+        map: combined }
     end
 
     private
