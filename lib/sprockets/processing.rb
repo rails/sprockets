@@ -1,3 +1,4 @@
+require 'source_map'
 require 'sprockets/engines'
 require 'sprockets/lazy_processor'
 require 'sprockets/legacy_proc_processor'
@@ -170,7 +171,8 @@ module Sprockets
         name: name,
         content_type: content_type,
         data: data,
-        metadata: metadata
+        metadata: metadata,
+        map: SourceMap::Map.new
       }
 
       processors.each do |processor|
