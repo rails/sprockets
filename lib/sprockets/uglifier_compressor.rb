@@ -15,7 +15,7 @@ module Sprockets
   #       Sprockets::UglifierCompressor.new(comments: :copyright)
   #
   class UglifierCompressor
-    VERSION = '1'
+    VERSION = '2'
 
     def self.call(*args)
       new.call(*args)
@@ -43,9 +43,17 @@ module Sprockets
 
     def call(input)
       data = input[:data]
-      input[:cache].fetch(@cache_key + [data]) do
-        @uglifier.compile(data)
+
+      js, map = input[:cache].fetch(@cache_key + [data]) do
+        @uglifier.compile_with_map(data)
       end
+
+      minified = SourceMap::Map.from_json(map)
+      original = input[:metadata][:map]
+      combined = original | minified
+
+      { data: js,
+        map: combined }
     end
   end
 end
