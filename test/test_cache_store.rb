@@ -115,7 +115,7 @@ class TestFileStore < Sprockets::TestCase
   def test_inspect
     Dir::mktmpdir "sprockets-file-store-inspect" do |dir|
       store = Sprockets::Cache::FileStore.new(dir)
-      assert_equal "#<Sprockets::Cache::FileStore size=0/1000>", store.inspect
+      assert_equal "#<Sprockets::Cache::FileStore size=0/26214400>", store.inspect
     end
   end
 
