@@ -834,13 +834,9 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
 
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
-
-    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
     assert_equal "foo.js", logical_path("foo.ngt.haml")
-
-    @env.register_engine '.es6', proc {}, mime_type: 'application/javascript'
     assert_equal "traceur.js", logical_path("traceur.es6")
+    assert_equal "traceur.js", logical_path("traceur.js.es6")
   end
 
   def logical_path(path)
@@ -902,12 +898,9 @@ class AssetContentTypeTest < Sprockets::TestCase
 
     assert_equal nil, content_type("sprite.css.embed")
 
-    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
     assert_equal "application/javascript", content_type("foo.ngt.haml")
-
-    @env.register_engine '.es6', proc {}, mime_type: 'application/javascript'
     assert_equal "application/javascript", content_type("traceur.es6")
+    assert_equal "application/javascript", content_type("traceur.js.es6")
   end
 
   def content_type(path)

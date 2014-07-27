@@ -160,7 +160,8 @@ module Sprockets
           unwrap_postprocessors(asset[:content_type])
         bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
-        processors = options[:bundle] ? bundled_processors : processed_processors
+        bundle_supported = options[:bundle] && bundled_processors.include?(Bundle)
+        processors = bundle_supported ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
