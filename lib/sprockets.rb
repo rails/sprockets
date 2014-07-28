@@ -45,6 +45,8 @@ module Sprockets
   @mime_types        = {}.freeze
   @mime_exts         = {}.freeze
   @encodings         = {}.freeze
+  @engines           = {}.freeze
+  @engine_mime_types = {}.freeze
   @transformers      = Hash.new { |h, k| {}.freeze }.freeze
   @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
@@ -64,6 +66,7 @@ module Sprockets
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/xml', extensions: ['.xml']
   register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
   register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
@@ -115,24 +118,17 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # Mmm, CoffeeScript
-  register_mime_type 'text/coffeescript', extensions: ['.coffee']
-  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new { CoffeeScriptTemplate }
+  register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
-  register_mime_type 'application/jst', extensions: ['.jst']
-  register_mime_type 'text/eco', extensions: ['.eco']
-  register_mime_type 'text/ejs', extensions: ['.ejs']
-  register_transformer 'application/jst', 'application/javascript', LazyProcessor.new { JstProcessor }
-  register_transformer 'text/eco', 'application/javascript', LazyProcessor.new { EcoTemplate }
-  register_transformer 'text/ejs', 'application/javascript', LazyProcessor.new { EjsTemplate }
+  register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
+  register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
-  register_mime_type 'text/sass', '.sass'
-  register_mime_type 'text/scss', '.scss'
-  register_transformer 'text/sass', 'text/css', LazyProcessor.new { SassTemplate }
-  register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssTemplate }
+  register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
+  register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 
   # Other
-  register_mime_type 'text/plain+ruby', '.erb'
-  register_transformer 'text/plain+ruby', 'text/plain', LazyProcessor.new { ERBTemplate }
+  register_engine '.erb',    LazyProcessor.new { ERBTemplate }, mime_type: 'text/plain'
 end

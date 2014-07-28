@@ -35,19 +35,34 @@ module EnvironmentTests
   end
 
   test "eco templates" do
-    asset = @env["goodbye.jst"]
+    asset = @env["goodbye.js"]
     context = ExecJS.compile(asset.to_s)
     assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
   end
 
   test "ejs templates" do
-    asset = @env["hello.jst"]
+    assert asset = @env["hello.js"]
     context = ExecJS.compile(asset.to_s)
     assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
+  test "another ejs templates" do
+    assert asset = @env["hello2.js"]
+    context = ExecJS.compile(asset.to_s)
+    assert_equal "hello2: world\n", context.call("JST2['hello2']", :name => "world")
+  end
+
+  test "angular templates" do
+    assert asset = @env["ng-view.js"]
+    assert_equal <<-JS, asset.to_s
+$app.run(function($templateCache) {
+  $templateCache.put('ng-view.html', "<div ng-view></div>");
+});
+    JS
+  end
+
   test "asset_data_uri helper" do
-    asset = @env["with_data_uri.css"]
+    assert asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
   end
 
@@ -91,6 +106,7 @@ module EnvironmentTests
     assert_equal fixture_path('default/manifest.js.yml'), asset.filename
 
     refute @env.find_asset("gallery.js", accept: "text/css")
+    refute @env.find_asset(fixture_path('default/gallery.js'), accept: "text/css")
 
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
@@ -212,6 +228,33 @@ module EnvironmentTests
     assert_equal "text/yaml", asset.content_type
   end
 
+  test "find html builder asset" do
+    assert asset = @env.find_asset("nokogiri-html.html")
+    assert_equal "text/html", asset.content_type
+    assert_equal <<-HTML, asset.to_s
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><body><span class="bold">Hello world</span></body></html>
+    HTML
+  end
+
+  test "find xml builder asset" do
+    skip "multiple builder outputs needs multiple extension support"
+
+    assert asset = @env.find_asset("nokogiri-xml.xml")
+    assert_equal "application/xml", asset.content_type
+    assert_equal <<-XML, asset.to_s
+<?xml version="1.0"?>
+<root>
+  <products>
+    <widget>
+      <id>10</id>
+      <name>Awesome widget</name>
+    </widget>
+  </products>
+</root>
+    XML
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
@@ -298,7 +341,8 @@ module EnvironmentTests
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path
   end
 
-  FILES_IN_PATH = 49
+  FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
+  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 5
 
   test "iterate over each logical path" do
     paths = []

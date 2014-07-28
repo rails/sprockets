@@ -18,6 +18,8 @@ module Sprockets
       @mime_types        = parent.mime_types
       @mime_exts         = parent.mime_exts
       @encodings         = parent.encodings
+      @engines           = parent.engines
+      @engine_mime_types = parent.engine_mime_types
       @transformers      = parent.transformers
       @preprocessors     = parent.preprocessors
       @postprocessors    = parent.postprocessors

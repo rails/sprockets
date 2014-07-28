@@ -34,6 +34,20 @@ module Sprockets
       end
     end
 
+    # Returns a `Hash` of `Engine`s registered on the `Environment`.
+    # If an `ext` argument is supplied, the `Engine` associated with
+    # that extension will be returned.
+    #
+    #     environment.engines
+    #     # => {".coffee" => CoffeeScriptTemplate, ".sass" => SassTemplate, ...}
+    #
+    attr_reader :engines
+
+    # Internal: Returns a `Hash` of engine extensions to mime types.
+    #
+    # # => { '.coffee' => 'application/javascript' }
+    attr_reader :engine_mime_types
+
     # Internal: Find and load engines by extension.
     #
     # extnames - Array of String extnames
@@ -41,8 +55,7 @@ module Sprockets
     # Returns Array of Procs.
     def unwrap_engines(extnames)
       extnames.map { |ext|
-        # TODO: Why just any extname works
-        transformers[mime_exts[ext]].values.first
+        engines[ext]
       }.map { |engine|
         unwrap_processor(engine)
       }
@@ -56,15 +69,25 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      from = mime_exts[ext]
-      if from.nil?
-        from = "sprockets/#{ext.sub(/^\./, '')}"
-        register_mime_type(from, extensions: [ext])
+      if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
+        mutate_config(:engines) do |engines|
+          engines.merge(ext => klass)
+        end
+        if options[:mime_type]
+          mutate_config(:engine_mime_types) do |mime_types|
+            mime_types.merge(ext.to_s => options[:mime_type])
+          end
+        end
+      else
+        mutate_config(:engines) do |engines|
+          engines.merge(ext => LegacyTiltProcessor.new(klass))
+        end
+        if klass.respond_to?(:default_mime_type) && klass.default_mime_type
+          mutate_config(:engine_mime_types) do |mime_types|
+            mime_types.merge(ext.to_s => klass.default_mime_type)
+          end
+        end
       end
-
-      to = klass.respond_to?(:default_mime_type) && klass.default_mime_type ?
-        klass.default_mime_type : "*/*"
-      register_transformer(from, to, LegacyTiltProcessor.new(klass))
     end
   end
 end

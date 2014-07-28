@@ -8,35 +8,35 @@ module Sprockets
 
     ## Binary encodings ##
 
-    # Public: Use deflate to compress enumerable data stream.
+    # Public: Use deflate to compress data.
     #
-    # enum - Enumerable of String data
+    # str - String data
     #
     # Returns a compressed String
-    def deflate(enum)
+    def deflate(str)
       deflater = Zlib::Deflate.new(
         Zlib::BEST_COMPRESSION,
         -Zlib::MAX_WBITS,
         Zlib::MAX_MEM_LEVEL,
         Zlib::DEFAULT_STRATEGY
       )
-      enum.each { |chunk| deflater << chunk }
+      deflater << str
       deflater.finish
     end
 
     # Public: Alias for CodingUtils.deflate
     DEFLATE = method(:deflate)
 
-    # Public: Use gzip to compress enumerable data stream.
+    # Public: Use gzip to compress data.
     #
-    # enum - Enumerable of String data
+    # str - String data
     #
     # Returns a compressed String
-    def gzip(enum)
+    def gzip(str)
       io = StringIO.new
       gz = Zlib::GzipWriter.new(io, Zlib::BEST_COMPRESSION)
       gz.mtime = 1
-      enum.each { |chunk| gz << chunk }
+      gz << str
       gz.finish
       io.string
     end
@@ -44,15 +44,13 @@ module Sprockets
     # Public: Alias for CodingUtils.gzip
     GZIP = method(:gzip)
 
-    # Public: Use base64 to encode enumerable data stream.
+    # Public: Use base64 to encode data.
     #
-    # enum - Enumerable of String data
+    # str - String data
     #
     # Returns a encoded String
-    def base64(enum)
-      io = StringIO.new
-      enum.each { |chunk| io << chunk }
-      Base64.strict_encode64(io.string)
+    def base64(str)
+      Base64.strict_encode64(str)
     end
 
     # Public: Alias for CodingUtils.base64

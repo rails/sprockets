@@ -2,7 +2,6 @@ require 'pathname'
 require 'rack/utils'
 require 'set'
 require 'sprockets/errors'
-require 'sprockets/utils'
 
 module Sprockets
   # Deprecated: `Context` provides helper methods to all `Template` processors.

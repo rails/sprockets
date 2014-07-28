@@ -1,4 +1,3 @@
-require 'json'
 require 'yui/compressor'
 
 module Sprockets
@@ -27,7 +26,7 @@ module Sprockets
         'YUICompressor',
         ::YUI::Compressor::VERSION,
         VERSION,
-        JSON.generate(options)
+        options
       ]
     end
 

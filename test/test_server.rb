@@ -108,6 +108,19 @@ class TestServer < Sprockets::TestCase
     refute_equal etag, last_response.headers['ETag']
   end
 
+  test "ignores accept encoding when url is fingerprinted" do
+    get "/assets/foo.js"
+    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+
+    get "/assets/foo-#{digest}.js", {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+    assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "9", last_response.headers['Content-Length']
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+    refute last_response.headers['Content-Encoding']
+    refute last_response.headers['Vary']
+  end
+
   test "serve single source file from cached environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body

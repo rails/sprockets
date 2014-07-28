@@ -69,8 +69,6 @@ module Sprockets
 
     # Experimental: Check if environment has asset.
     #
-    # TODO: Finalize API.
-    #
     # Acts similar to `find_asset(path) ? true : false` but does not build the
     # entire asset.
     #
@@ -78,12 +76,14 @@ module Sprockets
     def has_asset?(filename, options = {})
       return false unless file?(filename)
 
-      accepts = parse_q_values(options[:accept] || '*/*')
+      accepts = options[:accept] || '*/*'
 
-      # TODO: Review performance
-      extname = parse_path_extnames(filename)[1]
-      mime_type = mime_exts[extname]
-      mime_type.nil? || accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
+      if mime_type = parse_path_extnames(filename)[1]
+        accepts = parse_q_values(accepts)
+        accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
+      else
+        accepts == '*/*'
+      end
     end
 
     # Find asset by logical path or expanded path.
@@ -94,7 +94,7 @@ module Sprockets
       accept = options.delete(:accept)
       if_match = options.delete(:if_match)
 
-      if absolute_path?(path)
+      if absolute_path?(path) && has_asset?(path, accept: accept)
         filename = path
         return nil unless file?(filename)
       else
@@ -142,24 +142,29 @@ module Sprockets
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
         end
 
-        logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
-        logical_path = normalize_logical_path(logical_path, extname)
-        mime_type = mime_exts[extname]
+        logical_path, mime_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path = normalize_logical_path(logical_path)
 
         asset = {
           load_path: load_path,
           filename: filename,
-          logical_path: logical_path,
-          name: logical_path.chomp(extname)
+          name: logical_path
         }
-        asset[:content_type] = mime_type if mime_type
+
+        if mime_type
+          asset[:content_type] = mime_type
+          asset[:logical_path] = logical_path + mime_types[mime_type][:extensions].first
+        else
+          asset[:logical_path] = logical_path
+        end
 
         processed_processors = unwrap_preprocessors(asset[:content_type]) +
           unwrap_engines(engine_extnames).reverse +
           unwrap_postprocessors(asset[:content_type])
         bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
-        processors = options[:bundle] ? bundled_processors : processed_processors
+        bundle_supported = options[:bundle] && bundled_processors.include?(Bundle)
+        processors = bundle_supported ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
@@ -193,7 +198,7 @@ module Sprockets
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([filename])
 
         asset.merge(processed).merge({
-          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime }.max.to_i,
+          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
             dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
           )

@@ -53,14 +53,13 @@ module Sprockets
     def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
       return to_enum(__method__, load_path, logical_path, options) unless block_given?
 
-      # TODO: Review performance
-      logical_name, extname, _ = parse_path_extnames(logical_path)
+      logical_name, mime_type, _ = parse_path_extnames(logical_path)
       logical_basename = File.basename(logical_name)
 
-      accepts = parse_accept_options(extname, options[:accept])
+      accepts = parse_accept_options(mime_type, options[:accept])
 
       accepts.each do |accept, _|
-        path_matches(load_path, logical_name, logical_basename, extname) do |filename|
+        path_matches(load_path, logical_name, logical_basename) do |filename|
           if has_asset?(filename, accept: accept)
             yield filename
           end
@@ -88,15 +87,14 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      # TODO: Review performance
-      logical_name, extname, _ = parse_path_extnames(path)
+      logical_name, mime_type, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
 
-      accepts = parse_accept_options(extname, options[:accept])
+      accepts = parse_accept_options(mime_type, options[:accept])
 
       self.paths.each do |load_path|
         accepts.each do |accept, _|
-          path_matches(load_path, logical_name, logical_basename, extname) do |filename|
+          path_matches(load_path, logical_name, logical_basename) do |filename|
             if has_asset?(filename, accept: accept)
               yield filename
             end
@@ -120,8 +118,9 @@ module Sprockets
           next unless stat.file?
 
           path = split_subpath(load_path, filename)
-          path, extname, _ = parse_path_extnames(path)
-          path = normalize_logical_path(path, extname)
+          path, mime_type, _ = parse_path_extnames(path)
+          path = normalize_logical_path(path)
+          path += mime_types[mime_type][:extensions].first if mime_type
 
           if !seen.include?(path)
             yield path, filename
@@ -135,13 +134,13 @@ module Sprockets
     alias_method :each_logical_path, :logical_paths
 
     protected
-      def parse_accept_options(extname, types)
+      def parse_accept_options(mime_type, types)
         accepts = []
         accepts += parse_q_values(types) if types
 
-        if extname && (type = mime_exts[extname])
-          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(type, accept) }
-            accepts.unshift([type, 1.0])
+        if mime_type
+          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(mime_type, accept) }
+            accepts.unshift([mime_type, 1.0])
           else
             return []
           end
@@ -154,17 +153,14 @@ module Sprockets
         accepts
       end
 
-      # TODO: Should logical path normalization still be supported?
-      def normalize_logical_path(path, extname)
+      def normalize_logical_path(path)
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'
-        path += extname if extname
         path
       end
 
-      def path_matches(load_path, logical_name, logical_basename, extname, &block)
+      def path_matches(load_path, logical_name, logical_basename, &block)
         dirname = File.dirname(File.join(load_path, logical_name))
-        dirname_matches(dirname, "#{logical_basename}#{extname}", &block) if extname
         dirname_matches(dirname, logical_basename, &block)
         resolve_alternates(load_path, logical_name, &block)
         dirname_matches(File.join(load_path, logical_name), "index", &block)
@@ -172,7 +168,6 @@ module Sprockets
 
       def dirname_matches(dirname, basename)
         self.entries(dirname).each do |entry|
-          # TODO: Review performance
           name = parse_path_extnames(entry)[0]
           if basename == name
             yield File.join(dirname, entry)
@@ -183,28 +178,23 @@ module Sprockets
       def resolve_alternates(load_path, logical_name)
       end
 
-      # Internal: Returns the format extension and `Array` of engine extensions.
+      # Internal: Returns the name, mime type and `Array` of engine extensions.
       #
       #     "foo.js.coffee.erb"
-      #     # => { format: ".js",
-      #            engines: [".coffee", ".erb"] }
+      #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
-      # TODO: Review API and performance
-      # TODO: logical_path only makes sense within the context of a mime type
       def parse_path_extnames(path)
-        format_extname  = nil
+        mime_type       = nil
         engine_extnames = []
         len = path.length
 
         path_extnames(path).reverse_each do |extname|
-          if transformers[mime_exts[extname]].any?
-            # TODO: Why pick the first mime type
-            format_mime_type = transformers[mime_exts[extname]].keys.first
-            format_extname = mime_exts.key(format_mime_type)
+          if engines.key?(extname)
+            mime_type = engine_mime_types[extname]
             engine_extnames.unshift(extname)
             len -= extname.length
           elsif mime_exts.key?(extname)
-            format_extname = extname
+            mime_type = mime_exts[extname]
             len -= extname.length
             break
           else
@@ -213,7 +203,7 @@ module Sprockets
         end
 
         name = path[0, len]
-        return [name, format_extname, engine_extnames]
+        return [name, mime_type, engine_extnames]
       end
   end
 end

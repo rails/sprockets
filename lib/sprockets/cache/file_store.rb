@@ -17,7 +17,7 @@ module Sprockets
     #
     class FileStore
       # Internal: Default key limit for store.
-      DEFAULT_MAX_SIZE = 1000
+      DEFAULT_MAX_SIZE = 25 * 1024 * 1024
 
       # Internal: Default standard error fatal logger.
       #
@@ -34,11 +34,12 @@ module Sprockets
       # max_size - A Integer of the maximum number of keys the store will hold.
       #            (default: 1000).
       def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
-        @root = root
-        @size = find_caches.size
+        @root     = root
+        @size     = find_caches.inject(0) { |n, fn| n + File.size(fn) }
         @max_size = max_size
-        @logger = logger
-        @tmpdir = Dir.tmpdir
+        @gc_size  = max_size * 0.75
+        @logger   = logger
+        @tmpdir   = Dir.tmpdir
       end
 
       # Public: Retrieve value from cache.
@@ -88,10 +89,12 @@ module Sprockets
         exists = File.exist?(path)
 
         # Write data
-        PathUtils.atomic_write(path, @tmpdir) { |f| Marshal.dump(value, f) }
+        PathUtils.atomic_write(path, @tmpdir) do |f|
+          Marshal.dump(value, f)
+          @size += f.size unless exists
+        end
 
         # GC if necessary
-        @size += 1 unless exists
         gc! if @size > @max_size
 
         value
@@ -109,23 +112,34 @@ module Sprockets
           Dir.glob(File.join(@root, '**/*.cache'))
         end
 
+        def compute_size(caches)
+          caches.inject(0) { |sum, (_, stat)| sum + stat.size }
+        end
+
         def gc!
           start_time = Time.now
-          caches = find_caches
 
-          new_size = @max_size * 0.75
-          num_to_delete = caches.size - new_size
-          return unless num_to_delete > 0
+          caches = find_caches.map! { |filename|
+            [filename, File.stat(filename)]
+          }.sort_by { |filename, stat| stat.mtime.to_i }
 
-          caches.sort_by! { |path| -File.mtime(path).to_i }
-          FileUtils.remove(caches[0, num_to_delete], force: true)
+          size = compute_size(caches)
 
-          @size = find_caches.size
+          delete_caches, keep_caches = caches.partition { |filename, stat|
+            deleted = size > @gc_size
+            size -= stat.size
+            deleted
+          }
+
+          return if delete_caches.empty?
+
+          FileUtils.remove(delete_caches.map(&:first), force: true)
+          @size = compute_size(keep_caches)
 
           @logger.warn do
             secs = Time.now.to_f - start_time.to_f
             "#{self.class}[#{@root}] garbage collected " +
-              "#{num_to_delete.to_i} files (#{(secs * 1000).to_i}ms)"
+              "#{delete_caches.size} files (#{(secs * 1000).to_i}ms)"
           end
         end
     end

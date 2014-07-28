@@ -284,7 +284,7 @@ class TestSassFunctions < TestSprocketsSass
       end
     end
 
-    @env.register_transformer 'text/scss', 'text/css', engine
+    @env.register_engine('.scss', engine)
   end
 
   test "path functions" do

@@ -833,17 +833,13 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
     assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
 
+    assert_equal "foo-ng.js", logical_path("foo-ng.ngt")
+    assert_equal "bar-ng.js", logical_path("bar-ng.ngt.haml")
+    assert_equal "baz-ng.js", logical_path("baz-ng.js.ngt")
+
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
-
-    @env.register_mime_type 'sprockets/haml', '.haml'
-    @env.register_mime_type 'sprockets/ngt', '.ngt'
-    @env.register_transformer 'sprockets/haml', 'text/html', proc {}
-    @env.register_transformer 'sprockets/ngt', 'application/javascript', proc {}
-    assert_equal "foo.js", logical_path("foo.ngt.haml")
-
-    @env.register_mime_type 'sprockets/es6', '.es6'
-    @env.register_transformer 'sprockets/es6', 'application/javascript', proc {}
     assert_equal "traceur.js", logical_path("traceur.es6")
+    assert_equal "traceur.js", logical_path("traceur.js.es6")
   end
 
   def logical_path(path)
@@ -903,17 +899,14 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
     assert_equal "application/javascript", content_type("all.coffee/index.coffee")
 
+    assert_equal "application/javascript", content_type("foo-ng.ngt")
+    assert_equal "application/javascript", content_type("bar-ng.ngt.haml")
+    assert_equal "application/javascript", content_type("baz-ng.js.ngt")
+
     assert_equal nil, content_type("sprite.css.embed")
 
-    @env.register_mime_type 'sprockets/haml', '.haml'
-    @env.register_mime_type 'sprockets/ngt', '.ngt'
-    @env.register_transformer 'sprockets/haml', 'text/html', proc {}
-    @env.register_transformer 'sprockets/ngt', 'application/javascript', proc {}
-    assert_equal "application/javascript", content_type("foo.ngt.haml")
-
-    @env.register_mime_type 'sprockets/es6', '.es6'
-    @env.register_transformer 'sprockets/es6', 'application/javascript', proc {}
     assert_equal "application/javascript", content_type("traceur.es6")
+    assert_equal "application/javascript", content_type("traceur.js.es6")
   end
 
   def content_type(path)

@@ -1,4 +1,3 @@
-require 'json'
 require 'sass'
 
 module Sprockets
@@ -27,7 +26,7 @@ module Sprockets
         'SassCompressor',
         ::Sass::VERSION,
         VERSION,
-        JSON.generate(options)
+        options
       ]
     end
 
