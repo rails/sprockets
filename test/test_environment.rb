@@ -255,6 +255,16 @@ $app.run(function($templateCache) {
     XML
   end
 
+  test "svg transformer" do
+    assert asset = @env.find_asset("logo.svg")
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal [60, 115, 118, 103, 32, 119, 105, 100, 116, 104], asset.to_s[0, 10].bytes
+
+    assert asset = @env.find_asset("logo.png")
+    assert_equal "image/png", asset.content_type
+    assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding

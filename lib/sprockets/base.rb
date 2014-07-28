@@ -79,8 +79,13 @@ module Sprockets
       accepts = options[:accept] || '*/*'
 
       if mime_type = parse_path_extnames(filename)[1]
-        accepts = parse_q_values(accepts)
-        accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
+        matcher = lambda { |a, b| match_mime_type?(a, b) }
+        if find_best_q_match(accepts, self.transformers[mime_type].keys, &matcher)
+          true
+        else
+          accepts = parse_q_values(accepts)
+          accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
+        end
       else
         accepts == '*/*'
       end
@@ -102,7 +107,10 @@ module Sprockets
       end
 
       if filename
-        options = { bundle: options[:bundle], accept_encoding: options[:accept_encoding] }
+        mime_type = parse_path_extnames(path)[1]
+        accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
+
+        options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
         if if_match
           asset_hash = build_asset_hash_for_digest(filename, if_match, options)
         else
@@ -165,6 +173,13 @@ module Sprockets
 
         bundle_supported = options[:bundle] && bundled_processors.include?(Bundle)
         processors = bundle_supported ? bundled_processors : processed_processors
+
+        matcher = lambda { |a, b| match_mime_type?(a, b) }
+        if to_type = find_best_q_match(options[:accept], self.transformers[mime_type].keys, &matcher)
+          processors += [self.transformers[mime_type][to_type]]
+          asset[:content_type] = to_type
+        end
+
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
