@@ -118,7 +118,6 @@ module Sprockets
           next unless stat.file?
 
           path = split_subpath(load_path, filename)
-
           path, mime_type, _ = parse_path_extnames(path)
           path = normalize_logical_path(path)
           path += mime_types[mime_type][:extensions].first if mime_type
@@ -185,17 +184,17 @@ module Sprockets
       #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)
-        format_extname  = nil
+        mime_type       = nil
         engine_extnames = []
         len = path.length
 
         path_extnames(path).reverse_each do |extname|
           if engines.key?(extname)
-            format_extname = engine_extensions[extname]
+            mime_type = engine_mime_types[extname]
             engine_extnames.unshift(extname)
             len -= extname.length
           elsif mime_exts.key?(extname)
-            format_extname = extname
+            mime_type = mime_exts[extname]
             len -= extname.length
             break
           else
@@ -204,7 +203,7 @@ module Sprockets
         end
 
         name = path[0, len]
-        return [name, mime_exts[format_extname], engine_extnames]
+        return [name, mime_type, engine_extnames]
       end
   end
 end

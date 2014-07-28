@@ -35,10 +35,10 @@ module Sprockets
     #
     attr_reader :engines
 
-    # Internal: Returns a `Hash` of engine extensions to format extensions.
+    # Internal: Returns a `Hash` of engine extensions to mime types.
     #
-    # # => { '.coffee' => '.js' }
-    attr_reader :engine_extensions
+    # # => { '.coffee' => 'application/javascript' }
+    attr_reader :engine_mime_types
 
     # Internal: Find and load engines by extension.
     #
@@ -66,8 +66,8 @@ module Sprockets
           engines.merge(ext => klass)
         end
         if options[:mime_type]
-          mutate_config(:engine_extensions) do |engine_extensions|
-            engine_extensions.merge(ext.to_s => mime_types[options[:mime_type]][:extensions].first)
+          mutate_config(:engine_mime_types) do |mime_types|
+            mime_types.merge(ext.to_s => options[:mime_type])
           end
         end
       else
@@ -75,8 +75,8 @@ module Sprockets
           engines.merge(ext => LegacyTiltProcessor.new(klass))
         end
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          mutate_config(:engine_extensions) do |engine_extensions|
-            engine_extensions.merge(ext.to_s => mime_types[klass.default_mime_type][:extensions].first)
+          mutate_config(:engine_mime_types) do |mime_types|
+            mime_types.merge(ext.to_s => klass.default_mime_type)
           end
         end
       end
