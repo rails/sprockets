@@ -119,7 +119,8 @@ module Sprockets
 
           path = split_subpath(load_path, filename)
           path, extname, _ = parse_path_extnames(path)
-          path = normalize_logical_path(path, extname)
+          path = normalize_logical_path(path)
+          path += extname if extname
 
           if !seen.include?(path)
             yield path, filename
@@ -152,10 +153,9 @@ module Sprockets
         accepts
       end
 
-      def normalize_logical_path(path, extname)
+      def normalize_logical_path(path)
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'
-        path += extname if extname
         path
       end
 

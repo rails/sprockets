@@ -144,7 +144,8 @@ module Sprockets
         end
 
         logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
-        logical_path = normalize_logical_path(logical_path, extname)
+        logical_path = normalize_logical_path(logical_path)
+        logical_path += extname if extname
         mime_type = mime_exts[extname]
 
         asset = {
