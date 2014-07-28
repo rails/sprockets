@@ -118,9 +118,12 @@ module Sprockets
           next unless stat.file?
 
           path = split_subpath(load_path, filename)
+
           path, extname, _ = parse_path_extnames(path)
+          mime_type = mime_exts[extname]
+
           path = normalize_logical_path(path)
-          path += extname if extname
+          path += mime_types[mime_type][:extensions].first if mime_type
 
           if !seen.include?(path)
             yield path, filename

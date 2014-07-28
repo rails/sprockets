@@ -144,17 +144,22 @@ module Sprockets
         end
 
         logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
-        name = logical_path = normalize_logical_path(logical_path)
-        logical_path += extname if extname
         mime_type = mime_exts[extname]
+
+        logical_path = normalize_logical_path(logical_path)
 
         asset = {
           load_path: load_path,
           filename: filename,
-          logical_path: logical_path,
-          name: name
+          name: logical_path
         }
-        asset[:content_type] = mime_type if mime_type
+
+        if mime_type
+          asset[:content_type] = mime_type
+          asset[:logical_path] = logical_path + mime_types[mime_type][:extensions].first
+        else
+          asset[:logical_path] = logical_path
+        end
 
         processed_processors = unwrap_preprocessors(asset[:content_type]) +
           unwrap_engines(engine_extnames).reverse +
