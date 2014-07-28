@@ -78,8 +78,7 @@ module Sprockets
 
       accepts = options[:accept] || '*/*'
 
-      extname = parse_path_extnames(filename)[1]
-      if mime_type = mime_exts[extname]
+      if mime_type = parse_path_extnames(filename)[1]
         accepts = parse_q_values(accepts)
         accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
       else
@@ -143,9 +142,7 @@ module Sprockets
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
         end
 
-        logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
-        mime_type = mime_exts[extname]
-
+        logical_path, mime_type, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
 
         asset = {
