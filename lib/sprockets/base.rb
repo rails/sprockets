@@ -171,8 +171,8 @@ module Sprockets
           unwrap_postprocessors(asset[:content_type])
         bundled_processors = unwrap_bundle_processors(asset[:content_type])
 
-        bundle_supported = options[:bundle] && bundled_processors.include?(Bundle)
-        processors = bundle_supported ? bundled_processors : processed_processors
+        should_bundle = options[:bundle] && bundled_processors.any?
+        processors = should_bundle ? bundled_processors : processed_processors
 
         matcher = lambda { |a, b| match_mime_type?(a, b) }
         if to_type = find_best_q_match(options[:accept], self.transformers[mime_type].keys, &matcher)
