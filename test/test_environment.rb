@@ -237,23 +237,21 @@ $app.run(function($templateCache) {
     HTML
   end
 
-  test "find xml builder asset" do
-    skip "multiple builder outputs needs multiple extension support"
-
-    assert asset = @env.find_asset("nokogiri-xml.xml")
-    assert_equal "application/xml", asset.content_type
-    assert_equal <<-XML, asset.to_s
-<?xml version="1.0"?>
-<root>
-  <products>
-    <widget>
-      <id>10</id>
-      <name>Awesome widget</name>
-    </widget>
-  </products>
-</root>
-    XML
-  end
+#   test "find xml builder asset" do
+#     assert asset = @env.find_asset("nokogiri-xml.xml")
+#     assert_equal "application/xml", asset.content_type
+#     assert_equal <<-XML, asset.to_s
+# <?xml version="1.0"?>
+# <root>
+#   <products>
+#     <widget>
+#       <id>10</id>
+#       <name>Awesome widget</name>
+#     </widget>
+#   </products>
+# </root>
+#     XML
+#   end
 
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
