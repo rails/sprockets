@@ -96,4 +96,7 @@ module Sprockets
         false
       end
   end
+
+  JavascriptBundle = Bundle
+  StylesheetBundle = Bundle
 end

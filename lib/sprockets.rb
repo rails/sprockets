@@ -17,10 +17,12 @@ module Sprockets
   autoload :EcoTemplate,             'sprockets/eco_template'
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :JavascriptBundle,        'sprockets/bundle'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
+  autoload :StylesheetBundle,        'sprockets/bundle'
   autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
   autoload :YUICompressor,           'sprockets/yui_compressor'
 
@@ -105,8 +107,8 @@ module Sprockets
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
-  register_bundle_processor 'application/javascript', Bundle
-  register_bundle_processor 'text/css', Bundle
+  register_bundle_processor 'application/javascript', JavascriptBundle
+  register_bundle_processor 'text/css', StylesheetBundle
 
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
