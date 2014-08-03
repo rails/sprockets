@@ -20,6 +20,7 @@ module Sprockets
       @encodings         = parent.encodings
       @engines           = parent.engines
       @engine_mime_types = parent.engine_mime_types
+      @transformers      = parent.transformers
       @preprocessors     = parent.preprocessors
       @postprocessors    = parent.postprocessors
       @bundle_processors = parent.bundle_processors

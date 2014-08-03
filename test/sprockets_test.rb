@@ -72,6 +72,11 @@ XmlBuilderProcessor = proc { |input|
 
 Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'
 
+SVG2PNG = proc { |input|
+  "\x89\x50\x4e\x47\xd\xa\x1a\xa#{input[:data]}"
+}
+Sprockets.register_transformer 'image/svg+xml', 'image/png', SVG2PNG
+
 
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))

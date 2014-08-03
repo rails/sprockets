@@ -49,6 +49,7 @@ module Sprockets
   @encodings         = {}.freeze
   @engines           = {}.freeze
   @engine_mime_types = {}.freeze
+  @transformers      = Hash.new { |h, k| {}.freeze }.freeze
   @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
