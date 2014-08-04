@@ -176,7 +176,7 @@ module Sprockets
 
         matcher = lambda { |a, b| match_mime_type?(a, b) }
         if to_type = find_best_q_match(options[:accept], self.transformers[mime_type].keys, &matcher)
-          processors += [self.transformers[mime_type][to_type]]
+          processors += unwrap_transformer(mime_type, to_type)
           asset[:content_type] = to_type
         end
 

@@ -3,10 +3,11 @@ require 'sprockets/engines'
 require 'sprockets/mime'
 require 'sprockets/paths'
 require 'sprockets/processing'
+require 'sprockets/transformers'
 
 module Sprockets
   module Configuration
-    include Paths, Mime, Engines, Processing, Compressing
+    include Paths, Mime, Engines, Transformers, Processing, Compressing
 
     def initialize_configuration(parent)
       @logger            = parent.logger

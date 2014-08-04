@@ -26,14 +26,6 @@ module Sprockets
   #     Sprockets.register_engine '.sass', SassTemplate
   #
   module Engines
-    attr_reader :transformers
-
-    def register_transformer(from, to, processor)
-      mutate_hash_config(:transformers, from) do |transformers|
-        transformers.merge(to => processor)
-      end
-    end
-
     # Returns a `Hash` of `Engine`s registered on the `Environment`.
     # If an `ext` argument is supplied, the `Engine` associated with
     # that extension will be returned.
