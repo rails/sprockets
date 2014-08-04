@@ -153,24 +153,27 @@ module Sprockets
         path
       end
 
-      def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts)
-        accepts.each do |accept, _|
-          path_matches(load_path, logical_name, logical_basename) do |filename|
-            if !file?(filename)
-            elsif accept == '*/*'
-              yield filename
-            elsif resolve_path_transform_type(filename, accept)
-              yield filename
-            end
+      def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
+        filenames = path_matches(load_path, logical_name, logical_basename)
+
+        find_q_matches(accepts, filenames) do |filename, accepted|
+          if !file?(filename)
+            nil
+          elsif accepted == '*/*'
+            filename
+          elsif resolve_path_transform_type(filename, accepted)
+            filename
           end
-        end
+        end.each(&block)
       end
 
-      def path_matches(load_path, logical_name, logical_basename, &block)
+      def path_matches(load_path, logical_name, logical_basename)
+        filenames = []
         dirname = File.dirname(File.join(load_path, logical_name))
-        dirname_matches(dirname, logical_basename, &block)
-        resolve_alternates(load_path, logical_name, &block)
-        dirname_matches(File.join(load_path, logical_name), "index", &block)
+        dirname_matches(dirname, logical_basename) { |fn| filenames << fn }
+        resolve_alternates(load_path, logical_name) { |fn| filenames << fn }
+        dirname_matches(File.join(load_path, logical_name), "index") { |fn| filenames << fn }
+        filenames
       end
 
       def dirname_matches(dirname, basename)
