@@ -846,7 +846,8 @@ class AssetLogicalPathTest < Sprockets::TestCase
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      @env.find_asset(filename).logical_path
+      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      asset.logical_path
     end
   end
 end
@@ -913,7 +914,8 @@ class AssetContentTypeTest < Sprockets::TestCase
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      @env.find_asset(filename).content_type
+      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      asset.content_type
     end
   end
 end

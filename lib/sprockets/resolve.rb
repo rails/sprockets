@@ -93,6 +93,12 @@ module Sprockets
       nil
     end
 
+    # Experimental: Get transform type for filename
+    def resolve_path_transform_type(filename, accept)
+      mime_type = parse_path_extnames(filename)[1]
+      resolve_transform_type(mime_type, accept)
+    end
+
     # Public: Enumerate over all logical paths in the environment.
     #
     # Returns an Enumerator of [logical_path, filename].
@@ -150,7 +156,10 @@ module Sprockets
       def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts)
         accepts.each do |accept, _|
           path_matches(load_path, logical_name, logical_basename) do |filename|
-            if has_asset?(filename, accept: accept)
+            if !file?(filename)
+            elsif accept == '*/*'
+              yield filename
+            elsif resolve_path_transform_type(filename, accept)
               yield filename
             end
           end
