@@ -58,13 +58,7 @@ module Sprockets
 
       accepts = parse_accept_options(mime_type, options[:accept])
 
-      accepts.each do |accept, _|
-        path_matches(load_path, logical_name, logical_basename) do |filename|
-          if has_asset?(filename, accept: accept)
-            yield filename
-          end
-        end
-      end
+      _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
 
       nil
     end
@@ -93,13 +87,7 @@ module Sprockets
       accepts = parse_accept_options(mime_type, options[:accept])
 
       self.paths.each do |load_path|
-        accepts.each do |accept, _|
-          path_matches(load_path, logical_name, logical_basename) do |filename|
-            if has_asset?(filename, accept: accept)
-              yield filename
-            end
-          end
-        end
+        _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
       end
 
       nil
@@ -157,6 +145,16 @@ module Sprockets
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'
         path
+      end
+
+      def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts)
+        accepts.each do |accept, _|
+          path_matches(load_path, logical_name, logical_basename) do |filename|
+            if has_asset?(filename, accept: accept)
+              yield filename
+            end
+          end
+        end
       end
 
       def path_matches(load_path, logical_name, logical_basename, &block)
