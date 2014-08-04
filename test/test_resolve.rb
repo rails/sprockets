@@ -67,6 +67,40 @@ class TestResolve < Sprockets::TestCase
       @env.resolve('foo', accept: 'application/javascript, text/css')
     assert_equal fixture_path('resolve/javascripts/foo.js'),
       @env.resolve('foo', accept: 'text/css, application/javascript')
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: 'application/javascript; q=0.8, text/css')
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: 'text/css; q=0.8, application/javascript')
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: '*/*; q=0.8, application/javascript')
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo', accept: '*/*; q=0.8, text/css')
+  end
+
+  test "resolve accept type quality in paths" do
+    @env.append_path(fixture_path('resolve/javascripts'))
+
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: 'application/javascript')
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: 'text/css')
+
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: 'application/javascript, text/css')
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: 'text/css, application/javascript')
+
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: 'application/javascript; q=0.8, text/css')
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: 'text/css; q=0.8, application/javascript')
+
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: '*/*; q=0.8, application/javascript')
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: '*/*; q=0.8, text/css')
   end
 
   test "verify all logical paths" do
