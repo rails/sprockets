@@ -35,6 +35,15 @@ class TestHTTPUtils < Sprockets::TestCase
       parse_q_values("gzip;q=1.0, identity; q=0.5, *;q=0")
   end
 
+  test "find q matches" do
+    accept = "text/plain; q=0.5, image/*"
+    assert_equal ["text/plain"], find_mime_type_matches(accept, ["text/plain"])
+    assert_equal ["image/svg+xml"], find_mime_type_matches(accept, ["image/svg+xml"])
+    assert_equal ["image/svg+xml"], find_mime_type_matches(accept, ["image/svg+xml", "image/png"])
+    assert_equal ["image/svg+xml", "text/plain"], find_mime_type_matches(accept, ["image/svg+xml", "text/plain"])
+    assert_equal [], find_mime_type_matches(accept, ["text/css"])
+  end
+
   test "find best q match" do
     accept = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"
     assert_equal "text/plain", find_best_mime_type_match(accept, ["text/plain"])
@@ -52,5 +61,13 @@ class TestHTTPUtils < Sprockets::TestCase
     refute find_best_q_match(accept, [])
 
     refute find_best_q_match(nil, ["gzip"])
+  end
+
+  test "find best q match with parsed q values" do
+    assert accept = parse_q_values("text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c")
+    assert_equal "text/plain", find_best_mime_type_match(accept, ["text/plain"])
+    assert_equal "text/html", find_best_mime_type_match(accept, ["text/html"])
+    assert_equal "text/html", find_best_mime_type_match(accept, ["text/plain", "text/html"])
+    assert_equal "text/html", find_best_mime_type_match(accept, ["text/html", "text/plain"])
   end
 end
