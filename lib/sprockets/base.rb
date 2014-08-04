@@ -98,12 +98,11 @@ module Sprockets
         return nil unless file?(filename)
       else
         filename = resolve_all(path, accept: accept).first
+        mime_type = parse_path_extnames(path)[1]
+        accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
       end
 
       if filename
-        mime_type = parse_path_extnames(path)[1]
-        accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
-
         options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
         if if_match
           asset_hash = build_asset_hash_for_digest(filename, if_match, options)

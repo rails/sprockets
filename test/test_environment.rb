@@ -273,6 +273,21 @@ $app.run(function($templateCache) {
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
+  test "full path svg transformer" do
+    assert @env.find_asset(fixture_path("default/logo.svg"))
+    refute @env.find_asset(fixture_path("default/logo.png"))
+  end
+
+  test "full path svg transformer for accept" do
+    assert asset = @env.find_asset(fixture_path("default/logo.svg"), accept: "image/svg+xml")
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal [60, 115, 118, 103, 32, 119, 105, 100, 116, 104], asset.to_s[0, 10].bytes.to_a
+
+    assert asset = @env.find_asset(fixture_path("default/logo.svg"), accept: "image/png")
+    assert_equal "image/png", asset.content_type
+    assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
