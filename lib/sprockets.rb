@@ -120,14 +120,19 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # Mmm, CoffeeScript
+  register_mime_type 'text/coffeescript', extensions: ['.coffee']
   register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
+  register_mime_type 'text/eco', extensions: ['.eco']
+  register_mime_type 'text/ejs', extensions: ['.ejs']
   register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
   register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
   register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
+  register_mime_type 'text/sass', extensions: ['.sass']
+  register_mime_type 'text/scss', extensions: ['.scss']
   register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
   register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 
