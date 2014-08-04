@@ -79,13 +79,7 @@ module Sprockets
       accepts = options[:accept] || '*/*'
 
       if mime_type = parse_path_extnames(filename)[1]
-        matcher = lambda { |a, b| match_mime_type?(a, b) }
-        if find_best_q_match(accepts, self.transformers[mime_type].keys, &matcher)
-          true
-        else
-          accepts = parse_q_values(accepts)
-          accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
-        end
+        resolve_transform_type(mime_type, accepts)
       else
         accepts == '*/*'
       end
@@ -174,8 +168,7 @@ module Sprockets
         should_bundle = options[:bundle] && bundled_processors.any?
         processors = should_bundle ? bundled_processors : processed_processors
 
-        matcher = lambda { |a, b| match_mime_type?(a, b) }
-        if to_type = find_best_q_match(options[:accept], self.transformers[mime_type].keys, &matcher)
+        if to_type = resolve_transform_type(mime_type, options[:accept])
           processors += unwrap_transformer(mime_type, to_type)
           asset[:content_type] = to_type
         end

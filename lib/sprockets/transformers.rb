@@ -30,6 +30,28 @@ module Sprockets
       end
     end
 
+    # Public: Resolve target mime type that the source type should be
+    # transformed to.
+    #
+    # type   - String from mime type
+    # accept - String accept type list (default: '*/*')
+    #
+    # Examples
+    #
+    #   resolve_transform_type('text/plain', 'text/plain')
+    #   # => 'text/plain'
+    #
+    #   resolve_transform_type('image/svg+xml', 'image/png, image/*')
+    #   # => 'image/png'
+    #
+    #   resolve_transform_type('text/css', 'image/png')
+    #   # => nil
+    #
+    # Returns String mime type or nil is no type satisfied the accept value.
+    def resolve_transform_type(type, accept = nil)
+      find_best_mime_type_match(accept || '*/*', [type].compact + transformers[type].keys)
+    end
+
     # Internal: Find and load transformer by from and to mime type.
     #
     # from - String mime type

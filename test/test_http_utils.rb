@@ -11,6 +11,8 @@ class TestHTTPUtils < Sprockets::TestCase
   end
 
   test "parse q values" do
+    assert_equal [], parse_q_values(nil)
+
     assert_equal [["audio/*", 0.2], ["audio/basic", 1.0]],
       parse_q_values("audio/*; q=0.2, audio/basic")
     assert_equal [["text/plain", 0.5], ["text/html", 1.0], ["text/x-dvi", 0.8], ["text/x-c", 1.0]],
@@ -35,15 +37,20 @@ class TestHTTPUtils < Sprockets::TestCase
 
   test "find best q match" do
     accept = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"
-    matcher = lambda { |a, b| match_mime_type?(a, b) }
-    assert_equal "text/plain", find_best_q_match(accept, ["text/plain"], &matcher)
-    assert_equal "text/html", find_best_q_match(accept, ["text/html"], &matcher)
-    assert_equal "text/html", find_best_q_match(accept, ["text/plain", "text/html"], &matcher)
-    assert_equal "text/html", find_best_q_match(accept, ["text/html", "text/plain"], &matcher)
+    assert_equal "text/plain", find_best_mime_type_match(accept, ["text/plain"])
+    assert_equal "text/html", find_best_mime_type_match(accept, ["text/html"])
+    assert_equal "text/html", find_best_mime_type_match(accept, ["text/plain", "text/html"])
+    assert_equal "text/html", find_best_mime_type_match(accept, ["text/html", "text/plain"])
+    refute find_best_mime_type_match(accept, ["text/yaml"])
+    refute find_best_mime_type_match(accept, [])
 
     accept = "sdch, gzip, deflate"
     assert_equal "sdch", find_best_q_match(accept, ["sdch", "gzip"])
     assert_equal "gzip", find_best_q_match(accept, ["gzip"])
     assert_equal "deflate", find_best_q_match(accept, ["deflate"])
+    refute find_best_q_match(accept, ["base64"])
+    refute find_best_q_match(accept, [])
+
+    refute find_best_q_match(nil, ["gzip"])
   end
 end

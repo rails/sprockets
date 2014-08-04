@@ -36,7 +36,7 @@ module Sprockets
     #
     # Adapted from Rack::Utils#q_values.
     #
-    # Returns the matched String from available Array.
+    # Returns the matched String from available Array or nil.
     def find_best_q_match(q_value_header, available, &matcher)
       matcher ||= lambda { |a, b| a == b }
 
@@ -50,6 +50,18 @@ module Sprockets
 
       if matches.any?
         matches.sort_by { |match, quality| -quality }.first.first
+      end
+    end
+
+    # Internal: Find the best qvalue match from an Array of available mime type
+    # options.
+    #
+    # Adapted from Rack::Utils#q_values.
+    #
+    # Returns the matched mime type String from available Array or nil.
+    def find_best_mime_type_match(q_value_header, available)
+      find_best_q_match(q_value_header, available) do |a, b|
+        match_mime_type?(a, b)
       end
     end
   end
