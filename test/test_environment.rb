@@ -68,7 +68,7 @@ $app.run(function($templateCache) {
 
   test "lookup bundle processors" do
     assert_equal 1, @env.bundle_processors['application/javascript'].size
-    assert_equal 1, @env.bundle_processors['text/css'].size
+    assert_equal 2, @env.bundle_processors['text/css'].size
   end
 
   test "find asset with accept type" do
@@ -128,7 +128,7 @@ $app.run(function($templateCache) {
   test "find bower main by format extension" do
     assert_equal fixture_path('default/bower/main.js'),
       @env["bower.js"].filename
-      refute @env.find_asset("bower.css")
+    refute @env.find_asset("bower.css")
 
     assert_equal fixture_path('default/qunit/qunit.js'),
       @env["qunit.js"].filename
@@ -592,6 +592,11 @@ class TestEnvironment < Sprockets::TestCase
     assert asset = @env.find_asset("logo.png")
     assert_equal "image/png", asset.content_type
     assert_equal [:pre_svg, :post_png], asset.metadata[:test]
+  end
+
+  test "access selector count metadata" do
+    assert asset = @env.find_asset("mobile.css")
+    assert_equal 2, asset.metadata[:selector_count]
   end
 
   test "changing version doesn't affect the assets digest" do

@@ -77,6 +77,18 @@ SVG2PNG = proc { |input|
 }
 Sprockets.register_transformer 'image/svg+xml', 'image/png', SVG2PNG
 
+Sprockets.register_bundle_processor 'text/css', proc { |input|
+  selector_count = input[:metadata][:required_asset_hashes].inject(0) { |n, asset|
+    n + asset[:metadata][:selector_count]
+  }
+  { data: input[:data], selector_count: selector_count }
+}
+
+Sprockets.register_postprocessor 'text/css', proc { |input|
+  { data: input[:data],
+    selector_count: input[:data].scan(/\{/).size }
+}
+
 
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
