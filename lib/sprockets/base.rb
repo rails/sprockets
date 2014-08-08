@@ -126,7 +126,7 @@ module Sprockets
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
         end
 
-        logical_path, mime_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
 
         asset = {
@@ -135,22 +135,21 @@ module Sprockets
           name: logical_path
         }
 
-        if type = resolve_transform_type(mime_type, options[:accept])
-          asset[:content_type] = type
-          asset[:logical_path] = logical_path + mime_types[type][:extensions].first
+        if asset_type = resolve_transform_type(file_type, options[:accept])
+          asset[:content_type] = asset_type
+          asset[:logical_path] = logical_path + mime_types[asset_type][:extensions].first
         else
           asset[:logical_path] = logical_path
         end
 
-        processed_processors = unwrap_preprocessors(asset[:content_type]) +
+        processed_processors = unwrap_preprocessors(file_type) +
           unwrap_engines(engine_extnames).reverse +
-          unwrap_postprocessors(asset[:content_type])
-        bundled_processors = unwrap_bundle_processors(asset[:content_type])
+          unwrap_transformer(file_type, asset_type) +
+          unwrap_postprocessors(asset_type)
+        bundled_processors = unwrap_bundle_processors(asset_type)
 
         should_bundle = options[:bundle] && bundled_processors.any?
         processors = should_bundle ? bundled_processors : processed_processors
-
-        processors += unwrap_transformer(mime_type, asset[:content_type])
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
