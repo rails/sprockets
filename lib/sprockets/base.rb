@@ -135,9 +135,9 @@ module Sprockets
           name: logical_path
         }
 
-        if mime_type
-          asset[:content_type] = mime_type
-          asset[:logical_path] = logical_path + mime_types[mime_type][:extensions].first
+        if type = resolve_transform_type(mime_type, options[:accept])
+          asset[:content_type] = type
+          asset[:logical_path] = logical_path + mime_types[type][:extensions].first
         else
           asset[:logical_path] = logical_path
         end
@@ -150,11 +150,7 @@ module Sprockets
         should_bundle = options[:bundle] && bundled_processors.any?
         processors = should_bundle ? bundled_processors : processed_processors
 
-        if to_type = resolve_transform_type(mime_type, options[:accept])
-          processors += unwrap_transformer(mime_type, to_type)
-          asset[:content_type] = to_type
-        end
-
+        processors += unwrap_transformer(mime_type, asset[:content_type])
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
