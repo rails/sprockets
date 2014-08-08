@@ -571,6 +571,29 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env.css_compressor
   end
 
+  test "pre/post processors on transformed asset" do
+    @env.register_preprocessor 'image/svg+xml', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_svg] }
+    }
+    @env.register_preprocessor 'image/png', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_png] }
+    }
+    @env.register_postprocessor 'image/svg+xml', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:post_svg] }
+    }
+    @env.register_postprocessor 'image/png', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:post_png] }
+    }
+
+    assert asset = @env.find_asset("logo.svg")
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal [:pre_svg, :post_svg], asset.metadata[:test]
+
+    assert asset = @env.find_asset("logo.png")
+    assert_equal "image/png", asset.content_type
+    assert_equal [:pre_png, :post_png], asset.metadata[:test]
+  end
+
   test "changing version doesn't affect the assets digest" do
     old_asset_digest = @env["gallery.js"].digest
     @env.version = 'v2'
