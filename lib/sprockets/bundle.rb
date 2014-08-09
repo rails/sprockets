@@ -17,10 +17,9 @@ module Sprockets
     end
 
     def call(input)
-      env = input[:environment]
+      env      = input[:environment]
       filename = input[:filename]
-
-      type = input[:content_type]
+      type     = input[:content_type]
 
       assets = Hash.new do |h, path|
         h[path] = env.find_asset(path, bundle: false, accept: type)
@@ -30,21 +29,30 @@ module Sprockets
       stubbed_paths  = expand_required_paths(env, assets, Array(assets[filename].metadata[:stubbed_paths]))
       required_paths.subtract(stubbed_paths)
 
-      dependency_paths = required_paths.inject(Set.new) do |set, path|
-        set.merge(assets[path].metadata[:dependency_paths])
-      end
-
-      data = join_assets(required_paths.map { |path| assets[path].to_s })
-
-      # Deprecated: For Asset#to_a
-      required_asset_hashes = required_paths.map { |path| assets[path].to_hash }
-
-      { data: data,
-        required_asset_hashes: required_asset_hashes,
-        dependency_paths: dependency_paths }
+      reduce_assets(required_paths.map { |path| assets[path] })
     end
 
     private
+      def reduce_assets(assets)
+        assets.reduce({}) do |h, asset|
+          h[:data] ||= ""
+          h[:data] << map_asset_source(asset)
+
+          h[:dependency_paths] ||= Set.new
+          h[:dependency_paths].merge(asset.metadata[:dependency_paths])
+
+          # Deprecated: For Asset#to_a
+          h[:required_asset_hashes] ||= []
+          h[:required_asset_hashes] << asset.to_hash
+
+          h
+        end
+      end
+
+      def map_asset_source(asset)
+        asset.to_s
+      end
+
       def expand_required_paths(env, assets, paths)
         deps, seen = Set.new, Set.new
         stack = paths.reverse
@@ -95,14 +103,13 @@ module Sprockets
       false
     end
 
-    def join_assets(ary)
-      ary.map do |data|
-        if self.class.missing_semicolon?(data)
-          data + ";\n"
-        else
-          data
-        end
-      end.join
+    def map_asset_source(asset)
+      data = asset.to_s
+      if self.class.missing_semicolon?(data)
+        data + ";\n"
+      else
+        data
+      end
     end
   end
 end
