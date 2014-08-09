@@ -35,7 +35,7 @@ module Sprockets
     private
       def reduce_assets(assets)
         assets.reduce({}) do |h, asset|
-          h[:data] ||= ""
+          h[:data] ||= "".force_encoding(Encoding::UTF_8)
           h[:data] << map_asset_source(asset)
 
           h[:dependency_paths] ||= Set.new
