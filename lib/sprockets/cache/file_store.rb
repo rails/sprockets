@@ -116,12 +116,22 @@ module Sprockets
           caches.inject(0) { |sum, (_, stat)| sum + stat.size }
         end
 
+        def safe_stat(fn)
+          File.stat(fn)
+        rescue Errno::ENOENT
+          nil
+        end
+
         def gc!
           start_time = Time.now
 
-          caches = find_caches.map! { |filename|
-            [filename, File.stat(filename)]
-          }.sort_by { |filename, stat| stat.mtime.to_i }
+          caches = find_caches.map { |filename|
+            [filename, safe_stat(filename)]
+          }.reject { |filename, stat|
+            stat.nil?
+          }.sort_by { |filename, stat|
+            stat.mtime.to_i
+          }
 
           size = compute_size(caches)
 
