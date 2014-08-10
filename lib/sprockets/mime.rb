@@ -64,6 +64,25 @@ module Sprockets
       end
     end
 
+    # Public: Read file on disk with MIME type specific encoding.
+    #
+    # filename     - String path
+    # content_type - String MIME type
+    #
+    # Returns String file contents transcoded to UTF-8 or in its external
+    # encoding.
+    def read_file(filename, content_type = nil)
+      data = File.open(filename, 'rb') { |f| f.read }
+
+      if type = mime_types[content_type]
+        if charset = type[:charset]
+          data = charset.call(data).encode(Encoding::UTF_8)
+        end
+      end
+
+      data
+    end
+
     # Public: Mapping of supported HTTP Content/Transfer encodings
     #
     # key   - String name
