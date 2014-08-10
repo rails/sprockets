@@ -19,6 +19,75 @@ ensure
   $VERBOSE = old_verbose
 end
 
+# Popular extensions for testing but not part of Sprockets core
+
+NoopProcessor = proc { |input| input[:data] }
+Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
+Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html'
+
+Sprockets.register_mime_type 'text/ng-template', extensions: ['.ngt']
+AngularProcessor = proc { |input|
+  <<-EOS
+$app.run(function($templateCache) {
+  $templateCache.put('#{input[:name]}.html', #{input[:data].chomp.inspect});
+});
+  EOS
+}
+Sprockets.register_engine '.ngt', AngularProcessor, mime_type: 'application/javascript'
+
+Sprockets.register_mime_type 'text/mustache', extensions: ['.mustache']
+Sprockets.register_engine '.mustache', NoopProcessor, mime_type: 'application/javascript'
+
+Sprockets.register_mime_type 'text/x-handlebars-template', extensions: ['.handlebars']
+Sprockets.register_engine '.handlebars', NoopProcessor, mime_type: 'application/javascript'
+
+Sprockets.register_mime_type 'application/javascript-module', extensions: ['.es6']
+Sprockets.register_engine '.es6', NoopProcessor, mime_type: 'application/javascript'
+
+Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
+Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript'
+
+require 'nokogiri'
+Sprockets.register_mime_type 'application/ruby+builder', extensions: ['.builder']
+
+HtmlBuilderProcessor = proc { |input|
+  instance_eval <<-EOS
+    builder = Nokogiri::HTML::Builder.new do |doc|
+      #{input[:data]}
+    end
+    builder.to_html
+  EOS
+}
+Sprockets.register_engine '.builder', HtmlBuilderProcessor, mime_type: 'text/html'
+
+XmlBuilderProcessor = proc { |input|
+  instance_eval <<-EOS
+    builder = Nokogiri::XML::Builder.new do |xml|
+      #{input[:data]}
+    end
+    builder.to_xml
+  EOS
+}
+# Sprockets.register_engine '.builder', XmlBuilderProcessor, mime_type: 'application/xml'
+
+Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'
+
+SVG2PNG = proc { |input|
+  "\x89\x50\x4e\x47\xd\xa\x1a\xa#{input[:data]}"
+}
+Sprockets.register_transformer 'image/svg+xml', 'image/png', SVG2PNG
+
+CSS2HTMLIMPORT = proc { |input|
+  "<style>#{input[:data]}</style>"
+}
+Sprockets.register_transformer 'text/css', 'text/html', CSS2HTMLIMPORT
+
+JS2HTMLIMPORT = proc { |input|
+  "<script>#{input[:data]}</script>"
+}
+Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMPORT
+
+
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
 

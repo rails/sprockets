@@ -17,10 +17,12 @@ module Sprockets
   autoload :EcoTemplate,             'sprockets/eco_template'
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :JavascriptBundle,        'sprockets/bundle'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
+  autoload :StylesheetBundle,        'sprockets/bundle'
   autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
   autoload :YUICompressor,           'sprockets/yui_compressor'
 
@@ -46,7 +48,8 @@ module Sprockets
   @mime_exts         = {}.freeze
   @encodings         = {}.freeze
   @engines           = {}.freeze
-  @engine_extensions = {}.freeze
+  @engine_mime_types = {}.freeze
+  @transformers      = Hash.new { |h, k| {}.freeze }.freeze
   @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
@@ -65,6 +68,7 @@ module Sprockets
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/xml', extensions: ['.xml']
   register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
   register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
@@ -104,8 +108,8 @@ module Sprockets
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
-  register_bundle_processor 'application/javascript', Bundle
-  register_bundle_processor 'text/css', Bundle
+  register_bundle_processor 'application/javascript', JavascriptBundle
+  register_bundle_processor 'text/css', StylesheetBundle
 
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
@@ -116,14 +120,19 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # Mmm, CoffeeScript
+  register_mime_type 'text/coffeescript', extensions: ['.coffee']
   register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
+  register_mime_type 'text/eco', extensions: ['.eco']
+  register_mime_type 'text/ejs', extensions: ['.ejs']
   register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
   register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
   register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
+  register_mime_type 'text/sass', extensions: ['.sass']
+  register_mime_type 'text/scss', extensions: ['.scss']
   register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
   register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 

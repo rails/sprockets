@@ -1,0 +1,1 @@
+<div ng-view></div>

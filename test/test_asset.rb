@@ -833,21 +833,21 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
     assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
 
+    assert_equal "foo-ng.js", logical_path("foo-ng.ngt")
+    assert_equal "bar-ng.js", logical_path("bar-ng.ngt.haml")
+    assert_equal "baz-ng.js", logical_path("baz-ng.js.ngt")
+
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
-
-    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
-    assert_equal "foo.js", logical_path("foo.ngt.haml")
-
-    @env.register_engine '.es6', proc {}, mime_type: 'application/javascript'
     assert_equal "traceur.js", logical_path("traceur.es6")
+    assert_equal "traceur.js", logical_path("traceur.js.es6")
   end
 
   def logical_path(path)
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      @env.find_asset(filename).logical_path
+      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      asset.logical_path
     end
   end
 end
@@ -900,21 +900,22 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
     assert_equal "application/javascript", content_type("all.coffee/index.coffee")
 
+    assert_equal "application/javascript", content_type("foo-ng.ngt")
+    assert_equal "application/javascript", content_type("bar-ng.ngt.haml")
+    assert_equal "application/javascript", content_type("baz-ng.js.ngt")
+
     assert_equal nil, content_type("sprite.css.embed")
 
-    @env.register_engine '.haml', proc {}, mime_type: 'text/html'
-    @env.register_engine '.ngt', proc {}, mime_type: 'application/javascript'
-    assert_equal "application/javascript", content_type("foo.ngt.haml")
-
-    @env.register_engine '.es6', proc {}, mime_type: 'application/javascript'
     assert_equal "application/javascript", content_type("traceur.es6")
+    assert_equal "application/javascript", content_type("traceur.js.es6")
   end
 
   def content_type(path)
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      @env.find_asset(filename).content_type
+      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      asset.content_type
     end
   end
 end
