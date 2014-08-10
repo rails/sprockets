@@ -13,20 +13,19 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rack", "~> 1.0"
 
-  s.add_development_dependency "closure-compiler"
-  s.add_development_dependency "coffee-script-source", "~> 1.2"
-  s.add_development_dependency "coffee-script", "~> 2.0"
+  s.add_development_dependency "closure-compiler", "~> 1.1"
+  s.add_development_dependency "coffee-script-source", "~> 1.6"
+  s.add_development_dependency "coffee-script", "~> 2.2"
   s.add_development_dependency "eco", "~> 1.0"
   s.add_development_dependency "ejs", "~> 1.0"
   s.add_development_dependency "execjs", "~> 2.0"
-  s.add_development_dependency "json"
-  s.add_development_dependency "minitest"
-  s.add_development_dependency "nokogiri"
-  s.add_development_dependency "rack-test"
-  s.add_development_dependency "rake"
+  s.add_development_dependency "minitest", "~> 5.0"
+  s.add_development_dependency "nokogiri", "~> 1.3"
+  s.add_development_dependency "rack-test", "~> 0.6"
+  s.add_development_dependency "rake", "~> 10.0"
   s.add_development_dependency "sass", "~> 3.1"
-  s.add_development_dependency "uglifier"
-  s.add_development_dependency "yui-compressor"
+  s.add_development_dependency "uglifier", "~> 2.3"
+  s.add_development_dependency "yui-compressor", "~> 0.12"
 
   s.required_ruby_version = '>= 1.9.3'
 
