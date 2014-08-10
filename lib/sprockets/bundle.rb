@@ -16,6 +16,29 @@ module Sprockets
       new.call(input)
     end
 
+    DEFAULT_REDUCERS = {
+      data: proc { |data, asset|
+        data ||= "".force_encoding(Encoding::UTF_8)
+        data << asset.to_s
+      },
+
+      dependency_paths: proc { |paths, asset|
+        paths ||= Set.new
+        paths.merge(asset.metadata[:dependency_paths])
+      },
+
+      # Deprecated: For Asset#to_a
+      required_asset_hashes: proc { |hashes, asset|
+        hashes ||= []
+        hashes << asset.to_hash
+      }
+    }.freeze
+
+    def initialize(options = {})
+      options[:reducers] ||= {}
+      @reducers = DEFAULT_REDUCERS.merge(options[:reducers])
+    end
+
     def call(input)
       env      = input[:environment]
       filename = input[:filename]
@@ -33,35 +56,33 @@ module Sprockets
       stubbed_paths  = Utils.dfs(Array(assets[filename].metadata[:stubbed_paths]), &find_required_paths)
       required_paths.subtract(stubbed_paths)
 
-      reduce_assets(required_paths.map { |path| assets[path] })
+      required_paths.reduce({}) do |h, path|
+        asset = assets[path]
+        @reducers.each { |k, fn| h[k] = fn.call(h[k], asset) }
+        h
+      end
     end
-
-    private
-      def reduce_assets(assets)
-        assets.reduce({}) do |h, asset|
-          h[:data] ||= "".force_encoding(Encoding::UTF_8)
-          h[:data] << map_asset_source(asset)
-
-          h[:dependency_paths] ||= Set.new
-          h[:dependency_paths].merge(asset.metadata[:dependency_paths])
-
-          # Deprecated: For Asset#to_a
-          h[:required_asset_hashes] ||= []
-          h[:required_asset_hashes] << asset.to_hash
-
-          h
-        end
-      end
-
-      def map_asset_source(asset)
-        asset.to_s
-      end
   end
 
   class StylesheetBundle < Bundle
   end
 
   class JavascriptBundle < Bundle
+
+    def initialize(options = {})
+      options[:reducers] ||= {}
+      options[:reducers][:data] = proc { |data, asset|
+        data ||= "".force_encoding(Encoding::UTF_8)
+        contents = asset.to_s
+        if JavascriptBundle.missing_semicolon?(contents)
+          data << contents << ";\n"
+        else
+          data << contents
+        end
+      }
+      super(options)
+    end
+
     # Internal: Check if data is missing a trailing semicolon.
     #
     # data - String
@@ -81,15 +102,6 @@ module Sprockets
         end
       end
       false
-    end
-
-    def map_asset_source(asset)
-      data = asset.to_s
-      if self.class.missing_semicolon?(data)
-        data + ";\n"
-      else
-        data
-      end
     end
   end
 end
