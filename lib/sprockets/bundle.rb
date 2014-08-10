@@ -17,17 +17,20 @@ module Sprockets
     end
 
     def call(input)
-      env = input[:environment]
+      env      = input[:environment]
       filename = input[:filename]
-
-      type = input[:content_type]
+      type     = input[:content_type]
 
       assets = Hash.new do |h, path|
-        h[path] = env.find_asset(path, bundle: false, accept: type)
+        unless asset = env.find_asset(path, bundle: false, accept: type)
+          raise FileNotFound, "could not find #{path}"
+        end
+        h[path] = asset
       end
 
-      required_paths = expand_required_paths(env, assets, [filename])
-      stubbed_paths  = expand_required_paths(env, assets, Array(assets[filename].metadata[:stubbed_paths]))
+      find_required_paths = proc { |path| assets[path].metadata[:required_paths] }
+      required_paths = Utils.dfs([filename], &find_required_paths)
+      stubbed_paths  = Utils.dfs(Array(assets[filename].metadata[:stubbed_paths]), &find_required_paths)
       required_paths.subtract(stubbed_paths)
 
       dependency_paths = required_paths.inject(Set.new) do |set, path|
@@ -45,26 +48,6 @@ module Sprockets
     end
 
     private
-      def expand_required_paths(env, assets, paths)
-        deps, seen = Set.new, Set.new
-        stack = paths.reverse
-
-        while path = stack.pop
-          if seen.include?(path)
-            deps.add(path)
-          else
-            unless asset = assets[path]
-              raise FileNotFound, "could not find #{path}"
-            end
-            stack.push(path)
-            stack.concat(Array(asset.metadata[:required_paths]).reverse)
-            seen.add(path)
-          end
-        end
-
-        deps
-      end
-
       def join_assets(ary)
         ary.join
       end

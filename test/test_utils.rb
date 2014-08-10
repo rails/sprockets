@@ -1,3 +1,4 @@
+require 'matrix'
 require 'sprockets_test'
 require 'sprockets/utils'
 
@@ -21,6 +22,29 @@ class TestUtils < Sprockets::TestCase
     assert_raises(TypeError) do
       hexdigest(Object.new)
     end
+  end
+
+  test "post-order depth-first search" do
+    m = Array.new
+    m[11] = [4, 5, 10]
+    m[4]  = [2, 3]
+    m[10] = [8, 9]
+    m[2]  = [0, 1]
+    m[8]  = [6, 7]
+
+    assert_equal Set.new(0..11), dfs([11]) { |n| m[n] }
+
+    m = Array.new
+    m[11] = [4, 5, 10]
+    m[4]  = [2, 3]
+    m[3]  = [1]
+    m[5]  = [1, 2]
+    m[10] = [8, 9]
+    m[2]  = [0, 1]
+    m[8]  = [6, 7]
+    m[6]  = [5]
+
+    assert_equal Set.new(0..11), dfs([11]) { |n| m[n] }
   end
 
   module Functions
