@@ -77,6 +77,16 @@ SVG2PNG = proc { |input|
 }
 Sprockets.register_transformer 'image/svg+xml', 'image/png', SVG2PNG
 
+CSS2HTMLIMPORT = proc { |input|
+  "<style>#{input[:data]}</style>"
+}
+Sprockets.register_transformer 'text/css', 'text/html', CSS2HTMLIMPORT
+
+JS2HTMLIMPORT = proc { |input|
+  "<script>#{input[:data]}</script>"
+}
+Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMPORT
+
 
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))

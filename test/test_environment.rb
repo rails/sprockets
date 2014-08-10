@@ -111,6 +111,29 @@ $app.run(function($templateCache) {
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
 
+  test "resolve web component files" do
+    assert_equal fixture_path("default/menu/menu.js"),
+      @env.resolve("menu/menu.js")
+    assert_equal fixture_path("default/menu/menu.css"),
+      @env.resolve("menu/menu.css")
+    assert_equal fixture_path("default/menu/menu.html"),
+      @env.resolve("menu/menu.html")
+  end
+
+  test "web component assets" do
+    assert asset = @env["menu/menu.html"]
+    assert_equal "text/html", asset.content_type
+    assert_equal "<menu></menu>\n", asset.to_s
+
+    assert asset = @env["menu/menu.js"]
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "$.fn.menu = {};\n", asset.to_s
+
+    assert asset = @env["menu/menu.css"]
+    assert_equal "text/css", asset.content_type
+    assert_equal ".menu {}\n", asset.to_s
+  end
+
   test "explicit bower.json access returns json file" do
     assert_equal fixture_path('default/bower/bower.json'),
       @env["bower/bower.json"].filename
@@ -373,7 +396,7 @@ $app.run(function($templateCache) {
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  test "xxxmobile index logical path shorthand" do
+  test "mobile index logical path shorthand" do
     assert_equal "mobile.js",
       @env[fixture_path("default/mobile/index.js")].logical_path
     assert_equal "mobile-min/index.min.js",
@@ -381,7 +404,7 @@ $app.run(function($templateCache) {
   end
 
   FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
-  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 5
+  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 6
 
   test "iterate over each logical path" do
     paths = []

@@ -156,7 +156,23 @@ module Sprockets
       def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
         filenames = path_matches(load_path, logical_name, logical_basename)
 
-        find_q_matches(accepts, filenames) do |filename, accepted|
+        matches = []
+
+        # TODO: Cleanup double iteration of accept and filenames
+
+        # Exact mime type match first
+        matches += find_q_matches(accepts, filenames) do |filename, accepted|
+          if !file?(filename)
+            nil
+          elsif accepted == '*/*'
+            filename
+          elsif parse_path_extnames(filename)[1] == accepted
+            filename
+          end
+        end
+
+        # Then transformable match
+        matches += find_q_matches(accepts, filenames) do |filename, accepted|
           if !file?(filename)
             nil
           elsif accepted == '*/*'
@@ -164,7 +180,9 @@ module Sprockets
           elsif resolve_path_transform_type(filename, accepted)
             filename
           end
-        end.each(&block)
+        end
+
+        matches.uniq.each(&block)
       end
 
       def path_matches(load_path, logical_name, logical_basename)
