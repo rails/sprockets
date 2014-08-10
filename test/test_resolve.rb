@@ -115,4 +115,11 @@ class TestResolve < Sprockets::TestCase
         "Expected #{logical_path.inspect} to resolve to #{filename}"
     end
   end
+
+  test "legacy logical path iterator with matchers" do
+    @env.append_path(fixture_path('default'))
+
+    assert_equal ["application.js", "gallery.css"],
+      @env.each_logical_path("application.js", /gallery\.css/).to_a
+  end
 end
