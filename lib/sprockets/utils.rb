@@ -1,4 +1,5 @@
 require 'digest/sha1'
+require 'set'
 
 module Sprockets
   # `Utils`, we didn't know where else to put it!
@@ -104,6 +105,32 @@ module Sprockets
       end
 
       digest.hexdigest
+    end
+
+    # Internal: Post-order Depth-First search algorithm.
+    #
+    # Used for resolving asset dependencies.
+    #
+    # initial - Initial Array of nodes to traverse.
+    # block   -
+    #   node  - Current node to get children of
+    #
+    # Returns a Set of nodes.
+    def dfs(initial)
+      nodes, seen = Set.new, Set.new
+      stack = initial.reverse
+
+      while node = stack.pop
+        if seen.include?(node)
+          nodes.add(node)
+        else
+          seen.add(node)
+          stack.push(node)
+          stack.concat(Array(yield node).reverse)
+        end
+      end
+
+      nodes
     end
 
     def benchmark_start
