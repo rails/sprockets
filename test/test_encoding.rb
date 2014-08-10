@@ -170,6 +170,16 @@ class AssetEncodingTest < Sprockets::TestCase
     assert_equal expected, @env['utf16le-charset.css'].to_s
     assert_equal expected, @env['utf16le-bom-charset.css'].to_s
   end
+
+  test "read file with content type" do
+    data = @env.read_file(fixture_path('encoding/ascii.js'), 'application/javascript')
+    assert_equal "var foo = \"bar\";\n", data
+    assert_equal Encoding::UTF_8, data.encoding
+
+    data = @env.read_file(fixture_path('encoding/utf16le-charset.css'), 'text/css')
+    assert_equal "\n\nh1 { color: red; }\n", data
+    assert_equal Encoding::UTF_8, data.encoding
+  end
 end
 
 class BinaryEncodingUtilsTest < Sprockets::TestCase

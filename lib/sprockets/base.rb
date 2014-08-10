@@ -160,27 +160,17 @@ module Sprockets
       end
 
       def build_processed_asset_hash(asset, processors)
-        filename = asset[:filename]
-
-        data = File.open(filename, 'rb') { |f| f.read }
-
-        content_type = asset[:content_type]
-        mime_type = mime_types[content_type]
-        if mime_type && mime_type[:charset]
-          data = mime_type[:charset].call(data).encode(Encoding::UTF_8)
-        end
-
         processed = process(
           processors,
-          filename,
+          asset[:filename],
           asset[:load_path],
           asset[:name],
-          content_type,
-          data
+          asset[:content_type],
+          read_file(asset[:filename], asset[:content_type])
         )
 
         # Ensure originally read file is marked as a dependency
-        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([filename])
+        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,
