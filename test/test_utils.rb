@@ -32,7 +32,7 @@ class TestUtils < Sprockets::TestCase
     m[2]  = [0, 1]
     m[8]  = [6, 7]
 
-    assert_equal Set.new(0..11), dfs([11]) { |n| m[n] }
+    assert_equal Set.new(0..11), dfs(11) { |n| m[n] }
 
     m = Array.new
     m[11] = [4, 5, 10]
@@ -44,7 +44,7 @@ class TestUtils < Sprockets::TestCase
     m[8]  = [6, 7]
     m[6]  = [5]
 
-    assert_equal Set.new(0..11), dfs([11]) { |n| m[n] }
+    assert_equal Set.new(0..11), dfs(11) { |n| m[n] }
   end
 
   module Functions

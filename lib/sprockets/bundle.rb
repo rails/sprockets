@@ -29,8 +29,8 @@ module Sprockets
       end
 
       find_required_paths = proc { |path| assets[path].metadata[:required_paths] }
-      required_paths = Utils.dfs([filename], &find_required_paths)
-      stubbed_paths  = Utils.dfs(Array(assets[filename].metadata[:stubbed_paths]), &find_required_paths)
+      required_paths = Utils.dfs(filename, &find_required_paths)
+      stubbed_paths  = Utils.dfs(assets[filename].metadata[:stubbed_paths], &find_required_paths)
       required_paths.subtract(stubbed_paths)
 
       dependency_paths = required_paths.inject(Set.new) do |set, path|
