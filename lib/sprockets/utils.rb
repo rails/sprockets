@@ -118,7 +118,7 @@ module Sprockets
     # Returns a Set of nodes.
     def dfs(initial)
       nodes, seen = Set.new, Set.new
-      stack = initial.reverse
+      stack = Array(initial).reverse
 
       while node = stack.pop
         if seen.include?(node)
