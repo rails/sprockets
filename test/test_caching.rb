@@ -2,6 +2,10 @@ require 'sprockets_test'
 
 class TestCaching < Sprockets::TestCase
   def setup
+    reset
+  end
+
+  def reset
     @cache = {}
 
     @env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
@@ -140,6 +144,95 @@ class TestCaching < Sprockets::TestCase
 
     assert_raises Sprockets::FileNotFound do
       env2["main.js"].to_s
+    end
+  end
+
+  test "find cached with if-match before existing" do
+    filename = fixture_path("default/tmp.js")
+
+    foo_digest = bar_digest = nil
+
+    sandbox filename do
+      write(filename, "foo;")
+      assert asset = @env1.find_asset(filename)
+      assert foo_digest = asset.digest
+      assert_equal "foo;\n", asset.to_s
+
+      write(filename, "bar;")
+      assert asset = @env1.find_asset(filename)
+      assert bar_digest = asset.digest
+      assert_equal "bar;\n", asset.to_s
+    end
+
+    refute_equal foo_digest, bar_digest
+    reset
+
+    sandbox filename do
+      refute @env1.find_asset(filename, if_match: foo_digest)
+      refute @env1.find_asset(filename, if_match: bar_digest)
+
+      write(filename, "foo;\n")
+      assert asset = @env1.find_asset(filename, if_match: foo_digest)
+      assert_equal "foo;\n", asset.to_s
+
+      refute @env1.find_asset(filename, if_match: bar_digest)
+
+      write(filename, "bar;\n")
+      refute @env1.find_asset(filename, if_match: foo_digest)
+
+      assert asset = @env1.find_asset(filename, if_match: bar_digest)
+      assert_equal "bar;\n", asset.to_s
+    end
+  end
+
+  test "find cached with if-none-match before existing" do
+    filename = fixture_path("default/tmp.js")
+
+    foo_digest = bar_digest = nil
+
+    sandbox filename do
+      write(filename, "foo;")
+      assert asset = @env1.find_asset(filename)
+      assert foo_digest = asset.digest
+      assert_equal "foo;\n", asset.to_s
+
+      write(filename, "bar;")
+      assert asset = @env1.find_asset(filename)
+      assert bar_digest = asset.digest
+      assert_equal "bar;\n", asset.to_s
+    end
+
+    refute_equal foo_digest, bar_digest
+    reset
+
+    sandbox filename do
+      refute @env1.find_asset(filename, if_none_match: foo_digest)
+      refute @env1.find_asset(filename, if_none_match: bar_digest)
+
+      write(filename, "foo;\n")
+      refute @env1.find_asset(filename, if_none_match: foo_digest)
+      assert asset = @env1.find_asset(filename, if_none_match: bar_digest)
+      assert_equal "foo;\n", asset.to_s
+
+      write(filename, "bar;\n")
+      assert asset = @env1.find_asset(filename, if_none_match: foo_digest)
+      assert_equal "bar;\n", asset.to_s
+
+      refute @env1.find_asset(filename, if_none_match: bar_digest)
+    end
+  end
+
+  def write(filename, contents)
+    if File.exist?(filename)
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
+      mtime = File.stat(filename).mtime.to_i + 1
+      File.utime(mtime, mtime, filename)
+    else
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
     end
   end
 end
