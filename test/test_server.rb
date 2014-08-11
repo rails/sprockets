@@ -156,59 +156,11 @@ class TestServer < Sprockets::TestCase
       last_response.headers['ETag']
   end
 
-  test "updated file updates the last modified header" do
-    time = Time.now
-    path = fixture_path "server/app/javascripts/foo.js"
-
-    sandbox path do
-      File.utime(time, time, path)
-
-      get "/assets/application.js"
-      time_before_modifying = last_response.headers['Last-Modified']
-
-      get "/assets/application.js"
-      time_after_modifying = last_response.headers['Last-Modified']
-
-      assert_equal time_before_modifying, time_after_modifying
-
-      mtime = Time.now + 60
-      File.open(path, 'w') { |f| f.write "(change)" }
-      File.utime(mtime, mtime, path)
-
-      get "/assets/application.js"
-      time_after_modifying = last_response.headers['Last-Modified']
-
-      assert time_before_modifying != time_after_modifying
-    end
-  end
-
-  test "file updates do not update last modified header for cached environments" do
-    time = Time.now
-    path = fixture_path "server/app/javascripts/foo.js"
-    File.utime(time, time, path)
-
-    get "/cached/javascripts/application.js"
-    time_before_touching = last_response.headers['Last-Modified']
-
-    get "/cached/javascripts/application.js"
-    time_after_touching = last_response.headers['Last-Modified']
-
-    assert_equal time_before_touching, time_after_touching
-
-    mtime = Time.now + 60
-    File.utime(mtime, mtime, path)
-
-    get "/cached/javascripts/application.js"
-    time_after_touching = last_response.headers['Last-Modified']
-
-    assert_equal time_before_touching, time_after_touching
-  end
-
   test "not modified partial response when if-none-match etags match" do
     get "/assets/application.js"
     assert_equal 200, last_response.status
-    etag, last_modified, cache_control, expires, vary = last_response.headers.values_at(
-      'ETag', 'Last-Modified', 'Cache-Control', 'Expires', 'Vary'
+    etag, cache_control, expires, vary = last_response.headers.values_at(
+      'ETag', 'Cache-Control', 'Expires', 'Vary'
     )
 
     get "/assets/application.js", {},
@@ -219,7 +171,6 @@ class TestServer < Sprockets::TestCase
     # Allow 304 headers
     assert_equal cache_control, last_response.headers['Cache-Control']
     assert_equal etag, last_response.headers['ETag']
-    assert_equal last_modified, last_response.headers['Last-Modified']
     assert_equal expires, last_response.headers['Expires']
     assert_equal vary, last_response.headers['Vary']
 
@@ -238,9 +189,50 @@ class TestServer < Sprockets::TestCase
     assert_equal '52', last_response.headers['Content-Length']
   end
 
+  test "not modified partial response with fingerprint and if-none-match etags match" do
+    get "/assets/application.js"
+    assert_equal 200, last_response.status
+
+    etag   = last_response.headers['ETag']
+    digest = etag[/"(.+)"/, 1]
+
+    get "/assets/application-#{digest}.js", {},
+      'HTTP_IF_NONE_MATCH' => etag
+    assert_equal 304, last_response.status
+  end
+
+  test "ok response with fingerprint and if-nonematch etags don't match" do
+    get "/assets/application.js"
+    assert_equal 200, last_response.status
+
+    etag   = last_response.headers['ETag']
+    digest = etag[/"(.+)"/, 1]
+
+    get "/assets/application-#{digest}.js", {},
+      'HTTP_IF_NONE_MATCH' => "nope"
+    assert_equal 200, last_response.status
+  end
+
   test "not found with if-none-match" do
     get "/assets/missing.js", {},
       'HTTP_IF_NONE_MATCH' => '"000"'
+    assert_equal 404, last_response.status
+  end
+
+  test "not found fingerprint with if-none-match" do
+    get "/assets/missing-6413e7ce345409919a84538cb5577e2cd17bb72f.js", {},
+      'HTTP_IF_NONE_MATCH' => '"6413e7ce345409919a84538cb5577e2cd17bb72f"'
+    assert_equal 404, last_response.status
+  end
+
+  test "not found with response with incorrect fingerprint and matching if-none-match etags" do
+    get "/assets/application.js"
+    assert_equal 200, last_response.status
+
+    etag = last_response.headers['ETag']
+
+    get "/assets/application-0000000000000000000000000000000000000000.js", {},
+      'HTTP_IF_NONE_MATCH' => etag
     assert_equal 404, last_response.status
   end
 
@@ -261,6 +253,8 @@ class TestServer < Sprockets::TestCase
     get "/assets/application.js", {},
       'HTTP_IF_MATCH' => '"000"'
     assert_equal 412, last_response.status
+
+    refute last_response.headers['ETag']
   end
 
   test "not found with if-match" do
@@ -351,5 +345,19 @@ class TestServer < Sprockets::TestCase
     assert_equal 200, last_response.status
     assert_equal "text/plain", last_response.content_type
     assert_equal File.read(fixture_path("server/app/javascripts/hello.txt")), last_response.body
+  end
+
+  test "disallow non-get methods" do
+    get "/assets/foo.js"
+    assert_equal 200, last_response.status
+
+    post "/assets/foo.js"
+    assert_equal 405, last_response.status
+
+    put "/assets/foo.js"
+    assert_equal 405, last_response.status
+
+    delete "/assets/foo.js"
+    assert_equal 405, last_response.status
   end
 end

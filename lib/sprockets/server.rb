@@ -23,6 +23,10 @@ module Sprockets
       start_time = Time.now.to_f
       time_elapsed = lambda { ((Time.now.to_f - start_time) * 1000).to_i }
 
+      if env['REQUEST_METHOD'] != 'GET'
+        return method_not_allowed_response
+      end
+
       msg = "Served asset #{env['PATH_INFO']} -"
 
       # Extract the path from everything after the leading slash
@@ -46,34 +50,40 @@ module Sprockets
         options[:if_match] = fingerprint
       elsif env['HTTP_IF_MATCH']
         options[:if_match] = env['HTTP_IF_MATCH'][/^"(\w+)"$/, 1]
-      elsif env['HTTP_ACCEPT_ENCODING']
+      end
+
+      if env['HTTP_IF_NONE_MATCH']
+        options[:if_none_match] = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
+      end
+
+      if !options.key?(:if_match) && !options.key?(:if_none_match) && env['HTTP_ACCEPT_ENCODING']
         # Accept-Encoding negotiation is only enabled for non-fingerprinted
         # assets. Avoids the "Apache ETag gzip" bug. Just Google it.
         # https://issues.apache.org/bugzilla/show_bug.cgi?id=39727
         options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING']
       end
 
-      asset = find_asset(path, options)
-
-      # `find_asset` returns nil if the asset doesn't exist
-      if asset.nil?
-        logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
-
-        # Return a 404 Not Found
-        not_found_response
-
-      # Check request headers `HTTP_IF_NONE_MATCH` against the asset digest
-      elsif etag_match?(asset, env)
-        logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
-
-        # Return a 304 Not Modified
-        not_modified_response(asset, env)
-
-      else
+      status, asset = find_asset_with_status(path, options)
+      case status
+      when :ok
         logger.info "#{msg} 200 OK (#{time_elapsed.call}ms)"
-
-        # Return a 200 with the asset contents
         ok_response(asset, env)
+      when :not_modified
+        logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
+        not_modified_response(env, options[:if_none_match])
+      when :not_found
+        logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
+        not_found_response
+      when :precondition_failed
+        if fingerprint
+          logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
+          not_found_response
+        else
+          logger.info "#{msg} 412 Precondition Failed (#{time_elapsed.call}ms)"
+          precondition_failed_response
+        end
+      else
+        raise NotImplementedError, "unknown status: #{status}"
       end
     rescue Exception => e
       logger.error "Error compiling asset #{path}:"
@@ -102,6 +112,16 @@ module Sprockets
         path.include?("..")
       end
 
+      # Returns a 200 OK response tuple
+      def ok_response(asset, env)
+        [ 200, headers(env, asset, asset.length), asset ]
+      end
+
+      # Returns a 304 Not Modified response tuple
+      def not_modified_response(env, digest)
+        [ 304, cache_headers(env, digest), [] ]
+      end
+
       # Returns a 403 Forbidden response tuple
       def forbidden_response
         [ 403, { "Content-Type" => "text/plain", "Content-Length" => "9" }, [ "Forbidden" ] ]
@@ -110,6 +130,14 @@ module Sprockets
       # Returns a 404 Not Found response tuple
       def not_found_response
         [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9", "X-Cascade" => "pass" }, [ "Not found" ] ]
+      end
+
+      def method_not_allowed_response
+        [ 405, { "Content-Type" => "text/plain", "Content-Length" => "18" }, [ "Method Not Allowed" ] ]
+      end
+
+      def precondition_failed_response
+        [ 412, { "Content-Type" => "text/plain", "Content-Length" => "19", "X-Cascade" => "pass" }, [ "Precondition Failed" ] ]
       end
 
       # Returns a JavaScript response that re-throws a Ruby exception
@@ -182,33 +210,17 @@ module Sprockets
           gsub('/',  '\\\\002f ')
       end
 
-      # Compare the requests `HTTP_IF_NONE_MATCH` against the assets digest
-      def etag_match?(asset, env)
-        env["HTTP_IF_NONE_MATCH"] == etag(asset)
-      end
-
       # Test if `?body=1` or `body=true` query param is set
       def body_only?(env)
         env["QUERY_STRING"].to_s =~ /body=(1|t)/
       end
 
-      # Returns a 304 Not Modified response tuple
-      def not_modified_response(asset, env)
-        [ 304, cache_headers(env, asset), [] ]
-      end
-
-      # Returns a 200 OK response tuple
-      def ok_response(asset, env)
-        [ 200, headers(env, asset, asset.length), asset ]
-      end
-
-      def cache_headers(env, asset)
+      def cache_headers(env, digest)
         headers = {}
 
         # Set caching headers
         headers["Cache-Control"] = "public"
-        headers["Last-Modified"] = asset.mtime.httpdate
-        headers["ETag"]          = etag(asset)
+        headers["ETag"]          = %("#{digest}")
 
         # If the request url contains a fingerprint, set a long
         # expires on the response
@@ -244,7 +256,7 @@ module Sprockets
           headers["Content-Type"] = type
         end
 
-        headers.merge(cache_headers(env, asset))
+        headers.merge(cache_headers(env, asset.digest))
       end
 
       # Gets digest fingerprint.
@@ -254,11 +266,6 @@ module Sprockets
       #
       def path_fingerprint(path)
         path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
-      end
-
-      # Helper to quote the assets digest for use as an ETag.
-      def etag(asset)
-        %("#{asset.digest}")
       end
   end
 end
