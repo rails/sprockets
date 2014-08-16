@@ -125,7 +125,30 @@ module Sprockets
 
       nil
     end
-    alias_method :each_logical_path, :logical_paths
+
+    # Deprecated: Iterate over all logical paths with a matcher.
+    #
+    # Remove from 4.x.
+    #
+    # args - List of matcher objects.
+    #
+    # Returns Enumerator if no block is given.
+    def each_logical_path(*args, &block)
+      return to_enum(__method__, *args) unless block_given?
+
+      filters = args.flatten.map { |arg| Manifest.compile_match_filter(arg) }
+      logical_paths.each do |a, b|
+        if filters.any? { |f| f.call(a, b) }
+          if block.arity == 2
+            yield a, b
+          else
+            yield a
+          end
+        end
+      end
+
+      nil
+    end
 
     protected
       def parse_accept_options(mime_type, types)
@@ -156,7 +179,23 @@ module Sprockets
       def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
         filenames = path_matches(load_path, logical_name, logical_basename)
 
-        find_q_matches(accepts, filenames) do |filename, accepted|
+        matches = []
+
+        # TODO: Cleanup double iteration of accept and filenames
+
+        # Exact mime type match first
+        matches += find_q_matches(accepts, filenames) do |filename, accepted|
+          if !file?(filename)
+            nil
+          elsif accepted == '*/*'
+            filename
+          elsif parse_path_extnames(filename)[1] == accepted
+            filename
+          end
+        end
+
+        # Then transformable match
+        matches += find_q_matches(accepts, filenames) do |filename, accepted|
           if !file?(filename)
             nil
           elsif accepted == '*/*'
@@ -164,7 +203,9 @@ module Sprockets
           elsif resolve_path_transform_type(filename, accepted)
             filename
           end
-        end.each(&block)
+        end
+
+        matches.uniq.each(&block)
       end
 
       def path_matches(load_path, logical_name, logical_basename)

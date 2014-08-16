@@ -68,33 +68,9 @@ module Sprockets
     end
 
     # Find asset by logical path or expanded path.
-    def find_asset(path, options = {})
-      path = path.to_s
-      options = options.dup
-      options[:bundle] = true unless options.key?(:bundle)
-      accept = options.delete(:accept)
-      if_match = options.delete(:if_match)
-
-      if absolute_path?(path) && file?(path)
-        if accept.nil? || resolve_path_transform_type(path, accept)
-          filename = path
-        end
-      else
-        filename = resolve_all(path, accept: accept).first
-        mime_type = parse_path_extnames(path)[1]
-        accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
-      end
-
-      if filename
-        options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
-        if if_match
-          asset_hash = build_asset_hash_for_digest(filename, if_match, options)
-        else
-          asset_hash = build_asset_hash(filename, options)
-        end
-
-        Asset.new(asset_hash) if asset_hash
-      end
+    def find_asset(*args)
+      status, asset = find_asset_with_status(*args)
+      asset if status == :ok
     end
 
     # Preferred `find_asset` shorthand.
@@ -113,10 +89,38 @@ module Sprockets
     end
 
     protected
-      def build_asset_hash_for_digest(filename, digest, options)
-        asset_hash = build_asset_hash(filename, options)
-        if asset_hash[:digest] == digest
-          asset_hash
+      def find_asset_with_status(path, options = {})
+        path = path.to_s
+        options = options.dup
+        options[:bundle] = true unless options.key?(:bundle)
+        accept = options.delete(:accept)
+        if_match = options.delete(:if_match)
+        if_none_match = options.delete(:if_none_match)
+
+        if absolute_path?(path) && file?(path)
+          if accept.nil? || resolve_path_transform_type(path, accept)
+            filename = path
+          end
+        else
+          filename = resolve_all(path, accept: accept).first
+          mime_type = parse_path_extnames(path)[1]
+          accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
+        end
+
+        if filename
+          options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
+          asset_hash = build_asset_hash(filename, options)
+          asset = Asset.new(asset_hash) if asset_hash
+
+          if if_match && asset.digest != if_match
+            return :precondition_failed
+          elsif if_none_match && asset.digest == if_none_match
+            return :not_modified
+          else
+            return :ok, asset
+          end
+        else
+          return :not_found
         end
       end
 
