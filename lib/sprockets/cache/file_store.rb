@@ -52,22 +52,21 @@ module Sprockets
       def get(key)
         path = File.join(@root, "#{key}.cache")
 
-        if File.exist?(path)
-          value = File.open(path, 'rb') do |f|
-            begin
-              Marshal.load(f)
-            rescue Exception => e
-              @logger.error do
-                "#{self.class}[#{path}] could not be unmarshaled: " +
-                  "#{e.class}: #{e.message}"
-              end
-              nil
+        value = safe_open(path) do |f|
+          begin
+            Marshal.load(f)
+          rescue Exception => e
+            @logger.error do
+              "#{self.class}[#{path}] could not be unmarshaled: " +
+                "#{e.class}: #{e.message}"
             end
+            nil
           end
+        end
+
+        if value
           FileUtils.touch(path)
           value
-        else
-          nil
         end
       end
 
@@ -130,6 +129,13 @@ module Sprockets
           File.stat(fn)
         rescue Errno::ENOENT
           nil
+        end
+
+        def safe_open(path, &block)
+          if File.exist?(path)
+            File.open(path, 'rb', &block)
+          end
+        rescue Errno::ENOENT
         end
 
         def gc!
