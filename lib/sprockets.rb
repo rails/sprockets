@@ -114,6 +114,21 @@ module Sprockets
   register_bundle_reducer 'application/javascript', :data, Utils.method(:concat_javascript_sources)
   register_bundle_reducer '*/*', :dependency_paths, :+
 
+  register_postprocessor 'application/javascript', proc { |input|
+    # Use an identity map if no mapping is defined
+    if !input[:metadata][:map]
+      map = SourceMap::Map.new([
+        SourceMap::Mapping.new(
+          input[:name],
+          SourceMap::Offset.new(0, 0),
+          SourceMap::Offset.new(0, 0)
+        )
+      ])
+      { data: input[:data], map: map }
+    end
+  }
+  register_bundle_reducer 'application/javascript', :map, :+
+
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :yui, LazyProcessor.new { YUICompressor }
