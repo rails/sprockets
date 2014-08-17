@@ -35,7 +35,7 @@ module Sprockets
       #            (default: 1000).
       def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
         @root     = root
-        @size     = find_caches.inject(0) { |n, fn| n + File.size(fn) }
+        @size     = find_caches.inject(0) { |n, (_, stat)| n + stat.size }
         @max_size = max_size
         @gc_size  = max_size * 0.75
         @logger   = logger
@@ -108,8 +108,18 @@ module Sprockets
       end
 
       private
+        # Internal: Get all cache files along with stats.
+        #
+        # Returns an Array of [String filename, File::Stat] pairs sorted by
+        # mtime.
         def find_caches
-          Dir.glob(File.join(@root, '**/*.cache'))
+          Dir.glob(File.join(@root, '**/*.cache')).reduce([]) { |stats, filename|
+            stat = safe_stat(filename)
+            # stat maybe nil if file was removed between the time we called
+            # dir.glob and the next stat
+            stats << [filename, stat] if stat
+            stats
+          }.sort_by { |_, stat| stat.mtime.to_i }
         end
 
         def compute_size(caches)
@@ -125,14 +135,7 @@ module Sprockets
         def gc!
           start_time = Time.now
 
-          caches = find_caches.map { |filename|
-            [filename, safe_stat(filename)]
-          }.reject { |filename, stat|
-            stat.nil?
-          }.sort_by { |filename, stat|
-            stat.mtime.to_i
-          }
-
+          caches = find_caches
           size = compute_size(caches)
 
           delete_caches, keep_caches = caches.partition { |filename, stat|
