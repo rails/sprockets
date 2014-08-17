@@ -505,46 +505,6 @@ class TestEnvironment < Sprockets::TestCase
     assert @env.compressors['text/css'][:whitespace]
   end
 
-  test "register global block preprocessor" do
-    old_size = new_environment.preprocessors['text/css'].size
-    Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.preprocessors['text/css'].size
-    Sprockets.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.preprocessors['text/css'].size
-  end
-
-  test "unregister custom block preprocessor" do
-    old_size = @env.preprocessors['text/css'].size
-    @env.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.preprocessors['text/css'].size
-    @env.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, @env.preprocessors['text/css'].size
-  end
-
-  test "unregister custom block postprocessor" do
-    old_size = @env.postprocessors['text/css'].size
-    @env.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.postprocessors['text/css'].size
-    @env.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, @env.postprocessors['text/css'].size
-  end
-
-  test "register global block postprocessor" do
-    old_size = new_environment.postprocessors['text/css'].size
-    Sprockets.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.postprocessors['text/css'].size
-    Sprockets.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.postprocessors['text/css'].size
-  end
-
-  test "unregister custom block bundle processor" do
-    old_size = @env.bundle_processors['text/css'].size
-    @env.register_bundle_processor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.bundle_processors['text/css'].size
-    @env.unregister_bundle_processor('text/css', :foo)
-    assert_equal old_size, @env.bundle_processors['text/css'].size
-  end
-
   test "register global bundle processor" do
     old_size = Sprockets.bundle_processors['text/css'].size
     Sprockets.register_bundle_processor 'text/css', WhitespaceProcessor

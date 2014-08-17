@@ -1,8 +1,6 @@
 require 'source_map'
 require 'sprockets/engines'
 require 'sprockets/lazy_processor'
-require 'sprockets/legacy_proc_processor'
-require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
 require 'sprockets/utils'
 
@@ -49,9 +47,10 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_preprocessor(mime_type, klass, &block)
+    def register_preprocessor(mime_type, proc = nil, &block)
+      proc ||= block
       mutate_hash_config(:preprocessors, mime_type) do |processors|
-        processors.push(wrap_processor(klass, block))
+        processors.push(proc)
         processors
       end
     end
@@ -66,10 +65,10 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_postprocessor(mime_type, klass, proc = nil, &block)
+    def register_postprocessor(mime_type, proc = nil, &block)
       proc ||= block
       mutate_hash_config(:postprocessors, mime_type) do |processors|
-        processors.push(wrap_processor(klass, proc))
+        processors.push(proc)
         processors
       end
     end
@@ -78,15 +77,9 @@ module Sprockets
     #
     #     unregister_preprocessor 'text/css', Sprockets::DirectiveProcessor
     #
-    def unregister_preprocessor(mime_type, klass)
-      if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = preprocessors[mime_type].detect { |cls|
-          cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
-        }
-      end
-
+    def unregister_preprocessor(mime_type, proc)
       mutate_hash_config(:preprocessors, mime_type) do |processors|
-        processors.delete(klass)
+        processors.delete(proc)
         processors
       end
     end
@@ -95,15 +88,9 @@ module Sprockets
     #
     #     unregister_postprocessor 'text/css', Sprockets::DirectiveProcessor
     #
-    def unregister_postprocessor(mime_type, klass)
-      if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = postprocessors[mime_type].detect { |cls|
-          cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
-        }
-      end
-
+    def unregister_postprocessor(mime_type, proc)
       mutate_hash_config(:postprocessors, mime_type) do |processors|
-        processors.delete(klass)
+        processors.delete(proc)
         processors
       end
     end
@@ -133,9 +120,10 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_bundle_processor(mime_type, klass, &block)
+    def register_bundle_processor(mime_type, proc = nil, &block)
+      proc ||= block
       mutate_hash_config(:bundle_processors, mime_type) do |processors|
-        processors.push(wrap_processor(klass, block))
+        processors.push(proc)
         processors
       end
     end
@@ -144,15 +132,9 @@ module Sprockets
     #
     #     unregister_bundle_processor 'application/javascript', Sprockets::DirectiveProcessor
     #
-    def unregister_bundle_processor(mime_type, klass)
-      if klass.is_a?(String) || klass.is_a?(Symbol)
-        klass = bundle_processors[mime_type].detect { |cls|
-          cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
-        }
-      end
-
+    def unregister_bundle_processor(mime_type, proc)
       mutate_hash_config(:bundle_processors, mime_type) do |processors|
-        processors.delete(klass)
+        processors.delete(proc)
         processors
       end
     end
@@ -283,20 +265,6 @@ module Sprockets
     end
 
     private
-      def wrap_processor(klass, proc)
-        if !proc
-          if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
-            klass
-          else
-            LegacyTiltProcessor.new(klass)
-          end
-        elsif proc.respond_to?(:arity) && proc.arity == 2
-          LegacyProcProcessor.new(klass.to_s, proc)
-        else
-          proc
-        end
-      end
-
       def unwrap_processor(processor)
         processor.respond_to?(:unwrap) ? processor.unwrap : processor
       end

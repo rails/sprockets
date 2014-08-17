@@ -1,5 +1,4 @@
 require 'sprockets/lazy_processor'
-require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
 module Sprockets
@@ -61,23 +60,12 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
-        mutate_config(:engines) do |engines|
-          engines.merge(ext => klass)
-        end
-        if options[:mime_type]
-          mutate_config(:engine_mime_types) do |mime_types|
-            mime_types.merge(ext.to_s => options[:mime_type])
-          end
-        end
-      else
-        mutate_config(:engines) do |engines|
-          engines.merge(ext => LegacyTiltProcessor.new(klass))
-        end
-        if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          mutate_config(:engine_mime_types) do |mime_types|
-            mime_types.merge(ext.to_s => klass.default_mime_type)
-          end
+      mutate_config(:engines) do |engines|
+        engines.merge(ext => klass)
+      end
+      if options[:mime_type]
+        mutate_config(:engine_mime_types) do |mime_types|
+          mime_types.merge(ext.to_s => options[:mime_type])
         end
       end
     end

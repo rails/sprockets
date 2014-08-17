@@ -56,18 +56,13 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   require 'yaml'
-  class YamlProcessor
-    def initialize(file, &block)
-      @data = block.call
+  YamlProcessor = proc do |input|
+    env = input[:environment]
+    manifest = YAML.load(input[:data])
+    paths = manifest['require'].map do |logical_path|
+      env.resolve(logical_path)
     end
-
-    def render(context)
-      manifest = YAML.load(@data)
-      manifest['require'].each do |logical_path|
-        context.require_asset(logical_path)
-      end
-      ""
-    end
+    { data: "", required_paths: paths }
   end
 
   test "custom processor using Context#require" do
@@ -77,19 +72,13 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   require 'base64'
-  class DataUriProcessor
-    def initialize(file, &block)
-      @data = block.call
-    end
-
-    def render(context)
-      data = @data
-      data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.resolve($1)
-        context.depend_on(path)
-        data = Base64.encode64(File.open(path, "rb") { |f| f.read })
-        "url(data:image/png;base64,#{data})"
-      end
+  DataUriProcessor = proc do |input|
+    env = input[:environment]
+    data = input[:data]
+    data.gsub(/url\(\"(.+?)\"\)/) do
+      path = env.resolve($1)
+      data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+      "url(data:image/png;base64,#{data})"
     end
   end
 
@@ -104,10 +93,10 @@ class TestCustomProcessor < Sprockets::TestCase
   test "block custom processor" do
     require 'base64'
 
-    @env.register_preprocessor 'text/css', :data_uris do |context, data|
-      data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.resolve($1)
-        context.depend_on(path)
+    @env.register_preprocessor 'text/css' do |input|
+      env = input[:environment]
+      input[:data].gsub(/url\(\"(.+?)\"\)/) do
+        path = env.resolve($1)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"
       end
