@@ -16,7 +16,7 @@ class TestStylesheetBundle < Sprockets::TestCase
     }
 
     data = ".project {}\n"
-    result = Sprockets::StylesheetBundle.call(input)
+    result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [filename], result[:dependency_paths].to_a.sort
   end
@@ -36,7 +36,7 @@ class TestStylesheetBundle < Sprockets::TestCase
     }
 
     data = "/* b.css */\n\nb { display: none }\n/*\n\n\n\n */\n\n\nbody {}\n.project {}\n"
-    result = Sprockets::StylesheetBundle.call(input)
+    result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
       fixture_path('asset/project.css'),
@@ -44,9 +44,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       fixture_path('asset/tree/all/b.css')
     ], result[:dependency_paths].to_a.sort
   end
-end
 
-class TestJavascriptBundle < Sprockets::TestCase
   test "bundle single javascript file" do
     environment = Sprockets::Environment.new
     environment.append_path fixture_path('asset')
@@ -62,7 +60,7 @@ class TestJavascriptBundle < Sprockets::TestCase
     }
 
     data = "var Project = {\n  find: function(id) {\n  }\n};\n"
-    result = Sprockets::JavascriptBundle.call(input)
+    result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [filename], result[:dependency_paths].to_a.sort
   end
@@ -82,7 +80,7 @@ class TestJavascriptBundle < Sprockets::TestCase
     }
 
     data = "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n"
-    result = Sprockets::JavascriptBundle.call(input)
+    result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
       fixture_path('asset/application.js'),

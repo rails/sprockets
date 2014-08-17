@@ -6,7 +6,43 @@ module Sprockets
   module Utils
     extend self
 
-    # Prepends a leading "." to an extension if its missing.
+    # Internal: Check if string has a trailing semicolon.
+    #
+    # str - String
+    #
+    # Returns true or false.
+    def string_end_with_semicolon?(str)
+      i = str.size - 1
+      while i >= 0
+        c = str[i]
+        i -= 1
+        if c == "\n" || c == " " || c == "\t"
+          next
+        elsif c != ";"
+          return false
+        else
+          return true
+        end
+      end
+      true
+    end
+
+    # Internal: Accumulate asset source to buffer and append a trailing
+    # semicolon if necessary.
+    #
+    # buf   - String memo
+    # asset - Asset
+    #
+    # Returns appended buffer String.
+    def concat_javascript_sources(buf, source)
+      if string_end_with_semicolon?(buf)
+        buf + source
+      else
+        buf + ";\n" + source
+      end
+    end
+
+    # Internal: Prepends a leading "." to an extension if its missing.
     #
     #     normalize_extension("js")
     #     # => ".js"

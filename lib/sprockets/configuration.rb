@@ -24,6 +24,7 @@ module Sprockets
       @transformers      = parent.transformers
       @preprocessors     = parent.preprocessors
       @postprocessors    = parent.postprocessors
+      @bundle_reducers   = parent.bundle_reducers
       @bundle_processors = parent.bundle_processors
       @compressors       = parent.compressors
     end

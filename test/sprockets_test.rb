@@ -87,6 +87,13 @@ JS2HTMLIMPORT = proc { |input|
 }
 Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMPORT
 
+Sprockets.register_bundle_reducer 'text/css', :selector_count, :+
+
+Sprockets.register_postprocessor 'text/css', proc { |input|
+  { data: input[:data],
+    selector_count: input[:data].scan(/\{/).size }
+}
+
 
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))

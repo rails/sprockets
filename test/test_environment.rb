@@ -151,7 +151,7 @@ $app.run(function($templateCache) {
   test "find bower main by format extension" do
     assert_equal fixture_path('default/bower/main.js'),
       @env["bower.js"].filename
-      refute @env.find_asset("bower.css")
+    refute @env.find_asset("bower.css")
 
     assert_equal fixture_path('default/qunit/qunit.js'),
       @env["qunit.js"].filename
@@ -632,6 +632,11 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal [:pre_svg, :post_png], asset.metadata[:test]
   end
 
+  test "access selector count metadata" do
+    assert asset = @env.find_asset("mobile.css")
+    assert_equal 2, asset.metadata[:selector_count]
+  end
+
   test "changing version doesn't affect the assets digest" do
     old_asset_digest = @env["gallery.js"].digest
     @env.version = 'v2'
@@ -715,7 +720,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
-    assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
+    assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
 end
 
