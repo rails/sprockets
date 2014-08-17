@@ -68,7 +68,7 @@ $app.run(function($templateCache) {
 
   test "lookup bundle processors" do
     assert_equal 1, @env.bundle_processors['application/javascript'].size
-    assert_equal 2, @env.bundle_processors['text/css'].size
+    assert_equal 1, @env.bundle_processors['text/css'].size
   end
 
   test "find asset with accept type" do
@@ -720,7 +720,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
-    assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
+    assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
 end
 

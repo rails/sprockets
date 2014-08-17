@@ -759,7 +759,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "appends missing semicolons" do
-    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n;\n",
+    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n",
       asset("semicolons.js").to_s
   end
 

@@ -87,12 +87,7 @@ JS2HTMLIMPORT = proc { |input|
 }
 Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMPORT
 
-Sprockets.register_bundle_processor 'text/css', proc { |input|
-  selector_count = input[:metadata][:required_asset_hashes].inject(0) { |n, asset|
-    n + asset[:metadata][:selector_count]
-  }
-  { data: input[:data], selector_count: selector_count }
-}
+Sprockets.register_bundle_reducer 'text/css', :selector_count, :+
 
 Sprockets.register_postprocessor 'text/css', proc { |input|
   { data: input[:data],

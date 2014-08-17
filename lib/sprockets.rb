@@ -17,12 +17,10 @@ module Sprockets
   autoload :EcoTemplate,             'sprockets/eco_template'
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
-  autoload :JavascriptBundle,        'sprockets/bundle'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassTemplate,            'sprockets/sass_template'
   autoload :ScssTemplate,            'sprockets/sass_template'
-  autoload :StylesheetBundle,        'sprockets/bundle'
   autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
   autoload :YUICompressor,           'sprockets/yui_compressor'
 
@@ -52,6 +50,7 @@ module Sprockets
   @transformers      = Hash.new { |h, k| {}.freeze }.freeze
   @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
+  @bundle_reducers   = Hash.new { |h, k| {}.freeze }.freeze
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
   @context_class     = Context
@@ -108,8 +107,12 @@ module Sprockets
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
-  register_bundle_processor 'application/javascript', JavascriptBundle
-  register_bundle_processor 'text/css', StylesheetBundle
+  register_bundle_processor 'application/javascript', Bundle
+  register_bundle_processor 'text/css', Bundle
+
+  register_bundle_reducer '*/*', :data, :+
+  register_bundle_reducer 'application/javascript', :data, Utils.method(:concat_javascript_sources)
+  register_bundle_reducer '*/*', :dependency_paths, :+
 
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }

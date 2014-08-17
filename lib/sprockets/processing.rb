@@ -200,6 +200,86 @@ module Sprockets
       }
     end
 
+    # Internal: Two dimensional Hash of reducer functions for a given mime type
+    # and asset metadata key.
+    attr_reader :bundle_reducers
+
+    # Public: Register bundle reducer function.
+    #
+    # Examples
+    #
+    #   Sprockets.register_bundle_reducer 'application/javascript', :jshint_errors, [], :+
+    #
+    #   Sprockets.register_bundle_reducer 'text/css', :selector_count, 0 { |total, count|
+    #     total + count
+    #   }
+    #
+    # mime_type - String MIME Type. Use '*/*' applies to all types.
+    # key       - Symbol metadata key
+    # initial   - Initial memo to pass to the reduce funciton (default: nil)
+    # block     - Proc accepting the memo accumulator and current value
+    #
+    # Returns nothing.
+    def register_bundle_reducer(mime_type, key, *args, &block)
+      case args.size
+      when 0
+        reducer = block
+      when 1
+        if block_given?
+          initial = args[0]
+          reducer = block
+        else
+          initial = nil
+          reducer = args[0].to_proc
+        end
+      when 2
+        initial = args[0]
+        reducer = args[1].to_proc
+      else
+        raise ArgumentError, "wrong number of arguments (#{args.size} for 0..2)"
+      end
+
+      mutate_hash_config(:bundle_reducers, mime_type) do |reducers|
+        reducers.merge(key => [initial, reducer])
+      end
+    end
+
+    # Internal: Gather all bundle reducer functions for MIME type.
+    #
+    # mime_type - String MIME type
+    #
+    # Returns an Array of [initial, reducer_proc] pairs.
+    def unwrap_bundle_reducers(mime_type)
+      self.bundle_reducers['*/*'].merge(self.bundle_reducers[mime_type])
+    end
+
+    # Internal: Run bundle reducers on set of Assets producing a reduced
+    # metadata Hash.
+    #
+    # assets - Array of asset Hashes
+    # reducers - Array of [initial, reducer_proc] pairs
+    #
+    # Returns reduced asset metadata Hash.
+    def process_bundle_reducers(assets, reducers)
+      initial = {}
+      reducers.each do |k, (v, _)|
+        initial[k] = v if v
+      end
+      # Deprecated: For Asset#to_a
+      initial[:required_asset_hashes] = []
+
+      assets.reduce(initial) do |h, asset_hash|
+        reducers.each do |k, (_, block)|
+          # TODO: Avoid creating asset wrapper here
+          value = k == :data ? Asset.new(asset_hash).source : asset_hash[:metadata][k]
+          h[k]  = h.key?(k) ? block.call(h[k], value) : value
+        end
+        # Deprecated: For Asset#to_a
+        h[:required_asset_hashes] << asset_hash
+        h
+      end
+    end
+
     private
       def wrap_processor(klass, proc)
         if !proc
