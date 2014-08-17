@@ -150,9 +150,6 @@ module Sprockets
       end
     end
 
-    # Deprecated alias.
-    alias_method :find_logical_paths, :filter_logical_paths
-
     # Compile and write asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
