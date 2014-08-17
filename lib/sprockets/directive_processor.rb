@@ -152,7 +152,7 @@ module Sprockets
       #
       #     class DirectiveProcessor < Sprockets::DirectiveProcessor
       #       def process_require_glob_directive
-      #         Dir["#{pathname.dirname}/#{glob}"].sort.each do |filename|
+      #         Dir["#{dirname}/#{glob}"].sort.each do |filename|
       #           require(filename)
       #         end
       #       end

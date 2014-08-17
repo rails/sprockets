@@ -16,7 +16,7 @@ class TestContext < Sprockets::TestCase
   test "source file properties are exposed in context" do
     json = @env["properties.js"].to_s.chomp.chop
     assert_equal({
-      'pathname'     => fixture_path("context/properties.js.erb"),
+      'filename'     => fixture_path("context/properties.js.erb"),
       '__FILE__'     => fixture_path("context/properties.js.erb"),
       'root_path'    => fixture_path("context"),
       'logical_path' => "properties",
@@ -27,7 +27,7 @@ class TestContext < Sprockets::TestCase
   test "source file properties are exposed in context when path contains periods" do
     json = @env["properties.with.periods.js"].to_s.chomp.chop
     assert_equal({
-      'pathname'     => fixture_path("context/properties.with.periods.js.erb"),
+      'filename'     => fixture_path("context/properties.with.periods.js.erb"),
       '__FILE__'     => fixture_path("context/properties.with.periods.js.erb"),
       'root_path'    => fixture_path("context"),
       'logical_path' => "properties.with.periods",

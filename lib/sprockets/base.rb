@@ -3,7 +3,6 @@ require 'sprockets/bower'
 require 'sprockets/errors'
 require 'sprockets/resolve'
 require 'sprockets/server'
-require 'pathname'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.

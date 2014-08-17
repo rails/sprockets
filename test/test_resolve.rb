@@ -37,8 +37,6 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js")
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js"))
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve("coffee/foo.js")
     assert_equal fixture_path('default/jquery.tmpl.min.js'),

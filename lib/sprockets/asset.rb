@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'pathname'
 
 module Sprockets
   class Asset
@@ -38,13 +37,6 @@ module Sprockets
 
     # Public: Returns String path of asset.
     attr_reader :filename
-
-    # Deprecated: Use #filename instead.
-    #
-    # Returns Pathname.
-    def pathname
-      @pathname ||= Pathname.new(filename)
-    end
 
     # Public: Return logical path with digest spliced in.
     #

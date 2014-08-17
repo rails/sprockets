@@ -49,7 +49,7 @@ class TestCaching < Sprockets::TestCase
     env = @env1
 
     asset1 = env['gallery.js']
-    asset2 = env[asset1.pathname]
+    asset2 = env[asset1.filename]
 
     assert asset1
     assert asset2
@@ -62,7 +62,7 @@ class TestCaching < Sprockets::TestCase
     cached = @env1.cached
 
     asset1 = cached['gallery.js']
-    asset2 = cached[asset1.pathname]
+    asset2 = cached[asset1.filename]
 
     assert asset1
     assert asset2

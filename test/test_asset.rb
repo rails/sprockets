@@ -5,11 +5,6 @@ module AssetTests
     define_method("test_#{name.inspect}", &block)
   end
 
-  test "pathname is a Pathname that exists" do
-    assert_kind_of Pathname, @asset.pathname
-    assert @asset.pathname.exist?
-  end
-
   test "mtime" do
     assert @asset.mtime
   end

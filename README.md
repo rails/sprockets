@@ -126,7 +126,7 @@ get a `Sprockets::BundledAsset` instance back:
 
 Call `to_s` on the resulting asset to access its contents, `length` to
 get its length in bytes, `mtime` to query its last-modified time, and
-`pathname` to get its full path on the filesystem.
+`filename` to get its full path on the filesystem.
 
 # Using Engines #
 

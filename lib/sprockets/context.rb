@@ -1,4 +1,3 @@
-require 'pathname'
 require 'rack/utils'
 require 'set'
 require 'sprockets/errors'
@@ -19,7 +18,7 @@ module Sprockets
   # The `Context` also collects dependencies declared by
   # assets. See `DirectiveProcessor` for an example of this.
   class Context
-    attr_reader :environment, :pathname
+    attr_reader :environment, :filename
 
     def initialize(input)
       @environment  = input[:environment]
@@ -28,7 +27,6 @@ module Sprockets
       @logical_path = input[:name]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
-      @pathname     = Pathname.new(@filename)
       @content_type = input[:content_type]
 
       @required_paths   = Set.new(@metadata[:required_paths])
@@ -128,9 +126,9 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      pathname = resolve(path, accept: @content_type)
-      depend_on_asset(pathname)
-      @required_paths << pathname.to_s
+      filename = resolve(path, accept: @content_type)
+      depend_on_asset(filename)
+      @required_paths << filename
       nil
     end
 
