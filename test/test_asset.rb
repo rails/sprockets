@@ -26,18 +26,6 @@ module AssetTests
     assert_equal @asset.to_s.bytesize, @asset.bytesize
   end
 
-  test "splat asset" do
-    assert_kind_of Array, @asset.to_a
-  end
-
-  test "to_a body parts equals to_s" do
-    source = ""
-    @asset.to_a.each do |asset|
-      source << asset.to_s
-    end
-    assert_equal @asset.to_s, source
-  end
-
   test "write to file" do
     target = fixture_path('asset/tmp.js')
     begin
@@ -182,10 +170,6 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal 42917, @asset.bytesize
   end
 
-  test "splat" do
-    assert_equal [@asset], @asset.to_a
-  end
-
   test "asset is fresh if its mtime is changed but its contents is the same" do
     filename = fixture_path('asset/test-POW.png')
 
@@ -269,10 +253,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal 'utf-8', @asset.charset
   end
 
-  test "splat" do
-    assert_equal [@asset], @asset.to_a
-  end
-
   test "to_s" do
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
@@ -280,14 +260,6 @@ class ProcessedAssetTest < Sprockets::TestCase
   test "each" do
     body = ""
     @asset.each { |part| body << part }
-    assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
-  end
-
-  test "to_a" do
-    body = ""
-    @asset.to_a.each do |asset|
-      body << asset.to_s
-    end
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
@@ -561,15 +533,6 @@ class BundledAssetTest < Sprockets::TestCase
                   "users-08ae3439d6c8fe911445a2fb6e07ee1dc12ca599.js",
                   "application-b5df367abb741cac6526b05a726e9e8d7bd863d2.js"],
       asset("application.js").source_paths
-  end
-
-  test "splatted asset includes itself" do
-    assert_equal [fixture_path("asset/project.js.erb")], asset("project.js").to_a.map(&:filename)
-  end
-
-  test "splatted asset with child dependencies" do
-    assert_equal [fixture_path("asset/project.js.erb"), fixture_path("asset/users.js.erb"), fixture_path("asset/application.js")],
-      asset("application.js").to_a.map(&:filename)
   end
 
   test "bundling joins files with blank line" do

@@ -29,7 +29,10 @@ module Sprockets
       required_paths.subtract(stubbed_paths)
       assets = required_paths.map { |path| cache[path] }
 
-      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type))
+      metadata = env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type))
+      # TODO: Weird integration
+      metadata[:source_paths] = assets.map { |h| Asset.new(h).digest_path }
+      metadata
     end
   end
 end

@@ -58,30 +58,6 @@ module Sprockets
     # Public: Returns String MIME type of asset. Returns nil if type is unknown.
     attr_reader :content_type
 
-    # Deprecated: Expand asset into an `Array` of parts.
-    #
-    # Appending all of an assets body parts together should give you
-    # the asset's contents as a whole.
-    #
-    # This allows you to link to individual files for debugging
-    # purposes.
-    #
-    # Use Asset#source_paths instead. Keeping a full copy of the bundle's
-    # processed assets in memory (and in cache) is expensive and redundant. The
-    # common use case is to relink to the assets anyway. #source_paths provides
-    # that reference.
-    #
-    # Returns Array of Assets.
-    def to_a
-      if metadata.key?(:required_asset_hashes)
-        metadata[:required_asset_hashes].map do |hash|
-          Asset.new(hash)
-        end
-      else
-        [self]
-      end
-    end
-
     # Public: Array of required processed assets.
     #
     # This allows you to link to individual files for debugging
@@ -96,7 +72,7 @@ module Sprockets
     #
     # Returns an Array of String digest paths.
     def source_paths
-      to_a.map(&:digest_path)
+      metadata[:source_paths]
     end
 
     # Public: Return `String` of concatenated source.
