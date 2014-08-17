@@ -1,11 +1,48 @@
 require 'digest/sha1'
+require 'set'
 
 module Sprockets
   # `Utils`, we didn't know where else to put it!
   module Utils
     extend self
 
-    # Prepends a leading "." to an extension if its missing.
+    # Internal: Check if string has a trailing semicolon.
+    #
+    # str - String
+    #
+    # Returns true or false.
+    def string_end_with_semicolon?(str)
+      i = str.size - 1
+      while i >= 0
+        c = str[i]
+        i -= 1
+        if c == "\n" || c == " " || c == "\t"
+          next
+        elsif c != ";"
+          return false
+        else
+          return true
+        end
+      end
+      true
+    end
+
+    # Internal: Accumulate asset source to buffer and append a trailing
+    # semicolon if necessary.
+    #
+    # buf   - String memo
+    # asset - Asset
+    #
+    # Returns appended buffer String.
+    def concat_javascript_sources(buf, source)
+      if string_end_with_semicolon?(buf)
+        buf + source
+      else
+        buf + ";\n" + source
+      end
+    end
+
+    # Internal: Prepends a leading "." to an extension if its missing.
     #
     #     normalize_extension("js")
     #     # => ".js"
@@ -104,6 +141,32 @@ module Sprockets
       end
 
       digest.hexdigest
+    end
+
+    # Internal: Post-order Depth-First search algorithm.
+    #
+    # Used for resolving asset dependencies.
+    #
+    # initial - Initial Array of nodes to traverse.
+    # block   -
+    #   node  - Current node to get children of
+    #
+    # Returns a Set of nodes.
+    def dfs(initial)
+      nodes, seen = Set.new, Set.new
+      stack = Array(initial).reverse
+
+      while node = stack.pop
+        if seen.include?(node)
+          nodes.add(node)
+        else
+          seen.add(node)
+          stack.push(node)
+          stack.concat(Array(yield node).reverse)
+        end
+      end
+
+      nodes
     end
 
     def benchmark_start

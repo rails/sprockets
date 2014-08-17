@@ -3,10 +3,11 @@ require 'sprockets/engines'
 require 'sprockets/mime'
 require 'sprockets/paths'
 require 'sprockets/processing'
+require 'sprockets/transformers'
 
 module Sprockets
   module Configuration
-    include Paths, Mime, Engines, Processing, Compressing
+    include Paths, Mime, Engines, Transformers, Processing, Compressing
 
     def initialize_configuration(parent)
       @logger            = parent.logger
@@ -19,9 +20,11 @@ module Sprockets
       @mime_exts         = parent.mime_exts
       @encodings         = parent.encodings
       @engines           = parent.engines
-      @engine_extensions = parent.engine_extensions
+      @engine_mime_types = parent.engine_mime_types
+      @transformers      = parent.transformers
       @preprocessors     = parent.preprocessors
       @postprocessors    = parent.postprocessors
+      @bundle_reducers   = parent.bundle_reducers
       @bundle_processors = parent.bundle_processors
       @compressors       = parent.compressors
     end

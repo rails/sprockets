@@ -67,51 +67,10 @@ module Sprockets
       digest.hexdigest
     end
 
-    # Experimental: Check if environment has asset.
-    #
-    # Acts similar to `find_asset(path) ? true : false` but does not build the
-    # entire asset.
-    #
-    # Returns true or false.
-    def has_asset?(filename, options = {})
-      return false unless file?(filename)
-
-      accepts = options[:accept] || '*/*'
-
-      extname = parse_path_extnames(filename)[1]
-      if mime_type = mime_exts[extname]
-        accepts = parse_q_values(accepts)
-        accepts.any? { |accept, q| match_mime_type?(mime_type, accept) }
-      else
-        accepts == '*/*'
-      end
-    end
-
     # Find asset by logical path or expanded path.
-    def find_asset(path, options = {})
-      path = path.to_s
-      options = options.dup
-      options[:bundle] = true unless options.key?(:bundle)
-      accept = options.delete(:accept)
-      if_match = options.delete(:if_match)
-
-      if absolute_path?(path) && has_asset?(path, accept: accept)
-        filename = path
-        return nil unless file?(filename)
-      else
-        filename = resolve_all(path, accept: accept).first
-      end
-
-      if filename
-        options = { bundle: options[:bundle], accept_encoding: options[:accept_encoding] }
-        if if_match
-          asset_hash = build_asset_hash_for_digest(filename, if_match, options)
-        else
-          asset_hash = build_asset_hash(filename, options)
-        end
-
-        Asset.new(asset_hash) if asset_hash
-      end
+    def find_asset(*args)
+      status, asset = find_asset_with_status(*args)
+      asset if status == :ok
     end
 
     # Preferred `find_asset` shorthand.
@@ -130,10 +89,38 @@ module Sprockets
     end
 
     protected
-      def build_asset_hash_for_digest(filename, digest, options)
-        asset_hash = build_asset_hash(filename, options)
-        if asset_hash[:digest] == digest
-          asset_hash
+      def find_asset_with_status(path, options = {})
+        path = path.to_s
+        options = options.dup
+        options[:bundle] = true unless options.key?(:bundle)
+        accept = options.delete(:accept)
+        if_match = options.delete(:if_match)
+        if_none_match = options.delete(:if_none_match)
+
+        if absolute_path?(path) && file?(path)
+          if accept.nil? || resolve_path_transform_type(path, accept)
+            filename = path
+          end
+        else
+          filename = resolve_all(path, accept: accept).first
+          mime_type = parse_path_extnames(path)[1]
+          accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
+        end
+
+        if filename
+          options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
+          asset_hash = build_asset_hash(filename, options)
+          asset = Asset.new(asset_hash) if asset_hash
+
+          if if_match && asset.digest != if_match
+            return :precondition_failed
+          elsif if_none_match && asset.digest == if_none_match
+            return :not_modified
+          else
+            return :ok, asset
+          end
+        else
+          return :not_found
         end
       end
 
@@ -143,24 +130,30 @@ module Sprockets
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
         end
 
-        logical_path, extname, engine_extnames = parse_path_extnames(logical_path)
-        logical_path = normalize_logical_path(logical_path, extname)
-        mime_type = mime_exts[extname]
+        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path = normalize_logical_path(logical_path)
 
         asset = {
           load_path: load_path,
           filename: filename,
-          logical_path: logical_path,
-          name: logical_path.chomp(extname)
+          name: logical_path
         }
-        asset[:content_type] = mime_type if mime_type
 
-        processed_processors = unwrap_preprocessors(asset[:content_type]) +
+        if asset_type = resolve_transform_type(file_type, options[:accept])
+          asset[:content_type] = asset_type
+          asset[:logical_path] = logical_path + mime_types[asset_type][:extensions].first
+        else
+          asset[:logical_path] = logical_path
+        end
+
+        processed_processors = unwrap_preprocessors(file_type) +
           unwrap_engines(engine_extnames).reverse +
-          unwrap_postprocessors(asset[:content_type])
-        bundled_processors = unwrap_bundle_processors(asset[:content_type])
+          unwrap_transformer(file_type, asset_type) +
+          unwrap_postprocessors(asset_type)
+        bundled_processors = unwrap_bundle_processors(asset_type)
 
-        processors = options[:bundle] ? bundled_processors : processed_processors
+        should_bundle = options[:bundle] && bundled_processors.any?
+        processors = should_bundle ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
         if processors.any?
@@ -171,27 +164,17 @@ module Sprockets
       end
 
       def build_processed_asset_hash(asset, processors)
-        filename = asset[:filename]
-
-        data = File.open(filename, 'rb') { |f| f.read }
-
-        content_type = asset[:content_type]
-        mime_type = mime_types[content_type]
-        if mime_type && mime_type[:charset]
-          data = mime_type[:charset].call(data).encode(Encoding::UTF_8)
-        end
-
         processed = process(
           processors,
-          filename,
+          asset[:filename],
           asset[:load_path],
           asset[:name],
-          content_type,
-          data
+          asset[:content_type],
+          read_file(asset[:filename], asset[:content_type])
         )
 
         # Ensure originally read file is marked as a dependency
-        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([filename])
+        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,

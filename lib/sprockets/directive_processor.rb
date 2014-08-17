@@ -232,7 +232,7 @@ module Sprockets
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
               next
-            elsif @environment.has_asset?(subpath, accept: @content_type)
+            elsif @environment.resolve_path_transform_type(subpath, @content_type)
               @required_paths << subpath
             end
           end
@@ -263,7 +263,7 @@ module Sprockets
               next
             elsif stat.directory?
               @dependency_paths << subpath
-            elsif @environment.has_asset?(subpath, accept: @content_type)
+            elsif @environment.resolve_path_transform_type(subpath, @content_type)
               required_paths << subpath
             end
           end

@@ -122,6 +122,6 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal [fixture_path("context/foo.js"),
      fixture_path("context/foo.js"),
      fixture_path("context/foo.js")
-    ].join(",\n") + ";", @env["resolve_content_type.js"].to_s.strip
+    ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end

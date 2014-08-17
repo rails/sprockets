@@ -35,19 +35,34 @@ module EnvironmentTests
   end
 
   test "eco templates" do
-    asset = @env["goodbye.jst"]
+    asset = @env["goodbye.js"]
     context = ExecJS.compile(asset.to_s)
     assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
   end
 
   test "ejs templates" do
-    asset = @env["hello.jst"]
+    assert asset = @env["hello.js"]
     context = ExecJS.compile(asset.to_s)
     assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
+  test "another ejs templates" do
+    assert asset = @env["hello2.js"]
+    context = ExecJS.compile(asset.to_s)
+    assert_equal "hello2: world\n", context.call("JST2['hello2']", :name => "world")
+  end
+
+  test "angular templates" do
+    assert asset = @env["ng-view.js"]
+    assert_equal <<-JS, asset.to_s
+$app.run(function($templateCache) {
+  $templateCache.put('ng-view.html', "<div ng-view></div>");
+});
+    JS
+  end
+
   test "asset_data_uri helper" do
-    asset = @env["with_data_uri.css"]
+    assert asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
   end
 
@@ -96,6 +111,29 @@ module EnvironmentTests
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
 
+  test "resolve web component files" do
+    assert_equal fixture_path("default/menu/menu.js"),
+      @env.resolve("menu/menu.js")
+    assert_equal fixture_path("default/menu/menu.css"),
+      @env.resolve("menu/menu.css")
+    assert_equal fixture_path("default/menu/menu.html"),
+      @env.resolve("menu/menu.html")
+  end
+
+  test "web component assets" do
+    assert asset = @env["menu/menu.html"]
+    assert_equal "text/html", asset.content_type
+    assert_equal "<menu></menu>\n", asset.to_s
+
+    assert asset = @env["menu/menu.js"]
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "$.fn.menu = {};\n", asset.to_s
+
+    assert asset = @env["menu/menu.css"]
+    assert_equal "text/css", asset.content_type
+    assert_equal ".menu {}\n", asset.to_s
+  end
+
   test "explicit bower.json access returns json file" do
     assert_equal fixture_path('default/bower/bower.json'),
       @env["bower/bower.json"].filename
@@ -113,7 +151,7 @@ module EnvironmentTests
   test "find bower main by format extension" do
     assert_equal fixture_path('default/bower/main.js'),
       @env["bower.js"].filename
-      refute @env.find_asset("bower.css")
+    refute @env.find_asset("bower.css")
 
     assert_equal fixture_path('default/qunit/qunit.js'),
       @env["qunit.js"].filename
@@ -213,6 +251,72 @@ module EnvironmentTests
     assert_equal "text/yaml", asset.content_type
   end
 
+  test "find html builder asset" do
+    assert asset = @env.find_asset("nokogiri-html.html")
+    assert_equal "text/html", asset.content_type
+    assert_equal <<-HTML, asset.to_s
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><body><span class="bold">Hello world</span></body></html>
+    HTML
+  end
+
+#   test "find xml builder asset" do
+#     assert asset = @env.find_asset("nokogiri-xml.xml")
+#     assert_equal "application/xml", asset.content_type
+#     assert_equal <<-XML, asset.to_s
+# <?xml version="1.0"?>
+# <root>
+#   <products>
+#     <widget>
+#       <id>10</id>
+#       <name>Awesome widget</name>
+#     </widget>
+#   </products>
+# </root>
+#     XML
+#   end
+
+  test "svg transformer for extension" do
+    assert asset = @env.find_asset("logo.svg")
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal "logo.svg", asset.logical_path
+    assert_equal [60, 115, 118, 103, 32, 119, 105, 100, 116, 104], asset.to_s[0, 10].bytes.to_a
+
+    assert asset = @env.find_asset("logo.png")
+    assert_equal "image/png", asset.content_type
+    assert_equal "logo.png", asset.logical_path
+    assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
+  end
+
+  test "svg transformer for accept" do
+    assert asset = @env.find_asset("logo", accept: "image/svg+xml")
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal "logo.svg", asset.logical_path
+    assert_equal [60, 115, 118, 103, 32, 119, 105, 100, 116, 104], asset.to_s[0, 10].bytes.to_a
+
+    assert asset = @env.find_asset("logo", accept: "image/png")
+    assert_equal "image/png", asset.content_type
+    assert_equal "logo.png", asset.logical_path
+    assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
+  end
+
+  test "full path svg transformer" do
+    assert @env.find_asset(fixture_path("default/logo.svg"))
+    refute @env.find_asset(fixture_path("default/logo.png"))
+  end
+
+  test "full path svg transformer for accept" do
+    assert asset = @env.find_asset(fixture_path("default/logo.svg"), accept: "image/svg+xml")
+    assert_equal "logo.svg", asset.logical_path
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal [60, 115, 118, 103, 32, 119, 105, 100, 116, 104], asset.to_s[0, 10].bytes.to_a
+
+    assert asset = @env.find_asset(fixture_path("default/logo.svg"), accept: "image/png")
+    assert_equal "image/png", asset.content_type
+    assert_equal "logo.png", asset.logical_path
+    assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
@@ -241,6 +345,21 @@ module EnvironmentTests
     asset = @env.find_asset("gallery.js")
     assert @env.find_asset("gallery.js", if_match: asset.etag)
     refute @env.find_asset("gallery.js", if_match: "0000000000000000000000000000000000000000")
+    refute @env.find_asset("missing.js", if_match: "0000000000000000000000000000000000000000")
+  end
+
+  test "find asset not matching etag" do
+    assert asset = @env.find_asset("gallery.js")
+    refute @env.find_asset("gallery.js", if_none_match: asset.etag)
+    assert @env.find_asset("gallery.js", if_none_match: "0000000000000000000000000000000000000000")
+    refute @env.find_asset("missing.js", if_none_match: "0000000000000000000000000000000000000000")
+  end
+
+  test "find with if and if none match" do
+    assert asset = @env.find_asset("gallery.js")
+    refute @env.find_asset("gallery.js", if_match: asset.etag, if_none_match: asset.etag)
+    refute @env.find_asset("gallery.js", if_match: "0000000000000000000000000000000000000000", if_none_match: "0000000000000000000000000000000000000000")
+    refute @env.find_asset("missing.js", if_match: "0000000000000000000000000000000000000000", if_none_match: "0000000000000000000000000000000000000000")
   end
 
   test "missing static path returns nil" do
@@ -292,14 +411,15 @@ module EnvironmentTests
       @env[fixture_path("default/mobile/a.js")].logical_path
   end
 
-  test "xxxmobile index logical path shorthand" do
+  test "mobile index logical path shorthand" do
     assert_equal "mobile.js",
       @env[fixture_path("default/mobile/index.js")].logical_path
     assert_equal "mobile-min/index.min.js",
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path
   end
 
-  FILES_IN_PATH = 49
+  FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
+  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 6
 
   test "iterate over each logical path" do
     paths = []
@@ -489,6 +609,34 @@ class TestEnvironment < Sprockets::TestCase
     assert_nil @env.css_compressor
   end
 
+  test "pre/post processors on transformed asset" do
+    @env.register_preprocessor 'image/svg+xml', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_svg] }
+    }
+    @env.register_preprocessor 'image/png', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_png] }
+    }
+    @env.register_postprocessor 'image/svg+xml', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:post_svg] }
+    }
+    @env.register_postprocessor 'image/png', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:post_png] }
+    }
+
+    assert asset = @env.find_asset("logo.svg")
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal [:pre_svg, :post_svg], asset.metadata[:test]
+
+    assert asset = @env.find_asset("logo.png")
+    assert_equal "image/png", asset.content_type
+    assert_equal [:pre_svg, :post_png], asset.metadata[:test]
+  end
+
+  test "access selector count metadata" do
+    assert asset = @env.find_asset("mobile.css")
+    assert_equal 2, asset.metadata[:selector_count]
+  end
+
   test "changing version doesn't affect the assets digest" do
     old_asset_digest = @env["gallery.js"].digest
     @env.version = 'v2'
@@ -572,7 +720,7 @@ class TestEnvironment < Sprockets::TestCase
 
   test "disabling default directive preprocessor" do
     @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
-    assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
+    assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
 end
 

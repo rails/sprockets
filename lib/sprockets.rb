@@ -46,9 +46,11 @@ module Sprockets
   @mime_exts         = {}.freeze
   @encodings         = {}.freeze
   @engines           = {}.freeze
-  @engine_extensions = {}.freeze
+  @engine_mime_types = {}.freeze
+  @transformers      = Hash.new { |h, k| {}.freeze }.freeze
   @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
   @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
+  @bundle_reducers   = Hash.new { |h, k| {}.freeze }.freeze
   @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
   @compressors       = Hash.new { |h, k| {}.freeze }.freeze
   @context_class     = Context
@@ -65,6 +67,7 @@ module Sprockets
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
   register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/xml', extensions: ['.xml']
   register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
   register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
@@ -107,6 +110,25 @@ module Sprockets
   register_bundle_processor 'application/javascript', Bundle
   register_bundle_processor 'text/css', Bundle
 
+  register_bundle_reducer '*/*', :data, :+
+  register_bundle_reducer 'application/javascript', :data, Utils.method(:concat_javascript_sources)
+  register_bundle_reducer '*/*', :dependency_paths, :+
+
+  register_postprocessor 'application/javascript', proc { |input|
+    # Use an identity map if no mapping is defined
+    if !input[:metadata][:map]
+      map = SourceMap::Map.new([
+        SourceMap::Mapping.new(
+          input[:name],
+          SourceMap::Offset.new(0, 0),
+          SourceMap::Offset.new(0, 0)
+        )
+      ])
+      { data: input[:data], map: map }
+    end
+  }
+  register_bundle_reducer 'application/javascript', :map, :+
+
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :yui, LazyProcessor.new { YUICompressor }
@@ -116,14 +138,19 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # Mmm, CoffeeScript
+  register_mime_type 'text/coffeescript', extensions: ['.coffee']
   register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
 
   # JST engines
+  register_mime_type 'text/eco', extensions: ['.eco']
+  register_mime_type 'text/ejs', extensions: ['.ejs']
   register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
   register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
   register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
 
   # CSS engines
+  register_mime_type 'text/sass', extensions: ['.sass']
+  register_mime_type 'text/scss', extensions: ['.scss']
   register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
   register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
 

@@ -32,24 +32,65 @@ module Sprockets
       end
     end
 
-    # Internal: Find the best qvalue match from an Array of available options.
+    # Internal: Find all qvalue matches from an Array of available options.
     #
     # Adapted from Rack::Utils#q_values.
     #
-    # Returns the matched String from available Array.
-    def find_best_q_match(q_value_header, available, &matcher)
+    # Returns Array of matched Strings from available Array or [].
+    def find_q_matches(q_values, available, &matcher)
       matcher ||= lambda { |a, b| a == b }
 
       matches = []
 
-      parse_q_values(q_value_header).each do |accepted, quality|
+      case q_values
+      when Array
+      when String
+        q_values = parse_q_values(q_values)
+      when NilClass
+        q_values = []
+      else
+        raise TypeError, "unknown q_values type: #{q_values.class}"
+      end
+
+      q_values.each do |accepted, quality|
         if match = available.find { |option| matcher.call(option, accepted) }
           matches << [match, quality]
         end
       end
 
-      if matches.any?
-        matches.sort_by { |match, quality| -quality }.first.first
+      matches.sort_by { |match, quality| -quality }.map { |match, quality| match }
+    end
+
+    # Internal: Find the best qvalue match from an Array of available options.
+    #
+    # Adapted from Rack::Utils#q_values.
+    #
+    # Returns the matched String from available Array or nil.
+    def find_best_q_match(q_values, available, &matcher)
+      find_q_matches(q_values, available, &matcher).first
+    end
+
+    # Internal: Find the all qvalue match from an Array of available mime type
+    # options.
+    #
+    # Adapted from Rack::Utils#q_values.
+    #
+    # Returns Array of matched mime type Strings from available Array or [].
+    def find_mime_type_matches(q_value_header, available)
+      find_q_matches(q_value_header, available) do |a, b|
+        match_mime_type?(a, b)
+      end
+    end
+
+    # Internal: Find the best qvalue match from an Array of available mime type
+    # options.
+    #
+    # Adapted from Rack::Utils#q_values.
+    #
+    # Returns the matched mime type String from available Array or nil.
+    def find_best_mime_type_match(q_value_header, available)
+      find_best_q_match(q_value_header, available) do |a, b|
+        match_mime_type?(a, b)
       end
     end
   end

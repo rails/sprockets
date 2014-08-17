@@ -53,18 +53,12 @@ module Sprockets
     def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
       return to_enum(__method__, load_path, logical_path, options) unless block_given?
 
-      logical_name, extname, _ = parse_path_extnames(logical_path)
+      logical_name, mime_type, _ = parse_path_extnames(logical_path)
       logical_basename = File.basename(logical_name)
 
-      accepts = parse_accept_options(extname, options[:accept])
+      accepts = parse_accept_options(mime_type, options[:accept])
 
-      accepts.each do |accept, _|
-        path_matches(load_path, logical_name, logical_basename, extname) do |filename|
-          if has_asset?(filename, accept: accept)
-            yield filename
-          end
-        end
-      end
+      _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
 
       nil
     end
@@ -87,22 +81,22 @@ module Sprockets
       return to_enum(__method__, path, options) unless block_given?
       path = path.to_s
 
-      logical_name, extname, _ = parse_path_extnames(path)
+      logical_name, mime_type, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
 
-      accepts = parse_accept_options(extname, options[:accept])
+      accepts = parse_accept_options(mime_type, options[:accept])
 
       self.paths.each do |load_path|
-        accepts.each do |accept, _|
-          path_matches(load_path, logical_name, logical_basename, extname) do |filename|
-            if has_asset?(filename, accept: accept)
-              yield filename
-            end
-          end
-        end
+        _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
       end
 
       nil
+    end
+
+    # Experimental: Get transform type for filename
+    def resolve_path_transform_type(filename, accept)
+      mime_type = parse_path_extnames(filename)[1]
+      resolve_transform_type(mime_type, accept)
     end
 
     # Public: Enumerate over all logical paths in the environment.
@@ -118,8 +112,9 @@ module Sprockets
           next unless stat.file?
 
           path = split_subpath(load_path, filename)
-          path, extname, _ = parse_path_extnames(path)
-          path = normalize_logical_path(path, extname)
+          path, mime_type, _ = parse_path_extnames(path)
+          path = normalize_logical_path(path)
+          path += mime_types[mime_type][:extensions].first if mime_type
 
           if !seen.include?(path)
             yield path, filename
@@ -130,16 +125,39 @@ module Sprockets
 
       nil
     end
-    alias_method :each_logical_path, :logical_paths
+
+    # Deprecated: Iterate over all logical paths with a matcher.
+    #
+    # Remove from 4.x.
+    #
+    # args - List of matcher objects.
+    #
+    # Returns Enumerator if no block is given.
+    def each_logical_path(*args, &block)
+      return to_enum(__method__, *args) unless block_given?
+
+      filters = args.flatten.map { |arg| Manifest.compile_match_filter(arg) }
+      logical_paths.each do |a, b|
+        if filters.any? { |f| f.call(a, b) }
+          if block.arity == 2
+            yield a, b
+          else
+            yield a
+          end
+        end
+      end
+
+      nil
+    end
 
     protected
-      def parse_accept_options(extname, types)
+      def parse_accept_options(mime_type, types)
         accepts = []
         accepts += parse_q_values(types) if types
 
-        if extname && (type = mime_exts[extname])
-          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(type, accept) }
-            accepts.unshift([type, 1.0])
+        if mime_type
+          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(mime_type, accept) }
+            accepts.unshift([mime_type, 1.0])
           else
             return []
           end
@@ -152,19 +170,51 @@ module Sprockets
         accepts
       end
 
-      def normalize_logical_path(path, extname)
+      def normalize_logical_path(path)
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'
-        path += extname if extname
         path
       end
 
-      def path_matches(load_path, logical_name, logical_basename, extname, &block)
+      def _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
+        filenames = path_matches(load_path, logical_name, logical_basename)
+
+        matches = []
+
+        # TODO: Cleanup double iteration of accept and filenames
+
+        # Exact mime type match first
+        matches += find_q_matches(accepts, filenames) do |filename, accepted|
+          if !file?(filename)
+            nil
+          elsif accepted == '*/*'
+            filename
+          elsif parse_path_extnames(filename)[1] == accepted
+            filename
+          end
+        end
+
+        # Then transformable match
+        matches += find_q_matches(accepts, filenames) do |filename, accepted|
+          if !file?(filename)
+            nil
+          elsif accepted == '*/*'
+            filename
+          elsif resolve_path_transform_type(filename, accepted)
+            filename
+          end
+        end
+
+        matches.uniq.each(&block)
+      end
+
+      def path_matches(load_path, logical_name, logical_basename)
+        filenames = []
         dirname = File.dirname(File.join(load_path, logical_name))
-        dirname_matches(dirname, "#{logical_basename}#{extname}", &block) if extname
-        dirname_matches(dirname, logical_basename, &block)
-        resolve_alternates(load_path, logical_name, &block)
-        dirname_matches(File.join(load_path, logical_name), "index", &block)
+        dirname_matches(dirname, logical_basename) { |fn| filenames << fn }
+        resolve_alternates(load_path, logical_name) { |fn| filenames << fn }
+        dirname_matches(File.join(load_path, logical_name), "index") { |fn| filenames << fn }
+        filenames
       end
 
       def dirname_matches(dirname, basename)
@@ -179,24 +229,23 @@ module Sprockets
       def resolve_alternates(load_path, logical_name)
       end
 
-      # Internal: Returns the format extension and `Array` of engine extensions.
+      # Internal: Returns the name, mime type and `Array` of engine extensions.
       #
       #     "foo.js.coffee.erb"
-      #     # => { format: ".js",
-      #            engines: [".coffee", ".erb"] }
+      #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)
-        format_extname  = nil
+        mime_type       = nil
         engine_extnames = []
         len = path.length
 
         path_extnames(path).reverse_each do |extname|
           if engines.key?(extname)
-            format_extname = engine_extensions[extname]
+            mime_type = engine_mime_types[extname]
             engine_extnames.unshift(extname)
             len -= extname.length
           elsif mime_exts.key?(extname)
-            format_extname = extname
+            mime_type = mime_exts[extname]
             len -= extname.length
             break
           else
@@ -205,7 +254,7 @@ module Sprockets
         end
 
         name = path[0, len]
-        return [name, format_extname, engine_extnames]
+        return [name, mime_type, engine_extnames]
       end
   end
 end
