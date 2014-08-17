@@ -128,7 +128,7 @@ module Sprockets
         proc { |logical_path| filter.match(logical_path) }
       elsif filter.is_a?(String)
         # If its an absolute path, detect the matching full filename
-        if Pathname.new(filter).absolute?
+        if PathUtils.absolute_path?(filter)
           proc { |logical_path, filename| filename == filter.to_s }
         else
           # Otherwise do an fnmatch against the logical path.
