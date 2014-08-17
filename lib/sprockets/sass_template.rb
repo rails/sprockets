@@ -272,10 +272,4 @@ module Sprockets
       :scss
     end
   end
-
-  # Deprecated: Use Sprockets::SassTemplate::Functions instead.
-  SassFunctions = SassTemplate::Functions
-
-  # Deprecated: Use Sprockets::SassTemplate::CacheStore instead.
-  SassCacheStore = SassTemplate::CacheStore
 end
