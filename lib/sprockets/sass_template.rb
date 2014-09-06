@@ -6,7 +6,7 @@ module Sprockets
   #
   # For more infomation see:
   #
-  #   https://github.com/nex3/sass
+  #   https://github.com/sass/sass
   #   https://github.com/rails/sass-rails
   #
   class SassTemplate
