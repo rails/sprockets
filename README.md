@@ -365,6 +365,13 @@ submit a pull request.
 * Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
 * Support circular dependencies. For parity with ES6 modules.
 
+**2.12.2** (September 5, 2014)
+
+* Ensure internal asset lookups calls are still restricted to load paths within
+  asset compiles. Though, you should not depend on internal asset resolves to be
+  completely restricted for security reasons. Assets themselves should be
+  considered full scripting environments with filesystem access.
+
 **2.12.1** (April 17, 2014)
 
 * Fix making manifest target directory when its different than the output directory.

@@ -96,8 +96,9 @@ module Sprockets
         if_match = options.delete(:if_match)
         if_none_match = options.delete(:if_none_match)
 
-        if absolute_path?(path) && file?(path)
-          if accept.nil? || resolve_path_transform_type(path, accept)
+        if absolute_path?(path)
+          path = File.expand_path(path)
+          if file?(path) && (accept.nil? || resolve_path_transform_type(path, accept))
             filename = path
           end
         else
