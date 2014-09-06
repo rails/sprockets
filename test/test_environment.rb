@@ -180,6 +180,24 @@ module EnvironmentTests
     end
   end
 
+  test "can't require files outside the load path" do
+    path = fixture_path("default/../asset/project.css")
+    assert File.exist?(path)
+
+    assert_raise Sprockets::FileOutsidePaths do
+      @env[path]
+    end
+  end
+
+  test "can't require absolute files outside the load path" do
+    path = "/bin/sh"
+    assert File.exist?(path)
+
+    assert_raise Sprockets::FileOutsidePaths do
+      @env[path]
+    end
+  end
+
   test "asset logical path for absolute path" do
     assert_equal "gallery.js",
       @env[fixture_path("default/gallery.js")].logical_path
