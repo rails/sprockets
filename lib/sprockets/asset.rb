@@ -58,6 +58,15 @@ module Sprockets
     # Public: Returns String MIME type of asset. Returns nil if type is unknown.
     attr_reader :content_type
 
+    # Public: Get all externally linked asset filenames from asset.
+    #
+    # All linked assets should be compiled anytime this asset is.
+    #
+    # Returns Array of String filenames.
+    def links
+      metadata[:links]
+    end
+
     # Deprecated: Expand asset into an `Array` of parts.
     #
     # Appending all of an assets body parts together should give you

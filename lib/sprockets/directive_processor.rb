@@ -88,6 +88,7 @@ module Sprockets
 
       @required_paths   = Set.new(input[:metadata][:required_paths])
       @stubbed_paths    = Set.new(input[:metadata][:stubbed_paths])
+      @linked_paths     = Set.new(input[:metadata][:links])
       @dependency_paths = Set.new(input[:metadata][:dependency_paths])
 
       process_directives(directives)
@@ -95,6 +96,7 @@ module Sprockets
       { data: data,
         required_paths: @required_paths,
         stubbed_paths: @stubbed_paths,
+        links: @linked_paths,
         dependency_paths: @dependency_paths }
     end
 
@@ -319,6 +321,11 @@ module Sprockets
       #
       def process_stub_directive(path)
         @stubbed_paths << resolve(path, accept: @content_type)
+      end
+
+      def process_link_directive(path)
+        process_depend_on_asset_directive(path)
+        @linked_paths << resolve(path).to_s
       end
 
     private

@@ -456,6 +456,28 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "asset is stale when one of its linked assets is modified" do
+    a = fixture_path('asset/test-a.js')
+    b = fixture_path('asset/test-b.js')
+
+    sandbox a, b do
+      File.open(a, 'w') { |f| f.write "//= link test-b\n" }
+      File.open(b, 'w') { |f| f.write "b;" }
+      asset_a = asset('test-a.js')
+      asset_b = asset('test-b.js')
+
+      old_asset_a_mtime = asset_a.mtime
+      old_asset_b_mtime = asset_b.mtime
+
+      File.open(b, 'w') { |f| f.write "x;" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, b)
+
+      refute_equal old_asset_a_mtime, asset('test-a.js').mtime
+      refute_equal old_asset_b_mtime, asset('test-b.js').mtime
+    end
+  end
+
   test "asset is stale if a file is added to its require directory" do
     asset = asset("tree/all_with_require_directory.js")
     assert asset
@@ -693,6 +715,17 @@ class BundledAssetTest < Sprockets::TestCase
     assert_raises(Sprockets::ArgumentError) do
       asset("require_self_twice.css")
     end
+  end
+
+  test "link_asset depends on target asset" do
+    assert asset = asset("require_manifest.js")
+    assert_equal <<-EOS, asset.to_s
+
+define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
+define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+    EOS
+    assert_equal [fixture_path("asset/POW.png"), fixture_path("asset/application.js")],
+      asset.links.to_a.sort
   end
 
   test "stub single dependency" do

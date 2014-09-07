@@ -33,12 +33,14 @@ module Sprockets
 
       @required_paths   = Set.new(@metadata[:required_paths])
       @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
+      @linked_paths     = Set.new(@metadata[:linked_paths])
       @dependency_paths = Set.new(@metadata[:dependency_paths])
     end
 
     def metadata
       { required_paths: @required_paths,
         stubbed_paths: @stubbed_paths,
+        links: @linked_paths,
         dependency_paths: @dependency_paths }
     end
 
@@ -139,6 +141,11 @@ module Sprockets
     # in the bundle.
     def stub_asset(path)
       @stubbed_paths << resolve(path, accept: @content_type).to_s
+      nil
+    end
+
+    def link_asset(path)
+      @linked_paths << resolve(path).to_s
       nil
     end
 
