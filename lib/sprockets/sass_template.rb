@@ -77,6 +77,11 @@ module Sprockets
     # end
     #
     module Functions
+      # TODO: Decide out the _asset_path API override should work.
+      def _asset_path(path, options = {})
+        sprockets_context.asset_path(path, options)
+      end
+
       # Public: Generate a url for asset path.
       #
       # Default implementation is deprecated. Currently defaults to
@@ -87,7 +92,8 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_path(path, options = {})
-        ::Sass::Script::String.new(sprockets_context.asset_path(path.value, options), :string)
+        sprockets_context.link_asset(path.value)
+        ::Sass::Script::String.new(_asset_path(path.value, options), :string)
       end
 
       # Public: Generate a asset url() link.
