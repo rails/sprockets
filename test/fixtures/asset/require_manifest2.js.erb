@@ -1,0 +1,5 @@
+//= link application.js
+//= link POW.png
+
+define("application.js", <%= environment["application.js"].digest_path.inspect %>)
+define("POW.png", <%= environment["POW.png"].digest_path.inspect %>)

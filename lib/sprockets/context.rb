@@ -33,7 +33,7 @@ module Sprockets
 
       @required_paths   = Set.new(@metadata[:required_paths])
       @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
-      @linked_paths     = Set.new(@metadata[:linked_paths])
+      @linked_paths     = Set.new(@metadata[:links])
       @dependency_paths = Set.new(@metadata[:dependency_paths])
     end
 
@@ -145,6 +145,7 @@ module Sprockets
     end
 
     def link_asset(path)
+      depend_on_asset(path)
       @linked_paths << resolve(path).to_s
       nil
     end
