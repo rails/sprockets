@@ -140,7 +140,7 @@ module Sprockets
         if filename
           options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
           asset_hash = build_asset_hash(filename, options)
-          asset = Asset.new(asset_hash) if asset_hash
+          asset = Asset.new(self, asset_hash) if asset_hash
 
           if if_match && asset.digest != if_match
             return :precondition_failed

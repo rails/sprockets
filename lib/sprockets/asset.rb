@@ -13,7 +13,8 @@ module Sprockets
     # attributes - Hash of ivars
     #
     # Returns Asset.
-    def initialize(attributes = {})
+    def initialize(environment, attributes = {})
+      @environment = environment
       @attributes = attributes
       attributes.each do |name, value|
         instance_variable_set("@#{name}", value)
@@ -91,7 +92,7 @@ module Sprockets
     def to_a
       if metadata.key?(:required_asset_hashes)
         metadata[:required_asset_hashes].map do |hash|
-          Asset.new(hash)
+          Asset.new(@environment, hash)
         end
       else
         [self]
