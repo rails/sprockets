@@ -3,7 +3,6 @@ require 'sprockets/bower'
 require 'sprockets/errors'
 require 'sprockets/resolve'
 require 'sprockets/server'
-require 'sprockets/legacy'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -13,7 +12,6 @@ module Sprockets
     include Server
     include Resolve
     include Bower
-    include Legacy
 
     # Get persistent cache store
     attr_reader :cache
