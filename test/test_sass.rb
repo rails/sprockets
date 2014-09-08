@@ -319,12 +319,12 @@ div {
     end
 
     assert_equal [
-      fixture_path('compass/foo.css'),
-      fixture_path('compass/foo.js'),
-      fixture_path('compass/foo.mov'),
-      fixture_path('compass/foo.mp3'),
-      fixture_path('compass/foo.svg'),
-      fixture_path('compass/foo.woff')
+      "file://#{fixture_path('compass/foo.css')}?type=text/css",
+      "file://#{fixture_path('compass/foo.js')}?type=application/javascript",
+      "file://#{fixture_path('compass/foo.mov')}?type=",
+      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml",
+      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff"
     ], asset.links.to_a.sort
   end
 

@@ -766,8 +766,10 @@ class BundledAssetTest < Sprockets::TestCase
 define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
 define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
-    assert_equal [fixture_path("asset/POW.png"), fixture_path("asset/application.js")],
-      asset.links.to_a.sort
+    assert_equal [
+      "file://#{fixture_path("asset/POW.png")}?type=image/png",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript"
+    ], asset.links.to_a.sort
   end
 
   test "directive linked asset depends on target asset" do
@@ -779,8 +781,11 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
 define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
 define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
-    assert_equal [fixture_path("asset/POW.png"), fixture_path("asset/application.js")],
-      asset.links.to_a.sort
+
+    assert_equal [
+      "file://#{fixture_path("asset/POW.png")}?type=image/png",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript"
+    ], asset.links.to_a.sort
   end
 
   test "stub single dependency" do
