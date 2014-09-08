@@ -95,7 +95,7 @@ module Sprockets
         raise "invalid URI: missing type"
       end
 
-      unless asset = find_asset(path, accept: options['type'], bundle: !options.key?('processed'))
+      unless asset = find_asset(path, accept: options['type'], bundle: !options.key?('processed'), if_match: options['etag'])
         raise NotFound, "could not find #{uri}"
       end
 
@@ -211,6 +211,8 @@ module Sprockets
         # Ensure originally read file is marked as a dependency
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
+        asset[:uri] += "&etag=#{processed[:digest]}"
+
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
@@ -221,11 +223,13 @@ module Sprockets
 
       def build_static_asset_hash(asset)
         stat = self.stat(asset[:filename])
+        digest = digest_class.file(asset[:filename]).hexdigest
         asset.merge({
           encoding: Encoding::BINARY,
           length: stat.size,
           mtime: stat.mtime.to_i,
-          digest: digest_class.file(asset[:filename]).hexdigest,
+          digest: digest,
+          uri: "#{asset[:uri]}&etag=#{digest}",
           metadata: {
             dependency_paths: Set.new([asset[:filename]]),
             dependency_digest: dependencies_hexdigest([asset[:filename]]),

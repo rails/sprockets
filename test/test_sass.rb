@@ -319,12 +319,12 @@ div {
     end
 
     assert_equal [
-      "file://#{fixture_path('compass/foo.css')}?type=text/css",
-      "file://#{fixture_path('compass/foo.js')}?type=application/javascript",
-      "file://#{fixture_path('compass/foo.mov')}?type=",
-      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg",
-      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml",
-      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff"
+      "file://#{fixture_path('compass/foo.css')}?type=text/css&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "file://#{fixture_path('compass/foo.mov')}?type=&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709"
     ], asset.links.to_a.sort
   end
 

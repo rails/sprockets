@@ -24,7 +24,7 @@ module Sprockets
       required.subtract(stubbed)
       assets = required.map { |uri| cache[uri] }
 
-      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(included: required)
+      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(included: assets.map(&:uri))
     end
   end
 end

@@ -168,7 +168,7 @@ class StaticAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png",
+    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&etag=29cb842208672b7f65042744121b63d7f59783bf",
       @asset.uri.to_s
   end
 
@@ -264,7 +264,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&processed",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&processed&etag=b5df367abb741cac6526b05a726e9e8d7bd863d2",
       @asset.uri.to_s
   end
 
@@ -326,7 +326,7 @@ class BundledAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&etag=2a1b4881cb06529a04bdc4703afe68358defcc5c",
       @asset.uri.to_s
   end
 
@@ -758,8 +758,8 @@ define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.j
 define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png",
-      "file://#{fixture_path("asset/application.js")}?type=application/javascript"
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&etag=29cb842208672b7f65042744121b63d7f59783bf",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript&etag=2a1b4881cb06529a04bdc4703afe68358defcc5c"
     ], asset.links.to_a.sort
   end
 
@@ -774,8 +774,8 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
 
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png",
-      "file://#{fixture_path("asset/application.js")}?type=application/javascript"
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&etag=29cb842208672b7f65042744121b63d7f59783bf",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript&etag=2a1b4881cb06529a04bdc4703afe68358defcc5c"
     ], asset.links.to_a.sort
   end
 

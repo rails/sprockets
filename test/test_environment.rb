@@ -115,6 +115,12 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript")
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
+    assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
+
+    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&etag=4088f98ded5fdf9b60db467cb6c346926d9bedfc")
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+    assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
 
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
@@ -126,6 +132,10 @@ $app.run(function($templateCache) {
 
     assert_raises Sprockets::NotFound do
       @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=text/css")
+    end
+
+    assert_raises Sprockets::NotFound do
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&etag=0000000000000000000000000000000000000000")
     end
   end
 
