@@ -362,7 +362,7 @@ submit a pull request.
 * Environment#version no longer affects asset digests. Only used for busting the asset cache.
 * Removed builtin support for LESS.
 * Removed include directive support.
-* Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
+* Deprecated BundledAsset#to_a. Use BundledAsset#included to access debugging subcomponents.
 * Support circular dependencies. For parity with ES6 modules.
 * Manifest compilation will no longer generate .gz files by default. [Mixing
   Content-Encoding and ETags is just a bad

@@ -266,17 +266,12 @@ module Sprockets
       reducers.each do |k, (v, _)|
         initial[k] = v if v
       end
-      # Deprecated: For Asset#to_a
-      initial[:required_asset_hashes] = []
 
       assets.reduce(initial) do |h, asset|
         reducers.each do |k, (_, block)|
-          # TODO: Avoid creating asset wrapper here
           value = k == :data ? asset.source : asset.metadata[k]
           h[k]  = h.key?(k) ? block.call(h[k], value) : value
         end
-        # Deprecated: For Asset#to_a
-        h[:required_asset_hashes] << asset.to_hash
         h
       end
     end
