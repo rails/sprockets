@@ -77,6 +77,7 @@ module Sprockets
     def find_asset_by_uri(uri)
       uri     = URI(uri)
       path    = URI::Generic::DEFAULT_PARSER.unescape(uri.path)
+      path.force_encoding(Encoding::UTF_8)
       options = Rack::Utils.parse_query(uri.query)
 
       # Temporary sanity checks
