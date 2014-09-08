@@ -31,6 +31,10 @@ module AssetTests
     assert_equal @asset.to_s.bytesize, @asset.bytesize
   end
 
+  test "dependencies are an Array" do
+    assert_kind_of Array, @asset.dependencies
+  end
+
   test "splat asset" do
     assert_kind_of Array, @asset.to_a
   end
@@ -196,6 +200,10 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal [@asset], @asset.to_a
   end
 
+  test "dependencies" do
+    assert_equal [], @asset.dependencies
+  end
+
   test "asset is fresh if its mtime is changed but its contents is the same" do
     filename = fixture_path('asset/test-POW.png')
 
@@ -286,6 +294,10 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   test "splat" do
     assert_equal [@asset], @asset.to_a
+  end
+
+  test "dependencies" do
+    assert_equal [], @asset.dependencies
   end
 
   test "to_s" do
@@ -625,6 +637,11 @@ class BundledAssetTest < Sprockets::TestCase
   test "splatted asset with child dependencies" do
     assert_equal [fixture_path("asset/project.js.erb"), fixture_path("asset/users.js.erb"), fixture_path("asset/application.js")],
       asset("application.js").to_a.map(&:filename)
+  end
+
+  test "asset dependencies with child dependencies" do
+    assert_equal [fixture_path("asset/project.js.erb"), fixture_path("asset/users.js.erb")],
+      asset("application.js").dependencies.map(&:filename)
   end
 
   test "bundling joins files with blank line" do

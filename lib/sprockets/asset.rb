@@ -104,6 +104,15 @@ module Sprockets
       end
     end
 
+    # Deprecated: Get all required Assets.
+    #
+    # See Asset#to_a
+    #
+    # Returns Array of Assets.
+    def dependencies
+      to_a.reject { |a| a.filename.eql?(self.filename) }
+    end
+
     # Public: Return `String` of concatenated source.
     #
     # Returns String.
