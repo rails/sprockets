@@ -364,6 +364,9 @@ submit a pull request.
 * Removed include directive support.
 * Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
 * Support circular dependencies. For parity with ES6 modules.
+* Manifest compilation will no longer generate .gz files by default. [Mixing
+  Content-Encoding and ETags is just a bad
+  idea](https://issues.apache.org/bugzilla/show_bug.cgi?id=39727)
 
 **2.12.2** (September 5, 2014)
 
