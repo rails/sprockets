@@ -1,3 +1,5 @@
+require 'uri'
+
 module Sprockets
   # Internal: Bundle processor takes a single file asset and prepends all the
   # `:required_paths` to the contents.
@@ -19,8 +21,8 @@ module Sprockets
         unless env.file?(path)
           raise FileNotFound, "could not find #{path}"
         end
-        # TODO: Avoid using internal build_asset_hash API
-        h[path] = env.send(:build_asset_hash, path, bundle: false, accept: type)
+        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(path)}?type=#{type}&processed"
+        h[path] = env.find_asset_by_uri(uri).to_hash
       end
 
       find_required_paths = proc { |path| cache[path][:metadata][:required_paths] }
