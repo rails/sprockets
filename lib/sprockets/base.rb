@@ -211,9 +211,6 @@ module Sprockets
         # Ensure originally read file is marked as a dependency
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
-        # TODO: Shouldn't need to hard code linked_path init
-        processed[:metadata][:links] ||= Set.new
-
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
