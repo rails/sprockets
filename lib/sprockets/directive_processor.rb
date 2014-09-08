@@ -73,6 +73,7 @@ module Sprockets
 
     def call(input)
       @environment  = input[:environment]
+      @uri          = input[:uri]
       @load_path    = input[:load_path]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
@@ -195,9 +196,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        filename = resolve(path, accept: @content_type)
-        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
-        @required << uri
+        @required << resolve_uri(path)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -211,11 +210,10 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(@filename)}?type=#{@content_type}&processed"
-        if @required.include?(uri)
+        if @required.include?(@uri)
           raise ArgumentError, "require_self can only be called once per source file"
         end
-        @required << uri
+        @required << @uri
       end
 
       # `require_directory` requires all the files inside a single
@@ -325,9 +323,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        filename = resolve(path, accept: @content_type)
-        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
-        @stubbed << uri
+        @stubbed << resolve_uri(path)
       end
 
       def process_link_directive(path)
@@ -338,6 +334,11 @@ module Sprockets
     private
       def expand_relative_path(path)
         File.expand_path(path, @dirname)
+      end
+
+      def resolve_uri(path)
+        filename = resolve(path, accept: @content_type)
+        "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
       end
 
       def resolve(path, options = {})
