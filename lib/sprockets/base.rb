@@ -4,8 +4,6 @@ require 'sprockets/errors'
 require 'sprockets/resolve'
 require 'sprockets/server'
 require 'sprockets/legacy'
-require 'uri'
-require 'rack/utils'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -186,9 +184,7 @@ module Sprockets
         processors = should_bundle ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
-        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{asset[:content_type]}"
-        uri += "&processed" if processors.any? && !should_bundle
-        asset[:uri] = uri
+        asset[:uri] = build_asset_uri(filename, type: asset[:content_type], processed: processors.any? && !should_bundle)
 
         if processors.any?
           build_processed_asset_hash(asset, processors)
@@ -211,10 +207,12 @@ module Sprockets
         # Ensure originally read file is marked as a dependency
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
-        asset[:uri] += "&etag=#{processed[:digest]}"
+        path, params = parse_asset_uri(asset[:uri])
+        params[:etag] = processed[:digest]
+        asset[:uri] = build_asset_uri(path, params)
 
         asset.merge(processed).merge({
-          mtime: processed[:metadata][:dependency_paths].map { |path| stat(path).mtime.to_i }.max,
+          mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
             dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
           )
@@ -224,12 +222,17 @@ module Sprockets
       def build_static_asset_hash(asset)
         stat = self.stat(asset[:filename])
         digest = digest_class.file(asset[:filename]).hexdigest
+
+        path, params = parse_asset_uri(asset[:uri])
+        params[:etag] = digest
+        uri = build_asset_uri(path, params)
+
         asset.merge({
           encoding: Encoding::BINARY,
           length: stat.size,
           mtime: stat.mtime.to_i,
           digest: digest,
-          uri: "#{asset[:uri]}&etag=#{digest}",
+          uri: uri,
           metadata: {
             dependency_paths: Set.new([asset[:filename]]),
             dependency_digest: dependencies_hexdigest([asset[:filename]]),

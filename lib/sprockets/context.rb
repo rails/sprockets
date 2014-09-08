@@ -132,8 +132,7 @@ module Sprockets
     def require_asset(path)
       filename = resolve(path, accept: @content_type)
       depend_on_asset(filename)
-      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
-      @required << uri
+      @required << @environment.build_asset_uri(filename, type: @content_type, processed: true)
       nil
     end
 
@@ -142,8 +141,7 @@ module Sprockets
     # in the bundle.
     def stub_asset(path)
       filename = resolve(path, accept: @content_type)
-      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
-      @stubbed << uri
+      @stubbed << @environment.build_asset_uri(filename, type: @content_type, processed: true)
       nil
     end
 
