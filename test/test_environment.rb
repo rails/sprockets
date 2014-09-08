@@ -123,6 +123,10 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&processed")
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
+
+    assert_raises Sprockets::NotFound do
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=text/css")
+    end
   end
 
   test "resolve web component files" do

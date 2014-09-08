@@ -92,7 +92,11 @@ module Sprockets
         raise "invalid URI: missing type"
       end
 
-      find_asset(path, accept: options['type'], bundle: !options.key?('processed'))
+      unless asset = find_asset(path, accept: options['type'], bundle: !options.key?('processed'))
+        raise NotFound, "could not find #{uri}"
+      end
+
+      asset
     end
 
     # Preferred `find_asset` shorthand.

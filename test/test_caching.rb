@@ -121,7 +121,7 @@ class TestCaching < Sprockets::TestCase
       File.open(foo, 'w') { |f| f.puts "foo;" }
       File.unlink(bar)
       assert_nil @env2["bar-tmp.js"]
-      assert_raises Sprockets::FileNotFound do
+      assert_raises Sprockets::NotFound do
         @env1["foo-tmp.js"].to_s
       end
     end

@@ -562,7 +562,7 @@ class BundledAssetTest < Sprockets::TestCase
 
       File.unlink(dep)
 
-      assert_raises(Sprockets::FileNotFound) do
+      assert_raises(Sprockets::NotFound) do
         asset('test-main.js')
       end
     end

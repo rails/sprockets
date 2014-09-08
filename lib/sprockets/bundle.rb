@@ -18,9 +18,6 @@ module Sprockets
       type     = input[:content_type]
 
       cache = Hash.new do |h, path|
-        unless env.file?(path)
-          raise FileNotFound, "could not find #{path}"
-        end
         uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(path)}?type=#{type}&processed"
         h[path] = env.find_asset_by_uri(uri).to_hash
       end
