@@ -6,7 +6,7 @@ module AssetTests
   end
 
   test "uri can find itself" do
-    assert_kind_of URI, @asset.uri
+    # assert_kind_of URI, @asset.uri
     assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
   end
 
@@ -168,7 +168,7 @@ class StaticAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file:#{fixture_path('asset/POW.png')}?type=image/png",
+    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png",
       @asset.uri.to_s
   end
 
@@ -264,7 +264,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file:#{fixture_path('asset/application.js')}?type=application/javascript&processed",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&processed",
       @asset.uri.to_s
   end
 
@@ -326,7 +326,7 @@ class BundledAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file:#{fixture_path('asset/application.js')}?type=application/javascript",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript",
       @asset.uri.to_s
   end
 

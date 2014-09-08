@@ -10,20 +10,19 @@ module Sprockets
   # Also see DirectiveProcessor.
   class Bundle
     def self.call(input)
-      env      = input[:environment]
-      filename = input[:filename]
-      type     = input[:content_type]
+      env  = input[:environment]
+      type = input[:content_type]
+      processed_uri = input[:uri].to_s + "&processed"
 
       cache = Hash.new do |h, uri|
         h[uri] = env.find_asset_by_uri(uri)
       end
 
-      find_required = proc { |path| cache[path].metadata[:required] }
-      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{type}&processed"
-      required = Utils.dfs(uri, &find_required)
-      stubbed  = Utils.dfs(cache[uri].metadata[:stubbed], &find_required)
+      find_required = proc { |uri| cache[uri].metadata[:required] }
+      required = Utils.dfs(processed_uri, &find_required)
+      stubbed  = Utils.dfs(cache[processed_uri].metadata[:stubbed], &find_required)
       required.subtract(stubbed)
-      assets = required.map { |path| cache[path] }
+      assets = required.map { |uri| cache[uri] }
 
       env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type))
     end

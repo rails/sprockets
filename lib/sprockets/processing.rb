@@ -159,12 +159,13 @@ module Sprockets
     # Internal: Run processors on filename and data.
     #
     # Returns Hash.
-    def process(processors, filename, load_path, name, content_type, data)
+    def process(processors, uri, filename, load_path, name, content_type, data)
       metadata = {}
 
       input = {
         environment: self,
         cache: cache,
+        uri: uri,
         filename: filename,
         load_path: load_path,
         name: name,

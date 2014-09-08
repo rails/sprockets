@@ -185,7 +185,7 @@ module Sprockets
 
         uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{asset[:content_type]}"
         uri += "&processed" if processors.any? && !should_bundle
-        asset[:uri] = URI(uri)
+        asset[:uri] = uri
 
         if processors.any?
           build_processed_asset_hash(asset, processors)
@@ -197,6 +197,7 @@ module Sprockets
       def build_processed_asset_hash(asset, processors)
         processed = process(
           processors,
+          asset[:uri],
           asset[:filename],
           asset[:load_path],
           asset[:name],
