@@ -82,6 +82,15 @@ module Sprockets
       end
     end
 
+    # Deprecated: Get all required Assets.
+    #
+    # See Asset#to_a
+    #
+    # Returns Array of Assets.
+    def dependencies
+      to_a.reject { |a| a.filename.eql?(self.filename) }
+    end
+
     # Public: Array of required processed assets.
     #
     # This allows you to link to individual files for debugging
