@@ -183,6 +183,10 @@ module Sprockets
         processors = should_bundle ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(options[:accept_encoding])
 
+        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{asset[:content_type]}"
+        uri += "&processed" if processors.any? && !should_bundle
+        asset[:uri] = URI(uri)
+
         if processors.any?
           build_processed_asset_hash(asset, processors)
         else

@@ -5,6 +5,11 @@ module AssetTests
     define_method("test_#{name.inspect}", &block)
   end
 
+  test "uri can find itself" do
+    assert_kind_of URI, @asset.uri
+    assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
+  end
+
   test "pathname is a Pathname that exists" do
     assert_kind_of Pathname, @asset.pathname
     assert @asset.pathname.exist?
@@ -162,6 +167,11 @@ class StaticAssetTest < Sprockets::TestCase
 
   include AssetTests
 
+  test "uri" do
+    assert_equal "file:#{fixture_path('asset/POW.png')}?type=image/png",
+      @asset.uri.to_s
+  end
+
   test "logical path can find itself" do
     assert_equal @asset, @env[@asset.logical_path]
   end
@@ -253,6 +263,11 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   include AssetTests
 
+  test "uri" do
+    assert_equal "file:#{fixture_path('asset/application.js')}?type=application/javascript&processed",
+      @asset.uri.to_s
+  end
+
   test "logical path can find itself" do
     assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
   end
@@ -309,6 +324,11 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   include AssetTests
+
+  test "uri" do
+    assert_equal "file:#{fixture_path('asset/application.js')}?type=application/javascript",
+      @asset.uri.to_s
+  end
 
   test "logical path can find itself" do
     assert_equal @asset, @env[@asset.logical_path]

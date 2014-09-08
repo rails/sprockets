@@ -46,6 +46,13 @@ module Sprockets
       @pathname ||= Pathname.new(filename)
     end
 
+    # Public: Internal URI to lookup asset by.
+    #
+    # NOT a publically accessible URL.
+    #
+    # Returns URI.
+    attr_reader :uri
+
     # Public: Return logical path with digest spliced in.
     #
     #   "foo/bar-37b51d194a7513e45b56f6524f2d51f2.js"
