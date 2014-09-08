@@ -3,6 +3,8 @@ require 'sprockets/bower'
 require 'sprockets/errors'
 require 'sprockets/resolve'
 require 'sprockets/server'
+require 'uri'
+require 'rack/utils'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -70,6 +72,27 @@ module Sprockets
     def find_asset(*args)
       status, asset = find_asset_with_status(*args)
       asset if status == :ok
+    end
+
+    def find_asset_by_uri(uri)
+      uri     = URI(uri)
+      path    = uri.path
+      options = Rack::Utils.parse_query(uri.query)
+
+      # Temporary sanity checks
+      unless uri.scheme == 'file'
+        raise "invalid URI: must be file scheme"
+      end
+
+      unless absolute_path?(path)
+        raise "invalid URI: path must be absolute"
+      end
+
+      unless options['type']
+        raise "invalid URI: missing type"
+      end
+
+      find_asset(path, accept: options['type'])
     end
 
     # Preferred `find_asset` shorthand.

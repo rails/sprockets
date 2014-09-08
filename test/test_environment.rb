@@ -111,6 +111,16 @@ $app.run(function($templateCache) {
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
 
+  test "find asset by uri" do
+    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript")
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+
+    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
+    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+    assert_equal 'text/css', asset.content_type
+  end
+
   test "resolve web component files" do
     assert_equal fixture_path("default/menu/menu.js"),
       @env.resolve("menu/menu.js")
