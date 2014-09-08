@@ -119,6 +119,10 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
+
+    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&processed")
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
   end
 
   test "resolve web component files" do
