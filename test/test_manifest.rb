@@ -153,6 +153,30 @@ class TestManifest < Sprockets::TestCase
     assert_equal gallery_digest_path, data['assets']['gallery.css']
   end
 
+  test "compile asset with links" do
+    main_digest_path = @env['gallery-link.js'].digest_path
+    dep_digest_path  = @env['gallery.js'].digest_path
+
+    assert !File.exist?("#{@dir}/#{main_digest_path}")
+    assert !File.exist?("#{@dir}/#{dep_digest_path}")
+
+    @manifest.compile('gallery-link.js')
+    assert File.directory?(@manifest.directory)
+    assert File.file?(@manifest.filename)
+
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/#{main_digest_path}")
+    assert File.exist?("#{@dir}/#{dep_digest_path}")
+
+    data = JSON.parse(File.read(@manifest.filename))
+    assert data['files'][main_digest_path]
+    assert data['files'][dep_digest_path]
+    assert_equal "gallery-link.js", data['files'][main_digest_path]['logical_path']
+    assert_equal "gallery.js", data['files'][dep_digest_path]['logical_path']
+    assert_equal main_digest_path, data['assets']['gallery-link.js']
+    assert_equal dep_digest_path, data['assets']['gallery.js']
+  end
+
   test "compile with regex" do
     app_digest_path = @env['application.js'].digest_path
     gallery_digest_path = @env['gallery.css'].digest_path
