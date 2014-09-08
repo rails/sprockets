@@ -256,7 +256,7 @@ module Sprockets
     # Internal: Run bundle reducers on set of Assets producing a reduced
     # metadata Hash.
     #
-    # assets - Array of asset Hashes
+    # assets - Array of Assets
     # reducers - Array of [initial, reducer_proc] pairs
     #
     # Returns reduced asset metadata Hash.
@@ -268,14 +268,14 @@ module Sprockets
       # Deprecated: For Asset#to_a
       initial[:required_asset_hashes] = []
 
-      assets.reduce(initial) do |h, asset_hash|
+      assets.reduce(initial) do |h, asset|
         reducers.each do |k, (_, block)|
           # TODO: Avoid creating asset wrapper here
-          value = k == :data ? Asset.new(asset_hash).source : asset_hash[:metadata][k]
+          value = k == :data ? asset.source : asset.metadata[k]
           h[k]  = h.key?(k) ? block.call(h[k], value) : value
         end
         # Deprecated: For Asset#to_a
-        h[:required_asset_hashes] << asset_hash
+        h[:required_asset_hashes] << asset.to_hash
         h
       end
     end

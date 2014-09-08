@@ -86,16 +86,16 @@ module Sprockets
 
       data, directives = result.values_at(:data, :directives)
 
-      @required_paths   = Set.new(input[:metadata][:required_paths])
-      @stubbed_paths    = Set.new(input[:metadata][:stubbed_paths])
+      @required         = Set.new(input[:metadata][:required])
+      @stubbed          = Set.new(input[:metadata][:stubbed])
       @linked_paths     = Set.new(input[:metadata][:links])
       @dependency_paths = Set.new(input[:metadata][:dependency_paths])
 
       process_directives(directives)
 
       { data: data,
-        required_paths: @required_paths,
-        stubbed_paths: @stubbed_paths,
+        required: @required,
+        stubbed: @stubbed,
         links: @linked_paths,
         dependency_paths: @dependency_paths }
     end
@@ -195,7 +195,9 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required_paths << resolve(path, accept: @content_type)
+        filename = resolve(path, accept: @content_type)
+        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
+        @required << uri
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -209,10 +211,11 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        if @required_paths.include?(@filename)
+        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(@filename)}?type=#{@content_type}&processed"
+        if @required.include?(uri)
           raise ArgumentError, "require_self can only be called once per source file"
         end
-        @required_paths << @filename
+        @required << uri
       end
 
       # `require_directory` requires all the files inside a single
@@ -235,7 +238,8 @@ module Sprockets
             if subpath == @filename
               next
             elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              @required_paths << subpath
+              uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(subpath)}?type=#{@content_type}&processed"
+              @required << uri
             end
           end
         else
@@ -259,18 +263,19 @@ module Sprockets
 
           @dependency_paths << root
 
-          required_paths = []
+          required = []
           @environment.stat_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
               @dependency_paths << subpath
             elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              required_paths << subpath
+              required << subpath
             end
           end
-          required_paths.sort_by(&:to_s).each do |filename|
-            @required_paths << filename
+          required.sort_by(&:to_s).each do |subpath|
+            uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(subpath)}?type=#{@content_type}&processed"
+            @required << uri
           end
         else
           # The path must be relative and start with a `./`.
@@ -320,7 +325,9 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_paths << resolve(path, accept: @content_type)
+        filename = resolve(path, accept: @content_type)
+        uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
+        @stubbed << uri
       end
 
       def process_link_directive(path)

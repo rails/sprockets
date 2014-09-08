@@ -31,15 +31,15 @@ module Sprockets
       @pathname     = Pathname.new(@filename)
       @content_type = input[:content_type]
 
-      @required_paths   = Set.new(@metadata[:required_paths])
-      @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
+      @required         = Set.new(@metadata[:required])
+      @stubbed          = Set.new(@metadata[:stubbed])
       @linked_paths     = Set.new(@metadata[:links])
       @dependency_paths = Set.new(@metadata[:dependency_paths])
     end
 
     def metadata
-      { required_paths: @required_paths,
-        stubbed_paths: @stubbed_paths,
+      { required: @required,
+        stubbed: @stubbed,
         links: @linked_paths,
         dependency_paths: @dependency_paths }
     end
@@ -132,7 +132,8 @@ module Sprockets
     def require_asset(path)
       filename = resolve(path, accept: @content_type)
       depend_on_asset(filename)
-      @required_paths << filename
+      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
+      @required << uri
       nil
     end
 
@@ -140,7 +141,9 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed_paths << resolve(path, accept: @content_type).to_s
+      filename = resolve(path, accept: @content_type)
+      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(filename)}?type=#{@content_type}&processed"
+      @stubbed << uri
       nil
     end
 
