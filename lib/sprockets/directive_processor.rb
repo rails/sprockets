@@ -324,6 +324,14 @@ module Sprockets
         @stubbed << resolve_uri(path)
       end
 
+      # Declares a linked dependency on the target asset.
+      #
+      # The `path` must be a valid asset and should not already be part of the
+      # bundle. Any linked assets will automatically be compiled along with the
+      # current.
+      #
+      #   /*= link "logo.png" */
+      #
       def process_link_directive(path)
         if asset = @environment.find_asset(resolve(path, accept: "#{@content_type}, */*"))
           @dependency_paths.merge(asset.metadata[:dependency_paths])

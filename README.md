@@ -320,6 +320,31 @@ directory specified by *path*.
 `require_self` tells Sprockets to insert the body of the current
 source file before any subsequent `require` directives.
 
+### The `link` Directive ###
+
+`link` *path* declares a dependency on the target *path* and adds it to a list
+of subdependencies to automatically be compiled when the asset is written out to
+disk.
+
+For an example, in a CSS file you might reference an external image that always
+need to be compiled along with the css file.
+
+``` css
+/* link "logo.png" */
+.logo {
+  background-image: url(logo.png)
+}
+```
+
+However, if you use a `asset-path/url` SCSS helper, these links will
+automatically be setup for you.
+
+``` css
+.logo {
+  background-image: asset-url("logo.png")
+}
+```
+
 ### The `depend_on` Directive ###
 
 `depend_on` *path* declares a dependency on the given *path* without
