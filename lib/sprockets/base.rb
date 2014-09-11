@@ -9,6 +9,7 @@ module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
     include PathUtils, HTTPUtils
+    include AssetURI
     include Configuration
     include Server
     include Resolve
