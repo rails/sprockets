@@ -259,9 +259,13 @@ module Sprockets
         end
 
         if asset
-          yield asset
-          asset.links.each do |link|
-            yield environment.find_asset_by_uri(link)
+          queue = [asset]
+
+          while asset = queue.shift
+            yield asset
+            asset.links.each do |link|
+              queue.push(environment.find_asset_by_uri(link))
+            end
           end
         end
 
