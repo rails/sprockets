@@ -9,7 +9,12 @@ class TestYUICompressor < Sprockets::TestCase
       cache: Sprockets::Cache.new
     }
     output = "function foo(){return true};"
-    assert_equal output, Sprockets::YUICompressor.call(input)
+
+    begin
+      assert_equal output, Sprockets::YUICompressor.call(input)
+    rescue YUI::Compressor::RuntimeError
+      skip "No Java runtime present"
+    end
   end
 
   test "compress css" do
@@ -19,6 +24,11 @@ class TestYUICompressor < Sprockets::TestCase
       cache: Sprockets::Cache.new
     }
     output = "h1{color:red}"
-    assert_equal output, Sprockets::YUICompressor.call(input)
+
+    begin
+      assert_equal output, Sprockets::YUICompressor.call(input)
+    rescue YUI::Compressor::RuntimeError
+      skip "No Java runtime present"
+    end
   end
 end
