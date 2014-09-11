@@ -392,6 +392,8 @@ submit a pull request.
 * Manifest compilation will no longer generate .gz files by default. [Mixing
   Content-Encoding and ETags is just a bad
   idea](https://issues.apache.org/bugzilla/show_bug.cgi?id=39727)
+* Added linked or referenced assets. When an asset is compiled, any of its links
+  will be compiled as well.
 
 **2.12.2** (September 5, 2014)
 
