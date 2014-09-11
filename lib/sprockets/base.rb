@@ -76,15 +76,17 @@ module Sprockets
     end
 
     def find_asset_by_uri(uri)
-      uri     = URI(uri)
-      path    = URI::Generic::DEFAULT_PARSER.unescape(uri.path)
-      path.force_encoding(Encoding::UTF_8)
-      options = Rack::Utils.parse_query(uri.query)
+      path, params = parse_asset_uri(uri)
+      asset = find_asset(
+        path,
+        accept: params[:type],
+        bundle: !params.key?(:processed),
+        if_match: params[:etag]
+      )
 
-      unless asset = find_asset(path, accept: options['type'], bundle: !options.key?('processed'), if_match: options['etag'])
+      unless asset
         raise NotFound, "could not find #{uri}"
       end
-
       asset
     end
 
