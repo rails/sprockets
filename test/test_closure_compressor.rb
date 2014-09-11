@@ -8,6 +8,11 @@ class TestClosureCompressor < Sprockets::TestCase
       :cache => Sprockets::Cache.new
     }
     output = "function foo(){return!0};\n"
-    assert_equal output, Sprockets::ClosureCompressor.call(input)
+
+    begin
+      assert_equal output, Sprockets::ClosureCompressor.call(input)
+    rescue Closure::Error
+      skip "No Java runtime present"
+    end
   end
 end
