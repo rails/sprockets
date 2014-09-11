@@ -197,9 +197,7 @@ module Sprockets
         # Ensure originally read file is marked as a dependency
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
-        path, params = parse_asset_uri(asset[:uri])
-        params[:etag] = processed[:digest]
-        asset[:uri] = build_asset_uri(path, params)
+        asset[:uri] = update_asset_uri(asset[:uri], etag: processed[:digest])
 
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
@@ -210,12 +208,9 @@ module Sprockets
       end
 
       def build_static_asset_hash(asset)
-        stat = self.stat(asset[:filename])
+        stat   = self.stat(asset[:filename])
         digest = digest_class.file(asset[:filename]).hexdigest
-
-        path, params = parse_asset_uri(asset[:uri])
-        params[:etag] = digest
-        uri = build_asset_uri(path, params)
+        uri    = update_asset_uri(asset[:uri], etag: digest)
 
         asset.merge({
           encoding: Encoding::BINARY,

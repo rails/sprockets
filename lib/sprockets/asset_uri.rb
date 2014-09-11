@@ -30,5 +30,10 @@ module Sprockets
 
       return path, params
     end
+
+    def update_asset_uri(str, new_params = {})
+      path, params = parse_asset_uri(str)
+      build_asset_uri(path, params.merge(new_params))
+    end
   end
 end
