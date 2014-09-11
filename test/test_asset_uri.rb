@@ -32,5 +32,9 @@ class TestAssetURI < Sprockets::TestCase
       parse_asset_uri("file:///usr/local/var/github/app/assets/images/logo.svg?type=image/svg+xml&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709")
     assert_equal ["/usr/local/var/github/app/assets/stylesheets/users.css", {type: 'text/css', processed: true}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&processed")
+
+    assert_raises Sprockets::InvalidURIError do
+      parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
+    end
   end
 end

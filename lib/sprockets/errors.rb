@@ -7,4 +7,5 @@ module Sprockets
   class FileNotFound            < Error; end
   class FileOutsidePaths        < Error; end
   class NotImplementedError     < Error; end
+  class InvalidURIError         < Error; end
 end

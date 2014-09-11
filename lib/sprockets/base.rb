@@ -81,19 +81,6 @@ module Sprockets
       path.force_encoding(Encoding::UTF_8)
       options = Rack::Utils.parse_query(uri.query)
 
-      # Temporary sanity checks
-      unless uri.scheme == 'file'
-        raise "invalid URI: must be file scheme"
-      end
-
-      unless absolute_path?(path)
-        raise "invalid URI: path must be absolute"
-      end
-
-      unless options['type']
-        raise "invalid URI: missing type"
-      end
-
       unless asset = find_asset(path, accept: options['type'], bundle: !options.key?('processed'), if_match: options['etag'])
         raise NotFound, "could not find #{uri}"
       end
