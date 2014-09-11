@@ -1,15 +1,15 @@
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/errors'
+require 'sprockets/legacy'
 require 'sprockets/resolve'
 require 'sprockets/server'
-require 'sprockets/legacy'
+require 'uri'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
     include PathUtils, HTTPUtils
-    include AssetURI
     include Configuration
     include Server
     include Resolve
@@ -75,11 +75,55 @@ module Sprockets
       asset if status == :ok
     end
 
+    def build_asset_uri(path, params = {})
+      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(path)}"
+      query = []
+      query << "type=#{params[:type]}" if params[:type]
+      query << "processed" if params[:processed]
+      query << "encoding=#{params[:encoding]}" if params[:encoding]
+      query << "etag=#{params[:etag]}" if params[:etag]
+      uri += "?#{query.join('&')}" if query.any?
+      uri
+    end
+
+    def parse_asset_uri(str)
+      uri = URI(str)
+
+      unless uri.scheme == 'file'
+        raise InvalidURIError, "expected file:// scheme: #{str}"
+      end
+
+      path = URI::Generic::DEFAULT_PARSER.unescape(uri.path)
+      path.force_encoding(Encoding::UTF_8)
+
+      params = uri.query.to_s.split('&').reduce({}) do |h, p|
+        k, v = p.split('=', 2)
+        h.merge(k.to_sym => v || true)
+      end
+
+      if params[:type] && !self.mime_types.key?(params[:type])
+        raise InvalidURIError, "unknown type: #{params[:type]}"
+      end
+
+
+      if params[:encoding] && !self.encodings.key?(params[:encoding])
+        raise InvalidURIError, "unknown encoding: #{params[:encoding]}"
+      end
+
+      return path, params
+    end
+
+    def update_asset_uri(str, new_params = {})
+      path, params = parse_asset_uri(str)
+      build_asset_uri(path, params.merge(new_params))
+    end
+
     def find_asset_by_uri(uri)
       path, params = parse_asset_uri(uri)
 
-      type = params[:type]
-      etag = params[:etag]
+      type     = params[:type]
+      etag     = params[:etag]
+      encoding = params[:encoding]
 
       if !file?(path)
         raise FileNotFound, "could not find file: #{path}"
@@ -87,7 +131,7 @@ module Sprockets
         raise ConversionError, "could not convert to type: #{type}"
       end
 
-      asset_hash = build_asset_hash(path, bundle: !params.key?(:processed), accept: type)
+      asset_hash = build_asset_hash(path, bundle: !params.key?(:processed), accept: type, accept_encoding: encoding)
       asset = Asset.new(self, asset_hash)
 
       if etag && asset.digest != etag
