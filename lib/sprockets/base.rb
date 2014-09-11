@@ -77,17 +77,26 @@ module Sprockets
 
     def find_asset_by_uri(uri)
       path, params = parse_asset_uri(uri)
-      asset = find_asset(
+      status, asset = find_asset_with_status(
         path,
         accept: params[:type],
         bundle: !params.key?(:processed),
         if_match: params[:etag]
       )
 
-      unless asset
-        raise NotFound, "could not find #{uri}"
+      if status == :ok
+        asset
+      else
+        if status == :precondition_failed
+          raise VersionNotFound, "could not find specified etag: #{params[:etag]}"
+        elsif !file?(path)
+          raise FileNotFound, "could not find file: #{path}"
+        elsif !resolve_path_transform_type(path, params[:type])
+          raise ConversionError, "could not convert to type: #{params[:type]}"
+        else
+          raise NotFound, "could not find asset: #{uri}"
+        end
       end
-      asset
     end
 
     # Preferred `find_asset` shorthand.

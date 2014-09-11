@@ -3,9 +3,11 @@ module Sprockets
   class Error           < StandardError; end
   class ArgumentError           < Error; end
   class ContentTypeMismatch     < Error; end
-  class NotFound                < Error; end
-  class FileNotFound            < Error; end
-  class FileOutsidePaths        < Error; end
   class NotImplementedError     < Error; end
   class InvalidURIError         < Error; end
+  class NotFound                < Error; end
+  class ConversionError         < NotFound; end
+  class FileNotFound            < NotFound; end
+  class FileOutsidePaths        < NotFound; end
+  class VersionNotFound         < NotFound; end
 end
