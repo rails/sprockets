@@ -119,12 +119,10 @@ module Sprockets
 
     def find_asset_by_uri(uri)
       _, params = parse_asset_uri(uri)
-
-      if params.key?(:etag)
-        Asset.new(self, build_asset_by_etag_uri(uri))
-      else
-        Asset.new(self, build_asset_by_uri(uri))
-      end
+      asset = params.key?(:etag) ?
+        build_asset_by_etag_uri(uri) :
+        build_asset_by_uri(uri)
+      Asset.new(self, asset)
     end
 
     # Preferred `find_asset` shorthand.
@@ -202,7 +200,7 @@ module Sprockets
       end
 
       def build_asset_by_uri(uri)
-        path, params = parse_asset_uri(uri)
+        filename, params = parse_asset_uri(uri)
 
         # Internal assertion, should be routed through build_asset_by_etag_uri
         if params.key?(:etag)
@@ -211,19 +209,13 @@ module Sprockets
 
         type     = params[:type]
         encoding = params[:encoding]
-
-        if !file?(path)
-          raise FileNotFound, "could not find file: #{path}"
-        elsif type && !resolve_path_transform_type(path, type)
-          raise ConversionError, "could not convert to type: #{type}"
-        end
-
-        build_asset_hash(path, bundle: !params.key?(:processed), type: type, accept_encoding: encoding)
-      end
-
-      def build_asset_hash(filename, options)
         load_path, logical_path = paths_split(self.paths, filename)
-        unless load_path
+
+        if !file?(filename)
+          raise FileNotFound, "could not find file: #{filename}"
+        elsif type && !resolve_path_transform_type(filename, type)
+          raise ConversionError, "could not convert to type: #{type}"
+        elsif !load_path
           raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
         end
 
@@ -233,27 +225,28 @@ module Sprockets
         asset = {
           load_path: load_path,
           filename: filename,
-          name: logical_path
+          name: logical_path,
+          logical_path: logical_path
         }
 
-        if asset_type = options[:type]
-          asset[:content_type] = asset_type
-          asset[:logical_path] = logical_path + mime_types[asset_type][:extensions].first
-        else
-          asset[:logical_path] = logical_path
+        if type
+          asset[:content_type] = type
+          asset[:logical_path] += mime_types[type][:extensions].first
         end
 
         processed_processors = unwrap_preprocessors(file_type) +
           unwrap_engines(engine_extnames).reverse +
-          unwrap_transformer(file_type, asset_type) +
-          unwrap_postprocessors(asset_type)
-        bundled_processors = unwrap_bundle_processors(asset_type)
+          unwrap_transformer(file_type, type) +
+          unwrap_postprocessors(type)
+        bundled_processors = unwrap_bundle_processors(type)
 
-        should_bundle = options[:bundle] && bundled_processors.any?
+        # TODO: Simplify bundle/processed inputs
+        should_bundle = !params.key?(:processed) && bundled_processors.any?
         processors = should_bundle ? bundled_processors : processed_processors
-        processors += unwrap_encoding_processors(options[:accept_encoding])
+        processors += unwrap_encoding_processors(encoding)
 
-        asset[:uri] = build_asset_uri(filename, type: asset[:content_type], processed: processors.any? && !should_bundle)
+        # TODO: Should be able to use uri local
+        asset[:uri] = build_asset_uri(filename, type: type, processed: processors.any? && !should_bundle)
 
         if processors.any?
           build_processed_asset_hash(asset, processors)

@@ -108,16 +108,12 @@ module Sprockets
     end
 
     private
-      # Internal: Get a postprocessor to perform the first available accept
-      # encoding.
+      # Internal: Get a postprocessor to perform the encoding.
       #
-      # accept_encoding - String Accept-Encoding header value.
+      # encoding - String encoding.
       #
       # Returns an Array of Processors.
-      def unwrap_encoding_processors(accept_encodings)
-        available_encodings = self.encodings.keys + ['identity']
-        encoding = find_best_q_match(accept_encodings, available_encodings)
-
+      def unwrap_encoding_processors(encoding)
         processors = []
         if encoder = self.encodings[encoding]
           processors << lambda do |input|
