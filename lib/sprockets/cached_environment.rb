@@ -61,6 +61,53 @@ module Sprockets
         ]
       end
 
+      def asset_etag_uri_cache_key(uri)
+        [
+          'asset-etag-uri',
+          VERSION,
+          self.version,
+          uri
+        ]
+      end
+
+      def build_asset_by_etag_uri(uri)
+        cache.fetch(asset_etag_uri_cache_key(uri)) do
+          super
+        end
+      end
+
+      def build_asset_by_uri(uri)
+        filename, _ = parse_asset_uri(uri)
+
+        dep_graph_key = [
+          'asset-uri-dep-graph',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          file_hexdigest(filename)
+        ]
+
+        paths, digest, etag_uri = cache._get(dep_graph_key)
+        if paths && digest && etag_uri
+          if dependencies_hexdigest(paths) == digest
+            if asset = cache._get(asset_etag_uri_cache_key(etag_uri))
+              return asset
+            end
+          end
+        end
+
+        asset = super(uri)
+
+        etag_uri = asset[:uri]
+        digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
+        cache._set(dep_graph_key, [paths, digest, etag_uri])
+
+        cache.fetch(asset_etag_uri_cache_key(etag_uri)) { asset }
+
+        asset
+      end
+
       # Cache asset building in memory and in persisted cache.
       def build_asset_hash(filename, options)
         digest_key = asset_digest_cache_key(filename, options)
@@ -76,18 +123,14 @@ module Sprockets
           end
         end
 
-        if hash = super
-          cache._set(digest_key, hash[:digest])
+        hash = super
+        cache._set(digest_key, hash[:digest])
 
-          # Push into asset digest cache
-          hash_key = asset_hash_cache_key(filename, hash[:digest], options)
-          # cache._set(hash_key, hash)
-          cache.fetch(hash_key) { hash }
+        # Push into asset etag cache
+        cache.fetch(asset_hash_cache_key(filename, hash[:digest], options)) { hash }
+        cache.fetch(asset_etag_uri_cache_key(hash[:uri])) { hash }
 
-          return hash
-        end
-
-        nil
+        hash
       end
 
     private

@@ -119,26 +119,13 @@ module Sprockets
     end
 
     def find_asset_by_uri(uri)
-      path, params = parse_asset_uri(uri)
+      _, params = parse_asset_uri(uri)
 
-      type     = params[:type]
-      etag     = params[:etag]
-      encoding = params[:encoding]
-
-      if !file?(path)
-        raise FileNotFound, "could not find file: #{path}"
-      elsif type && !resolve_path_transform_type(path, type)
-        raise ConversionError, "could not convert to type: #{type}"
+      if params.key?(:etag)
+        Asset.new(self, build_asset_by_etag_uri(uri))
+      else
+        Asset.new(self, build_asset_by_uri(uri))
       end
-
-      asset_hash = build_asset_hash(path, bundle: !params.key?(:processed), accept: type, accept_encoding: encoding)
-      asset = Asset.new(self, asset_hash)
-
-      if etag && asset.digest != etag
-        raise VersionNotFound, "could not find specified etag: #{etag}"
-      end
-
-      asset
     end
 
     # Preferred `find_asset` shorthand.
@@ -191,6 +178,43 @@ module Sprockets
         else
           return :not_found
         end
+      end
+
+      def build_asset_by_etag_uri(uri)
+        path, params = parse_asset_uri(uri)
+
+        # Internal assertion, should be routed through build_asset_by_uri
+        unless etag = params.delete(:etag)
+          raise ArgumentError, "expected uri to have an etag: #{uri}"
+        end
+
+        asset = build_asset_by_uri(build_asset_uri(path, params))
+
+        if etag && asset[:digest] != etag
+          raise VersionNotFound, "could not find specified etag: #{etag}"
+        end
+
+        asset
+      end
+
+      def build_asset_by_uri(uri)
+        path, params = parse_asset_uri(uri)
+
+        # Internal assertion, should be routed through build_asset_by_etag_uri
+        if params.key?(:etag)
+          raise ArgumentError, "expected uri to have no etag: #{uri}"
+        end
+
+        type     = params[:type]
+        encoding = params[:encoding]
+
+        if !file?(path)
+          raise FileNotFound, "could not find file: #{path}"
+        elsif type && !resolve_path_transform_type(path, type)
+          raise ConversionError, "could not convert to type: #{type}"
+        end
+
+        build_asset_hash(path, bundle: !params.key?(:processed), accept: type, accept_encoding: encoding)
       end
 
       def build_asset_hash(filename, options)

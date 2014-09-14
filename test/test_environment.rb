@@ -531,6 +531,8 @@ $app.run(function($templateCache) {
       @env.build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', processed: true)
     assert_equal "file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip",
       @env.build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: 'gzip')
+    assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.js?type=application/javascript&processed&etag=b5df367abb741cac6526b05a726e9e8d7bd863d2",
+      @env.build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.js", type: 'application/javascript', processed: true, etag: 'b5df367abb741cac6526b05a726e9e8d7bd863d2')
   end
 
   test "parse asset uri" do
@@ -546,6 +548,8 @@ $app.run(function($templateCache) {
       @env.parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&processed")
     assert_equal ["/usr/local/var/github/app/assets/images/logo.png", {encoding: 'gzip'}],
       @env.parse_asset_uri("file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip")
+    assert_equal ["/usr/local/var/github/app/assets/javascripts/application.js", {type: 'application/javascript', processed: true, etag: 'b5df367abb741cac6526b05a726e9e8d7bd863d2'}],
+      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js?type=application/javascript&processed&etag=b5df367abb741cac6526b05a726e9e8d7bd863d2")
 
     assert_raises Sprockets::InvalidURIError do
       @env.parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
