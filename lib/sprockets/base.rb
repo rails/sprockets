@@ -142,37 +142,19 @@ module Sprockets
 
     protected
       def find_asset_with_status(path, options = {})
-        path = path.to_s
-        options = options.dup
-        options[:bundle] = true unless options.key?(:bundle)
-        accept = options.delete(:accept)
-        if_match = options.delete(:if_match)
-        if_none_match = options.delete(:if_none_match)
+        # Wheres AS Hash#slice
+        resolve_options = {}
+        resolve_options[:accept] = options[:accept] if options.key?(:accept)
+        resolve_options[:bundle] = options[:bundle] if options.key?(:bundle)
+        resolve_options[:accept_encoding] = options[:accept_encoding] if options.key?(:accept_encoding)
 
-        if absolute_path?(path)
-          path = File.expand_path(path)
-          if file?(path) && (accept.nil? || resolve_path_transform_type(path, accept))
-            filename = path
-          end
-        else
-          filename = resolve_all(path, accept: accept).first
-          mime_type = parse_path_extnames(path)[1]
-          accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
-        end
-
-        if filename
-          type = resolve_path_transform_type(filename, accept)
-
-          available_encodings = self.encodings.keys + ['identity']
-          encoding = find_best_q_match(options[:accept_encoding], available_encodings)
-
-          uri = build_asset_uri(filename, type: type, processed: !options[:bundle], encoding: encoding)
+        if uri = resolve_asset_uri(path, resolve_options)
           asset_hash = build_asset_by_uri(uri)
           asset = Asset.new(self, asset_hash) if asset_hash
 
-          if if_match && asset.digest != if_match
+          if options[:if_match] && asset.digest != options[:if_match]
             return :precondition_failed
-          elsif if_none_match && asset.digest == if_none_match
+          elsif options[:if_none_match] && asset.digest == options[:if_none_match]
             return :not_modified
           else
             return :ok, asset
