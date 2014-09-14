@@ -1,0 +1,254 @@
+body {
+  font-family: Times, "Times New Roman", serif;
+  background-color: #fff;
+  background-repeat: repeat-x;
+  margin: 0;
+  padding: 0;
+}
+
+.home body {
+  background-image: url(../images/background-yellow.png);
+}
+
+.installation_and_usage body {
+  background-image: url(../images/background-green.png);
+}
+
+a {
+  color: #00e;
+}
+
+body.grid div#page {
+  background-image: url(../images/grid.png);
+  background-position: -45px -33px;
+  padding: 33px 45px;
+  margin: 33px auto 132px;
+}
+
+div#page {
+  width: 990px;
+  margin: 66px auto 132px;
+}
+
+div#header {
+  overflow: hidden;
+  height: 99px;
+  position: relative;
+}
+
+div#header span,
+div#header h2 {
+  display: none;
+}
+
+div#header h1 {
+  background: url(../images/sprockets.png);
+  position: absolute;
+  top: 16px;
+  left: 90px;
+  width: 271px;
+  height: 30px;
+}
+
+div#header h1 a {
+  display: block;
+  width: 271px;
+  height: 30px;
+  border: none;
+}
+
+a#install_link {
+  display: block;
+  position: absolute;
+  width: 269px;
+  height: 29px;
+  top: 38px;
+  right: 90px;
+  background: url(../images/install_and_use_now.png);
+}
+
+div#explanation {
+  overflow: hidden;
+  margin: 1px 0 15px 0;
+  width: 990px;
+  height: 281px;
+  background: url(../images/explanation.png);
+}
+
+div#explanation p {
+  display: none;
+}
+
+div#content {
+  overflow: hidden;
+  color: #333;
+  line-height: 33px;
+  padding: 10px 0 0 90px;
+  margin: 0;
+  width: 900px;
+}
+
+.home div#content div.section {
+  overflow: hidden;
+}
+
+div#content h3 code,
+div#content p,
+div#content li {
+  font-size: 20px;
+}
+
+div#content p code,
+div#content li code {
+  font-size: 16px;
+  vertical-align: bottom;
+  background: #eef;
+  border: 1px solid #ddd;
+  padding: 2px;
+}
+
+div#content code,
+div#content li pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 16px;
+}
+
+div#content p {
+  margin: 0 90px 33px 0;
+}
+
+div#content li {
+  margin: 0 135px 0 45px;
+  padding: 0;
+}
+
+div#content ol ol {
+  margin: 0 0 0 45px;
+}
+
+div#content li pre,
+div#content li p {
+  margin-right: 0;
+}
+
+div#content h2,
+div#content h3,
+div#content pre,
+div#content ul,
+div#content ol {
+  margin: 0 0 33px;
+  padding: 0;
+}
+
+div#content pre {
+  margin-right: 90px;
+  background: #eee;
+}
+
+div#content h2,
+div#content h3,
+div#content strong {
+  color: #000;
+}
+
+div#content h2 {
+  margin: 66px 90px 20px 0;
+  padding: 0 0 9px;
+  border-bottom: 4px solid #000;
+  font-size: 28px;
+  letter-spacing: -1px;
+}
+
+.home div#content h2 {
+  border: none;
+}
+
+div#content h3 {
+  font-size: 22px;
+  margin: 0 90px 24px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #888;
+}
+
+div#content h2.image {
+  height: 21px;
+  margin: -9px auto 42px;
+  padding: 6px 0;
+}
+
+div#content h2.image span {
+  display: none;
+}
+
+div#content div.column {
+  float: left;
+  width: 360px;
+  margin: 0 90px 0 0;
+}
+
+div#content div.column p {
+  margin-right: 0;
+  font-size: 18px;
+}
+
+div#content div.column strong {
+  margin-right: 7px;
+  font-size: 20px;
+}
+
+div#content h2#why {
+  background: url(../images/why.png) no-repeat bottom left;
+  width: 456px;
+}
+
+div#content h2#how {
+  background: url(../images/how.png) no-repeat bottom left;
+  width: 339px;
+}
+
+div#installation_and_usage {
+  background: url(../images/installation_and_usage.png);
+  margin: 0 0 19px 90px;
+  width: 810px;
+  height: 145px;
+}
+
+div#installation_and_usage h1 {
+  display: none;
+}
+
+div#content div.toc ol {
+  margin-left: -45px;
+}
+
+div#content div.toc ol ol {
+  margin-left: 45px;
+}
+
+div#content div.toc ol li {
+  list-style-type: none;
+}
+
+div#content div.toc a {
+  color: #333;
+  text-decoration: none;
+}
+
+div#content div.toc a span {
+  text-decoration: underline;
+}
+
+div#footer {
+  border-top: 1px solid #888;
+  width: 810px;
+  margin: 21px 90px;
+}
+
+div#footer p {
+  line-height: 33px;
+  text-align: center;
+  font-size: 13px;
+  color: #555;
+}

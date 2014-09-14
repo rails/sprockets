@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="installation_and_usage">
+  <head>
+    <title>JavaScript dependency management and concatenation: Sprockets</title>
+    <link rel="stylesheet" type="text/css" href="./stylesheets/sprockets.css">
+  </head>
+  <body>
+    <div id="page">
+      <div id="header" ondblclick="with (document.body) className = className.match(/grid/) ? '' : 'grid'">
+        <h1><a href="index.html"><span>Sprockets</span></a></h1>
+        <h2><span>JavaScript dependency management and concatenation</span></h2>
+      </div>
+
+      <div id="installation_and_usage">
+        <h1><span>Installation &amp; usage</span></h1>
+      </div>
+
+      <div id="content">
+        <div class="section toc">
+          <ol>
+            <li><a href="#installing_sprockets"><span>Installing Sprockets</span></a></li>
+            <li><a href="#sprocketizing_your_source_code"><span>Sprocketizing your source code</span></a></li>
+            <ol>
+              <li><a href="#how_sprockets_handles_comments"><span>How Sprockets handles comments</span></a></li>
+              <li><a href="#specifying_dependencies_with_the_require_directive"><span>Specifying dependencies with the</span> <code>require</code> <span>directive</span></a></li>
+              <li><a href="#bundling_assets_with_the_provide_directive"><span>Bundling assets with the</span> <code>provide</code> <span>directive</span></a></li>
+              <li><a href="#inserting_string_constants"><span>Inserting string constants with</span> <code>&lt;%= ... %&gt;</code></a></li>
+            </ol>
+            <li><a href="#using_sprockets"><span>Using Sprockets</span></a></li>
+            <ol>
+              <li><a href="#sprockets_as_a_ruby_library"><span>Sprockets as a Ruby library</span></a></li>
+              <li><a href="#using_sprocketize_from_the_command_line"><span>Using</span> <code>sprocketize</code> <span>from the command line</span></a></li>
+              <li><a href="#using_the_sprockets-rails_plugin_in_your_rails_application"><span>Using the</span> <code>sprockets-rails</code> <span>plugin in your Rails application</span></a></li>
+              <li><a href="#using_the_bundled_sprockets_cgi_script"><span>Using the bundled Sprockets CGI script</span></a></li>
+            </ol>
+            <li><a href="#contributing_to_sprockets"><span>Contributing to Sprockets</span></a></li>
+            <ol>
+              <li><a href="#reporting_bugs"><span>Reporting bugs</span></a></li>
+            </ol>
+          </ol>
+        </div>
+
+        <div class="section">
+          <h2 id="installing_sprockets"><span>Installing Sprockets</span></h2>
+
+          <p>Sprockets is written in Ruby and has no runtime dependencies apart from the Ruby standard library. You can install it with RubyGems:</p>
+
+<pre><code>$ gem install --remote sprockets
+</code></pre>
+
+          <p>This will also install the <code>sprocketize</code> command-line utility.</p>
+        </div>
+
+        <div class="section">
+          <h2 id="sprocketizing_your_source_code"><span>Sprocketizing your source code</span></h2>
+
+          <p>Sprockets takes any number of <em>source files</em> and preprocesses them line-by-line in order to build a single <em>concatenation</em>. Specially formatted lines act as <em>directives</em> to the Sprockets preprocessor, telling it to <em>require</em> the contents of another file or library first or to <em>provide</em> a set of asset files to the document root. Sprockets attempts to fulfill required dependencies by searching a set of directories called the <em>load path</em>.</p>
+
+          <h3 id="how_sprockets_handles_comments">How Sprockets handles comments</h3>
+
+          <p>Use single-line (<code>//</code>) comments in JavaScript source files for comments that don&rsquo;t need to appear in the resulting concatenated output. Use multiple-line (<code>/* ... */</code>) comments for comments that <em>should</em> appear in the resulting concatenated output, like copyright notices or descriptive headers. PDoc (<code>/** ... **/</code>) documentation comments will not be included in the resulting concatenation.</p>
+
+          <p>Comments beginning with <code>//=</code> are treated by Sprockets as <em>directives</em>. Sprockets currently understands two directives, <code>require</code> and <code>provide</code>.</p>
+
+          <h3 id="specifying_dependencies_with_the_require_directive">Specifying dependencies with the <code>require</code> directive</h3>
+
+          <p>Use the <code>require</code> directive to tell Sprockets that another JavaScript source file should be inserted into the concatenation before continuing to preprocess the current source file. If the specified source file has already been required, Sprockets ignores the directive.</p>
+
+          <p>The format of a <code>require</code> directive determines how Sprockets looks for the dependent source file. If you place the name of the source file in angle brackets:</p>
+
+<pre><code>//= require &lt;prototype&gt;
+</code></pre>
+
+          <p>Sprockets will search your load path, in order, for a file named <code>prototype.js</code>, and begin preprocessing the first match it finds. (An error will be raised if a matching file can&rsquo;t be found.) If you place the name of the source file in quotes:</p>
+
+<pre><code>//= require "date_helper"
+</code></pre>
+
+          <p>Sprockets will <em>not</em> search the load path, but will instead look for a file named <code>date_helper.js</code> in the same directory as the current source file. In general, it is a good idea to use quotes to refer to related files, and angle brackets to refer to packages, libraries, or third-party code that may live in a different location.</p>
+
+          <p>You can refer to files in subdirectories with the <code>require</code> directive. For example:</p>
+
+<pre><code>//= require &lt;behavior/hover_observer&gt;
+</code></pre>
+
+          <p>Sprockets will search the load path for a file named <code>hover_observer.js</code> in a directory named <code>behavior</code>.</p>
+
+          <h3 id="bundling_assets_with_the_provide_directive">Bundling assets with the <code>provide</code> directive</h3>
+
+          <p>Sometimes it is necessary to include associated stylesheets, images, or even HTML files with a JavaScript plugin. Sprockets lets you specify that a JavaScript source file depends on a set of assets, and offers a routine for copying all dependent assets into the document root.</p>
+
+          <p>The <code>provide</code> directive tells Sprockets that the current source file depends on the set of assets in the named directory. For example, say you have a plugin with the following directory structure:</p>
+
+<pre><code>plugins/color_picker/assets/images/color_picker/arrow.png
+plugins/color_picker/assets/images/color_picker/circle.png
+plugins/color_picker/assets/images/color_picker/hue.png
+plugins/color_picker/assets/images/color_picker/saturation_and_brightness.png
+plugins/color_picker/assets/stylesheets/color_picker.css
+plugins/color_picker/src/color.js
+plugins/color_picker/src/color_picker.js
+</code></pre>
+
+          <p>Assume <code>plugins/color_picker/src/</code> is in your Sprockets load path. <code>plugins/color_picker/src/color_picker.js</code> might look like this:</p>
+
+<pre><code>//= require "color"
+//= provide "../assets"
+</code></pre>
+
+          <p>When <code>&lt;color_picker&gt;</code> is required in your application, its <code>provide</code> directive will tell Sprockets that all files in the <code>plugins/color_picker/assets/</code> directory should be copied into the web server&rsquo;s document root.</p>
+
+          <h3 id="inserting_string_constants">Inserting string constants with <code>&lt;%= ... %&gt;</code></h3>
+
+          <p>You may need to parameterize and insert constants into your source code. Sprockets lets you define such constants in a special file called <code>constants.yml</code> that lives in your load path. This file is formatted as a <a href="http://yaml.org/spec/1.2/">YAML</a> hash.</p>
+
+          <p>Continuing the <code>color_picker</code> example, assume <code>plugins/color_picker/src/constants.yml</code> contains the following:</p>
+
+<pre><code>COLOR_PICKER_VERSION: 1.0.0
+COLOR_PICKER_AUTHOR: Sam Stephenson &lt;sam@example.org&gt;
+</code></pre>
+
+          <p>The constants are specified in a single place, and you can now insert them into your source code without repetition:</p>
+
+<pre><code>/* Color Picker plugin, version &lt;%= COLOR_PICKER_VERSION %&gt;
+ * (c) 2009 &lt;%= COLOR_PICKER_AUTHOR %&gt;
+ * Distributed under the terms of an MIT-style license */
+
+var ColorPicker = {
+  VERSION: '&lt;%= COLOR_PICKER_VERSION %&gt;',
+  ...
+};
+</code></pre>
+
+          <p>The resulting concatenated output will have the constant values substituted in place:</p>
+
+<pre><code>/* Color Picker plugin, version 1.0.0
+ * (c) 2009 Sam Stephenson &lt;sam@example.org&gt;
+ * Distributed under the terms of an MIT-style license */
+
+var ColorPicker = {
+  VERSION: '1.0.0',
+  ...
+};
+</code></pre>
+
+          <p>Constants share a global namespace, so you can refer to constants defined anywhere in your load path. If a constant is not found, Sprockets raises an error and halts further preprocessing.</p>
+        </div>
+
+        <div class="section">
+          <h2 id="using_sprockets"><span>Using Sprockets</span></h2>
+
+          <p>Sprockets is distributed as a Ruby library. It comes with a command-line tool called <code>sprocketize</code> for generating concatenations and installing provided assets. You can also use the <code>sprockets-rails</code> plugin to sprocketize your Rails application. A simple CGI is bundled with Sprockets for use in other environments.</p>
+
+          <h3 id="sprockets_as_a_ruby_library">Sprockets as a Ruby library</h3>
+
+          <p>The simplest way to use Sprockets from Ruby is with the <code>Sprockets::Secretary</code> class. A <code>Secretary</code> handles the job of setting up a Sprockets environment, creating a preprocessor, loading your application&rsquo;s source files, and generating the resulting concatenation.</p>
+
+          <p>You can pass the following options to <code>Sprockets::Secretary.new</code>:</p>
+
+          <ul>
+          <li><code>:root</code> - Specifies the Sprockets root, or the base location for all directories specified in the load path and source files required by the preprocessor. Defaults to <code>"."</code> (the current working directory).</li>
+          <li><code>:asset_root</code> - Specifies the application&rsquo;s document root, or the directory from which the web server serves its files.</li>
+          <li><code>:load_path</code> - An ordered array of directory names (either absolute paths, or paths relative to the Sprockets root) where Sprockets will search for required JavaScript dependencies.</li>
+          <li><code>:source_files</code> - An ordered array of JavaScript source files (either absolute paths, or paths relative to the Sprockets root) that Sprockets will require one-by-one to build the resulting concatenation.</li>
+          <li><code>:expand_paths</code> - Specifies whether or not Sprockets will expand filenames in the <code>load_path</code> and <code>source_files</code> arrays according to shell glob rules (e.g. <code>:load_path =&gt; ["vendor/sprockets/*/src"]</code> or <code>:source_files =&gt; ["app/javascripts/**/*.js"]</code>). Defaults to <code>true</code>; set it to <code>false</code> if you do <em>not</em> want shell expansion applied to paths.</li>
+          </ul>
+
+
+          <p>Once you have a <code>Secretary</code> object, you can call its <code>concatenation</code> method to get a <code>Sprockets::Concatenation</code> object back. You can also call its <code>install_assets</code> method to install provided assets into the directory specified by the <code>:asset_root</code> option.</p>
+
+          <p>Example:</p>
+
+<pre><code>secretary = Sprockets::Secretary.new(
+  :asset_root   =&gt; "public",
+  :load_path    =&gt; ["vendor/sprockets/*/src", "vendor/plugins/*/javascripts"],
+  :source_files =&gt; ["app/javascripts/application.js", "app/javascripts/**/*.js"]
+)
+
+# Generate a Sprockets::Concatenation object from the source files
+concatenation = secretary.concatenation
+# Write the concatenation to disk
+concatenation.save_to("public/sprockets.js")
+
+# Install provided assets into the asset root
+secretary.install_assets
+</code></pre>
+
+          <p>You can ask the <code>Secretary</code> for the most recent last-modified time of all the source files that make up the concatenation with the <code>source_last_modified</code> method. Use this in conjunction with the <code>reset!</code> method to reuse a <code>Secretary</code> instance across multiple requests and only regenerate concatenations when the source file has changed.</p>
+
+          <h3 id="using_sprocketize_from_the_command_line">Using <code>sprocketize</code> from the command line</h3>
+
+          <p>The <code>sprocketize</code> command is a simple wrapper around <code>Sprockets::Secretary</code>. It takes any number of source files (specified as command-line arguments) and preprocesses them according to the options you pass. Then it prints the resulting concatenation to standard output, where it can be redirected to a file or piped to another program for further processing.</p>
+
+          <p>You can pass the following command-line options to <code>sprocketize</code>:</p>
+
+<pre><code>-C, --directory=DIRECTORY    Change to DIRECTORY before doing anything
+-I, --include-dir=DIRECTORY  Adds the directory to the Sprockets load path
+-a, --asset-root=DIRECTORY   Copy provided assets into DIRECTORY
+-h, --help                   Shows this help message
+-v, --version                Shows version
+</code></pre>
+
+          <p>Example:</p>
+
+<pre><code>$ sprocketize -I app/javascripts \
+              -I vendor/sprockets/prototype/src \
+              -I vendor/sprockets/color_picker/src \
+              --asset-root=public \
+              app/javascripts/*.js &gt; public/sprockets.js
+</code></pre>
+
+          <h3 id="using_the_sprockets-rails_plugin_in_your_rails_application">Using the <code>sprockets-rails</code> plugin in your Rails application</h3>
+
+          <p>The <a href="http://github.com/sstephenson/sprockets-rails/tree/master"><code>sprockets-rails</code></a> plugin (distributed separately) sets up your Rails application for use with Sprockets. To install it, first install the <code>sprockets</code> RubyGem, then check out a copy of the <code>sprockets-rails</code> repository into your <code>vendor/plugins/</code> directory. When you run the bundled <code>install.rb</code> script, <code>sprockets-rails</code> will create two new directories in your application and copy a configuration file into your <code>config/</code> directory.</p>
+
+          <p><code>sprockets-rails</code> includes a controller named <code>SprocketsController</code> that renders your application&rsquo;s Sprockets concatenation. When caching is enabled, e.g. in production mode, <code>SprocketsController</code> uses Rails page caching to save the concatenated output to <code>public/sprockets.js</code> the first time it is requested. When caching is disabled, e.g. in development mode, <code>SprocketsController</code> will render a fresh concatenation any time a source file changes.</p>
+
+          <p>To source Sprockets&rsquo; JavaScript concatenation from your HTML templates, use the provided <code>sprockets_include_tag</code> helper.</p>
+
+          <p><code>sprockets-rails</code> also includes a set of Rake tasks for generating the concatenation (<code>rake sprockets:install_script</code>) and installing provided assets (<code>rake sprockets:install_assets</code>). Run <code>sprockets:install_assets</code> any time you add or update a Sprockets plugin in your application. Add <code>sprockets:install_script</code> as a <a href="http://www.capify.org/">Capistrano</a> post-deploy hook to generate the Sprockets concatenation on your servers automatically at deploy time.</p>
+
+          <p>Here&rsquo;s a walkthrough of the installation process:</p>
+
+          <ol>
+          <li><p><code>gem install --remote sprockets</code></p></li>
+          <li><p><code>script/plugin install git://github.com/sstephenson/sprockets-rails.git</code></p>
+          <p>You now have <code>app/javascripts/</code> and <code>vendor/sprockets/</code> directories in your application, as well as a <code>config/sprockets.yml</code> file.</p></li>
+          <li><p>Edit your <code>config/routes.rb</code> file to add routes for <code>SprocketsController</code>:</p>
+<pre><code>ActionController::Routing::Routes.draw do |map|
+  # Add the following line:
+  SprocketsApplication.routes(map)
+  ...
+end
+</code></pre></li>
+          <li><p>Move your JavaScript source files from <code>public/javascripts/</code> into <code>app/javascripts/</code>. All files in all subdirectories of <code>app/javascripts/</code> will be required by Sprockets in alphabetical order, with the exception of <code>app/javascripts/application.js</code>, which is required <em>before any other file</em>. (You can change this behavior by editing the <code>source_files</code> line of <code>config/sprockets.yml</code>.)</p></li>
+          <li><p>Adjust your HTML templates to call <code>&lt;%= sprockets_include_tag %&gt;</code> instead of <code>&lt;%= javascript_include_tag ... %&gt;</code>.</p></li>
+          </ol>
+
+
+          <p>Once <code>sprockets-rails</code> is installed, you can check out Sprockets plugins into the <code>vendor/sprockets/</code> directory. By default, <code>sprockets-rails</code> configures Sprockets&rsquo; load path to search <code>vendor/sprockets/*/src/</code>, as well as <code>vendor/plugins/*/javascripts/</code>. This means that the <code>javascripts/</code> directories of Rails plugins are automatically installed into your Sprockets load path.</p>
+
+          <h3 id="using_the_bundled_sprockets_cgi_script">Using the bundled Sprockets CGI script</h3>
+
+          <p>Sprockets comes with a simple CGI script for serving JavaScript outside of a Ruby environment. You can find it, along with brief documentation and installation instructions, as <code>ext/nph-sprockets.cgi</code> in your copy of the Sprockets source code. (If you installed Sprockets with RubyGems, you can find the location of the Sprockets source code with the <code>gem which sprockets</code> command.)</p>
+        </div>
+
+        <div class="section">
+          <h2 id="contributing_to_sprockets"><span>Contributing to Sprockets</span></h2>
+
+          <p>The Sprockets source code is hosted on <a href="http://github.com/">GitHub</a>. Check out a working copy with <a href="http://git-scm.com/">Git</a>:</p>
+
+<pre><code>$ git clone git://github.com/sstephenson/sprockets.git
+</code></pre>
+
+          <p>You can fork the Sprockets project on GitHub, commit your changes, and <a href="http://github.com/guides/pull-requests">send a pull request</a> if you&rsquo;d like your feature or bug fix to be considered for the next release. Please make sure to update the unit tests as well.</p>
+
+          <h3 id="reporting_bugs">Reporting bugs</h3>
+
+          <p>If you find a bug in Sprockets and aren&rsquo;t feeling motivated to fix it yourself, you can file a ticket at the <a href="http://prototype.lighthouseapp.com/projects/8888-sprockets">Sprockets Lighthouse project</a>.</p>
+        </div>
+      </div>
+
+      <div id="footer">
+        <p>&copy; 2009 <a href="http://twitter.com/sstephenson">Sam Stephenson</a></p>
+      </div>
+    </div>
+  </body>
+</html>

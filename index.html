@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html class="home">
+  <head>
+    <title>JavaScript dependency management and concatenation: Sprockets</title>
+    <link rel="stylesheet" type="text/css" href="./stylesheets/sprockets.css">
+  </head>
+  <body>
+    <div id="page">
+      <div id="header" ondblclick="with (document.body) className = className.match(/grid/) ? '' : 'grid'">
+        <h1><span>Sprockets</span></h1>
+        <h2><span>JavaScript dependency management and concatenation</span></h2>
+        <a id="install_link" href="installation_and_usage.html"><span>&rarr; Install &amp; use now</span></a>
+      </div>
+
+      <div id="explanation">
+        <p>Sprockets helps you turn messy JavaScript into clean modules for development and a single file for deployment.</p>
+      </div>
+
+      <div id="content">
+        <div class="section">
+          <p>Sprockets is a Ruby library that preprocesses and concatenates JavaScript source files. It takes any number of source files and preprocesses them line-by-line in order to build a single concatenation. Specially formatted lines act as directives to the Sprockets preprocessor, telling it to require the contents of another file or library first or to provide a set of asset files (such as images or stylesheets) to the document root. Sprockets attempts to fulfill required dependencies by searching a set of directories called the load path.</p>
+        </div>
+
+        <div class="section">
+          <h2 id="why" class="image"><span>Why use Sprockets?</span></h2>
+
+          <div class="column">
+            <p><strong>Extract reusable code and share it across multiple web sites or applications.</strong> Sprockets makes it easy to extract JavaScript plugins from your site or application and share them across your portfolio. Use your SCM to check out plugin repositories directly into your site or application. Then tell Sprockets to add the plugins to your load path. Support for asset provisioning lets you bundle CSS and images with JavaScript plugins, too.</p>
+
+            <p><strong>Organize your JavaScript source code into multiple commented files and directories.</strong> Finally, an end to navigating long, difficult-to-maintain JavaScript source files. With Sprockets, JavaScript source code can live anywhere on your system, even outside your site&rsquo;s or application&rsquo;s document root. You&rsquo;re free to split source code up into multiple files and organize those files into directories during development. You can also add as many comments as you want&mdash;they&rsquo;ll be stripped from the resulting concatenated output automatically.</p>
+          </div>
+
+          <div class="column">
+            <p><strong>Speed up your site by automatically concatenating JavaScript into one file.</strong> Concatenating your site&rsquo;s JavaScript means all your source code is cached in the browser on the first hit. It also means you reduce the number of HTTP requests necessary to load a single page. When combined with gzip compression on the web server, concatenation is the fastest way to serve JavaScript to your users.</p>
+
+            <p><strong>Use bleeding-edge framework and library code in your application.</strong> If you use and contribute to open-source JavaScript frameworks and libraries that use Sprockets, like <a href="http://www.prototypejs.org/">Prototype</a> and <a href="http://script.aculo.us/">script.aculo.us</a>, the build processes for those scripts can be integrated directly into your application. That makes it possible to track the latest development versions of your framework and library dependencies by adding their repositories to your Sprockets load path.</p>
+
+            <p><strong>Sprockets is documentation-friendly</strong> when used with the <a href="http://www.pdoc.org/">PDoc</a> documentation system.</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 id="how" class="image"><span>How to get it</span></h2>
+
+          <p>Sprockets is open-source software distributed under the MIT license. You can <a href="http://github.com/sstephenson/sprockets/tree/master">view the source</a> on GitHub or <a href="installation_and_usage.html">install Sprockets</a> with RubyGems. <a href="http://prototype.lighthouseapp.com/projects/8888-sprockets">Report bugs</a> on the Sprockets Lighthouse project.</p>
+        </div>
+      </div>
+
+      <div id="footer">
+        <p>&copy; 2009 <a href="http://twitter.com/sstephenson">Sam Stephenson</a></p>
+      </div>
+    </div>
+  </body>
+</html>
