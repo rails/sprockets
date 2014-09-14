@@ -38,26 +38,15 @@ module Sprockets
     end
 
     protected
-      def asset_hash_cache_key(filename, digest, options)
+      def asset_dependency_graph_cache_key(uri)
+        filename, _ = parse_asset_uri(uri)
         [
-          'asset-hash',
+          'asset-uri-dep-graph',
           VERSION,
           self.version,
-          filename,
-          digest,
-          options
-        ]
-      end
-
-      def asset_digest_cache_key(filename, options)
-        [
-          'asset-digest',
-          VERSION,
-          self.version,
-          filename,
-          options,
-          file_hexdigest(filename),
-          self.paths
+          self.paths,
+          uri,
+          file_hexdigest(filename)
         ]
       end
 
@@ -76,61 +65,28 @@ module Sprockets
         end
       end
 
-      # def build_asset_by_uri(uri)
-      #   filename, _ = parse_asset_uri(uri)
-      #
-      #   dep_graph_key = [
-      #     'asset-uri-dep-graph',
-      #     VERSION,
-      #     self.version,
-      #     self.paths,
-      #     uri,
-      #     file_hexdigest(filename)
-      #   ]
-      #
-      #   paths, digest, etag_uri = cache._get(dep_graph_key)
-      #   if paths && digest && etag_uri
-      #     if dependencies_hexdigest(paths) == digest
-      #       if asset = cache._get(asset_etag_uri_cache_key(etag_uri))
-      #         return asset
-      #       end
-      #     end
-      #   end
-      #
-      #   asset = super(uri)
-      #
-      #   etag_uri = asset[:uri]
-      #   digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
-      #   cache._set(dep_graph_key, [paths, digest, etag_uri])
-      #
-      #   cache.fetch(asset_etag_uri_cache_key(etag_uri)) { asset }
-      #
-      #   asset
-      # end
+      def build_asset_by_uri(uri)
+        dep_graph_key = asset_dependency_graph_cache_key(uri)
 
-      # Cache asset building in memory and in persisted cache.
-      def build_asset_hash(filename, options)
-        digest_key = asset_digest_cache_key(filename, options)
-
-        if digest = cache._get(digest_key)
-          hash_key = asset_hash_cache_key(filename, digest, options)
-
-          if hash = cache._get(hash_key)
-            digest, paths = hash[:metadata].values_at(:dependency_digest, :dependency_paths)
-            if dependencies_hexdigest(paths) == digest
-              return hash
+        paths, digest, etag_uri = cache._get(dep_graph_key)
+        if paths && digest && etag_uri
+          if dependencies_hexdigest(paths) == digest
+            if asset = cache._get(asset_etag_uri_cache_key(etag_uri))
+              return asset
             end
           end
         end
 
-        hash = super
-        cache._set(digest_key, hash[:digest])
+        asset = super
 
-        # Push into asset etag cache
-        cache.fetch(asset_hash_cache_key(filename, hash[:digest], options)) { hash }
-        cache.fetch(asset_etag_uri_cache_key(hash[:uri])) { hash }
+        etag_uri = asset[:uri]
+        digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
+        cache._set(dep_graph_key, [paths, digest, etag_uri])
 
-        hash
+        cache._set(asset_etag_uri_cache_key(etag_uri), asset)
+        # cache.fetch(asset_etag_uri_cache_key(etag_uri)) { asset }
+
+        asset
       end
 
     private
