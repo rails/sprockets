@@ -80,7 +80,7 @@ module Sprockets
       query = []
       query << "type=#{params[:type]}" if params[:type]
       query << "processed" if params[:processed]
-      query << "encoding=#{params[:encoding]}" if params[:encoding]
+      query << "encoding=#{params[:encoding]}" if params[:encoding] && params[:encoding] != 'identity'
       query << "etag=#{params[:etag]}" if params[:etag]
       uri += "?#{query.join('&')}" if query.any?
       uri
@@ -104,7 +104,6 @@ module Sprockets
       if params[:type] && !self.mime_types.key?(params[:type])
         raise InvalidURIError, "unknown type: #{params[:type]}"
       end
-
 
       if params[:encoding] && !self.encodings.key?(params[:encoding])
         raise InvalidURIError, "unknown encoding: #{params[:encoding]}"
@@ -164,8 +163,13 @@ module Sprockets
         end
 
         if filename
-          options = { bundle: options[:bundle], accept: accept, accept_encoding: options[:accept_encoding] }
-          asset_hash = build_asset_hash(filename, options)
+          type = resolve_path_transform_type(filename, accept)
+
+          available_encodings = self.encodings.keys + ['identity']
+          encoding = find_best_q_match(options[:accept_encoding], available_encodings)
+
+          uri = build_asset_uri(filename, type: type, processed: !options[:bundle], encoding: encoding)
+          asset_hash = build_asset_by_uri(uri)
           asset = Asset.new(self, asset_hash) if asset_hash
 
           if if_match && asset.digest != if_match
@@ -214,7 +218,7 @@ module Sprockets
           raise ConversionError, "could not convert to type: #{type}"
         end
 
-        build_asset_hash(path, bundle: !params.key?(:processed), accept: type, accept_encoding: encoding)
+        build_asset_hash(path, bundle: !params.key?(:processed), type: type, accept_encoding: encoding)
       end
 
       def build_asset_hash(filename, options)
@@ -232,7 +236,7 @@ module Sprockets
           name: logical_path
         }
 
-        if asset_type = resolve_transform_type(file_type, options[:accept])
+        if asset_type = options[:type]
           asset[:content_type] = asset_type
           asset[:logical_path] = logical_path + mime_types[asset_type][:extensions].first
         else

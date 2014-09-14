@@ -76,37 +76,37 @@ module Sprockets
         end
       end
 
-      def build_asset_by_uri(uri)
-        filename, _ = parse_asset_uri(uri)
-
-        dep_graph_key = [
-          'asset-uri-dep-graph',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          file_hexdigest(filename)
-        ]
-
-        paths, digest, etag_uri = cache._get(dep_graph_key)
-        if paths && digest && etag_uri
-          if dependencies_hexdigest(paths) == digest
-            if asset = cache._get(asset_etag_uri_cache_key(etag_uri))
-              return asset
-            end
-          end
-        end
-
-        asset = super(uri)
-
-        etag_uri = asset[:uri]
-        digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
-        cache._set(dep_graph_key, [paths, digest, etag_uri])
-
-        cache.fetch(asset_etag_uri_cache_key(etag_uri)) { asset }
-
-        asset
-      end
+      # def build_asset_by_uri(uri)
+      #   filename, _ = parse_asset_uri(uri)
+      #
+      #   dep_graph_key = [
+      #     'asset-uri-dep-graph',
+      #     VERSION,
+      #     self.version,
+      #     self.paths,
+      #     uri,
+      #     file_hexdigest(filename)
+      #   ]
+      #
+      #   paths, digest, etag_uri = cache._get(dep_graph_key)
+      #   if paths && digest && etag_uri
+      #     if dependencies_hexdigest(paths) == digest
+      #       if asset = cache._get(asset_etag_uri_cache_key(etag_uri))
+      #         return asset
+      #       end
+      #     end
+      #   end
+      #
+      #   asset = super(uri)
+      #
+      #   etag_uri = asset[:uri]
+      #   digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
+      #   cache._set(dep_graph_key, [paths, digest, etag_uri])
+      #
+      #   cache.fetch(asset_etag_uri_cache_key(etag_uri)) { asset }
+      #
+      #   asset
+      # end
 
       # Cache asset building in memory and in persisted cache.
       def build_asset_hash(filename, options)
