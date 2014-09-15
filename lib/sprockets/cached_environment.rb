@@ -39,7 +39,7 @@ module Sprockets
 
     protected
       def asset_dependency_graph_cache_key(uri)
-        filename, _ = parse_asset_uri(uri)
+        filename, _ = AssetURI.parse(uri)
         [
           'asset-uri-dep-graph',
           VERSION,

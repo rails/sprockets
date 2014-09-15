@@ -4,7 +4,6 @@ require 'sprockets/errors'
 require 'sprockets/legacy'
 require 'sprockets/resolve'
 require 'sprockets/server'
-require 'uri'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -75,42 +74,8 @@ module Sprockets
       asset if status == :ok
     end
 
-    def build_asset_uri(path, params = {})
-      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(path)}"
-      query = []
-      query << "type=#{params[:type]}" if params[:type]
-      query << "processed" if params[:processed]
-      query << "encoding=#{params[:encoding]}" if params[:encoding]
-      query << "digest=#{params[:digest]}" if params[:digest]
-      uri += "?#{query.join('&')}" if query.any?
-      uri
-    end
-
-    def parse_asset_uri(str)
-      uri = URI(str)
-
-      unless uri.scheme == 'file'
-        raise InvalidURIError, "expected file:// scheme: #{str}"
-      end
-
-      path = URI::Generic::DEFAULT_PARSER.unescape(uri.path)
-      path.force_encoding(Encoding::UTF_8)
-
-      params = uri.query.to_s.split('&').reduce({}) do |h, p|
-        k, v = p.split('=', 2)
-        h.merge(k.to_sym => v || true)
-      end
-
-      return path, params
-    end
-
-    def update_asset_uri(str, new_params = {})
-      path, params = parse_asset_uri(str)
-      build_asset_uri(path, params.merge(new_params))
-    end
-
     def find_asset_by_uri(uri)
-      _, params = parse_asset_uri(uri)
+      _, params = AssetURI.parse(uri)
       asset = params.key?(:digest) ?
         build_asset_by_digest_uri(uri) :
         build_asset_by_uri(uri)
@@ -157,14 +122,14 @@ module Sprockets
       end
 
       def build_asset_by_digest_uri(uri)
-        path, params = parse_asset_uri(uri)
+        path, params = AssetURI.parse(uri)
 
         # Internal assertion, should be routed through build_asset_by_uri
         unless digest = params.delete(:digest)
           raise ArgumentError, "expected uri to have an digest: #{uri}"
         end
 
-        asset = build_asset_by_uri(build_asset_uri(path, params))
+        asset = build_asset_by_uri(AssetURI.build(path, params))
 
         if digest && asset[:metadata][:dependency_digest] != digest
           raise VersionNotFound, "could not find specified digest: #{digest}"
@@ -174,7 +139,7 @@ module Sprockets
       end
 
       def build_asset_by_uri(uri)
-        filename, params = parse_asset_uri(uri)
+        filename, params = AssetURI.parse(uri)
 
         # Internal assertion, should be routed through build_asset_by_digest_uri
         if params.key?(:digest)
@@ -224,7 +189,7 @@ module Sprockets
         end
 
         # TODO: Should be able to use uri local
-        asset[:uri] = build_asset_uri(filename, type: type, processed: processors.any? && !should_bundle)
+        asset[:uri] = AssetURI.build(filename, type: type, processed: processors.any? && !should_bundle)
 
         if processors.any?
           build_processed_asset_hash(asset, processors)
@@ -247,7 +212,7 @@ module Sprockets
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
         dep_digest = dependencies_hexdigest(processed[:metadata][:dependency_paths])
-        asset[:uri] = update_asset_uri(asset[:uri], digest: dep_digest)
+        asset[:uri] = AssetURI.merge(asset[:uri], digest: dep_digest)
 
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
@@ -261,7 +226,7 @@ module Sprockets
         stat   = self.stat(asset[:filename])
         digest = digest_class.file(asset[:filename]).hexdigest
         dep_digest = dependencies_hexdigest([asset[:filename]])
-        uri    = update_asset_uri(asset[:uri], digest: dep_digest)
+        uri    = AssetURI.merge(asset[:uri], digest: dep_digest)
 
         asset.merge({
           encoding: Encoding::BINARY,

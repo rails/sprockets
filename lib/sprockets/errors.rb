@@ -4,7 +4,6 @@ module Sprockets
   class ArgumentError           < Error; end
   class ContentTypeMismatch     < Error; end
   class NotImplementedError     < Error; end
-  class InvalidURIError         < Error; end
   class NotFound                < Error; end
   class ConversionError         < NotFound; end
   class FileNotFound            < NotFound; end

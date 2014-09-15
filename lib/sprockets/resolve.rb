@@ -124,7 +124,7 @@ module Sprockets
 
       if filename
         encoding = nil if encoding == 'identity'
-        build_asset_uri(filename, type: type, processed: processed, encoding: encoding)
+        AssetURI.build(filename, type: type, processed: processed, encoding: encoding)
       end
     end
 

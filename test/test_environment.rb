@@ -537,50 +537,6 @@ $app.run(function($templateCache) {
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)
   end
-
-  # TODO: Should be internal api
-  test "build asset uri" do
-    assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.js",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.js")
-    assert_equal "file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/javascripts/foo bar.js")
-    assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.coffee", type: 'application/javascript')
-    assert_equal "file:///usr/local/var/github/app/assets/images/logo.svg?type=image/svg+xml",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/images/logo.svg", type: 'image/svg+xml')
-    assert_equal "file:///usr/local/var/github/app/assets/images/logo.svg?type=image/svg+xml&digest=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/images/logo.svg", type: 'image/svg+xml', digest: 'da39a3ee5e6b4b0d3255bfef95601890afd80709')
-    assert_equal "file:///usr/local/var/github/app/assets/dump.bin?digest=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/dump.bin", digest: "da39a3ee5e6b4b0d3255bfef95601890afd80709")
-    assert_equal "file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&processed",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', processed: true)
-    assert_equal "file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: 'gzip')
-    assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.js?type=application/javascript&processed&digest=b5df367abb741cac6526b05a726e9e8d7bd863d2",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.js", type: 'application/javascript', processed: true, digest: 'b5df367abb741cac6526b05a726e9e8d7bd863d2')
-  end
-
-  # TODO: Should be internal api
-  test "parse asset uri" do
-    assert_equal ["/usr/local/var/github/app/assets/javascripts/application.js", {}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
-    assert_equal ["/usr/local/var/github/app/assets/javascripts/foo bar.js", {}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js")
-    assert_equal ["/usr/local/var/github/app/assets/javascripts/application.coffee", {type: 'application/javascript'}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript")
-    assert_equal ["/usr/local/var/github/app/assets/images/logo.svg", {type: 'image/svg+xml', digest: 'da39a3ee5e6b4b0d3255bfef95601890afd80709'}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/images/logo.svg?type=image/svg+xml&digest=da39a3ee5e6b4b0d3255bfef95601890afd80709")
-    assert_equal ["/usr/local/var/github/app/assets/stylesheets/users.css", {type: 'text/css', processed: true}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&processed")
-    assert_equal ["/usr/local/var/github/app/assets/images/logo.png", {encoding: 'gzip'}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip")
-    assert_equal ["/usr/local/var/github/app/assets/javascripts/application.js", {type: 'application/javascript', processed: true, digest: 'b5df367abb741cac6526b05a726e9e8d7bd863d2'}],
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js?type=application/javascript&processed&digest=b5df367abb741cac6526b05a726e9e8d7bd863d2")
-
-    assert_raises Sprockets::InvalidURIError do
-      @env.parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
-    end
-  end
 end
 
 class WhitespaceProcessor
