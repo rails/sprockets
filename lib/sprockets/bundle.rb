@@ -12,7 +12,7 @@ module Sprockets
     def self.call(input)
       env  = input[:environment]
       type = input[:content_type]
-      processed_uri = input[:uri].to_s + "&processed"
+      processed_uri = env.update_asset_uri(input[:uri], processed: true)
 
       cache = Hash.new do |h, uri|
         h[uri] = env.find_asset_by_uri(uri)
