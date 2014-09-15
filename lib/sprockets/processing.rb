@@ -159,8 +159,8 @@ module Sprockets
     # Internal: Run processors on filename and data.
     #
     # Returns Hash.
-    def process(processors, uri, filename, load_path, name, content_type, data)
-      metadata = {}
+    def process(processors, uri, filename, load_path, name, content_type)
+      data, metadata = nil, {}
 
       input = {
         environment: self,
@@ -170,7 +170,6 @@ module Sprockets
         load_path: load_path,
         name: name,
         content_type: content_type,
-        data: data,
         metadata: metadata
       }
 

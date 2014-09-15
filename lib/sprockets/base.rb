@@ -219,6 +219,10 @@ module Sprockets
         processors = should_bundle ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(encoding)
 
+        if processors.any? && !should_bundle
+          processors.unshift(method(:read_input))
+        end
+
         # TODO: Should be able to use uri local
         asset[:uri] = build_asset_uri(filename, type: type, processed: processors.any? && !should_bundle)
 
@@ -236,8 +240,7 @@ module Sprockets
           asset[:filename],
           asset[:load_path],
           asset[:name],
-          asset[:content_type],
-          read_file(asset[:filename], asset[:content_type])
+          asset[:content_type]
         )
 
         # Ensure originally read file is marked as a dependency

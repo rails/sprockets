@@ -108,6 +108,10 @@ module Sprockets
     end
 
     private
+      def read_input(input)
+        read_file(input[:filename], input[:content_type])
+      end
+
       # Internal: Get a postprocessor to perform the encoding.
       #
       # encoding - String encoding.
