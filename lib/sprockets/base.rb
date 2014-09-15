@@ -119,8 +119,8 @@ module Sprockets
 
     def find_asset_by_uri(uri)
       _, params = parse_asset_uri(uri)
-      asset = params.key?(:etag) ?
-        build_asset_by_etag_uri(uri) :
+      asset = params.key?(:digest) ?
+        build_asset_by_digest_uri(uri) :
         build_asset_by_uri(uri)
       Asset.new(self, asset)
     end
@@ -164,18 +164,18 @@ module Sprockets
         end
       end
 
-      def build_asset_by_etag_uri(uri)
+      def build_asset_by_digest_uri(uri)
         path, params = parse_asset_uri(uri)
 
         # Internal assertion, should be routed through build_asset_by_uri
-        unless etag = params.delete(:etag)
-          raise ArgumentError, "expected uri to have an etag: #{uri}"
+        unless digest = params.delete(:digest)
+          raise ArgumentError, "expected uri to have an digest: #{uri}"
         end
 
         asset = build_asset_by_uri(build_asset_uri(path, params))
 
-        if etag && asset[:digest] != etag
-          raise VersionNotFound, "could not find specified etag: #{etag}"
+        if digest && asset[:metadata][:dependency_digest] != digest
+          raise VersionNotFound, "could not find specified digest: #{digest}"
         end
 
         asset
@@ -184,9 +184,9 @@ module Sprockets
       def build_asset_by_uri(uri)
         filename, params = parse_asset_uri(uri)
 
-        # Internal assertion, should be routed through build_asset_by_etag_uri
-        if params.key?(:etag)
-          raise ArgumentError, "expected uri to have no etag: #{uri}"
+        # Internal assertion, should be routed through build_asset_by_digest_uri
+        if params.key?(:digest)
+          raise ArgumentError, "expected uri to have no digest: #{uri}"
         end
 
         type     = params[:type]

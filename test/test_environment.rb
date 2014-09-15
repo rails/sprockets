@@ -139,7 +139,7 @@ $app.run(function($templateCache) {
     end
 
     assert_raises Sprockets::VersionNotFound do
-      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&etag=0000000000000000000000000000000000000000")
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&digest=0000000000000000000000000000000000000000")
     end
   end
 
