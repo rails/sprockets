@@ -403,27 +403,6 @@ $app.run(function($templateCache) {
     assert_match uri, asset.uri
   end
 
-  test "find asset by etag" do
-    asset = @env.find_asset("gallery.js")
-    assert @env.find_asset("gallery.js", if_match: asset.etag)
-    refute @env.find_asset("gallery.js", if_match: "0000000000000000000000000000000000000000")
-    refute @env.find_asset("missing.js", if_match: "0000000000000000000000000000000000000000")
-  end
-
-  test "find asset not matching etag" do
-    assert asset = @env.find_asset("gallery.js")
-    refute @env.find_asset("gallery.js", if_none_match: asset.etag)
-    assert @env.find_asset("gallery.js", if_none_match: "0000000000000000000000000000000000000000")
-    refute @env.find_asset("missing.js", if_none_match: "0000000000000000000000000000000000000000")
-  end
-
-  test "find with if and if none match" do
-    assert asset = @env.find_asset("gallery.js")
-    refute @env.find_asset("gallery.js", if_match: asset.etag, if_none_match: asset.etag)
-    refute @env.find_asset("gallery.js", if_match: "0000000000000000000000000000000000000000", if_none_match: "0000000000000000000000000000000000000000")
-    refute @env.find_asset("missing.js", if_match: "0000000000000000000000000000000000000000", if_none_match: "0000000000000000000000000000000000000000")
-  end
-
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end

@@ -25,10 +25,8 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    protected
-      # Ensure `find_asset_with_status` calls are always involved on a cached environment.
-      def find_asset_with_status(*args)
-        cached.find_asset_with_status(*args)
-      end
+    def find_asset(*args)
+      cached.find_asset(*args)
+    end
   end
 end

@@ -69,9 +69,10 @@ module Sprockets
     end
 
     # Find asset by logical path or expanded path.
-    def find_asset(*args)
-      status, asset = find_asset_with_status(*args)
-      asset if status == :ok
+    def find_asset(path, options = {})
+      if uri = resolve_asset_uri(path, options)
+        Asset.new(self, build_asset_by_uri(uri))
+      end
     end
 
     def find_asset_by_uri(uri)
@@ -98,23 +99,6 @@ module Sprockets
     end
 
     protected
-      def find_asset_with_status(path, options = {})
-        if uri = resolve_asset_uri(path, options)
-          asset_hash = build_asset_by_uri(uri)
-          asset = Asset.new(self, asset_hash) if asset_hash
-
-          if options[:if_match] && asset.digest != options[:if_match]
-            return :precondition_failed
-          elsif options[:if_none_match] && asset.digest == options[:if_none_match]
-            return :not_modified
-          else
-            return :ok, asset
-          end
-        else
-          return :not_found
-        end
-      end
-
       def build_asset_by_digest_uri(uri)
         path, params = AssetURI.parse(uri)
 
