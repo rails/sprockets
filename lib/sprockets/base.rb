@@ -81,7 +81,7 @@ module Sprockets
       query << "type=#{params[:type]}" if params[:type]
       query << "processed" if params[:processed]
       query << "encoding=#{params[:encoding]}" if params[:encoding] && params[:encoding] != 'identity'
-      query << "etag=#{params[:etag]}" if params[:etag]
+      query << "digest=#{params[:digest]}" if params[:digest]
       uri += "?#{query.join('&')}" if query.any?
       uri
     end
@@ -251,12 +251,13 @@ module Sprockets
         # Ensure originally read file is marked as a dependency
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
-        asset[:uri] = update_asset_uri(asset[:uri], etag: processed[:digest])
+        dep_digest = dependencies_hexdigest(processed[:metadata][:dependency_paths])
+        asset[:uri] = update_asset_uri(asset[:uri], digest: dep_digest)
 
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
-            dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
+            dependency_digest: dep_digest
           )
         })
       end
@@ -264,7 +265,8 @@ module Sprockets
       def build_static_asset_hash(asset)
         stat   = self.stat(asset[:filename])
         digest = digest_class.file(asset[:filename]).hexdigest
-        uri    = update_asset_uri(asset[:uri], etag: digest)
+        dep_digest = dependencies_hexdigest([asset[:filename]])
+        uri    = update_asset_uri(asset[:uri], digest: dep_digest)
 
         asset.merge({
           encoding: Encoding::BINARY,
@@ -274,7 +276,7 @@ module Sprockets
           uri: uri,
           metadata: {
             dependency_paths: Set.new([asset[:filename]]),
-            dependency_digest: dependencies_hexdigest([asset[:filename]]),
+            dependency_digest: dep_digest
           }
         })
       end

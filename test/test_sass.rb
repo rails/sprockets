@@ -319,12 +319,12 @@ div {
     end
 
     assert_equal [
-      "file://#{fixture_path('compass/foo.css')}?type=text/css&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "file://#{fixture_path('compass/foo.mov')}?etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&etag=da39a3ee5e6b4b0d3255bfef95601890afd80709"
+      "file://#{fixture_path('compass/foo.css')}?type=text/css&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.mov')}?digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&digest=10a34637ad661d98ba3344717656fcc76209c2f8"
     ], asset.links.to_a.sort
   end
 
