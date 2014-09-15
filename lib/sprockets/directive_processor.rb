@@ -236,7 +236,7 @@ module Sprockets
             if subpath == @filename
               next
             elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              @required << AssetURI.build(subpath, type: @content_type, skip_bundle: true)
+              @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
             end
           end
         else
@@ -271,7 +271,7 @@ module Sprockets
             end
           end
           required.sort_by(&:to_s).each do |subpath|
-            @required << AssetURI.build(subpath, type: @content_type, skip_bundle: true)
+            @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
           end
         else
           # The path must be relative and start with a `./`.
@@ -346,7 +346,7 @@ module Sprockets
 
       def resolve_uri(path)
         filename = resolve(path, accept: @content_type)
-        AssetURI.build(filename, type: @content_type, skip_bundle: true)
+        @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
       end
 
       def resolve(path, options = {})

@@ -131,8 +131,7 @@ module Sprockets
     #
     def require_asset(path)
       filename = resolve(path, accept: @content_type)
-      depend_on_asset(filename)
-      @required << AssetURI.build(filename, type: @content_type, skip_bundle: true)
+      @required << @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
       nil
     end
 
@@ -141,7 +140,7 @@ module Sprockets
     # in the bundle.
     def stub_asset(path)
       filename = resolve(path, accept: @content_type)
-      @stubbed << AssetURI.build(filename, type: @content_type, skip_bundle: true)
+      @stubbed << @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
       nil
     end
 
