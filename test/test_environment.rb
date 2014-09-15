@@ -117,7 +117,7 @@ $app.run(function($templateCache) {
     assert_equal 'application/javascript', asset.content_type
     assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
 
-    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&etag=4088f98ded5fdf9b60db467cb6c346926d9bedfc")
+    assert asset = @env.find_asset_by_uri(asset.uri)
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
@@ -125,10 +125,6 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
-
-    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&processed")
-    assert_equal fixture_path('default/gallery.js'), asset.filename
-    assert_equal 'application/javascript', asset.content_type
 
     assert_raises Sprockets::FileNotFound do
       @env.find_asset_by_uri("file://#{fixture_path('default/missing.js')}?type=application/javascript")
@@ -398,11 +394,13 @@ $app.run(function($templateCache) {
   end
 
   test "find asset by uri with deflate encoding" do
-    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&encoding=deflate")
+    uri = "file://#{fixture_path('default/gallery.js')}?type=application/javascript&encoding=deflate"
+    assert asset = @env.find_asset_by_uri(uri)
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal 'deflate', asset.encoding
     assert_equal 'cc7336c29eab6a34b0b36f486bb52a31cb63dac0', asset.etag
+    assert_match uri, asset.uri
   end
 
   test "find asset by etag" do

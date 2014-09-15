@@ -146,8 +146,7 @@ module Sprockets
           raise ArgumentError, "expected uri to have no digest: #{uri}"
         end
 
-        type     = params[:type]
-        encoding = params[:encoding]
+        type = params[:type]
         load_path, logical_path = paths_split(self.paths, filename)
 
         if !file?(filename)
@@ -162,6 +161,7 @@ module Sprockets
         logical_path = normalize_logical_path(logical_path)
 
         asset = {
+          uri: uri,
           load_path: load_path,
           filename: filename,
           name: logical_path,
@@ -177,21 +177,14 @@ module Sprockets
           unwrap_engines(engine_extnames).reverse +
           unwrap_transformer(file_type, type) +
           unwrap_postprocessors(type)
-        bundled_processors = unwrap_bundle_processors(type)
 
-        # TODO: Simplify bundle/processed inputs
-        should_bundle = !params.key?(:processed) && bundled_processors.any?
-        processors = should_bundle ? bundled_processors : processed_processors
-        processors += unwrap_encoding_processors(encoding)
+        bundled_processors = params[:skip_bundle] ? [] : unwrap_bundle_processors(type)
 
-        if processors.any? && !should_bundle
-          processors.unshift(method(:read_input))
-        end
-
-        # TODO: Should be able to use uri local
-        asset[:uri] = AssetURI.build(filename, type: type, processed: processors.any? && !should_bundle)
+        processors = bundled_processors.any? ? bundled_processors : processed_processors
+        processors += unwrap_encoding_processors(params[:encoding])
 
         if processors.any?
+          processors.unshift(method(:read_input))
           build_processed_asset_hash(asset, processors)
         else
           build_static_asset_hash(asset)

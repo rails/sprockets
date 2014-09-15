@@ -103,7 +103,7 @@ module Sprockets
     def resolve_asset_uri(path, options = {})
       path = path.to_s
       accept = options[:accept]
-      processed = options.key?(:bundle) ? !options[:bundle] : false
+      skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
 
       available_encodings = self.encodings.keys + ['identity']
       encoding = find_best_q_match(options[:accept_encoding], available_encodings)
@@ -124,7 +124,7 @@ module Sprockets
 
       if filename
         encoding = nil if encoding == 'identity'
-        AssetURI.build(filename, type: type, processed: processed, encoding: encoding)
+        AssetURI.build(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
       end
     end
 

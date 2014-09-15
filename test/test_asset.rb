@@ -280,7 +280,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&processed&digest=75f2ebc5cbf9654ca772b569112c8cf6a2699030",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&digest=75f2ebc5cbf9654ca772b569112c8cf6a2699030",
       @asset.uri.to_s
   end
 
