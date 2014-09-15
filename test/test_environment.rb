@@ -349,6 +349,30 @@ $app.run(function($templateCache) {
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
+  test "find asset with no encoding" do
+    assert asset = @env.find_asset("gallery.js")
+    assert_equal nil, asset.encoding
+    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
+    assert_equal 18, asset.length
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+  end
+
+  test "find asset with unknown encoding" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "zepto")
+    assert_equal nil, asset.encoding
+    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
+    assert_equal 18, asset.length
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+  end
+
+  test "find asset with identity encoding" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "identity")
+    assert_equal nil, asset.encoding
+    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
+    assert_equal 18, asset.length
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
@@ -532,8 +556,6 @@ $app.run(function($templateCache) {
       @env.build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', processed: true)
     assert_equal "file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip",
       @env.build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: 'gzip')
-    assert_equal "file:///usr/local/var/github/app/assets/images/logo.png",
-      @env.build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: 'identity')
     assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.js?type=application/javascript&processed&digest=b5df367abb741cac6526b05a726e9e8d7bd863d2",
       @env.build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.js", type: 'application/javascript', processed: true, digest: 'b5df367abb741cac6526b05a726e9e8d7bd863d2')
   end
@@ -557,12 +579,6 @@ $app.run(function($templateCache) {
 
     assert_raises Sprockets::InvalidURIError do
       @env.parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
-    end
-    assert_raises Sprockets::InvalidURIError do
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js?type=text/foo")
-    end
-    assert_raises Sprockets::InvalidURIError do
-      @env.parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js?encoding=foo")
     end
   end
 end

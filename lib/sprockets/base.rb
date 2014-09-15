@@ -80,7 +80,7 @@ module Sprockets
       query = []
       query << "type=#{params[:type]}" if params[:type]
       query << "processed" if params[:processed]
-      query << "encoding=#{params[:encoding]}" if params[:encoding] && params[:encoding] != 'identity'
+      query << "encoding=#{params[:encoding]}" if params[:encoding]
       query << "digest=#{params[:digest]}" if params[:digest]
       uri += "?#{query.join('&')}" if query.any?
       uri
@@ -99,14 +99,6 @@ module Sprockets
       params = uri.query.to_s.split('&').reduce({}) do |h, p|
         k, v = p.split('=', 2)
         h.merge(k.to_sym => v || true)
-      end
-
-      if params[:type] && !self.mime_types.key?(params[:type])
-        raise InvalidURIError, "unknown type: #{params[:type]}"
-      end
-
-      if params[:encoding] && !self.encodings.key?(params[:encoding])
-        raise InvalidURIError, "unknown encoding: #{params[:encoding]}"
       end
 
       return path, params
