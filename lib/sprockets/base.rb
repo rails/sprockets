@@ -99,13 +99,7 @@ module Sprockets
 
     protected
       def find_asset_with_status(path, options = {})
-        # Wheres AS Hash#slice
-        resolve_options = {}
-        resolve_options[:accept] = options[:accept] if options.key?(:accept)
-        resolve_options[:bundle] = options[:bundle] if options.key?(:bundle)
-        resolve_options[:accept_encoding] = options[:accept_encoding] if options.key?(:accept_encoding)
-
-        if uri = resolve_asset_uri(path, resolve_options)
+        if uri = resolve_asset_uri(path, options)
           asset_hash = build_asset_by_uri(uri)
           asset = Asset.new(self, asset_hash) if asset_hash
 
