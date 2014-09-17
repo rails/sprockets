@@ -82,9 +82,7 @@ module Sprockets
         digest_uri = asset[:uri]
         digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
         cache._set(dep_graph_key, [paths, digest, digest_uri])
-
-        cache._set(asset_digest_uri_cache_key(digest_uri), asset)
-        # cache.fetch(asset_digest_uri_cache_key(digest_uri)) { asset }
+        cache.fetch(asset_digest_uri_cache_key(digest_uri)) { asset }
 
         asset
       end
