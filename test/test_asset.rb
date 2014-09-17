@@ -5,6 +5,11 @@ module AssetTests
     define_method("test_#{name.inspect}", &block)
   end
 
+  test "uri can find itself" do
+    # assert_kind_of URI, @asset.uri
+    assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
+  end
+
   test "pathname is a Pathname that exists" do
     assert_kind_of Pathname, @asset.pathname
     assert @asset.pathname.exist?
@@ -80,12 +85,14 @@ module FreshnessTests
       asset      = asset('test.js')
       old_digest = asset.digest
       old_mtime  = asset.mtime
+      old_uri    = asset.uri
       assert_equal "a;\n", asset.to_s
 
       write(filename, "b;")
       asset = asset('test.js')
       refute_equal old_digest, asset.digest
       refute_equal old_mtime, asset.mtime
+      refute_equal old_uri, asset.uri
       assert_equal "b;\n", asset.to_s
     end
   end
@@ -113,12 +120,14 @@ module FreshnessTests
       asset      = asset('test-main.js')
       old_mtime  = asset.mtime
       old_digest = asset.digest
+      old_uri    = asset.uri
       assert_equal "a;", asset.to_s
 
       write(dep, "b;")
       asset = asset('test-main.js')
       refute_equal old_mtime, asset.mtime
       refute_equal old_digest, asset.digest
+      refute_equal old_uri, asset.uri
       assert_equal "b;", asset.to_s
     end
   end
@@ -166,6 +175,11 @@ class StaticAssetTest < Sprockets::TestCase
 
   include AssetTests
 
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
+      @asset.uri.to_s
+  end
+
   test "logical path can find itself" do
     assert_equal @asset, @env[@asset.logical_path]
   end
@@ -201,8 +215,9 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test-POW.png']
       assert asset
-      old_mtime = asset.mtime
+      old_mtime  = asset.mtime
       old_digest = asset.digest
+      old_uri    = asset.uri
 
       File.open(filename, 'w') { |f| f.write "a" }
       mtime = Time.now + 1
@@ -210,6 +225,7 @@ class StaticAssetTest < Sprockets::TestCase
 
       assert_equal old_mtime, @env['test-POW.png'].mtime
       assert_equal old_digest, @env['test-POW.png'].digest
+      assert_equal old_uri, @env['test-POW.png'].uri
     end
   end
 
@@ -220,8 +236,9 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['POW.png']
       assert asset
-      old_mtime = asset.mtime
+      old_mtime  = asset.mtime
       old_digest = asset.digest
+      old_uri    = asset.uri
 
       File.open(filename, 'w') { |f| f.write "b" }
       mtime = Time.now + 1
@@ -229,6 +246,7 @@ class StaticAssetTest < Sprockets::TestCase
 
       refute_equal old_mtime, @env['POW.png'].mtime
       refute_equal old_digest, @env['POW.png'].digest
+      refute_equal old_uri, @env['POW.png'].uri
     end
   end
 
@@ -260,6 +278,11 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   include AssetTests
+
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&digest=75f2ebc5cbf9654ca772b569112c8cf6a2699030",
+      @asset.uri.to_s
+  end
 
   test "logical path can find itself" do
     assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
@@ -322,6 +345,11 @@ class BundledAssetTest < Sprockets::TestCase
 
   include AssetTests
 
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1",
+      @asset.uri.to_s
+  end
+
   test "logical path can find itself" do
     assert_equal @asset, @env[@asset.logical_path]
   end
@@ -357,12 +385,14 @@ class BundledAssetTest < Sprockets::TestCase
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
       old_digest = asset.digest
+      old_uri    = asset.uri
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
       refute_equal old_digest, asset('test-main.js').digest
+      refute_equal old_uri, asset('test-main.js').uri
     end
   end
 
@@ -374,8 +404,9 @@ class BundledAssetTest < Sprockets::TestCase
       File.open(main, 'w') { |f| f.write "//= depend_on_asset test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
-      old_mtime = asset.mtime
+      old_mtime  = asset.mtime
       old_digest = asset.digest
+      old_uri    = asset.uri
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
@@ -384,6 +415,7 @@ class BundledAssetTest < Sprockets::TestCase
       asset = asset('test-main.js')
       refute_equal old_mtime, asset.mtime
       assert_equal old_digest, asset.digest
+      refute_equal old_uri, asset.uri
     end
   end
 
@@ -403,6 +435,9 @@ class BundledAssetTest < Sprockets::TestCase
       old_asset_a_digest = asset_a.digest
       old_asset_b_digest = asset_b.digest
       old_asset_c_digest = asset_c.digest
+      old_asset_a_uri = asset_a.uri
+      old_asset_b_uri = asset_b.uri
+      old_asset_c_uri = asset_c.uri
 
       File.open(c, 'w') { |f| f.write "x;" }
       mtime = Time.now + 1
@@ -411,6 +446,9 @@ class BundledAssetTest < Sprockets::TestCase
       refute_equal old_asset_a_digest, asset('test-a.js').digest
       refute_equal old_asset_b_digest, asset('test-b.js').digest
       refute_equal old_asset_c_digest, asset('test-c.js').digest
+      refute_equal old_asset_a_uri, asset('test-a.js').uri
+      refute_equal old_asset_b_uri, asset('test-b.js').uri
+      refute_equal old_asset_c_uri, asset('test-c.js').uri
     end
   end
 
@@ -430,6 +468,9 @@ class BundledAssetTest < Sprockets::TestCase
       old_asset_a_mtime = asset_a.mtime
       old_asset_b_mtime = asset_b.mtime
       old_asset_c_mtime = asset_c.mtime
+      old_asset_a_uri   = asset_a.uri
+      old_asset_b_uri   = asset_b.uri
+      old_asset_c_uri   = asset_c.uri
 
       File.open(c, 'w') { |f| f.write "x;" }
       mtime = Time.now + 1
@@ -438,6 +479,9 @@ class BundledAssetTest < Sprockets::TestCase
       refute_equal old_asset_a_mtime, asset('test-a.js').mtime
       refute_equal old_asset_b_mtime, asset('test-b.js').mtime
       refute_equal old_asset_c_mtime, asset('test-c.js').mtime
+      refute_equal old_asset_a_uri, asset('test-a.js').uri
+      refute_equal old_asset_b_uri, asset('test-b.js').uri
+      refute_equal old_asset_c_uri, asset('test-c.js').uri
     end
   end
 
@@ -457,6 +501,9 @@ class BundledAssetTest < Sprockets::TestCase
       old_asset_a_mtime = asset_a.mtime
       old_asset_b_mtime = asset_b.mtime
       old_asset_c_mtime = asset_c.mtime
+      old_asset_a_uri = asset_a.uri
+      old_asset_b_uri = asset_b.uri
+      old_asset_c_uri = asset_c.uri
 
       File.open(c, 'w') { |f| f.write "x;" }
       mtime = Time.now + 1
@@ -465,6 +512,61 @@ class BundledAssetTest < Sprockets::TestCase
       refute_equal old_asset_a_mtime, asset('test-a.js').mtime
       refute_equal old_asset_b_mtime, asset('test-b.js').mtime
       refute_equal old_asset_c_mtime, asset('test-c.js').mtime
+      refute_equal old_asset_a_uri, asset('test-a.js').uri
+      refute_equal old_asset_b_uri, asset('test-b.js').uri
+      refute_equal old_asset_c_uri, asset('test-c.js').uri
+    end
+  end
+
+  test "asset is stale when one of its linked assets is modified" do
+    a = fixture_path('asset/test-a.js')
+    b = fixture_path('asset/test-b.js')
+
+    sandbox a, b do
+      File.open(a, 'w') { |f| f.write "//= link test-b\n" }
+      File.open(b, 'w') { |f| f.write "b;" }
+      asset_a = asset('test-a.js')
+      asset_b = asset('test-b.js')
+
+      old_asset_a_mtime = asset_a.mtime
+      old_asset_b_mtime = asset_b.mtime
+      old_asset_a_uri = asset_a.uri
+      old_asset_b_uri = asset_b.uri
+
+      File.open(b, 'w') { |f| f.write "x;" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, b)
+
+      refute_equal old_asset_a_mtime, asset('test-a.js').mtime
+      refute_equal old_asset_b_mtime, asset('test-b.js').mtime
+      refute_equal old_asset_a_uri, asset('test-a.js').uri
+      refute_equal old_asset_b_uri, asset('test-b.js').uri
+    end
+  end
+
+  test "erb asset is stale when one of its linked assets is modified" do
+    a = fixture_path('asset/test-a.js.erb')
+    b = fixture_path('asset/test-b.js.erb')
+
+    sandbox a, b do
+      File.open(a, 'w') { |f| f.write "<% link_asset 'test-b' %>\n" }
+      File.open(b, 'w') { |f| f.write "b;" }
+      asset_a = asset('test-a.js')
+      asset_b = asset('test-b.js')
+
+      old_asset_a_mtime = asset_a.mtime
+      old_asset_b_mtime = asset_b.mtime
+      old_asset_a_uri = asset_a.uri
+      old_asset_b_uri = asset_b.uri
+
+      File.open(b, 'w') { |f| f.write "x;" }
+      mtime = Time.now + 1
+      File.utime(mtime, mtime, b)
+
+      refute_equal old_asset_a_mtime, asset('test-a.js').mtime
+      refute_equal old_asset_b_mtime, asset('test-b.js').mtime
+      refute_equal old_asset_a_uri, asset('test-a.js').uri
+      refute_equal old_asset_b_uri, asset('test-b.js').uri
     end
   end
 
@@ -472,6 +574,7 @@ class BundledAssetTest < Sprockets::TestCase
     asset = asset("tree/all_with_require_directory.js")
     assert asset
     old_mtime = asset.mtime
+    old_uri   = asset.uri
 
     dirname  = File.join(fixture_path("asset"), "tree/all")
     filename = File.join(dirname, "z.js")
@@ -482,6 +585,7 @@ class BundledAssetTest < Sprockets::TestCase
       File.utime(mtime, mtime, dirname)
 
       refute_equal old_mtime, asset("tree/all_with_require_directory.js").mtime
+      refute_equal old_uri, asset("tree/all_with_require_directory.js").uri
     end
   end
 
@@ -489,6 +593,7 @@ class BundledAssetTest < Sprockets::TestCase
     asset = asset("tree/all_with_require_tree.js")
     assert asset
     old_mtime = asset.mtime
+    old_uri   = asset.uri
 
     dirname  = File.join(fixture_path("asset"), "tree/all/b/c")
     filename = File.join(dirname, "z.js")
@@ -499,6 +604,7 @@ class BundledAssetTest < Sprockets::TestCase
       File.utime(mtime, mtime, dirname)
 
       refute_equal old_mtime, asset("tree/all_with_require_tree.js").mtime
+      refute_equal old_uri, asset("tree/all_with_require_tree.js").uri
     end
   end
 
@@ -510,12 +616,14 @@ class BundledAssetTest < Sprockets::TestCase
       asset = asset('sprite.css')
       assert asset
       old_mtime = asset.mtime
+      old_uri   = asset.uri
 
       File.open(image, 'w') { |f| f.write "(change)" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, image)
 
       refute_equal old_mtime, asset('sprite.css').mtime
+      refute_equal old_uri, asset('sprite.css').uri
     end
   end
 
@@ -564,15 +672,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_raises Sprockets::FileNotFound do
       asset("mismatch.js")
     end
-  end
-
-  test "source paths" do
-    assert_equal ["project-729a810640240adfd653c3d958890cfc4ec0ea84.js"],
-      asset("project.js").source_paths
-    assert_equal ["project-729a810640240adfd653c3d958890cfc4ec0ea84.js",
-                  "users-08ae3439d6c8fe911445a2fb6e07ee1dc12ca599.js",
-                  "application-b5df367abb741cac6526b05a726e9e8d7bd863d2.js"],
-      asset("application.js").source_paths
   end
 
   test "splatted asset includes itself" do
@@ -710,6 +809,35 @@ class BundledAssetTest < Sprockets::TestCase
     assert_raises(Sprockets::ArgumentError) do
       asset("require_self_twice.css")
     end
+  end
+
+  test "linked asset depends on target asset" do
+    assert asset = asset("require_manifest.js")
+    assert_equal <<-EOS, asset.to_s
+
+define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
+define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+    EOS
+    assert_equal [
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1"
+    ], asset.links.to_a.sort
+  end
+
+  test "directive linked asset depends on target asset" do
+    assert asset = asset("require_manifest2.js")
+    assert_equal <<-EOS, asset.to_s
+
+
+
+define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
+define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+    EOS
+
+    assert_equal [
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1"
+    ], asset.links.to_a.sort
   end
 
   test "stub single dependency" do

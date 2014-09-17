@@ -99,6 +99,35 @@ module Sprockets
       resolve_transform_type(mime_type, accept)
     end
 
+    # Experimental
+    def resolve_asset_uri(path, options = {})
+      path = path.to_s
+      accept = options[:accept]
+      skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
+
+      available_encodings = self.encodings.keys + ['identity']
+      encoding = find_best_q_match(options[:accept_encoding], available_encodings)
+
+      if absolute_path?(path)
+        path = File.expand_path(path)
+        if file?(path) && (accept.nil? || resolve_path_transform_type(path, accept))
+          filename = path
+          type = resolve_path_transform_type(path, accept)
+        end
+      else
+        if filename = resolve_all(path, accept: accept).first
+          mime_type = parse_path_extnames(path)[1]
+          accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
+          type = resolve_path_transform_type(filename, accept)
+        end
+      end
+
+      if filename
+        encoding = nil if encoding == 'identity'
+        AssetURI.build(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+      end
+    end
+
     # Public: Enumerate over all logical paths in the environment.
     #
     # Returns an Enumerator of [logical_path, filename].

@@ -26,6 +26,7 @@ module Sprockets
 
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
+  autoload :AssetURI,                'sprockets/asset_uri'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :EncodingUtils,           'sprockets/encoding_utils'
@@ -113,6 +114,7 @@ module Sprockets
   register_bundle_reducer '*/*', :data, :+
   register_bundle_reducer 'application/javascript', :data, Utils.method(:concat_javascript_sources)
   register_bundle_reducer '*/*', :dependency_paths, :+
+  register_bundle_reducer '*/*', :links, :+
 
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
   register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }

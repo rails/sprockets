@@ -13,7 +13,8 @@ module Sprockets
     # attributes - Hash of ivars
     #
     # Returns Asset.
-    def initialize(attributes = {})
+    def initialize(environment, attributes = {})
+      @environment = environment
       @attributes = attributes
       attributes.each do |name, value|
         instance_variable_set("@#{name}", value)
@@ -46,6 +47,13 @@ module Sprockets
       @pathname ||= Pathname.new(filename)
     end
 
+    # Public: Internal URI to lookup asset by.
+    #
+    # NOT a publically accessible URL.
+    #
+    # Returns URI.
+    attr_reader :uri
+
     # Public: Return logical path with digest spliced in.
     #
     #   "foo/bar-37b51d194a7513e45b56f6524f2d51f2.js"
@@ -58,6 +66,23 @@ module Sprockets
     # Public: Returns String MIME type of asset. Returns nil if type is unknown.
     attr_reader :content_type
 
+    # Public: Get all externally linked asset filenames from asset.
+    #
+    # All linked assets should be compiled anytime this asset is.
+    #
+    # Returns Array of String asset URIs.
+    def links
+      metadata[:links]
+    end
+
+    # Public: Get all internally required assets that were concated into this
+    # asset.
+    #
+    # Returns Array of String asset URIs.
+    def included
+      metadata[:included]
+    end
+
     # Deprecated: Expand asset into an `Array` of parts.
     #
     # Appending all of an assets body parts together should give you
@@ -66,17 +91,14 @@ module Sprockets
     # This allows you to link to individual files for debugging
     # purposes.
     #
-    # Use Asset#source_paths instead. Keeping a full copy of the bundle's
-    # processed assets in memory (and in cache) is expensive and redundant. The
-    # common use case is to relink to the assets anyway. #source_paths provides
-    # that reference.
+    # Use Asset#included instead. Keeping a full copy of the bundle's processed
+    # assets in memory (and in cache) is expensive and redundant. The common use
+    # case is to relink to the assets anyway.
     #
     # Returns Array of Assets.
     def to_a
-      if metadata.key?(:required_asset_hashes)
-        metadata[:required_asset_hashes].map do |hash|
-          Asset.new(hash)
-        end
+      if metadata[:included]
+        metadata[:included].map { |uri| @environment.find_asset_by_uri(uri) }
       else
         [self]
       end
@@ -89,23 +111,6 @@ module Sprockets
     # Returns Array of Assets.
     def dependencies
       to_a.reject { |a| a.filename.eql?(self.filename) }
-    end
-
-    # Public: Array of required processed assets.
-    #
-    # This allows you to link to individual files for debugging
-    # purposes.
-    #
-    # Examples
-    #
-    #   asset.source_paths #=>
-    #   ["jquery-729a810640240adfd653c3d958890cfc4ec0ea84.js",
-    #    "users-08ae3439d6c8fe911445a2fb6e07ee1dc12ca599.js",
-    #    "application-b5df367abb741cac6526b05a726e9e8d7bd863d2.js"]
-    #
-    # Returns an Array of String digest paths.
-    def source_paths
-      to_a.map(&:digest_path)
     end
 
     # Public: Return `String` of concatenated source.

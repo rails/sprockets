@@ -320,6 +320,31 @@ directory specified by *path*.
 `require_self` tells Sprockets to insert the body of the current
 source file before any subsequent `require` directives.
 
+### The `link` Directive ###
+
+`link` *path* declares a dependency on the target *path* and adds it to a list
+of subdependencies to automatically be compiled when the asset is written out to
+disk.
+
+For an example, in a CSS file you might reference an external image that always
+need to be compiled along with the css file.
+
+``` css
+/* link "logo.png" */
+.logo {
+  background-image: url(logo.png)
+}
+```
+
+However, if you use a `asset-path/url` SCSS helper, these links will
+automatically be setup for you.
+
+``` css
+.logo {
+  background-image: asset-url("logo.png")
+}
+```
+
 ### The `depend_on` Directive ###
 
 `depend_on` *path* declares a dependency on the given *path* without
@@ -362,11 +387,13 @@ submit a pull request.
 * Environment#version no longer affects asset digests. Only used for busting the asset cache.
 * Removed builtin support for LESS.
 * Removed include directive support.
-* Deprecated BundledAsset#to_a. Use BundledAsset#source_paths to access debugging subcomponents.
+* Deprecated BundledAsset#to_a. Use BundledAsset#included to access debugging subcomponents.
 * Support circular dependencies. For parity with ES6 modules.
 * Manifest compilation will no longer generate .gz files by default. [Mixing
   Content-Encoding and ETags is just a bad
   idea](https://issues.apache.org/bugzilla/show_bug.cgi?id=39727)
+* Added linked or referenced assets. When an asset is compiled, any of its links
+  will be compiled as well.
 
 **2.12.2** (September 5, 2014)
 

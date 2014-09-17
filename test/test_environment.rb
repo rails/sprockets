@@ -111,6 +111,34 @@ $app.run(function($templateCache) {
     refute @env.find_asset('manifest.js.yml', accept: 'application/javascript')
   end
 
+  test "find asset by uri" do
+    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript")
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+    assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
+
+    assert asset = @env.find_asset_by_uri(asset.uri)
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+    assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
+
+    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
+    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+    assert_equal 'text/css', asset.content_type
+
+    assert_raises Sprockets::FileNotFound do
+      @env.find_asset_by_uri("file://#{fixture_path('default/missing.js')}?type=application/javascript")
+    end
+
+    assert_raises Sprockets::ConversionError do
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=text/css")
+    end
+
+    assert_raises Sprockets::VersionNotFound do
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&digest=0000000000000000000000000000000000000000")
+    end
+  end
+
   test "resolve web component files" do
     assert_equal fixture_path("default/menu/menu.js"),
       @env.resolve("menu/menu.js")
@@ -317,6 +345,30 @@ $app.run(function($templateCache) {
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
+  test "find asset with no encoding" do
+    assert asset = @env.find_asset("gallery.js")
+    assert_equal nil, asset.encoding
+    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
+    assert_equal 18, asset.length
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+  end
+
+  test "find asset with unknown encoding" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "zepto")
+    assert_equal nil, asset.encoding
+    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
+    assert_equal 18, asset.length
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+  end
+
+  test "find asset with identity encoding" do
+    assert asset = @env.find_asset("gallery.js", accept_encoding: "identity")
+    assert_equal nil, asset.encoding
+    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
+    assert_equal 18, asset.length
+    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+  end
+
   test "find deflate asset" do
     assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
     assert_equal 'deflate', asset.encoding
@@ -341,25 +393,14 @@ $app.run(function($templateCache) {
     assert_equal "6a6306c32b6a3028f3c41c36dfbabc343605417d", asset.digest
   end
 
-  test "find asset by etag" do
-    asset = @env.find_asset("gallery.js")
-    assert @env.find_asset("gallery.js", if_match: asset.etag)
-    refute @env.find_asset("gallery.js", if_match: "0000000000000000000000000000000000000000")
-    refute @env.find_asset("missing.js", if_match: "0000000000000000000000000000000000000000")
-  end
-
-  test "find asset not matching etag" do
-    assert asset = @env.find_asset("gallery.js")
-    refute @env.find_asset("gallery.js", if_none_match: asset.etag)
-    assert @env.find_asset("gallery.js", if_none_match: "0000000000000000000000000000000000000000")
-    refute @env.find_asset("missing.js", if_none_match: "0000000000000000000000000000000000000000")
-  end
-
-  test "find with if and if none match" do
-    assert asset = @env.find_asset("gallery.js")
-    refute @env.find_asset("gallery.js", if_match: asset.etag, if_none_match: asset.etag)
-    refute @env.find_asset("gallery.js", if_match: "0000000000000000000000000000000000000000", if_none_match: "0000000000000000000000000000000000000000")
-    refute @env.find_asset("missing.js", if_match: "0000000000000000000000000000000000000000", if_none_match: "0000000000000000000000000000000000000000")
+  test "find asset by uri with deflate encoding" do
+    uri = "file://#{fixture_path('default/gallery.js')}?type=application/javascript&encoding=deflate"
+    assert asset = @env.find_asset_by_uri(uri)
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+    assert_equal 'deflate', asset.encoding
+    assert_equal 'cc7336c29eab6a34b0b36f486bb52a31cb63dac0', asset.etag
+    assert_match uri, asset.uri
   end
 
   test "missing static path returns nil" do

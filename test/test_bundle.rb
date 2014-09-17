@@ -10,6 +10,7 @@ class TestStylesheetBundle < Sprockets::TestCase
 
     input = {
       environment: environment,
+      uri: "file://#{filename}?type=text/css",
       filename: filename,
       content_type: 'text/css',
       metadata: {}
@@ -30,6 +31,7 @@ class TestStylesheetBundle < Sprockets::TestCase
 
     input = {
       environment: environment,
+      uri: "file://#{filename}?type=text/css",
       filename: filename,
       content_type: 'text/css',
       metadata: {}
@@ -54,6 +56,7 @@ class TestStylesheetBundle < Sprockets::TestCase
 
     input = {
       environment: environment,
+      uri: "file://#{filename}?type=application/javascript",
       filename: filename,
       content_type: 'application/javascript',
       metadata: {}
@@ -74,6 +77,7 @@ class TestStylesheetBundle < Sprockets::TestCase
 
     input = {
       environment: environment,
+      uri: "file://#{filename}?type=application/javascript",
       filename: filename,
       content_type: 'application/javascript',
       metadata: {}

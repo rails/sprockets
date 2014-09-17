@@ -38,56 +38,53 @@ module Sprockets
     end
 
     protected
-      def asset_hash_cache_key(filename, digest, options)
+      def asset_dependency_graph_cache_key(uri)
+        filename, _ = AssetURI.parse(uri)
         [
-          'asset-hash',
+          'asset-uri-dep-graph',
           VERSION,
           self.version,
-          filename,
-          digest,
-          options
+          self.paths,
+          uri,
+          file_hexdigest(filename)
         ]
       end
 
-      def asset_digest_cache_key(filename, options)
+      def asset_digest_uri_cache_key(uri)
         [
-          'asset-digest',
+          'asset-digest-uri',
           VERSION,
           self.version,
-          filename,
-          options,
-          file_hexdigest(filename),
-          self.paths
+          uri
         ]
       end
 
-      # Cache asset building in memory and in persisted cache.
-      def build_asset_hash(filename, options)
-        digest_key = asset_digest_cache_key(filename, options)
+      def build_asset_by_digest_uri(uri)
+        cache.fetch(asset_digest_uri_cache_key(uri)) do
+          super
+        end
+      end
 
-        if digest = cache._get(digest_key)
-          hash_key = asset_hash_cache_key(filename, digest, options)
+      def build_asset_by_uri(uri)
+        dep_graph_key = asset_dependency_graph_cache_key(uri)
 
-          if hash = cache._get(hash_key)
-            digest, paths = hash[:metadata].values_at(:dependency_digest, :dependency_paths)
-            if dependencies_hexdigest(paths) == digest
-              return hash
+        paths, digest, digest_uri = cache._get(dep_graph_key)
+        if paths && digest && digest_uri
+          if dependencies_hexdigest(paths) == digest
+            if asset = cache._get(asset_digest_uri_cache_key(digest_uri))
+              return asset
             end
           end
         end
 
-        if hash = super
-          cache._set(digest_key, hash[:digest])
+        asset = super
 
-          # Push into asset digest cache
-          hash_key = asset_hash_cache_key(filename, hash[:digest], options)
-          # cache._set(hash_key, hash)
-          cache.fetch(hash_key) { hash }
+        digest_uri = asset[:uri]
+        digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
+        cache._set(dep_graph_key, [paths, digest, digest_uri])
+        cache.fetch(asset_digest_uri_cache_key(digest_uri)) { asset }
 
-          return hash
-        end
-
-        nil
+        asset
       end
 
     private
