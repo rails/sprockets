@@ -109,7 +109,7 @@ class TestPathUtils < Sprockets::TestCase
     filename = "atomic.file"
     begin
       contents = "Atomic Text"
-      atomic_write(filename, Dir.pwd) do |file|
+      atomic_write(filename) do |file|
         file.write(contents)
         assert !File.exist?(filename)
       end
