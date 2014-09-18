@@ -31,6 +31,10 @@ module AssetTests
     assert_equal @asset.to_s.bytesize, @asset.bytesize
   end
 
+  test "links are a Set" do
+    assert_kind_of Set, @asset.links
+  end
+
   test "dependencies are an Array" do
     assert_kind_of Array, @asset.dependencies
   end

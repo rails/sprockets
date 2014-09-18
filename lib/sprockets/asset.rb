@@ -70,9 +70,9 @@ module Sprockets
     #
     # All linked assets should be compiled anytime this asset is.
     #
-    # Returns Array of String asset URIs.
+    # Returns Set of String asset URIs.
     def links
-      metadata[:links]
+      metadata[:links] || Set.new
     end
 
     # Public: Get all internally required assets that were concated into this
