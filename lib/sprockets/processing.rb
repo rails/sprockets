@@ -142,12 +142,13 @@ module Sprockets
     # Internal: Run processors on filename and data.
     #
     # Returns Hash.
-    def process(processors, filename, load_path, name, content_type, data)
-      metadata = {}
+    def process(processors, uri, filename, load_path, name, content_type)
+      data, metadata = nil, {}
 
       input = {
         environment: self,
         cache: cache,
+        uri: uri,
         filename: filename,
         load_path: load_path,
         name: name,
@@ -240,7 +241,7 @@ module Sprockets
     # Internal: Run bundle reducers on set of Assets producing a reduced
     # metadata Hash.
     #
-    # assets - Array of asset Hashes
+    # assets - Array of Assets
     # reducers - Array of [initial, reducer_proc] pairs
     #
     # Returns reduced asset metadata Hash.
@@ -250,10 +251,9 @@ module Sprockets
         initial[k] = v if v
       end
 
-      assets.reduce(initial) do |h, asset_hash|
+      assets.reduce(initial) do |h, asset|
         reducers.each do |k, (_, block)|
-          # TODO: Avoid creating asset wrapper here
-          value = k == :data ? Asset.new(asset_hash).source : asset_hash[:metadata][k]
+          value = k == :data ? asset.source : asset.metadata[k]
           h[k]  = h.key?(k) ? block.call(h[k], value) : value
         end
         h

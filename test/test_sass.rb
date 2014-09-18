@@ -279,8 +279,8 @@ class TestSassFunctions < TestSprocketsSass
 
   def define_asset_path
     engine = Sprockets::ScssTemplate.new do
-      def asset_path(path, options = {})
-        Sass::Script::String.new("/#{path.value}", :string)
+      def _asset_path(path, options = {})
+        "/#{path}"
       end
     end
 
@@ -311,6 +311,21 @@ div {
   url: url(/foo.js);
   url: url(/foo.css); }
     EOS
+  end
+
+  test "path function generates links" do
+    asset = silence_warnings do
+      @env['sass/paths.scss']
+    end
+
+    assert_equal [
+      "file://#{fixture_path('compass/foo.css')}?type=text/css&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.mov')}?digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
+      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&digest=10a34637ad661d98ba3344717656fcc76209c2f8"
+    ], asset.links.to_a.sort
   end
 
   test "data-url function" do

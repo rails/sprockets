@@ -73,6 +73,7 @@ module Sprockets
 
     def call(input)
       @environment  = input[:environment]
+      @uri          = input[:uri]
       @load_path    = input[:load_path]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
@@ -86,15 +87,17 @@ module Sprockets
 
       data, directives = result.values_at(:data, :directives)
 
-      @required_paths   = Set.new(input[:metadata][:required_paths])
-      @stubbed_paths    = Set.new(input[:metadata][:stubbed_paths])
+      @required         = Set.new(input[:metadata][:required])
+      @stubbed          = Set.new(input[:metadata][:stubbed])
+      @links            = Set.new(input[:metadata][:links])
       @dependency_paths = Set.new(input[:metadata][:dependency_paths])
 
       process_directives(directives)
 
       { data: data,
-        required_paths: @required_paths,
-        stubbed_paths: @stubbed_paths,
+        required: @required,
+        stubbed: @stubbed,
+        links: @links,
         dependency_paths: @dependency_paths }
     end
 
@@ -193,7 +196,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required_paths << resolve(path, accept: @content_type)
+        @required << resolve_uri(path)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -207,10 +210,10 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        if @required_paths.include?(@filename)
+        if @required.include?(@uri)
           raise ArgumentError, "require_self can only be called once per source file"
         end
-        @required_paths << @filename
+        @required << @uri
       end
 
       # `require_directory` requires all the files inside a single
@@ -233,7 +236,7 @@ module Sprockets
             if subpath == @filename
               next
             elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              @required_paths << subpath
+              @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
             end
           end
         else
@@ -257,18 +260,18 @@ module Sprockets
 
           @dependency_paths << root
 
-          required_paths = []
+          required = []
           @environment.stat_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
               @dependency_paths << subpath
             elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              required_paths << subpath
+              required << subpath
             end
           end
-          required_paths.sort_by(&:to_s).each do |filename|
-            @required_paths << filename
+          required.sort_by(&:to_s).each do |subpath|
+            @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
           end
         else
           # The path must be relative and start with a `./`.
@@ -318,12 +321,32 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed_paths << resolve(path, accept: @content_type)
+        @stubbed << resolve_uri(path)
+      end
+
+      # Declares a linked dependency on the target asset.
+      #
+      # The `path` must be a valid asset and should not already be part of the
+      # bundle. Any linked assets will automatically be compiled along with the
+      # current.
+      #
+      #   /*= link "logo.png" */
+      #
+      def process_link_directive(path)
+        if asset = @environment.find_asset(resolve(path, accept: "#{@content_type}, */*"))
+          @dependency_paths.merge(asset.metadata[:dependency_paths])
+          @links << asset.uri
+        end
       end
 
     private
       def expand_relative_path(path)
         File.expand_path(path, @dirname)
+      end
+
+      def resolve_uri(path)
+        filename = resolve(path, accept: @content_type)
+        @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
       end
 
       def resolve(path, options = {})

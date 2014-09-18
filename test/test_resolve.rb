@@ -101,6 +101,22 @@ class TestResolve < Sprockets::TestCase
       @env.resolve('bar', accept: '*/*; q=0.8, text/css')
   end
 
+  test "resolve asset uri" do
+    @env.append_path(fixture_path('default'))
+
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
+      @env.resolve_asset_uri("gallery.js")
+    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript",
+      @env.resolve_asset_uri("coffee/foo.js")
+    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml",
+      @env.resolve_asset_uri("manifest.js.yml")
+
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
+      @env.resolve_asset_uri("gallery", accept: 'application/javascript')
+    # assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=text/coffeescript",
+    #   @env.resolve_asset_uri("coffee/foo", accept: 'text/coffeescript')
+  end
+
   test "verify all logical paths" do
     Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
       unless %w( . ..).include?(dir)

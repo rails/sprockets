@@ -47,43 +47,49 @@ module Sprockets
       options[:bundle] = !body_only?(env)
 
       if fingerprint
-        options[:if_match] = fingerprint
+        if_match = fingerprint
       elsif env['HTTP_IF_MATCH']
-        options[:if_match] = env['HTTP_IF_MATCH'][/^"(\w+)"$/, 1]
+        if_match = env['HTTP_IF_MATCH'][/^"(\w+)"$/, 1]
       end
 
       if env['HTTP_IF_NONE_MATCH']
-        options[:if_none_match] = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
+        if_none_match = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
       end
 
-      if !options.key?(:if_match) && !options.key?(:if_none_match) && env['HTTP_ACCEPT_ENCODING']
+      if !if_match && !if_none_match && env['HTTP_ACCEPT_ENCODING']
         # Accept-Encoding negotiation is only enabled for non-fingerprinted
         # assets. Avoids the "Apache ETag gzip" bug. Just Google it.
         # https://issues.apache.org/bugzilla/show_bug.cgi?id=39727
         options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING']
       end
 
-      status, asset = find_asset_with_status(path, options)
+      asset = find_asset(path, options)
+
+      if asset.nil?
+        status = :not_found
+      elsif fingerprint && asset.digest != fingerprint
+        status = :not_found
+      elsif if_match && asset.digest != if_match
+        status = :precondition_failed
+      elsif if_none_match && asset.digest == if_none_match
+        status = :not_modified
+      else
+        status = :ok
+      end
+
       case status
       when :ok
         logger.info "#{msg} 200 OK (#{time_elapsed.call}ms)"
         ok_response(asset, env)
       when :not_modified
         logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
-        not_modified_response(env, options[:if_none_match])
+        not_modified_response(env, if_none_match)
       when :not_found
         logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
         not_found_response
       when :precondition_failed
-        if fingerprint
-          logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
-          not_found_response
-        else
-          logger.info "#{msg} 412 Precondition Failed (#{time_elapsed.call}ms)"
-          precondition_failed_response
-        end
-      else
-        raise NotImplementedError, "unknown status: #{status}"
+        logger.info "#{msg} 412 Precondition Failed (#{time_elapsed.call}ms)"
+        precondition_failed_response
       end
     rescue Exception => e
       logger.error "Error compiling asset #{path}:"

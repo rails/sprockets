@@ -164,8 +164,8 @@ module Sprockets
 
       filenames = []
 
-      filter_logical_paths(*args).each do |logical_path, filename|
-        if asset = find_asset(filename)
+      filter_logical_paths(*args).each do |_, filename|
+        find_assets(filename) do |asset|
           files[asset.digest_path] = {
             'logical_path' => asset.logical_path,
             'mtime'        => asset.mtime.iso8601,
@@ -246,7 +246,7 @@ module Sprockets
 
     protected
       # Basic wrapper around Environment#find_asset. Logs compile time.
-      def find_asset(logical_path)
+      def find_assets(logical_path)
         asset = nil
         start = Utils.benchmark_start
         asset = environment.find_asset(logical_path)
@@ -254,7 +254,19 @@ module Sprockets
           ms = "(#{Utils.benchmark_end(start)}ms)"
           "Compiled #{logical_path}  #{ms}"
         end
-        asset
+
+        if asset
+          queue = [asset]
+
+          while asset = queue.shift
+            yield asset
+            asset.links.each do |link|
+              queue.push(environment.find_asset_by_uri(link))
+            end
+          end
+        end
+
+        nil
       end
 
       # Persist manfiest back to FS

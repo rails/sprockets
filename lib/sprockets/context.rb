@@ -29,14 +29,16 @@ module Sprockets
       @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
 
-      @required_paths   = Set.new(@metadata[:required_paths])
-      @stubbed_paths    = Set.new(@metadata[:stubbed_paths])
+      @required         = Set.new(@metadata[:required])
+      @stubbed          = Set.new(@metadata[:stubbed])
+      @links            = Set.new(@metadata[:links])
       @dependency_paths = Set.new(@metadata[:dependency_paths])
     end
 
     def metadata
-      { required_paths: @required_paths,
-        stubbed_paths: @stubbed_paths,
+      { required: @required,
+        stubbed: @stubbed,
+        links: @links,
         dependency_paths: @dependency_paths }
     end
 
@@ -127,8 +129,7 @@ module Sprockets
     #
     def require_asset(path)
       filename = resolve(path, accept: @content_type)
-      depend_on_asset(filename)
-      @required_paths << filename
+      @required << @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
       nil
     end
 
@@ -136,7 +137,16 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed_paths << resolve(path, accept: @content_type).to_s
+      filename = resolve(path, accept: @content_type)
+      @stubbed << @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
+      nil
+    end
+
+    def link_asset(path)
+      if asset = @environment.find_asset(resolve(path))
+        @dependency_paths.merge(asset.metadata[:dependency_paths])
+        @links << asset.uri
+      end
       nil
     end
 

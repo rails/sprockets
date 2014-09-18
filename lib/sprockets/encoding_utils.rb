@@ -183,6 +183,7 @@ module Sprockets
 
     # Internal: @charset bytes
     CHARSET_START = [0x40, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x20, 0x22]
+    CHARSET_SIZE  = CHARSET_START.size
 
     # Internal: Scan binary CSS string for @charset encoding name.
     #
@@ -190,36 +191,32 @@ module Sprockets
     #
     # Returns encoding String name or nil.
     def scan_css_charset(str)
-      name = nil
-      ascii_bytes = Enumerator.new do |y|
-        str.each_byte do |byte|
-          # Halt on line breaks
-          break if byte == 0x0A || byte == 0x0D
-          y << byte if 0x0 < byte && byte <= 0xFF
-        end
-      end
-
       buf = []
-      loop do
-        buf << ascii_bytes.next
-        break if buf.size == CHARSET_START.size
-      end
+      i = 0
 
-      if buf == CHARSET_START
-        buf = []
-        loop do
-          byte = ascii_bytes.next
+      str.each_byte.each do |byte|
+        # Halt on line breaks
+        break if byte == 0x0A || byte == 0x0D
 
-          if byte == 0x22 && ascii_bytes.peek == 0x3B
-            name = buf.pack('C*')
-            break
+        # Only ascii bytes
+        next unless 0x0 < byte && byte <= 0xFF
+
+        if i < CHARSET_SIZE
+        elsif i == CHARSET_SIZE
+          if buf == CHARSET_START
+            buf = []
           else
-            buf << byte
+            break
           end
+        elsif byte == 0x22
+          return buf.pack('C*')
         end
+
+        buf << byte
+        i += 1
       end
 
-      name
+      nil
     end
 
     # Public: Detect charset from HTML document. Defaults to ISO-8859-1.
