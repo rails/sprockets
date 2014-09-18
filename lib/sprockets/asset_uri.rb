@@ -60,16 +60,5 @@ module Sprockets
       uri << "?#{query.join('&')}" if query.any?
       uri
     end
-
-    # Internal: Merge new parameters into String URI.
-    #
-    # str        - String asset URI
-    # new_params - Hash of symbolized parameters
-    #
-    # Returns String URI.
-    def self.merge(str, new_params = {})
-      path, params = parse(str)
-      build(path, params.merge(new_params))
-    end
   end
 end

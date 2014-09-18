@@ -51,9 +51,4 @@ class TestAssetURI < Sprockets::TestCase
       Sprockets::AssetURI.build("/usr/local/var/github/app/assets/images/logo.png", encodings: ['gzip', 'deflate'])
     end
   end
-
-  test "merge params" do
-    assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=text/coffeescript&encoding=gzip&flag",
-      Sprockets::AssetURI.merge("file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript&encoding=gzip", type: 'text/coffeescript', flag: true)
-  end
 end

@@ -163,10 +163,16 @@ module Sprockets
 
         if processors.any?
           processors.unshift(method(:read_input))
-          build_processed_asset_hash(asset, processors)
+          asset = build_processed_asset_hash(asset, processors)
         else
-          build_static_asset_hash(asset)
+          asset = build_static_asset_hash(asset)
         end
+
+        params = params.merge(digest: asset[:metadata][:dependency_digest])
+
+        asset.merge(
+          uri: AssetURI.build(filename, params)
+        )
       end
 
       def build_processed_asset_hash(asset, processors)
@@ -182,32 +188,25 @@ module Sprockets
         # Ensure originally read file is marked as a dependency
         processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
 
-        dep_digest = dependencies_hexdigest(processed[:metadata][:dependency_paths])
-        asset[:uri] = AssetURI.merge(asset[:uri], digest: dep_digest)
-
         asset.merge(processed).merge({
           mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
           metadata: processed[:metadata].merge(
-            dependency_digest: dep_digest
+            dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
           )
         })
       end
 
       def build_static_asset_hash(asset)
-        stat   = self.stat(asset[:filename])
-        digest = digest_class.file(asset[:filename]).hexdigest
-        dep_digest = dependencies_hexdigest([asset[:filename]])
-        uri    = AssetURI.merge(asset[:uri], digest: dep_digest)
+        stat = self.stat(asset[:filename])
 
         asset.merge({
           encoding: Encoding::BINARY,
           length: stat.size,
           mtime: stat.mtime.to_i,
-          digest: digest,
-          uri: uri,
+          digest: digest_class.file(asset[:filename]).hexdigest,
           metadata: {
             dependency_paths: Set.new([asset[:filename]]),
-            dependency_digest: dep_digest
+            dependency_digest: dependencies_hexdigest([asset[:filename]])
           }
         })
       end
