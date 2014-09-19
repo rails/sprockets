@@ -162,53 +162,31 @@ module Sprockets
         processors += unwrap_encoding_processors(params[:encoding])
 
         if processors.any?
-          processors.unshift(method(:read_input))
-          asset = build_processed_asset_hash(asset, processors)
+          asset.merge!(process(
+            [method(:read_input)] + processors,
+            asset[:uri],
+            asset[:filename],
+            asset[:load_path],
+            asset[:name],
+            asset[:content_type]
+          ))
         else
-          asset = build_static_asset_hash(asset)
+          asset.merge!({
+            encoding: Encoding::BINARY,
+            length: self.stat(asset[:filename]).size,
+            digest: digest_class.file(asset[:filename]).hexdigest,
+            metadata: {}
+          })
         end
 
-        params = params.merge(digest: asset[:metadata][:dependency_digest])
+        metadata = asset[:metadata]
+        metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
+        metadata[:dependency_digest] = dependencies_hexdigest(metadata[:dependency_paths])
+        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
 
-        asset.merge(
-          uri: AssetURI.build(filename, params)
-        )
-      end
+        asset[:uri] = AssetURI.build(filename, params.merge(digest: metadata[:dependency_digest]))
 
-      def build_processed_asset_hash(asset, processors)
-        processed = process(
-          processors,
-          asset[:uri],
-          asset[:filename],
-          asset[:load_path],
-          asset[:name],
-          asset[:content_type]
-        )
-
-        # Ensure originally read file is marked as a dependency
-        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
-
-        asset.merge(processed).merge({
-          mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
-          metadata: processed[:metadata].merge(
-            dependency_digest: dependencies_hexdigest(processed[:metadata][:dependency_paths])
-          )
-        })
-      end
-
-      def build_static_asset_hash(asset)
-        stat = self.stat(asset[:filename])
-
-        asset.merge({
-          encoding: Encoding::BINARY,
-          length: stat.size,
-          mtime: stat.mtime.to_i,
-          digest: digest_class.file(asset[:filename]).hexdigest,
-          metadata: {
-            dependency_paths: Set.new([asset[:filename]]),
-            dependency_digest: dependencies_hexdigest([asset[:filename]])
-          }
-        })
+        asset
       end
   end
 end
