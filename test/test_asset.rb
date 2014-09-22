@@ -820,10 +820,12 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal <<-EOS, asset.to_s
 
 define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
+define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.css")
 define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
     assert_equal [
       "file://#{fixture_path("asset/POW.png")}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
+      "file://#{fixture_path("asset/application.css")}?type=text/css&digest=d99f2e5675d0ab6adeed7324fec8dbe12f1cff36",
       "file://#{fixture_path("asset/application.js")}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1"
     ], asset.links.to_a.sort
   end
@@ -834,12 +836,15 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
 
 
 
+
 define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
+define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.css")
 define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
 
     assert_equal [
       "file://#{fixture_path("asset/POW.png")}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
+      "file://#{fixture_path("asset/application.css")}?type=text/css&digest=d99f2e5675d0ab6adeed7324fec8dbe12f1cff36",
       "file://#{fixture_path("asset/application.js")}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1"
     ], asset.links.to_a.sort
   end

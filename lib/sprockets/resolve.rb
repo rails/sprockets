@@ -186,7 +186,7 @@ module Sprockets
 
         if mime_type
           if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(mime_type, accept) }
-            accepts.unshift([mime_type, 1.0])
+            accepts = [[mime_type, 1.0]]
           else
             return []
           end
