@@ -132,7 +132,7 @@ module Sprockets
         elsif type && !resolve_path_transform_type(filename, type)
           raise ConversionError, "could not convert to type: #{type}"
         elsif !load_path
-          raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
+          raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
         logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
