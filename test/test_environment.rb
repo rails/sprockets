@@ -139,6 +139,26 @@ $app.run(function($templateCache) {
     end
   end
 
+  test "find all linked assets" do
+    assert assets = @env.find_all_linked_assets("missing.js").to_a
+    assert_equal 0, assets.length
+
+    assert assets = @env.find_all_linked_assets("gallery.js").to_a
+    assert_equal 1, assets.length
+    assert_equal @env["gallery.js"], assets[0]
+
+    assert assets = @env.find_all_linked_assets("gallery-link.js").to_a
+    assert_equal 2, assets.length
+    assert_equal @env["gallery-link.js"], assets[0]
+    assert_equal @env["gallery.js"], assets[1]
+
+    assert assets = @env.find_all_linked_assets("explore-link.js").to_a
+    assert_equal 3, assets.length
+    assert_equal @env["explore-link.js"], assets[0]
+    assert_equal @env["gallery-link.js"], assets[1]
+    assert_equal @env["gallery.js"], assets[2]
+  end
+
   test "resolve web component files" do
     assert_equal fixture_path("default/menu/menu.js"),
       @env.resolve("menu/menu.js")
