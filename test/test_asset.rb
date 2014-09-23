@@ -185,8 +185,8 @@ class StaticAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&id=37308585d6073114f5a213cbb022bce5d32fbd89",
-      @asset.uri.to_s
+    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&id=xxx",
+      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
   end
 
   test "logical path can find itself" do
@@ -289,8 +289,8 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&id=fb232aba31d90e8ebf59f07b4c7641a8c4139faa",
-      @asset.uri.to_s
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&id=xxx",
+      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
   end
 
   test "logical path can find itself" do
@@ -355,8 +355,8 @@ class BundledAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&id=24bc6809cec26109431281290c42471ebd25026b",
-      @asset.uri.to_s
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&id=xxx",
+      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
   end
 
   test "logical path can find itself" do
