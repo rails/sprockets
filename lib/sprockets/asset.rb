@@ -47,6 +47,11 @@ module Sprockets
       @pathname ||= Pathname.new(filename)
     end
 
+    # Internal: Unique asset object ID.
+    #
+    # Returns String SHA1 String.
+    attr_reader :id
+
     # Public: Internal URI to lookup asset by.
     #
     # NOT a publically accessible URL.
@@ -198,7 +203,7 @@ module Sprockets
     #
     # Returns String.
     def inspect
-      "#<#{self.class}:0x#{object_id.to_s(16)} " +
+      "#<#{self.class}:#{id} " +
         "filename=#{filename.inspect}, " +
         "mtime=#{mtime.inspect}, " +
         "digest=#{digest.inspect}" +
@@ -208,9 +213,9 @@ module Sprockets
     # Public: Implements Object#hash so Assets can be used as a Hash key or
     # in a Set.
     #
-    # Returns Integer hash of digest.
+    # Returns Integer hash of the id.
     def hash
-      digest.hash
+      id.hash
     end
 
     # Public: Compare assets.
@@ -219,10 +224,7 @@ module Sprockets
     #
     # Returns true or false.
     def eql?(other)
-      other.class == self.class &&
-        other.filename == self.filename &&
-        other.mtime.to_i == self.mtime.to_i &&
-        other.digest == self.digest
+      self.class == other.class && self.id == other.id
     end
     alias_method :==, :eql?
   end

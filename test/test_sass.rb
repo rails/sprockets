@@ -319,13 +319,13 @@ div {
     end
 
     assert_equal [
-      "file://#{fixture_path('compass/foo.css')}?type=text/css&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.mov')}?digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&digest=10a34637ad661d98ba3344717656fcc76209c2f8"
-    ], asset.links.to_a.sort
+      "file://#{fixture_path('compass/foo.css')}?type=text/css&id=xxx",
+      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&id=xxx",
+      "file://#{fixture_path('compass/foo.mov')}?id=xxx",
+      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&id=xxx",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&id=xxx",
+      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&id=xxx"
+    ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
   end
 
   test "data-url function" do

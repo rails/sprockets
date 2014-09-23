@@ -135,7 +135,7 @@ $app.run(function($templateCache) {
     end
 
     assert_raises Sprockets::VersionNotFound do
-      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&digest=0000000000000000000000000000000000000000")
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=0000000000000000000000000000000000000000")
     end
   end
 
@@ -478,7 +478,7 @@ $app.run(function($templateCache) {
   end
 
   FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
-  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 6
+  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 9
 
   test "iterate over each logical path" do
     paths = []

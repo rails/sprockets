@@ -5,6 +5,11 @@ module AssetTests
     define_method("test_#{name.inspect}", &block)
   end
 
+  test "id is a SHA1 String" do
+    assert_kind_of String, @asset.id
+    assert_match(/^[0-9a-f]{40}$/, @asset.id)
+  end
+
   test "uri can find itself" do
     # assert_kind_of URI, @asset.uri
     assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
@@ -180,7 +185,7 @@ class StaticAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
+    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&id=37308585d6073114f5a213cbb022bce5d32fbd89",
       @asset.uri.to_s
   end
 
@@ -284,7 +289,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&digest=75f2ebc5cbf9654ca772b569112c8cf6a2699030",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&id=fb232aba31d90e8ebf59f07b4c7641a8c4139faa",
       @asset.uri.to_s
   end
 
@@ -350,7 +355,7 @@ class BundledAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&id=24bc6809cec26109431281290c42471ebd25026b",
       @asset.uri.to_s
   end
 
@@ -824,10 +829,10 @@ define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.
 define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
-      "file://#{fixture_path("asset/application.css")}?type=text/css&digest=d99f2e5675d0ab6adeed7324fec8dbe12f1cff36",
-      "file://#{fixture_path("asset/application.js")}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1"
-    ], asset.links.to_a.sort
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
+      "file://#{fixture_path("asset/application.css")}?type=text/css&id=xxx",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript&id=xxx"
+    ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
   end
 
   test "directive linked asset depends on target asset" do
@@ -843,10 +848,10 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
     EOS
 
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png&digest=1c33bf553e91eb62b71b17f64a1e26f351cfaade",
-      "file://#{fixture_path("asset/application.css")}?type=text/css&digest=d99f2e5675d0ab6adeed7324fec8dbe12f1cff36",
-      "file://#{fixture_path("asset/application.js")}?type=application/javascript&digest=cee9fece4efe070822dadb3c944d2e5843a1e6e1"
-    ], asset.links.to_a.sort
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
+      "file://#{fixture_path("asset/application.css")}?type=text/css&id=xxx",
+      "file://#{fixture_path("asset/application.js")}?type=application/javascript&id=xxx"
+    ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
   end
 
   test "stub single dependency" do

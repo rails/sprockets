@@ -68,9 +68,9 @@ module Sprockets
       def build_asset_by_uri(uri)
         dep_graph_key = asset_dependency_graph_cache_key(uri)
 
-        paths, digest, digest_uri = cache._get(dep_graph_key)
-        if paths && digest && digest_uri
-          if dependencies_hexdigest(paths) == digest
+        dependency_paths, dependency_digest, digest_uri = cache._get(dep_graph_key)
+        if dependency_paths && dependency_digest && digest_uri
+          if dependencies_hexdigest(dependency_paths) == dependency_digest
             if asset = cache._get(asset_digest_uri_cache_key(digest_uri))
               return asset
             end
@@ -79,10 +79,9 @@ module Sprockets
 
         asset = super
 
-        digest_uri = asset[:uri]
-        digest, paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
-        cache._set(dep_graph_key, [paths, digest, digest_uri])
-        cache.fetch(asset_digest_uri_cache_key(digest_uri)) { asset }
+        dependency_digest, dependency_paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
+        cache._set(dep_graph_key, [dependency_paths, dependency_digest, asset[:uri]])
+        cache.fetch(asset_digest_uri_cache_key(asset[:uri])) { asset }
 
         asset
       end

@@ -77,8 +77,8 @@ module Sprockets
 
     def find_asset_by_uri(uri)
       _, params = AssetURI.parse(uri)
-      asset = params.key?(:digest) ?
-        build_asset_by_digest_uri(uri) :
+      asset = params.key?(:id) ?
+        build_asset_by_id_uri(uri) :
         build_asset_by_uri(uri)
       Asset.new(self, asset)
     end
@@ -99,18 +99,18 @@ module Sprockets
     end
 
     protected
-      def build_asset_by_digest_uri(uri)
+      def build_asset_by_id_uri(uri)
         path, params = AssetURI.parse(uri)
 
         # Internal assertion, should be routed through build_asset_by_uri
-        unless digest = params.delete(:digest)
-          raise ArgumentError, "expected uri to have an digest: #{uri}"
+        unless id = params.delete(:id)
+          raise ArgumentError, "expected uri to have an id: #{uri}"
         end
 
         asset = build_asset_by_uri(AssetURI.build(path, params))
 
-        if digest && asset[:metadata][:dependency_digest] != digest
-          raise VersionNotFound, "could not find specified digest: #{digest}"
+        if id && asset[:id] != id
+          raise VersionNotFound, "could not find specified id: #{id}"
         end
 
         asset
@@ -119,9 +119,9 @@ module Sprockets
       def build_asset_by_uri(uri)
         filename, params = AssetURI.parse(uri)
 
-        # Internal assertion, should be routed through build_asset_by_digest_uri
-        if params.key?(:digest)
-          raise ArgumentError, "expected uri to have no digest: #{uri}"
+        # Internal assertion, should be routed through build_asset_by_id_uri
+        if params.key?(:id)
+          raise ArgumentError, "expected uri to have no id: #{uri}"
         end
 
         type = params[:type]
@@ -182,9 +182,12 @@ module Sprockets
         metadata = asset[:metadata]
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
         metadata[:dependency_digest] = dependencies_hexdigest(metadata[:dependency_paths])
-        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
 
-        asset[:uri] = AssetURI.build(filename, params.merge(digest: metadata[:dependency_digest]))
+        asset[:id]  = Utils.hexdigest(asset)
+        asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
+
+        # TODO: Avoid tracking Asset mtime
+        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
 
         asset
       end
