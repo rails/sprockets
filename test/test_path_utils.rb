@@ -25,6 +25,7 @@ class TestPathUtils < Sprockets::TestCase
       "encoding",
       "engines",
       "errors",
+      "octicons",
       "paths",
       "public",
       "resolve",
