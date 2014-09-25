@@ -66,6 +66,7 @@ class TestSprocketsSass < TestBaseSass
       env.cache = {}
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
+      env.append_path(fixture_path('octicons'))
     end
   end
 
@@ -278,13 +279,12 @@ class TestSassFunctions < TestSprocketsSass
   end
 
   def define_asset_path
-    engine = Sprockets::ScssTemplate.new do
-      def _asset_path(path, options = {})
+    @env.context_class.class_eval do
+      def asset_path(path, options = {})
+        link_asset(path)
         "/#{path}"
       end
     end
-
-    @env.register_engine('.scss', engine)
   end
 
   test "path functions" do
@@ -313,6 +313,16 @@ div {
     EOS
   end
 
+  test "url functions with query and hash parameters" do
+    assert_equal <<-EOS, render('octicons/octicons.scss')
+@font-face {
+  font-family: 'octicons';
+  src: url(/octicons.eot?#iefix) format("embedded-opentype"), url(/octicons.woff) format("woff"), url(/octicons.ttf) format("truetype"), url(/octicons.svg#octicons) format("svg");
+  font-weight: normal;
+  font-style: normal; }
+    EOS
+  end
+
   test "path function generates links" do
     asset = silence_warnings do
       @env['sass/paths.scss']
@@ -333,15 +343,5 @@ div {
 div {
   url: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAMAAAAoyzS7AAAABlBMVEUFO2sAAADPfNHpAAAACklEQVQIW2NgAAAAAgABYkBPaAAAAABJRU5ErkJggg%3D%3D); }
     EOS
-  end
-end
-
-class TestLegacySassFunctions < TestSassFunctions
-  def define_asset_path
-    @env.context_class.class_eval do
-      def asset_path(path, options = {})
-        "/#{path}"
-      end
-    end
   end
 end

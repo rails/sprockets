@@ -144,12 +144,17 @@ module Sprockets
       nil
     end
 
+    # `link_asset` declares an external dependency on an asset without directly
+    # including it. The target asset is returned from this function making it
+    # easy to construct a link to it.
+    #
+    # Returns an Asset or nil.
     def link_asset(path)
       if asset = @environment.find_asset(resolve(path))
         @dependency_paths.merge(asset.metadata[:dependency_paths])
         @links << asset.uri
       end
-      nil
+      asset
     end
 
     # Returns a Base64-encoded `data:` URI with the contents of the

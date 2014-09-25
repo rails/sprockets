@@ -1,5 +1,6 @@
 require 'rack/utils'
 require 'sass'
+require 'uri'
 
 module Sprockets
   # Template engine class for the SASS/SCSS compiler. Depends on the `sass` gem.
@@ -77,11 +78,6 @@ module Sprockets
     # end
     #
     module Functions
-      # TODO: Decide out the _asset_path API override should work.
-      def _asset_path(path, options = {})
-        sprockets_context.asset_path(path, options)
-      end
-
       # Public: Generate a url for asset path.
       #
       # Default implementation is deprecated. Currently defaults to
@@ -92,8 +88,14 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_path(path, options = {})
-        sprockets_context.link_asset(path.value)
-        ::Sass::Script::String.new(_asset_path(path.value, options), :string)
+        path = path.value
+
+        path, _, query, fragment = URI.split(path)[5..8]
+        path     = sprockets_context.asset_path(path, options)
+        query    = "?#{query}" if query
+        fragment = "##{fragment}" if fragment
+
+        ::Sass::Script::String.new("#{path}#{query}#{fragment}", :string)
       end
 
       # Public: Generate a asset url() link.
