@@ -219,7 +219,7 @@ module Sprockets
 
     # Public: Compare assets.
     #
-    # Assets are equal if they share the same path, mtime and digest.
+    # Assets are equal if they share the same path and digest.
     #
     # Returns true or false.
     def eql?(other)

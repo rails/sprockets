@@ -249,11 +249,11 @@ module Sprockets
 
     protected
       # Basic wrapper around Environment#find_asset. Logs compile time.
-      def find_assets(logical_path)
+      def find_assets(path)
         start = Utils.benchmark_start
-        environment.find_all_linked_assets(logical_path) do |asset|
+        environment.find_all_linked_assets(path) do |asset|
           logger.debug do
-            "Compiled #{logical_path}  (#{Utils.benchmark_end(start)}ms)"
+            "Compiled #{asset.logical_path}  (#{Utils.benchmark_end(start)}ms)"
           end
           yield asset
           start = Utils.benchmark_start
