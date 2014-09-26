@@ -15,10 +15,6 @@ module AssetTests
     assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
   end
 
-  test "mtime" do
-    assert @asset.mtime
-  end
-
   test "digest is source digest" do
     assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
   end
@@ -40,7 +36,6 @@ module AssetTests
     begin
       @asset.write_to(target)
       assert File.exist?(target)
-      assert_equal @asset.mtime, File.mtime(target)
     ensure
       FileUtils.rm(target) if File.exist?(target)
       assert !File.exist?(target)
@@ -52,7 +47,6 @@ module AssetTests
     begin
       @asset.write_to(target)
       assert File.exist?(target)
-      assert_equal @asset.mtime, File.mtime(target)
     ensure
       FileUtils.rm(target) if File.exist?(target)
       assert !File.exist?(target)
@@ -569,26 +563,6 @@ class BundledAssetTest < Sprockets::TestCase
       assert_raises(Sprockets::FileNotFound) do
         asset('test-main.js')
       end
-    end
-  end
-
-  test "mtime is based on required assets" do
-    required_asset = fixture_path('asset/dependencies/b.js')
-
-    sandbox required_asset do
-      mtime = Time.now + 1
-      File.utime mtime, mtime, required_asset
-      assert_equal mtime.to_i, asset('required_assets.js').mtime.to_i
-    end
-  end
-
-  test "mtime is based on dependency paths" do
-    asset_dependency = fixture_path('asset/dependencies/b.js')
-
-    sandbox asset_dependency do
-      mtime = Time.now + 1
-      File.utime mtime, mtime, asset_dependency
-      assert_equal mtime.to_i, asset('dependency_paths.js').mtime.to_i
     end
   end
 

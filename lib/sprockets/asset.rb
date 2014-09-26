@@ -116,15 +116,6 @@ module Sprockets
     attr_reader :length
     alias_method :bytesize, :length
 
-    # Deprecated: Returns Time of the last time the source was modified.
-    #
-    # Time resolution is normalized to the nearest second.
-    #
-    # Returns Time.
-    def mtime
-      Time.at(@mtime)
-    end
-
     # Public: Returns String hexdigest of source.
     attr_reader :digest
 
@@ -154,9 +145,6 @@ module Sprockets
         f.write source
       end
 
-      # Set mtime correctly
-      File.utime(mtime, mtime, filename)
-
       nil
     end
 
@@ -180,7 +168,7 @@ module Sprockets
 
     # Public: Compare assets.
     #
-    # Assets are equal if they share the same path, mtime and digest.
+    # Assets are equal if they share the same path and digest.
     #
     # Returns true or false.
     def eql?(other)

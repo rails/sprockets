@@ -168,7 +168,7 @@ module Sprockets
         find_assets(filename) do |asset|
           files[asset.digest_path] = {
             'logical_path' => asset.logical_path,
-            'mtime'        => asset.mtime.iso8601,
+            'mtime'        => Time.now.iso8601,
             'size'         => asset.bytesize,
             'digest'       => asset.digest
           }
