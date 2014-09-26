@@ -155,7 +155,7 @@ module Sprockets
     attr_reader :length
     alias_method :bytesize, :length
 
-    # Public: Returns Time of the last time the source was modified.
+    # Deprecated: Returns Time of the last time the source was modified.
     #
     # Time resolution is normalized to the nearest second.
     #
@@ -205,7 +205,6 @@ module Sprockets
     def inspect
       "#<#{self.class}:#{id} " +
         "filename=#{filename.inspect}, " +
-        "mtime=#{mtime.inspect}, " +
         "digest=#{digest.inspect}" +
         ">"
     end
