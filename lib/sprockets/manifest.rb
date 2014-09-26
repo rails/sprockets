@@ -106,50 +106,6 @@ module Sprockets
       @data['files'] ||= {}
     end
 
-    # Internal: Compile logical path matching filter into a proc that can be
-    # passed to logical_paths.select(&proc).
-    #
-    #   compile_match_filter(proc { |logical_path|
-    #     File.extname(logical_path) == '.js'
-    #   })
-    #
-    #   compile_match_filter(/application.js/)
-    #
-    #   compile_match_filter("foo/*.js")
-    #
-    # Returns a Proc or raise a TypeError.
-    def self.compile_match_filter(filter)
-      # If the filter is already a proc, great nothing to do.
-      if filter.respond_to?(:call)
-        filter
-      # If the filter is a regexp, wrap it in a proc that tests it against the
-      # logical path.
-      elsif filter.is_a?(Regexp)
-        proc { |logical_path| filter.match(logical_path) }
-      elsif filter.is_a?(String)
-        # If its an absolute path, detect the matching full filename
-        if PathUtils.absolute_path?(filter)
-          proc { |logical_path, filename| filename == filter.to_s }
-        else
-          # Otherwise do an fnmatch against the logical path.
-          proc { |logical_path| File.fnmatch(filter.to_s, logical_path) }
-        end
-      else
-        raise TypeError, "unknown filter type: #{filter.inspect}"
-      end
-    end
-
-    # Public: Filter logical paths in environment. Useful for selecting what
-    # files you want to compile.
-    #
-    # Returns an Enumerator.
-    def filter_logical_paths(*args)
-      filters = args.flatten.map { |arg| self.class.compile_match_filter(arg) }
-      environment.logical_paths.select do |a, b|
-        filters.any? { |f| f.call(a, b) }
-      end
-    end
-
     # Compile and write asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
@@ -164,8 +120,8 @@ module Sprockets
 
       filenames = []
 
-      filter_logical_paths(*args).each do |_, filename|
-        find_assets(filename) do |asset|
+      args.flatten.each do |path|
+        find_assets(path) do |asset|
           files[asset.digest_path] = {
             'logical_path' => asset.logical_path,
             'mtime'        => Time.now.iso8601,
@@ -246,11 +202,11 @@ module Sprockets
 
     protected
       # Basic wrapper around Environment#find_asset. Logs compile time.
-      def find_assets(logical_path)
+      def find_assets(path)
         start = Utils.benchmark_start
-        environment.find_all_linked_assets(logical_path) do |asset|
+        environment.find_all_linked_assets(path) do |asset|
           logger.debug do
-            "Compiled #{logical_path}  (#{Utils.benchmark_end(start)}ms)"
+            "Compiled #{asset.logical_path}  (#{Utils.benchmark_end(start)}ms)"
           end
           yield asset
           start = Utils.benchmark_start

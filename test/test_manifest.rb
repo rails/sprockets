@@ -207,26 +207,6 @@ class TestManifest < Sprockets::TestCase
     assert_equal subdep_digest_path, data['assets']['gallery.js']
   end
 
-  test "compile with regex" do
-    app_digest_path = @env['application.js'].digest_path
-    gallery_digest_path = @env['gallery.css'].digest_path
-
-    assert !File.exist?("#{@dir}/#{app_digest_path}")
-    assert !File.exist?("#{@dir}/#{gallery_digest_path}")
-
-    @manifest.compile('gallery.css', /application.js/)
-
-    assert File.exist?("#{@dir}/manifest.json")
-    assert File.exist?("#{@dir}/#{app_digest_path}")
-    assert File.exist?("#{@dir}/#{gallery_digest_path}")
-
-    data = JSON.parse(File.read(@manifest.filename))
-    assert data['files'][app_digest_path]
-    assert data['files'][gallery_digest_path]
-    assert_equal app_digest_path, data['assets']['application.js']
-    assert_equal gallery_digest_path, data['assets']['gallery.css']
-  end
-
   test "recompile asset" do
     digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
@@ -411,70 +391,5 @@ class TestManifest < Sprockets::TestCase
     assert_raises Sprockets::Error do
       @manifest.compile('application.js')
     end
-  end
-
-  test "find all filenames matching fnmatch filters" do
-    paths = []
-    @manifest.filter_logical_paths("*.js").each do |logical_path, filename|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matches index files" do
-    paths = []
-    @manifest.filter_logical_paths("coffee.js").each do |logical_path, filename|
-      paths << logical_path
-    end
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee/index.js")
-  end
-
-  test "each logical path enumerator matching fnmatch filters" do
-    paths = []
-    enum = @manifest.filter_logical_paths("*.js")
-    enum.to_a.each do |logical_path, manifest|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matching regexp filters" do
-    paths = []
-    @manifest.filter_logical_paths(/.*\.js/).each do |logical_path, filename|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matching proc filters" do
-    paths = []
-    @manifest.filter_logical_paths(proc { |fn| File.extname(fn) == '.js' }).each do |logical_path, filename|
-      paths << logical_path
-    end
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert !paths.include?("gallery.css")
-  end
-
-  test "iterate over each logical path matching proc filters with full path arg" do
-    paths = []
-    @manifest.filter_logical_paths(proc { |_, fn| fn.match(fixture_path('default/mobile')) }).each do |logical_path, filename|
-      paths << logical_path
-    end
-
-    assert paths.include?("mobile/a.js")
-    assert paths.include?("mobile/b.js")
-    assert !paths.include?("application.js")
   end
 end
