@@ -497,39 +497,6 @@ $app.run(function($templateCache) {
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path
   end
 
-  FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
-  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 9
-
-  test "iterate over each logical path" do
-    paths = []
-    paths = @env.logical_paths.to_a.map(&:first)
-    assert_equal FILES_IN_PATH, paths.length
-    assert_equal paths.size, paths.uniq.size, "has duplicates"
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee")
-  end
-
-  test "iterate over each logical path and filename" do
-    paths = []
-    filenames = []
-    @env.logical_paths.each do |logical_path, filename|
-      paths << logical_path
-      filenames << filename
-    end
-    assert_equal FILES_IN_PATH, paths.length
-    assert_equal paths.size, paths.uniq.size, "has duplicates"
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee")
-
-    assert filenames.any? { |p| p =~ /application.js.coffee/ }
-  end
-
   test "CoffeeScript files are compiled in a closure" do
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)

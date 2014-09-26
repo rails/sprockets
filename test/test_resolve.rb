@@ -136,17 +136,4 @@ class TestResolve < Sprockets::TestCase
     # assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=text/coffeescript",
     #   @env.resolve_asset_uri("coffee/foo", accept: 'text/coffeescript')
   end
-
-  test "verify all logical paths" do
-    Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
-      unless %w( . ..).include?(dir)
-        @env.append_path(fixture_path(dir))
-      end
-    end
-
-    @env.logical_paths.each do |logical_path, filename|
-      assert_equal filename, @env.resolve_all(logical_path).first,
-        "Expected #{logical_path.inspect} to resolve to #{filename}"
-    end
-  end
 end

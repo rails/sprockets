@@ -128,33 +128,6 @@ module Sprockets
       end
     end
 
-    # Public: Enumerate over all logical paths in the environment.
-    #
-    # Returns an Enumerator of [logical_path, filename].
-    def logical_paths
-      return to_enum(__method__) unless block_given?
-
-      seen = Set.new
-
-      self.paths.each do |load_path|
-        stat_tree(load_path).each do |filename, stat|
-          next unless stat.file?
-
-          path = split_subpath(load_path, filename)
-          path, mime_type, _ = parse_path_extnames(path)
-          path = normalize_logical_path(path)
-          path += mime_types[mime_type][:extensions].first if mime_type
-
-          if !seen.include?(path)
-            yield path, filename
-            seen << path
-          end
-        end
-      end
-
-      nil
-    end
-
     protected
       def parse_accept_options(mime_type, types)
         accepts = []
