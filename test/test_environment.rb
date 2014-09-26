@@ -135,8 +135,28 @@ $app.run(function($templateCache) {
     end
 
     assert_raises Sprockets::VersionNotFound do
-      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&digest=0000000000000000000000000000000000000000")
+      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=0000000000000000000000000000000000000000")
     end
+  end
+
+  test "find all linked assets" do
+    assert assets = @env.find_all_linked_assets("missing.js").to_a
+    assert_equal 0, assets.length
+
+    assert assets = @env.find_all_linked_assets("gallery.js").to_a
+    assert_equal 1, assets.length
+    assert_equal @env["gallery.js"], assets[0]
+
+    assert assets = @env.find_all_linked_assets("gallery-link.js").to_a
+    assert_equal 2, assets.length
+    assert_equal @env["gallery-link.js"], assets[0]
+    assert_equal @env["gallery.js"], assets[1]
+
+    assert assets = @env.find_all_linked_assets("explore-link.js").to_a
+    assert_equal 3, assets.length
+    assert_equal @env["explore-link.js"], assets[0]
+    assert_equal @env["gallery-link.js"], assets[1]
+    assert_equal @env["gallery.js"], assets[2]
   end
 
   test "resolve web component files" do
@@ -478,7 +498,7 @@ $app.run(function($templateCache) {
   end
 
   FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
-  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 6
+  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 9
 
   test "iterate over each logical path" do
     paths = []

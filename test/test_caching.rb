@@ -96,6 +96,27 @@ class TestCaching < Sprockets::TestCase
     refute_equal old_keys, new_keys
   end
 
+  test "assets from different load paths are not equal" do
+    # Normalize test fixture mtimes
+    mtime = File.stat(fixture_path("default/app/main.js")).mtime.to_i
+    File.utime(mtime, mtime, fixture_path("default/vendor/gems/jquery-2-0/jquery.js"))
+    File.utime(mtime, mtime, fixture_path("default/vendor/gems/jquery-1-9/jquery.js"))
+
+    env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor/gems/jquery-1-9")
+      env.cache = @cache
+    end
+
+    env2 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor/gems/jquery-2-0")
+      env.cache = @cache
+    end
+
+    refute_equal env1.find_asset("main.js"), env2.find_asset("main.js")
+  end
+
   test "stale cached asset isn't loaded if file is remove" do
     filename = fixture_path("default/tmp.js")
 
@@ -145,6 +166,32 @@ class TestCaching < Sprockets::TestCase
     assert_raises Sprockets::FileNotFound do
       env2["main.js"].to_s
     end
+  end
+
+  test "seperate cache for dependencies under a different load path" do
+    env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor/gems/jquery-1-9")
+      env.cache = @cache
+    end
+
+    env2 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor/gems/jquery-2-0")
+      env.cache = @cache
+    end
+
+    assert main = env1.find_asset("main.js")
+    assert_equal "var jQuery;\n", main.to_s
+    assert_equal fixture_path('default/app/main.js'), main.filename
+    assert_equal main, env1.find_asset_by_uri(main.uri)
+    assert_equal main, env1.find_asset("main.js")
+
+    assert main = env2.find_asset("main.js")
+    assert_equal "var jQuery;\n", main.to_s
+    assert_equal fixture_path('default/app/main.js'), main.filename
+    assert_equal main, env2.find_asset_by_uri(main.uri)
+    assert_equal main, env2.find_asset("main.js")
   end
 
   def write(filename, contents)

@@ -135,6 +135,15 @@ module Sprockets
         elsif klass == Hash
           digest << 'Hash'
           queue.concat(obj.sort)
+        elsif klass == Set
+          digest << 'Set'
+          queue.concat(obj.to_a)
+        elsif klass == Encoding
+          digest << 'Encoding'
+          digest << obj.name
+        elsif klass == SourceMap::Map
+          digest << 'SourceMap::Map'
+          queue << obj.as_json
         else
           raise TypeError, "couldn't digest #{klass}"
         end

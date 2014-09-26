@@ -77,6 +77,26 @@ class TestResolve < Sprockets::TestCase
       @env.resolve('foo', accept: '*/*; q=0.8, text/css')
   end
 
+  test "resolve extension before accept type" do
+    @env.append_path(fixture_path('resolve/javascripts'))
+    @env.append_path(fixture_path('resolve/stylesheets'))
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo.js', accept: 'application/javascript')
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo.css', accept: 'text/css')
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo.js', accept: '*/*')
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo.css', accept: '*/*')
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo.js', accept: 'text/css, */*')
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo.css', accept: 'application/javascript, */*')
+  end
+
   test "resolve accept type quality in paths" do
     @env.append_path(fixture_path('resolve/javascripts'))
 

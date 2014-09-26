@@ -66,6 +66,7 @@ class TestSprocketsSass < TestBaseSass
       env.cache = {}
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
+      env.append_path(fixture_path('octicons'))
     end
   end
 
@@ -278,13 +279,12 @@ class TestSassFunctions < TestSprocketsSass
   end
 
   def define_asset_path
-    engine = Sprockets::ScssTemplate.new do
-      def _asset_path(path, options = {})
+    @env.context_class.class_eval do
+      def asset_path(path, options = {})
+        link_asset(path)
         "/#{path}"
       end
     end
-
-    @env.register_engine('.scss', engine)
   end
 
   test "path functions" do
@@ -313,19 +313,29 @@ div {
     EOS
   end
 
+  test "url functions with query and hash parameters" do
+    assert_equal <<-EOS, render('octicons/octicons.scss')
+@font-face {
+  font-family: 'octicons';
+  src: url(/octicons.eot?#iefix) format("embedded-opentype"), url(/octicons.woff) format("woff"), url(/octicons.ttf) format("truetype"), url(/octicons.svg#octicons) format("svg");
+  font-weight: normal;
+  font-style: normal; }
+    EOS
+  end
+
   test "path function generates links" do
     asset = silence_warnings do
       @env['sass/paths.scss']
     end
 
     assert_equal [
-      "file://#{fixture_path('compass/foo.css')}?type=text/css&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.mov')}?digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&digest=10a34637ad661d98ba3344717656fcc76209c2f8",
-      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&digest=10a34637ad661d98ba3344717656fcc76209c2f8"
-    ], asset.links.to_a.sort
+      "file://#{fixture_path('compass/foo.css')}?type=text/css&id=xxx",
+      "file://#{fixture_path('compass/foo.js')}?type=application/javascript&id=xxx",
+      "file://#{fixture_path('compass/foo.mov')}?id=xxx",
+      "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&id=xxx",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&id=xxx",
+      "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&id=xxx"
+    ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
   end
 
   test "data-url function" do
@@ -333,15 +343,5 @@ div {
 div {
   url: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAMAAAAoyzS7AAAABlBMVEUFO2sAAADPfNHpAAAACklEQVQIW2NgAAAAAgABYkBPaAAAAABJRU5ErkJggg%3D%3D); }
     EOS
-  end
-end
-
-class TestLegacySassFunctions < TestSassFunctions
-  def define_asset_path
-    @env.context_class.class_eval do
-      def asset_path(path, options = {})
-        "/#{path}"
-      end
-    end
   end
 end

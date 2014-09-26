@@ -247,26 +247,14 @@ module Sprockets
     protected
       # Basic wrapper around Environment#find_asset. Logs compile time.
       def find_assets(logical_path)
-        asset = nil
         start = Utils.benchmark_start
-        asset = environment.find_asset(logical_path)
-        logger.debug do
-          ms = "(#{Utils.benchmark_end(start)}ms)"
-          "Compiled #{logical_path}  #{ms}"
-        end
-
-        if asset
-          queue = [asset]
-
-          while asset = queue.shift
-            yield asset
-            asset.links.each do |link|
-              queue.push(environment.find_asset_by_uri(link))
-            end
+        environment.find_all_linked_assets(logical_path) do |asset|
+          logger.debug do
+            "Compiled #{logical_path}  (#{Utils.benchmark_end(start)}ms)"
           end
+          yield asset
+          start = Utils.benchmark_start
         end
-
-        nil
       end
 
       # Persist manfiest back to FS

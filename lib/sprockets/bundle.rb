@@ -12,7 +12,9 @@ module Sprockets
     def self.call(input)
       env  = input[:environment]
       type = input[:content_type]
-      processed_uri = AssetURI.merge(input[:uri], encoding: nil, skip_bundle: true)
+
+      # TODO: Rebuilding this URI is a bit of a smell
+      processed_uri = AssetURI.build(input[:filename], type: type, skip_bundle: true)
 
       cache = Hash.new do |h, uri|
         h[uri] = env.find_asset_by_uri(uri)

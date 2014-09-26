@@ -75,10 +75,27 @@ module Sprockets
 
     def find_asset_by_uri(uri)
       _, params = AssetURI.parse(uri)
-      asset = params.key?(:digest) ?
-        build_asset_by_digest_uri(uri) :
+      asset = params.key?(:id) ?
+        build_asset_by_id_uri(uri) :
         build_asset_by_uri(uri)
       Asset.new(asset)
+    end
+
+    def find_all_linked_assets(path, options = {})
+      return to_enum(__method__, path, options) unless block_given?
+
+      asset = find_asset(path, options)
+      return unless asset
+
+      yield asset
+      stack = asset.links.to_a
+
+      while uri = stack.shift
+        yield asset = find_asset_by_uri(uri)
+        stack = asset.links.to_a + stack
+      end
+
+      nil
     end
 
     # Preferred `find_asset` shorthand.
@@ -97,18 +114,18 @@ module Sprockets
     end
 
     protected
-      def build_asset_by_digest_uri(uri)
+      def build_asset_by_id_uri(uri)
         path, params = AssetURI.parse(uri)
 
         # Internal assertion, should be routed through build_asset_by_uri
-        unless digest = params.delete(:digest)
-          raise ArgumentError, "expected uri to have an digest: #{uri}"
+        unless id = params.delete(:id)
+          raise ArgumentError, "expected uri to have an id: #{uri}"
         end
 
         asset = build_asset_by_uri(AssetURI.build(path, params))
 
-        if digest && asset[:metadata][:dependency_digest] != digest
-          raise VersionNotFound, "could not find specified digest: #{digest}"
+        if id && asset[:id] != id
+          raise VersionNotFound, "could not find specified id: #{id}"
         end
 
         asset
@@ -117,9 +134,9 @@ module Sprockets
       def build_asset_by_uri(uri)
         filename, params = AssetURI.parse(uri)
 
-        # Internal assertion, should be routed through build_asset_by_digest_uri
-        if params.key?(:digest)
-          raise ArgumentError, "expected uri to have no digest: #{uri}"
+        # Internal assertion, should be routed through build_asset_by_id_uri
+        if params.key?(:id)
+          raise ArgumentError, "expected uri to have no id: #{uri}"
         end
 
         type = params[:type]
@@ -130,7 +147,7 @@ module Sprockets
         elsif type && !resolve_path_transform_type(filename, type)
           raise ConversionError, "could not convert to type: #{type}"
         elsif !load_path
-          raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
+          raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
         logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
@@ -160,54 +177,34 @@ module Sprockets
         processors += unwrap_encoding_processors(params[:encoding])
 
         if processors.any?
-          processors.unshift(method(:read_input))
-          build_processed_asset_hash(asset, processors)
+          asset.merge!(process(
+            [method(:read_input)] + processors,
+            asset[:uri],
+            asset[:filename],
+            asset[:load_path],
+            asset[:name],
+            asset[:content_type]
+          ))
         else
-          build_static_asset_hash(asset)
+          asset.merge!({
+            encoding: Encoding::BINARY,
+            length: self.stat(asset[:filename]).size,
+            digest: digest_class.file(asset[:filename]).hexdigest,
+            metadata: {}
+          })
         end
-      end
 
-      def build_processed_asset_hash(asset, processors)
-        processed = process(
-          processors,
-          asset[:uri],
-          asset[:filename],
-          asset[:load_path],
-          asset[:name],
-          asset[:content_type]
-        )
+        metadata = asset[:metadata]
+        metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
+        metadata[:dependency_digest] = dependencies_hexdigest(metadata[:dependency_paths])
 
-        # Ensure originally read file is marked as a dependency
-        processed[:metadata][:dependency_paths] = Set.new(processed[:metadata][:dependency_paths]).merge([asset[:filename]])
+        asset[:id]  = Utils.hexdigest(asset)
+        asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
-        dep_digest = dependencies_hexdigest(processed[:metadata][:dependency_paths])
-        asset[:uri] = AssetURI.merge(asset[:uri], digest: dep_digest)
+        # TODO: Avoid tracking Asset mtime
+        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
 
-        asset.merge(processed).merge({
-          mtime: processed[:metadata][:dependency_paths].map { |p| stat(p).mtime.to_i }.max,
-          metadata: processed[:metadata].merge(
-            dependency_digest: dep_digest
-          )
-        })
-      end
-
-      def build_static_asset_hash(asset)
-        stat   = self.stat(asset[:filename])
-        digest = digest_class.file(asset[:filename]).hexdigest
-        dep_digest = dependencies_hexdigest([asset[:filename]])
-        uri    = AssetURI.merge(asset[:uri], digest: dep_digest)
-
-        asset.merge({
-          encoding: Encoding::BINARY,
-          length: stat.size,
-          mtime: stat.mtime.to_i,
-          digest: digest,
-          uri: uri,
-          metadata: {
-            dependency_paths: Set.new([asset[:filename]]),
-            dependency_digest: dep_digest
-          }
-        })
+        asset
       end
   end
 end
