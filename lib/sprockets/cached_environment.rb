@@ -14,9 +14,10 @@ module Sprockets
     def initialize(environment)
       initialize_configuration(environment)
 
-      @cache    = environment.cache
-      @stats    = Hash.new { |h, k| h[k] = _stat(k) }
-      @entries  = Hash.new { |h, k| h[k] = _entries(k) }
+      @cache      = environment.cache
+      @stats      = Hash.new { |h, k| h[k] = _stat(k) }
+      @entries    = Hash.new { |h, k| h[k] = _entries(k) }
+      @hexdigests = Hash.new { |h, k| h[k] = _file_hexdigest(k) }
     end
 
     # No-op return self as cached environment.
@@ -35,6 +36,12 @@ module Sprockets
     alias_method :_stat, :stat
     def stat(path)
       @stats[path]
+    end
+
+    # Internal: Cache Environment#file_hexdigest
+    alias_method :_file_hexdigest, :file_hexdigest
+    def file_hexdigest(path)
+      @hexdigests[path]
     end
 
     protected
