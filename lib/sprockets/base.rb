@@ -192,6 +192,7 @@ module Sprockets
             encoding: Encoding::BINARY,
             length: self.stat(asset[:filename]).size,
             digest: digest_class.file(asset[:filename]).hexdigest,
+            base64_digest: digest_class.file(asset[:filename]).base64digest,
             metadata: {}
           })
         end

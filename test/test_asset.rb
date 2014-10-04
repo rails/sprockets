@@ -28,6 +28,10 @@ module AssetTests
     assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
   end
 
+  test "base64_digest is source base64 digest" do
+    assert_equal Digest::SHA1.base64digest(@asset.to_s), @asset.base64_digest
+  end
+
   test "length is source length" do
     assert_equal @asset.to_s.length, @asset.length
   end
