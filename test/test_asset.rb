@@ -28,6 +28,14 @@ module AssetTests
     assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
   end
 
+  test "integrity is properly generated" do
+    digest = ::Digest::SHA256.digest(@asset.to_s)
+    digest = Base64.urlsafe_encode64(digest)
+    digest = digest.sub(/=*\z/, "")
+    expected = "ni:///sha-256;#{digest}"
+    assert_equal expected, @asset.integrity
+  end
+
   test "length is source length" do
     assert_equal @asset.to_s.length, @asset.length
   end

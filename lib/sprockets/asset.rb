@@ -167,6 +167,10 @@ module Sprockets
     # Public: Returns String hexdigest of source.
     attr_reader :digest
 
+    # Public: A "named information" URL specifying the base64 SHA256 digest of
+    # the asset.
+    attr_reader :integrity
+
     # Pubic: ETag String of Asset.
     alias_method :etag, :digest
 

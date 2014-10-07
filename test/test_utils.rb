@@ -5,6 +5,16 @@ require 'sprockets/utils'
 class TestUtils < Sprockets::TestCase
   include Sprockets::Utils
 
+  test "integrity_uri properly formats the named information URI" do
+    expected = "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI"
+    assert_equal expected, integrity_uri("alert(1)")
+  end
+
+  test "integrity_uri adds an encoded content-type if given one" do
+    expected = "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI?ct=application%2Fjavascript"
+    assert_equal expected, integrity_uri("alert(1)", "application/javascript")
+  end
+
   test "string ends with semicolon" do
     assert string_end_with_semicolon?("var foo;")
     refute string_end_with_semicolon?("var foo")
