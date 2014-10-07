@@ -1,10 +1,34 @@
-require 'digest/sha1'
+require 'digest'
+require 'base64'
+require 'cgi'
 require 'set'
 
 module Sprockets
   # `Utils`, we didn't know where else to put it!
   module Utils
     extend self
+
+    # Internal: Generate a "named information" URI for use in the `integrity`
+    # attribute of an asset tag as per the subresource integrity specification.
+    #
+    # content      - The content of the asset to generate the URI for.
+    # content_type - The content-type the asset will be served with. This *must*
+    #                be accurate if provided. Otherwise, subresource integrity
+    #                will block the loading of the asset.
+    #
+    # Returns a String.
+    def integrity_uri(content, content_type = nil)
+      # Prepare/format the digest.
+      digest = ::Digest::SHA256.digest(content)
+      digest = Base64.urlsafe_encode64(digest)
+      digest = digest.sub(/=*\z/, "")
+
+      # Prepare/format the query section.
+      query = content_type ? "?ct=#{CGI.escape(content_type)}" : ""
+
+      # Build the URI.
+      "ni:///sha-256;#{digest}#{query}"
+    end
 
     # Internal: Check if string has a trailing semicolon.
     #

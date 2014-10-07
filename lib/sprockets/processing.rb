@@ -196,7 +196,7 @@ module Sprockets
         charset: data.encoding.name.downcase,
         length: data.bytesize,
         digest: digest_class.hexdigest(data),
-        base64_digest: digest_class.base64digest(data),
+        integrity: Utils.integrity_uri(data),
         metadata: metadata
       }
     end

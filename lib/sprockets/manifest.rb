@@ -170,11 +170,11 @@ module Sprockets
       filter_logical_paths(*args).each do |_, filename|
         find_assets(filename) do |asset|
           files[asset.digest_path] = {
-            'logical_path'  => asset.logical_path,
-            'mtime'         => asset.mtime.iso8601,
-            'size'          => asset.bytesize,
-            'digest'        => asset.digest,
-            'base64_digest' => asset.base64_digest
+            'logical_path' => asset.logical_path,
+            'mtime'        => asset.mtime.iso8601,
+            'size'         => asset.bytesize,
+            'digest'       => asset.digest,
+            'integrity'    => asset.integrity
           }
           assets[asset.logical_path] = asset.digest_path
 
