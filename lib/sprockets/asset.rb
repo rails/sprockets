@@ -164,15 +164,23 @@ module Sprockets
       Time.at(@mtime)
     end
 
-    # Public: Returns String hexdigest of source.
+    # Deprecated: Returns String hexdigest of source.
     attr_reader :digest
+
+    # Public: Returns String hexdigest of source.
+    alias_method :hexdigest, :digest
+
+    # Pubic: ETag String of Asset.
+    alias_method :etag, :digest
+
+    # Public: Returns String base64 digest of source.
+    def base64digest
+      ::Digest::SHA256.base64digest(source)
+    end
 
     # Public: A "named information" URL specifying the base64 SHA256 digest of
     # the asset.
     attr_reader :integrity
-
-    # Pubic: ETag String of Asset.
-    alias_method :etag, :digest
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.

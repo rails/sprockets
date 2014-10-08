@@ -24,10 +24,6 @@ module AssetTests
     assert @asset.mtime
   end
 
-  test "digest is source digest" do
-    assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
-  end
-
   test "length is source length" do
     assert_equal @asset.to_s.length, @asset.length
   end
@@ -205,6 +201,19 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal 42917, @asset.bytesize
   end
 
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "29cb842208672b7f65042744121b63d7f59783bf", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "29cb842208672b7f65042744121b63d7f59783bf", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.base64digest
+  end
+
   test "integrity" do
     assert_equal "ni:///sha-256;HaLlnfddM9i3TD1x_u3mmPID8TZRLLqrIMaKW969WAA", @asset.integrity
   end
@@ -301,6 +310,19 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal 69, @asset.length
   end
 
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "b5df367abb741cac6526b05a726e9e8d7bd863d2", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "b5df367abb741cac6526b05a726e9e8d7bd863d2", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "al//iegyjxWOd2QrU+Mlwk7YRKa81aluwPkAQ4TpyaU=", @asset.base64digest
+  end
+
   test "integrity" do
     assert_equal "ni:///sha-256;al__iegyjxWOd2QrU-Mlwk7YRKa81aluwPkAQ4TpyaU", @asset.integrity
   end
@@ -369,6 +391,19 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "length" do
     assert_equal 159, @asset.length
+  end
+
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "2a1b4881cb06529a04bdc4703afe68358defcc5c", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "2a1b4881cb06529a04bdc4703afe68358defcc5c", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.base64digest
   end
 
   test "integrity" do
