@@ -193,7 +193,6 @@ module Sprockets
             encoding: Encoding::BINARY,
             length: self.stat(asset[:filename]).size,
             digest: file_digest(asset[:filename]),
-            integrity: Utils.integrity_uri(File.read(asset[:filename])),
             metadata: {}
           })
         end
@@ -204,6 +203,12 @@ module Sprockets
 
         asset[:id]  = Utils.hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
+
+        # Ensure digest is a SHA256, otherwise skip integrity.
+        # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
+        if asset[:digest].size == 32
+          asset[:integrity] = Utils.integrity_uri(asset[:digest], asset[:content_type])
+        end
 
         # TODO: Avoid tracking Asset mtime
         asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max

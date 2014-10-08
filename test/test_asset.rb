@@ -215,7 +215,7 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;HaLlnfddM9i3TD1x_u3mmPID8TZRLLqrIMaKW969WAA", @asset.integrity
+    assert_equal "ni:///sha-256;HaLlnfddM9i3TD1x_u3mmPID8TZRLLqrIMaKW969WAA?ct=image/png", @asset.integrity
   end
 
   test "splat" do
@@ -324,7 +324,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;al__iegyjxWOd2QrU-Mlwk7YRKa81aluwPkAQ4TpyaU", @asset.integrity
+    assert_equal "ni:///sha-256;al__iegyjxWOd2QrU-Mlwk7YRKa81aluwPkAQ4TpyaU?ct=application/javascript", @asset.integrity
   end
 
   test "charset is UTF-8" do
@@ -407,7 +407,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9_YWUkGzGpQ", @asset.integrity
+    assert_equal "ni:///sha-256;lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9_YWUkGzGpQ?ct=application/javascript", @asset.integrity
   end
 
   test "charset is UTF-8" do
