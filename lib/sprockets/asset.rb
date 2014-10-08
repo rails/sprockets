@@ -49,7 +49,7 @@ module Sprockets
 
     # Internal: Unique asset object ID.
     #
-    # Returns String SHA1 String.
+    # Returns String SHA256 String.
     attr_reader :id
 
     # Public: Internal URI to lookup asset by.

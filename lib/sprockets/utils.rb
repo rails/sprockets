@@ -1,4 +1,4 @@
-require 'digest'
+require 'digest/sha2'
 require 'base64'
 require 'cgi'
 require 'set'
@@ -129,9 +129,9 @@ module Sprockets
     #
     # obj - A JSON serializable object.
     #
-    # Returns a String SHA1 digest of the object.
+    # Returns a String SHA256 digest of the object.
     def hexdigest(obj)
-      digest = Digest::SHA1.new
+      digest = Digest::SHA256.new
       queue  = [obj]
 
       while queue.length > 0

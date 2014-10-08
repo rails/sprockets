@@ -1,3 +1,4 @@
+require 'digest/sha2'
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/errors'
@@ -33,11 +34,11 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Internal: Compute hexdigest for path.
+    # Internal: Compute SHA256 digest for path.
     #
     # path - String filename or directory path.
     #
-    # Returns a String SHA1 hexdigest or nil.
+    # Returns a String SHA256 digest or nil.
     def file_hexdigest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
@@ -45,13 +46,13 @@ module Sprockets
         # negligently reset thus appearing as if the file hasn't changed on
         # disk. Also, the mtime is only read to the nearest second. Its
         # also possible the file was updated more than once in a given second.
-        cache.fetch(['file_hexdigest', path, stat.mtime.to_i]) do
+        cache.fetch(['file_digest', path, stat.mtime.to_i]) do
           if stat.directory?
             # If its a directive, digest the list of filenames
-            Digest::SHA1.hexdigest(self.entries(path).join(','))
+            Digest::SHA256.hexdigest(self.entries(path).join(','))
           elsif stat.file?
             # If its a file, digest the contents
-            Digest::SHA1.file(path.to_s).hexdigest
+            Digest::SHA256.file(path.to_s).hexdigest
           end
         end
       end
@@ -61,9 +62,9 @@ module Sprockets
     #
     # paths - Array of filename or directory paths.
     #
-    # Returns a String SHA1 hexdigest.
+    # Returns a String SHA256 hexdigest.
     def dependencies_hexdigest(paths)
-      digest = Digest::SHA1.new
+      digest = Digest::SHA256.new
       paths.each { |path| digest.update(file_hexdigest(path).to_s) }
       digest.hexdigest
     end

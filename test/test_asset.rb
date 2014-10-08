@@ -5,9 +5,9 @@ module AssetTests
     define_method("test_#{name.inspect}", &block)
   end
 
-  test "id is a SHA1 String" do
+  test "id is a SHA256 String" do
     assert_kind_of String, @asset.id
-    assert_match(/^[0-9a-f]{40}$/, @asset.id)
+    assert_match(/^[0-9a-f]{64}$/, @asset.id)
   end
 
   test "uri can find itself" do
@@ -203,11 +203,11 @@ class StaticAssetTest < Sprockets::TestCase
 
   test "source digest" do
     # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "29cb842208672b7f65042744121b63d7f59783bf", @asset.digest
+    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.digest
   end
 
   test "source hexdigest" do
-    assert_equal "29cb842208672b7f65042744121b63d7f59783bf", @asset.hexdigest
+    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.hexdigest
   end
 
   test "source base64digest" do
@@ -312,11 +312,11 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   test "source digest" do
     # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "b5df367abb741cac6526b05a726e9e8d7bd863d2", @asset.digest
+    assert_equal "6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5", @asset.digest
   end
 
   test "source hexdigest" do
-    assert_equal "b5df367abb741cac6526b05a726e9e8d7bd863d2", @asset.hexdigest
+    assert_equal "6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5", @asset.hexdigest
   end
 
   test "source base64digest" do
@@ -395,11 +395,11 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "source digest" do
     # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "2a1b4881cb06529a04bdc4703afe68358defcc5c", @asset.digest
+    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.digest
   end
 
   test "source hexdigest" do
-    assert_equal "2a1b4881cb06529a04bdc4703afe68358defcc5c", @asset.hexdigest
+    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.hexdigest
   end
 
   test "source base64digest" do
@@ -835,9 +835,9 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset = asset("require_manifest.js")
     assert_equal <<-EOS, asset.to_s
 
-define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
-define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.css")
-define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
+define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
     assert_equal [
       "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
@@ -853,9 +853,9 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
 
 
 
-define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
-define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.css")
-define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
+define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
 
     assert_equal [
