@@ -395,6 +395,7 @@ submit a pull request.
 * Added linked or referenced assets. When an asset is compiled, any of its links
   will be compiled as well.
 * Add Asset integrity attribute for Subresource Integrity
+* Default digest changed to SHA256.
 * Rename Asset#digest to Asset#hexdigest. Asset#digest is deprecated and will
   return a raw byte String in 4.x.
 
@@ -417,7 +418,7 @@ submit a pull request.
 **2.11.0** (February 19, 2014)
 
 * Cache store must now be an LRU implementation.
-* Default digest changed to SHA256. To continue using MD5.
+* Default digest changed to SHA1. To continue using MD5.
   `env.digest_class = Digest::MD5`.
 
 **2.10.0** (May 24, 2013)
