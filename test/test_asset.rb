@@ -28,14 +28,6 @@ module AssetTests
     assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
   end
 
-  test "integrity is properly generated" do
-    digest = ::Digest::SHA256.digest(@asset.to_s)
-    digest = Base64.urlsafe_encode64(digest)
-    digest = digest.sub(/=*\z/, "")
-    expected = "ni:///sha-256;#{digest}"
-    assert_equal expected, @asset.integrity
-  end
-
   test "length is source length" do
     assert_equal @asset.to_s.length, @asset.length
   end
@@ -213,6 +205,10 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal 42917, @asset.bytesize
   end
 
+  test "integrity" do
+    assert_equal "ni:///sha-256;HaLlnfddM9i3TD1x_u3mmPID8TZRLLqrIMaKW969WAA", @asset.integrity
+  end
+
   test "splat" do
     assert_equal [@asset], @asset.to_a
   end
@@ -305,6 +301,10 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal 69, @asset.length
   end
 
+  test "integrity" do
+    assert_equal "ni:///sha-256;al__iegyjxWOd2QrU-Mlwk7YRKa81aluwPkAQ4TpyaU", @asset.integrity
+  end
+
   test "charset is UTF-8" do
     assert_equal 'utf-8', @asset.charset
   end
@@ -369,6 +369,10 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "length" do
     assert_equal 159, @asset.length
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9_YWUkGzGpQ", @asset.integrity
   end
 
   test "charset is UTF-8" do
