@@ -9,7 +9,7 @@ module Sprockets
     #
     # obj - A JSON serializable object.
     #
-    # Returns a String SHA256 digest of the object.
+    # Returns a String digest of the object.
     def hexdigest(obj)
       digest = Digest::SHA256.new
       queue  = [obj]

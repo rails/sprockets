@@ -34,11 +34,11 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Internal: Compute SHA256 digest for path.
+    # Internal: Compute digest for path.
     #
     # path - String filename or directory path.
     #
-    # Returns a String SHA256 digest or nil.
+    # Returns a String digest or nil.
     def file_digest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
@@ -58,11 +58,11 @@ module Sprockets
       end
     end
 
-    # Internal: Compute SHA256 digest for a set of paths.
+    # Internal: Compute digest for a set of paths.
     #
     # paths - Array of filename or directory paths.
     #
-    # Returns a String SHA256 digest.
+    # Returns a String digest.
     def dependencies_digest(paths)
       digest = Digest::SHA256.new
       paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
