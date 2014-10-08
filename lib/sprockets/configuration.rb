@@ -52,13 +52,13 @@ module Sprockets
       mutate_config(:version) { version.dup }
     end
 
-    # Returns a `Digest` implementation class.
+    # Deprecated: Returns a `Digest` implementation class.
     #
-    # Defaults to `Digest::SHA1`.
+    # Defaults to `Digest::SHA256`.
     attr_reader :digest_class
 
-    # Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::SHA1` or
+    # Deprecated: Assign a `Digest` implementation class. This maybe any Ruby
+    # `Digest::` implementation such as `Digest::SHA256` or
     # `Digest::MD5`.
     #
     #     environment.digest_class = Digest::MD5

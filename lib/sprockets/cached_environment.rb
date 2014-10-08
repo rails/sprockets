@@ -14,9 +14,10 @@ module Sprockets
     def initialize(environment)
       initialize_configuration(environment)
 
-      @cache    = environment.cache
-      @stats    = Hash.new { |h, k| h[k] = _stat(k) }
-      @entries  = Hash.new { |h, k| h[k] = _entries(k) }
+      @cache   = environment.cache
+      @stats   = Hash.new { |h, k| h[k] = _stat(k) }
+      @entries = Hash.new { |h, k| h[k] = _entries(k) }
+      @digests = Hash.new { |h, k| h[k] = _file_digest(k) }
     end
 
     # No-op return self as cached environment.
@@ -37,6 +38,12 @@ module Sprockets
       @stats[path]
     end
 
+    # Internal: Cache Environment#file_digest
+    alias_method :_file_digest, :file_digest
+    def file_digest(path)
+      @digests[path]
+    end
+
     protected
       def asset_dependency_graph_cache_key(uri)
         filename, _ = AssetURI.parse(uri)
@@ -46,7 +53,7 @@ module Sprockets
           self.version,
           self.paths,
           uri,
-          file_hexdigest(filename)
+          file_digest(filename)
         ]
       end
 
@@ -68,9 +75,9 @@ module Sprockets
       def build_asset_by_uri(uri)
         dep_graph_key = asset_dependency_graph_cache_key(uri)
 
-        dependency_paths, dependency_digest, digest_uri = cache._get(dep_graph_key)
-        if dependency_paths && dependency_digest && digest_uri
-          if dependencies_hexdigest(dependency_paths) == dependency_digest
+        dependency_paths, dependency_sources_digest, digest_uri = cache._get(dep_graph_key)
+        if dependency_paths && dependency_sources_digest && digest_uri
+          if dependencies_digest(dependency_paths) == dependency_sources_digest
             if asset = cache._get(asset_digest_uri_cache_key(digest_uri))
               return asset
             end
@@ -79,8 +86,8 @@ module Sprockets
 
         asset = super
 
-        dependency_digest, dependency_paths = asset[:metadata].values_at(:dependency_digest, :dependency_paths)
-        cache._set(dep_graph_key, [dependency_paths, dependency_digest, asset[:uri]])
+        dependency_sources_digest, dependency_paths = asset[:metadata].values_at(:dependency_sources_digest, :dependency_paths)
+        cache._set(dep_graph_key, [dependency_paths, dependency_sources_digest, asset[:uri]])
         cache.fetch(asset_digest_uri_cache_key(asset[:uri])) { asset }
 
         asset

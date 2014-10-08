@@ -126,7 +126,8 @@ module Sprockets
             'logical_path' => asset.logical_path,
             'mtime'        => Time.now.iso8601,
             'size'         => asset.bytesize,
-            'digest'       => asset.digest
+            'digest'       => asset.hexdigest,
+            'integrity'    => asset.integrity
           }
           assets[asset.logical_path] = asset.digest_path
 

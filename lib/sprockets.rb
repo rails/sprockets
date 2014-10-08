@@ -58,8 +58,8 @@ module Sprockets
   @version           = ''
 
   # Set the default digest
-  require 'digest/sha1'
-  @digest_class = Digest::SHA1
+  require 'digest/sha2'
+  @digest_class = Digest::SHA256
 
   require 'logger'
   @logger = Logger.new($stderr)

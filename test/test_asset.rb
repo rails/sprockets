@@ -5,18 +5,14 @@ module AssetTests
     define_method("test_#{name.inspect}", &block)
   end
 
-  test "id is a SHA1 String" do
+  test "id is a SHA256 String" do
     assert_kind_of String, @asset.id
-    assert_match(/^[0-9a-f]{40}$/, @asset.id)
+    assert_match(/^[0-9a-f]{64}$/, @asset.id)
   end
 
   test "uri can find itself" do
     # assert_kind_of URI, @asset.uri
     assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
-  end
-
-  test "digest is source digest" do
-    assert_equal Digest::SHA1.hexdigest(@asset.to_s), @asset.digest
   end
 
   test "length is source length" do
@@ -65,13 +61,13 @@ module FreshnessTests
     sandbox filename do
       write(filename, "a;")
       asset      = asset('test.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
       assert_equal "a;\n", asset.to_s
 
       write(filename, "b;")
       asset = asset('test.js')
-      refute_equal old_digest, asset.digest
+      refute_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
       assert_equal "b;\n", asset.to_s
     end
@@ -98,13 +94,13 @@ module FreshnessTests
       write(main, "//= depend_on test-dep\n<%= File.read('#{dep}') %>")
       write(dep, "a;")
       asset      = asset('test-main.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
       assert_equal "a;", asset.to_s
 
       write(dep, "b;")
       asset = asset('test-main.js')
-      refute_equal old_digest, asset.digest
+      refute_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
       assert_equal "b;", asset.to_s
     end
@@ -178,6 +174,23 @@ class StaticAssetTest < Sprockets::TestCase
     assert_equal 42917, @asset.bytesize
   end
 
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.base64digest
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;HaLlnfddM9i3TD1x_u3mmPID8TZRLLqrIMaKW969WAA?ct=image/png", @asset.integrity
+  end
+
   test "asset is fresh if its mtime is changed but its contents is the same" do
     filename = fixture_path('asset/test-POW.png')
 
@@ -185,14 +198,14 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test-POW.png']
       assert asset
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(filename, 'w') { |f| f.write "a" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert_equal old_digest, @env['test-POW.png'].digest
+      assert_equal old_digest, @env['test-POW.png'].hexdigest
       assert_equal old_uri, @env['test-POW.png'].uri
     end
   end
@@ -204,14 +217,14 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['POW.png']
       assert asset
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(filename, 'w') { |f| f.write "b" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      refute_equal old_digest, @env['POW.png'].digest
+      refute_equal old_digest, @env['POW.png'].hexdigest
       refute_equal old_uri, @env['POW.png'].uri
     end
   end
@@ -260,6 +273,23 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   test "length" do
     assert_equal 69, @asset.length
+  end
+
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "al//iegyjxWOd2QrU+Mlwk7YRKa81aluwPkAQ4TpyaU=", @asset.base64digest
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;al__iegyjxWOd2QrU-Mlwk7YRKa81aluwPkAQ4TpyaU?ct=application/javascript", @asset.integrity
   end
 
   test "charset is UTF-8" do
@@ -312,6 +342,23 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal 159, @asset.length
   end
 
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.base64digest
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9_YWUkGzGpQ?ct=application/javascript", @asset.integrity
+  end
+
   test "charset is UTF-8" do
     assert_equal 'utf-8', @asset.charset
   end
@@ -334,14 +381,14 @@ class BundledAssetTest < Sprockets::TestCase
       File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      refute_equal old_digest, asset('test-main.js').digest
+      refute_equal old_digest, asset('test-main.js').hexdigest
       refute_equal old_uri, asset('test-main.js').uri
     end
   end
@@ -354,7 +401,7 @@ class BundledAssetTest < Sprockets::TestCase
       File.open(main, 'w') { |f| f.write "//= depend_on_asset test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(dep, 'w') { |f| f.write "b;" }
@@ -362,7 +409,7 @@ class BundledAssetTest < Sprockets::TestCase
       File.utime(mtime, mtime, dep)
 
       asset = asset('test-main.js')
-      assert_equal old_digest, asset.digest
+      assert_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
     end
   end
@@ -380,9 +427,9 @@ class BundledAssetTest < Sprockets::TestCase
       asset_b = asset('test-b.js')
       asset_c = asset('test-c.js')
 
-      old_asset_a_digest = asset_a.digest
-      old_asset_b_digest = asset_b.digest
-      old_asset_c_digest = asset_c.digest
+      old_asset_a_digest = asset_a.hexdigest
+      old_asset_b_digest = asset_b.hexdigest
+      old_asset_c_digest = asset_c.hexdigest
       old_asset_a_uri = asset_a.uri
       old_asset_b_uri = asset_b.uri
       old_asset_c_uri = asset_c.uri
@@ -391,9 +438,9 @@ class BundledAssetTest < Sprockets::TestCase
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      refute_equal old_asset_a_digest, asset('test-a.js').digest
-      refute_equal old_asset_b_digest, asset('test-b.js').digest
-      refute_equal old_asset_c_digest, asset('test-c.js').digest
+      refute_equal old_asset_a_digest, asset('test-a.js').hexdigest
+      refute_equal old_asset_b_digest, asset('test-b.js').hexdigest
+      refute_equal old_asset_c_digest, asset('test-c.js').hexdigest
       refute_equal old_asset_a_uri, asset('test-a.js').uri
       refute_equal old_asset_b_uri, asset('test-b.js').uri
       refute_equal old_asset_c_uri, asset('test-c.js').uri
@@ -703,9 +750,9 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset = asset("require_manifest.js")
     assert_equal <<-EOS, asset.to_s
 
-define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
-define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.css")
-define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
+define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
     assert_equal [
       "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
@@ -721,9 +768,9 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
 
 
 
-define("application.js", "application-2a1b4881cb06529a04bdc4703afe68358defcc5c.js")
-define("application.css", "application-082e2256a61f471be1418c2585cfdd3c37b3f560.css")
-define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
+define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
+define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
 
     assert_equal [
@@ -785,7 +832,7 @@ define("POW.png", "POW-29cb842208672b7f65042744121b63d7f59783bf.png")
   end
 
   test "asset digest" do
-    assert asset("project.js").digest
+    assert asset("project.js").hexdigest
   end
 
   test "asset digest path" do
