@@ -39,7 +39,7 @@ module Sprockets
     # path - String filename or directory path.
     #
     # Returns a String SHA256 digest or nil.
-    def file_hexdigest(path)
+    def file_digest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
         # for a files contents to have changed and its mtime to have been
@@ -49,10 +49,10 @@ module Sprockets
         cache.fetch(['file_digest', path, stat.mtime.to_i]) do
           if stat.directory?
             # If its a directive, digest the list of filenames
-            Digest::SHA256.hexdigest(self.entries(path).join(','))
+            Digest::SHA256.digest(self.entries(path).join(','))
           elsif stat.file?
             # If its a file, digest the contents
-            Digest::SHA256.file(path.to_s).hexdigest
+            Digest::SHA256.file(path.to_s).digest
           end
         end
       end
@@ -65,7 +65,7 @@ module Sprockets
     # Returns a String SHA256 hexdigest.
     def dependencies_hexdigest(paths)
       digest = Digest::SHA256.new
-      paths.each { |path| digest.update(file_hexdigest(path).to_s) }
+      paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
       digest.hexdigest
     end
 
