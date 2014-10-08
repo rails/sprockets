@@ -149,7 +149,7 @@ class TestServer < Sprockets::TestCase
   end
 
   test "serve source with etag headers" do
-    digest = @env['application.js'].digest
+    digest = @env['application.js'].etag
 
     get "/assets/application.js"
     assert_equal "\"#{digest}\"",

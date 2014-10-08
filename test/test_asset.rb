@@ -88,13 +88,13 @@ module FreshnessTests
     sandbox filename do
       write(filename, "a;")
       asset      = asset('test.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
       assert_equal "a;\n", asset.to_s
 
       write(filename, "b;")
       asset = asset('test.js')
-      refute_equal old_digest, asset.digest
+      refute_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
       assert_equal "b;\n", asset.to_s
     end
@@ -121,13 +121,13 @@ module FreshnessTests
       write(main, "//= depend_on test-dep\n<%= File.read('#{dep}') %>")
       write(dep, "a;")
       asset      = asset('test-main.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
       assert_equal "a;", asset.to_s
 
       write(dep, "b;")
       asset = asset('test-main.js')
-      refute_equal old_digest, asset.digest
+      refute_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
       assert_equal "b;", asset.to_s
     end
@@ -233,14 +233,14 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['test-POW.png']
       assert asset
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(filename, 'w') { |f| f.write "a" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      assert_equal old_digest, @env['test-POW.png'].digest
+      assert_equal old_digest, @env['test-POW.png'].hexdigest
       assert_equal old_uri, @env['test-POW.png'].uri
     end
   end
@@ -252,14 +252,14 @@ class StaticAssetTest < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "a" }
       asset = @env['POW.png']
       assert asset
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(filename, 'w') { |f| f.write "b" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
-      refute_equal old_digest, @env['POW.png'].digest
+      refute_equal old_digest, @env['POW.png'].hexdigest
       refute_equal old_uri, @env['POW.png'].uri
     end
   end
@@ -432,14 +432,14 @@ class BundledAssetTest < Sprockets::TestCase
       File.open(main, 'w') { |f| f.write "//= require test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(dep, 'w') { |f| f.write "b;" }
       mtime = Time.now + 1
       File.utime(mtime, mtime, dep)
 
-      refute_equal old_digest, asset('test-main.js').digest
+      refute_equal old_digest, asset('test-main.js').hexdigest
       refute_equal old_uri, asset('test-main.js').uri
     end
   end
@@ -452,7 +452,7 @@ class BundledAssetTest < Sprockets::TestCase
       File.open(main, 'w') { |f| f.write "//= depend_on_asset test-dep\n" }
       File.open(dep, 'w') { |f| f.write "a;" }
       asset = asset('test-main.js')
-      old_digest = asset.digest
+      old_digest = asset.hexdigest
       old_uri    = asset.uri
 
       File.open(dep, 'w') { |f| f.write "b;" }
@@ -460,7 +460,7 @@ class BundledAssetTest < Sprockets::TestCase
       File.utime(mtime, mtime, dep)
 
       asset = asset('test-main.js')
-      assert_equal old_digest, asset.digest
+      assert_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
     end
   end
@@ -478,9 +478,9 @@ class BundledAssetTest < Sprockets::TestCase
       asset_b = asset('test-b.js')
       asset_c = asset('test-c.js')
 
-      old_asset_a_digest = asset_a.digest
-      old_asset_b_digest = asset_b.digest
-      old_asset_c_digest = asset_c.digest
+      old_asset_a_digest = asset_a.hexdigest
+      old_asset_b_digest = asset_b.hexdigest
+      old_asset_c_digest = asset_c.hexdigest
       old_asset_a_uri = asset_a.uri
       old_asset_b_uri = asset_b.uri
       old_asset_c_uri = asset_c.uri
@@ -489,9 +489,9 @@ class BundledAssetTest < Sprockets::TestCase
       mtime = Time.now + 1
       File.utime(mtime, mtime, c)
 
-      refute_equal old_asset_a_digest, asset('test-a.js').digest
-      refute_equal old_asset_b_digest, asset('test-b.js').digest
-      refute_equal old_asset_c_digest, asset('test-c.js').digest
+      refute_equal old_asset_a_digest, asset('test-a.js').hexdigest
+      refute_equal old_asset_b_digest, asset('test-b.js').hexdigest
+      refute_equal old_asset_c_digest, asset('test-c.js').hexdigest
       refute_equal old_asset_a_uri, asset('test-a.js').uri
       refute_equal old_asset_b_uri, asset('test-b.js').uri
       refute_equal old_asset_c_uri, asset('test-c.js').uri
@@ -917,7 +917,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "asset digest" do
-    assert asset("project.js").digest
+    assert asset("project.js").hexdigest
   end
 
   test "asset digest path" do

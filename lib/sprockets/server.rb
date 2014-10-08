@@ -67,11 +67,11 @@ module Sprockets
 
       if asset.nil?
         status = :not_found
-      elsif fingerprint && asset.digest != fingerprint
+      elsif fingerprint && asset.etag != fingerprint
         status = :not_found
-      elsif if_match && asset.digest != if_match
+      elsif if_match && asset.etag != if_match
         status = :precondition_failed
-      elsif if_none_match && asset.digest == if_none_match
+      elsif if_none_match && asset.etag == if_none_match
         status = :not_modified
       else
         status = :ok
@@ -124,8 +124,8 @@ module Sprockets
       end
 
       # Returns a 304 Not Modified response tuple
-      def not_modified_response(env, digest)
-        [ 304, cache_headers(env, digest), [] ]
+      def not_modified_response(env, etag)
+        [ 304, cache_headers(env, etag), [] ]
       end
 
       # Returns a 403 Forbidden response tuple
@@ -221,12 +221,12 @@ module Sprockets
         env["QUERY_STRING"].to_s =~ /body=(1|t)/
       end
 
-      def cache_headers(env, digest)
+      def cache_headers(env, etag)
         headers = {}
 
         # Set caching headers
         headers["Cache-Control"] = "public"
-        headers["ETag"]          = %("#{digest}")
+        headers["ETag"]          = %("#{etag}")
 
         # If the request url contains a fingerprint, set a long
         # expires on the response
@@ -262,10 +262,10 @@ module Sprockets
           headers["Content-Type"] = type
         end
 
-        headers.merge(cache_headers(env, asset.digest))
+        headers.merge(cache_headers(env, asset.etag))
       end
 
-      # Gets digest fingerprint.
+      # Gets ETag fingerprint.
       #
       #     "foo-0aa2105d29558f3eb790d411d7d8fb66.js"
       #     # => "0aa2105d29558f3eb790d411d7d8fb66"
