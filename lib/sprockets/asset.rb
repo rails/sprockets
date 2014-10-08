@@ -117,22 +117,20 @@ module Sprockets
     attr_reader :length
     alias_method :bytesize, :length
 
+    # Public: Returns String byte digest of source.
+    attr_reader :digest
+
     # Public: Returns String hexdigest of source.
     def hexdigest
-      @digest.unpack('H*').first
+      digest.unpack('H*').first
     end
-
-    # Deprecated: Returns String hexdigest of source.
-    #
-    # In 4.x this will be changed to return a raw Digest byte String.
-    alias_method :digest, :hexdigest
 
     # Pubic: ETag String of Asset.
     alias_method :etag, :hexdigest
 
     # Public: Returns String base64 digest of source.
     def base64digest
-      Base64.strict_encode64(@digest)
+      Base64.strict_encode64(digest)
     end
 
     # Public: A "named information" URL specifying the base64 SHA256 digest of

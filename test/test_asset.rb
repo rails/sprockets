@@ -175,8 +175,7 @@ class StaticAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.digest
+    assert_equal [29, 162, 229, 157, 247, 93, 51, 216, 183, 76, 61, 113, 254, 237, 230, 152, 242, 3, 241, 54, 81, 44, 186, 171, 32, 198, 138, 91, 222, 189, 88, 0], @asset.digest.bytes
   end
 
   test "source hexdigest" do
@@ -276,8 +275,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5", @asset.digest
+    assert_equal [106, 95, 255, 137, 232, 50, 143, 21, 142, 119, 100, 43, 83, 227, 37, 194, 78, 216, 68, 166, 188, 213, 169, 110, 192, 249, 0, 67, 132, 233, 201, 165], @asset.digest.bytes
   end
 
   test "source hexdigest" do
@@ -343,8 +341,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.digest
+    assert_equal [149, 91, 45, 221, 208, 209, 68, 155, 28, 97, 113, 36, 184, 59, 70, 48, 14, 218, 222, 192, 109, 86, 17, 4, 247, 246, 22, 82, 65, 179, 26, 148], @asset.digest.bytes
   end
 
   test "source hexdigest" do
