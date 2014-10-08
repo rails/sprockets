@@ -58,15 +58,15 @@ module Sprockets
       end
     end
 
-    # Internal: Compute hexdigest for a set of paths.
+    # Internal: Compute SHA256 digest for a set of paths.
     #
     # paths - Array of filename or directory paths.
     #
-    # Returns a String SHA256 hexdigest.
-    def dependencies_hexdigest(paths)
+    # Returns a String SHA256 digest.
+    def dependencies_digest(paths)
       digest = Digest::SHA256.new
       paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
-      digest.hexdigest
+      digest.digest
     end
 
     # Find asset by logical path or expanded path.
@@ -200,7 +200,7 @@ module Sprockets
 
         metadata = asset[:metadata]
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_digest] = dependencies_hexdigest(metadata[:dependency_paths])
+        metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
 
         asset[:id]  = Utils.hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
