@@ -1,3 +1,4 @@
+require 'base64'
 require 'fileutils'
 require 'pathname'
 
@@ -49,7 +50,7 @@ module Sprockets
 
     # Internal: Unique asset object ID.
     #
-    # Returns String SHA1 String.
+    # Returns String SHA256 String.
     attr_reader :id
 
     # Public: Internal URI to lookup asset by.
@@ -165,14 +166,26 @@ module Sprockets
     end
 
     # Public: Returns String hexdigest of source.
-    attr_reader :digest
+    def hexdigest
+      @digest.unpack('H*').first
+    end
+
+    # Deprecated: Returns String hexdigest of source.
+    #
+    # In 4.x this will be changed to return a raw Digest byte String.
+    alias_method :digest, :hexdigest
+
+    # Pubic: ETag String of Asset.
+    alias_method :etag, :digest
+
+    # Public: Returns String base64 digest of source.
+    def base64digest
+      Base64.strict_encode64(@digest)
+    end
 
     # Public: A "named information" URL specifying the base64 SHA256 digest of
     # the asset.
     attr_reader :integrity
-
-    # Pubic: ETag String of Asset.
-    alias_method :etag, :digest
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.

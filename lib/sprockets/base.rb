@@ -1,3 +1,4 @@
+require 'digest/sha2'
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/errors'
@@ -33,39 +34,39 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Internal: Compute hexdigest for path.
+    # Internal: Compute SHA256 digest for path.
     #
     # path - String filename or directory path.
     #
-    # Returns a String SHA1 hexdigest or nil.
-    def file_hexdigest(path)
+    # Returns a String SHA256 digest or nil.
+    def file_digest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
         # for a files contents to have changed and its mtime to have been
         # negligently reset thus appearing as if the file hasn't changed on
         # disk. Also, the mtime is only read to the nearest second. Its
         # also possible the file was updated more than once in a given second.
-        cache.fetch(['file_hexdigest', path, stat.mtime.to_i]) do
+        cache.fetch(['file_digest', path, stat.mtime.to_i]) do
           if stat.directory?
             # If its a directive, digest the list of filenames
-            Digest::SHA1.hexdigest(self.entries(path).join(','))
+            Digest::SHA256.digest(self.entries(path).join(','))
           elsif stat.file?
             # If its a file, digest the contents
-            Digest::SHA1.file(path.to_s).hexdigest
+            Digest::SHA256.file(path.to_s).digest
           end
         end
       end
     end
 
-    # Internal: Compute hexdigest for a set of paths.
+    # Internal: Compute SHA256 digest for a set of paths.
     #
     # paths - Array of filename or directory paths.
     #
-    # Returns a String SHA1 hexdigest.
-    def dependencies_hexdigest(paths)
-      digest = Digest::SHA1.new
-      paths.each { |path| digest.update(file_hexdigest(path).to_s) }
-      digest.hexdigest
+    # Returns a String SHA256 digest.
+    def dependencies_digest(paths)
+      digest = Digest::SHA256.new
+      paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
+      digest.digest
     end
 
     # Find asset by logical path or expanded path.
@@ -191,15 +192,20 @@ module Sprockets
           asset.merge!({
             encoding: Encoding::BINARY,
             length: self.stat(asset[:filename]).size,
-            digest: digest_class.file(asset[:filename]).hexdigest,
-            integrity: Utils.integrity_uri(File.read(asset[:filename])),
+            digest: file_digest(asset[:filename]),
             metadata: {}
           })
         end
 
         metadata = asset[:metadata]
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_digest] = dependencies_hexdigest(metadata[:dependency_paths])
+        metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
+
+        # Ensure digest is a SHA256, otherwise skip integrity.
+        # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
+        if asset[:digest].size == 32
+          asset[:integrity] = Utils.integrity_uri(asset[:digest], asset[:content_type])
+        end
 
         asset[:id]  = Utils.hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))

@@ -115,12 +115,12 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript")
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
-    assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
+    assert_equal '828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab', asset.etag
 
     assert asset = @env.find_asset_by_uri(asset.uri)
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
-    assert_equal '4088f98ded5fdf9b60db467cb6c346926d9bedfc', asset.etag
+    assert_equal '828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab', asset.etag
 
     assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
@@ -370,7 +370,7 @@ $app.run(function($templateCache) {
     assert_equal nil, asset.encoding
     assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
     assert_equal 18, asset.length
-    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+    assert_equal "828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab", asset.hexdigest
   end
 
   test "find asset with unknown encoding" do
@@ -378,7 +378,7 @@ $app.run(function($templateCache) {
     assert_equal nil, asset.encoding
     assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
     assert_equal 18, asset.length
-    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+    assert_equal "828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab", asset.hexdigest
   end
 
   test "find asset with identity encoding" do
@@ -386,7 +386,7 @@ $app.run(function($templateCache) {
     assert_equal nil, asset.encoding
     assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
     assert_equal 18, asset.length
-    assert_equal "4088f98ded5fdf9b60db467cb6c346926d9bedfc", asset.digest
+    assert_equal "828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab", asset.hexdigest
   end
 
   test "find deflate asset" do
@@ -394,7 +394,7 @@ $app.run(function($templateCache) {
     assert_equal 'deflate', asset.encoding
     assert_equal [43, 75, 44, 82, 112, 79, 204, 201], asset.to_s.bytes.take(8)
     assert_equal 20, asset.length
-    assert_equal "cc7336c29eab6a34b0b36f486bb52a31cb63dac0", asset.digest
+    assert_equal "d8025c5cd4255b8c3c45faae8f07f209d3f02e9f6c8837a24ba4d0c07d9e7c20", asset.hexdigest
   end
 
   test "find gzipped asset" do
@@ -402,7 +402,7 @@ $app.run(function($templateCache) {
     assert_equal 'gzip', asset.encoding
     assert_equal [31, 139, 8, 0], asset.to_s.bytes.take(4)
     assert_equal 38, asset.length
-    assert_equal "3eba6cbc64c8593e0a693e1c32a7681ca36b2b32", asset.digest
+    assert_equal "85d1160d6a4383a91434b003ed0abcd1f66361417f5942155ddffc3aa621be89", asset.hexdigest
   end
 
   test "find base64 asset" do
@@ -410,7 +410,7 @@ $app.run(function($templateCache) {
     assert_equal 'base64', asset.encoding
     assert_equal "dmFyIEdh", asset.to_s[0, 8]
     assert_equal 24, asset.length
-    assert_equal "6a6306c32b6a3028f3c41c36dfbabc343605417d", asset.digest
+    assert_equal "a8785bd0621f3c9efa12916dd328bc68c8ba2fb5022dc98adbbc23a755c782c7", asset.hexdigest
   end
 
   test "find asset by uri with deflate encoding" do
@@ -419,7 +419,7 @@ $app.run(function($templateCache) {
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal 'deflate', asset.encoding
-    assert_equal 'cc7336c29eab6a34b0b36f486bb52a31cb63dac0', asset.etag
+    assert_equal 'd8025c5cd4255b8c3c45faae8f07f209d3f02e9f6c8837a24ba4d0c07d9e7c20', asset.etag
     assert_match uri, asset.uri
   end
 
@@ -717,9 +717,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "changing version doesn't affect the assets digest" do
-    old_asset_digest = @env["gallery.js"].digest
+    old_asset_digest = @env["gallery.js"].hexdigest
     @env.version = 'v2'
-    assert old_asset_digest == @env["gallery.js"].digest
+    assert old_asset_digest == @env["gallery.js"].hexdigest
   end
 
   test "bundled asset is stale if its mtime is updated or deleted" do

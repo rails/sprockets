@@ -149,7 +149,7 @@ class TestServer < Sprockets::TestCase
   end
 
   test "serve source with etag headers" do
-    digest = @env['application.js'].digest
+    digest = @env['application.js'].etag
 
     get "/assets/application.js"
     assert_equal "\"#{digest}\"",
@@ -185,7 +185,7 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_NONE_MATCH' => "nope"
 
     assert_equal 200, last_response.status
-    assert_equal '"6413e7ce345409919a84538cb5577e2cd17bb72f"', last_response.headers['ETag']
+    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
     assert_equal '52', last_response.headers['Content-Length']
   end
 
@@ -220,8 +220,8 @@ class TestServer < Sprockets::TestCase
   end
 
   test "not found fingerprint with if-none-match" do
-    get "/assets/missing-6413e7ce345409919a84538cb5577e2cd17bb72f.js", {},
-      'HTTP_IF_NONE_MATCH' => '"6413e7ce345409919a84538cb5577e2cd17bb72f"'
+    get "/assets/missing-b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83.js", {},
+      'HTTP_IF_NONE_MATCH' => '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"'
     assert_equal 404, last_response.status
   end
 
@@ -245,7 +245,7 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_MATCH' => etag
 
     assert_equal 200, last_response.status
-    assert_equal '"6413e7ce345409919a84538cb5577e2cd17bb72f"', last_response.headers['ETag']
+    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
     assert_equal '52', last_response.headers['Content-Length']
   end
 

@@ -395,6 +395,9 @@ submit a pull request.
 * Added linked or referenced assets. When an asset is compiled, any of its links
   will be compiled as well.
 * Add Asset integrity attribute for Subresource Integrity
+* Default digest changed to SHA256. Configuring digest_class is deprecated.
+* Rename Asset#digest to Asset#hexdigest. Asset#digest is deprecated and will
+  return a raw byte String in 4.x.
 
 **2.12.2** (September 5, 2014)
 
