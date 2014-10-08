@@ -32,11 +32,11 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Internal: Compute SHA256 digest for path.
+    # Internal: Compute digest for path.
     #
     # path - String filename or directory path.
     #
-    # Returns a String SHA256 digest or nil.
+    # Returns a String digest or nil.
     def file_digest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
@@ -56,7 +56,7 @@ module Sprockets
       end
     end
 
-    # Internal: Compute SHA256 digest for a set of paths.
+    # Internal: Compute digest for a set of paths.
     #
     # paths - Array of filename or directory paths.
     #
@@ -199,11 +199,7 @@ module Sprockets
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
         metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
 
-        # Ensure digest is a SHA256, otherwise skip integrity.
-        # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
-        if asset[:digest].size == 32
-          asset[:integrity] = Utils.integrity_uri(asset[:digest], asset[:content_type])
-        end
+        asset[:integrity] = Utils.integrity_uri(asset[:digest], asset[:content_type])
 
         asset[:id]  = Utils.hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))

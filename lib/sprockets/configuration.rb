@@ -12,7 +12,6 @@ module Sprockets
     def initialize_configuration(parent)
       @logger            = parent.logger
       @version           = parent.version
-      @digest_class      = parent.digest_class
       @context_class     = Class.new(parent.context_class)
       @root              = parent.root
       @paths             = parent.paths
@@ -50,21 +49,6 @@ module Sprockets
     #
     def version=(version)
       mutate_config(:version) { version.dup }
-    end
-
-    # Deprecated: Returns a `Digest` implementation class.
-    #
-    # Defaults to `Digest::SHA256`.
-    attr_reader :digest_class
-
-    # Deprecated: Assign a `Digest` implementation class. This maybe any Ruby
-    # `Digest::` implementation such as `Digest::SHA256` or
-    # `Digest::MD5`.
-    #
-    #     environment.digest_class = Digest::MD5
-    #
-    def digest_class=(klass)
-      @digest_class = klass
     end
 
     # Deprecated: Get `Context` class.

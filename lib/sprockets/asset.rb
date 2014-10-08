@@ -41,7 +41,7 @@ module Sprockets
 
     # Internal: Unique asset object ID.
     #
-    # Returns String SHA256 String.
+    # Returns a String.
     attr_reader :id
 
     # Public: Internal URI to lookup asset by.
@@ -133,8 +133,7 @@ module Sprockets
       Base64.strict_encode64(digest)
     end
 
-    # Public: A "named information" URL specifying the base64 SHA256 digest of
-    # the asset.
+    # Public: A "named information" URL used for subresource integrity checks.
     attr_reader :integrity
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack

@@ -57,10 +57,6 @@ module Sprockets
   @context_class     = Context
   @version           = ''
 
-  # Set the default digest
-  require 'digest/sha2'
-  @digest_class = Digest::SHA256
-
   require 'logger'
   @logger = Logger.new($stderr)
   @logger.level = Logger::FATAL

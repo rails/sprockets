@@ -1,3 +1,4 @@
+require 'digest/sha2'
 require 'source_map'
 require 'sprockets/engines'
 require 'sprockets/lazy_processor'
@@ -180,7 +181,7 @@ module Sprockets
         source: data,
         charset: data.encoding.name.downcase,
         length: data.bytesize,
-        digest: digest_class.digest(data),
+        digest: Digest::SHA256.digest(data),
         metadata: metadata
       }
     end
