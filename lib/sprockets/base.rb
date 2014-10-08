@@ -192,7 +192,7 @@ module Sprockets
           asset.merge!({
             encoding: Encoding::BINARY,
             length: self.stat(asset[:filename]).size,
-            digest: digest_class.file(asset[:filename]).hexdigest,
+            digest: file_digest(asset[:filename]),
             integrity: Utils.integrity_uri(File.read(asset[:filename])),
             metadata: {}
           })
