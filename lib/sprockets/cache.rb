@@ -1,4 +1,4 @@
-require 'sprockets/utils'
+require 'sprockets/digest_utils'
 require 'logger'
 
 module Sprockets
@@ -142,7 +142,7 @@ module Sprockets
       #
       # Returns a String with a length less than 250 characters.
       def expand_key(key)
-        "sprockets/v#{VERSION}/#{Utils.hexdigest(key)}"
+        "sprockets/v#{VERSION}/#{DigestUtils.hexdigest(key)}"
       end
 
       PEEK_SIZE = 100

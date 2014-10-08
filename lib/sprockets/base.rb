@@ -204,10 +204,10 @@ module Sprockets
         # Ensure digest is a SHA256, otherwise skip integrity.
         # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
         if asset[:digest].size == 32
-          asset[:integrity] = Utils.integrity_uri(asset[:digest], asset[:content_type])
+          asset[:integrity] = DigestUtils.integrity_uri(asset[:digest], asset[:content_type])
         end
 
-        asset[:id]  = Utils.hexdigest(asset)
+        asset[:id]  = DigestUtils.hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         # TODO: Avoid tracking Asset mtime
