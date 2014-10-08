@@ -29,6 +29,7 @@ module Sprockets
   autoload :AssetURI,                'sprockets/asset_uri'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
+  autoload :DigestUtils,             'sprockets/digest_utils'
   autoload :EncodingUtils,           'sprockets/encoding_utils'
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'

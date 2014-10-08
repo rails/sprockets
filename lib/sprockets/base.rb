@@ -9,7 +9,7 @@ require 'sprockets/server'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils, HTTPUtils
+    include PathUtils, HTTPUtils, DigestUtils
     include Configuration
     include Server
     include Resolve
@@ -204,10 +204,10 @@ module Sprockets
         # Ensure digest is a SHA256, otherwise skip integrity.
         # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
         if asset[:digest].size == 32
-          asset[:integrity] = DigestUtils.integrity_uri(asset[:digest], asset[:content_type])
+          asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
         end
 
-        asset[:id]  = DigestUtils.hexdigest(asset)
+        asset[:id]  = hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         # TODO: Avoid tracking Asset mtime
