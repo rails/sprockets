@@ -66,7 +66,7 @@ module Sprockets
     #
     # Returns String.
     def digest_path
-      logical_path.sub(/\.(\w+)$/) { |ext| "-#{digest}#{ext}" }
+      logical_path.sub(/\.(\w+)$/) { |ext| "-#{etag}#{ext}" }
     end
 
     # Public: Returns String MIME type of asset. Returns nil if type is unknown.
@@ -176,7 +176,7 @@ module Sprockets
     alias_method :digest, :hexdigest
 
     # Pubic: ETag String of Asset.
-    alias_method :etag, :digest
+    alias_method :etag, :hexdigest
 
     # Public: Returns String base64 digest of source.
     def base64digest
