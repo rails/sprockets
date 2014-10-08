@@ -49,10 +49,10 @@ module Sprockets
         cache.fetch(['file_digest', path, stat.mtime.to_i]) do
           if stat.directory?
             # If its a directive, digest the list of filenames
-            Digest::SHA256.digest(self.entries(path).join(','))
+            digest_class.digest(self.entries(path).join(','))
           elsif stat.file?
             # If its a file, digest the contents
-            Digest::SHA256.file(path.to_s).digest
+            digest_class.file(path.to_s).digest
           end
         end
       end
@@ -64,7 +64,7 @@ module Sprockets
     #
     # Returns a String digest.
     def dependencies_digest(paths)
-      digest = Digest::SHA256.new
+      digest = digest_class.new
       paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
       digest.digest
     end

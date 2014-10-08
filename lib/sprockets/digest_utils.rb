@@ -5,13 +5,20 @@ module Sprockets
   module DigestUtils
     extend self
 
+    # Internal: Default digest class.
+    #
+    # Returns a Digest::Base subclass.
+    def digest_class
+      Digest::SHA256
+    end
+
     # Internal: Generate a hexdigest for a nested JSON serializable object.
     #
     # obj - A JSON serializable object.
     #
     # Returns a String digest of the object.
     def hexdigest(obj)
-      digest = Digest::SHA256.new
+      digest = digest_class.new
       queue  = [obj]
 
       while queue.length > 0
