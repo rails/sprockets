@@ -8,7 +8,7 @@ require 'sprockets/server'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils, HTTPUtils
+    include PathUtils, HTTPUtils, DigestUtils
     include Configuration
     include Server
     include Resolve
@@ -32,11 +32,11 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # Internal: Compute SHA256 digest for path.
+    # Internal: Compute digest for path.
     #
     # path - String filename or directory path.
     #
-    # Returns a String SHA256 digest or nil.
+    # Returns a String digest or nil.
     def file_digest(path)
       if stat = self.stat(path)
         # Caveat: Digests are cached by the path's current mtime. Its possible
@@ -47,22 +47,22 @@ module Sprockets
         cache.fetch(['file_digest', path, stat.mtime.to_i]) do
           if stat.directory?
             # If its a directive, digest the list of filenames
-            Digest::SHA256.digest(self.entries(path).join(','))
+            digest_class.digest(self.entries(path).join(','))
           elsif stat.file?
             # If its a file, digest the contents
-            Digest::SHA256.file(path.to_s).digest
+            digest_class.file(path.to_s).digest
           end
         end
       end
     end
 
-    # Internal: Compute SHA256 digest for a set of paths.
+    # Internal: Compute digest for a set of paths.
     #
     # paths - Array of filename or directory paths.
     #
-    # Returns a String SHA256 digest.
+    # Returns a String digest.
     def dependencies_digest(paths)
-      digest = Digest::SHA256.new
+      digest = digest_class.new
       paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
       digest.digest
     end
@@ -199,13 +199,9 @@ module Sprockets
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
         metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
 
-        # Ensure digest is a SHA256, otherwise skip integrity.
-        # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
-        if asset[:digest].size == 32
-          asset[:integrity] = Utils.integrity_uri(asset[:digest], asset[:content_type])
-        end
+        asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
 
-        asset[:id]  = Utils.hexdigest(asset)
+        asset[:id]  = hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         asset
