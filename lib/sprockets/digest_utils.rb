@@ -1,4 +1,6 @@
 require 'base64'
+require 'digest/md5'
+require 'digest/sha1'
 require 'digest/sha2'
 
 module Sprockets
@@ -10,6 +12,24 @@ module Sprockets
     # Returns a Digest::Base subclass.
     def digest_class
       Digest::SHA256
+    end
+
+    # Internal: Maps digest bytesize to the digest class.
+    DIGEST_SIZES = {
+      16 => Digest::MD5,
+      20 => Digest::SHA1,
+      32 => Digest::SHA256,
+      48 => Digest::SHA384,
+      64 => Digest::SHA512
+    }
+
+    # Internal: Detect digest class hash algorithm for digest bytes.
+    #
+    # While not elegant, all the supported digests have a unique bytesize.
+    #
+    # Returns Digest::Base or nil.
+    def detect_digest_class(bytes)
+      DIGEST_SIZES[bytes.bytesize]
     end
 
     # Internal: Generate a hexdigest for a nested JSON serializable object.
@@ -60,6 +80,15 @@ module Sprockets
       digest.hexdigest
     end
 
+    # Internal: Maps digest class to the named information hash algorithm name.
+    #
+    # http://www.iana.org/assignments/named-information/named-information.xhtml
+    NI_HASH_ALGORIHMS = {
+      Digest::SHA256 => 'sha-256'.freeze,
+      Digest::SHA384 => 'sha-384'.freeze,
+      Digest::SHA512 => 'sha-512'.freeze
+    }
+
     # Internal: Generate a "named information" URI for use in the `integrity`
     # attribute of an asset tag as per the subresource integrity specification.
     #
@@ -68,16 +97,26 @@ module Sprockets
     #                be accurate if provided. Otherwise, subresource integrity
     #                will block the loading of the asset.
     #
-    # Returns a String.
+    # Returns a String or nil if hash algorithm is incompatible.
     def integrity_uri(digest, content_type = nil)
-      # Prepare/format the digest.
-      digest = Base64.urlsafe_encode64(digest).sub(/=*\z/, "")
+      case digest
+      when Digest::Base
+        digest_class = digest.class
+        digest = digest.digest
+      when String
+        digest_class = DIGEST_SIZES[digest.bytesize]
+      else
+        raise TypeError, "unknown digest: #{digest.inspect}"
+      end
 
-      # Prepare/format the query section.
-      query = "?ct=#{content_type}" if content_type
+      if hash_name = NI_HASH_ALGORIHMS[digest_class]
+        # Prepare/format the digest.
+        digest = Base64.urlsafe_encode64(digest).sub(/=*\z/, "")
 
-      # Build the URI.
-      "ni:///sha-256;#{digest}#{query}"
+        uri = "ni:///#{hash_name};#{digest}"
+        uri << "?ct=#{content_type}" if content_type
+        uri
+      end
     end
   end
 end

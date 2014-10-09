@@ -201,11 +201,7 @@ module Sprockets
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
         metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
 
-        # Ensure digest is a SHA256, otherwise skip integrity.
-        # DEPRECATED: 4.x will enforce a SHA256 digest and make this guard unnecessary
-        if asset[:digest].size == 32
-          asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
-        end
+        asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
 
         asset[:id]  = hexdigest(asset)
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))

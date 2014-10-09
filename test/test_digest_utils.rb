@@ -17,21 +17,41 @@ class TestDigestUtils < Sprockets::TestCase
     assert_equal "28e62207146f413a3c7779609bda0b2607282b940a037059e4ccbf0f38112c56", hexdigest({"foo" => "baz"})
     assert_equal "905e6cc86eccb1849ae6c1e0bb01b96fedb3e341ad3d60f828e93e9b5e469a4f", hexdigest([[:foo, 1]])
     assert_equal "9500d3562922431a8ccce61bd510d341ca8d61cf6b6e5ae620e7b1598436ed73", hexdigest([{:foo => 1}])
+    assert_equal "94ee40cca7c2c6d2a134033d2f5a31c488cad5d3dcc61a3dbb5e2a858635874b", hexdigest("foo".encoding)
 
     assert_raises(TypeError) do
       hexdigest(Object.new)
     end
   end
 
-  test "integrity uri properly formats the named information URI" do
-    digest = Digest::SHA256.digest("alert(1)")
-    expected = "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI"
-    assert_equal expected, integrity_uri(digest)
+  test "detect digest class" do
+    md5    = Digest::MD5.new.digest
+    sha1   = Digest::SHA1.new.digest
+    sha256 = Digest::SHA256.new.digest
+    sha512 = Digest::SHA512.new.digest
+
+    refute detect_digest_class("0000")
+    assert_equal Digest::MD5, detect_digest_class(md5)
+    assert_equal Digest::SHA1, detect_digest_class(sha1)
+    assert_equal Digest::SHA256, detect_digest_class(sha256)
+    assert_equal Digest::SHA512, detect_digest_class(sha512)
   end
 
-  test "integrity uri adds an encoded content-type if given one" do
-    digest = Digest::SHA256.digest("alert(1)")
-    expected = "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI?ct=application/javascript"
-    assert_equal expected, integrity_uri(digest, "application/javascript")
+  test "integrity uri" do
+    sha256 = Digest::SHA256.new.update("alert(1)")
+    sha512 = Digest::SHA512.new.update("alert(1)")
+
+    assert_equal "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI",
+      integrity_uri(sha256)
+    assert_equal "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI",
+      integrity_uri(sha256.digest)
+
+    assert_equal "ni:///sha-512;-uuYUxxe7oWIShQrWEmMn_fixz_rxDP4qcAZddXLDM3nN8_tpk1ZC2jXQk6N-mXE65jwfzNVUJL_qjA3y9KbuQ",
+      integrity_uri(sha512)
+    assert_equal "ni:///sha-512;-uuYUxxe7oWIShQrWEmMn_fixz_rxDP4qcAZddXLDM3nN8_tpk1ZC2jXQk6N-mXE65jwfzNVUJL_qjA3y9KbuQ",
+      integrity_uri(sha512.digest)
+
+    assert_equal "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI?ct=application/javascript",
+      integrity_uri(sha256, "application/javascript")
   end
 end
