@@ -167,7 +167,7 @@ module Sprockets
 
     # Public: Returns String hexdigest of source.
     def hexdigest
-      @digest.unpack('H*').first
+      DigestUtils.pack_hexdigest(@digest)
     end
 
     # Deprecated: Returns String hexdigest of source.
@@ -180,7 +180,7 @@ module Sprockets
 
     # Public: Returns String base64 digest of source.
     def base64digest
-      Base64.strict_encode64(@digest)
+      DigestUtils.pack_base64digest(@digest)
     end
 
     # Public: A "named information" URL for subresource integrity.

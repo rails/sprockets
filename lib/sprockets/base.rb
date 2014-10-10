@@ -202,7 +202,7 @@ module Sprockets
 
         asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
 
-        asset[:id]  = hexdigest(asset)
+        asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         # TODO: Avoid tracking Asset mtime
