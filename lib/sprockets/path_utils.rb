@@ -114,6 +114,26 @@ module Sprockets
       File.basename(path).scan(/\.[^.]+/)
     end
 
+    # Internal: Returns all parents for path
+    #
+    # path - String absolute filename or directory
+    # root - String path to stop at (defualt: system root)
+    #
+    # Returns an Array of String paths.
+    def path_parents(path, root = nil)
+      root = "#{root}#{File::SEPARATOR}" if root
+      parents = []
+
+      loop do
+        parent = File.dirname(path)
+        break if parent == path
+        break if root && !path.start_with?(root)
+        parents << path = parent
+      end
+
+      parents
+    end
+
     # Internal: Stat all the files under a directory.
     #
     # dir - A String directory

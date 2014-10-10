@@ -83,6 +83,26 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
+  test "path parents" do
+    root = File.expand_path("../..", __FILE__)
+
+    assert_kind_of Array, path_parents(File.expand_path(__FILE__))
+
+    assert_equal ["#{root}/test", root],
+      path_parents(File.expand_path(__FILE__), root)
+    assert_equal ["#{root}/test", root],
+      path_parents(fixture_path(""), root)
+    assert_equal ["#{root}/test/fixtures", "#{root}/test", root],
+      path_parents(fixture_path("default"), root)
+    assert_equal ["#{root}/test/fixtures/default", "#{root}/test/fixtures", "#{root}/test", root],
+      path_parents(fixture_path("default/POW.png"), root)
+
+    assert_equal ["#{root}/test/fixtures/default", "#{root}/test/fixtures", "#{root}/test"],
+      path_parents(fixture_path("default/POW.png"), "#{root}/test")
+    assert_equal ["#{root}/test/fixtures/default"],
+      path_parents(fixture_path("default/POW.png"), "#{root}/test/fixtures/default")
+  end
+
   FILES_IN_DEFAULT = Dir["#{FIXTURE_ROOT}/default/*"].size
 
   test "stat directory" do
