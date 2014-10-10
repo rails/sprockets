@@ -103,6 +103,20 @@ class TestPathUtils < Sprockets::TestCase
       path_parents(fixture_path("default/POW.png"), "#{root}/test/fixtures/default")
   end
 
+  test "find upwards" do
+    root = File.expand_path("../..", __FILE__)
+
+    assert_equal "#{root}/Gemfile",
+      find_upwards("Gemfile", File.expand_path(__FILE__))
+    assert_equal "#{root}/Gemfile",
+      find_upwards("Gemfile", fixture_path(""))
+    assert_equal "#{root}/Gemfile",
+      find_upwards("Gemfile", fixture_path("default/POW.png"))
+
+    assert_equal "#{root}/test/sprockets_test.rb",
+      find_upwards("sprockets_test.rb", fixture_path("default/POW.png"))
+  end
+
   FILES_IN_DEFAULT = Dir["#{FIXTURE_ROOT}/default/*"].size
 
   test "stat directory" do

@@ -117,7 +117,7 @@ module Sprockets
     # Internal: Returns all parents for path
     #
     # path - String absolute filename or directory
-    # root - String path to stop at (defualt: system root)
+    # root - String path to stop at (default: system root)
     #
     # Returns an Array of String paths.
     def path_parents(path, root = nil)
@@ -132,6 +132,21 @@ module Sprockets
       end
 
       parents
+    end
+
+    # Internal: Find target basename checking upwards from path.
+    #
+    # basename - String filename: ".sprocketsrc"
+    # path     - String path to start search: "app/assets/javascripts/app.js"
+    # root     - String path to stop at (default: system root)
+    #
+    # Returns String filename or nil.
+    def find_upwards(basename, path, root = nil)
+      path_parents(path, root).each do |dir|
+        filename = File.join(dir, basename)
+        return filename if file?(filename)
+      end
+      nil
     end
 
     # Internal: Stat all the files under a directory.
