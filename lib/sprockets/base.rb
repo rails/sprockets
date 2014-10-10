@@ -63,9 +63,7 @@ module Sprockets
     #
     # Returns a String digest.
     def dependencies_digest(paths)
-      digest = digest_class.new
-      paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
-      digest.digest
+      digest(paths.map { |path| file_digest(path) })
     end
 
     # Find asset by logical path or expanded path.
