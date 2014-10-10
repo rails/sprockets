@@ -180,7 +180,7 @@ module Sprockets
           when NilClass
             # noop
           when Hash
-            data = result[:data]
+            data = result[:data] if result.key?(:data)
             metadata = metadata.merge(result)
             metadata.delete(:data)
           when String
