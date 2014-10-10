@@ -17,7 +17,7 @@ class TestDigestUtils < Sprockets::TestCase
     assert_equal "28e62207146f413a3c7779609bda0b2607282b940a037059e4ccbf0f38112c56", hexdigest({"foo" => "baz"})
     assert_equal "905e6cc86eccb1849ae6c1e0bb01b96fedb3e341ad3d60f828e93e9b5e469a4f", hexdigest([[:foo, 1]])
     assert_equal "9500d3562922431a8ccce61bd510d341ca8d61cf6b6e5ae620e7b1598436ed73", hexdigest([{:foo => 1}])
-    assert_equal "94ee40cca7c2c6d2a134033d2f5a31c488cad5d3dcc61a3dbb5e2a858635874b", hexdigest("foo".encoding)
+    assert_equal "94ee40cca7c2c6d2a134033d2f5a31c488cad5d3dcc61a3dbb5e2a858635874b", hexdigest("foo".force_encoding('UTF-8').encoding)
 
     assert_raises(TypeError) do
       hexdigest(Object.new)
