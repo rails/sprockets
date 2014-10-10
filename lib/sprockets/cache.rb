@@ -142,7 +142,7 @@ module Sprockets
       #
       # Returns a String with a length less than 250 characters.
       def expand_key(key)
-        "sprockets/v#{VERSION}/#{DigestUtils.pack_hexdigest(DigestUtils.digest(key))}"
+        "sprockets/v#{VERSION}/#{DigestUtils.pack_urlsafe_base64digest(DigestUtils.digest(key))}"
       end
 
       PEEK_SIZE = 100
@@ -158,7 +158,7 @@ module Sprockets
           key.each { |k| str << peek_key(k) }
           str.join(':')[0, PEEK_SIZE]
         else
-          peek_key(DigestUtils.pack_hexdigest(DigestUtils.digest(key)))
+          peek_key(DigestUtils.pack_urlsafe_base64digest(DigestUtils.digest(key)))
         end
       end
 
