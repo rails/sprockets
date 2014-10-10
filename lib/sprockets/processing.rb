@@ -195,7 +195,7 @@ module Sprockets
         source: data,
         charset: data.encoding.name.downcase,
         length: data.bytesize,
-        digest: digest_class.digest(data),
+        digest: digest(data),
         metadata: metadata
       }
     end
