@@ -62,7 +62,7 @@ module Sprockets
     # paths - Array of filename or directory paths.
     #
     # Returns a String digest.
-    def dependencies_digest(paths)
+    def files_digest(paths)
       digest(paths.map { |path| file_digest(path) })
     end
 
@@ -196,7 +196,7 @@ module Sprockets
 
         metadata = asset[:metadata]
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
+        metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
 
         asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
 

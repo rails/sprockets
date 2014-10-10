@@ -77,7 +77,7 @@ module Sprockets
 
         dependency_paths, dependency_sources_digest, digest_uri = cache._get(dep_graph_key)
         if dependency_paths && dependency_sources_digest && digest_uri
-          if dependencies_digest(dependency_paths) == dependency_sources_digest
+          if files_digest(dependency_paths) == dependency_sources_digest
             if asset = cache._get(asset_digest_uri_cache_key(digest_uri))
               return asset
             end
