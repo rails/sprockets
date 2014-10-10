@@ -1,4 +1,3 @@
-require 'digest/sha2'
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/errors'
