@@ -147,7 +147,7 @@ class TestPathUtils < Sprockets::TestCase
 
   test "stat directory" do
     files = stat_directory(File.join(FIXTURE_ROOT, "server")).to_a
-    assert_equal FILES_IN_SERVER, files.map(&:first)
+    assert_equal FILES_IN_SERVER.size, files.size, FILES_IN_SERVER - files.map(&:first)
     path, stat = stat_directory(File.join(FIXTURE_ROOT, "server")).first
     assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
@@ -159,7 +159,7 @@ class TestPathUtils < Sprockets::TestCase
 
   test "stat tree" do
     files = stat_tree(File.join(FIXTURE_ROOT, "server")).to_a
-    assert_equal FILES_UNDER_SERVER, files.map(&:first)
+    assert_equal FILES_UNDER_SERVER.size, files.size, FILES_UNDER_SERVER - files.map(&:first)
     path, stat = stat_tree(File.join(FIXTURE_ROOT, "server")).first
     assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
