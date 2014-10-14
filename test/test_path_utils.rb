@@ -154,13 +154,12 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
   end
 
-  SYMLINKS_UNDER_DEFAULT = 6
-  FILES_UNDER_DEFAULT = Dir["#{FIXTURE_ROOT}/default/**/*"].size + SYMLINKS_UNDER_DEFAULT
+  FILES_UNDER_DEFAULT = Dir["#{FIXTURE_ROOT}/server/**/*"].size
 
   test "stat tree" do
-    assert_equal FILES_UNDER_DEFAULT, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
-    path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first
-    assert_equal fixture_path("default/app"), path
+    assert_equal FILES_UNDER_DEFAULT, stat_tree(File.join(FIXTURE_ROOT, "server")).to_a.size
+    path, stat = stat_tree(File.join(FIXTURE_ROOT, "server")).first
+    assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
 
     assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a
