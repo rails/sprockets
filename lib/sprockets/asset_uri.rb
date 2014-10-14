@@ -14,16 +14,21 @@ module Sprockets
     #
     # Returns String path and Hash of symbolized parameters.
     def self.parse(str)
-      uri = URI(str)
+      scheme, _, host, port, _, path, _, query, _ = URI.split(str)
 
-      unless uri.scheme == 'file'
+      unless scheme == 'file'
         raise URI::InvalidURIError, "expected file:// scheme: #{str}"
       end
 
-      path = URI::Generic::DEFAULT_PARSER.unescape(uri.path)
+      path = URI::Generic::DEFAULT_PARSER.unescape(path)
       path.force_encoding(Encoding::UTF_8)
 
-      params = uri.query.to_s.split('&').reduce({}) do |h, p|
+      # Hack for parsing Windows "file://C:/Users/IEUser" paths
+      if host && port == ""
+        path = "#{host}:#{path}"
+      end
+
+      params = query.to_s.split('&').reduce({}) do |h, p|
         k, v = p.split('=', 2)
         h.merge(k.to_sym => v || true)
       end
