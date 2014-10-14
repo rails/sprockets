@@ -5,6 +5,10 @@ require 'sprockets/path_utils'
 class TestPathUtils < Sprockets::TestCase
   include Sprockets::PathUtils
 
+  DOSISH = File::ALT_SEPARATOR != nil
+  DOSISH_DRIVE_LETTER = File.dirname("A:") == "A:."
+  DOSISH_UNC = File.dirname("//") == "//"
+
   test "stat" do
     assert_kind_of File::Stat, stat(FIXTURE_ROOT)
     refute stat("/tmp/sprockets/missingfile")
@@ -36,10 +40,23 @@ class TestPathUtils < Sprockets::TestCase
   end
 
   test "check absolute path" do
+    assert absolute_path?(Dir.pwd)
+
     assert absolute_path?("/foo.rb")
     refute absolute_path?("foo.rb")
     refute absolute_path?("./foo.rb")
     refute absolute_path?("../foo.rb")
+
+    if DOSISH_DRIVE_LETTER
+      assert absolute_path?("A:foo.rb")
+      assert absolute_path?("A:/foo.rb")
+      assert absolute_path?("A:\\foo.rb")
+    end
+
+    if DOSISH
+      assert absolute_path?("/foo.rb")
+      assert absolute_path?("\\foo.rb")
+    end
   end
 
   test "check relative path" do
@@ -49,6 +66,15 @@ class TestPathUtils < Sprockets::TestCase
     assert relative_path?("../")
     assert relative_path?("./foo.rb")
     assert relative_path?("../foo.rb")
+
+    if DOSISH
+      assert relative_path?(".\\")
+      assert relative_path?("..\\")
+      assert relative_path?(".\\foo.rb")
+      assert relative_path?("..\\foo.rb")
+    end
+
+    refute relative_path?(Dir.pwd)
     refute relative_path?("/foo.rb")
     refute relative_path?("foo.rb")
     refute relative_path?(".foo.rb")

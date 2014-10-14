@@ -54,14 +54,23 @@ module Sprockets
     #
     # Returns true if path is absolute, otherwise false.
     if File::ALT_SEPARATOR
+      require 'pathname'
+
       # On Windows, ALT_SEPARATOR is \
+      # Delegate to Pathname nice the logic gets complex.
       def absolute_path?(path)
-        path[0] == File::SEPARATOR || path[0] == File::ALT_SEPARATOR
+        Pathname.new(path).absolute?
       end
     else
       def absolute_path?(path)
         path[0] == File::SEPARATOR
       end
+    end
+
+    if File::ALT_SEPARATOR
+      SEPARATOR_PATTERN = "#{Regexp.quote(File::SEPARATOR)}|#{Regexp.quote(File::ALT_SEPARATOR)}"
+    else
+      SEPARATOR_PATTERN = "#{Regexp.quote(File::SEPARATOR)}"
     end
 
     # Internal: Check if path is explicitly relative.
@@ -71,7 +80,7 @@ module Sprockets
     #
     # Returns true if path is relative, otherwise false.
     def relative_path?(path)
-      path =~ /^\.\.?($|\/)/ ? true : false
+      path =~ /^\.\.?($|#{SEPARATOR_PATTERN})/ ? true : false
     end
 
     # Internal: Get relative path for root path and subpath.
