@@ -72,15 +72,15 @@ module Sprockets
     # Returns String file contents transcoded to UTF-8 or in its external
     # encoding.
     def read_file(filename, content_type = nil)
-      data = File.open(filename, 'rb') { |f| f.read }
-
       if type = mime_types[content_type]
         if charset = type[:charset]
-          data = charset.call(data).encode(Encoding::UTF_8)
+          # Read as text so system prefers line ending transformations
+          data = File.open(filename, 'r') { |f| f.read }
+          return charset.call(data).encode(Encoding::UTF_8)
         end
       end
 
-      data
+      File.open(filename, 'rb') { |f| f.read }
     end
 
     # Public: Mapping of supported HTTP Content/Transfer encodings
