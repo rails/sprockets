@@ -143,25 +143,25 @@ class TestPathUtils < Sprockets::TestCase
       find_upwards("sprockets_test.rb", fixture_path("default/POW.png"))
   end
 
-  FILES_IN_DIRECTIVES = Dir["#{FIXTURE_ROOT}/directives/*"]
+  FILES_IN_SERVER = Dir["#{FIXTURE_ROOT}/server/*"]
 
   test "stat directory" do
-    files = stat_directory(File.join(FIXTURE_ROOT, "directives")).to_a
-    assert_equal FILES_IN_DIRECTIVES.size, files.size
-    path, stat = stat_directory(File.join(FIXTURE_ROOT, "directives")).first
-    assert_equal fixture_path("directives/code_before_comment"), path
+    files = stat_directory(File.join(FIXTURE_ROOT, "server")).to_a
+    assert_equal FILES_IN_SERVER.size, files.size
+    path, stat = stat_directory(File.join(FIXTURE_ROOT, "server")).first
+    assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
 
     assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
   end
 
-  FILES_UNDER_DIRECTIVES = Dir["#{FIXTURE_ROOT}/directives/**/*"]
+  FILES_UNDER_SERVER = Dir["#{FIXTURE_ROOT}/server/**/*"]
 
   test "stat tree" do
-    files = stat_tree(File.join(FIXTURE_ROOT, "directives")).to_a
-    assert_equal FILES_UNDER_DIRECTIVES.size, files.size
-    path, stat = stat_tree(File.join(FIXTURE_ROOT, "directives")).first
-    assert_equal fixture_path("directives/code_before_comment"), path
+    files = stat_tree(File.join(FIXTURE_ROOT, "server")).to_a
+    assert_equal FILES_UNDER_SERVER.size, files.size
+    path, stat = stat_tree(File.join(FIXTURE_ROOT, "server")).first
+    assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
 
     assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a
