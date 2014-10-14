@@ -26,6 +26,7 @@ class TestDigestUtils < Sprockets::TestCase
     assert_equal "92de503a8b413365fc38050c7dd4bacf28b0f705e744dacebcaa89f2032dcd67", hexdigest(true)
     assert_equal "bdfd64a7c8febcc3b0b8fb05d60c8e2a4cb6b8c081fcba20db1c9778e9beaf89", hexdigest(false)
     assert_equal "0d4af38194cb7dc915a75b04926886f6753ffc5b4f54513adfc582fdf3642e8c", hexdigest(42)
+    assert_equal "abed5dfa575e89eb850242440d64c316071f76de0db48dd8d416f4aa5ece6afd", hexdigest(2 ** 128)
     assert_equal "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", hexdigest("foo")
     assert_equal "dea6712e86478d2ee22a35a8c5ac9627e7cbc5ce2407a7da7c645fea2434fe9b", hexdigest(:foo)
     assert_equal "f0cf39d0be3efbb6f86ac2404100ff7e055c17ded946a06808d66f89ca03a811", hexdigest([])

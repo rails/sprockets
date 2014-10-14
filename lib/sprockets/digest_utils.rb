@@ -52,6 +52,9 @@ module Sprockets
         elsif klass == Fixnum
           digest << 'Fixnum'
           digest << obj.to_s
+        elsif klass == Bignum
+          digest << 'Bignum'
+          digest << obj.to_s
         elsif klass == TrueClass
           digest << 'TrueClass'
         elsif klass == FalseClass
