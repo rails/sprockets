@@ -436,7 +436,28 @@ $app.run(function($templateCache) {
   end
 
   test "missing asset path returns nil" do
-    assert_nil @env[fixture_path("default/missing.js")]
+    refute @env[fixture_path("default/missing.js")]
+  end
+
+  test "asset filename outside of load paths" do
+    path = File.expand_path("../../bin/sprockets", __FILE__)
+    assert File.exist?(path), "#{path} didn't exist"
+
+    refute @env[path]
+  end
+
+  test "non-existent asset filename outside of load paths" do
+    path = File.expand_path("../../bin/sprockets2", __FILE__)
+    refute File.exist?(path), "#{path} exists"
+
+    refute @env[path]
+  end
+
+  test "can't require files outside the load path" do
+    path = fixture_path("default/../asset/project.css")
+    assert File.exist?(path)
+
+    refute @env[path]
   end
 
   test "asset with missing requires raises an exception" do
@@ -451,33 +472,9 @@ $app.run(function($templateCache) {
     end
   end
 
-  test "asset filename outside of load paths" do
-    assert_raises Sprockets::FileOutsidePaths do
-      @env["/bin/sh"]
-    end
-  end
-
   test "asset with missing absolute depend_on raises an exception" do
     assert_raises Sprockets::FileOutsidePaths do
       @env["missing_absolute_depend_on.js"]
-    end
-  end
-
-  test "can't require files outside the load path" do
-    path = fixture_path("default/../asset/project.css")
-    assert File.exist?(path)
-
-    assert_raises Sprockets::FileOutsidePaths do
-      @env[path]
-    end
-  end
-
-  test "can't require absolute files outside the load path" do
-    path = "/bin/sh"
-    assert File.exist?(path)
-
-    assert_raises Sprockets::FileOutsidePaths do
-      @env[path]
     end
   end
 

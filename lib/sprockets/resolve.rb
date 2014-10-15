@@ -110,7 +110,8 @@ module Sprockets
 
       if absolute_path?(path)
         path = File.expand_path(path)
-        if file?(path) && (accept.nil? || resolve_path_transform_type(path, accept))
+        if paths_split(self.paths, path) && file?(path) &&
+            (accept.nil? || resolve_path_transform_type(path, accept))
           filename = path
           type = resolve_path_transform_type(path, accept)
         end
