@@ -744,13 +744,13 @@ class TestEnvironment < Sprockets::TestCase
     sandbox filename do
       assert_nil @env["tmp.png"]
 
-      File.open(filename, 'w') { |f| f.puts "foo" }
-      assert_equal "foo\n", @env["tmp.png"].to_s
+      File.open(filename, 'wb') { |f| f.write "\x01\x02\x03" }
+      assert_equal "\x01\x02\x03", @env["tmp.png"].to_s
 
-      File.open(filename, 'w') { |f| f.puts "bar" }
+      File.open(filename, 'wb') { |f| f.write "\x04\x05\x06" }
       time = Time.now + 60
       File.utime(time, time, filename)
-      assert_equal "bar\n", @env["tmp.png"].to_s
+      assert_equal "\x04\x05\x06", @env["tmp.png"].to_s
 
       File.unlink(filename)
       assert_nil @env["tmp.png"]
