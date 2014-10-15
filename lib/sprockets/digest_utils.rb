@@ -1,4 +1,3 @@
-require 'base64'
 require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
@@ -37,7 +36,7 @@ module Sprockets
     # obj - A JSON serializable object.
     #
     # Returns a String digest of the object.
-    def hexdigest(obj)
+    def digest(obj)
       digest = digest_class.new
       queue  = [obj]
 
@@ -46,13 +45,15 @@ module Sprockets
         klass = obj.class
 
         if klass == String
-          digest << 'String'
           digest << obj
         elsif klass == Symbol
           digest << 'Symbol'
           digest << obj.to_s
         elsif klass == Fixnum
           digest << 'Fixnum'
+          digest << obj.to_s
+        elsif klass == Bignum
+          digest << 'Bignum'
           digest << obj.to_s
         elsif klass == TrueClass
           digest << 'TrueClass'
@@ -80,7 +81,34 @@ module Sprockets
         end
       end
 
-      digest.hexdigest
+      digest.digest
+    end
+
+    # Internal: Pack a binary digest to a hex encoded string.
+    #
+    # bin - String bytes
+    #
+    # Returns hex String.
+    def pack_hexdigest(bin)
+      bin.unpack('H*').first
+    end
+
+    # Internal: Pack a binary digest to a base64 encoded string.
+    #
+    # bin - String bytes
+    #
+    # Returns base64 String.
+    def pack_base64digest(bin)
+      [bin].pack('m0')
+    end
+
+    # Internal: Pack a binary digest to a urlsafe base64 encoded string.
+    #
+    # bin - String bytes
+    #
+    # Returns urlsafe base64 String.
+    def pack_urlsafe_base64digest(bin)
+      pack_base64digest(bin).tr('+/', '-_').tr('=', '')
     end
 
     # Internal: Maps digest class to the named information hash algorithm name.
@@ -113,10 +141,7 @@ module Sprockets
       end
 
       if hash_name = NI_HASH_ALGORIHMS[digest_class]
-        # Prepare/format the digest.
-        digest = Base64.urlsafe_encode64(digest).sub(/=*\z/, "")
-
-        uri = "ni:///#{hash_name};#{digest}"
+        uri = "ni:///#{hash_name};#{pack_urlsafe_base64digest(digest)}"
         uri << "?ct=#{content_type}" if content_type
         uri
       end

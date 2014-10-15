@@ -1,4 +1,3 @@
-require 'base64'
 require 'fileutils'
 
 module Sprockets
@@ -88,7 +87,7 @@ module Sprockets
         @source
       else
         # File is read everytime to avoid memory bloat of large binary files
-        File.open(filename, 'rb') { |f| f.read }
+        File.binread(filename)
       end
     end
 
@@ -122,7 +121,7 @@ module Sprockets
 
     # Public: Returns String hexdigest of source.
     def hexdigest
-      digest.unpack('H*').first
+      DigestUtils.pack_hexdigest(digest)
     end
 
     # Pubic: ETag String of Asset.
@@ -130,7 +129,7 @@ module Sprockets
 
     # Public: Returns String base64 digest of source.
     def base64digest
-      Base64.strict_encode64(digest)
+      DigestUtils.pack_base64digest(digest)
     end
 
     # Public: A "named information" URL for subresource integrity.

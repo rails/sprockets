@@ -90,8 +90,7 @@ Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMP
 Sprockets.register_bundle_reducer 'text/css', :selector_count, :+
 
 Sprockets.register_postprocessor 'text/css', proc { |input|
-  { data: input[:data],
-    selector_count: input[:data].scan(/\{/).size }
+  { selector_count: input[:data].scan(/\{/).size }
 }
 
 

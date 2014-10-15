@@ -7,6 +7,8 @@ class TestAssetURI < Sprockets::TestCase
       Sprockets::AssetURI.parse("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal ["/usr/local/var/github/app/assets/javascripts/foo bar.js", {}],
       Sprockets::AssetURI.parse("file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js")
+    assert_equal ["C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js", {}],
+      Sprockets::AssetURI.parse("file://C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
   end
 
   test "parse query params" do
@@ -29,6 +31,8 @@ class TestAssetURI < Sprockets::TestCase
       Sprockets::AssetURI.build("/usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal "file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js",
       Sprockets::AssetURI.build("/usr/local/var/github/app/assets/javascripts/foo bar.js")
+    assert_equal "file://C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+      Sprockets::AssetURI.build("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
   end
 
   test "build query params" do

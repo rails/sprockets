@@ -42,7 +42,7 @@ module Sprockets
     # Returns an empty `Array` if the directory does not exist.
     def entries(path)
       if File.directory?(path)
-        Dir.entries(path).reject { |entry| entry =~ /^\.|~$|^\#.*\#$/ }.sort
+        Dir.entries(path, :encoding => Encoding.default_internal).reject { |entry| entry =~ /^\.|~$|^\#.*\#$/ }.sort
       else
         []
       end
@@ -54,14 +54,23 @@ module Sprockets
     #
     # Returns true if path is absolute, otherwise false.
     if File::ALT_SEPARATOR
+      require 'pathname'
+
       # On Windows, ALT_SEPARATOR is \
+      # Delegate to Pathname nice the logic gets complex.
       def absolute_path?(path)
-        path[0] == File::SEPARATOR || path[0] == File::ALT_SEPARATOR
+        Pathname.new(path).absolute?
       end
     else
       def absolute_path?(path)
         path[0] == File::SEPARATOR
       end
+    end
+
+    if File::ALT_SEPARATOR
+      SEPARATOR_PATTERN = "#{Regexp.quote(File::SEPARATOR)}|#{Regexp.quote(File::ALT_SEPARATOR)}"
+    else
+      SEPARATOR_PATTERN = "#{Regexp.quote(File::SEPARATOR)}"
     end
 
     # Internal: Check if path is explicitly relative.
@@ -71,7 +80,7 @@ module Sprockets
     #
     # Returns true if path is relative, otherwise false.
     def relative_path?(path)
-      path =~ /^\.\.?($|\/)/ ? true : false
+      path =~ /^\.\.?($|#{SEPARATOR_PATTERN})/ ? true : false
     end
 
     # Internal: Get relative path for root path and subpath.
@@ -112,6 +121,41 @@ module Sprockets
     # Returns an Array of String extnames.
     def path_extnames(path)
       File.basename(path).scan(/\.[^.]+/)
+    end
+
+    # Internal: Returns all parents for path
+    #
+    # path - String absolute filename or directory
+    # root - String path to stop at (default: system root)
+    #
+    # Returns an Array of String paths.
+    def path_parents(path, root = nil)
+      root = "#{root}#{File::SEPARATOR}" if root
+      parents = []
+
+      loop do
+        parent = File.dirname(path)
+        break if parent == path
+        break if root && !path.start_with?(root)
+        parents << path = parent
+      end
+
+      parents
+    end
+
+    # Internal: Find target basename checking upwards from path.
+    #
+    # basename - String filename: ".sprocketsrc"
+    # path     - String path to start search: "app/assets/javascripts/app.js"
+    # root     - String path to stop at (default: system root)
+    #
+    # Returns String filename or nil.
+    def find_upwards(basename, path, root = nil)
+      path_parents(path, root).each do |dir|
+        filename = File.join(dir, basename)
+        return filename if file?(filename)
+      end
+      nil
     end
 
     # Internal: Stat all the files under a directory.

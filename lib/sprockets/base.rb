@@ -1,4 +1,3 @@
-require 'digest/sha2'
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/errors'
@@ -61,10 +60,8 @@ module Sprockets
     # paths - Array of filename or directory paths.
     #
     # Returns a String digest.
-    def dependencies_digest(paths)
-      digest = digest_class.new
-      paths.each { |path| digest.update(file_digest(path) || "ENOENT") }
-      digest.digest
+    def files_digest(paths)
+      digest(paths.map { |path| file_digest(path) })
     end
 
     # Find asset by logical path or expanded path.
@@ -177,7 +174,9 @@ module Sprockets
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
 
-        if processors.any?
+        # Read into memory and process if theres a processor pipeline or the
+        # content type is text.
+        if processors.any? || mime_type_charset_detecter(type)
           asset.merge!(process(
             [method(:read_input)] + processors,
             asset[:uri],
@@ -197,11 +196,11 @@ module Sprockets
 
         metadata = asset[:metadata]
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_sources_digest] = dependencies_digest(metadata[:dependency_paths])
+        metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
 
         asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
 
-        asset[:id]  = hexdigest(asset)
+        asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         asset

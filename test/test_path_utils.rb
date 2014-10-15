@@ -5,6 +5,10 @@ require 'sprockets/path_utils'
 class TestPathUtils < Sprockets::TestCase
   include Sprockets::PathUtils
 
+  DOSISH = File::ALT_SEPARATOR != nil
+  DOSISH_DRIVE_LETTER = File.dirname("A:") == "A:."
+  DOSISH_UNC = File.dirname("//") == "//"
+
   test "stat" do
     assert_kind_of File::Stat, stat(FIXTURE_ROOT)
     refute stat("/tmp/sprockets/missingfile")
@@ -37,10 +41,23 @@ class TestPathUtils < Sprockets::TestCase
   end
 
   test "check absolute path" do
+    assert absolute_path?(Dir.pwd)
+
     assert absolute_path?("/foo.rb")
     refute absolute_path?("foo.rb")
     refute absolute_path?("./foo.rb")
     refute absolute_path?("../foo.rb")
+
+    if DOSISH_DRIVE_LETTER
+      assert absolute_path?("A:foo.rb")
+      assert absolute_path?("A:/foo.rb")
+      assert absolute_path?("A:\\foo.rb")
+    end
+
+    if DOSISH
+      assert absolute_path?("/foo.rb")
+      assert absolute_path?("\\foo.rb")
+    end
   end
 
   test "check relative path" do
@@ -50,6 +67,15 @@ class TestPathUtils < Sprockets::TestCase
     assert relative_path?("../")
     assert relative_path?("./foo.rb")
     assert relative_path?("../foo.rb")
+
+    if DOSISH
+      assert relative_path?(".\\")
+      assert relative_path?("..\\")
+      assert relative_path?(".\\foo.rb")
+      assert relative_path?("..\\foo.rb")
+    end
+
+    refute relative_path?(Dir.pwd)
     refute relative_path?("/foo.rb")
     refute relative_path?("foo.rb")
     refute relative_path?(".foo.rb")
@@ -84,24 +110,59 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
-  FILES_IN_DEFAULT = Dir["#{FIXTURE_ROOT}/default/*"].size
+  test "path parents" do
+    root = File.expand_path("../..", __FILE__)
+
+    assert_kind_of Array, path_parents(File.expand_path(__FILE__))
+
+    assert_equal ["#{root}/test", root],
+      path_parents(File.expand_path(__FILE__), root)
+    assert_equal ["#{root}/test", root],
+      path_parents(fixture_path(""), root)
+    assert_equal ["#{root}/test/fixtures", "#{root}/test", root],
+      path_parents(fixture_path("default"), root)
+    assert_equal ["#{root}/test/fixtures/default", "#{root}/test/fixtures", "#{root}/test", root],
+      path_parents(fixture_path("default/POW.png"), root)
+
+    assert_equal ["#{root}/test/fixtures/default", "#{root}/test/fixtures", "#{root}/test"],
+      path_parents(fixture_path("default/POW.png"), "#{root}/test")
+    assert_equal ["#{root}/test/fixtures/default"],
+      path_parents(fixture_path("default/POW.png"), "#{root}/test/fixtures/default")
+  end
+
+  test "find upwards" do
+    root = File.expand_path("../..", __FILE__)
+
+    assert_equal "#{root}/Gemfile",
+      find_upwards("Gemfile", File.expand_path(__FILE__))
+    assert_equal "#{root}/Gemfile",
+      find_upwards("Gemfile", fixture_path(""))
+    assert_equal "#{root}/Gemfile",
+      find_upwards("Gemfile", fixture_path("default/POW.png"))
+
+    assert_equal "#{root}/test/sprockets_test.rb",
+      find_upwards("sprockets_test.rb", fixture_path("default/POW.png"))
+  end
+
+  FILES_IN_SERVER = Dir["#{FIXTURE_ROOT}/server/*"]
 
   test "stat directory" do
-    assert_equal FILES_IN_DEFAULT, stat_directory(File.join(FIXTURE_ROOT, "default")).to_a.size
-    path, stat = stat_directory(File.join(FIXTURE_ROOT, "default")).first
-    assert_equal fixture_path("default/app"), path
+    files = stat_directory(File.join(FIXTURE_ROOT, "server")).to_a
+    assert_equal FILES_IN_SERVER.size, files.size
+    path, stat = stat_directory(File.join(FIXTURE_ROOT, "server")).first
+    assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
 
     assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
   end
 
-  SYMLINKS_UNDER_DEFAULT = 6
-  FILES_UNDER_DEFAULT = Dir["#{FIXTURE_ROOT}/default/**/*"].size + SYMLINKS_UNDER_DEFAULT
+  FILES_UNDER_SERVER = Dir["#{FIXTURE_ROOT}/server/**/*"]
 
   test "stat tree" do
-    assert_equal FILES_UNDER_DEFAULT, stat_tree(File.join(FIXTURE_ROOT, "default")).to_a.size
-    path, stat = stat_tree(File.join(FIXTURE_ROOT, "default")).first
-    assert_equal fixture_path("default/app"), path
+    files = stat_tree(File.join(FIXTURE_ROOT, "server")).to_a
+    assert_equal FILES_UNDER_SERVER.size, files.size
+    path, stat = stat_tree(File.join(FIXTURE_ROOT, "server")).first
+    assert_equal fixture_path("server/app"), path
     assert_kind_of File::Stat, stat
 
     assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a

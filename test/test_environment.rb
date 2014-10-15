@@ -436,7 +436,28 @@ $app.run(function($templateCache) {
   end
 
   test "missing asset path returns nil" do
-    assert_nil @env[fixture_path("default/missing.js")]
+    refute @env[fixture_path("default/missing.js")]
+  end
+
+  test "asset filename outside of load paths" do
+    path = File.expand_path("../../bin/sprockets", __FILE__)
+    assert File.exist?(path), "#{path} didn't exist"
+
+    refute @env[path]
+  end
+
+  test "non-existent asset filename outside of load paths" do
+    path = File.expand_path("../../bin/sprockets2", __FILE__)
+    refute File.exist?(path), "#{path} exists"
+
+    refute @env[path]
+  end
+
+  test "can't require files outside the load path" do
+    path = fixture_path("default/../asset/project.css")
+    assert File.exist?(path)
+
+    refute @env[path]
   end
 
   test "asset with missing requires raises an exception" do
@@ -451,33 +472,9 @@ $app.run(function($templateCache) {
     end
   end
 
-  test "asset filename outside of load paths" do
-    assert_raises Sprockets::FileOutsidePaths do
-      @env["/bin/sh"]
-    end
-  end
-
   test "asset with missing absolute depend_on raises an exception" do
     assert_raises Sprockets::FileOutsidePaths do
       @env["missing_absolute_depend_on.js"]
-    end
-  end
-
-  test "can't require files outside the load path" do
-    path = fixture_path("default/../asset/project.css")
-    assert File.exist?(path)
-
-    assert_raises Sprockets::FileOutsidePaths do
-      @env[path]
-    end
-  end
-
-  test "can't require absolute files outside the load path" do
-    path = "/bin/sh"
-    assert File.exist?(path)
-
-    assert_raises Sprockets::FileOutsidePaths do
-      @env[path]
     end
   end
 
@@ -655,10 +652,10 @@ class TestEnvironment < Sprockets::TestCase
     sandbox filename do
       assert_nil @env["tmp.js"]
 
-      File.open(filename, 'w') { |f| f.puts "foo;" }
+      File.open(filename, 'w') { |f| f.write "foo;\n" }
       assert_equal "foo;\n", @env["tmp.js"].to_s
 
-      File.open(filename, 'w') { |f| f.puts "bar;" }
+      File.open(filename, 'w') { |f| f.write "bar;\n" }
       time = Time.now + 60
       File.utime(time, time, filename)
       assert_equal "bar;\n", @env["tmp.js"].to_s
@@ -674,13 +671,13 @@ class TestEnvironment < Sprockets::TestCase
     sandbox filename do
       assert_nil @env["tmp.png"]
 
-      File.open(filename, 'w') { |f| f.puts "foo" }
-      assert_equal "foo\n", @env["tmp.png"].to_s
+      File.open(filename, 'wb') { |f| f.write "\x01\x02\x03" }
+      assert_equal "\x01\x02\x03", @env["tmp.png"].to_s
 
-      File.open(filename, 'w') { |f| f.puts "bar" }
+      File.open(filename, 'wb') { |f| f.write "\x04\x05\x06" }
       time = Time.now + 60
       File.utime(time, time, filename)
-      assert_equal "bar\n", @env["tmp.png"].to_s
+      assert_equal "\x04\x05\x06", @env["tmp.png"].to_s
 
       File.unlink(filename)
       assert_nil @env["tmp.png"]
@@ -693,7 +690,7 @@ class TestEnvironment < Sprockets::TestCase
     filename = File.join(fixture_path("default"), "tmp.coffee")
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.puts "-->" }
+      File.open(filename, 'w') { |f| f.write "-->" }
       begin
         @env["tmp.js"].to_s
       rescue ExecJS::Error => e
@@ -702,7 +699,7 @@ class TestEnvironment < Sprockets::TestCase
         flunk "nothing raised"
       end
 
-      File.open(filename, 'w') { |f| f.puts "->" }
+      File.open(filename, 'w') { |f| f.write "->" }
       time = Time.now + 60
       File.utime(time, time, filename)
       assert_equal "(function() {\n  (function() {});\n\n}).call(this);\n", @env["tmp.js"].to_s
