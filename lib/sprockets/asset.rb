@@ -127,7 +127,7 @@ module Sprockets
         @source
       else
         # File is read everytime to avoid memory bloat of large binary files
-        File.open(filename, 'rb') { |f| f.read }
+        File.binread(filename)
       end
     end
 

@@ -176,7 +176,9 @@ module Sprockets
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
 
-        if processors.any?
+        # Read into memory and process if theres a processor pipeline or the
+        # content type is text.
+        if processors.any? || mime_type_charset_detecter(type)
           asset.merge!(process(
             [method(:read_input)] + processors,
             asset[:uri],

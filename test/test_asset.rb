@@ -165,7 +165,44 @@ module FreshnessTests
   end
 end
 
-class StaticAssetTest < Sprockets::TestCase
+class TextStaticAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @asset = @env['log.txt']
+  end
+
+  include AssetTests
+
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/log.txt')}?type=text/plain&id=xxx",
+      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
+  end
+
+  test "logical path can find itself" do
+    assert_equal @asset, @env[@asset.logical_path]
+  end
+
+  test "content type" do
+    assert_equal "text/plain", @asset.content_type
+  end
+
+  test "charset is UTF-8" do
+    assert_equal 'utf-8', @asset.charset
+  end
+
+  test "length" do
+    assert_equal 6, @asset.length
+  end
+
+  test "bytesize" do
+    assert_equal 6, @asset.bytesize
+  end
+end
+
+class BinaryStaticAssetTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.append_path(fixture_path('asset'))

@@ -10,6 +10,7 @@ class TestServer < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env.append_path(fixture_path("server/app/javascripts"))
+    @env.append_path(fixture_path("server/app/images"))
     @env.append_path(fixture_path("server/vendor/javascripts"))
     @env.append_path(fixture_path("server/vendor/stylesheets"))
   end
@@ -341,10 +342,10 @@ class TestServer < Sprockets::TestCase
   end
 
   test "serving static assets" do
-    get "/assets/hello.txt"
+    get "/assets/logo.png"
     assert_equal 200, last_response.status
-    assert_equal "text/plain", last_response.content_type
-    assert_equal File.read(fixture_path("server/app/javascripts/hello.txt")), last_response.body
+    assert_equal "image/png", last_response.content_type
+    assert_equal File.binread(fixture_path("server/app/images/logo.png")), last_response.body
   end
 
   test "disallow non-get methods" do

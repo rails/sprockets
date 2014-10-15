@@ -64,6 +64,19 @@ module Sprockets
       end
     end
 
+    # Internal: Get detecter function for MIME type.
+    #
+    # mime_type - String MIME type
+    #
+    # Returns Proc detector or nil if none is available.
+    def mime_type_charset_detecter(mime_type)
+      if type = mime_types[mime_type]
+        if detect = type[:charset]
+          return detect
+        end
+      end
+    end
+
     # Public: Read file on disk with MIME type specific encoding.
     #
     # filename     - String path
@@ -72,15 +85,13 @@ module Sprockets
     # Returns String file contents transcoded to UTF-8 or in its external
     # encoding.
     def read_file(filename, content_type = nil)
-      if type = mime_types[content_type]
-        if charset = type[:charset]
-          # Read as text so system prefers line ending transformations
-          data = File.open(filename, 'r') { |f| f.read }
-          return charset.call(data).encode(Encoding::UTF_8)
-        end
-      end
+      data = File.binread(filename)
 
-      File.open(filename, 'rb') { |f| f.read }
+      if detect = mime_type_charset_detecter(content_type)
+        detect.call(data).encode(Encoding::UTF_8, :universal_newline => true)
+      else
+        data
+      end
     end
 
     # Public: Mapping of supported HTTP Content/Transfer encodings
