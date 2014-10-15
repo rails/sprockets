@@ -121,7 +121,7 @@ class TestCaching < Sprockets::TestCase
     filename = fixture_path("default/tmp.js")
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.puts "foo;" }
+      File.open(filename, 'w') { |f| f.write "foo;\n" }
       assert_equal "foo;\n", @env1["tmp.js"].to_s
 
       File.unlink(filename)
@@ -134,12 +134,12 @@ class TestCaching < Sprockets::TestCase
     bar = fixture_path("default/bar-tmp.js")
 
     sandbox foo, bar do
-      File.open(foo, 'w') { |f| f.puts "//= require bar-tmp\nfoo;" }
-      File.open(bar, 'w') { |f| f.puts "bar;" }
+      File.open(foo, 'w') { |f| f.write "//= require bar-tmp\nfoo;\n" }
+      File.open(bar, 'w') { |f| f.write "bar;\n" }
       assert_equal "bar;\nfoo;\n", @env1["foo-tmp.js"].to_s
       assert_equal "bar;\n", @env1["bar-tmp.js"].to_s
 
-      File.open(foo, 'w') { |f| f.puts "foo;" }
+      File.open(foo, 'w') { |f| f.write "foo;\n" }
       File.unlink(bar)
       assert_nil @env2["bar-tmp.js"]
       assert_raises Sprockets::FileNotFound do

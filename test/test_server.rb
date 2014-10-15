@@ -329,7 +329,7 @@ class TestServer < Sprockets::TestCase
       assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar japanese = \"日本語\";\n", last_response.body
 
       File.open(filename, "w") do |f|
-        f.puts "var baz;"
+        f.write "var baz;\n"
       end
 
       path = fixture_path "server/app/javascripts"

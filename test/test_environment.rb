@@ -725,10 +725,10 @@ class TestEnvironment < Sprockets::TestCase
     sandbox filename do
       assert_nil @env["tmp.js"]
 
-      File.open(filename, 'w') { |f| f.puts "foo;" }
+      File.open(filename, 'w') { |f| f.write "foo;\n" }
       assert_equal "foo;\n", @env["tmp.js"].to_s
 
-      File.open(filename, 'w') { |f| f.puts "bar;" }
+      File.open(filename, 'w') { |f| f.write "bar;\n" }
       time = Time.now + 60
       File.utime(time, time, filename)
       assert_equal "bar;\n", @env["tmp.js"].to_s
@@ -763,7 +763,7 @@ class TestEnvironment < Sprockets::TestCase
     filename = File.join(fixture_path("default"), "tmp.coffee")
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.puts "-->" }
+      File.open(filename, 'w') { |f| f.write "-->" }
       begin
         @env["tmp.js"].to_s
       rescue ExecJS::Error => e
@@ -772,7 +772,7 @@ class TestEnvironment < Sprockets::TestCase
         flunk "nothing raised"
       end
 
-      File.open(filename, 'w') { |f| f.puts "->" }
+      File.open(filename, 'w') { |f| f.write "->" }
       time = Time.now + 60
       File.utime(time, time, filename)
       assert_equal "(function() {\n  (function() {});\n\n}).call(this);\n", @env["tmp.js"].to_s
