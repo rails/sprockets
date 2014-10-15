@@ -33,14 +33,14 @@ module Sprockets
       # Extract the path from everything after the leading slash
       path = unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
-      # URLs containing a `".."` are rejected for security reasons.
-      if forbidden_request?(path)
-        return forbidden_response
-      end
-
       # Strip fingerprint
       if fingerprint = path_fingerprint(path)
         path = path.sub("-#{fingerprint}", '')
+      end
+
+      # URLs containing a `".."` are rejected for security reasons.
+      if forbidden_request?(path)
+        return forbidden_response
       end
 
       # Look up the asset.
@@ -90,7 +90,7 @@ module Sprockets
         #
         #     http://example.org/assets/../../../etc/passwd
         #
-        path.include?("..")
+        path.include?("..") || Pathname.new(path).absolute?
       end
 
       # Returns a 403 Forbidden response tuple
@@ -222,7 +222,7 @@ module Sprockets
       #     # => "0aa2105d29558f3eb790d411d7d8fb66"
       #
       def path_fingerprint(path)
-        path[/-([0-9a-f]{7,40})\.[^.]+$/, 1]
+        path[/-([0-9a-f]{7,40})\.[^.]+\z/, 1]
       end
 
       # URI.unescape is deprecated on 1.9. We need to use URI::Parser
