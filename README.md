@@ -366,6 +366,10 @@ submit a pull request.
 
 ## Version History ##
 
+**2.12.3** (October 28, 2014)
+
+* Security: Fix directory traversal bug in development mode server.
+
 **2.12.2** (September 5, 2014)
 
 * Ensure internal asset lookups calls are still restricted to load paths within
