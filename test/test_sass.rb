@@ -152,7 +152,7 @@ footer, header, hgroup, menu, nav, section {
   test "@import relative nested file" do
     assert_equal <<-EOS, render('sass/relative.scss')
 body {
-  background: #666666; }
+  background: #666; }
     EOS
   end
 
