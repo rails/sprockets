@@ -183,12 +183,31 @@ class TestServer < Sprockets::TestCase
   end
 
   test "illegal require outside load path" do
-    get "/assets/../config/passwd"
+    get "/assets//etc/passwd"
     assert_equal 403, last_response.status
 
-    get "/assets/%2e%2e/config/passwd"
+    get "/assets/%2fetc/passwd"
+    assert_equal 403, last_response.status
+
+    get "/assets//%2fetc/passwd"
+    assert_equal 403, last_response.status
+
+    get "/assets/%2f/etc/passwd"
+    assert_equal 403, last_response.status
+
+    get "/assets/../etc/passwd"
+    assert_equal 403, last_response.status
+
+    get "/assets/%2e%2e/etc/passwd"
+    assert_equal 403, last_response.status
+
+    get "/assets/.-0000000./etc/passwd"
+    assert_equal 403, last_response.status
+
+    get "/assets/.-0000000./etc/passwd"
     assert_equal 403, last_response.status
   end
+
 
   test "add new source to tree" do
     filename = fixture_path("server/app/javascripts/baz.js")
