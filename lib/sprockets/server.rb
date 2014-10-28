@@ -32,14 +32,14 @@ module Sprockets
       # Extract the path from everything after the leading slash
       path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
-      # URLs containing a `".."` are rejected for security reasons.
-      if forbidden_request?(path)
-        return forbidden_response
-      end
-
       # Strip fingerprint
       if fingerprint = path_fingerprint(path)
         path = path.sub("-#{fingerprint}", '')
+      end
+
+      # URLs containing a `".."` are rejected for security reasons.
+      if forbidden_request?(path)
+        return forbidden_response
       end
 
       # Look up the asset.
@@ -115,7 +115,7 @@ module Sprockets
         #
         #     http://example.org/assets/../../../etc/passwd
         #
-        path.include?("..")
+        path.include?("..") || absolute_path?(path)
       end
 
       # Returns a 200 OK response tuple
@@ -271,7 +271,7 @@ module Sprockets
       #     # => "0aa2105d29558f3eb790d411d7d8fb66"
       #
       def path_fingerprint(path)
-        path[/-([0-9a-f]{7,128})\.[^.]+$/, 1]
+        path[/-([0-9a-f]{7,128})\.[^.]+\z/, 1]
       end
   end
 end
