@@ -366,10 +366,6 @@ submit a pull request.
 
 ## Version History ##
 
-**2.11.1** (March 13, 2014)
-
-* Avoid context reference in SassImporter hack so its Marshallable.
-
 **2.11.0** (February 19, 2014)
 
 * Support for `.bower.json`
