@@ -334,9 +334,6 @@ class TestServer < Sprockets::TestCase
 
     get "/assets/.-0000000./etc/passwd"
     assert_equal 403, last_response.status
-
-    get "/assets/.-0000000./etc/passwd"
-    assert_equal 403, last_response.status
   end
 
   test "add new source to tree" do
