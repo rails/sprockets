@@ -1,4 +1,5 @@
 require 'sprockets/base'
+require 'sprockets/cache/memory_store'
 require 'sprockets/cached_environment'
 
 module Sprockets

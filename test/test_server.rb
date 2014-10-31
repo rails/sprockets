@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-require "sprockets_test"
-
+require 'sprockets_test'
 require 'rack/builder'
 require 'rack/test'
 

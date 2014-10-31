@@ -1,3 +1,5 @@
+require 'sprockets/asset_uri'
+
 module Sprockets
   # Internal: Bundle processor takes a single file asset and prepends all the
   # `:required` URIs to the contents.

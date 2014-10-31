@@ -1,3 +1,4 @@
+require 'sprockets/asset_uri'
 require 'sprockets/base'
 
 module Sprockets

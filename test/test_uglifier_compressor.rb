@@ -1,4 +1,5 @@
 require 'sprockets_test'
+require 'sprockets/cache'
 require 'sprockets/uglifier_compressor'
 
 class TestUglifierCompressor < Sprockets::TestCase
