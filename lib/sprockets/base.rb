@@ -1,7 +1,11 @@
 require 'sprockets/asset'
 require 'sprockets/bower'
+require 'sprockets/configuration'
+require 'sprockets/digest_utils'
 require 'sprockets/errors'
+require 'sprockets/http_utils'
 require 'sprockets/legacy'
+require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
 
