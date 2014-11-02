@@ -394,8 +394,8 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
-  def asset(logical_path)
-    @env.find_asset(logical_path, :bundle => @bundle)
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, {:bundle => @bundle}.merge(options))
   end
 end
 
@@ -701,6 +701,38 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "asset is stale when one of its stubbed targets dependencies are modified" do
+    frameworks = fixture_path('asset/stub-frameworks.js')
+    app        = fixture_path('asset/stub-app.js')
+    jquery     = fixture_path('asset/stub-jquery.js')
+
+    sandbox frameworks, app, jquery do
+      write(frameworks, "frameworks = {};")
+      write(app, "//= stub stub-frameworks\n//= require stub-jquery\napp = {};")
+      write(jquery, "jquery = {};")
+
+      asset_jquery = asset('stub-jquery.js', :bundle => false)
+
+      refute asset('stub-frameworks.js').included.include?(asset_jquery.uri)
+      assert asset('stub-app.js').included.include?(asset_jquery.uri)
+
+      old_asset_frameworks_uri = asset('stub-frameworks.js').uri
+      old_asset_app_uri        = asset('stub-app.js').uri
+
+      write(frameworks, "//= require stub-jquery\nframeworks = {};")
+
+      # jquery never changed
+      assert_equal asset_jquery.uri, asset('stub-jquery.js', :bundle => false).uri
+
+      # jquery moved from app to frameworks
+      assert asset('stub-frameworks.js').included.include?(asset_jquery.uri)
+      refute asset('stub-app.js').included.include?(asset_jquery.uri)
+
+      refute_equal old_asset_frameworks_uri, asset('stub-frameworks.js').uri
+      refute_equal old_asset_app_uri, asset('stub-app.js').uri
+    end
+  end
+
   test "mtime is based on required assets" do
     required_asset = fixture_path('asset/dependencies/b.js')
 
@@ -983,8 +1015,8 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     end
   end
 
-  def asset(logical_path)
-    @env.find_asset(logical_path, :bundle => @bundle)
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, {:bundle => @bundle}.merge(options))
   end
 
   def read(logical_path)

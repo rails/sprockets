@@ -117,7 +117,6 @@ module Sprockets
 
   register_bundle_reducer '*/*', :data, :+
   register_bundle_reducer 'application/javascript', :data, Utils.method(:concat_javascript_sources)
-  register_bundle_reducer '*/*', :dependency_paths, :+
   register_bundle_reducer '*/*', :links, :+
 
   register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
