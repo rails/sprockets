@@ -1,5 +1,6 @@
 require "minitest/autorun"
 require "sprockets"
+require "sprockets/environment"
 require "fileutils"
 
 require "coffee_script"
@@ -70,6 +71,7 @@ XmlBuilderProcessor = proc { |input|
 }
 # Sprockets.register_engine '.builder', XmlBuilderProcessor, mime_type: 'application/xml'
 
+require 'sprockets/jst_processor'
 Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'
 
 SVG2PNG = proc { |input|

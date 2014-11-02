@@ -1,3 +1,6 @@
+require 'sprockets/asset_uri'
+require 'sprockets/manifest'
+
 module Sprockets
   module Resolve
     # Public: Iterate over every file under all load paths.

@@ -1,4 +1,5 @@
 require 'sprockets/encoding_utils'
+require 'sprockets/http_utils'
 
 module Sprockets
   module Mime

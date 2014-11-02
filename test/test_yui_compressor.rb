@@ -1,4 +1,5 @@
 require 'sprockets_test'
+require 'sprockets/cache'
 require 'sprockets/yui_compressor'
 
 class TestYUICompressor < Sprockets::TestCase

@@ -40,6 +40,7 @@ module Sprockets
 
   # Extend Sprockets module to provide global registry
   require 'sprockets/configuration'
+  require 'sprockets/context'
   extend Configuration
 
   @root              = File.expand_path('..', __FILE__).freeze
@@ -106,9 +107,11 @@ module Sprockets
   register_encoding :gzip,    EncodingUtils::GZIP
   register_encoding :base64,  EncodingUtils::BASE64
 
+  require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor
   register_preprocessor 'application/javascript', DirectiveProcessor
 
+  require 'sprockets/bundle'
   register_bundle_processor 'application/javascript', Bundle
   register_bundle_processor 'text/css', Bundle
 
