@@ -58,8 +58,6 @@ module Sprockets
     #     environment.register_engine '.coffee', CoffeeScriptTemplate
     #
     def register_engine(ext, klass, options = {})
-      ext = Sprockets::Utils.normalize_extension(ext)
-
       mutate_config(:engines) do |engines|
         engines.merge(ext => klass)
       end

@@ -41,23 +41,6 @@ module Sprockets
       end
     end
 
-    # Internal: Prepends a leading "." to an extension if its missing.
-    #
-    #     normalize_extension("js")
-    #     # => ".js"
-    #
-    #     normalize_extension(".css")
-    #     # => ".css"
-    #
-    def normalize_extension(extension)
-      extension = extension.to_s
-      if extension[/^\./]
-        extension
-      else
-        ".#{extension}"
-      end
-    end
-
     # Internal: Feature detect if UnboundMethods can #bind to any Object or
     # just Objects that share the same super class.
     # Basically if RUBY_VERSION >= 2.

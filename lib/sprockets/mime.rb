@@ -44,9 +44,7 @@ module Sprockets
         options = { extensions: [options] }
       end
 
-      extnames = Array(options[:extensions]).map { |extname|
-        Sprockets::Utils.normalize_extension(extname)
-      }
+      extnames = Array(options[:extensions])
 
       charset = options[:charset]
       charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
