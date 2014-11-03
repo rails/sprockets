@@ -89,7 +89,7 @@ JS2HTMLIMPORT = proc { |input|
 }
 Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMPORT
 
-Sprockets.register_bundle_reducer 'text/css', :selector_count, :+
+Sprockets.register_bundle_metadata_reducer 'text/css', :selector_count, :+
 
 Sprockets.register_postprocessor 'text/css', proc { |input|
   { selector_count: input[:data].scan(/\{/).size }
