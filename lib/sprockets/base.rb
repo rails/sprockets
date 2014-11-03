@@ -8,6 +8,7 @@ require 'sprockets/errors'
 require 'sprockets/http_utils'
 require 'sprockets/legacy'
 require 'sprockets/loader'
+require 'sprockets/path_digest_utils'
 require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
@@ -15,7 +16,7 @@ require 'sprockets/server'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils, HTTPUtils, DigestUtils
+    include PathDigestUtils, PathUtils, HTTPUtils, DigestUtils
     include Configuration
     include Server
     include Resolve, Loader
@@ -53,24 +54,9 @@ module Sprockets
         # disk. Also, the mtime is only read to the nearest second. Its
         # also possible the file was updated more than once in a given second.
         cache.fetch(['file_digest', path, stat.mtime.to_i]) do
-          if stat.directory?
-            # If its a directive, digest the list of filenames
-            digest_class.digest(self.entries(path).join(','))
-          elsif stat.file?
-            # If its a file, digest the contents
-            digest_class.file(path.to_s).digest
-          end
+          self.stat_digest(path, stat)
         end
       end
-    end
-
-    # Internal: Compute digest for a set of paths.
-    #
-    # paths - Array of filename or directory paths.
-    #
-    # Returns a String digest.
-    def files_digest(paths)
-      digest(paths.map { |path| file_digest(path) })
     end
 
     # Find asset by logical path or expanded path.
