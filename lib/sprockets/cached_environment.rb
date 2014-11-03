@@ -19,6 +19,7 @@ module Sprockets
       @stats   = Hash.new { |h, k| h[k] = _stat(k) }
       @entries = Hash.new { |h, k| h[k] = _entries(k) }
       @digests = Hash.new { |h, k| h[k] = _file_digest(k) }
+      @uris    = Hash.new { |h, k| h[k] = _load(k) }
     end
 
     # No-op return self as cached environment.
@@ -43,6 +44,12 @@ module Sprockets
     alias_method :_file_digest, :file_digest
     def file_digest(path)
       @digests[path]
+    end
+
+    # Internal: Cache Environment#load
+    alias_method :_load, :load
+    def load(uri)
+      @uris[uri]
     end
 
     protected
