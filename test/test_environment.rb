@@ -159,6 +159,15 @@ $app.run(function($templateCache) {
     assert_equal @env["gallery.js"], assets[2]
   end
 
+  test "html subresource links" do
+    assert asset = @env["homepage-links.html"]
+    assert_equal "text/html", asset.content_type
+    assert asset.to_s.match(/gallery-[a-z0-9]+\.css/)
+    assert asset.to_s.match(/gallery-[a-z0-9]+\.js/)
+    assert asset.links.include?(@env["gallery.css"].uri)
+    assert asset.links.include?(@env["gallery.js"].uri)
+  end
+
   test "resolve web component files" do
     assert_equal fixture_path("default/menu/menu.js"),
       @env.resolve("menu/menu.js")
