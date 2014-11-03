@@ -15,11 +15,23 @@ module Sprockets
     #
     # Returns Asset.
     def initialize(environment, attributes = {})
-      @environment = environment
-      @attributes = attributes
-      attributes.each do |name, value|
-        instance_variable_set("@#{name}", value)
-      end
+      @environment  = environment
+      @attributes   = attributes
+      @charset      = attributes[:charset]
+      @content_type = attributes[:content_type]
+      @digest       = attributes[:digest]
+      @encoding     = attributes[:encoding]
+      @filename     = attributes[:filename]
+      @id           = attributes[:id]
+      @integrity    = attributes[:integrity]
+      @length       = attributes[:length]
+      @load_path    = attributes[:load_path]
+      @logical_path = attributes[:logical_path]
+      @metadata     = attributes[:metadata]
+      @mtime        = attributes[:mtime]
+      @name         = attributes[:name]
+      @source       = attributes[:source]
+      @uri          = attributes[:uri]
     end
 
     # Internal: Return all internal instance variables as a hash.
@@ -123,7 +135,7 @@ module Sprockets
     #
     # Returns String.
     def source
-      if defined? @source
+      if @source
         @source
       else
         # File is read everytime to avoid memory bloat of large binary files
