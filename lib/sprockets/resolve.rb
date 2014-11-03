@@ -1,5 +1,4 @@
 require 'sprockets/asset_uri'
-require 'sprockets/manifest'
 
 module Sprockets
   module Resolve
@@ -135,30 +134,6 @@ module Sprockets
           if !seen.include?(path)
             yield path, filename
             seen << path
-          end
-        end
-      end
-
-      nil
-    end
-
-    # Deprecated: Iterate over all logical paths with a matcher.
-    #
-    # Remove from 4.x.
-    #
-    # args - List of matcher objects.
-    #
-    # Returns Enumerator if no block is given.
-    def each_logical_path(*args, &block)
-      return to_enum(__method__, *args) unless block_given?
-
-      filters = args.flatten.map { |arg| Manifest.compile_match_filter(arg) }
-      logical_paths.each do |a, b|
-        if filters.any? { |f| f.call(a, b) }
-          if block.arity == 2
-            yield a, b
-          else
-            yield a
           end
         end
       end
