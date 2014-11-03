@@ -5,11 +5,11 @@ module Sprockets
   # `Engines` provides a global and `Environment` instance registry.
   #
   # An engine is a type of processor that is bound to a filename
-  # extension. `application.js.coffee` indicates that the
+  # extension. `application.coffee` indicates that the
   # `CoffeeScriptTemplate` engine will be ran on the file.
   #
   # Extensions can be stacked and will be evaulated from right to
-  # left. `application.js.coffee.erb` will first run `ERBTemplate`
+  # left. `application.coffee.erb` will first run `ERBTemplate`
   # then `CoffeeScriptTemplate`.
   #
   # All `Engine`s must follow the `Template` interface. It is

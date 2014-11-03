@@ -123,7 +123,7 @@ class TestManifest < Sprockets::TestCase
 
     assert !File.exist?("#{@dir}/#{digest_path}")
 
-    @manifest.compile(fixture_path('default/application.js.coffee'))
+    @manifest.compile(fixture_path('default/application.coffee'))
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{digest_path}")
@@ -209,7 +209,7 @@ class TestManifest < Sprockets::TestCase
 
   test "recompile asset" do
     digest_path = @env['application.js'].digest_path
-    filename = fixture_path('default/application.js.coffee')
+    filename = fixture_path('default/application.coffee')
 
     sandbox filename do
       assert !File.exist?("#{@dir}/#{digest_path}"), Dir["#{@dir}/*"].inspect
@@ -262,7 +262,7 @@ class TestManifest < Sprockets::TestCase
 
   test "remove old asset" do
     digest_path = @env['application.js'].digest_path
-    filename = fixture_path('default/application.js.coffee')
+    filename = fixture_path('default/application.coffee')
 
     sandbox filename do
       @manifest.compile('application.js')
@@ -288,7 +288,7 @@ class TestManifest < Sprockets::TestCase
 
   test "remove old backups" do
     digest_path = @env['application.js'].digest_path
-    filename = fixture_path('default/application.js.coffee')
+    filename = fixture_path('default/application.coffee')
 
     sandbox filename do
       @manifest.compile('application.js')

@@ -6,7 +6,7 @@ module Sprockets
     # searching the environment's paths.
     #
     #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js.coffee"
+    #     # => "/path/to/app/javascripts/application.coffee"
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(path, options = {})
@@ -53,7 +53,7 @@ module Sprockets
     # and shadowed matches.
     #
     #     resolve_all("application.js").first
-    #     # => "/path/to/app/javascripts/application.js.coffee"
+    #     # => "/path/to/app/javascripts/application.coffee"
     #
     # `resolve_all` returns an `Enumerator`. This allows you to filter your
     # matches by any condition.
@@ -195,7 +195,7 @@ module Sprockets
 
       # Internal: Returns the name, mime type and `Array` of engine extensions.
       #
-      #     "foo.js.coffee.erb"
+      #     "foo.coffee.erb"
       #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)

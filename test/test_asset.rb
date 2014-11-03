@@ -949,9 +949,9 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "application.css", logical_path("application.css")
 
     assert_equal "application.js", logical_path("application.js.erb")
-    assert_equal "application.js", logical_path("application.js.coffee")
-    assert_equal "application.css", logical_path("application.css.scss")
-    assert_equal "project.js", logical_path("project.js.coffee.erb")
+    assert_equal "application.js", logical_path("application.coffee")
+    assert_equal "application.css", logical_path("application.scss")
+    assert_equal "project.js", logical_path("project.coffee.erb")
 
     assert_equal "store.css", logical_path("store.css.erb")
     assert_equal "store.foo", logical_path("store.foo")
@@ -1016,9 +1016,9 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "text/css", content_type("application.css")
 
     assert_equal "application/javascript", content_type("application.js.erb")
-    assert_equal "application/javascript", content_type("application.js.coffee")
-    assert_equal "text/css", content_type("application.css.scss")
-    assert_equal "application/javascript", content_type("project.js.coffee.erb")
+    assert_equal "application/javascript", content_type("application.coffee")
+    assert_equal "text/css", content_type("application.scss")
+    assert_equal "application/javascript", content_type("project.coffee.erb")
 
     assert_equal "text/css", content_type("store.css.erb")
     assert_equal "text/plain", content_type("files.erb")

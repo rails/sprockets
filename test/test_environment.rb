@@ -463,7 +463,7 @@ $app.run(function($templateCache) {
     assert_equal "gallery.js",
       @env[fixture_path("default/gallery.js")].logical_path
     assert_equal "application.js",
-      @env[fixture_path("default/application.js.coffee")].logical_path
+      @env[fixture_path("default/application.coffee")].logical_path
     assert_equal "mobile/a.js",
       @env[fixture_path("default/mobile/a.js")].logical_path
   end

@@ -136,8 +136,8 @@ Sprockets. Compilers for these languages are called *engines*.
 
 Engines are specified by additional extensions on the asset source
 filename. For example, a CSS file written in SCSS might have the name
-`layout.css.scss`, while a JavaScript file written in CoffeeScript
-might have the name `dialog.js.coffee`.
+`layout.scss`, while a JavaScript file written in CoffeeScript
+might have the name `dialog.coffee`.
 
 ## Minifying Assets ##
 
@@ -158,8 +158,8 @@ If the `sass` gem is available to your application, you can use Sass
 to write CSS assets in Sprockets.
 
 Sprockets supports both Sass syntaxes. For the original
-whitespace-sensitive syntax, use the extension `.css.sass`. For the
-new SCSS syntax, use the extension `.css.scss`.
+whitespace-sensitive syntax, use the extension `.sass`. For the
+new SCSS syntax, use the extension `.scss`.
 
 ## Scripting with CoffeeScript ##
 
@@ -175,7 +175,7 @@ an [ExecJS](https://github.com/sstephenson/execjs)-supported runtime
 on your system to invoke it.
 
 To write JavaScript assets with CoffeeScript, use the extension
-`.js.coffee`.
+`.coffee`.
 
 ## JavaScript Templating with EJS and Eco ##
 
@@ -219,7 +219,7 @@ filename to enable the ERB engine.
 **Note**: Sprockets processes multiple engine extensions in order from
   right to left, so you can use multiple engines with a single
   asset. For example, to have a CoffeeScript asset that is first
-  preprocessed with ERB, use the extension `.js.coffee.erb`.
+  preprocessed with ERB, use the extension `.coffee.erb`.
 
 Ruby code embedded in an asset is evaluated in the context of a
 `Sprockets::Context` instance for the given asset. Common uses for ERB
