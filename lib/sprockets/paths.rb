@@ -1,5 +1,9 @@
+require 'sprockets/path_utils'
+
 module Sprockets
   module Paths
+    include PathUtils
+
     # Returns `Environment` root.
     #
     # All relative paths are expanded with root as its base. To be
@@ -40,6 +44,23 @@ module Sprockets
       mutate_config(:paths) do |paths|
         paths.clear
       end
+    end
+
+    # Public: Iterate over every file under all load paths.
+    #
+    # Returns Enumerator if no block is given.
+    def each_file
+      return to_enum(__method__) unless block_given?
+
+      paths.each do |root|
+        stat_tree(root).each do |filename, stat|
+          if stat.file?
+            yield filename
+          end
+        end
+      end
+
+      nil
     end
   end
 end
