@@ -949,15 +949,15 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "application.css", logical_path("application.css")
 
     assert_equal "application.js", logical_path("application.js.erb")
-    assert_equal "application.js", logical_path("application.coffee")
+    assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
     assert_equal "application.css", logical_path("application.scss")
-    assert_equal "project.js", logical_path("project.coffee.erb")
+    assert_equal "project.js", logical_path("project.coffee.erb", accept: "application/javascript")
 
     assert_equal "store.css", logical_path("store.css.erb")
     assert_equal "store.foo", logical_path("store.foo")
     assert_equal "files.txt", logical_path("files.erb")
 
-    assert_equal "application.js", logical_path("application.coffee")
+    assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
     assert_equal "application.css", logical_path("application.scss")
     assert_equal "hello.js", logical_path("hello.jst.ejs")
 
@@ -965,7 +965,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "bower/bower.json", logical_path("bower/bower.json")
 
     assert_equal "coffee.js", logical_path("coffee/index.js")
-    assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee")
+    assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee", accept: "application/javascript")
 
     assert_equal "jquery.js", logical_path("jquery.js")
     assert_equal "jquery.min.js", logical_path("jquery.min.js")
@@ -976,13 +976,13 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "jquery.tmpl.min.js", logical_path("jquery.tmpl.min.js")
     assert_equal "jquery.ext.js", logical_path("jquery.ext/index.js")
     assert_equal "jquery.ext/form.js", logical_path("jquery.ext/form.js")
-    assert_equal "jquery-coffee.min.js", logical_path("jquery-coffee.min.coffee")
+    assert_equal "jquery-coffee.min.js", logical_path("jquery-coffee.min.coffee", accept: "application/javascript")
     assert_equal "jquery-custom.min.js", logical_path("jquery-custom.min.js.erb")
     assert_equal "jquery.js.min", logical_path("jquery.js.min")
 
     assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
-    assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
-    assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
+    assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee", accept: "application/javascript")
+    assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee", accept: "application/javascript")
 
     assert_equal "foo-ng.js", logical_path("foo-ng.ngt")
     assert_equal "bar-ng.js", logical_path("bar-ng.ngt.haml")
@@ -993,11 +993,11 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "traceur.js", logical_path("traceur.js.es6")
   end
 
-  def logical_path(path)
+  def logical_path(path, options = {})
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      assert asset = @env.find_asset(filename, options), "couldn't find asset: #{filename}"
       asset.logical_path
     end
   end
@@ -1016,15 +1016,15 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "text/css", content_type("application.css")
 
     assert_equal "application/javascript", content_type("application.js.erb")
-    assert_equal "application/javascript", content_type("application.coffee")
+    assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
     assert_equal "text/css", content_type("application.scss")
-    assert_equal "application/javascript", content_type("project.coffee.erb")
+    assert_equal "application/javascript", content_type("project.coffee.erb", accept: "application/javascript")
 
     assert_equal "text/css", content_type("store.css.erb")
     assert_equal "text/plain", content_type("files.erb")
     assert_equal nil, content_type("store.foo")
 
-    assert_equal "application/javascript", content_type("application.coffee")
+    assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
     assert_equal "text/css", content_type("application.scss")
     assert_equal "application/javascript", content_type("hello.jst.ejs")
 
@@ -1032,7 +1032,7 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/json", content_type("bower/bower.json")
 
     assert_equal "application/javascript", content_type("coffee/index.js")
-    assert_equal "application/javascript", content_type("coffee/foo.coffee")
+    assert_equal "application/javascript", content_type("coffee/foo.coffee", accept: "application/javascript")
 
     assert_equal "application/javascript", content_type("jquery.js")
     assert_equal "application/javascript", content_type("jquery.min.js")
@@ -1043,13 +1043,13 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("jquery.tmpl.min.js")
     assert_equal "application/javascript", content_type("jquery.ext/index.js")
     assert_equal "application/javascript", content_type("jquery.ext/form.js")
-    assert_equal "application/javascript", content_type("jquery-coffee.min.coffee")
+    assert_equal "application/javascript", content_type("jquery-coffee.min.coffee", accept: "application/javascript")
     assert_equal "application/javascript", content_type("jquery-custom.min.js.erb")
     assert_equal nil, content_type("jquery.js.min")
 
     assert_equal "application/javascript", content_type("all.coffee/plain.js")
-    assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
-    assert_equal "application/javascript", content_type("all.coffee/index.coffee")
+    assert_equal "application/javascript", content_type("all.coffee/hot.coffee", accept: "application/javascript")
+    assert_equal "application/javascript", content_type("all.coffee/index.coffee", accept: "application/javascript")
 
     assert_equal "application/javascript", content_type("foo-ng.ngt")
     assert_equal "application/javascript", content_type("bar-ng.ngt.haml")
@@ -1061,11 +1061,11 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("traceur.js.es6")
   end
 
-  def content_type(path)
+  def content_type(path, options = {})
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      assert asset = @env.find_asset(filename, options), "couldn't find asset: #{filename}"
       asset.content_type
     end
   end

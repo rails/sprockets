@@ -119,18 +119,18 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile asset with absolute path" do
-    digest_path = @env['application.js'].digest_path
+    digest_path = @env['gallery.js'].digest_path
 
     assert !File.exist?("#{@dir}/#{digest_path}")
 
-    @manifest.compile(fixture_path('default/application.coffee'))
+    @manifest.compile(fixture_path('default/gallery.js'))
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{digest_path}")
 
     data = JSON.parse(File.read(@manifest.filename))
     assert data['files'][digest_path]
-    assert_equal digest_path, data['assets']['application.js']
+    assert_equal digest_path, data['assets']['gallery.js']
   end
 
   test "compile multiple assets" do

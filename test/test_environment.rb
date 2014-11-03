@@ -90,7 +90,7 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset("coffee/foo", accept: "application/javascript")
     assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
 
-    assert asset = @env.find_asset("coffee/foo.coffee", accept: "application/javascript")
+    assert asset = @env.find_asset("coffee/foo.js", accept: "application/javascript")
     assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
 
     assert asset = @env.find_asset("jquery.tmpl.min", accept: 'application/javascript')
@@ -461,11 +461,11 @@ $app.run(function($templateCache) {
 
   test "asset logical path for absolute path" do
     assert_equal "gallery.js",
-      @env[fixture_path("default/gallery.js")].logical_path
+      @env.find_asset(fixture_path("default/gallery.js")).logical_path
     assert_equal "application.js",
-      @env[fixture_path("default/application.coffee")].logical_path
+      @env.find_asset(fixture_path("default/application.coffee"), accept: "application/javascript").logical_path
     assert_equal "mobile/a.js",
-      @env[fixture_path("default/mobile/a.js")].logical_path
+      @env.find_asset(fixture_path("default/mobile/a.js")).logical_path
   end
 
   test "mobile index logical path shorthand" do

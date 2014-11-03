@@ -144,7 +144,8 @@ module Sprockets
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee']
-  register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
+  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new { CoffeeScriptTemplate }
+  register_preprocessor 'text/coffeescript', DirectiveProcessor
 
   # JST engines
   register_mime_type 'text/eco', extensions: ['.eco']
