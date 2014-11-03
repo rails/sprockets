@@ -73,7 +73,7 @@ module Sprockets
         end
       end
 
-      def build_asset_by_uri(uri)
+      def load_asset_by_uri(uri)
         dep_graph_key = asset_dependency_graph_cache_key(uri)
 
         dependency_paths, dependency_sources_digest, digest_uri = cache._get(dep_graph_key)

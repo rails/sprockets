@@ -112,30 +112,30 @@ $app.run(function($templateCache) {
   end
 
   test "find asset by uri" do
-    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript")
+    assert asset = @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript")
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal '828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab', asset.etag
 
-    assert asset = @env.find_asset_by_uri(asset.uri)
+    assert asset = @env.load(asset.uri)
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal '828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab', asset.etag
 
-    assert asset = @env.find_asset_by_uri("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
+    assert asset = @env.load("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
 
     assert_raises Sprockets::FileNotFound do
-      @env.find_asset_by_uri("file://#{fixture_path('default/missing.js')}?type=application/javascript")
+      @env.load("file://#{fixture_path('default/missing.js')}?type=application/javascript")
     end
 
     assert_raises Sprockets::ConversionError do
-      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=text/css")
+      @env.load("file://#{fixture_path('default/gallery.js')}?type=text/css")
     end
 
     assert_raises Sprockets::VersionNotFound do
-      @env.find_asset_by_uri("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=0000000000000000000000000000000000000000")
+      @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=0000000000000000000000000000000000000000")
     end
   end
 
@@ -424,7 +424,7 @@ $app.run(function($templateCache) {
 
   test "find asset by uri with deflate encoding" do
     uri = "file://#{fixture_path('default/gallery.js')}?type=application/javascript&encoding=deflate"
-    assert asset = @env.find_asset_by_uri(uri)
+    assert asset = @env.load(uri)
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal 'deflate', asset.encoding

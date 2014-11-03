@@ -116,7 +116,7 @@ module Sprockets
     # Returns Array of Assets.
     def to_a
       if metadata[:included]
-        metadata[:included].map { |uri| @environment.find_asset_by_uri(uri) }
+        metadata[:included].map { |uri| @environment.load(uri) }
       else
         [self]
       end

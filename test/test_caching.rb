@@ -184,13 +184,13 @@ class TestCaching < Sprockets::TestCase
     assert main = env1.find_asset("main.js")
     assert_equal "var jQuery;\n", main.to_s
     assert_equal fixture_path('default/app/main.js'), main.filename
-    assert_equal main, env1.find_asset_by_uri(main.uri)
+    assert_equal main, env1.load(main.uri)
     assert_equal main, env1.find_asset("main.js")
 
     assert main = env2.find_asset("main.js")
     assert_equal "var jQuery;\n", main.to_s
     assert_equal fixture_path('default/app/main.js'), main.filename
-    assert_equal main, env2.find_asset_by_uri(main.uri)
+    assert_equal main, env2.load(main.uri)
     assert_equal main, env2.find_asset("main.js")
   end
 
