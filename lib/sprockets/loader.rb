@@ -125,5 +125,49 @@ module Sprockets
 
         asset
       end
+
+      # Internal: Run processors on filename and data.
+      #
+      # Returns Hash.
+      def process(processors, uri, filename, load_path, name, content_type)
+        data, metadata = nil, {}
+
+        input = {
+          environment: self,
+          cache: cache,
+          uri: uri,
+          filename: filename,
+          load_path: load_path,
+          name: name,
+          content_type: content_type,
+          metadata: metadata
+        }
+
+        processors.each do |processor|
+          begin
+            result = processor.call(input.merge(data: data, metadata: metadata))
+            case result
+            when NilClass
+              # noop
+            when Hash
+              data = result[:data] if result.key?(:data)
+              metadata = metadata.merge(result)
+              metadata.delete(:data)
+            when String
+              data = result
+            else
+              raise Error, "invalid processor return type: #{result.class}"
+            end
+          end
+        end
+
+        {
+          source: data,
+          charset: data.encoding.name.downcase,
+          length: data.bytesize,
+          digest: digest(data),
+          metadata: metadata
+        }
+      end
   end
 end
