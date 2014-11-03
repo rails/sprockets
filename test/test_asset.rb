@@ -12,7 +12,7 @@ module AssetTests
 
   test "uri can find itself" do
     # assert_kind_of URI, @asset.uri
-    assert_equal @asset, @env.find_asset_by_uri(@asset.uri)
+    assert_equal @asset, @env.load(@asset.uri)
   end
 
   test "length is source length" do

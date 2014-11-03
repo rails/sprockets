@@ -1,25 +1,7 @@
 require 'sprockets/asset_uri'
-require 'sprockets/manifest'
 
 module Sprockets
   module Resolve
-    # Public: Iterate over every file under all load paths.
-    #
-    # Returns Enumerator if no block is given.
-    def each_file
-      return to_enum(__method__) unless block_given?
-
-      paths.each do |root|
-        stat_tree(root).each do |filename, stat|
-          if stat.file?
-            yield filename
-          end
-        end
-      end
-
-      nil
-    end
-
     # Finds the expanded real path for a given logical path by
     # searching the environment's paths.
     #

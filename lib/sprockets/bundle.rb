@@ -19,7 +19,7 @@ module Sprockets
       processed_uri = AssetURI.build(input[:filename], type: type, skip_bundle: true)
 
       cache = Hash.new do |h, uri|
-        h[uri] = env.find_asset_by_uri(uri)
+        h[uri] = env.load(uri)
       end
 
       find_required = proc { |uri| cache[uri].metadata[:required] }
