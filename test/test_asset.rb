@@ -950,7 +950,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
 
     assert_equal "application.js", logical_path("application.js.erb")
     assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
-    assert_equal "application.css", logical_path("application.scss")
+    assert_equal "application.css", logical_path("application.scss", accept: "text/css")
     assert_equal "project.js", logical_path("project.coffee.erb", accept: "application/javascript")
 
     assert_equal "store.css", logical_path("store.css.erb")
@@ -958,7 +958,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "files.txt", logical_path("files.erb")
 
     assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
-    assert_equal "application.css", logical_path("application.scss")
+    assert_equal "application.css", logical_path("application.scss", accept: "text/css")
     assert_equal "hello.js", logical_path("hello.jst.ejs")
 
     assert_equal "bower/main.js", logical_path("bower/main.js")
@@ -1017,7 +1017,7 @@ class AssetContentTypeTest < Sprockets::TestCase
 
     assert_equal "application/javascript", content_type("application.js.erb")
     assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
-    assert_equal "text/css", content_type("application.scss")
+    assert_equal "text/css", content_type("application.scss", accept: "text/css")
     assert_equal "application/javascript", content_type("project.coffee.erb", accept: "application/javascript")
 
     assert_equal "text/css", content_type("store.css.erb")
@@ -1025,7 +1025,7 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal nil, content_type("store.foo")
 
     assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
-    assert_equal "text/css", content_type("application.scss")
+    assert_equal "text/css", content_type("application.scss", accept: "text/css")
     assert_equal "application/javascript", content_type("hello.jst.ejs")
 
     assert_equal "application/javascript", content_type("bower/main.js")

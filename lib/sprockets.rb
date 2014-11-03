@@ -157,8 +157,10 @@ module Sprockets
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass']
   register_mime_type 'text/scss', extensions: ['.scss']
-  register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
-  register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
+  register_transformer 'text/sass', 'text/css', LazyProcessor.new { SassTemplate }
+  register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssTemplate }
+  register_preprocessor 'text/sass', DirectiveProcessor
+  register_preprocessor 'text/scss', DirectiveProcessor
 
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBTemplate }, mime_type: 'text/plain'
