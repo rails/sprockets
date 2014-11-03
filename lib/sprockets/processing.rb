@@ -189,13 +189,13 @@ module Sprockets
     # and asset metadata key.
     attr_reader :bundle_reducers
 
-    # Public: Register bundle reducer function.
+    # Public: Register bundle metadata reducer function.
     #
     # Examples
     #
-    #   Sprockets.register_bundle_reducer 'application/javascript', :jshint_errors, [], :+
+    #   Sprockets.register_bundle_metadata_reducer 'application/javascript', :jshint_errors, [], :+
     #
-    #   Sprockets.register_bundle_reducer 'text/css', :selector_count, 0 { |total, count|
+    #   Sprockets.register_bundle_metadata_reducer 'text/css', :selector_count, 0 { |total, count|
     #     total + count
     #   }
     #
@@ -205,7 +205,7 @@ module Sprockets
     # block     - Proc accepting the memo accumulator and current value
     #
     # Returns nothing.
-    def register_bundle_reducer(mime_type, key, *args, &block)
+    def register_bundle_metadata_reducer(mime_type, key, *args, &block)
       case args.size
       when 0
         reducer = block
