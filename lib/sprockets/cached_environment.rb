@@ -83,21 +83,29 @@ module Sprockets
       def load_asset_by_uri(uri)
         dep_graph_key = asset_dependency_graph_cache_key(uri)
 
-        dependency_paths, dependency_sources_digest, cached_uri = cache._get(dep_graph_key)
-        if dependency_paths && dependency_sources_digest && cached_uri
-          if files_digest(dependency_paths) == dependency_sources_digest
-            if asset = cache._get(asset_uri_cache_key(cached_uri))
-              return asset
-            end
-          end
+        if asset = get_asset_dependency_graph_cache(dep_graph_key)
+          asset
+        else
+          asset = super
+          set_asset_dependency_graph_cache(dep_graph_key, asset)
+          asset
         end
+      end
 
-        asset = super
+      def get_asset_dependency_graph_cache(key)
+        return unless cached = cache._get(key)
+        paths, digest, uri = cached
 
-        dependency_sources_digest, dependency_paths = asset[:metadata].values_at(:dependency_sources_digest, :dependency_paths)
-        cache._set(dep_graph_key, [dependency_paths, dependency_sources_digest, asset[:uri]])
-        cache.fetch(asset_uri_cache_key(asset[:uri])) { asset }
+        if files_digest(paths) == digest
+          cache._get(asset_uri_cache_key(uri))
+        end
+      end
 
+      def set_asset_dependency_graph_cache(key, asset)
+        uri = asset[:uri]
+        digest, paths = asset[:metadata].values_at(:dependency_sources_digest, :dependency_paths)
+        cache._set(key, [paths, digest, uri])
+        cache.fetch(asset_uri_cache_key(uri)) { asset }
         asset
       end
 
