@@ -94,22 +94,51 @@ module Sprockets
         # Read into memory and process if theres a processor pipeline or the
         # content type is text.
         if processors.any? || mime_type_charset_detecter(type)
-          asset.merge!(process(
-            [method(:read_input)] + processors,
-            asset[:uri],
-            asset[:filename],
-            asset[:load_path],
-            asset[:name],
-            asset[:content_type]
-          ))
+          data = read_file(asset[:filename], asset[:content_type])
+          metadata = {}
+
+          input = {
+            environment: self,
+            cache: self.cache,
+            uri: asset[:uri],
+            filename: asset[:filename],
+            load_path: asset[:load_path],
+            name: asset[:name],
+            content_type: asset[:content_type],
+            map: SourceMap::Map.new,
+            metadata: metadata
+          }
+
+          processors.each do |processor|
+            begin
+              result = processor.call(input.merge(data: data, metadata: metadata))
+              case result
+              when NilClass
+                # noop
+              when Hash
+                data = result[:data] if result.key?(:data)
+                metadata = metadata.merge(result)
+                metadata.delete(:data)
+              when String
+                data = result
+              else
+                raise Error, "invalid processor return type: #{result.class}"
+              end
+            end
+          end
+
+          asset[:source] = data
+          asset[:metadata] = metadata.merge(
+            charset: data.encoding.name.downcase,
+            digest: digest(data),
+            length: data.bytesize
+          )
         else
-          asset.merge!({
-            metadata: {
-              encoding: Encoding::BINARY,
-              digest: file_digest(asset[:filename]),
-              length: self.stat(asset[:filename]).size
-            }
-          })
+          asset[:metadata] = {
+            encoding: Encoding::BINARY,
+            digest: file_digest(asset[:filename]),
+            length: self.stat(asset[:filename]).size
+          }
         end
 
         metadata = asset[:metadata]
@@ -122,53 +151,6 @@ module Sprockets
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         asset
-      end
-
-      # Internal: Run processors on filename and data.
-      #
-      # Returns Hash.
-      def process(processors, uri, filename, load_path, name, content_type)
-        data, metadata = nil, {}
-
-        input = {
-          environment: self,
-          cache: cache,
-          uri: uri,
-          filename: filename,
-          load_path: load_path,
-          name: name,
-          content_type: content_type,
-          data: data,
-          metadata: metadata,
-          map: SourceMap::Map.new
-        }
-
-        processors.each do |processor|
-          begin
-            result = processor.call(input.merge(data: data, metadata: metadata))
-            case result
-            when NilClass
-              # noop
-            when Hash
-              data = result[:data] if result.key?(:data)
-              metadata = metadata.merge(result)
-              metadata.delete(:data)
-            when String
-              data = result
-            else
-              raise Error, "invalid processor return type: #{result.class}"
-            end
-          end
-        end
-
-        {
-          source: data,
-          metadata: metadata.merge(
-            charset: data.encoding.name.downcase,
-            digest: digest(data),
-            length: data.bytesize
-          )
-        }
       end
   end
 end
