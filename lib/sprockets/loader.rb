@@ -104,10 +104,11 @@ module Sprockets
           ))
         else
           asset.merge!({
-            encoding: Encoding::BINARY,
-            length: self.stat(asset[:filename]).size,
-            digest: file_digest(asset[:filename]),
-            metadata: {}
+            metadata: {
+              encoding: Encoding::BINARY,
+              digest: file_digest(asset[:filename]),
+              length: self.stat(asset[:filename]).size
+            }
           })
         end
 
@@ -115,7 +116,7 @@ module Sprockets
         metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
         metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
 
-        asset[:integrity] = integrity_uri(asset[:digest], asset[:content_type])
+        asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
@@ -162,10 +163,11 @@ module Sprockets
 
         {
           source: data,
-          charset: data.encoding.name.downcase,
-          length: data.bytesize,
-          digest: digest(data),
-          metadata: metadata
+          metadata: metadata.merge(
+            charset: data.encoding.name.downcase,
+            digest: digest(data),
+            length: data.bytesize
+          )
         }
       end
   end

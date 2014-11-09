@@ -1,4 +1,3 @@
-require 'sprockets/errors'
 require 'uri'
 
 module Sprockets

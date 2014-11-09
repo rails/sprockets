@@ -14,14 +14,10 @@ module Sprockets
     # Returns Asset.
     def initialize(attributes = {})
       @attributes   = attributes
-      @charset      = attributes[:charset]
       @content_type = attributes[:content_type]
-      @digest       = attributes[:digest]
-      @encoding     = attributes[:encoding]
       @filename     = attributes[:filename]
       @id           = attributes[:id]
       @integrity    = attributes[:integrity]
-      @length       = attributes[:length]
       @load_path    = attributes[:load_path]
       @logical_path = attributes[:logical_path]
       @metadata     = attributes[:metadata]
@@ -122,14 +118,20 @@ module Sprockets
     # Public: Get charset of source.
     #
     # Returns a String charset name or nil if binary.
-    attr_reader :charset
+    def charset
+      metadata[:charset]
+    end
 
     # Public: Returns Integer length of source.
-    attr_reader :length
+    def length
+      metadata[:length]
+    end
     alias_method :bytesize, :length
 
     # Public: Returns String byte digest of source.
-    attr_reader :digest
+    def digest
+      metadata[:digest]
+    end
 
     # Public: Returns String hexdigest of source.
     def hexdigest
@@ -158,7 +160,7 @@ module Sprockets
       yield to_s
     end
 
-    # Public: Save asset to disk.
+    # Deprecated: Save asset to disk.
     #
     # filename - String target
     #
