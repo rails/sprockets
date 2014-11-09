@@ -209,7 +209,7 @@ module Sprockets
       yield to_s
     end
 
-    # Public: Save asset to disk.
+    # Deprecated: Save asset to disk.
     #
     # filename - String target
     #
