@@ -17,14 +17,10 @@ module Sprockets
     def initialize(environment, attributes = {})
       @environment  = environment
       @attributes   = attributes
-      @charset      = attributes[:charset]
       @content_type = attributes[:content_type]
-      @digest       = attributes[:digest]
-      @encoding     = attributes[:encoding]
       @filename     = attributes[:filename]
       @id           = attributes[:id]
       @integrity    = attributes[:integrity]
-      @length       = attributes[:length]
       @load_path    = attributes[:load_path]
       @logical_path = attributes[:logical_path]
       @metadata     = attributes[:metadata]
@@ -162,10 +158,14 @@ module Sprockets
     # Public: Get charset of source.
     #
     # Returns a String charset name or nil if binary.
-    attr_reader :charset
+    def charset
+      metadata[:charset]
+    end
 
     # Public: Returns Integer length of source.
-    attr_reader :length
+    def length
+      metadata[:length]
+    end
     alias_method :bytesize, :length
 
     # Deprecated: Returns Time of the last time the source was modified.
@@ -179,7 +179,7 @@ module Sprockets
 
     # Public: Returns String hexdigest of source.
     def hexdigest
-      DigestUtils.pack_hexdigest(@digest)
+      DigestUtils.pack_hexdigest(metadata[:digest])
     end
 
     # Deprecated: Returns String hexdigest of source.
@@ -192,7 +192,7 @@ module Sprockets
 
     # Public: Returns String base64 digest of source.
     def base64digest
-      DigestUtils.pack_base64digest(@digest)
+      DigestUtils.pack_base64digest(metadata[:digest])
     end
 
     # Public: A "named information" URL for subresource integrity.
