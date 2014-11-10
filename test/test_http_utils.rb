@@ -44,6 +44,15 @@ class TestHTTPUtils < Sprockets::TestCase
     assert_equal [], find_mime_type_matches(accept, ["text/css"])
   end
 
+  test "find matches with parsed q values" do
+    accept = [["text/plain", 0.5], ["image/*", 1.0]]
+    assert_equal ["text/plain"], find_mime_type_matches(accept, ["text/plain"])
+    assert_equal ["image/svg+xml"], find_mime_type_matches(accept, ["image/svg+xml"])
+    assert_equal ["image/svg+xml"], find_mime_type_matches(accept, ["image/svg+xml", "image/png"])
+    assert_equal ["image/svg+xml", "text/plain"], find_mime_type_matches(accept, ["image/svg+xml", "text/plain"])
+    assert_equal [], find_mime_type_matches(accept, ["text/css"])
+  end
+
   test "find best q match" do
     accept = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"
     assert_equal "text/plain", find_best_mime_type_match(accept, ["text/plain"])
