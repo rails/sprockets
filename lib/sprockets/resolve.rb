@@ -17,7 +17,6 @@ module Sprockets
     # The String path is returned or nil if no results are found.
     def resolve(path, options = {})
       logical_name, mime_type, _ = parse_path_extnames(path)
-      logical_basename = File.basename(logical_name)
 
       accepts = parse_accept_options(mime_type, options[:accept])
 
@@ -31,7 +30,7 @@ module Sprockets
           filename
         end
       else
-        filename, _ = _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+        filename, _ = _resolve(logical_name, mime_type, accepts, paths)
         filename
       end
     end
@@ -71,7 +70,6 @@ module Sprockets
         end
       else
         logical_name, mime_type, _ = parse_path_extnames(path)
-        logical_basename = File.basename(logical_name)
         parsed_accept = parse_accept_options(mime_type, accept)
 
         if parsed_accept.empty?
@@ -82,7 +80,7 @@ module Sprockets
           ary += [[t, q]] + self.inverted_transformers[t].keys.map { |t2| [t2, q * 0.5] }
         end
 
-        filename, mime_type = _resolve(logical_name, mime_type, logical_basename, tranformed_accepts, paths)
+        filename, mime_type = _resolve(logical_name, mime_type, tranformed_accepts, paths)
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
@@ -93,7 +91,9 @@ module Sprockets
     end
 
     protected
-      def _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+      def _resolve(logical_name, mime_type, accepts, paths)
+        logical_basename = File.basename(logical_name)
+
         paths.each do |load_path|
           candidates = path_matches(load_path, logical_name, logical_basename)
           candidate = find_best_filename_match(accepts, candidates)
