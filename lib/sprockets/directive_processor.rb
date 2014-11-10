@@ -260,18 +260,14 @@ module Sprockets
 
           @dependency_paths << root
 
-          required = []
-          @environment.stat_tree(root).each do |subpath, stat|
+          @environment.stat_sorted_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
               @dependency_paths << subpath
             elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              required << subpath
+              @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
             end
-          end
-          required.sort_by(&:to_s).each do |subpath|
-            @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
           end
         else
           # The path must be relative and start with a `./`.
