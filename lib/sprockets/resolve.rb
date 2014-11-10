@@ -63,9 +63,11 @@ module Sprockets
       available_encodings = self.encodings.keys + ['identity']
       encoding = find_best_q_match(options[:accept_encoding], available_encodings)
 
+      paths = options[:load_paths] || self.paths
+
       if absolute_path?(path)
         path = File.expand_path(path)
-        if paths_split(self.paths, path) && file?(path)
+        if paths_split(paths, path) && file?(path)
           mime_type = parse_path_extnames(path)[1]
           _type = resolve_transform_type(mime_type, accept)
           if !accept || _type
@@ -74,7 +76,7 @@ module Sprockets
           end
         end
       else
-        if filename = resolve(path, accept: accept)
+        if filename = resolve(path, accept: accept, load_paths: paths)
           mime_type = parse_path_extnames(path)[1]
           accept = parse_accept_options(mime_type, accept)
           mime_type2 = parse_path_extnames(filename)[1]

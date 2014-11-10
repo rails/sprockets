@@ -117,6 +117,19 @@ class TestResolve < Sprockets::TestCase
       @env.locate("gallery", accept: 'application/javascript')
   end
 
+  test "locate asset uri under load path" do
+    @env.append_path(scripts = fixture_path('resolve/javascripts'))
+    @env.append_path(styles = fixture_path('resolve/stylesheets'))
+
+    assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript",
+      @env.locate('foo.js', load_paths: [scripts])
+    assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css",
+      @env.locate('foo.css', load_paths: [styles])
+
+    refute @env.locate('foo.js', load_paths: [styles])
+    refute @env.locate('foo.css', load_paths: [scripts])
+  end
+
   test "verify all logical paths" do
     Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
       unless %w( . ..).include?(dir)
