@@ -290,7 +290,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << resolve!(path)
+        @dependency_paths << resolve(path)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -373,7 +373,7 @@ module Sprockets
         end
       end
 
-      def resolve!(path, options = {})
+      def resolve(path, options = {})
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file: #{path}"
         elsif @environment.relative_path?(path)
