@@ -48,7 +48,7 @@ module Sprockets
     #   # => nil
     #
     # Returns String mime type or nil is no type satisfied the accept value.
-    def resolve_transform_type(type, accept = nil)
+    def resolve_transform_type(type, accept)
       find_best_mime_type_match(accept || '*/*', [type].compact + transformers[type].keys)
     end
 
