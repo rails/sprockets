@@ -290,7 +290,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << resolve!(path)
+        @dependency_paths << resolve(path)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -343,43 +343,20 @@ module Sprockets
       end
 
       def locate(path, options = {})
-        if @environment.absolute_path?(path)
-          raise FileOutsidePaths, "can't require absolute file: #{path}"
-        elsif @environment.relative_path?(path)
-          path = expand_relative_path(path)
-          if logical_path = @environment.split_subpath(@load_path, path)
-            if filename = @environment.locate(logical_path, options.merge(load_paths: [@load_path]))
-              filename
-            else
-              accept = options[:accept]
-              message = "couldn't find file '#{logical_path}' under '#{@load_path}'"
-              message << " with type '#{accept}'" if accept
-              raise FileNotFound, message
-            end
-          else
-            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
-          end
-        else
-          filename = @environment.locate(path, options)
-        end
-
-        if filename
-          filename
-        else
-          accept = options[:accept]
-          message = "couldn't find file '#{path}'"
-          message << " with type '#{accept}'" if accept
-          raise FileNotFound, message
-        end
+        _resolve(:locate, path, options)
       end
 
-      def resolve!(path, options = {})
+      def resolve(path, options = {})
+        _resolve(:resolve, path, options)
+      end
+
+      def _resolve(method, path, options = {})
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file: #{path}"
         elsif @environment.relative_path?(path)
           path = expand_relative_path(path)
           if logical_path = @environment.split_subpath(@load_path, path)
-            if filename = @environment.resolve(logical_path, options.merge(load_paths: [@load_path]))
+            if filename = @environment.send(method, logical_path, options.merge(load_paths: [@load_path]))
               filename
             else
               accept = options[:accept]
@@ -391,7 +368,7 @@ module Sprockets
             raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
           end
         else
-          filename = @environment.resolve(path, options)
+          filename = @environment.send(method, path, options)
         end
 
         if filename
