@@ -69,10 +69,6 @@ module Sprockets
         logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
 
-        if type && !resolve_transform_type(file_type, type)
-          raise ConversionError, "could not convert to type: #{type}"
-        end
-
         asset = {
           uri: uri,
           load_path: load_path,
@@ -86,9 +82,18 @@ module Sprockets
           asset[:logical_path] += mime_types[type][:extensions].first
         end
 
+        if type != file_type
+          transformers = unwrap_transformer(file_type, type)
+          unless transformers.any?
+            raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
+          end
+        else
+          transformers = []
+        end
+
         processed_processors = unwrap_preprocessors(file_type) +
           unwrap_engines(engine_extnames).reverse +
-          unwrap_transformer(file_type, type) +
+          transformers +
           unwrap_postprocessors(type)
 
         bundled_processors = params[:skip_bundle] ? [] : unwrap_bundle_processors(type)
