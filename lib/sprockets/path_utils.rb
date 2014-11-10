@@ -195,6 +195,28 @@ module Sprockets
       nil
     end
 
+    # Internal: Recursive stat all the files under a directory in alphabetical
+    # order.
+    #
+    # dir - A String directory
+    #
+    # Returns an Enumerator of [path, stat].
+    def stat_sorted_tree(dir, &block)
+      return to_enum(__method__, dir) unless block_given?
+
+      self.stat_directory(dir).sort_by { |path, stat|
+        stat.directory? ? "#{path}/" : path
+      }.each do |path, stat|
+        yield path, stat
+
+        if stat.directory?
+          stat_sorted_tree(path, &block)
+        end
+      end
+
+      nil
+    end
+
     # Internal: Write to a file atomically. Useful for situations where you
     # don't want other processes or threads to see half-written files.
     #

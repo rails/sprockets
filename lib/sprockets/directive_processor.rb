@@ -196,7 +196,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << resolve_uri(path)
+        @required << locate!(path)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -235,8 +235,10 @@ module Sprockets
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
               next
-            elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
+            elsif stat.directory?
+              next
+            elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
+              @required << uri
             end
           end
         else
@@ -260,18 +262,14 @@ module Sprockets
 
           @dependency_paths << root
 
-          required = []
-          @environment.stat_tree(root).each do |subpath, stat|
+          @environment.stat_sorted_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
               @dependency_paths << subpath
-            elsif @environment.resolve_path_transform_type(subpath, @content_type)
-              required << subpath
+            elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
+              @required << uri
             end
-          end
-          required.sort_by(&:to_s).each do |subpath|
-            @required << @environment.resolve_asset_uri(subpath, accept: @content_type, bundle: false)
           end
         else
           # The path must be relative and start with a `./`.
@@ -292,7 +290,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << resolve(path, accept: "#{@content_type}, */*")
+        @dependency_paths << resolve!(path, accept: "#{@content_type}, */*")
       end
 
       # Allows you to state a dependency on an asset without including
@@ -307,7 +305,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.find_asset(resolve(path, accept: "#{@content_type}, */*"))
+        if asset = @environment.find_asset(resolve!(path, accept: "#{@content_type}, */*"))
           @dependency_paths.merge(asset.metadata[:dependency_paths])
         end
       end
@@ -321,7 +319,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << resolve_uri(path)
+        @stubbed << locate!(path)
       end
 
       # Declares a linked dependency on the target asset.
@@ -333,7 +331,7 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        if asset = @environment.find_asset(resolve(path, accept: "#{@content_type}, */*"))
+        if asset = @environment.find_asset(resolve!(path, accept: "#{@content_type}, */*"))
           @dependency_paths.merge(asset.metadata[:dependency_paths])
           @links << asset.uri
         end
@@ -344,12 +342,12 @@ module Sprockets
         File.expand_path(path, @dirname)
       end
 
-      def resolve_uri(path)
-        filename = resolve(path, accept: @content_type)
-        @environment.resolve_asset_uri(filename, accept: @content_type, bundle: false)
+      def locate!(path)
+        filename = resolve!(path, accept: @content_type)
+        @environment.locate(filename, accept: @content_type, bundle: false)
       end
 
-      def resolve(path, options = {})
+      def resolve!(path, options = {})
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file: #{path}"
         elsif @environment.relative_path?(path)

@@ -60,7 +60,7 @@ class TestCustomProcessor < Sprockets::TestCase
     env = input[:environment]
     manifest = YAML.load(input[:data])
     paths = manifest['require'].map do |logical_path|
-      env.resolve_asset_uri(env.resolve(logical_path))
+      env.locate(env.resolve(logical_path))
     end
     { data: "", required: paths }
   end

@@ -156,16 +156,54 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
   end
 
-  FILES_UNDER_SERVER = Dir["#{FIXTURE_ROOT}/server/**/*"]
-
   test "stat tree" do
-    files = stat_tree(File.join(FIXTURE_ROOT, "server")).to_a
-    assert_equal FILES_UNDER_SERVER.size, files.size
-    path, stat = stat_tree(File.join(FIXTURE_ROOT, "server")).first
-    assert_equal fixture_path("server/app"), path
+    files = stat_tree(fixture_path("asset/tree/all")).to_a
+    assert_equal 11, files.size
+
+    path, stat = files.first
+    assert_equal fixture_path("asset/tree/all/README.md"), path
     assert_kind_of File::Stat, stat
 
-    assert_equal [], stat_tree(File.join(FIXTURE_ROOT, "missing")).to_a
+    assert_equal [
+      fixture_path("asset/tree/all/README.md"),
+      fixture_path("asset/tree/all/b"),
+      fixture_path("asset/tree/all/b/c"),
+      fixture_path("asset/tree/all/b/c/d.js"),
+      fixture_path("asset/tree/all/b/c/e.js"),
+      fixture_path("asset/tree/all/b/c.js"),
+      fixture_path("asset/tree/all/b.css"),
+      fixture_path("asset/tree/all/b.js.erb"),
+      fixture_path("asset/tree/all/d"),
+      fixture_path("asset/tree/all/d/c.coffee"),
+      fixture_path("asset/tree/all/d/e.js")
+    ], files.map(&:first)
+
+    assert_equal [], stat_tree("#{FIXTURE_ROOT}/missing").to_a
+  end
+
+  test "stat sorted tree" do
+    files = stat_sorted_tree(fixture_path("asset/tree/all")).to_a
+    assert_equal 11, files.size
+
+    path, stat = files.first
+    assert_equal fixture_path("asset/tree/all/README.md"), path
+    assert_kind_of File::Stat, stat
+
+    assert_equal [
+      fixture_path("asset/tree/all/README.md"),
+      fixture_path("asset/tree/all/b.css"),
+      fixture_path("asset/tree/all/b.js.erb"),
+      fixture_path("asset/tree/all/b"),
+      fixture_path("asset/tree/all/b/c.js"),
+      fixture_path("asset/tree/all/b/c"),
+      fixture_path("asset/tree/all/b/c/d.js"),
+      fixture_path("asset/tree/all/b/c/e.js"),
+      fixture_path("asset/tree/all/d"),
+      fixture_path("asset/tree/all/d/c.coffee"),
+      fixture_path("asset/tree/all/d/e.js"),
+    ], files.map(&:first)
+
+    assert_equal [], stat_tree("#{FIXTURE_ROOT}/missing").to_a
   end
 
   test "atomic write without errors" do

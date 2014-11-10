@@ -78,14 +78,8 @@ module Sprockets
       nil
     end
 
-    # Experimental: Get transform type for filename
-    def resolve_path_transform_type(filename, accept)
-      mime_type = parse_path_extnames(filename)[1]
-      resolve_transform_type(mime_type, accept)
-    end
-
     # Experimental
-    def resolve_asset_uri(path, options = {})
+    def locate(path, options = {})
       path = path.to_s
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
@@ -95,16 +89,20 @@ module Sprockets
 
       if absolute_path?(path)
         path = File.expand_path(path)
-        if paths_split(self.paths, path) && file?(path) &&
-            (accept.nil? || resolve_path_transform_type(path, accept))
-          filename = path
-          type = resolve_path_transform_type(path, accept)
+        if paths_split(self.paths, path) && file?(path)
+          mime_type = parse_path_extnames(path)[1]
+          _type = resolve_transform_type(mime_type, accept)
+          if !accept || _type
+            filename = path
+            type = _type
+          end
         end
       else
         if filename = resolve_all(path, accept: accept).first
           mime_type = parse_path_extnames(path)[1]
           accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
-          type = resolve_path_transform_type(filename, accept)
+          mime_type2 = parse_path_extnames(filename)[1]
+          type = resolve_transform_type(mime_type2, accept)
         end
       end
 
@@ -164,7 +162,7 @@ module Sprockets
             nil
           elsif accepted == '*/*'
             filename
-          elsif resolve_path_transform_type(filename, accepted)
+          elsif resolve_transform_type(parse_path_extnames(filename)[1], accepted)
             filename
           end
         end
