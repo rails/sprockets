@@ -17,41 +17,7 @@ module Sprockets
 
       paths = options[:load_paths] || self.paths
 
-      paths.each do |load_path|
-        filenames = path_matches(load_path, logical_name, logical_basename)
-
-        matches = []
-
-        # TODO: Cleanup double iteration of accept and filenames
-
-        # Exact mime type match first
-        matches += find_q_matches(accepts, filenames) do |filename, accepted|
-          if !file?(filename)
-            nil
-          elsif accepted == '*/*'
-            filename
-          elsif parse_path_extnames(filename)[1] == accepted
-            filename
-          end
-        end
-
-        # Then transformable match
-        matches += find_q_matches(accepts, filenames) do |filename, accepted|
-          if !file?(filename)
-            nil
-          elsif accepted == '*/*'
-            filename
-          elsif resolve_transform_type(parse_path_extnames(filename)[1], accepted)
-            filename
-          end
-        end
-
-        matches.uniq.each do |filename|
-          return filename
-        end
-      end
-
-      nil
+      _resolve(logical_name, mime_type, logical_basename, accepts, paths)
     end
 
     # Experimental
@@ -76,11 +42,21 @@ module Sprockets
           end
         end
       else
-        if filename = resolve(path, accept: accept, load_paths: paths)
-          mime_type = parse_path_extnames(path)[1]
-          accept = parse_accept_options(mime_type, accept)
+        logical_name, mime_type, _ = parse_path_extnames(path)
+        logical_basename = File.basename(logical_name)
+        parsed_accept = parse_accept_options(mime_type, accept)
+
+        if parsed_accept.empty?
+          return
+        end
+
+        tranformed_accepts = parsed_accept.reduce([]) do |ary, (t, q)|
+          ary += [[t, q]] + self.inverted_transformers[t].keys.map { |t2| [t2, q * 0.5] }
+        end
+
+        if filename = _resolve(logical_name, mime_type, logical_basename, tranformed_accepts, paths)
           mime_type2 = parse_path_extnames(filename)[1]
-          type = resolve_transform_type(mime_type2, accept)
+          type = resolve_transform_type(mime_type2, parsed_accept)
         end
       end
 
@@ -91,6 +67,33 @@ module Sprockets
     end
 
     protected
+      def _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+        paths.each do |load_path|
+          filenames = path_matches(load_path, logical_name, logical_basename)
+
+          matches = []
+
+          # TODO: Cleanup double iteration of accept and filenames
+
+          # Exact mime type match first
+          matches += find_q_matches(accepts, filenames) do |filename, accepted|
+            if !file?(filename)
+              nil
+            elsif accepted == '*/*'
+              filename
+            elsif parse_path_extnames(filename)[1] == accepted
+              filename
+            end
+          end
+
+          matches.uniq.each do |filename|
+            return filename
+          end
+        end
+
+        nil
+      end
+
       def parse_accept_options(mime_type, types)
         accepts = []
         accepts += parse_q_values(types) if types
