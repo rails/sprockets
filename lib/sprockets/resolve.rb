@@ -10,8 +10,15 @@ module Sprockets
     #
     # A `FileNotFound` exception is raised if the file does not exist.
     def resolve(path, options = {})
-      resolve_all(path, options) do |filename|
-        return filename
+      logical_name, mime_type, _ = parse_path_extnames(path)
+      logical_basename = File.basename(logical_name)
+
+      accepts = parse_accept_options(mime_type, options[:accept])
+
+      self.paths.each do |load_path|
+        _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts) do |filename|
+          return filename
+        end
       end
 
       accept = options[:accept]
@@ -29,36 +36,6 @@ module Sprockets
       accepts = parse_accept_options(mime_type, options[:accept])
 
       _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
-
-      nil
-    end
-
-    # Public: Finds the expanded real path for a given logical path by searching
-    # the environment's paths. Includes all matching paths including fallbacks
-    # and shadowed matches.
-    #
-    #     resolve_all("application.js").first
-    #     # => "/path/to/app/javascripts/application.js.coffee"
-    #
-    # `resolve_all` returns an `Enumerator`. This allows you to filter your
-    # matches by any condition.
-    #
-    #     resolve_all("application").find do |path|
-    #       mime_type_for(path) == "text/css"
-    #     end
-    #
-    def resolve_all(path, options = {}, &block)
-      return to_enum(__method__, path, options) unless block_given?
-      path = path.to_s
-
-      logical_name, mime_type, _ = parse_path_extnames(path)
-      logical_basename = File.basename(logical_name)
-
-      accepts = parse_accept_options(mime_type, options[:accept])
-
-      self.paths.each do |load_path|
-        _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
-      end
 
       nil
     end
@@ -83,7 +60,22 @@ module Sprockets
           end
         end
       else
-        if filename = resolve_all(path, accept: accept).first
+        resolve = lambda do
+          logical_name, mime_type, _ = parse_path_extnames(path)
+          logical_basename = File.basename(logical_name)
+
+          accepts = parse_accept_options(mime_type, accept)
+
+          self.paths.each do |load_path|
+            _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts) do |fn|
+              return fn
+            end
+          end
+
+          nil
+        end
+
+        if filename = resolve.call
           mime_type = parse_path_extnames(path)[1]
           accept = parse_accept_options(mime_type, accept)
           mime_type2 = parse_path_extnames(filename)[1]

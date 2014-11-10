@@ -10,8 +10,6 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal fixture_path('default/gallery.js'),
       @env.resolve("gallery.js")
-    assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(Pathname.new("gallery.js"))
     assert_equal fixture_path('default/coffee/foo.coffee'),
       @env.resolve("coffee/foo.js")
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
@@ -21,7 +19,6 @@ class TestResolve < Sprockets::TestCase
     assert_equal fixture_path('default/manifest.js.yml'),
       @env.resolve('manifest.js.yml')
 
-    refute @env.resolve_all("null").first
     assert_raises(Sprockets::FileNotFound) do
       @env.resolve("null")
     end
@@ -118,7 +115,7 @@ class TestResolve < Sprockets::TestCase
     end
 
     @env.logical_paths.each do |logical_path, filename|
-      assert_equal filename, @env.resolve_all(logical_path).first,
+      assert_equal filename, @env.resolve(logical_path),
         "Expected #{logical_path.inspect} to resolve to #{filename}"
     end
   end
