@@ -26,10 +26,13 @@ module Sprockets
       if absolute_path?(path)
         path = File.expand_path(path)
         if paths_split(paths, path) && file?(path)
-          find_best_filename_match(accepts, [path])
+          candidate = [path, mime_type]
+          filename, _ = find_best_filename_match(accepts, [candidate])
+          filename
         end
       else
-        _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+        filename, _ = _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+        filename
       end
     end
 
@@ -79,10 +82,8 @@ module Sprockets
           ary += [[t, q]] + self.inverted_transformers[t].keys.map { |t2| [t2, q * 0.5] }
         end
 
-        if filename = _resolve(logical_name, mime_type, logical_basename, tranformed_accepts, paths)
-          mime_type2 = parse_path_extnames(filename)[1]
-          type = resolve_transform_type(mime_type2, parsed_accept)
-        end
+        filename, mime_type = _resolve(logical_name, mime_type, logical_basename, tranformed_accepts, paths)
+        type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
       if filename
@@ -94,11 +95,9 @@ module Sprockets
     protected
       def _resolve(logical_name, mime_type, logical_basename, accepts, paths)
         paths.each do |load_path|
-          filenames = path_matches(load_path, logical_name, logical_basename)
-
-          if fn = find_best_filename_match(accepts, filenames)
-            return fn
-          end
+          candidates = path_matches(load_path, logical_name, logical_basename)
+          candidate = find_best_filename_match(accepts, candidates)
+          return candidate if candidate
         end
 
         nil
@@ -123,13 +122,9 @@ module Sprockets
         accepts
       end
 
-      def find_best_filename_match(accepts, filenames)
-        find_best_q_match(accepts, filenames) do |filename, accepted|
-          if accepted == '*/*'
-            filename
-          elsif parse_path_extnames(filename)[1] == accepted
-            filename
-          end
+      def find_best_filename_match(accepts, candidates)
+        find_best_q_match(accepts, candidates) do |candidate, matcher|
+          match_mime_type?(candidate[1] || "application/octet-stream", matcher)
         end
       end
 
@@ -140,19 +135,19 @@ module Sprockets
       end
 
       def path_matches(load_path, logical_name, logical_basename)
-        filenames = []
+        candidates = []
         dirname = File.dirname(File.join(load_path, logical_name))
-        dirname_matches(dirname, logical_basename) { |fn| filenames << fn }
-        resolve_alternates(load_path, logical_name) { |fn| filenames << fn }
-        dirname_matches(File.join(load_path, logical_name), "index") { |fn| filenames << fn }
-        filenames.select { |fn| file?(fn) }
+        dirname_matches(dirname, logical_basename) { |candidate| candidates << candidate }
+        resolve_alternates(load_path, logical_name) { |fn| candidates << [fn, parse_path_extnames(fn)[1]] }
+        dirname_matches(File.join(load_path, logical_name), "index") { |candidate| candidates << candidate }
+        candidates.select { |fn, _| file?(fn) }
       end
 
       def dirname_matches(dirname, basename)
         self.entries(dirname).each do |entry|
-          name = parse_path_extnames(entry)[0]
+          name, type, _ = parse_path_extnames(entry)
           if basename == name
-            yield File.join(dirname, entry)
+            yield [File.join(dirname, entry), type]
           end
         end
       end
