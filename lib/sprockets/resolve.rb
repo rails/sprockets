@@ -25,7 +25,7 @@ module Sprockets
 
       if absolute_path?(path)
         path = File.expand_path(path)
-        if paths_split(paths, path)
+        if paths_split(paths, path) && file?(path)
           find_best_filename_match(accepts, [path])
         end
       else
@@ -125,9 +125,7 @@ module Sprockets
 
       def find_best_filename_match(accepts, filenames)
         find_best_q_match(accepts, filenames) do |filename, accepted|
-          if !file?(filename)
-            nil
-          elsif accepted == '*/*'
+          if accepted == '*/*'
             filename
           elsif parse_path_extnames(filename)[1] == accepted
             filename
@@ -147,7 +145,7 @@ module Sprockets
         dirname_matches(dirname, logical_basename) { |fn| filenames << fn }
         resolve_alternates(load_path, logical_name) { |fn| filenames << fn }
         dirname_matches(File.join(load_path, logical_name), "index") { |fn| filenames << fn }
-        filenames
+        filenames.select { |fn| file?(fn) }
       end
 
       def dirname_matches(dirname, basename)
