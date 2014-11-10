@@ -196,7 +196,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << locate!(path)
+        @required << locate(path, accept: @content_type, bundle: false)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -305,7 +305,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.find_asset(resolve!(path))
+        if asset = @environment.load(locate(path))
           @dependency_paths.merge(asset.metadata[:dependency_paths])
         end
       end
@@ -319,7 +319,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << locate!(path)
+        @stubbed << locate(path, accept: @content_type, bundle: false)
       end
 
       # Declares a linked dependency on the target asset.
@@ -331,7 +331,7 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        if asset = @environment.find_asset(resolve!(path, accept: "#{@content_type}, */*"))
+        if asset = @environment.load(locate(path))
           @dependency_paths.merge(asset.metadata[:dependency_paths])
           @links << asset.uri
         end
@@ -342,9 +342,35 @@ module Sprockets
         File.expand_path(path, @dirname)
       end
 
-      def locate!(path)
-        filename = resolve!(path, accept: @content_type)
-        @environment.locate(filename, accept: @content_type, bundle: false)
+      def locate(path, options = {})
+        if @environment.absolute_path?(path)
+          raise FileOutsidePaths, "can't require absolute file: #{path}"
+        elsif @environment.relative_path?(path)
+          path = expand_relative_path(path)
+          if logical_path = @environment.split_subpath(@load_path, path)
+            if filename = @environment.locate(logical_path, options.merge(load_paths: [@load_path]))
+              filename
+            else
+              accept = options[:accept]
+              message = "couldn't find file '#{logical_path}' under '#{@load_path}'"
+              message << " with type '#{accept}'" if accept
+              raise FileNotFound, message
+            end
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
+          end
+        else
+          filename = @environment.locate(path, options)
+        end
+
+        if filename
+          filename
+        else
+          accept = options[:accept]
+          message = "couldn't find file '#{path}'"
+          message << " with type '#{accept}'" if accept
+          raise FileNotFound, message
+        end
       end
 
       def resolve!(path, options = {})
