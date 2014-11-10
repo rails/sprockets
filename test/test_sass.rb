@@ -334,6 +334,7 @@ div {
       "file://#{fixture_path('compass/foo.js')}?type=application/javascript&id=xxx",
       "file://#{fixture_path('compass/foo.mov')}?id=xxx",
       "file://#{fixture_path('compass/foo.mp3')}?type=audio/mpeg&id=xxx",
+      "file://#{fixture_path('compass/foo.svg')}?type=image/png&id=xxx",
       "file://#{fixture_path('compass/foo.svg')}?type=image/svg+xml&id=xxx",
       "file://#{fixture_path('compass/foo.woff')}?type=application/font-woff&id=xxx"
     ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort

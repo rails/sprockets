@@ -80,13 +80,11 @@ module Sprockets
       options[:accept] = options.delete(:content_type)
 
       if environment.absolute_path?(path)
-        path
+        filename = path
       elsif environment.relative_path?(path)
         path = File.expand_path(path, @dirname)
         if logical_path = @environment.split_subpath(load_path, path)
-          if filename = environment.resolve_all_under_load_path(load_path, logical_path, options).first
-            filename
-          else
+          if filename = environment.resolve(logical_path, options.merge(load_paths: [load_path]))
             accept = options[:accept]
             message = "couldn't find file '#{logical_path}' under '#{load_path}'"
             message << " with type '#{accept}'" if accept
@@ -96,7 +94,48 @@ module Sprockets
           raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
         end
       else
-        environment.resolve(path, options)
+        filename = environment.resolve(path, options)
+      end
+
+      if filename
+        filename
+      else
+        accept = options[:accept]
+        message = "couldn't find file '#{path}'"
+        message << " with type '#{accept}'" if accept
+        raise FileNotFound, message
+      end
+    end
+
+    def locate(path, options = {})
+      options[:content_type] = self.content_type if options[:content_type] == :self
+      options[:accept] = options.delete(:content_type)
+
+      if environment.absolute_path?(path)
+        filename = path
+      elsif environment.relative_path?(path)
+        path = File.expand_path(path, @dirname)
+        if logical_path = @environment.split_subpath(load_path, path)
+          if filename = environment.locate(logical_path, options.merge(load_paths: [load_path]))
+            accept = options[:accept]
+            message = "couldn't find file '#{logical_path}' under '#{load_path}'"
+            message << " with type '#{accept}'" if accept
+            raise FileNotFound, message
+          end
+        else
+          raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
+        end
+      else
+        filename = environment.locate(path, options)
+      end
+
+      if filename
+        filename
+      else
+        accept = options[:accept]
+        message = "couldn't find file '#{path}'"
+        message << " with type '#{accept}'" if accept
+        raise FileNotFound, message
       end
     end
 
@@ -119,7 +158,7 @@ module Sprockets
     # file. Unlike `depend_on`, this will include recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
-      if asset = @environment.find_asset(resolve(path))
+      if asset = @environment.load(locate(path))
         @dependency_paths.merge(asset.metadata[:dependency_paths])
       end
       nil
@@ -135,8 +174,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      filename = resolve(path, accept: @content_type)
-      @required << @environment.locate(filename, accept: @content_type, bundle: false)
+      @required << locate(path, accept: @content_type, bundle: false)
       nil
     end
 
@@ -144,8 +182,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      filename = resolve(path, accept: @content_type)
-      @stubbed << @environment.locate(filename, accept: @content_type, bundle: false)
+      @stubbed << @environment.locate(path, accept: @content_type, bundle: false)
       nil
     end
 
@@ -155,7 +192,7 @@ module Sprockets
     #
     # Returns an Asset or nil.
     def link_asset(path)
-      if asset = @environment.find_asset(resolve(path))
+      if asset = @environment.load(locate(path))
         @dependency_paths.merge(asset.metadata[:dependency_paths])
         @links << asset.uri
       end
