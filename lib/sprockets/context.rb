@@ -86,7 +86,7 @@ module Sprockets
       elsif environment.relative_path?(path)
         path = File.expand_path(path, @dirname)
         if logical_path = @environment.split_subpath(load_path, path)
-          if filename = environment.resolve(logical_path, options.merge(load_path: load_path))
+          if filename = environment.resolve(logical_path, options.merge(load_paths: [load_path]))
             accept = options[:accept]
             message = "couldn't find file '#{logical_path}' under '#{load_path}'"
             message << " with type '#{accept}'" if accept

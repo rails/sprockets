@@ -353,7 +353,7 @@ module Sprockets
         elsif @environment.relative_path?(path)
           path = expand_relative_path(path)
           if logical_path = @environment.split_subpath(@load_path, path)
-            if filename = @environment.resolve(logical_path, options.merge(load_path: @load_path))
+            if filename = @environment.resolve(logical_path, options.merge(load_paths: [@load_path]))
               filename
             else
               accept = options[:accept]

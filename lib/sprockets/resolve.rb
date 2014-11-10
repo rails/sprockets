@@ -15,7 +15,7 @@ module Sprockets
 
       accepts = parse_accept_options(mime_type, options[:accept])
 
-      paths = options[:load_path] ? [options[:load_path]] : self.paths
+      paths = options[:load_paths] || self.paths
 
       paths.each do |load_path|
         filenames = path_matches(load_path, logical_name, logical_basename)

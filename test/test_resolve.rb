@@ -51,12 +51,12 @@ class TestResolve < Sprockets::TestCase
     @env.append_path(styles = fixture_path('resolve/stylesheets'))
 
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo.js', load_path: scripts)
+      @env.resolve('foo.js', load_paths: [scripts])
     assert_equal fixture_path('resolve/stylesheets/foo.css'),
-      @env.resolve('foo.css', load_path: styles)
+      @env.resolve('foo.css', load_paths: [styles])
 
-    refute @env.resolve('foo.js', load_path: styles)
-    refute @env.resolve('foo.css', load_path: scripts)
+    refute @env.resolve('foo.js', load_paths: [styles])
+    refute @env.resolve('foo.css', load_paths: [scripts])
   end
 
   test "resolve extension before accept type" do
