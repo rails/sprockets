@@ -135,8 +135,6 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
       @env.locate("gallery", accept: 'application/javascript')
-    # assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=text/coffeescript",
-    #   @env.locate("coffee/foo", accept: 'text/coffeescript')
   end
 
   test "verify all logical paths" do
