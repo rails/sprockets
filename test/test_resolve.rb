@@ -59,6 +59,21 @@ class TestResolve < Sprockets::TestCase
     refute @env.resolve('foo.css', load_paths: [scripts])
   end
 
+  test "resolve absolute" do
+    @env.append_path(fixture_path('default'))
+
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/gallery.js'))
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/app/../gallery.js'))
+    assert_equal fixture_path('default/gallery.js'),
+      @env.resolve(fixture_path('default/gallery.js'), accept: 'application/javascript')
+
+    refute @env.resolve(fixture_path('default/asset/POW.png'))
+    refute @env.resolve(fixture_path('default/missing'))
+    refute @env.resolve(fixture_path('default/gallery.js'), accept: 'text/css')
+  end
+
   test "resolve extension before accept type" do
     @env.append_path(fixture_path('resolve/javascripts'))
     @env.append_path(fixture_path('resolve/stylesheets'))

@@ -2,13 +2,19 @@ require 'sprockets/asset_uri'
 
 module Sprockets
   module Resolve
-    # Finds the expanded real path for a given logical path by
-    # searching the environment's paths.
+    # Public: Finds the absolute path for a given logical path by searching the
+    # environment's load paths.
     #
     #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js.coffee"
+    #     # => "/path/to/app/javascripts/application.js"
     #
-    # A `FileNotFound` exception is raised if the file does not exist.
+    # An accept content type can be given if the logical path doesn't have a
+    # format extension.
+    #
+    #     resolve("application", accept: "application/javascript")
+    #     # => "/path/to/app/javascripts/application.js"
+    #
+    # The String path is returned or nil if no results are found.
     def resolve(path, options = {})
       logical_name, mime_type, _ = parse_path_extnames(path)
       logical_basename = File.basename(logical_name)
@@ -17,10 +23,29 @@ module Sprockets
 
       paths = options[:load_paths] || self.paths
 
-      _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+      if absolute_path?(path)
+        path = File.expand_path(path)
+        if paths_split(paths, path)
+          find_best_filename_match(accepts, [path])
+        end
+      else
+        _resolve(logical_name, mime_type, logical_basename, accepts, paths)
+      end
     end
 
-    # Experimental
+    # Public: Find Asset URI for given a logical path by searching the
+    # environment's load paths.
+    #
+    #     locate("application.js")
+    #     # => "file:///path/to/app/javascripts/application.js?content_type=application/javascript"
+    #
+    # An accept content type can be given if the logical path doesn't have a
+    # format extension.
+    #
+    #     locate("application", accept: "application/javascript")
+    #     # => "file:///path/to/app/javascripts/application.coffee?content_type=application/javascript"
+    #
+    # The String Asset URI is returned or nil if no results are found.
     def locate(path, options = {})
       path = path.to_s
       accept = options[:accept]
@@ -71,17 +96,9 @@ module Sprockets
         paths.each do |load_path|
           filenames = path_matches(load_path, logical_name, logical_basename)
 
-          fn = find_best_q_match(accepts, filenames) do |filename, accepted|
-            if !file?(filename)
-              nil
-            elsif accepted == '*/*'
-              filename
-            elsif parse_path_extnames(filename)[1] == accepted
-              filename
-            end
+          if fn = find_best_filename_match(accepts, filenames)
+            return fn
           end
-
-          return fn if fn
         end
 
         nil
@@ -104,6 +121,18 @@ module Sprockets
         end
 
         accepts
+      end
+
+      def find_best_filename_match(accepts, filenames)
+        find_best_q_match(accepts, filenames) do |filename, accepted|
+          if !file?(filename)
+            nil
+          elsif accepted == '*/*'
+            filename
+          elsif parse_path_extnames(filename)[1] == accepted
+            filename
+          end
+        end
       end
 
       def normalize_logical_path(path)
