@@ -79,11 +79,8 @@ module Sprockets
           return
         end
 
-        tranformed_accepts = parsed_accept.reduce([]) do |ary, (t, q)|
-          ary += [[t, q]] + self.inverted_transformers[t].keys.map { |t2| [t2, q * 0.5] }
-        end
-
-        filename, mime_type = resolve_under_paths(paths, logical_name, mime_type, tranformed_accepts)
+        transformed_accepts = expand_transform_accepts(parsed_accept)
+        filename, mime_type = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
