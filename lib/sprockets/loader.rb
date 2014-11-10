@@ -54,19 +54,24 @@ module Sprockets
           raise ArgumentError, "expected uri to have no id: #{uri}"
         end
 
+        unless file?(filename)
+          raise FileNotFound, "could not find file: #{filename}"
+        end
+
+
         type = params[:type]
         load_path, logical_path = paths_split(self.paths, filename)
 
-        if !file?(filename)
-          raise FileNotFound, "could not find file: #{filename}"
-        elsif type && !resolve_path_transform_type(filename, type)
-          raise ConversionError, "could not convert to type: #{type}"
-        elsif !load_path
+        unless load_path
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
         logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
+
+        if type && !resolve_transform_type(file_type, type)
+          raise ConversionError, "could not convert to type: #{type}"
+        end
 
         asset = {
           uri: uri,
