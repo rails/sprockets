@@ -52,7 +52,7 @@ module Sprockets
       mutate_config(:version) { version.dup }
     end
 
-    # Deprecated: Returns a `Digest` implementation class.
+    # Public: Returns a `Digest` implementation class.
     #
     # Defaults to `Digest::SHA256`.
     attr_reader :digest_class
