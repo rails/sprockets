@@ -353,7 +353,14 @@ module Sprockets
         elsif @environment.relative_path?(path)
           path = expand_relative_path(path)
           if logical_path = @environment.split_subpath(@load_path, path)
-            @environment.resolve_in_load_path(@load_path, logical_path, options)
+            if filename = @environment.resolve_all_under_load_path(@load_path, logical_path, options).first
+              filename
+            else
+              accept = options[:accept]
+              message = "couldn't find file '#{logical_path}' under '#{load_path}'"
+              message << " with type '#{accept}'" if accept
+              raise FileNotFound, message
+            end
           else
             raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
           end
