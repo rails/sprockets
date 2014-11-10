@@ -290,7 +290,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << resolve!(path, accept: "#{@content_type}, */*")
+        @dependency_paths << resolve!(path)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -305,7 +305,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.find_asset(resolve!(path, accept: "#{@content_type}, */*"))
+        if asset = @environment.find_asset(resolve!(path))
           @dependency_paths.merge(asset.metadata[:dependency_paths])
         end
       end

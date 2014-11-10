@@ -43,21 +43,22 @@ module Sprockets
   require 'sprockets/context'
   extend Configuration
 
-  @root              = File.expand_path('..', __FILE__).freeze
-  @paths             = [].freeze
-  @mime_types        = {}.freeze
-  @mime_exts         = {}.freeze
-  @encodings         = {}.freeze
-  @engines           = {}.freeze
-  @engine_mime_types = {}.freeze
-  @transformers      = Hash.new { |h, k| {}.freeze }.freeze
-  @preprocessors     = Hash.new { |h, k| [].freeze }.freeze
-  @postprocessors    = Hash.new { |h, k| [].freeze }.freeze
-  @bundle_reducers   = Hash.new { |h, k| {}.freeze }.freeze
-  @bundle_processors = Hash.new { |h, k| [].freeze }.freeze
-  @compressors       = Hash.new { |h, k| {}.freeze }.freeze
-  @context_class     = Context
-  @version           = ''
+  @root                  = File.expand_path('..', __FILE__).freeze
+  @paths                 = [].freeze
+  @mime_types            = {}.freeze
+  @mime_exts             = {}.freeze
+  @encodings             = {}.freeze
+  @engines               = {}.freeze
+  @engine_mime_types     = {}.freeze
+  @transformers          = Hash.new { |h, k| {}.freeze }.freeze
+  @inverted_transformers = Hash.new { |h, k| {}.freeze }.freeze
+  @preprocessors         = Hash.new { |h, k| [].freeze }.freeze
+  @postprocessors        = Hash.new { |h, k| [].freeze }.freeze
+  @bundle_reducers       = Hash.new { |h, k| {}.freeze }.freeze
+  @bundle_processors     = Hash.new { |h, k| [].freeze }.freeze
+  @compressors           = Hash.new { |h, k| {}.freeze }.freeze
+  @context_class         = Context
+  @version               = ''
 
   # Set the default digest
   require 'digest/sha2'

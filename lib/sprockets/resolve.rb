@@ -85,7 +85,7 @@ module Sprockets
       else
         if filename = resolve_all(path, accept: accept).first
           mime_type = parse_path_extnames(path)[1]
-          accept = parse_accept_options(mime_type, accept).map { |t, v| "#{t}; q=#{v}" }.join(", ")
+          accept = parse_accept_options(mime_type, accept)
           mime_type2 = parse_path_extnames(filename)[1]
           type = resolve_transform_type(mime_type2, accept)
         end
