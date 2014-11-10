@@ -154,7 +154,7 @@ module Sprockets
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
-        # TODO: Avoid tracking Asset mtime
+        # Deprecated: Avoid tracking Asset mtime
         asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
 
         asset
