@@ -71,12 +71,7 @@ module Sprockets
         paths.each do |load_path|
           filenames = path_matches(load_path, logical_name, logical_basename)
 
-          matches = []
-
-          # TODO: Cleanup double iteration of accept and filenames
-
-          # Exact mime type match first
-          matches += find_q_matches(accepts, filenames) do |filename, accepted|
+          fn = find_best_q_match(accepts, filenames) do |filename, accepted|
             if !file?(filename)
               nil
             elsif accepted == '*/*'
@@ -86,9 +81,7 @@ module Sprockets
             end
           end
 
-          matches.uniq.each do |filename|
-            return filename
-          end
+          return fn if fn
         end
 
         nil
