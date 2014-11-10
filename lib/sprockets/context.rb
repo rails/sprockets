@@ -66,9 +66,6 @@ module Sprockets
 
     # Internal
     def _resolve(method, path, options = {})
-      options[:content_type] = self.content_type if options[:content_type] == :self
-      options[:accept] = options.delete(:content_type)
-
       if environment.absolute_path?(path)
         filename = path
       elsif environment.relative_path?(path)
