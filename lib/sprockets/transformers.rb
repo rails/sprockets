@@ -43,7 +43,7 @@ module Sprockets
       end
     end
 
-    # Public: Resolve target mime type that the source type should be
+    # Internal: Resolve target mime type that the source type should be
     # transformed to.
     #
     # type   - String from mime type
@@ -63,6 +63,27 @@ module Sprockets
     # Returns String mime type or nil is no type satisfied the accept value.
     def resolve_transform_type(type, accept)
       find_best_mime_type_match(accept || '*/*', [type].compact + transformers[type].keys)
+    end
+
+    # Internal: Expand accept type list to include possible transformed types.
+    #
+    # parsed_accepts - Array of accept q values
+    #
+    # Examples
+    #
+    #   expand_transform_accepts([['application/javascript', 1.0]])
+    #   # => [['application/javascript', 1.0], ['text/coffeescript', 0.8]]
+    #
+    # Returns an expanded Array of q values.
+    def expand_transform_accepts(parsed_accepts)
+      accepts = []
+      parsed_accepts.each do |(type, q)|
+        accepts.push([type, q])
+        inverted_transformers[type].keys.each do |subtype|
+          accepts.push([subtype, q * 0.8])
+        end
+      end
+      accepts
     end
 
     # Internal: Find and load transformer by from and to mime type.
