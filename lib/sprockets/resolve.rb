@@ -25,12 +25,7 @@ module Sprockets
         raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
       end
 
-      logical_name, mime_type, _ = parse_path_extnames(logical_path)
-      logical_basename = File.basename(logical_name)
-
-      accepts = parse_accept_options(mime_type, options[:accept])
-
-      _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts) do |filename|
+      resolve_all_under_load_path(load_path, logical_path, options) do |filename|
         return filename
       end
 
@@ -38,6 +33,19 @@ module Sprockets
       message = "couldn't find file '#{logical_path}' under '#{load_path}'"
       message << " with type '#{accept}'" if accept
       raise FileNotFound, message
+    end
+
+    def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
+      return to_enum(__method__, load_path, logical_path, options) unless block_given?
+
+      logical_name, mime_type, _ = parse_path_extnames(logical_path)
+      logical_basename = File.basename(logical_name)
+
+      accepts = parse_accept_options(mime_type, options[:accept])
+
+      _resolve_all_under_load_path(load_path, logical_name, logical_basename, accepts, &block)
+
+      nil
     end
 
     # Public: Finds the expanded real path for a given logical path by searching
