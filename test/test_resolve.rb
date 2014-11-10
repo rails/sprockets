@@ -18,10 +18,7 @@ class TestResolve < Sprockets::TestCase
       @env.resolve("jquery.tmpl.min.js")
     assert_equal fixture_path('default/manifest.js.yml'),
       @env.resolve('manifest.js.yml')
-
-    assert_raises(Sprockets::FileNotFound) do
-      @env.resolve("null")
-    end
+    refute @env.resolve("null")
   end
 
   test "resolve accept type list before paths" do

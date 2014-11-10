@@ -82,13 +82,11 @@ module Sprockets
       options[:accept] = options.delete(:content_type)
 
       if environment.absolute_path?(path)
-        path
+        filename = path
       elsif environment.relative_path?(path)
         path = File.expand_path(path, @dirname)
         if logical_path = @environment.split_subpath(load_path, path)
-          if filename = environment.resolve_all_under_load_path(load_path, logical_path, options).first
-            filename
-          else
+          if filename = environment.resolve(logical_path, options.merge(load_path: load_path))
             accept = options[:accept]
             message = "couldn't find file '#{logical_path}' under '#{load_path}'"
             message << " with type '#{accept}'" if accept
@@ -98,7 +96,16 @@ module Sprockets
           raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
         end
       else
-        environment.resolve(path, options)
+        filename = environment.resolve(path, options)
+      end
+
+      if filename
+        filename
+      else
+        accept = options[:accept]
+        message = "couldn't find file '#{path}'"
+        message << " with type '#{accept}'" if accept
+        raise FileNotFound, message
       end
     end
 
