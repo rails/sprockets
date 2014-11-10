@@ -20,21 +20,6 @@ module Sprockets
       raise FileNotFound, message
     end
 
-    def resolve_in_load_path(load_path, logical_path, options = {})
-      if !self.paths.include?(load_path.to_s)
-        raise FileOutsidePaths, "#{load_path} isn't in paths: #{self.paths.join(', ')}"
-      end
-
-      resolve_all_under_load_path(load_path, logical_path, options) do |filename|
-        return filename
-      end
-
-      accept = options[:accept]
-      message = "couldn't find file '#{logical_path}' under '#{load_path}'"
-      message << " with type '#{accept}'" if accept
-      raise FileNotFound, message
-    end
-
     def resolve_all_under_load_path(load_path, logical_path, options = {}, &block)
       return to_enum(__method__, load_path, logical_path, options) unless block_given?
 
