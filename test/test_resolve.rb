@@ -133,7 +133,7 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
       @env.resolve_asset_uri("gallery", accept: 'application/javascript')
-    # assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=text/coffeescript",
-    #   @env.resolve_asset_uri("coffee/foo", accept: 'text/coffeescript')
+    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=text/coffeescript",
+      @env.resolve_asset_uri("coffee/foo", accept: 'text/coffeescript')
   end
 end
