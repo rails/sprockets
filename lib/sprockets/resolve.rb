@@ -18,19 +18,22 @@ module Sprockets
     def resolve(path, options = {})
       logical_name, mime_type, _ = parse_path_extnames(path)
 
-      accepts = parse_accept_options(mime_type, options[:accept])
-
       paths = options[:load_paths] || self.paths
 
       if absolute_path?(path)
         path = File.expand_path(path)
         if paths_split(paths, path) && file?(path)
-          candidate = [path, mime_type]
-          filename, _ = find_best_filename_match(accepts, [candidate])
-          filename
+          if accept = options[:accept]
+            find_best_q_match(accept, [path]) do |candidate, matcher|
+              match_mime_type?(mime_type || "application/octet-stream", matcher)
+            end
+          else
+            path
+          end
         end
       else
-        filename, _ = _resolve(logical_name, mime_type, accepts, paths)
+        accepts = parse_accept_options(mime_type, options[:accept])
+        filename, _ = resolve_under_paths(paths, logical_name, mime_type, accepts)
         filename
       end
     end
@@ -80,7 +83,7 @@ module Sprockets
           ary += [[t, q]] + self.inverted_transformers[t].keys.map { |t2| [t2, q * 0.5] }
         end
 
-        filename, mime_type = _resolve(logical_name, mime_type, tranformed_accepts, paths)
+        filename, mime_type = resolve_under_paths(paths, logical_name, mime_type, tranformed_accepts)
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
@@ -91,12 +94,14 @@ module Sprockets
     end
 
     protected
-      def _resolve(logical_name, mime_type, accepts, paths)
+      def resolve_under_paths(paths, logical_name, mime_type, accepts)
         logical_basename = File.basename(logical_name)
 
         paths.each do |load_path|
           candidates = path_matches(load_path, logical_name, logical_basename)
-          candidate = find_best_filename_match(accepts, candidates)
+          candidate = find_best_q_match(accepts, candidates) do |c, matcher|
+            match_mime_type?(c[1] || "application/octet-stream", matcher)
+          end
           return candidate if candidate
         end
 
@@ -120,12 +125,6 @@ module Sprockets
         end
 
         accepts
-      end
-
-      def find_best_filename_match(accepts, candidates)
-        find_best_q_match(accepts, candidates) do |candidate, matcher|
-          match_mime_type?(candidate[1] || "application/octet-stream", matcher)
-        end
       end
 
       def normalize_logical_path(path)
