@@ -10,6 +10,16 @@ module Sprockets
     #
     attr_reader :transformers
 
+    # Public: Two level mapping of target mime type to source mime type.
+    #
+    #   environment.inverted_transformers
+    #   # => { 'application/javascript' => {
+    #            'text/coffeescript' => ConvertCoffeeScriptToJavaScript
+    #          }
+    #        }
+    #
+    attr_reader :inverted_transformers
+
     # Public: Register a transformer from and to a mime type.
     #
     # from - String mime type
@@ -27,6 +37,9 @@ module Sprockets
     def register_transformer(from, to, proc)
       mutate_hash_config(:transformers, from) do |transformers|
         transformers.merge(to => proc)
+      end
+      mutate_hash_config(:inverted_transformers, to) do |transformers|
+        transformers.merge(from => proc)
       end
     end
 

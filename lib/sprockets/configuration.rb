@@ -10,23 +10,24 @@ module Sprockets
     include Paths, Mime, Engines, Transformers, Processing, Compressing
 
     def initialize_configuration(parent)
-      @logger            = parent.logger
-      @version           = parent.version
-      @digest_class      = parent.digest_class
-      @context_class     = Class.new(parent.context_class)
-      @root              = parent.root
-      @paths             = parent.paths
-      @mime_types        = parent.mime_types
-      @mime_exts         = parent.mime_exts
-      @encodings         = parent.encodings
-      @engines           = parent.engines
-      @engine_mime_types = parent.engine_mime_types
-      @transformers      = parent.transformers
-      @preprocessors     = parent.preprocessors
-      @postprocessors    = parent.postprocessors
-      @bundle_reducers   = parent.bundle_reducers
-      @bundle_processors = parent.bundle_processors
-      @compressors       = parent.compressors
+      @logger                = parent.logger
+      @version               = parent.version
+      @digest_class          = parent.digest_class
+      @context_class         = Class.new(parent.context_class)
+      @root                  = parent.root
+      @paths                 = parent.paths
+      @mime_types            = parent.mime_types
+      @mime_exts             = parent.mime_exts
+      @encodings             = parent.encodings
+      @engines               = parent.engines
+      @engine_mime_types     = parent.engine_mime_types
+      @transformers          = parent.transformers
+      @inverted_transformers = parent.inverted_transformers
+      @preprocessors         = parent.preprocessors
+      @postprocessors        = parent.postprocessors
+      @bundle_reducers       = parent.bundle_reducers
+      @bundle_processors     = parent.bundle_processors
+      @compressors           = parent.compressors
     end
 
     # Get and set `Logger` instance.
