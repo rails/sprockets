@@ -72,5 +72,19 @@ module Sprockets
           end
         end
       end
+
+      # URI.unescape is deprecated on 1.9. We need to use URI::Parser
+      # if its available.
+      if defined? URI::DEFAULT_PARSER
+        def unescape(str)
+          str = URI::DEFAULT_PARSER.unescape(str)
+          str.force_encoding(Encoding.default_internal) if Encoding.default_internal
+          str
+        end
+      else
+        def unescape(str)
+          URI.unescape(str)
+        end
+      end
   end
 end
