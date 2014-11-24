@@ -116,4 +116,7 @@ module Sprockets
         raise RuntimeError, "can't modify immutable cached environment"
       end
   end
+
+  # Deprecated
+  Index = CachedEnvironment
 end
