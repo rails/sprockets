@@ -337,6 +337,71 @@ module Sprockets
         end
       end
 
+      # `link_directory` links all the files inside a single
+      # directory. It's similar to `path/*` since it does not follow
+      # nested directories.
+      #
+      #     //= link_directory "./fonts"
+      #
+      def process_link_directory_directive(path = ".")
+        if @environment.relative_path?(path)
+          root = expand_relative_path(path)
+
+          unless (stats = @environment.stat(root)) && stats.directory?
+            raise ArgumentError, "link_directory argument must be a directory"
+          end
+
+          @dependency_paths << root
+
+          @environment.stat_directory(root).each do |subpath, stat|
+            if subpath == @filename
+              next
+            elsif stat.directory?
+              next
+            elsif uri = @environment.locate(subpath)
+              asset = @environment.load(uri)
+              @dependency_paths.merge(asset.metadata[:dependency_paths])
+              @links << asset.uri
+            end
+          end
+        else
+          # The path must be relative and start with a `./`.
+          raise ArgumentError, "link_directory argument must be a relative path"
+        end
+      end
+
+      # `link_tree` links all the nested files in a directory.
+      # Its glob equivalent is `path/**/*`.
+      #
+      #     //= link_tree "./images"
+      #
+      def process_link_tree_directive(path = ".")
+        if @environment.relative_path?(path)
+          root = expand_relative_path(path)
+
+          unless (stats = @environment.stat(root)) && stats.directory?
+            raise ArgumentError, "link_tree argument must be a directory"
+          end
+
+          @dependency_paths << root
+
+          @environment.stat_sorted_tree(root).each do |subpath, stat|
+            if subpath == @filename
+              next
+            elsif stat.directory?
+              @dependency_paths << subpath
+            elsif uri = @environment.locate(subpath)
+              asset = @environment.load(uri)
+              @dependency_paths.merge(asset.metadata[:dependency_paths])
+              @links << asset.uri
+            end
+          end
+        else
+          # The path must be relative and start with a `./`.
+          raise ArgumentError, "link_tree argument must be a relative path"
+        end
+      end
+
     private
       def expand_relative_path(path)
         File.expand_path(path, @dirname)
