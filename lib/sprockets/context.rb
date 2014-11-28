@@ -67,6 +67,7 @@ module Sprockets
     attr_reader :content_type
 
     # Internal
+    # TODO: Cleanup relative resolver logic shared between directive processor.
     def _resolve(method, path, options = {})
       options[:content_type] = self.content_type if options[:content_type] == :self
       options[:accept] = options.delete(:content_type)

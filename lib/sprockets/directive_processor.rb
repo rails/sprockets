@@ -415,6 +415,7 @@ module Sprockets
         _resolve(:resolve, path, options)
       end
 
+      # TODO: Cleanup relative resolver logic shared between context.
       def _resolve(method, path, options = {})
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file: #{path}"
