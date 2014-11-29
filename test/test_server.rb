@@ -29,7 +29,7 @@ class TestServer < Sprockets::TestCase
   end
 
   def app
-    @app ||= default_app
+    @app ||= Rack::Lint.new(default_app)
   end
 
   test "serve single source file" do
@@ -358,7 +358,8 @@ class TestServer < Sprockets::TestCase
   test "serving static assets" do
     get "/assets/logo.png"
     assert_equal 200, last_response.status
-    assert_equal "image/png", last_response.content_type
+    assert_equal "image/png", last_response.headers['Content-Type']
+    refute last_response.headers['Content-Encoding']
     assert_equal File.binread(fixture_path("server/app/images/logo.png")), last_response.body
   end
 

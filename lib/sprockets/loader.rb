@@ -145,7 +145,6 @@ module Sprockets
           )
         else
           asset[:metadata] = {
-            encoding: Encoding::BINARY,
             digest: file_digest(asset[:filename]),
             length: self.stat(asset[:filename]).size
           }

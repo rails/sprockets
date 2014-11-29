@@ -48,6 +48,14 @@ module AssetTests
       assert !File.exist?(target)
     end
   end
+
+  def normalize_uri(uri)
+    uri.sub(/id=\w+/, 'id=xxx')
+  end
+
+  def normalize_uris(uris)
+    uris.to_a.map { |uri| normalize_uri(uri) }.sort
+  end
 end
 
 module FreshnessTests
@@ -151,7 +159,7 @@ class TextStaticAssetTest < Sprockets::TestCase
 
   test "uri" do
     assert_equal "file://#{fixture_path('asset/log.txt')}?type=text/plain&id=xxx",
-      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
+      normalize_uri(@asset.uri)
   end
 
   test "logical path can find itself" do
@@ -188,7 +196,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
 
   test "uri" do
     assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&id=xxx",
-      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
+      normalize_uri(@asset.uri)
   end
 
   test "logical path can find itself" do
@@ -296,7 +304,7 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   test "uri" do
     assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&id=xxx",
-      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
+      normalize_uri(@asset.uri)
   end
 
   test "logical path can find itself" do
@@ -362,7 +370,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "uri" do
     assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&id=xxx",
-      @asset.uri.to_s.sub(/id=\w+/, 'id=xxx')
+      normalize_uri(@asset.uri)
   end
 
   test "logical path can find itself" do
@@ -824,7 +832,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
       "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
       "file://#{fixture_path("asset/application.css")}?type=text/css&id=xxx",
       "file://#{fixture_path("asset/application.js")}?type=application/javascript&id=xxx"
-    ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
+    ], normalize_uris(asset.links)
   end
 
   test "directive linked asset depends on target asset" do
@@ -843,7 +851,61 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
       "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
       "file://#{fixture_path("asset/application.css")}?type=text/css&id=xxx",
       "file://#{fixture_path("asset/application.js")}?type=application/javascript&id=xxx"
-    ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
+    ], normalize_uris(asset.links)
+  end
+
+  test "link_directory current directory includes self last" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/directory/bar.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/directory/foo.js")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/directory/application.js").links)
+  end
+
+  test "link_tree requires all descendant files in alphabetical order" do
+    assert_equal normalize_uris(asset("link/all_with_require.js").links),
+      normalize_uris(asset("link/all_with_require_tree.js").links)
+  end
+
+  test "link_tree without an argument defaults to the current directory" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/without_argument/a.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/without_argument/b.js")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/without_argument/require_tree_without_argument.js").links)
+  end
+
+  test "link_tree with current directory includes self last" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/tree/bar.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/tree/foo.js")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/tree/application.js").links)
+  end
+
+  test "link_tree with a logical path argument raises an exception" do
+    assert_raises(Sprockets::ArgumentError) do
+      asset("link/with_logical_path/require_tree_with_logical_path.js")
+    end
+  end
+
+  test "link_tree with a nonexistent path raises an exception" do
+    assert_raises(Sprockets::ArgumentError) do
+      asset("link/with_logical_path/require_tree_with_nonexistent_path.js")
+    end
+  end
+
+  test "link_directory requires all child files in alphabetical order" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/all/README.md")}?id=xxx",
+      "file://#{fixture_path("asset/link/all/b.css")}?type=text/css&id=xxx",
+      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/all_with_require_directory.js").links)
+  end
+
+  test "link_tree respects order of child dependencies" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/require_tree_alpha.js").links)
   end
 
   test "stub single dependency" do

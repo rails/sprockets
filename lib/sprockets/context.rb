@@ -65,6 +65,7 @@ module Sprockets
     attr_reader :content_type
 
     # Internal
+    # TODO: Cleanup relative resolver logic shared between directive processor.
     def _resolve(method, path, options = {})
       if environment.absolute_path?(path)
         filename = path
