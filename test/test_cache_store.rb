@@ -48,6 +48,12 @@ module CacheStoreTests
     assert_equal "3", @store._get("baz")
   end
 
+  def test_large_write_and_read_hit
+    data = ("a"..."zzz").to_a.join
+    @store._set("foo", data)
+    assert_equal data, @store._get("foo")
+  end
+
   def test_delete
     @store._set("foo", "bar")
     assert_equal "bar", @store._get("foo")
