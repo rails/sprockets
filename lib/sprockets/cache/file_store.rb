@@ -1,6 +1,7 @@
 require 'digest/md5'
 require 'fileutils'
 require 'logger'
+require 'zlib'
 
 module Sprockets
   class Cache
@@ -52,7 +53,13 @@ module Sprockets
 
         value = safe_open(path) do |f|
           begin
-            Marshal.load(f)
+            raw = f.read
+            if raw =~ /\A\x04\x08/
+              marshaled = raw
+            else
+              marshaled = Zlib::Inflate.new(Zlib::MAX_WBITS).inflate(raw)
+            end
+            Marshal.load(marshaled)
           rescue Exception => e
             @logger.error do
               "#{self.class}[#{path}] could not be unmarshaled: " +
@@ -85,9 +92,26 @@ module Sprockets
         # Check if cache exists before writing
         exists = File.exist?(path)
 
+        # Serialize value
+        marshaled = Marshal.dump(value)
+
+        # Compress if larger than 4KB
+        if marshaled.bytesize > 4 * 1024
+          deflater = Zlib::Deflate.new(
+            Zlib::BEST_COMPRESSION,
+            Zlib::MAX_WBITS,
+            Zlib::MAX_MEM_LEVEL,
+            Zlib::DEFAULT_STRATEGY
+          )
+          deflater << marshaled
+          raw = deflater.finish
+        else
+          raw = marshaled
+        end
+
         # Write data
         PathUtils.atomic_write(path) do |f|
-          Marshal.dump(value, f)
+          f.write(raw)
           @size += f.size unless exists
         end
 
