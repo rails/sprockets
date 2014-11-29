@@ -21,6 +21,9 @@ module Sprockets
   class Context
     attr_reader :environment, :filename, :pathname
 
+    # Deprecated
+    attr_accessor :__LINE__
+
     def initialize(input)
       @environment  = input[:environment]
       @metadata     = input[:metadata]
