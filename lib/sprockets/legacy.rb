@@ -53,6 +53,14 @@ module Sprockets
       nil
     end
 
+    def cache_get(key)
+      cache._get(key)
+    end
+
+    def cache_set(key, value)
+      cache._set(key, value)
+    end
+
     private
       # Deprecated: Seriously.
       def matches_filter(filters, logical_path, filename)
