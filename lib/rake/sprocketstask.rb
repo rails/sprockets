@@ -127,9 +127,9 @@ module Rake
       task :clobber => ["clobber_#{name}"]
 
       desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
-      task "clean_#{name}" do
+      task "clean_#{name}", [:keep] do |t, args|
         with_logger do
-          manifest.clean(keep)
+          manifest.clean(Integer(args.keep || self.keep))
         end
       end
 

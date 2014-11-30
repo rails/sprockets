@@ -106,6 +106,25 @@ module Sprockets
       @data['files'] ||= {}
     end
 
+    # Public: Find all assets matching pattern set in environment.
+    #
+    # Returns Enumerator of Assets.
+    def find(*args)
+      unless environment
+        raise Error, "manifest requires environment for compilation"
+      end
+
+      return to_enum(__method__, *args) unless block_given?
+
+      args.flatten.each do |path|
+        environment.find_all_linked_assets(path) do |asset|
+          yield asset
+        end
+      end
+
+      nil
+    end
+
     # Compile and write asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
@@ -120,28 +139,26 @@ module Sprockets
 
       filenames = []
 
-      args.flatten.each do |path|
-        find_assets(path) do |asset|
-          files[asset.digest_path] = {
-            'logical_path' => asset.logical_path,
-            'mtime'        => Time.now.iso8601,
-            'size'         => asset.bytesize,
-            'digest'       => asset.hexdigest,
-            'integrity'    => asset.integrity
-          }
-          assets[asset.logical_path] = asset.digest_path
+      find(*args) do |asset|
+        files[asset.digest_path] = {
+          'logical_path' => asset.logical_path,
+          'mtime'        => Time.now.iso8601,
+          'size'         => asset.bytesize,
+          'digest'       => asset.hexdigest,
+          'integrity'    => asset.integrity
+        }
+        assets[asset.logical_path] = asset.digest_path
 
-          target = File.join(dir, asset.digest_path)
+        target = File.join(dir, asset.digest_path)
 
-          if File.exist?(target)
-            logger.debug "Skipping #{target}, already exists"
-          else
-            logger.info "Writing #{target}"
-            asset.write_to target
-          end
-
-          filenames << filename
+        if File.exist?(target)
+          logger.debug "Skipping #{target}, already exists"
+        else
+          logger.info "Writing #{target}"
+          asset.write_to target
         end
+
+        filenames << asset.filename
       end
       save
 
@@ -202,18 +219,6 @@ module Sprockets
     end
 
     protected
-      # Basic wrapper around Environment#find_asset. Logs compile time.
-      def find_assets(path)
-        start = Utils.benchmark_start
-        environment.find_all_linked_assets(path) do |asset|
-          logger.debug do
-            "Compiled #{asset.logical_path}  (#{Utils.benchmark_end(start)}ms)"
-          end
-          yield asset
-          start = Utils.benchmark_start
-        end
-      end
-
       # Persist manfiest back to FS
       def save
         FileUtils.mkdir_p File.dirname(filename)
