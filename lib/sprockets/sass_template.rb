@@ -40,6 +40,7 @@ module Sprockets
       @cache_key = [
         self.class.name,
         VERSION,
+        Sass::VERSION,
         @cache_version
       ]
 
