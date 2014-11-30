@@ -54,14 +54,24 @@ module Sprockets
 
     protected
       def asset_dependency_graph_cache_key(uri)
-        filename, _ = AssetURI.parse(uri)
+        filename, params = AssetURI.parse(uri)
+
+        _, logical_path = paths_split(self.paths, filename)
+        _, file_type, engine_extnames = parse_path_extnames(logical_path)
+
+        processors = processors_for(file_type, engine_extnames, params)
+        processor_cache_key = processors.map { |proc|
+          proc.respond_to?(:cache_key) ? proc.cache_key : nil
+        }.compact
+
         [
           'asset-uri-dep-graph',
           VERSION,
           self.version,
           self.paths,
           uri,
-          file_digest(filename)
+          file_digest(filename),
+          processor_cache_key
         ]
       end
 
