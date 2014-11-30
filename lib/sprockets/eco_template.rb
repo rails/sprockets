@@ -11,6 +11,10 @@ module Sprockets
   module EcoTemplate
     VERSION = '1'
 
+    def self.cache_key
+      @cache_key ||= [name, ::Eco::Source::VERSION, VERSION].freeze
+    end
+
     # Compile template data with Eco compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -20,8 +24,7 @@ module Sprockets
     #
     def self.call(input)
       data = input[:data]
-      key  = ['EcoTemplate', ::Eco::Source::VERSION, VERSION, data]
-      input[:cache].fetch(key) do
+      input[:cache].fetch(cache_key + [data]) do
         ::Eco.compile(data)
       end
     end

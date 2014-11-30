@@ -20,15 +20,21 @@ module Sprockets
       new.call(*args)
     end
 
+    def self.cache_key
+      new.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(options = {})
       @compiler = ::Closure::Compiler.new(options)
       @cache_key = [
-        'ClosureCompressor',
+        self.class.name,
         ::Closure::VERSION,
         ::Closure::COMPILER_VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)

@@ -20,6 +20,12 @@ module Sprockets
       new.call(*args)
     end
 
+    def self.cache_key
+      new.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(options = {})
       # Feature detect Uglifier 2.0 option support
       if Uglifier::DEFAULTS[:copyright]
@@ -33,11 +39,11 @@ module Sprockets
       @uglifier = ::Uglifier.new(options)
 
       @cache_key = [
-        'UglifierCompressor',
+        self.class.name,
         ::Uglifier::VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)

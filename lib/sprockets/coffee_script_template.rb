@@ -12,10 +12,13 @@ module Sprockets
     VERSION = '1'
     SOURCE_VERSION = ::CoffeeScript::Source.version
 
+    def self.cache_key
+      @cache_key ||= [name, SOURCE_VERSION, VERSION].freeze
+    end
+
     def self.call(input)
       data = input[:data]
-      key  = ['CoffeeScriptTemplate', SOURCE_VERSION, VERSION, data]
-      input[:cache].fetch(key) do
+      input[:cache].fetch(self.cache_key + [data]) do
         ::CoffeeScript.compile(data)
       end
     end

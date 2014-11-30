@@ -11,6 +11,8 @@ module Sprockets
   #   https://github.com/rails/sass-rails
   #
   class SassTemplate
+    VERSION = '1'
+
     # Internal: Defines default sass syntax to use. Exposed so the ScssTemplate
     # may override it.
     def self.syntax
@@ -21,6 +23,12 @@ module Sprockets
       new.call(*args)
     end
 
+    def self.cache_key
+      new.cache_key
+    end
+
+    attr_reader :cache_key
+
     # Public: Initialize template with custom options.
     #
     # options - Hash
@@ -29,6 +37,11 @@ module Sprockets
     #
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
+      @cache_key = [
+        self.class.name,
+        VERSION,
+        @cache_version
+      ]
 
       @functions = Module.new do
         include Functions

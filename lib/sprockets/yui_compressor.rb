@@ -20,14 +20,20 @@ module Sprockets
       new.call(*args)
     end
 
+    def self.cache_key
+      new.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(options = {})
       @options = options
       @cache_key = [
-        'YUICompressor',
+        self.class.name,
         ::YUI::Compressor::VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)
