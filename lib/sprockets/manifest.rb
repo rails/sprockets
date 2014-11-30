@@ -106,7 +106,7 @@ module Sprockets
       @data['files'] ||= {}
     end
 
-    # Internal: Compile logical path matching filter into a proc that can be
+    # Deprecated: Compile logical path matching filter into a proc that can be
     # passed to logical_paths.select(&proc).
     #
     #   compile_match_filter(proc { |logical_path|
@@ -139,7 +139,7 @@ module Sprockets
       end
     end
 
-    # Public: Filter logical paths in environment. Useful for selecting what
+    # Deprecated: Filter logical paths in environment. Useful for selecting what
     # files you want to compile.
     #
     # Returns an Enumerator.
@@ -148,6 +148,29 @@ module Sprockets
       environment.logical_paths.select do |a, b|
         filters.any? { |f| f.call(a, b) }
       end
+    end
+
+    # Public: Find all assets matching pattern set in environment.
+    #
+    # Returns Enumerator of Assets.
+    def find(*args)
+      unless environment
+        raise Error, "manifest requires environment for compilation"
+      end
+
+      return to_enum(__method__, *args) unless block_given?
+
+      filters = args.flatten.map { |arg| self.class.compile_match_filter(arg) }
+
+      environment.logical_paths do |logical_path, filename|
+        if filters.any? { |f| f.call(logical_path, filename) }
+          environment.find_all_linked_assets(filename) do |asset|
+            yield asset
+          end
+        end
+      end
+
+      nil
     end
 
     # Deprecated alias.
@@ -167,28 +190,26 @@ module Sprockets
 
       filenames = []
 
-      filter_logical_paths(*args).each do |_, filename|
-        find_assets(filename) do |asset|
-          files[asset.digest_path] = {
-            'logical_path' => asset.logical_path,
-            'mtime'        => asset.mtime.iso8601,
-            'size'         => asset.bytesize,
-            'digest'       => asset.hexdigest,
-            'integrity'    => asset.integrity
-          }
-          assets[asset.logical_path] = asset.digest_path
+      find(*args) do |asset|
+        files[asset.digest_path] = {
+          'logical_path' => asset.logical_path,
+          'mtime'        => asset.mtime.iso8601,
+          'size'         => asset.bytesize,
+          'digest'       => asset.hexdigest,
+          'integrity'    => asset.integrity
+        }
+        assets[asset.logical_path] = asset.digest_path
 
-          target = File.join(dir, asset.digest_path)
+        target = File.join(dir, asset.digest_path)
 
-          if File.exist?(target)
-            logger.debug "Skipping #{target}, already exists"
-          else
-            logger.info "Writing #{target}"
-            asset.write_to target
-          end
-
-          filenames << filename
+        if File.exist?(target)
+          logger.debug "Skipping #{target}, already exists"
+        else
+          logger.info "Writing #{target}"
+          asset.write_to target
         end
+
+        filenames << asset.filename
       end
       save
 
@@ -249,18 +270,6 @@ module Sprockets
     end
 
     protected
-      # Basic wrapper around Environment#find_asset. Logs compile time.
-      def find_assets(path)
-        start = Utils.benchmark_start
-        environment.find_all_linked_assets(path) do |asset|
-          logger.debug do
-            "Compiled #{asset.logical_path}  (#{Utils.benchmark_end(start)}ms)"
-          end
-          yield asset
-          start = Utils.benchmark_start
-        end
-      end
-
       # Persist manfiest back to FS
       def save
         FileUtils.mkdir_p File.dirname(filename)
