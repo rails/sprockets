@@ -74,6 +74,15 @@ class TestResolve < Sprockets::TestCase
     refute @env.resolve(fixture_path('default/gallery.js'), accept: 'text/css')
   end
 
+  test "resolve absolute identity" do
+    @env.append_path(fixture_path('default'))
+
+    @env.stat_tree(fixture_path('default')).each do |path, stat|
+      next unless stat.file?
+      assert_equal path, @env.resolve(path)
+    end
+  end
+
   test "resolve extension before accept type" do
     @env.append_path(fixture_path('resolve/javascripts'))
     @env.append_path(fixture_path('resolve/stylesheets'))
@@ -143,6 +152,16 @@ class TestResolve < Sprockets::TestCase
 
     refute @env.locate('foo.js', load_paths: [styles])
     refute @env.locate('foo.css', load_paths: [scripts])
+  end
+
+  test "locate absolute identity" do
+    @env.append_path(fixture_path('default'))
+
+    @env.stat_tree(fixture_path('default')).each do |path, stat|
+      next unless stat.file?
+      assert uri = @env.locate(path)
+      assert_equal uri, @env.locate(uri)
+    end
   end
 
   test "verify all logical paths" do
