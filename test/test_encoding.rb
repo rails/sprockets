@@ -200,4 +200,48 @@ class BinaryEncodingUtilsTest < Sprockets::TestCase
   test "base64" do
     assert_equal "Zm9vYmFy", base64("foobar")
   end
+
+  test "unmarshal" do
+    str = Marshal.dump("abc")
+    assert_equal Marshal.load(str), unmarshaled_deflated(str)
+  end
+
+  test "unmarshal older minor version" do
+    old_verbose, $VERBOSE = $VERBOSE, false
+    begin
+      str = Marshal.dump("abc")
+      str[1] = "\0"
+      assert_equal Marshal.load(str), unmarshaled_deflated(str)
+    ensure
+      $VERBOSE = old_verbose
+    end
+  end
+
+  test "fail to unmarshal older major version" do
+    str = Marshal.dump("abc")
+    str[0] = "\1"
+
+    assert_raises TypeError do
+      Marshal.load(str)
+    end
+
+    assert_raises TypeError do
+      unmarshaled_deflated(str)
+    end
+  end
+
+  test "fail to unmarshal not enough data" do
+    assert_raises ArgumentError do
+      Marshal.load("")
+    end
+
+    assert_raises ArgumentError do
+      unmarshaled_deflated("")
+    end
+  end
+
+  test "unmarshal deflated" do
+    str = deflate(Marshal.dump("abc"))
+    assert_equal "abc", unmarshaled_deflated(str)
+  end
 end
