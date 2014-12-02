@@ -27,6 +27,30 @@ module Sprockets
     # Public: Alias for CodingUtils.deflate
     DEFLATE = method(:deflate)
 
+    # Internal: Unmarshal optionally deflated data.
+    #
+    # Checks leading marshal header to see if the bytes are uncompressed
+    # otherwise inflate the data an unmarshal.
+    #
+    # str - Marshaled String
+    # window_bits - Integer deflate window size. See ZLib::Inflate.new()
+    #
+    # Returns unmarshaled Object or raises an Exception.
+    def unmarshaled_deflated(str, window_bits = -Zlib::MAX_WBITS)
+      major, minor = str[0], str[1]
+      if major && major.ord == Marshal::MAJOR_VERSION &&
+          minor && minor.ord <= Marshal::MINOR_VERSION
+        marshaled = str
+      else
+        begin
+          marshaled = Zlib::Inflate.new(window_bits).inflate(str)
+        rescue Zlib::DataError
+          marshaled = str
+        end
+      end
+      Marshal.load(marshaled)
+    end
+
     # Public: Use gzip to compress data.
     #
     # str - String data

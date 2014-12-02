@@ -80,10 +80,7 @@ module Sprockets
       @content_type = input[:content_type]
 
       data = input[:data]
-      cache_key = ['DirectiveProcessor', VERSION, data]
-      result = input[:cache].fetch(cache_key) do
-        process_source(data)
-      end
+      result = process_source(data)
 
       data, directives = result.values_at(:data, :directives)
 
