@@ -53,13 +53,7 @@ module Sprockets
 
         value = safe_open(path) do |f|
           begin
-            raw = f.read
-            if raw =~ /\A\x04\x08/
-              marshaled = raw
-            else
-              marshaled = Zlib::Inflate.new(Zlib::MAX_WBITS).inflate(raw)
-            end
-            Marshal.load(marshaled)
+            EncodingUtils.unmarshaled_deflated(f.read, Zlib::MAX_WBITS)
           rescue Exception => e
             @logger.error do
               "#{self.class}[#{path}] could not be unmarshaled: " +

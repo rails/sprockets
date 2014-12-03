@@ -2,6 +2,13 @@ require 'sprockets_test'
 require 'sprockets/asset_uri'
 
 class TestAssetURI < Sprockets::TestCase
+  test "validate" do
+    assert Sprockets::AssetURI.valid?("file:///usr/local/var/github/app/assets/javascripts/application.js")
+    assert Sprockets::AssetURI.valid?("file://C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    refute Sprockets::AssetURI.valid?("http:///usr/local/var/github/app/assets/javascripts/application.js")
+    refute Sprockets::AssetURI.valid?("/usr/local/var/github/app/assets/javascripts/application.js")
+  end
+
   test "parse file paths" do
     assert_equal ["/usr/local/var/github/app/assets/javascripts/application.js", {}],
       Sprockets::AssetURI.parse("file:///usr/local/var/github/app/assets/javascripts/application.js")
