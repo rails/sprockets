@@ -159,6 +159,17 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
+  test "fingerprint digest of file body" do
+    get "/assets/application.js?body=1"
+    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+
+    get "/assets/application-#{digest}.js?body=1"
+    assert_equal 200, last_response.status
+    assert_equal "\n(function() {\n  application.boot();\n})();\n", last_response.body
+    assert_equal "43", last_response.headers['Content-Length']
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+  end
+
   test "missing source" do
     get "/assets/none.js"
     assert_equal 404, last_response.status
