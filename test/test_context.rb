@@ -47,6 +47,13 @@ class TestContext < Sprockets::TestCase
       @env["helpers.css"].to_s.lines.to_a[0..1].join
     assert_equal 58240, @env["helpers.css"].length
   end
+
+  test "resolve with content type" do
+    assert_equal [
+      fixture_path("context/foo.js"),
+      fixture_path("context/foo.js")
+    ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
+  end
 end
 
 class TestCustomProcessor < Sprockets::TestCase
@@ -105,12 +112,5 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
       @env["sprite2.css"].to_s.lines.to_a[0..1].join
     assert_equal 58240, @env["sprite2.css"].length
-  end
-
-  test "resolve with content type" do
-    assert_equal [
-      fixture_path("context/foo.js"),
-      fixture_path("context/foo.js")
-    ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end

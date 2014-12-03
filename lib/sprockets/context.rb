@@ -111,7 +111,11 @@ module Sprockets
     end
 
     def locate(path, options = {})
-      _resolve(:locate, path, options)
+      if AssetURI.valid?(path)
+        path
+      else
+        _resolve(:locate, path, options)
+      end
     end
 
     # `depend_on` allows you to state a dependency on a file without
@@ -157,7 +161,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed << @environment.locate(path, accept: @content_type, bundle: false)
+      @stubbed << locate(path, accept: @content_type, bundle: false)
       nil
     end
 

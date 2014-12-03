@@ -61,7 +61,9 @@ module Sprockets
 
       paths = options[:load_paths] || self.paths
 
-      if absolute_path?(path)
+      if AssetURI.valid?(path)
+        return path
+      elsif absolute_path?(path)
         path = File.expand_path(path)
         if paths_split(paths, path) && file?(path)
           mime_type = parse_path_extnames(path)[1]

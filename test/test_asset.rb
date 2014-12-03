@@ -908,6 +908,18 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     ], normalize_uris(asset("link/require_tree_alpha.js").links)
   end
 
+  test "link_asset with uri" do
+    assert asset = asset("link/asset_uri.css")
+    assert_equal <<-EOS, asset.to_s
+.logo {
+  background: url(POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png);
+}
+    EOS
+    assert_equal [
+      "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx"
+      ], normalize_uris(asset.links)
+  end
+
   test "stub single dependency" do
     assert_equal "var jQuery.UI = {};\n\n\n", asset("stub/skip_jquery").to_s
   end

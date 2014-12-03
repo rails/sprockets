@@ -2,6 +2,18 @@ require 'uri'
 
 module Sprockets
   module AssetURI
+    # Internal: Check if String is a valid Asset URI.
+    #
+    # str - Possible String asset URI.
+    #
+    # Returns true or false.
+    def self.valid?(str)
+      # Quick prefix check before attempting a full parse
+      str.start_with?("file://") && parse(str) ? true : false
+    rescue URI::InvalidURIError
+      false
+    end
+
     # Internal: Parse Asset URI.
     #
     # Examples
