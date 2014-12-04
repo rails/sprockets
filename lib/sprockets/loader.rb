@@ -30,119 +30,128 @@ module Sprockets
 
     private
       def load_asset_by_id_uri(uri)
-        path, params = AssetURI.parse(uri)
+        cache.fetch(asset_uri_cache_key(uri)) do
+          path, params = AssetURI.parse(uri)
 
-        # Internal assertion, should be routed through load_asset_by_uri
-        unless id = params.delete(:id)
-          raise ArgumentError, "expected uri to have an id: #{uri}"
+          # Internal assertion, should be routed through load_asset_by_uri
+          unless id = params.delete(:id)
+            raise ArgumentError, "expected uri to have an id: #{uri}"
+          end
+
+          asset = load_asset_by_uri(AssetURI.build(path, params))
+
+          if id && asset[:id] != id
+            raise VersionNotFound, "could not find specified id: #{id}"
+          end
+
+          asset
         end
-
-        asset = load_asset_by_uri(AssetURI.build(path, params))
-
-        if id && asset[:id] != id
-          raise VersionNotFound, "could not find specified id: #{id}"
-        end
-
-        asset
       end
 
       def load_asset_by_uri(uri)
-        filename, params = AssetURI.parse(uri)
+        dep_graph_key = asset_dependency_graph_cache_key(uri)
 
-        # Internal assertion, should be routed through load_asset_by_id_uri
-        if params.key?(:id)
-          raise ArgumentError, "expected uri to have no id: #{uri}"
-        end
+        if asset = get_asset_dependency_graph_cache(dep_graph_key)
+          asset
+        else
+          filename, params = AssetURI.parse(uri)
 
-        unless file?(filename)
-          raise FileNotFound, "could not find file: #{filename}"
-        end
-
-        load_path, logical_path = paths_split(self.paths, filename)
-
-        unless load_path
-          raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
-        end
-
-        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
-        logical_path = normalize_logical_path(logical_path)
-
-        asset = {
-          uri: uri,
-          load_path: load_path,
-          filename: filename,
-          name: logical_path,
-          logical_path: logical_path
-        }
-
-        if type = params[:type]
-          asset[:content_type] = type
-          asset[:logical_path] += mime_types[type][:extensions].first
-        end
-
-        processors = processors_for(file_type, engine_extnames, params)
-
-        # Read into memory and process if theres a processor pipeline or the
-        # content type is text.
-        if processors.any? || mime_type_charset_detecter(type)
-          data = read_file(asset[:filename], asset[:content_type])
-          metadata = {}
-
-          input = {
-            environment: self,
-            cache: self.cache,
-            uri: asset[:uri],
-            filename: asset[:filename],
-            load_path: asset[:load_path],
-            name: asset[:name],
-            content_type: asset[:content_type],
-            metadata: metadata
-          }
-
-          processors.each do |processor|
-            begin
-              result = processor.call(input.merge(data: data, metadata: metadata))
-              case result
-              when NilClass
-                # noop
-              when Hash
-                data = result[:data] if result.key?(:data)
-                metadata = metadata.merge(result)
-                metadata.delete(:data)
-              when String
-                data = result
-              else
-                raise Error, "invalid processor return type: #{result.class}"
-              end
-            end
+          # Internal assertion, should be routed through load_asset_by_id_uri
+          if params.key?(:id)
+            raise ArgumentError, "expected uri to have no id: #{uri}"
           end
 
-          asset[:source] = data
-          asset[:metadata] = metadata.merge(
-            charset: data.encoding.name.downcase,
-            digest: digest(data),
-            length: data.bytesize
-          )
-        else
-          asset[:metadata] = {
-            digest: file_digest(asset[:filename]),
-            length: self.stat(asset[:filename]).size
+          unless file?(filename)
+            raise FileNotFound, "could not find file: #{filename}"
+          end
+
+          load_path, logical_path = paths_split(self.paths, filename)
+
+          unless load_path
+            raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
+          end
+
+          logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
+          logical_path = normalize_logical_path(logical_path)
+
+          asset = {
+            uri: uri,
+            load_path: load_path,
+            filename: filename,
+            name: logical_path,
+            logical_path: logical_path
           }
+
+          if type = params[:type]
+            asset[:content_type] = type
+            asset[:logical_path] += mime_types[type][:extensions].first
+          end
+
+          processors = processors_for(file_type, engine_extnames, params)
+
+          # Read into memory and process if theres a processor pipeline or the
+          # content type is text.
+          if processors.any? || mime_type_charset_detecter(type)
+            data = read_file(asset[:filename], asset[:content_type])
+            metadata = {}
+
+            input = {
+              environment: self,
+              cache: self.cache,
+              uri: asset[:uri],
+              filename: asset[:filename],
+              load_path: asset[:load_path],
+              name: asset[:name],
+              content_type: asset[:content_type],
+              metadata: metadata
+            }
+
+            processors.each do |processor|
+              begin
+                result = processor.call(input.merge(data: data, metadata: metadata))
+                case result
+                when NilClass
+                  # noop
+                when Hash
+                  data = result[:data] if result.key?(:data)
+                  metadata = metadata.merge(result)
+                  metadata.delete(:data)
+                when String
+                  data = result
+                else
+                  raise Error, "invalid processor return type: #{result.class}"
+                end
+              end
+            end
+
+            asset[:source] = data
+            asset[:metadata] = metadata.merge(
+              charset: data.encoding.name.downcase,
+              digest: digest(data),
+              length: data.bytesize
+            )
+          else
+            asset[:metadata] = {
+              digest: file_digest(asset[:filename]),
+              length: self.stat(asset[:filename]).size
+            }
+          end
+
+          metadata = asset[:metadata]
+          metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
+          metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
+
+          asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
+
+          asset[:id]  = pack_hexdigest(digest(asset))
+          asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
+
+          # Deprecated: Avoid tracking Asset mtime
+          asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
+
+          set_asset_dependency_graph_cache(dep_graph_key, asset)
+          asset
         end
-
-        metadata = asset[:metadata]
-        metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
-
-        asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
-
-        asset[:id]  = pack_hexdigest(digest(asset))
-        asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
-
-        # Deprecated: Avoid tracking Asset mtime
-        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
-
-        asset
       end
 
       def processors_for(file_type, engine_extnames, params)
@@ -166,6 +175,54 @@ module Sprockets
 
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
+      end
+
+      def asset_dependency_graph_cache_key(uri)
+        filename, params = AssetURI.parse(uri)
+
+        _, logical_path = paths_split(self.paths, filename)
+        _, file_type, engine_extnames = parse_path_extnames(logical_path)
+
+        processors = processors_for(file_type, engine_extnames, params)
+        processor_cache_key = processors.map { |proc|
+          proc.respond_to?(:cache_key) ? proc.cache_key : nil
+        }.compact
+
+        [
+          'asset-uri-dep-graph',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          file_digest(filename),
+          processor_cache_key
+        ]
+      end
+
+      def asset_uri_cache_key(uri)
+        [
+          'asset-uri',
+          VERSION,
+          self.version,
+          uri
+        ]
+      end
+
+      def get_asset_dependency_graph_cache(key)
+        return unless cached = cache._get(key)
+        paths, digest, uri = cached
+
+        if files_digest(paths) == digest
+          cache._get(asset_uri_cache_key(uri))
+        end
+      end
+
+      def set_asset_dependency_graph_cache(key, asset)
+        uri = asset[:uri]
+        digest, paths = asset[:metadata].values_at(:dependency_sources_digest, :dependency_paths)
+        cache._set(key, [paths, digest, uri])
+        cache.fetch(asset_uri_cache_key(uri)) { asset }
+        asset
       end
   end
 end
