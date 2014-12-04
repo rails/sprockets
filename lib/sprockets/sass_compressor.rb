@@ -16,9 +16,22 @@ module Sprockets
   class SassCompressor
     VERSION = '1'
 
-    def self.call(*args)
-      new.call(*args)
+    # Public: Return singleton instance with default options.
+    #
+    # Returns SassCompressor object.
+    def self.instance
+      @instance ||= new
     end
+
+    def self.call(input)
+      instance.call(input)
+    end
+
+    def cache_key
+      instance.cache_key
+    end
+
+    attr_reader :cache_key
 
     def initialize(options = {})
       @options = options

@@ -2,8 +2,15 @@ require 'erb'
 
 module Sprockets
   class ERBTemplate
+    # Public: Return singleton instance with default options.
+    #
+    # Returns ERBTemplate object.
+    def self.instance
+      @instance ||= new
+    end
+
     def self.call(input)
-      new.call(input)
+      instance.call(input)
     end
 
     def initialize(&block)
