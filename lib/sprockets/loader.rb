@@ -49,46 +49,57 @@ module Sprockets
       end
 
       def load_asset_by_uri(uri)
-        dep_graph_key = asset_dependency_graph_cache_key(uri)
+        filename, params = AssetURI.parse(uri)
 
-        if asset = get_asset_dependency_graph_cache(dep_graph_key)
-          asset
+        # Internal assertion, should be routed through load_asset_by_id_uri
+        if params.key?(:id)
+          raise ArgumentError, "expected uri to have no id: #{uri}"
+        end
+
+        unless file?(filename)
+          raise FileNotFound, "could not find file: #{filename}"
+        end
+
+        load_path, logical_path = paths_split(self.paths, filename)
+
+        unless load_path
+          raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
+        end
+
+        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path = normalize_logical_path(logical_path)
+
+        asset = {
+          uri: uri,
+          load_path: load_path,
+          filename: filename,
+          name: logical_path,
+          logical_path: logical_path
+        }
+
+        if type = params[:type]
+          asset[:content_type] = type
+          asset[:logical_path] += mime_types[type][:extensions].first
+        end
+
+        processors = processors_for(file_type, engine_extnames, params)
+        processor_cache_key = processors.map { |proc|
+          proc.respond_to?(:cache_key) ? proc.cache_key : nil
+        }.compact
+
+        dep_graph_key = [
+          'asset-uri-dep-graph',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          file_digest(filename),
+          processor_cache_key
+        ]
+
+        if cached_asset = get_asset_dependency_graph_cache(dep_graph_key)
+          cached_asset
         else
-          filename, params = AssetURI.parse(uri)
-
-          # Internal assertion, should be routed through load_asset_by_id_uri
-          if params.key?(:id)
-            raise ArgumentError, "expected uri to have no id: #{uri}"
-          end
-
-          unless file?(filename)
-            raise FileNotFound, "could not find file: #{filename}"
-          end
-
-          load_path, logical_path = paths_split(self.paths, filename)
-
-          unless load_path
-            raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
-          end
-
-          logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
-          logical_path = normalize_logical_path(logical_path)
-
-          asset = {
-            uri: uri,
-            load_path: load_path,
-            filename: filename,
-            name: logical_path,
-            logical_path: logical_path
-          }
-
-          if type = params[:type]
-            asset[:content_type] = type
-            asset[:logical_path] += mime_types[type][:extensions].first
-          end
-
-          processors = processors_for(file_type, engine_extnames, params)
-
           # Read into memory and process if theres a processor pipeline or the
           # content type is text.
           if processors.any? || mime_type_charset_detecter(type)
@@ -175,28 +186,6 @@ module Sprockets
 
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
-      end
-
-      def asset_dependency_graph_cache_key(uri)
-        filename, params = AssetURI.parse(uri)
-
-        _, logical_path = paths_split(self.paths, filename)
-        _, file_type, engine_extnames = parse_path_extnames(logical_path)
-
-        processors = processors_for(file_type, engine_extnames, params)
-        processor_cache_key = processors.map { |proc|
-          proc.respond_to?(:cache_key) ? proc.cache_key : nil
-        }.compact
-
-        [
-          'asset-uri-dep-graph',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          file_digest(filename),
-          processor_cache_key
-        ]
       end
 
       def asset_uri_cache_key(uri)
