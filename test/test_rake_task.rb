@@ -43,26 +43,6 @@ class TestRakeTask < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
-  test "clean" do
-    digest_path = @env['application.js'].digest_path
-
-    @rake[:assets].invoke
-    assert File.exist?("#{@dir}/#{digest_path}")
-
-    @rake[:clean_assets].invoke
-    assert File.exist?("#{@dir}/#{digest_path}")
-  end
-
-  test "clean with keep" do
-    digest_path = @env['application.js'].digest_path
-
-    @rake[:assets].invoke
-    assert File.exist?("#{@dir}/#{digest_path}")
-
-    @rake[:clean_assets].invoke(1)
-    assert File.exist?("#{@dir}/#{digest_path}")
-  end
-
   test "clobber" do
     digest_path = @env['application.js'].digest_path
 
@@ -70,7 +50,7 @@ class TestRakeTask < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
 
     @rake[:clobber_assets].invoke
-    refute File.exist?("#{@dir}/#{digest_path}")
+    assert !File.exist?("#{@dir}/#{digest_path}")
   end
 
   test "custom manifest" do
