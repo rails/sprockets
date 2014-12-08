@@ -111,7 +111,7 @@ module Sprockets
     # Internal: Maps digest class to the named information hash algorithm name.
     #
     # http://www.iana.org/assignments/named-information/named-information.xhtml
-    NI_HASH_ALGORIHMS = {
+    NI_HASH_ALGORITHMS = {
       Digest::SHA256 => 'sha-256'.freeze,
       Digest::SHA384 => 'sha-384'.freeze,
       Digest::SHA512 => 'sha-512'.freeze
@@ -137,7 +137,7 @@ module Sprockets
         raise TypeError, "unknown digest: #{digest.inspect}"
       end
 
-      if hash_name = NI_HASH_ALGORIHMS[digest_class]
+      if hash_name = NI_HASH_ALGORITHMS[digest_class]
         uri = "ni:///#{hash_name};#{pack_urlsafe_base64digest(digest)}"
         uri << "?ct=#{content_type}" if content_type
         uri
