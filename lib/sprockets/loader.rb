@@ -58,8 +58,6 @@ module Sprockets
           raise FileNotFound, "could not find file: #{filename}"
         end
 
-
-        type = params[:type]
         load_path, logical_path = paths_split(self.paths, filename)
 
         unless load_path
@@ -77,29 +75,12 @@ module Sprockets
           logical_path: logical_path
         }
 
-        if type
+        if type = params[:type]
           asset[:content_type] = type
           asset[:logical_path] += mime_types[type][:extensions].first
         end
 
-        if type != file_type
-          transformers = unwrap_transformer(file_type, type)
-          unless transformers.any?
-            raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
-          end
-        else
-          transformers = []
-        end
-
-        processed_processors = unwrap_preprocessors(file_type) +
-          unwrap_engines(engine_extnames).reverse +
-          transformers +
-          unwrap_postprocessors(type)
-
-        bundled_processors = params[:skip_bundle] ? [] : unwrap_bundle_processors(type)
-
-        processors = bundled_processors.any? ? bundled_processors : processed_processors
-        processors += unwrap_encoding_processors(params[:encoding])
+        processors = processors_for(file_type, engine_extnames, params)
 
         # Read into memory and process if theres a processor pipeline or the
         # content type is text.
@@ -160,6 +141,29 @@ module Sprockets
         asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
 
         asset
+      end
+
+      def processors_for(file_type, engine_extnames, params)
+        type = params[:type]
+
+        if type != file_type
+          transformers = unwrap_transformer(file_type, type)
+          unless transformers.any?
+            raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
+          end
+        else
+          transformers = []
+        end
+
+        processed_processors = unwrap_preprocessors(file_type) +
+          unwrap_engines(engine_extnames).reverse +
+          transformers +
+          unwrap_postprocessors(type)
+
+        bundled_processors = params[:skip_bundle] ? [] : unwrap_bundle_processors(type)
+
+        processors = bundled_processors.any? ? bundled_processors : processed_processors
+        processors += unwrap_encoding_processors(params[:encoding])
       end
   end
 end
