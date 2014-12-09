@@ -17,6 +17,7 @@ module Sprockets
   autoload :EcoTemplate,             'sprockets/eco_template'
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :ES6to5Processor,         'sprockets/es6to5_processor'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassTemplate,            'sprockets/sass_template'
@@ -142,6 +143,11 @@ module Sprockets
   register_compressor 'application/javascript', :uglifier, LazyProcessor.new { UglifierCompressor }
   register_compressor 'application/javascript', :uglify, LazyProcessor.new { UglifierCompressor }
   register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
+
+  # 6to5, TheFuture™ is now
+  register_mime_type 'text/ecmascript-6', extensions: ['.es6'], charset: EncodingUtils::DETECT_UNICODE
+  register_transformer 'text/ecmascript-6', 'application/javascript',  LazyProcessor.new { ES6to5Processor }
+  register_preprocessor 'text/ecmascript-6', DirectiveProcessor
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee']

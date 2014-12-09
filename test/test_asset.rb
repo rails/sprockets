@@ -1063,8 +1063,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "baz-ng.js", logical_path("baz-ng.js.ngt")
 
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
-    assert_equal "traceur.js", logical_path("traceur.es6")
-    assert_equal "traceur.js", logical_path("traceur.js.es6")
+    assert_equal "traceur.js", logical_path("traceur.es6", accept: "application/javascript")
   end
 
   def logical_path(path, options = {})
@@ -1131,8 +1130,7 @@ class AssetContentTypeTest < Sprockets::TestCase
 
     assert_equal nil, content_type("sprite.css.embed")
 
-    assert_equal "application/javascript", content_type("traceur.es6")
-    assert_equal "application/javascript", content_type("traceur.js.es6")
+    assert_equal "application/javascript", content_type("traceur.es6", accept: "application/javascript")
   end
 
   def content_type(path, options = {})
