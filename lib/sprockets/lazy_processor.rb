@@ -1,7 +1,7 @@
 module Sprockets
   # Internal: Used for lazy loading processors.
   #
-  #   LazyProcessor.new { CoffeeScriptTemplate }
+  #   LazyProcessor.new { CoffeeScriptProcessor }
   #
   class LazyProcessor
     def initialize(&block)

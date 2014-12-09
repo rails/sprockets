@@ -11,17 +11,17 @@ module Sprockets
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
   autoload :ClosureCompressor,       'sprockets/closure_compressor'
-  autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
+  autoload :CoffeeScriptProcessor,   'sprockets/coffee_script_processor'
   autoload :Context,                 'sprockets/context'
   autoload :DirectiveProcessor,      'sprockets/directive_processor'
-  autoload :EcoTemplate,             'sprockets/eco_template'
-  autoload :EjsTemplate,             'sprockets/ejs_template'
-  autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :EcoProcessor,            'sprockets/eco_processor'
+  autoload :EjsProcessor,            'sprockets/ejs_processor'
+  autoload :ERBProcessor,            'sprockets/erb_processor'
   autoload :ES6to5Processor,         'sprockets/es6to5_processor'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
-  autoload :SassTemplate,            'sprockets/sass_template'
-  autoload :ScssTemplate,            'sprockets/sass_template'
+  autoload :SassProcessor,           'sprockets/sass_processor'
+  autoload :ScssProcessor,           'sprockets/sass_processor'
   autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
   autoload :YUICompressor,           'sprockets/yui_compressor'
 
@@ -151,24 +151,24 @@ module Sprockets
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee']
-  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new { CoffeeScriptTemplate }
+  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new { CoffeeScriptProcessor }
   register_preprocessor 'text/coffeescript', DirectiveProcessor
 
   # JST engines
   register_mime_type 'text/eco', extensions: ['.eco']
   register_mime_type 'text/ejs', extensions: ['.ejs']
   register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
-  register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
-  register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
+  register_engine '.eco',    LazyProcessor.new { EcoProcessor },  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProcessor.new { EjsProcessor },  mime_type: 'application/javascript'
 
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass']
   register_mime_type 'text/scss', extensions: ['.scss']
-  register_transformer 'text/sass', 'text/css', LazyProcessor.new { SassTemplate }
-  register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssTemplate }
+  register_transformer 'text/sass', 'text/css', LazyProcessor.new { SassProcessor }
+  register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssProcessor }
   register_preprocessor 'text/sass', DirectiveProcessor
   register_preprocessor 'text/scss', DirectiveProcessor
 
   # Other
-  register_engine '.erb',    LazyProcessor.new { ERBTemplate }, mime_type: 'text/plain'
+  register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
 end

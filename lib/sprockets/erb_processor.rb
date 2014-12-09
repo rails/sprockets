@@ -1,7 +1,7 @@
 require 'erb'
 
 module Sprockets
-  class ERBTemplate
+  class ERBProcessor
     def self.call(input)
       new.call(input)
     end

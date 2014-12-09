@@ -3,15 +3,15 @@ require 'sass'
 require 'uri'
 
 module Sprockets
-  # Template engine class for the SASS/SCSS compiler. Depends on the `sass` gem.
+  # Processor engine class for the SASS/SCSS compiler. Depends on the `sass` gem.
   #
   # For more infomation see:
   #
   #   https://github.com/sass/sass
   #   https://github.com/rails/sass-rails
   #
-  class SassTemplate
-    # Internal: Defines default sass syntax to use. Exposed so the ScssTemplate
+  class SassProcessor
+    # Internal: Defines default sass syntax to use. Exposed so the ScssProcessor
     # may override it.
     def self.syntax
       :sass
@@ -72,7 +72,7 @@ module Sprockets
     # Sass environments. Though, scoping your functions to just your environment
     # is preferred.
     #
-    # module Sprockets::SassTemplate::Functions
+    # module Sprockets::SassProcessor::Functions
     #   def asset_path(path, options = {})
     #   end
     # end
@@ -275,9 +275,15 @@ module Sprockets
     end
   end
 
-  class ScssTemplate < SassTemplate
+  class ScssProcessor < SassProcessor
     def self.syntax
       :scss
     end
   end
+
+  # Deprecated: Use Sprockets::SassProcessor::Functions instead.
+  SassFunctions = SassProcessor::Functions
+
+  # Deprecated: Use Sprockets::SassProcessor::CacheStore instead.
+  SassCacheStore = SassProcessor::CacheStore
 end

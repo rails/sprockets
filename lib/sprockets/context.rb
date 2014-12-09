@@ -3,7 +3,7 @@ require 'set'
 require 'sprockets/errors'
 
 module Sprockets
-  # Deprecated: `Context` provides helper methods to all `Template` processors.
+  # Deprecated: `Context` provides helper methods to all processors.
   # They are typically accessed by ERB templates. You can mix in custom helpers
   # by injecting them into `Environment#context_class`. Do not mix them into
   # `Context` directly.

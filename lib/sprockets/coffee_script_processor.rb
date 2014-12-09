@@ -2,20 +2,20 @@ require 'coffee_script'
 require 'source_map'
 
 module Sprockets
-  # Template engine class for the CoffeeScript compiler.
-  # Depends on the `coffee-script` and `coffee-script-source` gems.
+  # Processor engine class for the CoffeeScript compiler.
+  # Depends on the `coffeescript` and `coffeescriptsource` gems.
   #
   # For more infomation see:
   #
-  #   https://github.com/josh/ruby-coffee-script
+  #   https://github.com/josh/rubycoffeescript
   #
-  module CoffeeScriptTemplate
+  module CoffeeScriptProcessor
     VERSION = '2'
     SOURCE_VERSION = ::CoffeeScript::Source.version
 
     def self.call(input)
       data = input[:data]
-      key  = ['CoffeeScriptTemplate', SOURCE_VERSION, VERSION, data]
+      key  = [self.name, SOURCE_VERSION, VERSION, data]
 
       result = input[:cache].fetch(key) do
         ::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:name]])
