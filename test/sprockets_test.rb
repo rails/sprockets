@@ -42,9 +42,6 @@ Sprockets.register_engine '.mustache', NoopProcessor, mime_type: 'application/ja
 Sprockets.register_mime_type 'text/x-handlebars-template', extensions: ['.handlebars']
 Sprockets.register_engine '.handlebars', NoopProcessor, mime_type: 'application/javascript'
 
-Sprockets.register_mime_type 'application/javascript-module', extensions: ['.es6']
-Sprockets.register_engine '.es6', NoopProcessor, mime_type: 'application/javascript'
-
 Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
 Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript'
 

@@ -271,6 +271,12 @@ $app.run(function($templateCache) {
     assert_equal "text/yaml", asset.content_type
   end
 
+  test "es6 asset" do
+    assert asset = @env.find_asset("future.js")
+    assert_match(/var square/, asset.to_s)
+    assert_match(/function/, asset.to_s)
+  end
+
   test "find html builder asset" do
     assert asset = @env.find_asset("nokogiri-html.html")
     assert_equal "text/html", asset.content_type
