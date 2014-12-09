@@ -14,16 +14,17 @@ module Sprockets
     end
 
     def initialize(options = {})
-      @options = {blacklist: []}.merge(options)
-      @options[:blacklist] << 'useStrict'
-      @options[:sourceMap] = true
+      @options = options.merge({
+        'blacklist' => (options['blacklist'] || []) + ['useStrict'],
+        'sourceMap' => true
+      }).freeze
 
       @cache_key = [
         self.class.name,
         SOURCE_VERSION,
         VERSION,
         @options
-      ]
+      ].freeze
     end
 
     def call(input)
