@@ -7,11 +7,11 @@ module Sprockets
   #
   # An engine is a type of processor that is bound to a filename
   # extension. `application.js.coffee` indicates that the
-  # `CoffeeScriptTemplate` engine will be ran on the file.
+  # `CoffeeScriptProcessor` engine will be ran on the file.
   #
   # Extensions can be stacked and will be evaulated from right to
-  # left. `application.js.coffee.erb` will first run `ERBTemplate`
-  # then `CoffeeScriptTemplate`.
+  # left. `application.js.coffee.erb` will first run `ERBProcessor`
+  # then `CoffeeScriptProcessor`.
   #
   # All `Engine`s must follow the `Template` interface. It is
   # recommended to subclass `Template`.
@@ -23,7 +23,7 @@ module Sprockets
   #
   # The global registry is exposed for plugins to register themselves.
   #
-  #     Sprockets.register_engine '.sass', SassTemplate
+  #     Sprockets.register_engine '.sass', SassProcessor
   #
   module Engines
     # Returns a `Hash` of `Engine`s registered on the `Environment`.
@@ -31,7 +31,7 @@ module Sprockets
     # that extension will be returned.
     #
     #     environment.engines
-    #     # => {".coffee" => CoffeeScriptTemplate, ".sass" => SassTemplate, ...}
+    #     # => {".coffee" => CoffeeScriptProcessor, ".sass" => SassProcessor, ...}
     #
     attr_reader :engines
 
@@ -56,7 +56,7 @@ module Sprockets
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
-    #     environment.register_engine '.coffee', CoffeeScriptTemplate
+    #     environment.register_engine '.coffee', CoffeeScriptProcessor
     #
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)

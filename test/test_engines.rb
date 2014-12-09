@@ -1,7 +1,7 @@
 require 'sprockets_test'
 require 'sprockets/engines'
 
-class AlertTemplate
+class AlertProcessor
   def self.default_mime_type
     'application/javascript'
   end
@@ -15,7 +15,7 @@ class AlertTemplate
   end
 end
 
-class StringTemplate
+class StringProcessor
   def initialize(file, &block)
     @data = block.call
   end
@@ -28,7 +28,7 @@ end
 class TestEngines < Sprockets::TestCase
   test "registering engine" do
     env = new_environment
-    env.register_engine ".alert", AlertTemplate
+    env.register_engine ".alert", AlertProcessor
     asset = env["hello.alert"]
     assert_equal 'alert("Hello world!\n");', asset.to_s
     assert_equal 'application/javascript', asset.content_type

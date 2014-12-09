@@ -1,13 +1,13 @@
 require 'sprockets_test'
-require 'sprockets/ejs_template'
+require 'sprockets/ejs_processor'
 
-class TestEjsTemplate < Sprockets::TestCase
+class TestEjsProcessor < Sprockets::TestCase
   test "compile ejs template to js" do
     input = {
       content_type: 'application/javascript',
       data: "<span>Hello, <%= name %></p>",
       cache: Sprockets::Cache.new
     }
-    assert Sprockets::EjsTemplate.call(input).match(/<span>Hello, /)
+    assert Sprockets::EjsProcessor.call(input).match(/<span>Hello, /)
   end
 end
