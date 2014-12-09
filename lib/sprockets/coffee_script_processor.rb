@@ -3,11 +3,11 @@ require 'source_map'
 
 module Sprockets
   # Processor engine class for the CoffeeScript compiler.
-  # Depends on the `coffeescript` and `coffeescriptsource` gems.
+  # Depends on the `coffee-script` and `coffee-script-source` gems.
   #
   # For more infomation see:
   #
-  #   https://github.com/josh/rubycoffeescript
+  #   https://github.com/josh/ruby-coffee-script
   #
   module CoffeeScriptProcessor
     VERSION = '2'
