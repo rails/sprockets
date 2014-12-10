@@ -47,7 +47,8 @@ module Sprockets
       extnames = Array(options[:extensions])
 
       charset = options[:charset]
-      charset ||= EncodingUtils::DETECT if mime_type.start_with?('text/')
+      charset ||= :default if mime_type.start_with?('text/')
+      charset = EncodingUtils::CHARSET_DETECT[charset] if charset.is_a?(Symbol)
 
       mutate_config(:mime_exts) do |mime_exts|
         extnames.each do |extname|
