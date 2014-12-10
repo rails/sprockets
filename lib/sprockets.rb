@@ -145,7 +145,7 @@ module Sprockets
   register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
 
   # 6to5, TheFuture™ is now
-  register_mime_type 'text/ecmascript-6', extensions: ['.es6'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'text/ecmascript-6', extensions: ['.es6'], charset: :unicode
   register_transformer 'text/ecmascript-6', 'application/javascript',  LazyProcessor.new { ES6to5Processor }
   register_preprocessor 'text/ecmascript-6', DirectiveProcessor
 
