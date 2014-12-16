@@ -700,7 +700,9 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "disabling default directive preprocessor" do
-    @env.unregister_preprocessor('application/javascript', Sprockets::DirectiveProcessor)
+    assert processor = @env.preprocessors['application/javascript'][0]
+    assert_kind_of Sprockets::DirectiveProcessor, processor
+    @env.unregister_preprocessor('application/javascript', processor)
     assert_equal "// =require \"notfound\"\n", @env["missing_require.js"].to_s
   end
 end

@@ -16,19 +16,26 @@ module Sprockets
   class ClosureCompressor
     VERSION = '1'
 
-    def self.call(*args)
-      new.call(*args)
+    # Public: Return singleton instance with default options.
+    #
+    # Returns ClosureCompressor object.
+    def self.instance
+      @instance ||= new
+    end
+
+    def self.call(input)
+      instance.call(input)
     end
 
     def initialize(options = {})
       @compiler = ::Closure::Compiler.new(options)
       @cache_key = [
-        'ClosureCompressor',
+        self.class.name,
         ::Closure::VERSION,
         ::Closure::COMPILER_VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)

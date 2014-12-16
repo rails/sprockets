@@ -36,24 +36,6 @@ module Sprockets
   class DirectiveProcessor
     VERSION = '1'
 
-    # Directives will only be picked up if they are in the header
-    # of the source file. C style (/* */), JavaScript (//), and
-    # Ruby (#) comments are supported.
-    #
-    # Directives in comments after the first non-whitespace line
-    # of code will not be processed.
-    #
-    HEADER_PATTERN = /
-      \A (
-        (?m:\s*) (
-          (\/\* (?m:.*?) \*\/) |
-          (\#\#\# (?m:.*?) \#\#\#) |
-          (\/\/ .* \n?)+ |
-          (\# .* \n?)+
-        )
-      )+
-    /x
-
     # Directives are denoted by a `=` followed by the name, then
     # argument list.
     #
@@ -67,11 +49,26 @@ module Sprockets
       ^ \W* = \s* (\w+.*?) (\*\/)? $
     /x
 
+    def self.instance
+      @instance ||= new(
+        # Deprecated: Default to C and Ruby comment styles
+        comments: ["//", ["/*", "*/"]] + ["#", ["###", "###"]]
+      )
+    end
+
     def self.call(input)
-      new.call(input)
+      instance.call(input)
+    end
+
+    def initialize(options = {})
+      @header_pattern = compile_header_pattern(Array(options[:comments]))
     end
 
     def call(input)
+      dup._call(input)
+    end
+
+    def _call(input)
       @environment  = input[:environment]
       @uri          = input[:uri]
       @load_path    = input[:load_path]
@@ -99,8 +96,28 @@ module Sprockets
     end
 
     protected
+      # Directives will only be picked up if they are in the header
+      # of the source file. C style (/* */), JavaScript (//), and
+      # Ruby (#) comments are supported.
+      #
+      # Directives in comments after the first non-whitespace line
+      # of code will not be processed.
+      def compile_header_pattern(comments)
+        re = comments.map { |c|
+          case c
+          when String
+            "(?:#{Regexp.escape(c)}.*\\n?)+"
+          when Array
+            "(?:#{Regexp.escape(c[0])}(?m:.*?)#{Regexp.escape(c[1])})"
+          else
+            raise TypeError, "unknown comment type: #{c.class}"
+          end
+        }.join("|")
+        Regexp.compile("\\A(?:(?m:\\s*)(?:#{re}))+")
+      end
+
       def process_source(source)
-        header = source[HEADER_PATTERN, 0] || ""
+        header = source[@header_pattern, 0] || ""
         body   = $' || source
 
         header, directives = extract_directives(header)

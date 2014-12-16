@@ -110,8 +110,12 @@ module Sprockets
   register_encoding :base64,  EncodingUtils::BASE64
 
   require 'sprockets/directive_processor'
-  register_preprocessor 'text/css', DirectiveProcessor
-  register_preprocessor 'application/javascript', DirectiveProcessor
+  register_preprocessor 'text/css', DirectiveProcessor.new(
+    comments: ["//", ["/*", "*/"]]
+  )
+  register_preprocessor 'application/javascript', DirectiveProcessor.new(
+    comments: ["//", ["/*", "*/"]] + ["#", ["###", "###"]]
+  )
 
   require 'sprockets/bundle'
   register_bundle_processor 'application/javascript', Bundle
