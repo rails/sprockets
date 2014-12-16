@@ -50,10 +50,8 @@ module Sprockets
     /x
 
     def self.instance
-      @instance ||= new(
-        # Deprecated: Default to C and Ruby comment styles
-        comments: ["//", ["/*", "*/"]] + ["#", ["###", "###"]]
-      )
+      # Default to C omment styles
+      @instance ||= new(comments: ["//", ["/*", "*/"]])
     end
 
     def self.call(input)

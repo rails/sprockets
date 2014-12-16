@@ -110,12 +110,8 @@ module Sprockets
   register_encoding :base64,  EncodingUtils::BASE64
 
   require 'sprockets/directive_processor'
-  register_preprocessor 'text/css', DirectiveProcessor.new(
-    comments: ["//", ["/*", "*/"]]
-  )
-  register_preprocessor 'application/javascript', DirectiveProcessor.new(
-    comments: ["//", ["/*", "*/"]] + ["#", ["###", "###"]]
-  )
+  register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   require 'sprockets/bundle'
   register_bundle_processor 'application/javascript', Bundle
@@ -151,12 +147,12 @@ module Sprockets
   # 6to5, TheFuture™ is now
   register_mime_type 'text/ecmascript-6', extensions: ['.es6'], charset: :unicode
   register_transformer 'text/ecmascript-6', 'application/javascript',  LazyProcessor.new { ES6to5Processor }
-  register_preprocessor 'text/ecmascript-6', DirectiveProcessor
+  register_preprocessor 'text/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee']
   register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new { CoffeeScriptProcessor }
-  register_preprocessor 'text/coffeescript', DirectiveProcessor
+  register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
   # JST engines
   register_mime_type 'text/eco', extensions: ['.eco']
@@ -170,8 +166,8 @@ module Sprockets
   register_mime_type 'text/scss', extensions: ['.scss']
   register_transformer 'text/sass', 'text/css', LazyProcessor.new { SassProcessor }
   register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssProcessor }
-  register_preprocessor 'text/sass', DirectiveProcessor
-  register_preprocessor 'text/scss', DirectiveProcessor
+  register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
