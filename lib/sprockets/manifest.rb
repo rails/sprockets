@@ -242,8 +242,16 @@ module Sprockets
     end
 
     # Cleanup old assets in the compile directory. By default it will
-    # keep the latest version plus 2 backups.
-    def clean(keep = 2)
+    # keep the latest version, 2 backups and any created within the past hour.
+    #
+    # Examples
+    #
+    #   To force only 1 backup to be kept, set count=1 and age=0.
+    #
+    #   To only keep files created within the last 10 minutes, set count=0 and
+    #   age=600.
+    #
+    def clean(count = 2, age = 3600)
       asset_versions = files.group_by { |_, attrs| attrs['logical_path'] }
 
       asset_versions.each do |logical_path, versions|
@@ -254,13 +262,14 @@ module Sprockets
         }.sort_by { |_, attrs|
           # Sort by timestamp
           Time.parse(attrs['mtime'])
-        }.reverse
-
-        # Keep the last N backups
-        backups = backups[keep..-1] || []
-
-        # Remove old assets
-        backups.each { |path, _| remove(path) }
+        }.reverse.each_with_index.drop_while { |(_, attrs), index|
+          age = [0, Time.now - Time.parse(attrs['mtime'])].max
+          # Keep if under age or within the count limit
+          age < age || index < count
+        }.each { |(path, _), _|
+           # Remove old assets
+          remove(path)
+        }
       end
     end
 
