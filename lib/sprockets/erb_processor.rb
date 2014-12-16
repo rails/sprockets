@@ -2,8 +2,15 @@ require 'erb'
 
 module Sprockets
   class ERBProcessor
+    # Public: Return singleton instance with default options.
+    #
+    # Returns ERBProcessor object.
+    def self.instance
+      @instance ||= new
+    end
+
     def self.call(input)
-      new.call(input)
+      instance.call(input)
     end
 
     def initialize(&block)

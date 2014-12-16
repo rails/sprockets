@@ -16,18 +16,25 @@ module Sprockets
   class YUICompressor
     VERSION = '1'
 
-    def self.call(*args)
-      new.call(*args)
+    # Public: Return singleton instance with default options.
+    #
+    # Returns YUICompressor object.
+    def self.instance
+      @instance ||= new
+    end
+
+    def self.call(input)
+      instance.call(input)
     end
 
     def initialize(options = {})
       @options = options
       @cache_key = [
-        'YUICompressor',
+        self.class.name,
         ::YUI::Compressor::VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)

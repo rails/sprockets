@@ -16,8 +16,15 @@ module Sprockets
   class UglifierCompressor
     VERSION = '1'
 
-    def self.call(*args)
-      new.call(*args)
+    # Public: Return singleton instance with default options.
+    #
+    # Returns UglifierCompressor object.
+    def self.instance
+      @instance ||= new
+    end
+
+    def self.call(input)
+      instance.call(input)
     end
 
     def initialize(options = {})
@@ -33,11 +40,11 @@ module Sprockets
       @uglifier = ::Uglifier.new(options)
 
       @cache_key = [
-        'UglifierCompressor',
+        self.class.name,
         ::Uglifier::VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)
