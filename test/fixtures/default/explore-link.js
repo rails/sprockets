@@ -1,1 +1,1 @@
-#= link gallery-link.js
+//= link gallery-link.js

@@ -83,6 +83,9 @@ module Sprockets
 
     ## Charset encodings ##
 
+    # Internal: Shorthand aliases for detecter functions.
+    CHARSET_DETECT = {}
+
     # Internal: Mapping unicode encodings to byte order markers.
     BOM = {
       Encoding::UTF_32LE => [0xFF, 0xFE, 0x00, 0x00],
@@ -115,9 +118,7 @@ module Sprockets
 
       str
     end
-
-    # Public: Alias for EncodingUtils.detect_unicode
-    DETECT = method(:detect)
+    CHARSET_DETECT[:default] = method(:detect)
 
     # Internal: Use Charlock Holmes to detect encoding.
     #
@@ -151,9 +152,7 @@ module Sprockets
 
       str
     end
-
-    # Public: Alias for EncodingUtils.detect_unicode
-    DETECT_UNICODE = method(:detect_unicode)
+    CHARSET_DETECT[:unicode] = method(:detect_unicode)
 
     # Public: Detect and strip BOM from possible unicode string.
     #
@@ -201,9 +200,7 @@ module Sprockets
 
       str
     end
-
-    # Public: Alias for EncodingUtils.detect_css
-    DETECT_CSS = method(:detect_css)
+    CHARSET_DETECT[:css] = method(:detect_css)
 
     # Internal: @charset bytes
     CHARSET_START = [0x40, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x20, 0x22]
@@ -263,8 +260,6 @@ module Sprockets
 
       str
     end
-
-    # Public: Alias for EncodingUtils.detect_html
-    DETECT_HTML = method(:detect_html)
+    CHARSET_DETECT[:html] = method(:detect_html)
   end
 end

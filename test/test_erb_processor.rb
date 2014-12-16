@@ -1,7 +1,7 @@
 require 'sprockets_test'
-require 'sprockets/erb_template'
+require 'sprockets/erb_processor'
 
-class TestERBTemplate < Sprockets::TestCase
+class TestERBProcessor < Sprockets::TestCase
   test "compile js erb template" do
     environment = Sprockets::Environment.new
 
@@ -15,7 +15,7 @@ class TestERBTemplate < Sprockets::TestCase
     }
 
     output = "var data = {\"foo\":true};"
-    assert_equal output, Sprockets::ERBTemplate.call(input)[:data]
+    assert_equal output, Sprockets::ERBProcessor.call(input)[:data]
   end
 
   test "compile erb template with depend_on call" do
@@ -33,7 +33,7 @@ class TestERBTemplate < Sprockets::TestCase
     }
 
     output = "var data = 'DATA';"
-    result = Sprockets::ERBTemplate.call(input)
+    result = Sprockets::ERBProcessor.call(input)
     assert_equal output, result[:data]
     assert_equal path, result[:dependency_paths].first
   end
@@ -41,7 +41,7 @@ class TestERBTemplate < Sprockets::TestCase
   test "pass custom erb helpers to template" do
     environment = Sprockets::Environment.new
 
-    template = Sprockets::ERBTemplate.new do
+    template = Sprockets::ERBProcessor.new do
       def foo
         :bar
       end

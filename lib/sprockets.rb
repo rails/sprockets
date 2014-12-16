@@ -11,15 +11,21 @@ module Sprockets
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
   autoload :ClosureCompressor,       'sprockets/closure_compressor'
+  autoload :CoffeeScriptProcessor,   'sprockets/coffee_script_processor'
   autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
   autoload :Context,                 'sprockets/context'
   autoload :DirectiveProcessor,      'sprockets/directive_processor'
+  autoload :EcoProcessor,            'sprockets/eco_processor'
   autoload :EcoTemplate,             'sprockets/eco_template'
+  autoload :EjsProcessor,            'sprockets/ejs_processor'
   autoload :EjsTemplate,             'sprockets/ejs_template'
+  autoload :ERBProcessor,            'sprockets/erb_processor'
   autoload :ERBTemplate,             'sprockets/erb_template'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
+  autoload :SassProcessor,           'sprockets/sass_processor'
   autoload :SassTemplate,            'sprockets/sass_template'
+  autoload :ScssProcessor,           'sprockets/sass_processor'
   autoload :ScssTemplate,            'sprockets/sass_template'
   autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
   autoload :YUICompressor,           'sprockets/yui_compressor'
@@ -69,13 +75,13 @@ module Sprockets
   @logger.level = Logger::FATAL
 
   # Common asset text types
-  register_mime_type 'application/javascript', extensions: ['.js'], charset: EncodingUtils::DETECT_UNICODE
-  register_mime_type 'application/json', extensions: ['.json'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'application/javascript', extensions: ['.js'], charset: :unicode
+  register_mime_type 'application/json', extensions: ['.json'], charset: :unicode
   register_mime_type 'application/xml', extensions: ['.xml']
-  register_mime_type 'text/css', extensions: ['.css'], charset: EncodingUtils::DETECT_CSS
-  register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: EncodingUtils::DETECT_HTML
+  register_mime_type 'text/css', extensions: ['.css'], charset: :css
+  register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: :html
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
-  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: EncodingUtils::DETECT_UNICODE
+  register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: :unicode
 
   # Common image types
   register_mime_type 'image/x-icon', extensions: ['.ico']
@@ -109,8 +115,12 @@ module Sprockets
   register_encoding :base64,  EncodingUtils::BASE64
 
   require 'sprockets/directive_processor'
-  register_preprocessor 'text/css', DirectiveProcessor
-  register_preprocessor 'application/javascript', DirectiveProcessor
+  register_preprocessor 'text/css', DirectiveProcessor.new(
+    comments: ["//", ["/*", "*/"]]
+  )
+  register_preprocessor 'application/javascript', DirectiveProcessor.new(
+    comments: ["//", ["/*", "*/"]] + ["#", ["###", "###"]]
+  )
 
   require 'sprockets/bundle'
   register_bundle_processor 'application/javascript', Bundle
@@ -130,21 +140,21 @@ module Sprockets
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee']
-  register_engine '.coffee', LazyProcessor.new { CoffeeScriptTemplate }, mime_type: 'application/javascript'
+  register_engine '.coffee', LazyProcessor.new { CoffeeScriptProcessor }, mime_type: 'application/javascript'
 
   # JST engines
   register_mime_type 'text/eco', extensions: ['.eco']
   register_mime_type 'text/ejs', extensions: ['.ejs']
   register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
-  register_engine '.eco',    LazyProcessor.new { EcoTemplate },  mime_type: 'application/javascript'
-  register_engine '.ejs',    LazyProcessor.new { EjsTemplate },  mime_type: 'application/javascript'
+  register_engine '.eco',    LazyProcessor.new { EcoProcessor },  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProcessor.new { EjsProcessor },  mime_type: 'application/javascript'
 
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass']
   register_mime_type 'text/scss', extensions: ['.scss']
-  register_engine '.sass',   LazyProcessor.new { SassTemplate }, mime_type: 'text/css'
-  register_engine '.scss',   LazyProcessor.new { ScssTemplate }, mime_type: 'text/css'
+  register_engine '.sass',   LazyProcessor.new { SassProcessor }, mime_type: 'text/css'
+  register_engine '.scss',   LazyProcessor.new { ScssProcessor }, mime_type: 'text/css'
 
   # Other
-  register_engine '.erb',    LazyProcessor.new { ERBTemplate }, mime_type: 'text/plain'
+  register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
 end

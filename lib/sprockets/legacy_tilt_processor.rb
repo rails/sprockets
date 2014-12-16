@@ -6,7 +6,7 @@ module Sprockets
   #
   # Will be removed in Sprockets 4.x.
   #
-  #     LegacyTiltProcessor.new(Tilt::CoffeeScriptTemplate)
+  #     LegacyTiltProcessor.new(Tilt::CoffeeScriptProcessor)
   #
   class LegacyTiltProcessor < Delegator
     def initialize(klass)

@@ -1,2 +1,2 @@
-# Deprecated: Require sprockets/sass_template instead
-require 'sprockets/sass_template'
+# Deprecated: Require sprockets/sass_processor instead
+require 'sprockets/sass_processor'

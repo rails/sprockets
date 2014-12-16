@@ -1,32 +1,6 @@
-require 'eco'
+require 'sprockets/eco_processor'
 
 module Sprockets
-  # Template engine class for the Eco compiler. Depends on the `eco` gem.
-  #
-  # For more infomation see:
-  #
-  #   https://github.com/sstephenson/ruby-eco
-  #   https://github.com/sstephenson/eco
-  #
-  module EcoTemplate
-    VERSION = '1'
-
-    def self.cache_key
-      @cache_key ||= [name, ::Eco::Source::VERSION, VERSION].freeze
-    end
-
-    # Compile template data with Eco compiler.
-    #
-    # Returns a JS function definition String. The result should be
-    # assigned to a JS variable.
-    #
-    #     # => "function(...) {...}"
-    #
-    def self.call(input)
-      data = input[:data]
-      input[:cache].fetch(cache_key + [data]) do
-        ::Eco.compile(data)
-      end
-    end
-  end
+  # Deprecated
+  EcoTemplate = EcoProcessor
 end

@@ -36,11 +36,11 @@ module Sprockets
     def initialize(options = {})
       @options = options
       @cache_key = [
-        'SassCompressor',
+        self.class.name,
         ::Sass::VERSION,
         VERSION,
         options
-      ]
+      ].freeze
     end
 
     def call(input)
