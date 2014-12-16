@@ -244,12 +244,12 @@ module Sprockets
     #
     # Examples
     #
-    #   To force only 1 backup to be kept, set keep=1 and max_age=0.
+    #   To force only 1 backup to be kept, set count=1 and age=0.
     #
-    #   To only keep files created within the last 10 minutes, set keep=0 and
-    #   max_age=600.
+    #   To only keep files created within the last 10 minutes, set count=0 and
+    #   age=600.
     #
-    def clean(keep = 2, max_age = 3600)
+    def clean(count = 2, age = 3600)
       asset_versions = files.group_by { |_, attrs| attrs['logical_path'] }
 
       asset_versions.each do |logical_path, versions|
@@ -262,8 +262,8 @@ module Sprockets
           Time.parse(attrs['mtime'])
         }.reverse.each_with_index.drop_while { |(_, attrs), index|
           age = [0, Time.now - Time.parse(attrs['mtime'])].max
-          # Keep if under max-age or within the keep limit
-          age < max_age || index < keep
+          # Keep if under age or within the count limit
+          age < age || index < count
         }.each { |(path, _), _|
            # Remove old assets
           remove(path)
