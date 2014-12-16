@@ -72,6 +72,10 @@ module Sprockets
     end
 
     def call(input)
+      dup._call(input)
+    end
+
+    def _call(input)
       @environment  = input[:environment]
       @uri          = input[:uri]
       @load_path    = input[:load_path]
