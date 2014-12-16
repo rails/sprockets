@@ -257,7 +257,7 @@ module Sprockets
       asset_versions.each do |logical_path, versions|
         current = assets[logical_path]
 
-        backups = versions.reject { |path, _|
+        versions.reject { |path, _|
           path == current
         }.sort_by { |_, attrs|
           # Sort by timestamp
