@@ -372,6 +372,63 @@ of the bundle. `stub` should only be used at the top level bundle, not
 within any subdependencies.
 
 
+## Processor Interface
+
+Sprockets 2.x was originally design around [Tilt](https://github.com/rtomayko/tilt)'s engine interface. However, starting with 3.x, a new interface has been introduced deprecating Tilt.
+
+Similar to Rack, a processor is a any "callable" (an object that responds to `call`). This maybe a simple Proc or a full class that defines a `def self.call(input)` method. The `call` method accepts an `input` Hash and returns a Hash of metadata.
+
+### input Hash
+
+The `input` Hash defines the following public fields.
+
+* `:data` - String asset contents
+* `:environment` - Current `Sprockets::Environment` instance.
+* `:cache` - A `Sprockets::Cache` instance. See [`Sprockets::Cache#fetch`](https://github.com/sstephenson/sprockets/blob/master/lib/sprockets/cache.rb).
+* `:uri` - String Asset URI.
+* `:filename` - String full path to original file.
+* `:load_path` - String current load path for filename.
+* `:name` - String logical path for filename.
+* `:content_type` - String content type of the output asset.
+* `:metadata` - Hash of processor metadata.
+
+``` ruby
+def self.call(input)
+  input[:cache].fetch("my:cache:key:v1") do
+    # Remove all semicolons from source
+    input[:data].gsub(";", "")
+  end
+end
+```
+
+### return Hash
+
+The processor should return metadata `Hash`. With the exception of the `:data` key, the processor can store arbitrary JSON valid values in this Hash. The data will be stored and exposed on `Asset#metadata`.
+
+The returned `:data` replaces the assets `input[:data]` to the next processor in the chain. Returning a `String` is shorthand for returning `{ data: str }`. And returning `nil` is shorthand for a no-op where the input data is not transformed, `{ data: input[:data] }`.
+
+### metadata
+
+The metadata Hash provides an open format for processors to extend the pipeline processor. Internally, built-in processors use it for passing data to each other.
+
+* `:required` - A `Set` of String Asset URIs that the Bundle processor should concatenate together.
+* `:stubbed` - A `Set` of String Asset URIs that will be omitted from the `:required` set.
+* `:links` - A `Set` of String Asset URIs that should be compiled along with this asset.
+* `:dependency_paths` - A `Set` of String filenames that should be monitored for caching.
+
+``` ruby
+def self.call(input)
+  # Any metadata may start off as nil, so initialize it the value
+  required = Set.new(input[:metadata][:required])
+
+  # Manually add "some_path" to our bundle
+  required << Sprockets::AssetURI.build(some_path, type: "application/javascript")
+
+  { required: required }
+end
+```
+
+
 ## Development
 
 ### Contributing
