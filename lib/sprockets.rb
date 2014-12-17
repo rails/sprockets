@@ -32,7 +32,6 @@ module Sprockets
 
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
-  autoload :AssetURI,                'sprockets/asset_uri'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :DigestUtils,             'sprockets/digest_utils'

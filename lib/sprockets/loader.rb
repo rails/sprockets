@@ -1,4 +1,3 @@
-require 'sprockets/asset_uri'
 require 'sprockets/asset'
 require 'sprockets/digest_utils'
 require 'sprockets/engines'
@@ -8,12 +7,13 @@ require 'sprockets/path_utils'
 require 'sprockets/processing'
 require 'sprockets/resolve'
 require 'sprockets/transformers'
+require 'sprockets/uri_utils'
 
 module Sprockets
   # The loader phase takes a asset URI location and returns a constructed Asset
   # object.
   module Loader
-    include DigestUtils, Engines, Mime, PathUtils, Processing, Resolve, Transformers
+    include DigestUtils, Engines, Mime, PathUtils, URIUtils, Processing, Resolve, Transformers
 
     # Public: Load Asset by AssetURI.
     #
@@ -21,7 +21,7 @@ module Sprockets
     #
     # Returns Asset.
     def load(uri)
-      _, params = AssetURI.parse(uri)
+      _, params = parse_asset_uri(uri)
       asset = params.key?(:id) ?
         load_asset_by_id_uri(uri) :
         load_asset_by_uri(uri)
@@ -30,14 +30,14 @@ module Sprockets
 
     private
       def load_asset_by_id_uri(uri)
-        path, params = AssetURI.parse(uri)
+        path, params = parse_asset_uri(uri)
 
         # Internal assertion, should be routed through load_asset_by_uri
         unless id = params.delete(:id)
           raise ArgumentError, "expected uri to have an id: #{uri}"
         end
 
-        asset = load_asset_by_uri(AssetURI.build(path, params))
+        asset = load_asset_by_uri(build_asset_uri(path, params))
 
         if id && asset[:id] != id
           raise VersionNotFound, "could not find specified id: #{id}"
@@ -47,7 +47,7 @@ module Sprockets
       end
 
       def load_asset_by_uri(uri)
-        filename, params = AssetURI.parse(uri)
+        filename, params = parse_asset_uri(uri)
 
         # Internal assertion, should be routed through load_asset_by_id_uri
         if params.key?(:id)
@@ -137,7 +137,7 @@ module Sprockets
         asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
         asset[:id]  = pack_hexdigest(digest(asset))
-        asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
+        asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
         # Deprecated: Avoid tracking Asset mtime
         asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max

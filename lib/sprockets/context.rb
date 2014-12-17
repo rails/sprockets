@@ -119,7 +119,7 @@ module Sprockets
     end
 
     def locate(path, options = {})
-      if AssetURI.valid?(path)
+      if environment.valid_asset_uri?(path)
         path
       else
         _resolve(:locate, path, options)

@@ -1,4 +1,3 @@
-require 'sprockets/asset_uri'
 require 'sprockets/base'
 
 module Sprockets
@@ -54,7 +53,7 @@ module Sprockets
 
     protected
       def asset_dependency_graph_cache_key(uri)
-        filename, _ = AssetURI.parse(uri)
+        filename, _ = parse_asset_uri(uri)
         [
           'asset-uri-dep-graph',
           VERSION,
