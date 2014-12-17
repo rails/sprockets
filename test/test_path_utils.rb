@@ -1,25 +1,24 @@
-# -*- coding: utf-8 -*-
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/path_utils'
 
-class TestPathUtils < Sprockets::TestCase
+class TestPathUtils < MiniTest::Test
   include Sprockets::PathUtils
 
   DOSISH = File::ALT_SEPARATOR != nil
   DOSISH_DRIVE_LETTER = File.dirname("A:") == "A:."
   DOSISH_UNC = File.dirname("//") == "//"
 
-  test "stat" do
-    assert_kind_of File::Stat, stat(FIXTURE_ROOT)
+  def test_stat
+    assert_kind_of File::Stat, stat(File.expand_path("../fixtures", __FILE__))
     refute stat("/tmp/sprockets/missingfile")
   end
 
-  test "file?" do
-    assert_equal true, file?(File.join(FIXTURE_ROOT, 'default', 'hello.txt'))
-    assert_equal false, file?(FIXTURE_ROOT)
+  def test_file
+    assert_equal true, file?(File.expand_path("../fixtures/default/hello.txt", __FILE__))
+    assert_equal false, file?(File.expand_path("../fixtures", __FILE__))
   end
 
-  test "entries" do
+  def test_entries
     assert_equal [
       "asset",
       "compass",
@@ -36,10 +35,10 @@ class TestPathUtils < Sprockets::TestCase
       "sass",
       "server",
       "symlink"
-    ], entries(FIXTURE_ROOT)
+    ], entries(File.expand_path("../fixtures", __FILE__))
   end
 
-  test "check absolute path" do
+  def test_check_absolute_path
     assert absolute_path?(Dir.pwd)
 
     assert absolute_path?("/foo.rb")
@@ -59,7 +58,7 @@ class TestPathUtils < Sprockets::TestCase
     end
   end
 
-  test "check relative path" do
+  def test_check_relative_path
     assert relative_path?(".")
     assert relative_path?("..")
     assert relative_path?("./")
@@ -81,25 +80,38 @@ class TestPathUtils < Sprockets::TestCase
     refute relative_path?("..foo.rb")
   end
 
-  test "split subpath from root path" do
-    assert_equal "application.js",
-      split_subpath(fixture_path("default"), fixture_path("default/application.js"))
-    assert_equal "application.js",
-      split_subpath(fixture_path("default") + "/", fixture_path("default/application.js"))
-    assert_equal "app/application.js",
-      split_subpath(fixture_path("default"), fixture_path("default/app/application.js"))
-    refute split_subpath(fixture_path("default"), fixture_path("other/app/application.js"))
+  def test_split_subpath_from_root_path
+    path = File.expand_path("../fixtures/default", __FILE__)
+
+    subpath = File.expand_path("../fixtures/default/application.js", __FILE__)
+    assert_equal "application.js", split_subpath(path, subpath)
+
+    subpath = File.expand_path("../fixtures/default/application.js", __FILE__)
+    assert_equal "application.js", split_subpath(path + "/", subpath)
+
+    subpath = File.expand_path("../fixtures/default/app/application.js", __FILE__)
+    assert_equal "app/application.js", split_subpath(path, subpath)
+
+    subpath = File.expand_path("../fixtures/other/app/application.js", __FILE__)
+    refute split_subpath(path, subpath)
   end
 
-  test "split paths root from base" do
-    assert_equal [fixture_path("default"), "application.js"],
-      paths_split([fixture_path("default")], fixture_path("default/application.js"))
-    assert_equal [fixture_path("default"), "app/application.js"],
-      paths_split([fixture_path("default")], fixture_path("default/app/application.js"))
-    refute paths_split([fixture_path("default")], fixture_path("other/app/application.js"))
+  def test_split_paths_root_from_base
+    paths = [File.expand_path("../fixtures/default", __FILE__)]
+
+    filename = File.expand_path("../fixtures/default/application.js", __FILE__)
+    expected = [paths.first, "application.js"]
+    assert_equal expected, paths_split(paths, filename)
+
+    filename = File.expand_path("../fixtures/default/app/application.js", __FILE__)
+    expected = [paths.first, "app/application.js"]
+    assert_equal expected, paths_split(paths, filename)
+
+    filename = File.expand_path("../fixtures/other/app/application.js", __FILE__)
+    refute paths_split(paths, filename)
   end
 
-  test "path extensions" do
+  def test_path_extensions
     assert_equal [".txt"], path_extnames("hello.txt")
     assert_equal [".txt"], path_extnames("sub/hello.txt")
     assert_equal [".txt"], path_extnames("sub.dir/hello.txt")
@@ -109,7 +121,7 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
-  test "path parents" do
+  def test_path_parents
     root = File.expand_path("../..", __FILE__)
 
     assert_kind_of Array, path_parents(File.expand_path(__FILE__))
@@ -117,95 +129,95 @@ class TestPathUtils < Sprockets::TestCase
     assert_equal ["#{root}/test", root],
       path_parents(File.expand_path(__FILE__), root)
     assert_equal ["#{root}/test", root],
-      path_parents(fixture_path(""), root)
+      path_parents("#{root}/test/fixtures/", root)
     assert_equal ["#{root}/test/fixtures", "#{root}/test", root],
-      path_parents(fixture_path("default"), root)
+      path_parents("#{root}/test/fixtures/default", root)
     assert_equal ["#{root}/test/fixtures/default", "#{root}/test/fixtures", "#{root}/test", root],
-      path_parents(fixture_path("default/POW.png"), root)
+      path_parents("#{root}/test/fixtures/default/POW.png", root)
 
     assert_equal ["#{root}/test/fixtures/default", "#{root}/test/fixtures", "#{root}/test"],
-      path_parents(fixture_path("default/POW.png"), "#{root}/test")
+      path_parents("#{root}/test/fixtures/default/POW.png", "#{root}/test")
     assert_equal ["#{root}/test/fixtures/default"],
-      path_parents(fixture_path("default/POW.png"), "#{root}/test/fixtures/default")
+      path_parents("#{root}/test/fixtures/default/POW.png", "#{root}/test/fixtures/default")
   end
 
-  test "find upwards" do
+  def test_find_upwards
     root = File.expand_path("../..", __FILE__)
 
     assert_equal "#{root}/Gemfile",
       find_upwards("Gemfile", File.expand_path(__FILE__))
     assert_equal "#{root}/Gemfile",
-      find_upwards("Gemfile", fixture_path(""))
+      find_upwards("Gemfile", "#{root}/test/fixtures/")
     assert_equal "#{root}/Gemfile",
-      find_upwards("Gemfile", fixture_path("default/POW.png"))
+      find_upwards("Gemfile", "#{root}/test/fixtures/default/POW.png")
 
     assert_equal "#{root}/test/sprockets_test.rb",
-      find_upwards("sprockets_test.rb", fixture_path("default/POW.png"))
+      find_upwards("sprockets_test.rb", "#{root}/test/fixtures/default/POW.png")
   end
 
-  FILES_IN_SERVER = Dir["#{FIXTURE_ROOT}/server/*"]
+  FILES_IN_SERVER = Dir["#{File.expand_path("../fixtures/server", __FILE__)}/*"]
 
-  test "stat directory" do
-    files = stat_directory(File.join(FIXTURE_ROOT, "server")).to_a
+  def test_stat_directory
+    files = stat_directory(File.expand_path("../fixtures/server", __FILE__)).to_a
     assert_equal FILES_IN_SERVER.size, files.size
-    path, stat = stat_directory(File.join(FIXTURE_ROOT, "server")).first
-    assert_equal fixture_path("server/app"), path
+    path, stat = stat_directory(File.expand_path("../fixtures/server", __FILE__)).first
+    assert_equal File.expand_path("../fixtures/server/app", __FILE__), path
     assert_kind_of File::Stat, stat
 
-    assert_equal [], stat_directory(File.join(FIXTURE_ROOT, "missing")).to_a
+    assert_equal [], stat_directory(File.expand_path("../fixtures/missing", __FILE__)).to_a
   end
 
-  test "stat tree" do
-    files = stat_tree(fixture_path("asset/tree/all")).to_a
+  def test_stat_tree
+    files = stat_tree(File.expand_path("../fixtures/asset/tree/all", __FILE__)).to_a
     assert_equal 11, files.size
 
     path, stat = files.first
-    assert_equal fixture_path("asset/tree/all/README.md"), path
+    assert_equal File.expand_path("../fixtures/asset/tree/all/README.md", __FILE__), path
     assert_kind_of File::Stat, stat
 
     assert_equal [
-      fixture_path("asset/tree/all/README.md"),
-      fixture_path("asset/tree/all/b"),
-      fixture_path("asset/tree/all/b/c"),
-      fixture_path("asset/tree/all/b/c/d.js"),
-      fixture_path("asset/tree/all/b/c/e.js"),
-      fixture_path("asset/tree/all/b/c.js"),
-      fixture_path("asset/tree/all/b.css"),
-      fixture_path("asset/tree/all/b.js.erb"),
-      fixture_path("asset/tree/all/d"),
-      fixture_path("asset/tree/all/d/c.js.coffee"),
-      fixture_path("asset/tree/all/d/e.js")
+      File.expand_path("../fixtures/asset/tree/all/README.md", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c/d.js", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c/e.js", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c.js", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b.css", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b.js.erb", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/d", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/d/c.js.coffee", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/d/e.js", __FILE__)
     ], files.map(&:first)
 
-    assert_equal [], stat_tree("#{FIXTURE_ROOT}/missing").to_a
+    assert_equal [], stat_tree("#{File.expand_path("../fixtures", __FILE__)}/missing").to_a
   end
 
-  test "stat sorted tree" do
-    files = stat_sorted_tree(fixture_path("asset/tree/all")).to_a
+  def test_stat_sorted_tree
+    files = stat_sorted_tree(File.expand_path("../fixtures/asset/tree/all", __FILE__)).to_a
     assert_equal 11, files.size
 
     path, stat = files.first
-    assert_equal fixture_path("asset/tree/all/README.md"), path
+    assert_equal File.expand_path("../fixtures/asset/tree/all/README.md", __FILE__), path
     assert_kind_of File::Stat, stat
 
     assert_equal [
-      fixture_path("asset/tree/all/README.md"),
-      fixture_path("asset/tree/all/b.css"),
-      fixture_path("asset/tree/all/b.js.erb"),
-      fixture_path("asset/tree/all/b"),
-      fixture_path("asset/tree/all/b/c.js"),
-      fixture_path("asset/tree/all/b/c"),
-      fixture_path("asset/tree/all/b/c/d.js"),
-      fixture_path("asset/tree/all/b/c/e.js"),
-      fixture_path("asset/tree/all/d"),
-      fixture_path("asset/tree/all/d/c.js.coffee"),
-      fixture_path("asset/tree/all/d/e.js"),
+      File.expand_path("../fixtures/asset/tree/all/README.md", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b.css", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b.js.erb", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c.js", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c/d.js", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/b/c/e.js", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/d", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/d/c.js.coffee", __FILE__),
+      File.expand_path("../fixtures/asset/tree/all/d/e.js", __FILE__),
     ], files.map(&:first)
 
-    assert_equal [], stat_tree("#{FIXTURE_ROOT}/missing").to_a
+    assert_equal [], stat_tree(File.expand_path("../fixtures/missing", __FILE__)).to_a
   end
 
-  test "atomic write without errors" do
+  def test_atomic_write_without_errors
     filename = "atomic.file"
     begin
       contents = "Atomic Text"
