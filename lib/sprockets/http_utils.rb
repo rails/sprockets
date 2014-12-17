@@ -1,4 +1,6 @@
 module Sprockets
+  # Internal: HTTP URI utilities. Many adapted from Rack::Utils. Mixed into
+  # Environment.
   module HTTPUtils
     extend self
 
