@@ -421,8 +421,8 @@ def self.call(input)
   # Any metadata may start off as nil, so initialize it the value
   required = Set.new(input[:metadata][:required])
 
-  # Manually add "some_path" to our bundle
-  required << Sprockets::AssetURI.build(some_path, type: "application/javascript")
+  # Manually add "foo.js" asset uri to our bundle
+  required << input[:environment].locate("foo.js")
 
   { required: required }
 end
