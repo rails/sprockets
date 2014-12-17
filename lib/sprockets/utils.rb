@@ -6,6 +6,66 @@ module Sprockets
   module Utils
     extend self
 
+    # Internal: Check if object can safely be .dup'd.
+    #
+    # Similar to ActiveSupport #duplicable? check.
+    #
+    # obj - Any Object
+    #
+    # Returns false if .dup would raise a TypeError, otherwise true.
+    def duplicable?(obj)
+      case obj
+      when NilClass, FalseClass, TrueClass, Symbol, Numeric
+        false
+      else
+        true
+      end
+    end
+
+    # Internal: Duplicate and store key/value on new frozen hash.
+    #
+    # Seperated for recursive calls, always use hash_reassoc(hash, *keys).
+    #
+    # hash - Hash
+    # key  - Object key
+    #
+    # Returns Hash.
+    def hash_reassoc1(hash, key)
+      hash = hash.dup if hash.frozen?
+      old_value = hash[key]
+      old_value = old_value.dup if duplicable?(old_value)
+      new_value = yield old_value
+      new_value.freeze if duplicable?(new_value)
+      hash.store(key, new_value)
+      hash.freeze
+    end
+
+    # Internal: Duplicate and store key/value on new frozen hash.
+    #
+    # Similar to Hash#store for nested frozen hashes.
+    #
+    # hash  - Hash
+    # key   - Object keys. Use multiple keys for nested hashes.
+    # block - Receives current value at key.
+    #
+    # Examples
+    #
+    #     config = {paths: ["/bin", "/sbin"]}.freeze
+    #     new_config = hash_reassoc(config, :paths) do |paths|
+    #       paths << "/usr/local/bin"
+    #     end
+    #
+    # Returns duplicated frozen Hash.
+    def hash_reassoc(hash, *keys, &block)
+      if keys.size == 1
+        hash_reassoc1(hash, keys[0], &block)
+      else
+        hash_reassoc1(hash, keys[0]) do |value|
+          hash_reassoc(value, *keys[1..-1], &block)
+        end
+      end
+    end
+
     # Internal: Check if string has a trailing semicolon.
     #
     # str - String

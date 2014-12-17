@@ -1,5 +1,9 @@
+require 'sprockets/utils'
+
 module Sprockets
   module Transformers
+    include Utils
+
     # Public: Two level mapping of a source mime type to a target mime type.
     #
     #   environment.transformers
@@ -8,7 +12,9 @@ module Sprockets
     #          }
     #        }
     #
-    attr_reader :transformers
+    def transformers
+      config[:transformers]
+    end
 
     # Public: Two level mapping of target mime type to source mime type.
     #
@@ -18,7 +24,9 @@ module Sprockets
     #          }
     #        }
     #
-    attr_reader :inverted_transformers
+    def inverted_transformers
+      config[:inverted_transformers]
+    end
 
     # Public: Register a transformer from and to a mime type.
     #
@@ -35,10 +43,10 @@ module Sprockets
     #
     # Returns nothing.
     def register_transformer(from, to, proc)
-      mutate_hash_config(:transformers, from) do |transformers|
+      self.config = hash_reassoc(config, :transformers, from) do |transformers|
         transformers.merge(to => proc)
       end
-      mutate_hash_config(:inverted_transformers, to) do |transformers|
+      self.config = hash_reassoc(config, :inverted_transformers, to) do |transformers|
         transformers.merge(from => proc)
       end
     end

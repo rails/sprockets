@@ -26,6 +26,8 @@ module Sprockets
   #     Sprockets.register_engine '.sass', SassProcessor
   #
   module Engines
+    include Utils
+
     # Returns a `Hash` of `Engine`s registered on the `Environment`.
     # If an `ext` argument is supplied, the `Engine` associated with
     # that extension will be returned.
@@ -33,12 +35,16 @@ module Sprockets
     #     environment.engines
     #     # => {".coffee" => CoffeeScriptProcessor, ".sass" => SassProcessor, ...}
     #
-    attr_reader :engines
+    def engines
+      config[:engines]
+    end
 
     # Internal: Returns a `Hash` of engine extensions to mime types.
     #
     # # => { '.coffee' => 'application/javascript' }
-    attr_reader :engine_mime_types
+    def engine_mime_types
+      config[:engine_mime_types]
+    end
 
     # Internal: Find and load engines by extension.
     #
@@ -62,20 +68,20 @@ module Sprockets
       ext = Sprockets::Utils.normalize_extension(ext)
 
       if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
-        mutate_config(:engines) do |engines|
+        self.config = hash_reassoc(config, :engines) do |engines|
           engines.merge(ext => klass)
         end
         if options[:mime_type]
-          mutate_config(:engine_mime_types) do |mime_types|
+          self.config = hash_reassoc(config, :engine_mime_types) do |mime_types|
             mime_types.merge(ext.to_s => options[:mime_type])
           end
         end
       else
-        mutate_config(:engines) do |engines|
+        self.config = hash_reassoc(config, :engines) do |engines|
           engines.merge(ext => LegacyTiltProcessor.new(klass))
         end
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
-          mutate_config(:engine_mime_types) do |mime_types|
+          self.config = hash_reassoc(config, :engine_mime_types) do |mime_types|
             mime_types.merge(ext.to_s => klass.default_mime_type)
           end
         end

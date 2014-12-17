@@ -11,7 +11,7 @@ module Sprockets
     #
     def initialize(root = ".")
       initialize_configuration(Sprockets)
-      @root = File.expand_path(root)
+      self.root = root
       self.cache = Cache::MemoryStore.new
       yield self if block_given?
     end
