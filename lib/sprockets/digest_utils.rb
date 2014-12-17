@@ -4,6 +4,8 @@ require 'digest/sha2'
 require 'set'
 
 module Sprockets
+  # Internal: Hash functions and digest related utilities. Mixed into
+  # Environment.
   module DigestUtils
     extend self
 
@@ -33,6 +35,9 @@ module Sprockets
     end
 
     # Internal: Generate a hexdigest for a nested JSON serializable object.
+    #
+    # This is used for generating cache keys, so its pretty important its
+    # wicked fast. Microbenchmarks away!
     #
     # obj - A JSON serializable object.
     #
