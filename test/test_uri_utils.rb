@@ -1,17 +1,17 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/uri_utils'
 
-class TestURIUtils < Sprockets::TestCase
+class TestURIUtils < MiniTest::Test
   include Sprockets::URIUtils
 
-  test "validate" do
+  def test_validate
     assert valid_asset_uri?("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert valid_asset_uri?("file://C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
     refute valid_asset_uri?("http:///usr/local/var/github/app/assets/javascripts/application.js")
     refute valid_asset_uri?("/usr/local/var/github/app/assets/javascripts/application.js")
   end
 
-  test "parse file paths" do
+  def test_parse_file_paths
     assert_equal ["/usr/local/var/github/app/assets/javascripts/application.js", {}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal ["/usr/local/var/github/app/assets/javascripts/foo bar.js", {}],
@@ -20,7 +20,7 @@ class TestURIUtils < Sprockets::TestCase
       parse_asset_uri("file://C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
   end
 
-  test "parse query params" do
+  def test_parse_query_params
     assert_equal ["/usr/local/var/github/app/assets/javascripts/application.coffee", {type: 'application/javascript'}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript")
     assert_equal ["/usr/local/var/github/app/assets/images/logo.png", {encoding: 'gzip'}],
@@ -29,13 +29,13 @@ class TestURIUtils < Sprockets::TestCase
       parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&flag")
   end
 
-  test "raise erorr when invalid uri scheme" do
+  def test_raise_erorr_when_invalid_uri_scheme
     assert_raises URI::InvalidURIError do
       parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
     end
   end
 
-  test "build file path" do
+  def test_build_file_path
     assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.js",
       build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal "file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js",
@@ -44,7 +44,7 @@ class TestURIUtils < Sprockets::TestCase
       build_asset_uri("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
   end
 
-  test "build query params" do
+  def test_build_query_params
     assert_equal "file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript",
       build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.coffee", type: 'application/javascript')
     assert_equal "file:///usr/local/var/github/app/assets/images/logo.svg?type=image/svg+xml",
@@ -59,7 +59,7 @@ class TestURIUtils < Sprockets::TestCase
       build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: nil)
   end
 
-  test "raise error when invalid param value" do
+  def test_raise_error_when_invalid_param_value
     assert_raises TypeError do
       build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encodings: ['gzip', 'deflate'])
     end
