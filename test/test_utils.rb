@@ -1,11 +1,10 @@
-require 'matrix'
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/utils'
 
-class TestUtils < Sprockets::TestCase
+class TestUtils < MiniTest::Test
   include Sprockets::Utils
 
-  test "string ends with semicolon" do
+  def test_string_ends_with_semicolon
     assert string_end_with_semicolon?("var foo;")
     refute string_end_with_semicolon?("var foo")
 
@@ -25,12 +24,12 @@ class TestUtils < Sprockets::TestCase
     refute string_end_with_semicolon?("var foo\n\n")
   end
 
-  test "concat javascript sources" do
+  def test_concat_javascript_sources
     assert_equal "var foo;\nvar bar;\n", concat_javascript_sources("var foo;\n", "var bar;\n")
     assert_equal "var foo;\nvar bar", concat_javascript_sources("var foo", "var bar")
   end
 
-  test "post-order depth-first search" do
+  def test_post_order_depth_first_search
     m = Array.new
     m[11] = [4, 5, 10]
     m[4]  = [2, 3]
@@ -94,7 +93,7 @@ class TestUtils < Sprockets::TestCase
     include Functions
   end
 
-  test "module include" do
+  def test_module_include
     context = Context.new
 
     assert context.respond_to?(:foo)

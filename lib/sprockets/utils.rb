@@ -1,7 +1,8 @@
 require 'set'
 
 module Sprockets
-  # `Utils`, we didn't know where else to put it!
+  # Internal: Utils, we didn't know where else to put it! Functions may
+  # eventually be shuffled into more specific drawers.
   module Utils
     extend self
 
@@ -124,14 +125,6 @@ module Sprockets
       end
 
       nodes
-    end
-
-    def benchmark_start
-      Time.now.to_f
-    end
-
-    def benchmark_end(start_time)
-      ((Time.now.to_f - start_time) * 1000).to_i
     end
   end
 end

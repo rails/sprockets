@@ -76,7 +76,7 @@ module Sprockets
     #
     # Returns a JSON serializable object.
     def fetch(key)
-      start = Utils.benchmark_start
+      start = Time.now.to_f
       expanded_key = expand_key(key)
       value = @fetch_cache.get(expanded_key)
       if value.nil?
@@ -85,7 +85,7 @@ module Sprockets
           value = yield
           @cache_wrapper.set(expanded_key, value)
           @logger.debug do
-            ms = "(#{Utils.benchmark_end(start)}ms)"
+            ms = "(#{((Time.now.to_f - start) * 1000).to_i}ms)"
             "Sprockets Cache miss #{peek_key(key)}  #{ms}"
           end
         end
