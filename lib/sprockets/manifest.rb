@@ -195,10 +195,8 @@ module Sprockets
           'logical_path' => asset.logical_path,
           'mtime'        => asset.mtime.iso8601,
           'size'         => asset.bytesize,
-          'digest'       => asset.hexdigest
-
-          # TODO: Re-enable integrity once spec issues are cleared up
-          # 'integrity'    => asset.integrity
+          'digest'       => asset.hexdigest,
+          'integrity'    => asset.integrity
         }
         assets[asset.logical_path] = asset.digest_path
 
