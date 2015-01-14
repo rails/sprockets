@@ -97,5 +97,15 @@ module Sprockets
       uri << "?#{query.join('&')}" if query.any?
       uri
     end
+
+    def parse_file_digest_uri(str)
+      path = URI.split(str)[5]
+      path = URI::Generic::DEFAULT_PARSER.unescape(path)
+      path
+    end
+
+    def build_file_digest_uri(path)
+      "file-digest:#{URI::Generic::DEFAULT_PARSER.escape(path)}"
+    end
   end
 end

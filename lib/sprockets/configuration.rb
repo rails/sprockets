@@ -1,3 +1,4 @@
+require 'sprockets/caching'
 require 'sprockets/compressing'
 require 'sprockets/engines'
 require 'sprockets/mime'
@@ -8,7 +9,7 @@ require 'sprockets/utils'
 
 module Sprockets
   module Configuration
-    include Paths, Mime, Engines, Transformers, Processing, Compressing, Utils
+    include Paths, Mime, Engines, Transformers, Processing, Compressing, Caching, Utils
 
     def initialize_configuration(parent)
       @config = parent.config

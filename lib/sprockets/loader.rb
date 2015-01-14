@@ -131,8 +131,9 @@ module Sprockets
         end
 
         metadata = asset[:metadata]
-        metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
+        metadata[:cache_dependencies] = Set.new(metadata[:cache_dependencies]).merge([URIUtils.build_file_digest_uri(asset[:filename])])
+
+        metadata[:cache_dependencies_digest] = resolve_cache_dependencies(metadata[:cache_dependencies])
 
         asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
@@ -140,7 +141,11 @@ module Sprockets
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
         # Deprecated: Avoid tracking Asset mtime
-        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
+        asset[:mtime] = metadata[:cache_dependencies].map { |u|
+          u.start_with?("file-digest:") ?
+            stat(parse_file_digest_uri(u)).mtime.to_i :
+            0
+        }.max
 
         asset
       end

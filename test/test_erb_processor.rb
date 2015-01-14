@@ -35,7 +35,7 @@ class TestERBProcessor < Sprockets::TestCase
     output = "var data = 'DATA';"
     result = Sprockets::ERBProcessor.call(input)
     assert_equal output, result[:data]
-    assert_equal path, result[:dependency_paths].first
+    assert_equal "file-digest:#{path}", result[:cache_dependencies].first
   end
 
   test "pass custom erb helpers to template" do

@@ -414,7 +414,7 @@ The metadata Hash provides an open format for processors to extend the pipeline 
 * `:required` - A `Set` of String Asset URIs that the Bundle processor should concatenate together.
 * `:stubbed` - A `Set` of String Asset URIs that will be omitted from the `:required` set.
 * `:links` - A `Set` of String Asset URIs that should be compiled along with this asset.
-* `:dependency_paths` - A `Set` of String filenames that should be monitored for caching.
+* `:cache_dependencies` - A `Set` of String Cache URIs that should be monitored for caching.
 
 ``` ruby
 def self.call(input)
