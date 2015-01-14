@@ -58,7 +58,6 @@ module Sprockets
           'asset-uri-dep-graph',
           VERSION,
           self.version,
-          self.paths,
           uri,
           file_digest(filename)
         ]

@@ -14,6 +14,10 @@ module Sprockets
 
     def resolve_cache_dependency(str)
       case scheme = URI.split(str)[0]
+      when "env-version"
+        [VERSION, self.version]
+      when "env-paths"
+        self.paths
       when "file-digest"
         file_digest(parse_file_digest_uri(str))
       else
@@ -23,14 +27,7 @@ module Sprockets
 
     private
       def asset_uri_cache_key(uri)
-        [
-          'asset-uri',
-          # TODO: Include version in global cache_dependencies
-          VERSION,
-          # TODO: Include version in global cache_dependencies
-          self.version,
-          uri
-        ]
+        ['asset-uri', uri]
       end
 
       def get_asset_dependency_graph_cache(key)
