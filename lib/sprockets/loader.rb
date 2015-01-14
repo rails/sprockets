@@ -131,11 +131,9 @@ module Sprockets
         end
 
         metadata = asset[:metadata]
-        metadata[:cache_dependencies] = Set.new(metadata[:cache_dependencies]).merge([
-          "env-version:*",
-          "env-paths:*",
-          URIUtils.build_file_digest_uri(asset[:filename])
-        ])
+        metadata[:cache_dependencies] = cache_dependencies.dup
+          .merge(metadata[:cache_dependencies] || [])
+          .merge([URIUtils.build_file_digest_uri(asset[:filename])])
 
         metadata[:cache_dependencies_digest] = resolve_cache_dependencies(metadata[:cache_dependencies])
 

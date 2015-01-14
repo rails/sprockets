@@ -8,6 +8,16 @@ module Sprockets
   module Caching
     include DigestUtils, PathDigestUtils, URIUtils
 
+    def cache_dependencies
+      config[:cache_dependencies]
+    end
+
+    def add_cache_dependency(uri)
+      self.config = hash_reassoc(config, :cache_dependencies) do |set|
+        set + Set.new([uri])
+      end
+    end
+
     def resolve_cache_dependencies(uris)
       digest(uris.map { |uri| resolve_cache_dependency(uri) })
     end

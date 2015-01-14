@@ -52,6 +52,7 @@ module Sprockets
   self.config = {
     bundle_processors: Hash.new { |h, k| [].freeze }.freeze,
     bundle_reducers: Hash.new { |h, k| {}.freeze }.freeze,
+    cache_dependencies: Set.new.freeze,
     compressors: Hash.new { |h, k| {}.freeze }.freeze,
     digest_class: Digest::SHA256,
     encodings: {}.freeze,
@@ -157,4 +158,7 @@ module Sprockets
 
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
+
+  add_cache_dependency "env-version:*"
+  add_cache_dependency "env-paths:*"
 end
