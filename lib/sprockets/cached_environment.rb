@@ -51,54 +51,6 @@ module Sprockets
       @uris[uri]
     end
 
-    protected
-      def asset_digest_cache_key(uri, digest)
-        [
-          'asset-uri-digest',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          digest
-        ]
-      end
-
-      def asset_uri_cache_key(uri)
-        [
-          'asset-uri',
-          VERSION,
-          self.version,
-          uri
-        ]
-      end
-
-      def load_asset_by_id_uri(uri)
-        cache.fetch(asset_uri_cache_key(uri)) do
-          super
-        end
-      end
-
-      def load_asset_by_uri(uri)
-        filename, _ = parse_asset_uri(uri)
-
-        if paths = cache._get(asset_digest_cache_key(uri, file_digest(filename)))
-          if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
-            if asset = cache.__get(asset_uri_cache_key(id_uri))
-              return asset
-            end
-          end
-        end
-
-        asset = super
-
-        paths, digest = asset[:metadata].values_at(:dependency_paths, :dependency_sources_digest)
-        cache.__set(asset_uri_cache_key(asset[:uri]), asset)
-        cache.__set(asset_digest_cache_key(uri, digest), asset[:uri])
-        cache._set(asset_digest_cache_key(uri, file_digest(filename)), paths)
-
-        asset
-      end
-
     private
       # Cache is immutable, any methods that try to change the runtime config
       # should bomb.

@@ -22,13 +22,37 @@ module Sprockets
     # Returns Asset.
     def load(uri)
       _, params = parse_asset_uri(uri)
-      asset = params.key?(:id) ?
-        load_asset_by_id_uri(uri) :
-        load_asset_by_uri(uri)
+      if params.key?(:id)
+        asset = cache.fetch(asset_uri_cache_key(uri)) do
+          load_asset_by_id_uri(uri)
+        end
+      else
+        asset = get_asset_uri_from_cache(uri) || load_asset_by_uri(uri)
+      end
       Asset.new(self, asset)
     end
 
     private
+      def asset_digest_cache_key(uri, digest)
+        [
+          'asset-uri-digest',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          digest
+        ]
+      end
+
+      def asset_uri_cache_key(uri)
+        [
+          'asset-uri',
+          VERSION,
+          self.version,
+          uri
+        ]
+      end
+
       def load_asset_by_id_uri(uri)
         path, params = parse_asset_uri(uri)
 
@@ -142,7 +166,23 @@ module Sprockets
         # Deprecated: Avoid tracking Asset mtime
         asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
 
+        cache.__set(asset_uri_cache_key(asset[:uri]), asset)
+        cache.__set(asset_digest_cache_key(uri, asset[:metadata][:dependency_sources_digest]), asset[:uri])
+        cache._set(asset_digest_cache_key(uri, file_digest(filename)), asset[:metadata][:dependency_paths])
+
         asset
+      end
+
+      def get_asset_uri_from_cache(uri)
+        filename, _ = parse_asset_uri(uri)
+
+        if paths = cache._get(asset_digest_cache_key(uri, file_digest(filename)))
+          if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
+            return cache.__get(asset_uri_cache_key(id_uri))
+          end
+        end
+
+        nil
       end
 
       def processors_for(file_type, engine_extnames, params)
