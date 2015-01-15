@@ -367,6 +367,54 @@ class TestPerformance < Sprockets::TestCase
     end
   end
 
+  test "rollback file dependency add/remove" do
+    env = new_environment
+    env.cache = Cache.new
+
+    main = fixture_path("default/tmp.js")
+    deps = fixture_path("default/tmp")
+    depa = fixture_path("default/tmp/a.js")
+    depb = fixture_path("default/tmp/b.js")
+
+    sandbox main, deps, depa, depb do
+      FileUtils.mkdir_p(deps)
+      write(main, "//= require_directory ./tmp", 1421000000)
+      write(depa, "a;", 1421000000)
+      File.utime(1421000000, 1421000000, deps)
+      reset_stats!
+
+      assert asset = env["tmp.js"]
+      assert_equal "a;\n", asset.source
+      id = asset.id
+      assert_no_redundant_processor_calls
+      assert_no_redundant_bundle_processor_calls
+      assert_no_redundant_cache_set_calls
+
+      write(depb, "b;", 142100001)
+      File.utime(1421000001, 1421000001, deps)
+      reset_stats!
+
+      assert asset = env["tmp.js"]
+      assert_equal "a;\nb;\n", asset.source
+      assert_no_redundant_processor_calls
+      assert_no_redundant_bundle_processor_calls
+      assert_no_redundant_cache_set_calls
+
+      FileUtils.rm(depb)
+      File.utime(1421000000, 1421000000, deps)
+      reset_stats!
+
+      assert asset = env["tmp.js"]
+      assert_equal "a;\n", asset.source
+      assert_equal id, asset.id
+      assert_no_redundant_stat_calls
+      assert_no_processor_calls
+      # assert_no_bundle_processor_calls
+      assert_no_redundant_cache_get_calls
+      # assert_no_cache_set_calls
+    end
+  end
+
   def new_environment
     Sprockets::Environment.new(".") do |env|
       env.cache = Cache.new
