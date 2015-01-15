@@ -52,6 +52,7 @@ class TestPerformance < Sprockets::TestCase
     $file_stat_calls = nil
     $dir_entires_calls = nil
     $processor_calls = nil
+    $bundle_processor_calls = nil
     $cache_get_calls = nil
     $cache_set_calls = nil
   end
@@ -60,24 +61,28 @@ class TestPerformance < Sprockets::TestCase
     @env["gallery.js"].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
   end
 
   test "cached simple file" do
     @env.cached["gallery.js"].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
   end
 
   test "file with deps" do
     @env["mobile.js"].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
   end
 
   test "cached file with deps" do
     @env.cached["mobile.js"].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
   end
 
   test "loading from backend cache" do
@@ -88,6 +93,7 @@ class TestPerformance < Sprockets::TestCase
 
     env1["mobile.js"]
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
@@ -95,6 +101,7 @@ class TestPerformance < Sprockets::TestCase
     env2["mobile.js"]
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
   end
@@ -103,12 +110,14 @@ class TestPerformance < Sprockets::TestCase
     env = @env.cached
     env["mobile.js"]
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
 
     reset_stats!
 
     env["mobile.js"]
     assert_no_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
   end
 
   test "loading from cached with backend cache" do
@@ -119,6 +128,7 @@ class TestPerformance < Sprockets::TestCase
 
     env1.cached["mobile.js"]
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
@@ -126,6 +136,7 @@ class TestPerformance < Sprockets::TestCase
     env2.cached["mobile.js"]
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
   end
@@ -134,12 +145,14 @@ class TestPerformance < Sprockets::TestCase
     etag = @env["mobile.js"].etag
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
     reset_stats!
 
     @env.find_asset("mobile.js", if_match: etag)
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
 
@@ -148,6 +161,7 @@ class TestPerformance < Sprockets::TestCase
     @env.find_asset("mobile.js", if_match: etag)
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
   end
@@ -157,32 +171,40 @@ class TestPerformance < Sprockets::TestCase
     env.cache = Cache.new
 
     env.version = "1"
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    id1 = asset.id
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
 
     env.version = "2"
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    id2 = asset.id
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
 
     env.version = "1"
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    assert_equal id1, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
 
     reset_stats!
 
     env.version = "2"
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    assert_equal id2, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
   end
@@ -194,8 +216,10 @@ class TestPerformance < Sprockets::TestCase
     env.clear_paths
     env.append_path(fixture_path('default'))
 
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    path1 = asset.id
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
@@ -203,17 +227,21 @@ class TestPerformance < Sprockets::TestCase
     env.append_path(fixture_path('asset'))
     env.append_path(fixture_path('default'))
 
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    path2 = asset.id
     assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
     env.clear_paths
     env.append_path(fixture_path('default'))
 
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    assert_equal path1, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
 
@@ -222,9 +250,11 @@ class TestPerformance < Sprockets::TestCase
     env.append_path(fixture_path('asset'))
     env.append_path(fixture_path('default'))
 
-    env["mobile.js"]
+    assert asset = env["mobile.js"]
+    assert_equal path2, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
+    assert_no_bundle_processor_calls
     assert_no_redundant_cache_get_calls
     assert_no_cache_set_calls
   end
@@ -239,32 +269,99 @@ class TestPerformance < Sprockets::TestCase
       write(filename, "a;", 1421000000)
       reset_stats!
 
-      env["tmp.js"]
+      assert asset = env["tmp.js"]
+      assert_equal "a;\n", asset.source
+      ida = asset.id
       assert_no_redundant_processor_calls
+      assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
       write(filename, "b;", 1421000001)
       reset_stats!
 
-      env["tmp.js"]
+      assert asset = env["tmp.js"]
+      assert_equal "b;\n", asset.source
+      idb = asset.id
       assert_no_redundant_processor_calls
+      assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
       write(filename, "a;", 1421000000)
       reset_stats!
 
-      env["tmp.js"]
+      assert asset = env["tmp.js"]
+      assert_equal "a;\n", asset.source
+      assert_equal ida, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
+      assert_no_bundle_processor_calls
       assert_no_redundant_cache_get_calls
       assert_no_cache_set_calls
 
       write(filename, "b;", 1421000001)
       reset_stats!
 
-      env["tmp.js"]
+      assert asset = env["tmp.js"]
+      assert_equal "b;\n", asset.source
+      assert_equal idb, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
+      assert_no_bundle_processor_calls
+      assert_no_redundant_cache_get_calls
+      assert_no_cache_set_calls
+    end
+  end
+
+  test "rollback file dependency change" do
+    env = new_environment
+    env.cache = Cache.new
+
+    main = fixture_path("default/tmp-main.js")
+    dep  = fixture_path("default/tmp-dep.js")
+
+    sandbox main, dep do
+      write(main, "//= require ./tmp-dep", 1421000000)
+      write(dep, "a;", 1421000000)
+      reset_stats!
+
+      assert asset = env["tmp-main.js"]
+      assert_equal "a;\n", asset.source
+      ida = asset.id
+      assert_no_redundant_processor_calls
+      assert_no_redundant_bundle_processor_calls
+      assert_no_redundant_cache_set_calls
+
+      write(dep, "b;", 1421000001)
+      reset_stats!
+
+      assert asset = env["tmp-main.js"]
+      assert_equal "b;\n", asset.source
+      idb = asset.id
+      assert_no_redundant_processor_calls
+      assert_no_redundant_bundle_processor_calls
+      assert_no_redundant_cache_set_calls
+
+      write(dep, "a;", 1421000000)
+      reset_stats!
+
+      assert asset = env["tmp-main.js"]
+      assert_equal "a;\n", asset.source
+      assert_equal ida, asset.id
+      assert_no_redundant_stat_calls
+      assert_no_processor_calls
+      assert_no_bundle_processor_calls
+      assert_no_redundant_cache_get_calls
+      assert_no_cache_set_calls
+
+      write(dep, "b;", 1421000001)
+      reset_stats!
+
+      assert asset = env["tmp-main.js"]
+      assert_equal "b;\n", asset.source
+      assert_equal idb, asset.id
+      assert_no_redundant_stat_calls
+      assert_no_processor_calls
+      assert_no_bundle_processor_calls
       assert_no_redundant_cache_get_calls
       assert_no_cache_set_calls
     end
@@ -279,6 +376,11 @@ class TestPerformance < Sprockets::TestCase
         $processor_calls[input[:filename]] << caller
         nil
       }
+      env.register_bundle_processor 'application/javascript', proc { |input|
+        $bundle_processor_calls[input[:filename]] ||= []
+        $bundle_processor_calls[input[:filename]] << caller
+        nil
+      }
     end
   end
 
@@ -286,6 +388,7 @@ class TestPerformance < Sprockets::TestCase
     $file_stat_calls = {}
     $dir_entires_calls = {}
     $processor_calls = {}
+    $bundle_processor_calls = {}
     $cache_get_calls = {}
     $cache_set_calls = {}
   end
@@ -319,6 +422,18 @@ class TestPerformance < Sprockets::TestCase
   def assert_no_redundant_processor_calls
     $processor_calls.each do |path, callers|
       assert_equal 1, callers.size, "Processor ran on #{path.inspect} #{callers.size} times\n\n#{format_callers(callers)}"
+    end
+  end
+
+  def assert_no_bundle_processor_calls
+    $bundle_processor_calls.each do |path, callers|
+      assert_equal 0, callers.size, "Bundle Processor ran on #{path.inspect} #{callers.size} times\n\n#{format_callers(callers)}"
+    end
+  end
+
+  def assert_no_redundant_bundle_processor_calls
+    $bundle_processor_calls.each do |path, callers|
+      assert_equal 1, callers.size, "Bundle Processor ran on #{path.inspect} #{callers.size} times\n\n#{format_callers(callers)}"
     end
   end
 

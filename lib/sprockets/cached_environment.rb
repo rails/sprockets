@@ -52,15 +52,14 @@ module Sprockets
     end
 
     protected
-      def asset_dependency_graph_cache_key(uri)
-        filename, _ = parse_asset_uri(uri)
+      def asset_digest_cache_key(uri, digest)
         [
-          'asset-uri-dep-graph',
+          'asset-uri-digest',
           VERSION,
           self.version,
           self.paths,
           uri,
-          file_digest(filename)
+          digest
         ]
       end
 
@@ -80,31 +79,23 @@ module Sprockets
       end
 
       def load_asset_by_uri(uri)
-        dep_graph_key = asset_dependency_graph_cache_key(uri)
+        filename, _ = parse_asset_uri(uri)
 
-        if asset = get_asset_dependency_graph_cache(dep_graph_key)
-          asset
-        else
-          asset = super
-          set_asset_dependency_graph_cache(dep_graph_key, asset)
-          asset
+        if paths = cache._get(asset_digest_cache_key(uri, file_digest(filename)))
+          if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
+            if asset = cache.__get(asset_uri_cache_key(id_uri))
+              return asset
+            end
+          end
         end
-      end
 
-      def get_asset_dependency_graph_cache(key)
-        return unless cached = cache._get(key)
-        paths, digest, uri = cached
+        asset = super
 
-        if files_digest(paths) == digest
-          cache._get(asset_uri_cache_key(uri))
-        end
-      end
+        paths, digest = asset[:metadata].values_at(:dependency_paths, :dependency_sources_digest)
+        cache.__set(asset_uri_cache_key(asset[:uri]), asset)
+        cache.__set(asset_digest_cache_key(uri, digest), asset[:uri])
+        cache._set(asset_digest_cache_key(uri, file_digest(filename)), paths)
 
-      def set_asset_dependency_graph_cache(key, asset)
-        uri = asset[:uri]
-        digest, paths = asset[:metadata].values_at(:dependency_sources_digest, :dependency_paths)
-        cache._set(key, [paths, digest, uri])
-        cache.fetch(asset_uri_cache_key(uri)) { asset }
         asset
       end
 
