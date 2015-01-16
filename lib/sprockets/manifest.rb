@@ -281,9 +281,10 @@ module Sprockets
     protected
       # Persist manfiest back to FS
       def save
+        data = json_encode(@data)
         FileUtils.mkdir_p File.dirname(filename)
-        File.open(filename, 'w') do |f|
-          f.write json_encode(@data)
+        PathUtils.atomic_write(filename) do |f|
+          f.write(data)
         end
       end
 
