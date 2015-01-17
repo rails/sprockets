@@ -51,36 +51,6 @@ module Sprockets
       @uris[uri]
     end
 
-    protected
-      def asset_dependency_graph_cache_key(uri)
-        filename, _ = parse_asset_uri(uri)
-        [
-          'asset-uri-dep-graph',
-          VERSION,
-          self.version,
-          uri,
-          file_digest(filename)
-        ]
-      end
-
-      def load_asset_by_id_uri(uri)
-        cache.fetch(asset_uri_cache_key(uri)) do
-          super
-        end
-      end
-
-      def load_asset_by_uri(uri)
-        dep_graph_key = asset_dependency_graph_cache_key(uri)
-
-        if asset = get_asset_dependency_graph_cache(dep_graph_key)
-          asset
-        else
-          asset = super
-          set_asset_dependency_graph_cache(dep_graph_key, asset)
-          asset
-        end
-      end
-
     private
       # Cache is immutable, any methods that try to change the runtime config
       # should bomb.

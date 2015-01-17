@@ -193,20 +193,6 @@ class TestCaching < Sprockets::TestCase
     assert_equal main, env2.load(main.uri)
     assert_equal main, env2.find_asset("main.js")
   end
-
-  def write(filename, contents)
-    if File.exist?(filename)
-      File.open(filename, 'w') do |f|
-        f.write(contents)
-      end
-      mtime = File.stat(filename).mtime.to_i + 1
-      File.utime(mtime, mtime, filename)
-    else
-      File.open(filename, 'w') do |f|
-        f.write(contents)
-      end
-    end
-  end
 end
 
 require 'tmpdir'

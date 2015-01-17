@@ -102,9 +102,7 @@ module Sprockets
     # with caution, which is why its prefixed with an underscore. Prefer the
     # Cache#fetch API over using this.
     #
-    # key   - JSON serializable key
-    # value - A consistent JSON serializable object for the given key. Setting
-    #         a different value for the given key has undefined behavior.
+    # key - JSON serializable key
     #
     # Returns a JSON serializable object or nil if there was a cache miss.
     def _get(key)
@@ -118,7 +116,9 @@ module Sprockets
     # with caution, which is why its prefixed with an underscore. Prefer the
     # Cache#fetch API over using this.
     #
-    # key - JSON serializable key
+    # key   - JSON serializable key
+    # value - A consistent JSON serializable object for the given key. Setting
+    #         a different value for the given key has undefined behavior.
     #
     # Returns the value argument.
     def _set(key, value)
@@ -130,6 +130,36 @@ module Sprockets
     # Returns String.
     def inspect
       "#<#{self.class} local=#{@fetch_cache.inspect} store=#{@cache_wrapper.cache.inspect}>"
+    end
+
+    # Internal: Get cached value from memory cache or fallback to backend cache.
+    #
+    # Use fetch() instead.
+    #
+    # key - JSON serializable key
+    #
+    # Returns a JSON serializable object or nil if there was a cache miss.
+    def __get(key)
+      expanded_key = expand_key(key)
+      value = @fetch_cache.get(expanded_key)
+      value = @cache_wrapper.get(expanded_key) if value.nil?
+      value
+    end
+
+    # Internal: Set cached value to both memory cache and fallback backend
+    # cache.
+    #
+    # Use fetch() instead.
+    #
+    # key   - JSON serializable key
+    # value - A consistent JSON serializable object for the given key. Setting
+    #         a different value for the given key has undefined behavior.
+    #
+    # Returns the value argument.
+    def __set(key, value)
+      expanded_key = expand_key(key)
+      @fetch_cache.set(expanded_key, value)
+      @cache_wrapper.set(expanded_key, value)
     end
 
     private

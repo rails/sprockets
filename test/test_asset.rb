@@ -157,20 +157,6 @@ module FreshnessTests
       end
     end
   end
-
-  def write(filename, contents)
-    if File.exist?(filename)
-      File.open(filename, 'w') do |f|
-        f.write(contents)
-      end
-      mtime = File.stat(filename).mtime.to_i + 1
-      File.utime(mtime, mtime, filename)
-    else
-      File.open(filename, 'w') do |f|
-        f.write(contents)
-      end
-    end
-  end
 end
 
 class TextStaticAssetTest < Sprockets::TestCase
