@@ -23,15 +23,18 @@ module Sprockets
     def load(uri)
       _, params = parse_asset_uri(uri)
       if params.key?(:id)
-        asset = cache.fetch(asset_uri_cache_key(uri)) do
+        key = ['asset-uri', uri]
+        asset = cache.fetch(key) do
           load_asset_by_id_uri(uri)
         end
       else
         asset = fetch_asset_from_dependency_cache(uri) do |paths|
           if paths
-            key = asset_digest_cache_key(uri, resolve_cache_dependencies(paths))
+            digest = resolve_cache_dependencies(paths)
+            key = ['asset-uri-digest', uri, digest]
             if id_uri = cache.__get(key)
-              cache.__get(asset_uri_cache_key(id_uri))
+              key = ['asset-uri', id_uri]
+              cache.__get(key)
             end
           else
             load_asset_by_uri(uri)
@@ -42,38 +45,6 @@ module Sprockets
     end
 
     private
-      def asset_digest_cache_key(uri, digest)
-        [
-          'asset-uri-digest',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          digest
-        ]
-      end
-
-      def asset_cache_dependencies_key(uri)
-        filename, _ = parse_asset_uri(uri)
-        [
-          'asset-uri-cache-dependencies',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          file_digest(filename)
-        ]
-      end
-
-      def asset_uri_cache_key(uri)
-        [
-          'asset-uri',
-          VERSION,
-          self.version,
-          uri
-        ]
-      end
-
       def load_asset_by_id_uri(uri)
         path, params = parse_asset_uri(uri)
 
@@ -194,14 +165,18 @@ module Sprockets
             0
         }.max
 
-        cache.__set(asset_uri_cache_key(asset[:uri]), asset)
-        cache.__set(asset_digest_cache_key(uri, asset[:metadata][:cache_dependencies_digest]), asset[:uri])
+        key = ['asset-uri', asset[:uri]]
+        cache.__set(key, asset)
+
+        key = ['asset-uri-digest', uri, asset[:metadata][:cache_dependencies_digest]]
+        cache.__set(key, asset[:uri])
 
         asset
       end
 
       def fetch_asset_from_dependency_cache(uri, limit = 3)
-        key = asset_cache_dependencies_key(uri)
+        filename, _ = parse_asset_uri(uri)
+        key = ['asset-uri-cache-dependencies', uri, file_digest(filename)]
         history = cache._get(key) || []
 
         history.each_with_index do |deps, index|
