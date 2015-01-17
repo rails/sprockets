@@ -27,7 +27,15 @@ module Sprockets
           load_asset_by_id_uri(uri)
         end
       else
-        asset = get_asset_uri_from_cache(uri) || load_asset_by_uri(uri)
+        asset = fetch_asset_from_dependency_cache(uri) do |paths|
+          if paths
+            if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
+              cache.__get(asset_uri_cache_key(id_uri))
+            end
+          else
+            load_asset_by_uri(uri)
+          end
+        end
       end
       Asset.new(self, asset)
     end
@@ -41,6 +49,18 @@ module Sprockets
           self.paths,
           uri,
           digest
+        ]
+      end
+
+      def asset_cache_dependencies_key(uri)
+        filename, _ = parse_asset_uri(uri)
+        [
+          'asset-uri-cache-dependencies',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          file_digest(filename)
         ]
       end
 
@@ -168,21 +188,25 @@ module Sprockets
 
         cache.__set(asset_uri_cache_key(asset[:uri]), asset)
         cache.__set(asset_digest_cache_key(uri, asset[:metadata][:dependency_sources_digest]), asset[:uri])
-        cache._set(asset_digest_cache_key(uri, file_digest(filename)), asset[:metadata][:dependency_paths])
 
         asset
       end
 
-      def get_asset_uri_from_cache(uri)
-        filename, _ = parse_asset_uri(uri)
+      def fetch_asset_from_dependency_cache(uri, limit = 3)
+        key = asset_cache_dependencies_key(uri)
+        history = cache._get(key) || []
 
-        if paths = cache._get(asset_digest_cache_key(uri, file_digest(filename)))
-          if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
-            return cache.__get(asset_uri_cache_key(id_uri))
+        history.each_with_index do |deps, index|
+          if asset = yield(deps)
+            cache._set(key, history.rotate!(index)) if index > 0
+            return asset
           end
         end
 
-        nil
+        asset = yield
+        deps = asset[:metadata][:dependency_paths]
+        cache._set(key, history.unshift(deps).take(limit))
+        asset
       end
 
       def processors_for(file_type, engine_extnames, params)

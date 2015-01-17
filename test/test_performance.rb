@@ -385,7 +385,7 @@ class TestPerformance < Sprockets::TestCase
 
       assert asset = env["tmp.js"]
       assert_equal "a;\n", asset.source
-      id = asset.id
+      ida = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
@@ -396,6 +396,7 @@ class TestPerformance < Sprockets::TestCase
 
       assert asset = env["tmp.js"]
       assert_equal "a;\nb;\n", asset.source
+      idab = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
@@ -406,12 +407,25 @@ class TestPerformance < Sprockets::TestCase
 
       assert asset = env["tmp.js"]
       assert_equal "a;\n", asset.source
-      assert_equal id, asset.id
+      assert_equal ida, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
-      # assert_no_bundle_processor_calls
+      assert_no_bundle_processor_calls
       assert_no_redundant_cache_get_calls
-      # assert_no_cache_set_calls
+      assert_no_redundant_cache_set_calls
+
+      write(depb, "b;", 142100001)
+      File.utime(1421000001, 1421000001, deps)
+      reset_stats!
+
+      assert asset = env["tmp.js"]
+      assert_equal "a;\nb;\n", asset.source
+      assert_equal idab, asset.id
+      assert_no_redundant_stat_calls
+      assert_no_processor_calls
+      assert_no_bundle_processor_calls
+      assert_no_redundant_cache_get_calls
+      assert_no_redundant_cache_set_calls
     end
   end
 
