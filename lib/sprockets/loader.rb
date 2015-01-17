@@ -1,4 +1,3 @@
-require 'sprockets/asset_uri'
 require 'sprockets/asset'
 require 'sprockets/digest_utils'
 require 'sprockets/engines'
@@ -8,12 +7,13 @@ require 'sprockets/path_utils'
 require 'sprockets/processing'
 require 'sprockets/resolve'
 require 'sprockets/transformers'
+require 'sprockets/uri_utils'
 
 module Sprockets
   # The loader phase takes a asset URI location and returns a constructed Asset
   # object.
   module Loader
-    include DigestUtils, Engines, Mime, PathUtils, Processing, Resolve, Transformers
+    include DigestUtils, Engines, Mime, PathUtils, URIUtils, Processing, Resolve, Transformers
 
     # Public: Load Asset by AssetURI.
     #
@@ -21,23 +21,67 @@ module Sprockets
     #
     # Returns Asset.
     def load(uri)
-      _, params = AssetURI.parse(uri)
-      asset = params.key?(:id) ?
-        load_asset_by_id_uri(uri) :
-        load_asset_by_uri(uri)
+      _, params = parse_asset_uri(uri)
+      if params.key?(:id)
+        asset = cache.fetch(asset_uri_cache_key(uri)) do
+          load_asset_by_id_uri(uri)
+        end
+      else
+        asset = fetch_asset_from_dependency_cache(uri) do |paths|
+          if paths
+            if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
+              cache.__get(asset_uri_cache_key(id_uri))
+            end
+          else
+            load_asset_by_uri(uri)
+          end
+        end
+      end
       Asset.new(asset)
     end
 
     private
+      def asset_digest_cache_key(uri, digest)
+        [
+          'asset-uri-digest',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          digest
+        ]
+      end
+
+      def asset_cache_dependencies_key(uri)
+        filename, _ = parse_asset_uri(uri)
+        [
+          'asset-uri-cache-dependencies',
+          VERSION,
+          self.version,
+          self.paths,
+          uri,
+          file_digest(filename)
+        ]
+      end
+
+      def asset_uri_cache_key(uri)
+        [
+          'asset-uri',
+          VERSION,
+          self.version,
+          uri
+        ]
+      end
+
       def load_asset_by_id_uri(uri)
-        path, params = AssetURI.parse(uri)
+        path, params = parse_asset_uri(uri)
 
         # Internal assertion, should be routed through load_asset_by_uri
         unless id = params.delete(:id)
           raise ArgumentError, "expected uri to have an id: #{uri}"
         end
 
-        asset = load_asset_by_uri(AssetURI.build(path, params))
+        asset = load_asset_by_uri(build_asset_uri(path, params))
 
         if id && asset[:id] != id
           raise VersionNotFound, "could not find specified id: #{id}"
@@ -47,7 +91,7 @@ module Sprockets
       end
 
       def load_asset_by_uri(uri)
-        filename, params = AssetURI.parse(uri)
+        filename, params = parse_asset_uri(uri)
 
         # Internal assertion, should be routed through load_asset_by_id_uri
         if params.key?(:id)
@@ -138,8 +182,28 @@ module Sprockets
         asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
         asset[:id]  = pack_hexdigest(digest(asset))
-        asset[:uri] = AssetURI.build(filename, params.merge(id: asset[:id]))
+        asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
+        cache.__set(asset_uri_cache_key(asset[:uri]), asset)
+        cache.__set(asset_digest_cache_key(uri, asset[:metadata][:dependency_sources_digest]), asset[:uri])
+
+        asset
+      end
+
+      def fetch_asset_from_dependency_cache(uri, limit = 3)
+        key = asset_cache_dependencies_key(uri)
+        history = cache._get(key) || []
+
+        history.each_with_index do |deps, index|
+          if asset = yield(deps)
+            cache._set(key, history.rotate!(index)) if index > 0
+            return asset
+          end
+        end
+
+        asset = yield
+        deps = asset[:metadata][:dependency_paths]
+        cache._set(key, history.unshift(deps).take(limit))
         asset
       end
 

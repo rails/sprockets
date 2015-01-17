@@ -1,9 +1,10 @@
 require 'sprockets/encoding_utils'
 require 'sprockets/http_utils'
+require 'sprockets/utils'
 
 module Sprockets
   module Mime
-    include HTTPUtils
+    include HTTPUtils, Utils
 
     # Public: Mapping of MIME type Strings to properties Hash.
     #
@@ -13,7 +14,9 @@ module Sprockets
     #   charset    - Default Encoding or function to detect encoding
     #
     # Returns Hash.
-    attr_reader :mime_types
+    def mime_types
+      config[:mime_types]
+    end
 
     # Internal: Mapping of MIME extension Strings to MIME type Strings.
     #
@@ -27,7 +30,9 @@ module Sprockets
     # value - MIME Type String
     #
     # Returns Hash.
-    attr_reader :mime_exts
+    def mime_exts
+      config[:mime_exts]
+    end
 
     # Public: Register a new mime type.
     #
@@ -50,14 +55,14 @@ module Sprockets
       charset ||= :default if mime_type.start_with?('text/')
       charset = EncodingUtils::CHARSET_DETECT[charset] if charset.is_a?(Symbol)
 
-      mutate_config(:mime_exts) do |mime_exts|
+      self.config = hash_reassoc(config, :mime_exts) do |mime_exts|
         extnames.each do |extname|
           mime_exts[extname] = mime_type
         end
         mime_exts
       end
 
-      mutate_config(:mime_types) do |mime_types|
+      self.config = hash_reassoc(config, :mime_types) do |mime_types|
         type = { extensions: extnames }
         type[:charset] = charset if charset
         mime_types.merge(mime_type => type)
@@ -100,7 +105,9 @@ module Sprockets
     # value - Method/Proc to encode data
     #
     # Returns Hash.
-    attr_reader :encodings
+    def encodings
+      config[:encodings]
+    end
 
     # Public: Register a new encoding.
     #
@@ -113,7 +120,7 @@ module Sprockets
     #
     # Returns nothing.
     def register_encoding(name, encode)
-      mutate_config(:encodings) do |encodings|
+      self.config = hash_reassoc(config, :encodings) do |encodings|
         encodings.merge(name.to_s => encode)
       end
     end

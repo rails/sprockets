@@ -1,7 +1,9 @@
-require 'sprockets/asset_uri'
+require 'sprockets/uri_utils'
 
 module Sprockets
   module Resolve
+    include URIUtils
+
     # Public: Finds the absolute path for a given logical path by searching the
     # environment's load paths.
     #
@@ -61,7 +63,7 @@ module Sprockets
 
       paths = options[:load_paths] || self.paths
 
-      if AssetURI.valid?(path)
+      if valid_asset_uri?(path)
         return path
       elsif absolute_path?(path)
         path = File.expand_path(path)
@@ -88,7 +90,7 @@ module Sprockets
 
       if filename
         encoding = nil if encoding == 'identity'
-        AssetURI.build(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+        build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
       end
     end
 

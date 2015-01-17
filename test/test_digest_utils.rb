@@ -1,10 +1,10 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/digest_utils'
 
-class TestDigestUtils < Sprockets::TestCase
+class TestDigestUtils < MiniTest::Test
   include Sprockets::DigestUtils
 
-  test "detect digest class" do
+  def test_detect_digest_class
     md5    = Digest::MD5.new.digest
     sha1   = Digest::SHA1.new.digest
     sha256 = Digest::SHA256.new.digest
@@ -21,7 +21,7 @@ class TestDigestUtils < Sprockets::TestCase
     pack_hexdigest(digest(obj))
   end
 
-  test "digest" do
+  def test_digest
     assert_equal "9bda381dac87b1c16b04f996abb623f43f1cdb89ce8be7dda3f67319dc440bc5", hexdigest(nil)
     assert_equal "92de503a8b413365fc38050c7dd4bacf28b0f705e744dacebcaa89f2032dcd67", hexdigest(true)
     assert_equal "bdfd64a7c8febcc3b0b8fb05d60c8e2a4cb6b8c081fcba20db1c9778e9beaf89", hexdigest(false)
@@ -42,27 +42,27 @@ class TestDigestUtils < Sprockets::TestCase
     end
   end
 
-  test "pack hexdigest" do
+  def test_pack_hexdigest
     digest = Digest::SHA256.new.update("alert(1)")
 
     assert_equal "6e11c72f7cf6bc383152dd16ddd5903aba6bb1c99d6b6639a4bb0b838185fa92", digest.hexdigest
     assert_equal "6e11c72f7cf6bc383152dd16ddd5903aba6bb1c99d6b6639a4bb0b838185fa92", pack_hexdigest(digest.digest)
   end
 
-  test "pack base64 digest" do
+  def test_pack_base64_digest
     digest = Digest::SHA256.new.update("alert(1)")
 
     assert_equal "bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF+pI=", digest.base64digest
     assert_equal "bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF+pI=", pack_base64digest(digest.digest)
   end
 
-  test "pack urlsafe base64 digest" do
+  def test_pack_urlsafe_base64_digest
     digest = Digest::SHA256.new.update("alert(1)")
 
     assert_equal "bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI", pack_urlsafe_base64digest(digest.digest)
   end
 
-  test "integrity uri" do
+  def test_integrity_uri
     sha256 = Digest::SHA256.new.update("alert(1)")
     sha512 = Digest::SHA512.new.update("alert(1)")
 

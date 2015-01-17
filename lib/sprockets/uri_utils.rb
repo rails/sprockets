@@ -1,15 +1,36 @@
 require 'uri'
 
 module Sprockets
-  module AssetURI
+  # Internal: Asset URI related parsing utilities. Mixed into Environment.
+  #
+  # An Asset URI identifies the compiled Asset result. It shares the file:
+  # scheme and requires an absolute path.
+  #
+  # Other query parameters
+  #
+  # type - String output content type. Otherwise assumed from file extension.
+  #        This maybe different than the extension if the asset is transformed
+  #        from one content type to another. For an example .coffee -> .js.
+  #
+  # id - Unique fingerprint of the entire asset and all its metadata. Assets
+  #      will only have the same id if they serialize to an identical value.
+  #
+  # skip_bundle - Boolean if bundle processors should be skipped.
+  #
+  # encoding - A content encoding such as "gzip" or "deflate". NOT a charset
+  #            like "utf-8".
+  #
+  module URIUtils
+    extend self
+
     # Internal: Check if String is a valid Asset URI.
     #
     # str - Possible String asset URI.
     #
     # Returns true or false.
-    def self.valid?(str)
+    def valid_asset_uri?(str)
       # Quick prefix check before attempting a full parse
-      str.start_with?("file://") && parse(str) ? true : false
+      str.start_with?("file://") && parse_asset_uri(str) ? true : false
     rescue URI::InvalidURIError
       false
     end
@@ -24,7 +45,7 @@ module Sprockets
     # str - String asset URI
     #
     # Returns String path and Hash of symbolized parameters.
-    def self.parse(str)
+    def parse_asset_uri(str)
       scheme, _, host, port, _, path, _, query, _ = URI.split(str)
 
       unless scheme == 'file'
@@ -58,7 +79,7 @@ module Sprockets
     # params - Hash of optional parameters
     #
     # Returns String URI.
-    def self.build(path, params = {})
+    def build_asset_uri(path, params = {})
       query = []
       params.each do |key, value|
         case value

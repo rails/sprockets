@@ -140,4 +140,19 @@ class Sprockets::TestCase < MiniTest::Test
       end
     end
   end
+
+  def write(filename, contents, mtime = nil)
+    if File.exist?(filename)
+      mtime ||= [Time.now.to_i, File.stat(filename).mtime.to_i].max + 1
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
+      File.utime(mtime, mtime, filename)
+    else
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
+      File.utime(mtime, mtime, filename) if mtime
+    end
+  end
 end

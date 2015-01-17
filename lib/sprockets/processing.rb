@@ -8,9 +8,13 @@ module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
+    include Utils
+
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
-    attr_reader :preprocessors
+    def preprocessors
+      config[:preprocessors]
+    end
 
     # Internal: Find and load preprocessors by mime type.
     #
@@ -24,7 +28,9 @@ module Sprockets
     end
 
     # Postprocessors are ran after Preprocessors and Engine processors.
-    attr_reader :postprocessors
+    def postprocessors
+      config[:postprocessors]
+    end
 
     # Internal: Find and load postprocessors by mime type.
     #
@@ -49,7 +55,7 @@ module Sprockets
     #
     def register_preprocessor(mime_type, proc = nil, &block)
       proc ||= block
-      mutate_hash_config(:preprocessors, mime_type) do |processors|
+      self.config = hash_reassoc(config, :preprocessors, mime_type) do |processors|
         processors.push(proc)
         processors
       end
@@ -67,7 +73,7 @@ module Sprockets
     #
     def register_postprocessor(mime_type, proc = nil, &block)
       proc ||= block
-      mutate_hash_config(:postprocessors, mime_type) do |processors|
+      self.config = hash_reassoc(config, :postprocessors, mime_type) do |processors|
         processors.push(proc)
         processors
       end
@@ -78,7 +84,7 @@ module Sprockets
     #     unregister_preprocessor 'text/css', Sprockets::DirectiveProcessor
     #
     def unregister_preprocessor(mime_type, proc)
-      mutate_hash_config(:preprocessors, mime_type) do |processors|
+      self.config = hash_reassoc(config, :preprocessors, mime_type) do |processors|
         processors.delete(proc)
         processors
       end
@@ -89,7 +95,7 @@ module Sprockets
     #     unregister_postprocessor 'text/css', Sprockets::DirectiveProcessor
     #
     def unregister_postprocessor(mime_type, proc)
-      mutate_hash_config(:postprocessors, mime_type) do |processors|
+      self.config = hash_reassoc(config, :postprocessors, mime_type) do |processors|
         processors.delete(proc)
         processors
       end
@@ -97,7 +103,9 @@ module Sprockets
 
     # Bundle Processors are ran on concatenated assets rather than
     # individual files.
-    attr_reader :bundle_processors
+    def bundle_processors
+      config[:bundle_processors]
+    end
 
     # Internal: Find and load bundle processors by mime type.
     #
@@ -122,7 +130,7 @@ module Sprockets
     #
     def register_bundle_processor(mime_type, proc = nil, &block)
       proc ||= block
-      mutate_hash_config(:bundle_processors, mime_type) do |processors|
+      self.config = hash_reassoc(config, :bundle_processors, mime_type) do |processors|
         processors.push(proc)
         processors
       end
@@ -133,7 +141,7 @@ module Sprockets
     #     unregister_bundle_processor 'application/javascript', Sprockets::DirectiveProcessor
     #
     def unregister_bundle_processor(mime_type, proc)
-      mutate_hash_config(:bundle_processors, mime_type) do |processors|
+      self.config = hash_reassoc(config, :bundle_processors, mime_type) do |processors|
         processors.delete(proc)
         processors
       end
@@ -141,7 +149,9 @@ module Sprockets
 
     # Internal: Two dimensional Hash of reducer functions for a given mime type
     # and asset metadata key.
-    attr_reader :bundle_reducers
+    def bundle_reducers
+      config[:bundle_reducers]
+    end
 
     # Public: Register bundle metadata reducer function.
     #
@@ -178,7 +188,7 @@ module Sprockets
         raise ArgumentError, "wrong number of arguments (#{args.size} for 0..2)"
       end
 
-      mutate_hash_config(:bundle_reducers, mime_type) do |reducers|
+      self.config = hash_reassoc(config, :bundle_reducers, mime_type) do |reducers|
         reducers.merge(key => [initial, reducer])
       end
     end

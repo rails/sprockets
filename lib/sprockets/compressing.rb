@@ -1,11 +1,17 @@
+require 'sprockets/utils'
+
 module Sprockets
   # `Compressing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Compressing
-    attr_reader :compressors
+    include Utils
+
+    def compressors
+      config[:compressors]
+    end
 
     def register_compressor(mime_type, sym, klass)
-      mutate_hash_config(:compressors, mime_type) do |compressors|
+      self.config = hash_reassoc(config, :compressors, mime_type) do |compressors|
         compressors[sym] = klass
         compressors
       end
