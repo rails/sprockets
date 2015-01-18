@@ -78,59 +78,57 @@ module Sprockets
 
         logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
+        name = logical_path
+
+        if type = params[:type]
+          logical_path += mime_types[type][:extensions].first
+        end
+
+        processors = processors_for(file_type, engine_extnames, params)
+
+        cache_dependencies = self.cache_dependencies
+        cache_dependencies += Set.new([build_file_digest_uri(filename)])
+
+        # Read into memory and process if theres a processor pipeline or the
+        # content type is text.
+        if processors.any? || mime_type_charset_detecter(type)
+          result = call_processors(processors, {
+            environment: self,
+            cache: self.cache,
+            uri: uri,
+            filename: filename,
+            load_path: load_path,
+            name: name,
+            content_type: type,
+            data: read_file(filename, type),
+            metadata: { cache_dependencies: cache_dependencies }
+          })
+          source = result.delete(:data)
+          metadata = result.merge!(
+            charset: source.encoding.name.downcase,
+            digest: digest(source),
+            length: source.bytesize
+          )
+        else
+          metadata = {
+            digest: file_digest(filename),
+            length: self.stat(filename).size,
+            cache_dependencies: cache_dependencies
+          }
+        end
 
         asset = {
           uri: uri,
           load_path: load_path,
           filename: filename,
-          name: logical_path,
-          logical_path: logical_path
+          name: name,
+          logical_path: logical_path,
+          content_type: type,
+          source: source,
+          metadata: metadata,
+          integrity: integrity_uri(metadata[:digest], type),
+          cache_dependencies_digest: resolve_cache_dependencies(metadata[:cache_dependencies])
         }
-
-        if type = params[:type]
-          asset[:content_type] = type
-          asset[:logical_path] += mime_types[type][:extensions].first
-        end
-
-        processors = processors_for(file_type, engine_extnames, params)
-
-        # Read into memory and process if theres a processor pipeline or the
-        # content type is text.
-        if processors.any? || mime_type_charset_detecter(type)
-          input = {
-            environment: self,
-            cache: self.cache,
-            uri: asset[:uri],
-            filename: asset[:filename],
-            load_path: asset[:load_path],
-            name: asset[:name],
-            content_type: asset[:content_type],
-            data: read_file(asset[:filename], asset[:content_type]),
-            metadata: {}
-          }
-          result = call_processors(processors, input)
-          data = asset[:source] = result.delete(:data)
-          asset[:metadata] = result.merge(
-            charset: data.encoding.name.downcase,
-            digest: digest(data),
-            length: data.bytesize
-          )
-        else
-          asset[:metadata] = {
-            digest: file_digest(asset[:filename]),
-            length: self.stat(asset[:filename]).size
-          }
-        end
-
-        metadata = asset[:metadata]
-        metadata[:cache_dependencies] = cache_dependencies.dup
-          .merge(metadata[:cache_dependencies] || [])
-          .merge([URIUtils.build_file_digest_uri(asset[:filename])])
-
-        cache_digest = resolve_cache_dependencies(metadata[:cache_dependencies])
-        asset[:cache_dependencies_digest] = cache_digest
-
-        asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
@@ -143,7 +141,7 @@ module Sprockets
         }.max
 
         cache.__set(['asset-uri', asset[:uri]], asset)
-        cache.__set(['asset-uri-digest', uri, cache_digest], asset[:uri])
+        cache.__set(['asset-uri-digest', uri, asset[:cache_dependencies_digest]], asset[:uri])
 
         asset
       end
