@@ -5,6 +5,7 @@ require 'sprockets/errors'
 require 'sprockets/mime'
 require 'sprockets/path_utils'
 require 'sprockets/processing'
+require 'sprockets/processor_utils'
 require 'sprockets/resolve'
 require 'sprockets/transformers'
 require 'sprockets/uri_utils'
@@ -13,7 +14,8 @@ module Sprockets
   # The loader phase takes a asset URI location and returns a constructed Asset
   # object.
   module Loader
-    include DigestUtils, Engines, Mime, PathUtils, URIUtils, Processing, Resolve, Transformers
+    include DigestUtils, PathUtils, ProcessorUtils, URIUtils
+    include Engines, Mime, Processing, Resolve, Transformers
 
     # Public: Load Asset by AssetURI.
     #
@@ -21,14 +23,14 @@ module Sprockets
     #
     # Returns Asset.
     def load(uri)
-      _, params = parse_asset_uri(uri)
+      filename, params = parse_asset_uri(uri)
       if params.key?(:id)
         key = ['asset-uri', uri]
         asset = cache.fetch(key) do
-          load_asset_by_id_uri(uri)
+          load_asset_by_id_uri(uri, filename, params)
         end
       else
-        asset = fetch_asset_from_dependency_cache(uri) do |paths|
+        asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             digest = resolve_cache_dependencies(paths)
             key = ['asset-uri-digest', uri, digest]
@@ -37,7 +39,7 @@ module Sprockets
               cache.__get(key)
             end
           else
-            load_asset_by_uri(uri)
+            load_asset_by_uri(uri, filename, params)
           end
         end
       end
@@ -45,15 +47,14 @@ module Sprockets
     end
 
     private
-      def load_asset_by_id_uri(uri)
-        path, params = parse_asset_uri(uri)
-
+      def load_asset_by_id_uri(uri, filename, params)
         # Internal assertion, should be routed through load_asset_by_uri
         unless id = params.delete(:id)
           raise ArgumentError, "expected uri to have an id: #{uri}"
         end
 
-        asset = load_asset_by_uri(build_asset_uri(path, params))
+        uri = build_asset_uri(filename, params)
+        asset = load_asset_by_uri(uri, filename, params)
 
         if id && asset[:id] != id
           raise VersionNotFound, "could not find specified id: #{id}"
@@ -62,9 +63,7 @@ module Sprockets
         asset
       end
 
-      def load_asset_by_uri(uri)
-        filename, params = parse_asset_uri(uri)
-
+      def load_asset_by_uri(uri, filename, params)
         # Internal assertion, should be routed through load_asset_by_id_uri
         if params.key?(:id)
           raise ArgumentError, "expected uri to have no id: #{uri}"
@@ -101,9 +100,6 @@ module Sprockets
         # Read into memory and process if theres a processor pipeline or the
         # content type is text.
         if processors.any? || mime_type_charset_detecter(type)
-          data = read_file(asset[:filename], asset[:content_type])
-          metadata = {}
-
           input = {
             environment: self,
             cache: self.cache,
@@ -112,29 +108,12 @@ module Sprockets
             load_path: asset[:load_path],
             name: asset[:name],
             content_type: asset[:content_type],
-            metadata: metadata
+            data: read_file(asset[:filename], asset[:content_type]),
+            metadata: {}
           }
-
-          processors.each do |processor|
-            begin
-              result = processor.call(input.merge(data: data, metadata: metadata))
-              case result
-              when NilClass
-                # noop
-              when Hash
-                data = result[:data] if result.key?(:data)
-                metadata = metadata.merge(result)
-                metadata.delete(:data)
-              when String
-                data = result
-              else
-                raise Error, "invalid processor return type: #{result.class}"
-              end
-            end
-          end
-
-          asset[:source] = data
-          asset[:metadata] = metadata.merge(
+          result = call_processors(processors, input)
+          data = asset[:source] = result.delete(:data)
+          asset[:metadata] = result.merge(
             charset: data.encoding.name.downcase,
             digest: digest(data),
             length: data.bytesize
@@ -174,8 +153,7 @@ module Sprockets
         asset
       end
 
-      def fetch_asset_from_dependency_cache(uri, limit = 3)
-        filename, _ = parse_asset_uri(uri)
+      def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
         key = ['asset-uri-cache-dependencies', uri, file_digest(filename)]
         history = cache._get(key) || []
 
@@ -213,6 +191,7 @@ module Sprockets
 
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
+        processors.reverse
       end
   end
 end

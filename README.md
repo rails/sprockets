@@ -378,6 +378,8 @@ Sprockets 2.x was originally design around [Tilt](https://github.com/rtomayko/ti
 
 Similar to Rack, a processor is a any "callable" (an object that responds to `call`). This maybe a simple Proc or a full class that defines a `def self.call(input)` method. The `call` method accepts an `input` Hash and returns a Hash of metadata.
 
+Also see [`Sprockets::ProcessorUtils`](https://github.com/sstephenson/sprockets/blob/master/lib/sprockets/processor_utils.rb) for public helper methods.
+
 ### input Hash
 
 The `input` Hash defines the following public fields.
