@@ -130,7 +130,8 @@ module Sprockets
           .merge(metadata[:cache_dependencies] || [])
           .merge([URIUtils.build_file_digest_uri(asset[:filename])])
 
-        metadata[:cache_dependencies_digest] = resolve_cache_dependencies(metadata[:cache_dependencies])
+        cache_digest = resolve_cache_dependencies(metadata[:cache_dependencies])
+        asset[:cache_dependencies_digest] = cache_digest
 
         asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
@@ -147,7 +148,7 @@ module Sprockets
         key = ['asset-uri', asset[:uri]]
         cache.__set(key, asset)
 
-        key = ['asset-uri-digest', uri, asset[:metadata][:cache_dependencies_digest]]
+        key = ['asset-uri-digest', uri, cache_digest]
         cache.__set(key, asset[:uri])
 
         asset
