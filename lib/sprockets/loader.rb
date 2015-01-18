@@ -25,18 +25,15 @@ module Sprockets
     def load(uri)
       filename, params = parse_asset_uri(uri)
       if params.key?(:id)
-        key = ['asset-uri', uri]
-        asset = cache.fetch(key) do
+        asset = cache.fetch(['asset-uri', uri]) do
           load_asset_by_id_uri(uri, filename, params)
         end
       else
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             digest = resolve_cache_dependencies(paths)
-            key = ['asset-uri-digest', uri, digest]
-            if id_uri = cache.__get(key)
-              key = ['asset-uri', id_uri]
-              cache.__get(key)
+            if id_uri = cache.__get(['asset-uri-digest', uri, digest])
+              cache.__get(['asset-uri', id_uri])
             end
           else
             load_asset_by_uri(uri, filename, params)
@@ -145,11 +142,8 @@ module Sprockets
             0
         }.max
 
-        key = ['asset-uri', asset[:uri]]
-        cache.__set(key, asset)
-
-        key = ['asset-uri-digest', uri, cache_digest]
-        cache.__set(key, asset[:uri])
+        cache.__set(['asset-uri', asset[:uri]], asset)
+        cache.__set(['asset-uri-digest', uri, cache_digest], asset[:uri])
 
         asset
       end
