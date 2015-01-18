@@ -24,8 +24,10 @@ module Sprockets
 
     def resolve_cache_dependency(str)
       case scheme = URI.split(str)[0]
+      when "sprockets-version"
+        VERSION
       when "env-version"
-        [VERSION, self.version]
+        self.version
       when "env-paths"
         self.paths
       when "file-digest"

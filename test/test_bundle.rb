@@ -19,7 +19,8 @@ class TestStylesheetBundle < Sprockets::TestCase
     data = ".project {}\n"
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
-    assert_equal ["env-paths:*", "env-version:*", "file-digest:#{filename}"], result[:cache_dependencies].to_a.sort
+    assert_equal ["file-digest:#{filename}"],
+      result[:cache_dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 
   test "bundle multiple stylesheet files" do
@@ -41,12 +42,10 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
-      "env-paths:*",
-      "env-version:*",
       "file-digest:" + fixture_path('asset/project.css'),
       "file-digest:" + fixture_path('asset/require_self.css'),
       "file-digest:" + fixture_path('asset/tree/all/b.css')
-    ], result[:cache_dependencies].to_a.sort
+    ], result[:cache_dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 
   test "bundle single javascript file" do
@@ -67,7 +66,8 @@ class TestStylesheetBundle < Sprockets::TestCase
     data = "var Project = {\n  find: function(id) {\n  }\n};\n"
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
-    assert_equal ["env-paths:*", "env-version:*", "file-digest:#{filename}"], result[:cache_dependencies].to_a.sort
+    assert_equal ["file-digest:#{filename}"],
+      result[:cache_dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 
   test "bundle multiple javascript files" do
@@ -89,11 +89,9 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
-      "env-paths:*",
-      "env-version:*",
       "file-digest:" + fixture_path('asset/application.js'),
       "file-digest:" + fixture_path('asset/project.js.erb'),
       "file-digest:" + fixture_path('asset/users.js.erb')
-    ], result[:cache_dependencies].to_a.sort
+    ], result[:cache_dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 end

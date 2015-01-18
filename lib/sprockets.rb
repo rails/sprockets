@@ -159,6 +159,7 @@ module Sprockets
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
 
+  add_cache_dependency "sprockets-version:*"
   add_cache_dependency "env-version:*"
   add_cache_dependency "env-paths:*"
 end
