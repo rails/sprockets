@@ -23,19 +23,19 @@ module Sprockets
     #
     # Returns Asset.
     def load(uri)
-      _, params = parse_asset_uri(uri)
+      filename, params = parse_asset_uri(uri)
       if params.key?(:id)
         asset = cache.fetch(asset_uri_cache_key(uri)) do
-          load_asset_by_id_uri(uri)
+          load_asset_by_id_uri(uri, filename, params)
         end
       else
-        asset = fetch_asset_from_dependency_cache(uri) do |paths|
+        asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
               cache.__get(asset_uri_cache_key(id_uri))
             end
           else
-            load_asset_by_uri(uri)
+            load_asset_by_uri(uri, filename, params)
           end
         end
       end
@@ -54,8 +54,7 @@ module Sprockets
         ]
       end
 
-      def asset_cache_dependencies_key(uri)
-        filename, _ = parse_asset_uri(uri)
+      def asset_cache_dependencies_key(uri, filename)
         [
           'asset-uri-cache-dependencies',
           VERSION,
@@ -75,15 +74,14 @@ module Sprockets
         ]
       end
 
-      def load_asset_by_id_uri(uri)
-        path, params = parse_asset_uri(uri)
-
+      def load_asset_by_id_uri(uri, filename, params)
         # Internal assertion, should be routed through load_asset_by_uri
         unless id = params.delete(:id)
           raise ArgumentError, "expected uri to have an id: #{uri}"
         end
 
-        asset = load_asset_by_uri(build_asset_uri(path, params))
+        uri = build_asset_uri(filename, params)
+        asset = load_asset_by_uri(uri, filename, params)
 
         if id && asset[:id] != id
           raise VersionNotFound, "could not find specified id: #{id}"
@@ -92,9 +90,7 @@ module Sprockets
         asset
       end
 
-      def load_asset_by_uri(uri)
-        filename, params = parse_asset_uri(uri)
-
+      def load_asset_by_uri(uri, filename, params)
         # Internal assertion, should be routed through load_asset_by_id_uri
         if params.key?(:id)
           raise ArgumentError, "expected uri to have no id: #{uri}"
@@ -174,8 +170,8 @@ module Sprockets
         asset
       end
 
-      def fetch_asset_from_dependency_cache(uri, limit = 3)
-        key = asset_cache_dependencies_key(uri)
+      def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
+        key = asset_cache_dependencies_key(uri, filename)
         history = cache._get(key) || []
 
         history.each_with_index do |deps, index|
