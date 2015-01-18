@@ -5,6 +5,7 @@ require 'sprockets/errors'
 require 'sprockets/mime'
 require 'sprockets/path_utils'
 require 'sprockets/processing'
+require 'sprockets/processor_utils'
 require 'sprockets/resolve'
 require 'sprockets/transformers'
 require 'sprockets/uri_utils'
@@ -13,7 +14,8 @@ module Sprockets
   # The loader phase takes a asset URI location and returns a constructed Asset
   # object.
   module Loader
-    include DigestUtils, Engines, Mime, PathUtils, URIUtils, Processing, Resolve, Transformers
+    include DigestUtils, PathUtils, ProcessorUtils, URIUtils
+    include Engines, Mime, Processing, Resolve, Transformers
 
     # Public: Load Asset by AssetURI.
     #
@@ -129,9 +131,6 @@ module Sprockets
         # Read into memory and process if theres a processor pipeline or the
         # content type is text.
         if processors.any? || mime_type_charset_detecter(type)
-          data = read_file(asset[:filename], asset[:content_type])
-          metadata = {}
-
           input = {
             environment: self,
             cache: self.cache,
@@ -140,29 +139,12 @@ module Sprockets
             load_path: asset[:load_path],
             name: asset[:name],
             content_type: asset[:content_type],
-            metadata: metadata
+            data: read_file(asset[:filename], asset[:content_type]),
+            metadata: {}
           }
-
-          processors.each do |processor|
-            begin
-              result = processor.call(input.merge(data: data, metadata: metadata))
-              case result
-              when NilClass
-                # noop
-              when Hash
-                data = result[:data] if result.key?(:data)
-                metadata = metadata.merge(result)
-                metadata.delete(:data)
-              when String
-                data = result
-              else
-                raise Error, "invalid processor return type: #{result.class}"
-              end
-            end
-          end
-
-          asset[:source] = data
-          asset[:metadata] = metadata.merge(
+          result = call_processors(processors, input)
+          data = asset[:source] = result.delete(:data)
+          asset[:metadata] = result.merge(
             charset: data.encoding.name.downcase,
             digest: digest(data),
             length: data.bytesize
@@ -230,6 +212,7 @@ module Sprockets
 
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
+        processors.reverse
       end
   end
 end
