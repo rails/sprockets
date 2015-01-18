@@ -22,16 +22,20 @@ module Sprockets
       digest(uris.map { |uri| resolve_cache_dependency(uri) })
     end
 
+    def cache_resolvers
+      config[:cache_resolvers]
+    end
+
+    def register_cache_resolver(scheme, &block)
+      self.config = hash_reassoc(config, :cache_resolvers) do |hash|
+        hash.merge(scheme => block)
+      end
+    end
+
     def resolve_cache_dependency(str)
-      case scheme = URI.split(str)[0]
-      when "sprockets-version"
-        VERSION
-      when "env-version"
-        self.version
-      when "env-paths"
-        self.paths
-      when "file-digest"
-        file_digest(parse_file_digest_uri(str))
+      scheme = URI.split(str)[0]
+      if resolver = cache_resolvers[scheme]
+        resolver.call(self, str)
       else
         raise TypeError, "unknown cache scheme: #{scheme}"
       end
