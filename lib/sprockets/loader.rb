@@ -175,12 +175,12 @@ module Sprockets
           transformers = []
         end
 
-        processed_processors = unwrap_preprocessors(file_type) +
+        processed_processors = unwrap_config_processors(:preprocessors, file_type) +
           unwrap_engines(engine_extnames).reverse +
           transformers +
-          unwrap_postprocessors(type)
+          unwrap_config_processors(:postprocessors, type)
 
-        bundled_processors = params[:skip_bundle] ? [] : unwrap_bundle_processors(type)
+        bundled_processors = params[:skip_bundle] ? [] : unwrap_config_processors(:bundle_processors, type)
 
         processors = bundled_processors.any? ? bundled_processors : processed_processors
         processors += unwrap_encoding_processors(params[:encoding])
