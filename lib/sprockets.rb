@@ -173,7 +173,7 @@ module Sprockets
     env.file_digest(env.parse_file_digest_uri(str))
   end
 
-  add_cache_dependency "sprockets-version:*"
-  add_cache_dependency "environment-version:*"
-  add_cache_dependency "environment-paths:*"
+  add_cache_dependency "sprockets-version"
+  add_cache_dependency "environment-version"
+  add_cache_dependency "environment-paths"
 end
