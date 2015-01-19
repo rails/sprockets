@@ -239,7 +239,7 @@ require 'tmpdir'
 
 class TestFileStoreCaching < Sprockets::TestCase
   def setup
-    @cache = Sprockets::Cache::FileStore.new(Dir::tmpdir)
+    @cache = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, 'sprockets'))
 
     @env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
