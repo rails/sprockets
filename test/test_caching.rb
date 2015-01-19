@@ -107,19 +107,14 @@ class TestCaching < Sprockets::TestCase
     end
   end
 
-  test "keys are different if processor cache key changes" do
+  test "asset ids are different if processor cache key changes" do
     @env1.register_preprocessor 'application/javascript', MockProcessor.new('1.0')
+    assert asset1 = @env1['gallery.js']
 
-    @env1['gallery.js']
-    old_keys = @cache.keys.sort
-
-    @cache.clear
     @env2.register_preprocessor 'application/javascript', MockProcessor.new('2.0')
+    assert asset2 = @env2['gallery.js']
 
-    @env2['gallery.js']
-    new_keys = @cache.keys.sort
-
-    refute_equal old_keys, new_keys
+    refute_equal asset1.id, asset2.id
   end
 
   test "assets from different load paths are not equal" do
