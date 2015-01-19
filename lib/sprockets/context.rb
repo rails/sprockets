@@ -133,7 +133,7 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      @cache_dependencies << URIUtils.build_file_digest_uri(resolve(path).to_s)
+      @cache_dependencies << @environment.build_file_digest_uri(resolve(path).to_s)
       nil
     end
 

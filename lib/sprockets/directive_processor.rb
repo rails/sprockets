@@ -244,7 +244,7 @@ module Sprockets
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          @cache_dependencies << URIUtils.build_file_digest_uri(root)
+          @cache_dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
@@ -274,13 +274,13 @@ module Sprockets
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          @cache_dependencies << URIUtils.build_file_digest_uri(root)
+          @cache_dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_sorted_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
-              @cache_dependencies << URIUtils.build_file_digest_uri(subpath)
+              @cache_dependencies << @environment.build_file_digest_uri(subpath)
             elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
               @required << uri
             end
@@ -304,7 +304,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @cache_dependencies << URIUtils.build_file_digest_uri(resolve(path))
+        @cache_dependencies << @environment.build_file_digest_uri(resolve(path))
       end
 
       # Allows you to state a dependency on an asset without including
@@ -365,7 +365,7 @@ module Sprockets
             raise ArgumentError, "link_directory argument must be a directory"
           end
 
-          @cache_dependencies << URIUtils.build_file_digest_uri(root)
+          @cache_dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
@@ -397,13 +397,13 @@ module Sprockets
             raise ArgumentError, "link_tree argument must be a directory"
           end
 
-          @cache_dependencies << URIUtils.build_file_digest_uri(root)
+          @cache_dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_sorted_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
-              @cache_dependencies << URIUtils.build_file_digest_uri(subpath)
+              @cache_dependencies << @environment.build_file_digest_uri(subpath)
             elsif uri = @environment.locate(subpath)
               asset = @environment.load(uri)
               @cache_dependencies.merge(asset.metadata[:cache_dependencies])
