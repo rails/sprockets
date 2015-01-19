@@ -269,11 +269,11 @@ module Sprockets
       end
 
       def _store(key, version, sha, contents)
-        @cache._set("#{@version}/#{version}/#{key}/#{sha}", contents)
+        @cache.set("#{@version}/#{version}/#{key}/#{sha}", contents)
       end
 
       def _retrieve(key, version, sha)
-        @cache._get("#{@version}/#{version}/#{key}/#{sha}")
+        @cache.get("#{@version}/#{version}/#{key}/#{sha}")
       end
 
       def path_to(key)

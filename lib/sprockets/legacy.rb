@@ -54,11 +54,11 @@ module Sprockets
     end
 
     def cache_get(key)
-      cache._get(key)
+      cache.get(key)
     end
 
     def cache_set(key, value)
-      cache._set(key, value)
+      cache.set(key, value)
     end
 
     private
