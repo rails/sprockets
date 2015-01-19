@@ -31,7 +31,7 @@ module Sprockets
       else
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
-            digest = resolve_cache_dependencies(paths)
+            digest = digest(resolve_dependencies(paths))
             if id_uri = cache.__get(['asset-uri-digest', uri, digest])
               cache.__get(['asset-uri', id_uri])
             end
@@ -86,8 +86,8 @@ module Sprockets
 
         processors = processors_for(file_type, engine_extnames, params)
 
-        cache_dependencies = self.cache_dependencies
-        cache_dependencies += Set.new([build_file_digest_uri(filename)])
+        dependencies = self.dependencies
+        dependencies += Set.new([build_file_digest_uri(filename)])
 
         # Read into memory and process if theres a processor pipeline or the
         # content type is text.
@@ -101,7 +101,7 @@ module Sprockets
             name: name,
             content_type: type,
             data: read_file(filename, type),
-            metadata: { cache_dependencies: cache_dependencies }
+            metadata: { dependencies: dependencies }
           })
           source = result.delete(:data)
           metadata = result.merge!(
@@ -113,7 +113,7 @@ module Sprockets
           metadata = {
             digest: file_digest(filename),
             length: self.stat(filename).size,
-            cache_dependencies: cache_dependencies
+            dependencies: dependencies
           }
         end
 
@@ -127,21 +127,21 @@ module Sprockets
           source: source,
           metadata: metadata,
           integrity: integrity_uri(metadata[:digest], type),
-          cache_dependencies_digest: resolve_cache_dependencies(metadata[:cache_dependencies])
+          dependencies_digest: digest(resolve_dependencies(metadata[:dependencies]))
         }
 
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
         # Deprecated: Avoid tracking Asset mtime
-        asset[:mtime] = metadata[:cache_dependencies].map { |u|
+        asset[:mtime] = metadata[:dependencies].map { |u|
           u.start_with?("file-digest:") ?
             stat(parse_file_digest_uri(u)).mtime.to_i :
             0
         }.max
 
         cache.__set(['asset-uri', asset[:uri]], asset)
-        cache.__set(['asset-uri-digest', uri, asset[:cache_dependencies_digest]], asset[:uri])
+        cache.__set(['asset-uri-digest', uri, asset[:dependencies_digest]], asset[:uri])
 
         asset
       end
@@ -158,7 +158,7 @@ module Sprockets
         end
 
         asset = yield
-        deps = asset[:metadata][:cache_dependencies]
+        deps = asset[:metadata][:dependencies]
         cache._set(key, history.unshift(deps).take(limit))
         asset
       end

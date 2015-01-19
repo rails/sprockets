@@ -55,7 +55,7 @@ module Sprockets
         sprockets: {
           context: context,
           environment: input[:environment],
-          cache_dependencies: context.metadata[:cache_dependencies]
+          dependencies: context.metadata[:dependencies]
         }
       }
 
@@ -67,7 +67,7 @@ module Sprockets
 
       # Track all imported files
       engine.dependencies.map do |dependency|
-        context.metadata[:cache_dependencies] << URIUtils.build_file_digest_uri(dependency.options[:filename])
+        context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.options[:filename])
       end
 
       context.metadata.merge(data: css)
@@ -229,7 +229,7 @@ module Sprockets
       # Returns a Sass::Script::String.
       def asset_data_url(path)
         if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
-          sprockets_cache_dependencies << URIUtils.build_file_digest_uri(asset.filename)
+          sprockets_dependencies << URIUtils.build_file_digest_uri(asset.filename)
           url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
           ::Sass::Script::String.new("url(" + url + ")")
         end
@@ -243,11 +243,11 @@ module Sprockets
           options[:sprockets][:environment]
         end
 
-        # Public: Mutatable set of cache dependencies.
+        # Public: Mutatable set of dependencies.
         #
         # Returns a Set.
-        def sprockets_cache_dependencies
-          options[:sprockets][:cache_dependencies]
+        def sprockets_dependencies
+          options[:sprockets][:dependencies]
         end
 
         # Deprecated: Get the Context instance. Use APIs on

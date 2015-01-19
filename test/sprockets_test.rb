@@ -22,7 +22,7 @@ end
 
 # Popular extensions for testing but not part of Sprockets core
 
-Sprockets.register_cache_resolver "rand" do
+Sprockets.register_dependency_resolver "rand" do
   rand(2**100)
 end
 

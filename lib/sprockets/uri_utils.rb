@@ -98,7 +98,7 @@ module Sprockets
       uri
     end
 
-    # Internal: Parse file-digest cache dependency URI.
+    # Internal: Parse file-digest dependency URI.
     #
     # Examples
     #
@@ -121,7 +121,7 @@ module Sprockets
       path
     end
 
-    # Internal: Build file-digest cache dependency URI.
+    # Internal: Build file-digest dependency URI.
     #
     # Examples
     #

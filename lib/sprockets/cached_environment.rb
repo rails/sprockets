@@ -19,7 +19,7 @@ module Sprockets
       @entries = Hash.new { |h, k| h[k] = _entries(k) }
       @uris    = Hash.new { |h, k| h[k] = _load(k) }
 
-      @resolved_caches = Hash.new { |h, k| h[k] = _resolve_cache_dependency(k) }
+      @resolved_dependencies = Hash.new { |h, k| h[k] = _resolve_dependency(k) }
     end
 
     # No-op return self as cached environment.
@@ -46,10 +46,10 @@ module Sprockets
       @uris[uri]
     end
 
-    # Internal: Cache Environment#resolve_cache_dependency
-    alias_method :_resolve_cache_dependency, :resolve_cache_dependency
-    def resolve_cache_dependency(str)
-      @resolved_caches[str]
+    # Internal: Cache Environment#resolve_dependency
+    alias_method :_resolve_dependency, :resolve_dependency
+    def resolve_dependency(str)
+      @resolved_dependencies[str]
     end
 
     private
