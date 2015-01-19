@@ -33,7 +33,7 @@ module Sprockets
     end
 
     def resolve_cache_dependency(str)
-      scheme = str =~ /:/ ? URI.split(str)[0] : str
+      scheme = str[/([^:]+)/, 1]
       if resolver = cache_resolvers[scheme]
         resolver.call(self, str)
       else
