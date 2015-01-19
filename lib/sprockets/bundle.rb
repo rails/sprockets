@@ -28,12 +28,12 @@ module Sprockets
       required.subtract(stubbed)
       assets = required.map { |uri| cache[uri] }
 
-      dependency_paths = Set.new
+      dependencies = Set.new
       (required + stubbed).each do |uri|
-        dependency_paths += cache[uri].metadata[:dependency_paths]
+        dependencies += cache[uri].metadata[:dependencies]
       end
 
-      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(dependency_paths: dependency_paths, included: assets.map(&:uri))
+      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
     end
   end
 end

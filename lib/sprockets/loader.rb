@@ -25,14 +25,15 @@ module Sprockets
     def load(uri)
       filename, params = parse_asset_uri(uri)
       if params.key?(:id)
-        asset = cache.fetch(asset_uri_cache_key(uri)) do
+        asset = cache.fetch(['asset-uri', uri]) do
           load_asset_by_id_uri(uri, filename, params)
         end
       else
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
-            if id_uri = cache.__get(asset_digest_cache_key(uri, files_digest(paths)))
-              cache.__get(asset_uri_cache_key(id_uri))
+            digest = digest(resolve_dependencies(paths))
+            if id_uri = cache.__get(['asset-uri-digest', uri, digest])
+              cache.__get(['asset-uri', id_uri])
             end
           else
             load_asset_by_uri(uri, filename, params)
@@ -43,37 +44,6 @@ module Sprockets
     end
 
     private
-      def asset_digest_cache_key(uri, digest)
-        [
-          'asset-uri-digest',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          digest
-        ]
-      end
-
-      def asset_cache_dependencies_key(uri, filename)
-        [
-          'asset-uri-cache-dependencies',
-          VERSION,
-          self.version,
-          self.paths,
-          uri,
-          file_digest(filename)
-        ]
-      end
-
-      def asset_uri_cache_key(uri)
-        [
-          'asset-uri',
-          VERSION,
-          self.version,
-          uri
-        ]
-      end
-
       def load_asset_by_id_uri(uri, filename, params)
         # Internal assertion, should be routed through load_asset_by_uri
         unless id = params.delete(:id)
@@ -108,70 +78,76 @@ module Sprockets
 
         logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
+        name = logical_path
+
+        if type = params[:type]
+          logical_path += mime_types[type][:extensions].first
+        end
+
+        processors = processors_for(file_type, engine_extnames, params)
+
+        dependencies = self.dependencies
+        dependencies += Set.new([build_file_digest_uri(filename)])
+
+        # Read into memory and process if theres a processor pipeline or the
+        # content type is text.
+        if processors.any? || mime_type_charset_detecter(type)
+          result = call_processors(processors, {
+            environment: self,
+            cache: self.cache,
+            uri: uri,
+            filename: filename,
+            load_path: load_path,
+            name: name,
+            content_type: type,
+            data: read_file(filename, type),
+            metadata: { dependencies: dependencies }
+          })
+          source = result.delete(:data)
+          metadata = result.merge!(
+            charset: source.encoding.name.downcase,
+            digest: digest(source),
+            length: source.bytesize
+          )
+        else
+          metadata = {
+            digest: file_digest(filename),
+            length: self.stat(filename).size,
+            dependencies: dependencies
+          }
+        end
 
         asset = {
           uri: uri,
           load_path: load_path,
           filename: filename,
-          name: logical_path,
-          logical_path: logical_path
+          name: name,
+          logical_path: logical_path,
+          content_type: type,
+          source: source,
+          metadata: metadata,
+          integrity: integrity_uri(metadata[:digest], type),
+          dependencies_digest: digest(resolve_dependencies(metadata[:dependencies]))
         }
-
-        if type = params[:type]
-          asset[:content_type] = type
-          asset[:logical_path] += mime_types[type][:extensions].first
-        end
-
-        processors = processors_for(file_type, engine_extnames, params)
-
-        # Read into memory and process if theres a processor pipeline or the
-        # content type is text.
-        if processors.any? || mime_type_charset_detecter(type)
-          input = {
-            environment: self,
-            cache: self.cache,
-            uri: asset[:uri],
-            filename: asset[:filename],
-            load_path: asset[:load_path],
-            name: asset[:name],
-            content_type: asset[:content_type],
-            data: read_file(asset[:filename], asset[:content_type]),
-            metadata: {}
-          }
-          result = call_processors(processors, input)
-          data = asset[:source] = result.delete(:data)
-          asset[:metadata] = result.merge(
-            charset: data.encoding.name.downcase,
-            digest: digest(data),
-            length: data.bytesize
-          )
-        else
-          asset[:metadata] = {
-            digest: file_digest(asset[:filename]),
-            length: self.stat(asset[:filename]).size
-          }
-        end
-
-        metadata = asset[:metadata]
-        metadata[:dependency_paths] = Set.new(metadata[:dependency_paths]).merge([asset[:filename]])
-        metadata[:dependency_sources_digest] = files_digest(metadata[:dependency_paths])
-
-        asset[:integrity] = integrity_uri(asset[:metadata][:digest], asset[:content_type])
 
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
         # Deprecated: Avoid tracking Asset mtime
-        asset[:mtime] = metadata[:dependency_paths].map { |p| stat(p).mtime.to_i }.max
+        asset[:mtime] = metadata[:dependencies].map { |u|
+          u.start_with?("file-digest:") ?
+            stat(parse_file_digest_uri(u)).mtime.to_i :
+            0
+        }.max
 
-        cache.__set(asset_uri_cache_key(asset[:uri]), asset)
-        cache.__set(asset_digest_cache_key(uri, asset[:metadata][:dependency_sources_digest]), asset[:uri])
+        cache.__set(['asset-uri', asset[:uri]], asset)
+        cache.__set(['asset-uri-digest', uri, asset[:dependencies_digest]], asset[:uri])
 
         asset
       end
 
       def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
-        key = asset_cache_dependencies_key(uri, filename)
+        key = ['asset-uri-cache-dependencies', uri, file_digest(filename)]
         history = cache._get(key) || []
 
         history.each_with_index do |deps, index|
@@ -182,7 +158,7 @@ module Sprockets
         end
 
         asset = yield
-        deps = asset[:metadata][:dependency_paths]
+        deps = asset[:metadata][:dependencies]
         cache._set(key, history.unshift(deps).take(limit))
         asset
       end

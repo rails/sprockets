@@ -29,7 +29,7 @@ class TestURIUtils < MiniTest::Test
       parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&flag")
   end
 
-  def test_raise_erorr_when_invalid_uri_scheme
+  def test_asset_uri_raise_erorr_when_invalid_uri_scheme
     assert_raises URI::InvalidURIError do
       parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
     end
@@ -62,6 +62,30 @@ class TestURIUtils < MiniTest::Test
   def test_raise_error_when_invalid_param_value
     assert_raises TypeError do
       build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encodings: ['gzip', 'deflate'])
+    end
+  end
+
+  def test_parse_file_digest_uri
+    assert_equal "/usr/local/var/github/app/assets/javascripts/application.js",
+      parse_file_digest_uri("file-digest:/usr/local/var/github/app/assets/javascripts/application.js")
+    assert_equal "/usr/local/var/github/app/assets/javascripts/foo bar.js",
+      parse_file_digest_uri("file-digest:/usr/local/var/github/app/assets/javascripts/foo%20bar.js")
+    assert_equal "C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+      parse_file_digest_uri("file-digest:C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+  end
+
+  def test_build_file_digest_uri
+    assert_equal "file-digest:/usr/local/var/github/app/assets/javascripts/application.js",
+      build_file_digest_uri("/usr/local/var/github/app/assets/javascripts/application.js")
+    assert_equal "file-digest:/usr/local/var/github/app/assets/javascripts/foo%20bar.js",
+      build_file_digest_uri("/usr/local/var/github/app/assets/javascripts/foo bar.js")
+    assert_equal "file-digest:C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+      build_file_digest_uri("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+  end
+
+  def test_file_digest_raise_erorr_when_invalid_uri_scheme
+    assert_raises URI::InvalidURIError do
+      parse_file_digest_uri("http:/usr/local/var/github/app/assets/javascripts/application.js")
     end
   end
 end

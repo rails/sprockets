@@ -193,6 +193,20 @@ class TestCaching < Sprockets::TestCase
     assert_equal main, env2.load(main.uri)
     assert_equal main, env2.find_asset("main.js")
   end
+
+  test "environment cache resolver evaluated on load" do
+    env = @env1
+    assert asset1 = env['rand.js']
+    assert asset2 = env['rand.js']
+    refute_equal asset1.id, asset2.id
+  end
+
+  test "cached environment cache resolver evaluated onced" do
+    env = @env1.cached
+    assert asset1 = env['rand.js']
+    assert asset2 = env['rand.js']
+    assert_equal asset1.id, asset2.id
+  end
 end
 
 require 'tmpdir'
