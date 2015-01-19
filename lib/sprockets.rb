@@ -160,20 +160,20 @@ module Sprockets
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
 
-  register_dependency_resolver "sprockets-version" do
+  register_dependency_resolver 'sprockets-version' do
     VERSION
   end
-  register_dependency_resolver "environment-version" do |env|
+  register_dependency_resolver 'environment-version' do |env|
     env.version
   end
-  register_dependency_resolver "environment-paths" do |env|
+  register_dependency_resolver 'environment-paths' do |env|
     env.paths
   end
-  register_dependency_resolver "file-digest" do |env, str|
+  register_dependency_resolver 'file-digest' do |env, str|
     env.file_digest(env.parse_file_digest_uri(str))
   end
 
-  depend_on "sprockets-version"
-  depend_on "environment-version"
-  depend_on "environment-paths"
+  depend_on 'sprockets-version'
+  depend_on 'environment-version'
+  depend_on 'environment-paths'
 end
