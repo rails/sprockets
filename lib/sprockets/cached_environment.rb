@@ -17,8 +17,9 @@ module Sprockets
       @cache   = environment.cache
       @stats   = Hash.new { |h, k| h[k] = _stat(k) }
       @entries = Hash.new { |h, k| h[k] = _entries(k) }
-      @digests = Hash.new { |h, k| h[k] = _file_digest(k) }
       @uris    = Hash.new { |h, k| h[k] = _load(k) }
+
+      @resolved_dependencies = Hash.new { |h, k| h[k] = _resolve_dependency(k) }
     end
 
     # No-op return self as cached environment.
@@ -39,16 +40,16 @@ module Sprockets
       @stats[path]
     end
 
-    # Internal: Cache Environment#file_digest
-    alias_method :_file_digest, :file_digest
-    def file_digest(path)
-      @digests[path]
-    end
-
     # Internal: Cache Environment#load
     alias_method :_load, :load
     def load(uri)
       @uris[uri]
+    end
+
+    # Internal: Cache Environment#resolve_dependency
+    alias_method :_resolve_dependency, :resolve_dependency
+    def resolve_dependency(str)
+      @resolved_dependencies[str]
     end
 
     private

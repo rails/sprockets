@@ -29,17 +29,17 @@ module Sprockets
       @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
 
-      @required         = Set.new(@metadata[:required])
-      @stubbed          = Set.new(@metadata[:stubbed])
-      @links            = Set.new(@metadata[:links])
-      @dependency_paths = Set.new(@metadata[:dependency_paths])
+      @required     = Set.new(@metadata[:required])
+      @stubbed      = Set.new(@metadata[:stubbed])
+      @links        = Set.new(@metadata[:links])
+      @dependencies = Set.new(input[:metadata][:dependencies])
     end
 
     def metadata
       { required: @required,
         stubbed: @stubbed,
         links: @links,
-        dependency_paths: @dependency_paths }
+        dependencies: @dependencies }
     end
 
     # Returns the environment path that contains the file.
@@ -125,7 +125,7 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      @dependency_paths << resolve(path).to_s
+      @dependencies << @environment.build_file_digest_uri(resolve(path).to_s)
       nil
     end
 
@@ -138,7 +138,7 @@ module Sprockets
     # the target asset's dependencies.
     def depend_on_asset(path)
       if asset = @environment.load(locate(path))
-        @dependency_paths.merge(asset.metadata[:dependency_paths])
+        @dependencies.merge(asset.metadata[:dependencies])
       end
       nil
     end
@@ -172,7 +172,7 @@ module Sprockets
     # Returns an Asset or nil.
     def link_asset(path)
       if asset = @environment.load(locate(path))
-        @dependency_paths.merge(asset.metadata[:dependency_paths])
+        @dependencies.merge(asset.metadata[:dependencies])
         @links << asset.uri
       end
       asset

@@ -79,10 +79,10 @@ module Sprockets
 
       data, directives = result.values_at(:data, :directives)
 
-      @required         = Set.new(input[:metadata][:required])
-      @stubbed          = Set.new(input[:metadata][:stubbed])
-      @links            = Set.new(input[:metadata][:links])
-      @dependency_paths = Set.new(input[:metadata][:dependency_paths])
+      @required     = Set.new(input[:metadata][:required])
+      @stubbed      = Set.new(input[:metadata][:stubbed])
+      @links        = Set.new(input[:metadata][:links])
+      @dependencies = Set.new(input[:metadata][:dependencies])
 
       process_directives(directives)
 
@@ -90,7 +90,7 @@ module Sprockets
         required: @required,
         stubbed: @stubbed,
         links: @links,
-        dependency_paths: @dependency_paths }
+        dependencies: @dependencies }
     end
 
     protected
@@ -242,7 +242,7 @@ module Sprockets
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          @dependency_paths << root
+          @dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
@@ -272,13 +272,13 @@ module Sprockets
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          @dependency_paths << root
+          @dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_sorted_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
-              @dependency_paths << subpath
+              @dependencies << @environment.build_file_digest_uri(subpath)
             elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
               @required << uri
             end
@@ -302,7 +302,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependency_paths << resolve(path)
+        @dependencies << @environment.build_file_digest_uri(resolve(path))
       end
 
       # Allows you to state a dependency on an asset without including
@@ -318,7 +318,7 @@ module Sprockets
       #
       def process_depend_on_asset_directive(path)
         if asset = @environment.load(locate(path))
-          @dependency_paths.merge(asset.metadata[:dependency_paths])
+          @dependencies.merge(asset.metadata[:dependencies])
         end
       end
 
@@ -344,7 +344,7 @@ module Sprockets
       #
       def process_link_directive(path)
         if asset = @environment.load(locate(path))
-          @dependency_paths.merge(asset.metadata[:dependency_paths])
+          @dependencies.merge(asset.metadata[:dependencies])
           @links << asset.uri
         end
       end
@@ -363,7 +363,7 @@ module Sprockets
             raise ArgumentError, "link_directory argument must be a directory"
           end
 
-          @dependency_paths << root
+          @dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_directory(root).each do |subpath, stat|
             if subpath == @filename
@@ -372,7 +372,7 @@ module Sprockets
               next
             elsif uri = @environment.locate(subpath)
               asset = @environment.load(uri)
-              @dependency_paths.merge(asset.metadata[:dependency_paths])
+              @dependencies.merge(asset.metadata[:dependencies])
               @links << asset.uri
             end
           end
@@ -395,16 +395,16 @@ module Sprockets
             raise ArgumentError, "link_tree argument must be a directory"
           end
 
-          @dependency_paths << root
+          @dependencies << @environment.build_file_digest_uri(root)
 
           @environment.stat_sorted_tree(root).each do |subpath, stat|
             if subpath == @filename
               next
             elsif stat.directory?
-              @dependency_paths << subpath
+              @dependencies << @environment.build_file_digest_uri(subpath)
             elsif uri = @environment.locate(subpath)
               asset = @environment.load(uri)
-              @dependency_paths.merge(asset.metadata[:dependency_paths])
+              @dependencies.merge(asset.metadata[:dependencies])
               @links << asset.uri
             end
           end

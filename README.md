@@ -379,6 +379,8 @@ Sprockets 2.x was originally design around [Tilt](https://github.com/rtomayko/ti
 
 Similar to Rack, a processor is a any "callable" (an object that responds to `call`). This maybe a simple Proc or a full class that defines a `def self.call(input)` method. The `call` method accepts an `input` Hash and returns a Hash of metadata.
 
+Also see [`Sprockets::ProcessorUtils`](https://github.com/sstephenson/sprockets/blob/master/lib/sprockets/processor_utils.rb) for public helper methods.
+
 ### input Hash
 
 The `input` Hash defines the following public fields.
@@ -415,7 +417,7 @@ The metadata Hash provides an open format for processors to extend the pipeline 
 * `:required` - A `Set` of String Asset URIs that the Bundle processor should concatenate together.
 * `:stubbed` - A `Set` of String Asset URIs that will be omitted from the `:required` set.
 * `:links` - A `Set` of String Asset URIs that should be compiled along with this asset.
-* `:dependency_paths` - A `Set` of String filenames that should be monitored for caching.
+* `:dependencies` - A `Set` of String Cache URIs that should be monitored for caching.
 
 ``` ruby
 def self.call(input)
