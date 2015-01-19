@@ -98,12 +98,39 @@ module Sprockets
       uri
     end
 
+    # Internal: Parse file-digest cache dependency URI.
+    #
+    # Examples
+    #
+    #   parse("file-digest:/tmp/js/application.js")
+    #   # => "/tmp/js/application.js"
+    #
+    # str - String file-digest URI
+    #
+    # Returns String path.
     def parse_file_digest_uri(str)
-      path = URI.split(str)[5]
-      path = URI::Generic::DEFAULT_PARSER.unescape(path)
+      scheme, _, _, _, _, path, opaque, _, _ = URI.split(str)
+
+      unless scheme == 'file-digest'
+        raise URI::InvalidURIError, "expected file-digest scheme: #{str}"
+      end
+
+      path = URI::Generic::DEFAULT_PARSER.unescape(path || opaque)
+      path.force_encoding(Encoding::UTF_8)
+
       path
     end
 
+    # Internal: Build file-digest cache dependency URI.
+    #
+    # Examples
+    #
+    #   build("/tmp/js/application.js")
+    #   # => "file-digest:/tmp/js/application.js"
+    #
+    # path - String file path
+    #
+    # Returns String URI.
     def build_file_digest_uri(path)
       "file-digest:#{URI::Generic::DEFAULT_PARSER.escape(path)}"
     end
