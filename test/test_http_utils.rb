@@ -1,16 +1,16 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/http_utils'
 
-class TestHTTPUtils < Sprockets::TestCase
+class TestHTTPUtils < MiniTest::Test
   include Sprockets::HTTPUtils
 
-  test "match mime type" do
+  def test_match_mime_type
     assert match_mime_type?("text/html", "text/*")
     assert match_mime_type?("text/plain", "*")
     refute match_mime_type?("text/html", "application/json")
   end
 
-  test "parse q values" do
+  def test_parse_q_values
     assert_equal [], parse_q_values(nil)
 
     assert_equal [["audio/*", 0.2], ["audio/basic", 1.0]],
@@ -35,7 +35,7 @@ class TestHTTPUtils < Sprockets::TestCase
       parse_q_values("gzip;q=1.0, identity; q=0.5, *;q=0")
   end
 
-  test "find q matches" do
+  def test_find_q_matches
     accept = "text/plain; q=0.5, image/*"
     assert_equal ["text/plain"], find_mime_type_matches(accept, ["text/plain"])
     assert_equal ["image/svg+xml"], find_mime_type_matches(accept, ["image/svg+xml"])
@@ -44,7 +44,7 @@ class TestHTTPUtils < Sprockets::TestCase
     assert_equal [], find_mime_type_matches(accept, ["text/css"])
   end
 
-  test "find matches with parsed q values" do
+  def test_find_matches_with_parsed_q_values
     accept = [["text/plain", 0.5], ["image/*", 1.0]]
     assert_equal ["text/plain"], find_mime_type_matches(accept, ["text/plain"])
     assert_equal ["image/svg+xml"], find_mime_type_matches(accept, ["image/svg+xml"])
@@ -53,7 +53,7 @@ class TestHTTPUtils < Sprockets::TestCase
     assert_equal [], find_mime_type_matches(accept, ["text/css"])
   end
 
-  test "find best q match" do
+  def test_find_best_q_match
     accept = "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c"
     assert_equal "text/plain", find_best_mime_type_match(accept, ["text/plain"])
     assert_equal "text/html", find_best_mime_type_match(accept, ["text/html"])
@@ -72,7 +72,7 @@ class TestHTTPUtils < Sprockets::TestCase
     refute find_best_q_match(nil, ["gzip"])
   end
 
-  test "find best q match with parsed q values" do
+  def test_find_best_q_match_with_parsed_q_values
     assert accept = parse_q_values("text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c")
     assert_equal "text/plain", find_best_mime_type_match(accept, ["text/plain"])
     assert_equal "text/html", find_best_mime_type_match(accept, ["text/html"])

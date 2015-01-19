@@ -22,6 +22,10 @@ end
 
 # Popular extensions for testing but not part of Sprockets core
 
+Sprockets.register_dependency_resolver "rand" do
+  rand(2**100)
+end
+
 NoopProcessor = proc { |input| input[:data] }
 Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
 Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html'
@@ -141,6 +145,21 @@ class Sprockets::TestCase < MiniTest::Test
 
         assert !File.exist?(path)
       end
+    end
+  end
+
+  def write(filename, contents, mtime = nil)
+    if File.exist?(filename)
+      mtime ||= [Time.now.to_i, File.stat(filename).mtime.to_i].max + 1
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
+      File.utime(mtime, mtime, filename)
+    else
+      File.open(filename, 'w') do |f|
+        f.write(contents)
+      end
+      File.utime(mtime, mtime, filename) if mtime
     end
   end
 end

@@ -1,4 +1,4 @@
-require 'sprockets/asset_uri'
+require 'sprockets/utils'
 
 module Sprockets
   # Internal: Bundle processor takes a single file asset and prepends all the
@@ -16,7 +16,7 @@ module Sprockets
       type = input[:content_type]
 
       # TODO: Rebuilding this URI is a bit of a smell
-      processed_uri = AssetURI.build(input[:filename], type: type, skip_bundle: true)
+      processed_uri = env.build_asset_uri(input[:filename], type: type, skip_bundle: true)
 
       cache = Hash.new do |h, uri|
         h[uri] = env.load(uri)
@@ -28,12 +28,12 @@ module Sprockets
       required.subtract(stubbed)
       assets = required.map { |uri| cache[uri] }
 
-      dependency_paths = Set.new
+      dependencies = Set.new
       (required + stubbed).each do |uri|
-        dependency_paths += cache[uri].metadata[:dependency_paths]
+        dependencies += cache[uri].metadata[:dependencies]
       end
 
-      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(dependency_paths: dependency_paths, included: assets.map(&:uri))
+      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
     end
   end
 end

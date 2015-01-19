@@ -195,10 +195,8 @@ module Sprockets
           'logical_path' => asset.logical_path,
           'mtime'        => asset.mtime.iso8601,
           'size'         => asset.bytesize,
-          'digest'       => asset.hexdigest
-
-          # TODO: Re-enable integrity once spec issues are cleared up
-          # 'integrity'    => asset.integrity
+          'digest'       => asset.hexdigest,
+          'integrity'    => asset.integrity
         }
         assets[asset.logical_path] = asset.digest_path
 
@@ -283,9 +281,10 @@ module Sprockets
     protected
       # Persist manfiest back to FS
       def save
+        data = json_encode(@data)
         FileUtils.mkdir_p File.dirname(filename)
-        File.open(filename, 'w') do |f|
-          f.write json_encode(@data)
+        PathUtils.atomic_write(filename) do |f|
+          f.write(data)
         end
       end
 

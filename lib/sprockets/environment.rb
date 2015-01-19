@@ -11,7 +11,7 @@ module Sprockets
     #
     def initialize(root = ".")
       initialize_configuration(Sprockets)
-      @root = File.expand_path(root)
+      self.root = root
       self.cache = Cache::MemoryStore.new
       yield self if block_given?
     end
@@ -28,6 +28,14 @@ module Sprockets
 
     def find_asset(*args)
       cached.find_asset(*args)
+    end
+
+    def find_all_linked_assets(*args, &block)
+      cached.find_all_linked_assets(*args, &block)
+    end
+
+    def load(*args)
+      cached.load(*args)
     end
   end
 end

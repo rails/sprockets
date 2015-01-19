@@ -1,33 +1,27 @@
 require 'sprockets/compressing'
+require 'sprockets/dependencies'
 require 'sprockets/engines'
 require 'sprockets/mime'
 require 'sprockets/paths'
 require 'sprockets/processing'
 require 'sprockets/transformers'
+require 'sprockets/utils'
 
 module Sprockets
   module Configuration
-    include Paths, Mime, Engines, Transformers, Processing, Compressing
+    include Paths, Mime, Engines, Transformers, Processing, Compressing, Dependencies, Utils
 
     def initialize_configuration(parent)
-      @logger                = parent.logger
-      @version               = parent.version
-      @digest_class          = parent.digest_class
-      @context_class         = Class.new(parent.context_class)
-      @root                  = parent.root
-      @paths                 = parent.paths
-      @mime_types            = parent.mime_types
-      @mime_exts             = parent.mime_exts
-      @encodings             = parent.encodings
-      @engines               = parent.engines
-      @engine_mime_types     = parent.engine_mime_types
-      @transformers          = parent.transformers
-      @inverted_transformers = parent.inverted_transformers
-      @preprocessors         = parent.preprocessors
-      @postprocessors        = parent.postprocessors
-      @bundle_reducers       = parent.bundle_reducers
-      @bundle_processors     = parent.bundle_processors
-      @compressors           = parent.compressors
+      @config = parent.config
+      @logger = parent.logger
+      @context_class = Class.new(parent.context_class)
+    end
+
+    attr_reader :config
+
+    def config=(config)
+      raise TypeError, "can't assign mutable config" unless config.frozen?
+      @config = config
     end
 
     # Get and set `Logger` instance.
@@ -43,20 +37,24 @@ module Sprockets
     #
     # It would be wise to increment this value anytime you make a
     # configuration change to the `Environment` object.
-    attr_reader :version
+    def version
+      config[:version]
+    end
 
     # Assign an environment version.
     #
     #     environment.version = '2.0'
     #
     def version=(version)
-      mutate_config(:version) { version.dup }
+      self.config = hash_reassoc(config, :version) { version.dup }
     end
 
     # Public: Returns a `Digest` implementation class.
     #
     # Defaults to `Digest::SHA256`.
-    attr_reader :digest_class
+    def digest_class
+      config[:digest_class]
+    end
 
     # Deprecated: Assign a `Digest` implementation class. This maybe any Ruby
     # `Digest::` implementation such as `Digest::SHA256` or
@@ -65,7 +63,7 @@ module Sprockets
     #     environment.digest_class = Digest::MD5
     #
     def digest_class=(klass)
-      @digest_class = klass
+      self.config = config.merge(digest_class: klass).freeze
     end
 
     # Deprecated: Get `Context` class.
@@ -78,19 +76,5 @@ module Sprockets
     #     end
     #
     attr_reader :context_class
-
-    private
-      def mutate_config(sym)
-        obj = yield self.instance_variable_get("@#{sym}").dup
-        self.instance_variable_set("@#{sym}", obj.freeze)
-      end
-
-      def mutate_hash_config(sym, key)
-        mutate_config(sym) do |hash|
-          obj = yield hash[key].dup
-          hash[key] = obj.freeze
-          hash
-        end
-      end
   end
 end

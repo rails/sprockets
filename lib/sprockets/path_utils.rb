@@ -57,7 +57,7 @@ module Sprockets
       require 'pathname'
 
       # On Windows, ALT_SEPARATOR is \
-      # Delegate to Pathname nice the logic gets complex.
+      # Delegate to Pathname since the logic gets complex.
       def absolute_path?(path)
         Pathname.new(path).absolute?
       end

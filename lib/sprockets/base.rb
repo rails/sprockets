@@ -1,4 +1,3 @@
-require 'sprockets/asset_uri'
 require 'sprockets/asset'
 require 'sprockets/bower'
 require 'sprockets/cache'
@@ -12,11 +11,12 @@ require 'sprockets/path_digest_utils'
 require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
+require 'sprockets/uri_utils'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathDigestUtils, PathUtils, HTTPUtils, DigestUtils
+    include PathDigestUtils, PathUtils, HTTPUtils, DigestUtils, URIUtils
     include Configuration
     include Server
     include Resolve, Loader

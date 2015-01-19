@@ -67,7 +67,7 @@ module Sprockets
         sprockets: {
           context: context,
           environment: input[:environment],
-          dependencies: context.metadata[:dependency_paths]
+          dependencies: context.metadata[:dependencies]
         }
       }
 
@@ -79,7 +79,7 @@ module Sprockets
 
       # Track all imported files
       engine.dependencies.map do |dependency|
-        context.metadata[:dependency_paths] << dependency.options[:filename]
+        context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.options[:filename])
       end
 
       context.metadata.merge(data: css)
@@ -241,7 +241,7 @@ module Sprockets
       # Returns a Sass::Script::String.
       def asset_data_url(path)
         if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
-          sprockets_dependencies << asset.filename
+          sprockets_dependencies << URIUtils.build_file_digest_uri(asset.filename)
           url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
           ::Sass::Script::String.new("url(" + url + ")")
         end
@@ -255,7 +255,7 @@ module Sprockets
           options[:sprockets][:environment]
         end
 
-        # Public: Mutatable set dependency paths.
+        # Public: Mutatable set of dependencies.
         #
         # Returns a Set.
         def sprockets_dependencies

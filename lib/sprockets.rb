@@ -32,7 +32,6 @@ module Sprockets
 
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
-  autoload :AssetURI,                'sprockets/asset_uri'
   autoload :Cache,                   'sprockets/cache'
   autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :DigestUtils,             'sprockets/digest_utils'
@@ -47,28 +46,31 @@ module Sprockets
   # Extend Sprockets module to provide global registry
   require 'sprockets/configuration'
   require 'sprockets/context'
+  require 'digest/sha2'
   extend Configuration
 
-  @root                  = File.expand_path('..', __FILE__).freeze
-  @paths                 = [].freeze
-  @mime_types            = {}.freeze
-  @mime_exts             = {}.freeze
-  @encodings             = {}.freeze
-  @engines               = {}.freeze
-  @engine_mime_types     = {}.freeze
-  @transformers          = Hash.new { |h, k| {}.freeze }.freeze
-  @inverted_transformers = Hash.new { |h, k| {}.freeze }.freeze
-  @preprocessors         = Hash.new { |h, k| [].freeze }.freeze
-  @postprocessors        = Hash.new { |h, k| [].freeze }.freeze
-  @bundle_reducers       = Hash.new { |h, k| {}.freeze }.freeze
-  @bundle_processors     = Hash.new { |h, k| [].freeze }.freeze
-  @compressors           = Hash.new { |h, k| {}.freeze }.freeze
-  @context_class         = Context
-  @version               = ''
+  self.config = {
+    bundle_processors: Hash.new { |h, k| [].freeze }.freeze,
+    bundle_reducers: Hash.new { |h, k| {}.freeze }.freeze,
+    dependencies: Set.new.freeze,
+    dependency_resolvers: {}.freeze,
+    compressors: Hash.new { |h, k| {}.freeze }.freeze,
+    digest_class: Digest::SHA256,
+    encodings: {}.freeze,
+    engine_mime_types: {}.freeze,
+    engines: {}.freeze,
+    inverted_transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    mime_exts: {}.freeze,
+    mime_types: {}.freeze,
+    paths: [].freeze,
+    postprocessors: Hash.new { |h, k| [].freeze }.freeze,
+    preprocessors: Hash.new { |h, k| [].freeze }.freeze,
+    root: File.expand_path('..', __FILE__).freeze,
+    transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    version: ""
+  }.freeze
 
-  # Set the default digest
-  require 'digest/sha2'
-  @digest_class = Digest::SHA256
+  @context_class = Context
 
   require 'logger'
   @logger = Logger.new($stderr)
@@ -157,4 +159,21 @@ module Sprockets
 
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
+
+  register_dependency_resolver "sprockets-version" do
+    VERSION
+  end
+  register_dependency_resolver "environment-version" do |env|
+    env.version
+  end
+  register_dependency_resolver "environment-paths" do |env|
+    env.paths
+  end
+  register_dependency_resolver "file-digest" do |env, str|
+    env.file_digest(env.parse_file_digest_uri(str))
+  end
+
+  depend_on "sprockets-version"
+  depend_on "environment-version"
+  depend_on "environment-paths"
 end

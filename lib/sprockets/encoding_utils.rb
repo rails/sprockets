@@ -3,6 +3,8 @@ require 'stringio'
 require 'zlib'
 
 module Sprockets
+  # Internal: HTTP transport encoding and charset detecting related functions.
+  # Mixed into Environment.
   module EncodingUtils
     extend self
 
