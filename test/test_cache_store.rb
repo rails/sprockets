@@ -4,17 +4,17 @@ require 'fileutils'
 
 module CacheStoreNullTests
   def test_read
-    refute @store._get("foo")
+    refute @store.get("foo")
   end
 
   def test_write
-    result = @store._set("foo", "bar")
+    result = @store.set("foo", "bar")
     assert_equal "bar", result
   end
 
   def test_write_and_read_miss
-    @store._set("foo", "bar")
-    refute @store._get("foo")
+    @store.set("foo", "bar")
+    refute @store.get("foo")
   end
 
   def test_fetch
@@ -25,40 +25,40 @@ end
 
 module CacheStoreTests
   def test_read_miss
-    refute @store._get("missing")
+    refute @store.get("missing")
   end
 
   def test_write
-    result = @store._set("foo", "bar")
+    result = @store.set("foo", "bar")
     assert_equal "bar", result
   end
 
   def test_write_and_read_hit
-    @store._set("foo", "bar")
-    assert_equal "bar", @store._get("foo")
+    @store.set("foo", "bar")
+    assert_equal "bar", @store.get("foo")
   end
 
   def test_multiple_write_and_read_hit
-    @store._set("foo", "1")
-    @store._set("bar", "2")
-    @store._set("baz", "3")
+    @store.set("foo", "1")
+    @store.set("bar", "2")
+    @store.set("baz", "3")
 
-    assert_equal "1", @store._get("foo")
-    assert_equal "2", @store._get("bar")
-    assert_equal "3", @store._get("baz")
+    assert_equal "1", @store.get("foo")
+    assert_equal "2", @store.get("bar")
+    assert_equal "3", @store.get("baz")
   end
 
   def test_large_write_and_read_hit
     data = ("a"..."zzz").to_a.join
-    @store._set("foo", data)
-    assert_equal data, @store._get("foo")
+    @store.set("foo", data)
+    assert_equal data, @store.get("foo")
   end
 
   def test_delete
-    @store._set("foo", "bar")
-    assert_equal "bar", @store._get("foo")
-    @store._set("foo", nil)
-    assert_equal nil, @store._get("foo")
+    @store.set("foo", "bar")
+    assert_equal "bar", @store.get("foo")
+    @store.set("foo", nil)
+    assert_equal nil, @store.get("foo")
   end
 
   def test_fetch

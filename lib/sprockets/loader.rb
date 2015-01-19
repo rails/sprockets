@@ -32,8 +32,8 @@ module Sprockets
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             digest = digest(resolve_dependencies(paths))
-            if id_uri = cache.__get(['asset-uri-digest', uri, digest])
-              cache.__get(['asset-uri', id_uri])
+            if id_uri = cache.get(['asset-uri-digest', uri, digest], true)
+              cache.get(['asset-uri', id_uri], true)
             end
           else
             load_asset_by_uri(uri, filename, params)
@@ -134,26 +134,26 @@ module Sprockets
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
-        cache.__set(['asset-uri', asset[:uri]], asset)
-        cache.__set(['asset-uri-digest', uri, asset[:dependencies_digest]], asset[:uri])
+        cache.set(['asset-uri', asset[:uri]], asset, true)
+        cache.set(['asset-uri-digest', uri, asset[:dependencies_digest]], asset[:uri], true)
 
         asset
       end
 
       def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
         key = ['asset-uri-cache-dependencies', uri, file_digest(filename)]
-        history = cache._get(key) || []
+        history = cache.get(key) || []
 
         history.each_with_index do |deps, index|
           if asset = yield(deps)
-            cache._set(key, history.rotate!(index)) if index > 0
+            cache.set(key, history.rotate!(index)) if index > 0
             return asset
           end
         end
 
         asset = yield
         deps = asset[:metadata][:dependencies]
-        cache._set(key, history.unshift(deps).take(limit))
+        cache.set(key, history.unshift(deps).take(limit))
         asset
       end
 

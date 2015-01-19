@@ -98,31 +98,36 @@ module Sprockets
     # store.
     #
     # This API may be used publicaly, but may have undefined behavior
-    # depending on the backend store being used. Therefore it must be used
-    # with caution, which is why its prefixed with an underscore. Prefer the
+    # depending on the backend store being used. Prefer the
     # Cache#fetch API over using this.
     #
-    # key - JSON serializable key
+    # key   - JSON serializable key
+    # local - Check local cache first (default: false)
     #
     # Returns a JSON serializable object or nil if there was a cache miss.
-    def _get(key)
-      @cache_wrapper.get(expand_key(key))
+    def get(key, local = false)
+      expanded_key = expand_key(key)
+      value = @fetch_cache.get(expanded_key) if local
+      value = @cache_wrapper.get(expanded_key) if value.nil?
+      value
     end
 
     # Public: Low level API to set item directly to the backend cache store.
     #
     # This API may be used publicaly, but may have undefined behavior
-    # depending on the backend store being used. Therefore it must be used
-    # with caution, which is why its prefixed with an underscore. Prefer the
+    # depending on the backend store being used. Prefer the
     # Cache#fetch API over using this.
     #
     # key   - JSON serializable key
     # value - A consistent JSON serializable object for the given key. Setting
     #         a different value for the given key has undefined behavior.
+    # local - Set on local cache (default: false)
     #
     # Returns the value argument.
-    def _set(key, value)
-      @cache_wrapper.set(expand_key(key), value)
+    def set(key, value, local = false)
+      expanded_key = expand_key(key)
+      @fetch_cache.set(expanded_key, value)
+      @cache_wrapper.set(expanded_key, value)
     end
 
     # Public: Pretty inspect
@@ -130,36 +135,6 @@ module Sprockets
     # Returns String.
     def inspect
       "#<#{self.class} local=#{@fetch_cache.inspect} store=#{@cache_wrapper.cache.inspect}>"
-    end
-
-    # Internal: Get cached value from memory cache or fallback to backend cache.
-    #
-    # Use fetch() instead.
-    #
-    # key - JSON serializable key
-    #
-    # Returns a JSON serializable object or nil if there was a cache miss.
-    def __get(key)
-      expanded_key = expand_key(key)
-      value = @fetch_cache.get(expanded_key)
-      value = @cache_wrapper.get(expanded_key) if value.nil?
-      value
-    end
-
-    # Internal: Set cached value to both memory cache and fallback backend
-    # cache.
-    #
-    # Use fetch() instead.
-    #
-    # key   - JSON serializable key
-    # value - A consistent JSON serializable object for the given key. Setting
-    #         a different value for the given key has undefined behavior.
-    #
-    # Returns the value argument.
-    def __set(key, value)
-      expanded_key = expand_key(key)
-      @fetch_cache.set(expanded_key, value)
-      @cache_wrapper.set(expanded_key, value)
     end
 
     private
