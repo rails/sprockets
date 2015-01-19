@@ -22,6 +22,10 @@ end
 
 # Popular extensions for testing but not part of Sprockets core
 
+Sprockets.register_cache_resolver "rand" do
+  rand(2**100)
+end
+
 NoopProcessor = proc { |input| input[:data] }
 Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
 Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html'
