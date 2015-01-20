@@ -21,6 +21,7 @@ module Sprockets
   autoload :EjsTemplate,             'sprockets/ejs_template'
   autoload :ERBProcessor,            'sprockets/erb_processor'
   autoload :ERBTemplate,             'sprockets/erb_template'
+  autoload :FileReader,              'sprockets/file_reader'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassProcessor,           'sprockets/sass_processor'

@@ -2,6 +2,7 @@ require 'sprockets/asset'
 require 'sprockets/digest_utils'
 require 'sprockets/engines'
 require 'sprockets/errors'
+require 'sprockets/file_reader'
 require 'sprockets/mime'
 require 'sprockets/path_utils'
 require 'sprockets/processing'
@@ -92,13 +93,10 @@ module Sprockets
 
         processors = unwrap_processors(processors)
 
-        dependencies = self.dependencies
-        dependencies += Set.new([build_file_digest_uri(filename)])
-        dependencies += processor_dependencies
+        dependencies = self.dependencies + processor_dependencies
 
-        # Read into memory and process if theres a processor pipeline or the
-        # content type is text.
-        if processors.any? || mime_type_charset_detecter(type)
+        # Read into memory and process if theres a processor pipeline
+        if processors.any?
           result = call_processors(processors, {
             environment: self,
             cache: self.cache,
@@ -107,7 +105,6 @@ module Sprockets
             load_path: load_path,
             name: name,
             content_type: type,
-            data: read_file(filename, type),
             metadata: { dependencies: dependencies }
           })
           source = result.delete(:data)
@@ -196,6 +193,10 @@ module Sprockets
 
           processors += engine_extnames.map { |ext| engines[ext] }
           processors += config[:preprocessors][file_type]
+        end
+
+        if processors.any? || mime_type_charset_detecter(type)
+          processors += [FileReader]
         end
 
         processors
