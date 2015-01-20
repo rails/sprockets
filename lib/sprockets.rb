@@ -60,6 +60,8 @@ module Sprockets
     paths: [].freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
+    processor_dependency_uris: {}.freeze,
+    inverted_processor_dependency_uris: {}.freeze,
     root: File.expand_path('..', __FILE__).freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""
@@ -174,20 +176,23 @@ module Sprockets
   # Other
   register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
 
-  register_dependency_resolver "sprockets-version" do
+  register_dependency_resolver 'sprockets-version' do
     VERSION
   end
-  register_dependency_resolver "environment-version" do |env|
+  register_dependency_resolver 'environment-version' do |env|
     env.version
   end
-  register_dependency_resolver "environment-paths" do |env|
+  register_dependency_resolver 'environment-paths' do |env|
     env.paths
   end
-  register_dependency_resolver "file-digest" do |env, str|
+  register_dependency_resolver 'file-digest' do |env, str|
     env.file_digest(env.parse_file_digest_uri(str))
   end
+  register_dependency_resolver 'processor' do |env, str|
+    env.resolve_processor_cache_key_uri(str)
+  end
 
-  depend_on "sprockets-version"
-  depend_on "environment-version"
-  depend_on "environment-paths"
+  depend_on 'sprockets-version'
+  depend_on 'environment-version'
+  depend_on 'environment-paths'
 end

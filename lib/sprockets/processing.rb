@@ -2,13 +2,14 @@ require 'source_map'
 require 'sprockets/engines'
 require 'sprockets/lazy_processor'
 require 'sprockets/mime'
+require 'sprockets/uri_utils'
 require 'sprockets/utils'
 
 module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    include Utils
+    include URIUtils, Utils
 
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
@@ -16,31 +17,9 @@ module Sprockets
       config[:preprocessors]
     end
 
-    # Internal: Find and load preprocessors by mime type.
-    #
-    # mime_type - String MIME type.
-    #
-    # Returns Array of Procs.
-    def unwrap_preprocessors(mime_type)
-      preprocessors[mime_type].map do |processor|
-        unwrap_processor(processor)
-      end
-    end
-
     # Postprocessors are ran after Preprocessors and Engine processors.
     def postprocessors
       config[:postprocessors]
-    end
-
-    # Internal: Find and load postprocessors by mime type.
-    #
-    # mime_type - String MIME type.
-    #
-    # Returns Array of Procs.
-    def unwrap_postprocessors(mime_type)
-      postprocessors[mime_type].map do |processor|
-        unwrap_processor(processor)
-      end
     end
 
     # Registers a new Preprocessor `klass` for `mime_type`.
@@ -53,12 +32,8 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_preprocessor(mime_type, proc = nil, &block)
-      proc ||= block
-      self.config = hash_reassoc(config, :preprocessors, mime_type) do |processors|
-        processors.push(proc)
-        processors
-      end
+    def register_preprocessor(*args, &block)
+      register_config_processor(:preprocessors, *args, &block)
     end
 
     # Registers a new Postprocessor `klass` for `mime_type`.
@@ -71,51 +46,30 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_postprocessor(mime_type, proc = nil, &block)
-      proc ||= block
-      self.config = hash_reassoc(config, :postprocessors, mime_type) do |processors|
-        processors.push(proc)
-        processors
-      end
+    def register_postprocessor(*args, &block)
+      register_config_processor(:postprocessors, *args, &block)
     end
 
     # Remove Preprocessor `klass` for `mime_type`.
     #
     #     unregister_preprocessor 'text/css', Sprockets::DirectiveProcessor
     #
-    def unregister_preprocessor(mime_type, proc)
-      self.config = hash_reassoc(config, :preprocessors, mime_type) do |processors|
-        processors.delete(proc)
-        processors
-      end
+    def unregister_preprocessor(*args)
+      unregister_config_processor(:preprocessors, *args)
     end
 
     # Remove Postprocessor `klass` for `mime_type`.
     #
     #     unregister_postprocessor 'text/css', Sprockets::DirectiveProcessor
     #
-    def unregister_postprocessor(mime_type, proc)
-      self.config = hash_reassoc(config, :postprocessors, mime_type) do |processors|
-        processors.delete(proc)
-        processors
-      end
+    def unregister_postprocessor(*args)
+      unregister_config_processor(:postprocessors, *args)
     end
 
     # Bundle Processors are ran on concatenated assets rather than
     # individual files.
     def bundle_processors
       config[:bundle_processors]
-    end
-
-    # Internal: Find and load bundle processors by mime type.
-    #
-    # mime_type - String MIME type.
-    #
-    # Returns Array of Procs.
-    def unwrap_bundle_processors(mime_type)
-      bundle_processors[mime_type].map do |processor|
-        unwrap_processor(processor)
-      end
     end
 
     # Registers a new Bundle Processor `klass` for `mime_type`.
@@ -128,23 +82,16 @@ module Sprockets
     #       data.gsub(...)
     #     end
     #
-    def register_bundle_processor(mime_type, proc = nil, &block)
-      proc ||= block
-      self.config = hash_reassoc(config, :bundle_processors, mime_type) do |processors|
-        processors.push(proc)
-        processors
-      end
+    def register_bundle_processor(*args, &block)
+      register_config_processor(:bundle_processors, *args, &block)
     end
 
     # Remove Bundle Processor `klass` for `mime_type`.
     #
     #     unregister_bundle_processor 'application/javascript', Sprockets::DirectiveProcessor
     #
-    def unregister_bundle_processor(mime_type, proc)
-      self.config = hash_reassoc(config, :bundle_processors, mime_type) do |processors|
-        processors.delete(proc)
-        processors
-      end
+    def unregister_bundle_processor(*args)
+      unregister_config_processor(:bundle_processors, *args)
     end
 
     # Internal: Two dimensional Hash of reducer functions for a given mime type
@@ -224,7 +171,47 @@ module Sprockets
       end
     end
 
+    protected
+      def resolve_processor_cache_key_uri(uri)
+        return unless processor = config[:processor_dependency_uris][uri]
+        processor = unwrap_processor(processor)
+        processor.cache_key if processor.respond_to?(:cache_key)
+      end
+
     private
+      def register_config_processor(type, mime_type, processor = nil, &block)
+        processor ||= block
+
+        pos = config[type][mime_type].size
+        uri = build_processor_uri(type, processor, type: mime_type, pos: pos)
+        register_processor_dependency_uri(uri, processor)
+
+        self.config = hash_reassoc(config, type, mime_type) do |processors|
+          processors.push(processor)
+          processors
+        end
+      end
+
+      def register_processor_dependency_uri(uri, processor)
+        self.config = hash_reassoc(config, :processor_dependency_uris) do |uris|
+          uris.merge(uri => processor)
+        end
+        self.config = hash_reassoc(config, :inverted_processor_dependency_uris) do |uris|
+          uris.merge(processor => uri)
+        end
+      end
+
+      def unregister_config_processor(type, mime_type, proccessor)
+        self.config = hash_reassoc(config, type, mime_type) do |processors|
+          processors.delete(proccessor)
+          processors
+        end
+      end
+
+      def unwrap_processors(processors)
+        processors.map { |p| unwrap_processor(p) }
+      end
+
       def unwrap_processor(processor)
         processor.respond_to?(:unwrap) ? processor.unwrap : processor
       end

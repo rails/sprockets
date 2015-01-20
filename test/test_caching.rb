@@ -96,6 +96,27 @@ class TestCaching < Sprockets::TestCase
     refute_equal old_keys, new_keys
   end
 
+  class MockProcessor
+    attr_reader :cache_key
+
+    def initialize(cache_key)
+      @cache_key = cache_key
+    end
+
+    def call(input)
+    end
+  end
+
+  test "asset ids are different if processor cache key changes" do
+    @env1.register_preprocessor 'application/javascript', MockProcessor.new('1.0')
+    assert asset1 = @env1['gallery.js']
+
+    @env2.register_preprocessor 'application/javascript', MockProcessor.new('2.0')
+    assert asset2 = @env2['gallery.js']
+
+    refute_equal asset1.id, asset2.id
+  end
+
   test "assets from different load paths are not equal" do
     # Normalize test fixture mtimes
     mtime = File.stat(fixture_path("default/app/main.js")).mtime.to_i

@@ -44,25 +44,15 @@ module Sprockets
       config[:engine_mime_types]
     end
 
-    # Internal: Find and load engines by extension.
-    #
-    # extnames - Array of String extnames
-    #
-    # Returns Array of Procs.
-    def unwrap_engines(extnames)
-      extnames.map { |ext|
-        engines[ext]
-      }.map { |engine|
-        unwrap_processor(engine)
-      }
-    end
-
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
     #     environment.register_engine '.coffee', CoffeeScriptProcessor
     #
     def register_engine(ext, klass, options = {})
+      uri = build_processor_uri(:engine, klass, extname: ext)
+      register_processor_dependency_uri(uri, klass)
+
       self.config = hash_reassoc(config, :engines) do |engines|
         engines.merge(ext => klass)
       end

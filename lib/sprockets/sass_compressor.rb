@@ -27,6 +27,12 @@ module Sprockets
       instance.call(input)
     end
 
+    def cache_key
+      instance.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(options = {})
       @options = options
       @cache_key = [

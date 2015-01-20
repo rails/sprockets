@@ -28,6 +28,12 @@ module Sprockets
       instance.call(input)
     end
 
+    def self.cache_key
+      instance.cache_key
+    end
+
+    attr_reader :cache_key
+
     # Public: Initialize template with custom options.
     #
     # options - Hash
@@ -36,6 +42,12 @@ module Sprockets
     #
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
+      @cache_key = [
+        self.class.name,
+        VERSION,
+        Sass::VERSION,
+        @cache_version
+      ].freeze
 
       @functions = Module.new do
         include Functions

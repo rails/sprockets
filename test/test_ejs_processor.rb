@@ -10,4 +10,8 @@ class TestEjsProcessor < Sprockets::TestCase
     }
     assert Sprockets::EjsProcessor.call(input).match(/<span>Hello, /)
   end
+
+  test "cache key" do
+    assert Sprockets::EjsProcessor.cache_key
+  end
 end

@@ -10,6 +10,10 @@ module Sprockets
   module EjsProcessor
     VERSION = '1'
 
+    def self.cache_key
+      @cache_key ||= [name, VERSION].freeze
+    end
+
     # Compile template data with EJS compiler.
     #
     # Returns a JS function definition String. The result should be
@@ -19,8 +23,7 @@ module Sprockets
     #
     def self.call(input)
       data = input[:data]
-      key  = [self.name, VERSION, data]
-      input[:cache].fetch(key) do
+      input[:cache].fetch(cache_key + [data]) do
         ::EJS.compile(data)
       end
     end

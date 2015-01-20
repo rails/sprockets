@@ -80,21 +80,9 @@ module Sprockets
     #
     # Returns String URI.
     def build_asset_uri(path, params = {})
-      query = []
-      params.each do |key, value|
-        case value
-        when String
-          query << "#{key}=#{value}"
-        when TrueClass
-          query << "#{key}"
-        when FalseClass, NilClass
-        else
-          raise TypeError, "unexpected type: #{value.class}"
-        end
-      end
-
+      query = encode_uri_query_params(params)
       uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(path)}"
-      uri << "?#{query.join('&')}" if query.any?
+      uri << "?#{query}" if query
       uri
     end
 
@@ -133,6 +121,54 @@ module Sprockets
     # Returns String URI.
     def build_file_digest_uri(path)
       "file-digest:#{URI::Generic::DEFAULT_PARSER.escape(path)}"
+    end
+
+    # Internal: Build processor dependency URI.
+    #
+    #
+    # type - String or Symbol processor type (preprocessor, postprocessor, ...)
+    # processor - Processor callable object
+    # params - Hash of associated metadata
+    #
+    # Returns String URI.
+    def build_processor_uri(type, processor = nil, params = {})
+      if processor
+        if processor.respond_to?(:name)
+          params[:name] = processor.name
+        elsif processor && processor.class.respond_to?(:name)
+          params[:class_name] = processor.class.name
+        end
+      end
+
+      query = encode_uri_query_params(params)
+      uri = "processor:#{type}"
+      uri << "?#{query}" if query
+      uri
+    end
+
+    # Internal: Serialize hash of params into query string.
+    #
+    # params - Hash of params to serialize
+    #
+    # Returns String query or nil if empty.
+    def encode_uri_query_params(params)
+      query = []
+
+      params.each do |key, value|
+        case value
+        when Integer
+          query << "#{key}=#{value}"
+        when String
+          query << "#{key}=#{URI::Generic::DEFAULT_PARSER.escape(value)}"
+        when TrueClass
+          query << "#{key}"
+        when FalseClass, NilClass
+        else
+          raise TypeError, "unexpected type: #{value.class}"
+        end
+      end
+
+      "#{query.join('&')}" if query.any?
     end
   end
 end

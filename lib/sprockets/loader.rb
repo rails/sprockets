@@ -86,8 +86,15 @@ module Sprockets
 
         processors = processors_for(file_type, engine_extnames, params)
 
+        processor_dependencies = Set.new(processors.map { |processor|
+          config[:inverted_processor_dependency_uris][processor]
+        }.compact)
+
+        processors = unwrap_processors(processors)
+
         dependencies = self.dependencies
         dependencies += Set.new([build_file_digest_uri(filename)])
+        dependencies += processor_dependencies
 
         # Read into memory and process if theres a processor pipeline or the
         # content type is text.
@@ -161,23 +168,28 @@ module Sprockets
         type = params[:type]
 
         if type != file_type
-          transformers = unwrap_transformer(file_type, type)
-          unless transformers.any?
+          if processor = transformers[file_type][type]
+            transformers = [processor]
+          else
             raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
           end
         else
           transformers = []
         end
 
-        processed_processors = unwrap_preprocessors(file_type) +
-          unwrap_engines(engine_extnames).reverse +
+        processed_processors = config[:preprocessors][file_type] +
+          engine_extnames.reverse.map { |ext| engines[ext] } +
           transformers +
-          unwrap_postprocessors(type)
+          config[:postprocessors][type]
 
-        bundled_processors = params[:skip_bundle] ? [] : unwrap_bundle_processors(type)
+        bundled_processors = params[:skip_bundle] ? [] : config[:bundle_processors][type]
 
         processors = bundled_processors.any? ? bundled_processors : processed_processors
-        processors += unwrap_encoding_processors(params[:encoding])
+
+        if processor = encoding_processor_for(params[:encoding])
+          processors += [processor]
+        end
+
         processors.reverse
       end
   end

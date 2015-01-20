@@ -24,4 +24,8 @@ class TestCoffeeScriptProcessor < Sprockets::TestCase
     assert_equal 19, result[:map].size
     assert_equal ['squared'], result[:map].sources
   end
+
+  test "cache key" do
+    assert Sprockets::CoffeeScriptProcessor.cache_key
+  end
 end
