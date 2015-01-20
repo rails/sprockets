@@ -15,7 +15,6 @@ module Sprockets
       env  = input[:environment]
       type = input[:content_type]
 
-      # TODO: Rebuilding this URI is a bit of a smell
       processed_uri = env.build_asset_uri(input[:filename], type: type, skip_bundle: true)
 
       find_required = proc { |uri| env.load(uri).metadata[:required] }
