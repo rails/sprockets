@@ -42,8 +42,10 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
+      "file-digest:" + fixture_path('asset'),
       "file-digest:" + fixture_path('asset/project.css'),
       "file-digest:" + fixture_path('asset/require_self.css'),
+      "file-digest:" + fixture_path('asset/tree/all'),
       "file-digest:" + fixture_path('asset/tree/all/b.css')
     ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
@@ -89,6 +91,7 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
+      "file-digest:" + fixture_path('asset'),
       "file-digest:" + fixture_path('asset/application.js'),
       "file-digest:" + fixture_path('asset/project.js.erb'),
       "file-digest:" + fixture_path('asset/users.js.erb')

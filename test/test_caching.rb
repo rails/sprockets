@@ -189,6 +189,47 @@ class TestCaching < Sprockets::TestCase
     end
   end
 
+  test "add/remove file to shadow vendor" do
+    @env = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor")
+      env.cache = @cache
+    end
+
+    patched_jquery = fixture_path('default/app/jquery.js')
+
+    sandbox patched_jquery do
+      asset = @env["jquery.js"]
+      assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+
+      asset = @env["main.js"]
+      assert_equal fixture_path('default/app/main.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+
+      write(patched_jquery, "jQueryFixed;\n")
+
+      asset = @env["main.js"]
+      assert_equal fixture_path('default/app/main.js'), asset.filename
+      assert_equal "jQueryFixed;\n", asset.to_s
+
+      asset = @env["jquery.js"]
+      assert_equal fixture_path('default/app/jquery.js'), asset.filename
+      assert_equal "jQueryFixed;\n", asset.to_s
+
+      File.unlink(patched_jquery)
+      File.utime(Time.now.to_i+3, Time.now.to_i+3, File.dirname(patched_jquery))
+
+      asset = @env["jquery.js"]
+      assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+
+      asset = @env["main.js"]
+      assert_equal fixture_path('default/app/main.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+    end
+  end
+
   test "seperate cache for dependencies under a different load path" do
     env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path("app")

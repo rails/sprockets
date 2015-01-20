@@ -1,8 +1,11 @@
+require 'set'
 require 'sprockets/uri_utils'
 
 module Sprockets
   module Resolve
     include URIUtils
+
+    attr_accessor :last_resolve_dependencies
 
     # Public: Finds the absolute path for a given logical path by searching the
     # environment's load paths.
@@ -18,6 +21,7 @@ module Sprockets
     #
     # The String path is returned or nil if no results are found.
     def resolve(path, options = {})
+      self.last_resolve_dependencies = nil
       logical_name, mime_type, _ = parse_path_extnames(path)
 
       paths = options[:load_paths] || self.paths
@@ -35,7 +39,8 @@ module Sprockets
         end
       else
         accepts = parse_accept_options(mime_type, options[:accept])
-        filename, _ = resolve_under_paths(paths, logical_name, mime_type, accepts)
+        filename, _, stats = resolve_under_paths(paths, logical_name, mime_type, accepts)
+        self.last_resolve_dependencies = stats
         filename
       end
     end
@@ -54,6 +59,8 @@ module Sprockets
     #
     # The String Asset URI is returned or nil if no results are found.
     def locate(path, options = {})
+      self.last_resolve_dependencies = nil
+
       path = path.to_s
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
@@ -84,7 +91,8 @@ module Sprockets
         end
 
         transformed_accepts = expand_transform_accepts(parsed_accept)
-        filename, mime_type = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
+        filename, mime_type, stats = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
+        self.last_resolve_dependencies = stats
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
@@ -98,15 +106,17 @@ module Sprockets
       def resolve_under_paths(paths, logical_name, mime_type, accepts)
         logical_basename = File.basename(logical_name)
 
+        all_stats = Set.new
         paths.each do |load_path|
-          candidates = path_matches(load_path, logical_name, logical_basename)
+          candidates, stats = path_matches(load_path, logical_name, logical_basename)
+          all_stats.merge(stats)
           candidate = find_best_q_match(accepts, candidates) do |c, matcher|
             match_mime_type?(c[1] || "application/octet-stream", matcher)
           end
-          return candidate if candidate
+          return candidate + [all_stats] if candidate
         end
 
-        nil
+        return nil, nil, all_stats
       end
 
       def parse_accept_options(mime_type, types)
@@ -135,12 +145,13 @@ module Sprockets
       end
 
       def path_matches(load_path, logical_name, logical_basename)
-        candidates = []
+        candidates, stats = [], Set.new
         dirname = File.dirname(File.join(load_path, logical_name))
+        stats << build_file_digest_uri(dirname)
         dirname_matches(dirname, logical_basename) { |candidate| candidates << candidate }
         resolve_alternates(load_path, logical_name) { |fn| candidates << [fn, parse_path_extnames(fn)[1]] }
         dirname_matches(File.join(load_path, logical_name), "index") { |candidate| candidates << candidate }
-        candidates.select { |fn, _| file?(fn) }
+        return candidates.select { |fn, _| file?(fn) }, stats
       end
 
       def dirname_matches(dirname, basename)

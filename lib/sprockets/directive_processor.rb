@@ -210,7 +210,9 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << locate(path, accept: @content_type, bundle: false)
+        uri = locate(path, accept: @content_type, bundle: false)
+        @dependencies += Set.new(@environment.last_resolve_dependencies)
+        @required << uri
       end
 
       # `require_self` causes the body of the current file to be inserted
