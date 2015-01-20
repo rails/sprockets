@@ -199,6 +199,8 @@ class TestCaching < Sprockets::TestCase
     patched_jquery = fixture_path('default/app/jquery.js')
 
     sandbox patched_jquery do
+      File.utime(1421000000, 1422000000, File.dirname(patched_jquery))
+
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
       assert_equal "jQuery;\n", asset.to_s
@@ -207,7 +209,7 @@ class TestCaching < Sprockets::TestCase
       assert_equal fixture_path('default/app/main.js'), asset.filename
       assert_equal "jQuery;\n", asset.to_s
 
-      write(patched_jquery, "jQueryFixed;\n")
+      write(patched_jquery, "jQueryFixed;\n", 1422000010)
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
@@ -218,8 +220,7 @@ class TestCaching < Sprockets::TestCase
       assert_equal "jQueryFixed;\n", asset.to_s
 
       File.unlink(patched_jquery)
-      timestamp = File.mtime(File.dirname(patched_jquery)).to_i+1
-      File.utime(timestamp, timestamp, File.dirname(patched_jquery))
+      File.utime(1421000020, 1422000020, File.dirname(patched_jquery))
 
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
@@ -241,6 +242,8 @@ class TestCaching < Sprockets::TestCase
     patched_jquery = fixture_path('default/app/jquery/index.js')
 
     sandbox File.dirname(patched_jquery), patched_jquery do
+      File.utime(1423000000, 1423000000, File.dirname(File.dirname(patched_jquery)))
+
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
       assert_equal "jQuery;\n", asset.to_s
@@ -250,7 +253,7 @@ class TestCaching < Sprockets::TestCase
       assert_equal "jQuery;\n", asset.to_s
 
       FileUtils.mkdir(File.dirname(patched_jquery))
-      write(patched_jquery, "jQueryFixed;\n")
+      write(patched_jquery, "jQueryFixed;\n", 1423000010)
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
@@ -261,8 +264,7 @@ class TestCaching < Sprockets::TestCase
       assert_equal "jQueryFixed;\n", asset.to_s
 
       File.unlink(patched_jquery)
-      timestamp = File.mtime(File.dirname(patched_jquery)).to_i+1
-      File.utime(timestamp, timestamp, File.dirname(patched_jquery))
+      File.utime(1423000020, 1423000020, File.dirname(patched_jquery))
 
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/vendor/jquery.js'), asset.filename

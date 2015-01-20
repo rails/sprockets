@@ -80,6 +80,14 @@ class TestPathUtils < MiniTest::Test
     refute relative_path?("..foo.rb")
   end
 
+  def test_detect_path_type
+    assert_equal :absolute, detect_path_type("/foo")
+    assert_equal :relative, detect_path_type("./foo")
+    assert_equal :relative, detect_path_type("../foo")
+    assert_equal :logical, detect_path_type("foo")
+    assert_equal :logical, detect_path_type("foo/bar")
+  end
+
   def test_split_subpath_from_root_path
     path = File.expand_path("../fixtures/default", __FILE__)
 
@@ -94,6 +102,13 @@ class TestPathUtils < MiniTest::Test
 
     subpath = File.expand_path("../fixtures/other/app/application.js", __FILE__)
     refute split_subpath(path, subpath)
+  end
+
+  def test_split_relative_subpath_from_root_path
+    path = File.expand_path("../fixtures/default", __FILE__)
+
+    assert_equal "application.js", split_relative_subpath(path, "../fixtures/default/application.js", __FILE__)
+    refute split_relative_subpath(path, "../fixtures/other/app/application.js", __FILE__)
   end
 
   def test_split_paths_root_from_base

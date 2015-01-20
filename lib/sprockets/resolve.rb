@@ -45,6 +45,22 @@ module Sprockets
       end
     end
 
+    def resolve_relative(path, options = {})
+      options = options.dup
+
+      unless load_path = options.delete(:load_path)
+        raise ArgumentError, "missing keyword: load_path"
+      end
+
+      unless dirname = options.delete(:dirname)
+        raise ArgumentError, "missing keyword: dirname"
+      end
+
+      if path = split_relative_subpath(load_path, path, dirname)
+        resolve(path, options.merge(load_paths: [load_path]))
+      end
+    end
+
     # Public: Find Asset URI for given a logical path by searching the
     # environment's load paths.
     #
@@ -99,6 +115,47 @@ module Sprockets
       if filename
         encoding = nil if encoding == 'identity'
         build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+      end
+    end
+
+    def locate_relative(path, options = {})
+      options = options.dup
+
+      unless load_path = options.delete(:load_path)
+        raise ArgumentError, "missing keyword: load_path"
+      end
+
+      unless dirname = options.delete(:dirname)
+        raise ArgumentError, "missing keyword: dirname"
+      end
+
+      if path = split_relative_subpath(load_path, path, dirname)
+        locate(path, options.merge(load_paths: [load_path]))
+      end
+    end
+
+    def fail_file_not_found(path, options = {})
+      accept = options[:accept]
+      case detect_path_type(path)
+      when :absolute
+        raise FileOutsidePaths, "can't require absolute file: #{path}"
+      when :relative
+        dirname, load_path = options[:dirname], options[:load_path]
+        if dirname && load_path
+          if path = split_relative_subpath(load_path, path, dirname)
+            message = "couldn't find file '#{path}' under '#{load_path}'"
+            message << " with type '#{accept}'" if accept
+            raise FileNotFound, message
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
+          end
+        else
+          raise FileOutsidePaths, "can't require relative file: #{path}"
+        end
+      else
+        message = "couldn't find file '#{path}'"
+        message << " with type '#{accept}'" if accept
+        raise FileNotFound, message
       end
     end
 

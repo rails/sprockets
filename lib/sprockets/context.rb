@@ -69,40 +69,6 @@ module Sprockets
     #
     attr_reader :content_type
 
-    # Internal
-    # TODO: Cleanup relative resolver logic shared between directive processor.
-    def _resolve(method, path, options = {})
-      options[:content_type] = self.content_type if options[:content_type] == :self
-      options[:accept] = options.delete(:content_type)
-
-      if environment.absolute_path?(path)
-        filename = path
-      elsif environment.relative_path?(path)
-        path = File.expand_path(path, @dirname)
-        if logical_path = @environment.split_subpath(load_path, path)
-          if filename = environment.send(method, logical_path, options.merge(load_paths: [load_path]))
-            accept = options[:accept]
-            message = "couldn't find file '#{logical_path}' under '#{load_path}'"
-            message << " with type '#{accept}'" if accept
-            raise FileNotFound, message
-          end
-        else
-          raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
-        end
-      else
-        filename = environment.send(method, path, options)
-      end
-
-      if filename
-        filename
-      else
-        accept = options[:accept]
-        message = "couldn't find file '#{path}'"
-        message << " with type '#{accept}'" if accept
-        raise FileNotFound, message
-      end
-    end
-
     # Given a logical path, `resolve` will find and return the fully
     # expanded path. Relative paths will also be resolved. An optional
     # `:content_type` restriction can be supplied to restrict the
@@ -115,14 +81,39 @@ module Sprockets
     #     # => "/path/to/app/javascripts/bar.js"
     #
     def resolve(path, options = {})
-      _resolve(:resolve, path, options)
+      options[:content_type] = self.content_type if options[:content_type] == :self
+      options[:accept] ||= options.delete(:content_type)
+
+      filename = case environment.detect_path_type(path)
+      when :absolute
+        path
+      when :relative
+        environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
+      when :logical
+        environment.resolve(path, options)
+      end
+
+      filename || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
     end
 
     def locate(path, options = {})
       if environment.valid_asset_uri?(path)
         path
       else
-        _resolve(:locate, path, options)
+        options[:content_type] = self.content_type if options[:content_type] == :self
+        options[:accept] ||= options.delete(:content_type)
+
+        uri = case environment.detect_path_type(path)
+        when :absolute
+          # TODO: Should return an Asset URI
+          path
+        when :relative
+          environment.locate_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
+        when :logical
+          environment.locate(path, options)
+        end
+
+        uri || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
     end
 

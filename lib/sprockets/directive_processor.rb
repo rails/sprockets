@@ -424,43 +424,25 @@ module Sprockets
       end
 
       def locate(path, options = {})
-        _resolve(:locate, path, options)
+        uri = case @environment.detect_path_type(path)
+        when :relative
+          @environment.locate_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
+        when :logical
+          @environment.locate(path, options)
+        end
+
+        uri || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
 
       def resolve(path, options = {})
-        _resolve(:resolve, path, options)
-      end
-
-      # TODO: Cleanup relative resolver logic shared between context.
-      def _resolve(method, path, options = {})
-        if @environment.absolute_path?(path)
-          raise FileOutsidePaths, "can't require absolute file: #{path}"
-        elsif @environment.relative_path?(path)
-          path = expand_relative_path(path)
-          if logical_path = @environment.split_subpath(@load_path, path)
-            if filename = @environment.send(method, logical_path, options.merge(load_paths: [@load_path]))
-              filename
-            else
-              accept = options[:accept]
-              message = "couldn't find file '#{logical_path}' under '#{@load_path}'"
-              message << " with type '#{accept}'" if accept
-              raise FileNotFound, message
-            end
-          else
-            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
-          end
-        else
-          filename = @environment.send(method, path, options)
+        filename = case @environment.detect_path_type(path)
+        when :relative
+          @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
+        when :logical
+          @environment.resolve(path, options)
         end
 
-        if filename
-          filename
-        else
-          accept = options[:accept]
-          message = "couldn't find file '#{path}'"
-          message << " with type '#{accept}'" if accept
-          raise FileNotFound, message
-        end
+        filename || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
   end
 end
