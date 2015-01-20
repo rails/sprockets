@@ -132,15 +132,13 @@ module Sprockets
       #
       # encoding - String encoding.
       #
-      # Returns an Array of Processors.
-      def unwrap_encoding_processors(encoding)
-        processors = []
+      # Returns an encoding Processor Proc.
+      def encoding_processor_for(encoding)
         if encoder = self.encodings[encoding]
-          processors << lambda do |input|
+          proc do |input|
             { data: encoder.call(input[:data]), encoding: encoding }
           end
         end
-        processors
       end
   end
 end

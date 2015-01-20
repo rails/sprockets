@@ -32,4 +32,8 @@ class TestYUICompressor < Sprockets::TestCase
       skip "No Java runtime present"
     end
   end
+
+  test "cache key" do
+    assert Sprockets::YUICompressor.cache_key
+  end
 end

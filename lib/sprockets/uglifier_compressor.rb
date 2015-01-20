@@ -27,6 +27,12 @@ module Sprockets
       instance.call(input)
     end
 
+    def self.cache_key
+      instance.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(options = {})
       # Feature detect Uglifier 2.0 option support
       if Uglifier::DEFAULTS[:copyright]

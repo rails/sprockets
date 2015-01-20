@@ -10,4 +10,8 @@ class TestEcoProcessor < Sprockets::TestCase
     }
     assert Sprockets::EcoProcessor.call(input).match(/<span>Hello, /)
   end
+
+  test "cache key" do
+    assert Sprockets::EcoProcessor.cache_key
+  end
 end

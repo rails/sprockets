@@ -12,4 +12,8 @@ class TestUglifierCompressor < Sprockets::TestCase
     output = "function foo(){return!0}"
     assert_equal output, Sprockets::UglifierCompressor.call(input)
   end
+
+  test "cache key" do
+    assert Sprockets::UglifierCompressor.cache_key
+  end
 end
