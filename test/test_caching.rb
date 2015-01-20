@@ -108,8 +108,6 @@ class TestCaching < Sprockets::TestCase
   end
 
   test "asset ids are different if processor cache key changes" do
-    skip "working on processor cache keys"
-
     @env1.register_preprocessor 'application/javascript', MockProcessor.new('1.0')
     assert asset1 = @env1['gallery.js']
 

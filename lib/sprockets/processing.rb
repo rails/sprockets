@@ -3,13 +3,14 @@ require 'sprockets/lazy_processor'
 require 'sprockets/legacy_proc_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
+require 'sprockets/uri_utils'
 require 'sprockets/utils'
 
 module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    include Utils
+    include URIUtils, Utils
 
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
@@ -171,12 +172,35 @@ module Sprockets
       end
     end
 
+    protected
+      def resolve_processor_cache_key_uri(uri)
+        return unless processor = config[:processor_dependency_uris][uri]
+        processor = unwrap_processor(processor)
+        processor.cache_key if processor.respond_to?(:cache_key)
+      end
+
     private
       def register_config_processor(type, mime_type, klass, proc = nil, &block)
         proc ||= block
+
+        processor = wrap_processor(klass, proc)
+
+        pos = config[type][mime_type].size
+        uri = build_processor_uri(type, processor, type: mime_type, pos: pos)
+        register_processor_dependency_uri(uri, processor)
+
         self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.push(wrap_processor(klass, proc))
+          processors.push(processor)
           processors
+        end
+      end
+
+      def register_processor_dependency_uri(uri, processor)
+        self.config = hash_reassoc(config, :processor_dependency_uris) do |uris|
+          uris.merge(uri => processor)
+        end
+        self.config = hash_reassoc(config, :inverted_processor_dependency_uris) do |uris|
+          uris.merge(processor => uri)
         end
       end
 
@@ -193,12 +217,6 @@ module Sprockets
         end
       end
 
-      def unwrap_config_processors(type, mime_type)
-        config[type][mime_type].map do |processor|
-          unwrap_processor(processor)
-        end
-      end
-
       def wrap_processor(klass, proc)
         if !proc
           if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
@@ -211,6 +229,10 @@ module Sprockets
         else
           proc
         end
+      end
+
+      def unwrap_processors(processors)
+        processors.map { |p| unwrap_processor(p) }
       end
 
       def unwrap_processor(processor)

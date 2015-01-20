@@ -46,19 +46,6 @@ module Sprockets
       config[:engine_mime_types]
     end
 
-    # Internal: Find and load engines by extension.
-    #
-    # extnames - Array of String extnames
-    #
-    # Returns Array of Procs.
-    def unwrap_engines(extnames)
-      extnames.map { |ext|
-        engines[ext]
-      }.map { |engine|
-        unwrap_processor(engine)
-      }
-    end
-
     # Registers a new Engine `klass` for `ext`. If the `ext` already
     # has an engine registered, it will be overridden.
     #
@@ -68,6 +55,10 @@ module Sprockets
       ext = Sprockets::Utils.normalize_extension(ext)
 
       if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
+        processor = klass
+        uri = build_processor_uri(:engine, processor, extname: ext)
+        register_processor_dependency_uri(uri, processor)
+
         self.config = hash_reassoc(config, :engines) do |engines|
           engines.merge(ext => klass)
         end
@@ -77,8 +68,12 @@ module Sprockets
           end
         end
       else
+        processor = LegacyTiltProcessor.new(klass)
+        uri = build_processor_uri(:engine, processor, extname: ext)
+        register_processor_dependency_uri(uri, processor)
+
         self.config = hash_reassoc(config, :engines) do |engines|
-          engines.merge(ext => LegacyTiltProcessor.new(klass))
+          engines.merge(ext => processor)
         end
         if klass.respond_to?(:default_mime_type) && klass.default_mime_type
           self.config = hash_reassoc(config, :engine_mime_types) do |mime_types|

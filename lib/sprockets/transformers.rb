@@ -43,6 +43,9 @@ module Sprockets
     #
     # Returns nothing.
     def register_transformer(from, to, proc)
+      uri = build_processor_uri(:transformer, proc, from: from, to: to)
+      register_processor_dependency_uri(uri, proc)
+
       self.config = hash_reassoc(config, :transformers, from) do |transformers|
         transformers.merge(to => proc)
       end
@@ -92,20 +95,6 @@ module Sprockets
         end
       end
       accepts
-    end
-
-    # Internal: Find and load transformer by from and to mime type.
-    #
-    # from - String mime type
-    # to   - String mime type
-    #
-    # Returns Array of Procs.
-    def unwrap_transformer(from, to)
-      if processor = transformers[from][to]
-        [unwrap_processor(processor)]
-      else
-        []
-      end
     end
   end
 end
