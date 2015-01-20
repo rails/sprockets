@@ -218,7 +218,51 @@ class TestCaching < Sprockets::TestCase
       assert_equal "jQueryFixed;\n", asset.to_s
 
       File.unlink(patched_jquery)
-      File.utime(Time.now.to_i+3, Time.now.to_i+3, File.dirname(patched_jquery))
+      timestamp = File.mtime(File.dirname(patched_jquery)).to_i+1
+      File.utime(timestamp, timestamp, File.dirname(patched_jquery))
+
+      asset = @env["jquery.js"]
+      assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+
+      asset = @env["main.js"]
+      assert_equal fixture_path('default/app/main.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+    end
+  end
+
+  test "add/remove index file to shadow vendor" do
+    @env = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path("app")
+      env.append_path("vendor")
+      env.cache = @cache
+    end
+
+    patched_jquery = fixture_path('default/app/jquery/index.js')
+
+    sandbox File.dirname(patched_jquery), patched_jquery do
+      asset = @env["jquery.js"]
+      assert_equal fixture_path('default/vendor/jquery.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+
+      asset = @env["main.js"]
+      assert_equal fixture_path('default/app/main.js'), asset.filename
+      assert_equal "jQuery;\n", asset.to_s
+
+      FileUtils.mkdir(File.dirname(patched_jquery))
+      write(patched_jquery, "jQueryFixed;\n")
+
+      asset = @env["main.js"]
+      assert_equal fixture_path('default/app/main.js'), asset.filename
+      assert_equal "jQueryFixed;\n", asset.to_s
+
+      asset = @env["jquery.js"]
+      assert_equal fixture_path('default/app/jquery/index.js'), asset.filename
+      assert_equal "jQueryFixed;\n", asset.to_s
+
+      File.unlink(patched_jquery)
+      timestamp = File.mtime(File.dirname(patched_jquery)).to_i+1
+      File.utime(timestamp, timestamp, File.dirname(patched_jquery))
 
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/vendor/jquery.js'), asset.filename

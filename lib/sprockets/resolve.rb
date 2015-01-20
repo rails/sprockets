@@ -150,6 +150,7 @@ module Sprockets
         stats << build_file_digest_uri(dirname)
         dirname_matches(dirname, logical_basename) { |candidate| candidates << candidate }
         resolve_alternates(load_path, logical_name) { |fn| candidates << [fn, parse_path_extnames(fn)[1]] }
+        stats << build_file_digest_uri(File.join(load_path, logical_name))
         dirname_matches(File.join(load_path, logical_name), "index") { |candidate| candidates << candidate }
         return candidates.select { |fn, _| file?(fn) }, stats
       end
