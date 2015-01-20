@@ -173,30 +173,32 @@ module Sprockets
       def processors_for(file_type, engine_extnames, params)
         type = params[:type]
 
-        if type != file_type
-          if processor = transformers[file_type][type]
-            transformers = [processor]
-          else
-            raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
-          end
-        else
-          transformers = []
-        end
-
-        processed_processors = config[:preprocessors][file_type] +
-          engine_extnames.reverse.map { |ext| engines[ext] } +
-          transformers +
-          config[:postprocessors][type]
-
-        bundled_processors = params[:skip_bundle] ? [] : config[:bundle_processors][type]
-
-        processors = bundled_processors.any? ? bundled_processors : processed_processors
+        processors = []
 
         if processor = encoding_processor_for(params[:encoding])
           processors += [processor]
         end
 
-        processors.reverse
+        bundled_processors = params[:skip_bundle] ? [] : config[:bundle_processors][type]
+
+        if bundled_processors.any?
+          processors += bundled_processors
+        else
+          processors += config[:postprocessors][type]
+
+          if type != file_type
+            if processor = transformers[file_type][type]
+              processors += [processor]
+            else
+              raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
+            end
+          end
+
+          processors += engine_extnames.map { |ext| engines[ext] }
+          processors += config[:preprocessors][file_type]
+        end
+
+        processors
       end
   end
 end

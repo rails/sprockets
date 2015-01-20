@@ -190,7 +190,7 @@ module Sprockets
         register_processor_dependency_uri(uri, processor)
 
         self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.push(processor)
+          processors.unshift(processor)
           processors
         end
       end
