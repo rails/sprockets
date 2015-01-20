@@ -10,4 +10,8 @@ class TestCoffeeScriptProcessor < Sprockets::TestCase
     }
     assert Sprockets::CoffeeScriptProcessor.call(input).match(/var square/)
   end
+
+  test "cache key" do
+    assert Sprockets::CoffeeScriptProcessor.cache_key
+  end
 end
