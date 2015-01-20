@@ -18,19 +18,15 @@ module Sprockets
       # TODO: Rebuilding this URI is a bit of a smell
       processed_uri = env.build_asset_uri(input[:filename], type: type, skip_bundle: true)
 
-      cache = Hash.new do |h, uri|
-        h[uri] = env.load(uri)
-      end
-
-      find_required = proc { |uri| cache[uri].metadata[:required] }
+      find_required = proc { |uri| env.load(uri).metadata[:required] }
       required = Utils.dfs(processed_uri, &find_required)
-      stubbed  = Utils.dfs(cache[processed_uri].metadata[:stubbed], &find_required)
+      stubbed  = Utils.dfs(env.load(processed_uri).metadata[:stubbed], &find_required)
       required.subtract(stubbed)
-      assets = required.map { |uri| cache[uri] }
+      assets = required.map { |uri| env.load(uri) }
 
       dependencies = Set.new
       (required + stubbed).each do |uri|
-        dependencies += cache[uri].metadata[:dependencies]
+        dependencies.merge(env.load(uri).metadata[:dependencies])
       end
 
       env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
