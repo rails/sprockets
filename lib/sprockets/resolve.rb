@@ -41,7 +41,7 @@ module Sprockets
             filename = path
             type = _type
             # TODO
-            deps = []
+            deps = Set.new
           end
         end
       else
@@ -64,7 +64,7 @@ module Sprockets
         deps << build_file_digest_uri(filename)
       end
 
-      return uri, (deps || [])
+      return uri, (deps || Set.new)
     end
 
     # TODO: Merge into resolve
@@ -83,7 +83,7 @@ module Sprockets
         uri, deps = resolve(path, options.merge(load_paths: [load_path], compat: false))
       end
 
-      return uri, (deps || [])
+      return uri, (deps || Set.new)
     end
 
     def fail_file_not_found(path, options = {})
