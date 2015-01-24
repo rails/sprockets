@@ -134,9 +134,9 @@ module Sprockets
     def build_processor_uri(type, processor = nil, params = {})
       if processor
         if processor.respond_to?(:name)
-          params[:name] = processor.name
+          params[:name] = processor.name.to_s
         elsif processor && processor.class.respond_to?(:name)
-          params[:class_name] = processor.class.name
+          params[:class_name] = processor.class.name.to_s
         end
       end
 
