@@ -1,7 +1,60 @@
+require 'sprockets/context'
 require 'sprockets/manifest'
+require 'sprockets/resolve'
 
 module Sprockets
   module Legacy
+    include Resolve
+
+    # Deprecated: Change default return type of resolve() to return 2.x
+    # compatible plain filename String. 4.x will always return an Asset URI
+    # and a set of file system dependencies that had to be read to compute the
+    # result.
+    #
+    #   2.x
+    #
+    #     resolve("foo.js")
+    #     # => "/path/to/app/javascripts/foo.js"
+    #
+    #   3.x
+    #
+    #     resolve("foo.js")
+    #     # => "/path/to/app/javascripts/foo.js"
+    #
+    #     resolve("foo.js", compat: true)
+    #     # => "/path/to/app/javascripts/foo.js"
+    #
+    #     resolve("foo.js", compat: false)
+    #     # => [
+    #     #   "file:///path/to/app/javascripts/foo.js?type=application/javascript"
+    #     #    #<Set: {"file-digest:/path/to/app/javascripts/foo.js"}>
+    #     # ]
+    #
+    #   4.x
+    #
+    #     resolve("foo.js")
+    #     # => [
+    #     #   "file:///path/to/app/javascripts/foo.js?type=application/javascript"
+    #     #    #<Set: {"file-digest:/path/to/app/javascripts/foo.js"}>
+    #     # ]
+    #
+    def resolve_with_compat(path, options = {})
+      options = options.dup
+      if options.delete(:compat) { true }
+        uri, _ = resolve_without_compat(path, options)
+        if uri
+          path, _ = parse_asset_uri(uri)
+          path
+        else
+          nil
+        end
+      else
+        resolve_without_compat(path, options)
+      end
+    end
+    alias_method :resolve_without_compat, :resolve
+    alias_method :resolve, :resolve_with_compat
+
     # Deprecated: Iterate over all logical paths with a matcher.
     #
     # Remove from 4.x.
@@ -94,5 +147,44 @@ module Sprockets
           URI.unescape(str)
         end
       end
+  end
+
+  class Context
+    # Deprecated: Change default return type of resolve() to return 2.x
+    # compatible plain filename String. 4.x will always return an Asset URI.
+    #
+    #   2.x
+    #
+    #     resolve("foo.js")
+    #     # => "/path/to/app/javascripts/foo.js"
+    #
+    #   3.x
+    #
+    #     resolve("foo.js")
+    #     # => "/path/to/app/javascripts/foo.js"
+    #
+    #     resolve("foo.js", compat: true)
+    #     # => "/path/to/app/javascripts/foo.js"
+    #
+    #     resolve("foo.js", compat: false)
+    #     # => "file:///path/to/app/javascripts/foo.js?type=application/javascript"
+    #
+    #   4.x
+    #
+    #     resolve("foo.js")
+    #     # => "file:///path/to/app/javascripts/foo.js?type=application/javascript"
+    #
+    def resolve_with_compat(path, options = {})
+      options = options.dup
+      if options.delete(:compat) { true }
+        uri = resolve_without_compat(path, options)
+        path, _ = environment.parse_asset_uri(uri)
+        path
+      else
+        resolve_without_compat(path, options)
+      end
+    end
+    alias_method :resolve_without_compat, :resolve
+    alias_method :resolve, :resolve_with_compat
   end
 end

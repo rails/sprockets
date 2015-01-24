@@ -82,14 +82,9 @@ module Sprockets
     # path - String logical or absolute path
     # options
     #   accept - String content accept type
-    #   compat - Force 2.x plain filename return type. Else return Asset URI.
     #
-    # Returns filename String in compat mode, otherwise returns an Asset URI
-    # string. 4.x will always return an Asset URI string.
+    # Returns an Asset URI String.
     def resolve(path, options = {})
-      options = options.dup
-      compat = options.delete(:compat) { true }
-
       if environment.valid_asset_uri?(path)
         uri = path
       else
@@ -111,12 +106,7 @@ module Sprockets
         @dependencies.merge(deps)
       end
 
-      if compat
-        path, _ = environment.parse_asset_uri(uri)
-        path
-      else
-        uri
-      end
+      uri
     end
 
     # `depend_on` allows you to state a dependency on a file without

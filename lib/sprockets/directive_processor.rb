@@ -453,9 +453,9 @@ module Sprockets
       def resolve(path, options = {})
         result = case @environment.detect_path_type(path)
         when :relative
-          @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, :compat => false))
+          @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
         when :logical
-          @environment.resolve(path, options.merge(:compat => false))
+          @environment.resolve(path, options.merge(compat: false))
         else
           [nil, []]
         end

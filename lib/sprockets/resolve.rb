@@ -19,9 +19,6 @@ module Sprockets
     #
     # The String Asset URI is returned or nil if no results are found.
     def resolve(path, options = {})
-      options = options.dup
-      compat = options.delete(:compat) { true }
-
       path = path.to_s
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
@@ -66,21 +63,12 @@ module Sprockets
         deps << build_file_digest_uri(filename)
       end
 
-      if compat
-        if uri
-          path, _ = parse_asset_uri(uri)
-          path
-        else
-          nil
-        end
-      else
-        return uri, (deps || [])
-      end
+      return uri, (deps || [])
     end
 
+    # TODO: Merge into resolve
     def resolve_relative(path, options = {})
       options = options.dup
-      compat = options.delete(:compat) { true }
 
       unless load_path = options.delete(:load_path)
         raise ArgumentError, "missing keyword: load_path"
@@ -94,16 +82,7 @@ module Sprockets
         uri, deps = resolve(path, options.merge(load_paths: [load_path], compat: false))
       end
 
-      if compat
-        if uri
-          path, _ = parse_asset_uri(uri)
-          path
-        else
-          nil
-        end
-      else
-        return uri, (deps || [])
-      end
+      return uri, (deps || [])
     end
 
     def fail_file_not_found(path, options = {})
