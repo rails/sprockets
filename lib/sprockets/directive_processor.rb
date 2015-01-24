@@ -210,9 +210,9 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        uri, stats = resolve(path, accept: @content_type, bundle: false)
+        uri, deps = resolve(path, accept: @content_type, bundle: false)
         @required << uri
-        @dependencies.merge(stats)
+        @dependencies.merge(deps)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -242,7 +242,7 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
@@ -253,10 +253,13 @@ module Sprockets
               next
             elsif stat.directory?
               next
-            elsif result = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
-              uri, stats = result
-              @required << uri
-              @dependencies.merge(stats)
+            else
+              uri, deps = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
+              @dependencies.merge(deps)
+
+              if uri
+                @required << uri
+              end
             end
           end
         else
@@ -274,7 +277,7 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
@@ -285,10 +288,13 @@ module Sprockets
               next
             elsif stat.directory?
               @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif result = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
-              uri, stats = result
-              @required << uri
-              @dependencies.merge(stats)
+            else
+              uri, deps = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
+              @dependencies.merge(deps)
+
+              if uri
+                @required << uri
+              end
             end
           end
         else
@@ -310,10 +316,10 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        uri, stats = resolve(path)
+        uri, deps = resolve(path)
         filename, _ = @environment.parse_asset_uri(uri)
         @dependencies << @environment.build_file_digest_uri(filename)
-        @dependencies.merge(stats)
+        @dependencies.merge(deps)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -328,10 +334,10 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        uri, stats = resolve(path)
+        uri, deps = resolve(path)
         asset = @environment.load(uri)
         @dependencies.merge(asset.metadata[:dependencies])
-        @dependencies.merge(stats)
+        @dependencies.merge(deps)
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -343,9 +349,9 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        uri, stats = resolve(path, accept: @content_type, bundle: false)
+        uri, deps = resolve(path, accept: @content_type, bundle: false)
         @stubbed << uri
-        @dependencies.merge(stats)
+        @dependencies.merge(deps)
       end
 
       # Declares a linked dependency on the target asset.
@@ -357,13 +363,11 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        uri, stats = resolve(path)
-        @dependencies.merge(stats)
-
-        if asset = @environment.load(uri)
-          @dependencies.merge(asset.metadata[:dependencies])
-          @links << asset.uri
-        end
+        uri, deps = resolve(path)
+        asset = @environment.load(uri)
+        @dependencies.merge(deps)
+        @dependencies.merge(asset.metadata[:dependencies])
+        @links << asset.uri
       end
 
       # `link_directory` links all the files inside a single
@@ -376,7 +380,7 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "link_directory argument must be a directory"
           end
 
@@ -387,12 +391,15 @@ module Sprockets
               next
             elsif stat.directory?
               next
-            elsif result = @environment.resolve(subpath, compat: false)
-              uri, stats = result
-              asset = @environment.load(uri)
-              @dependencies.merge(stats)
-              @dependencies.merge(asset.metadata[:dependencies])
-              @links << asset.uri
+            else
+              uri, deps = @environment.resolve(subpath, compat: false)
+              @dependencies.merge(deps)
+
+              if uri
+                asset = @environment.load(uri)
+                @dependencies.merge(asset.metadata[:dependencies])
+                @links << asset.uri
+              end
             end
           end
         else
@@ -410,7 +417,7 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "link_tree argument must be a directory"
           end
 
@@ -421,12 +428,15 @@ module Sprockets
               next
             elsif stat.directory?
               @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif result = @environment.resolve(subpath, compat: false)
-              uri, stats = result
-              asset = @environment.load(uri)
-              @dependencies.merge(asset.metadata[:dependencies])
-              @dependencies.merge(stats)
-              @links << asset.uri
+            else
+              uri, deps = @environment.resolve(subpath, compat: false)
+              @dependencies.merge(deps)
+
+              if uri
+                asset = @environment.load(uri)
+                @dependencies.merge(asset.metadata[:dependencies])
+                @links << asset.uri
+              end
             end
           end
         else
@@ -446,9 +456,19 @@ module Sprockets
           @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, :compat => false))
         when :logical
           @environment.resolve(path, options.merge(:compat => false))
+        else
+          [nil, []]
         end
 
-        result || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
+        unless result
+          raise [path, options].inspect
+        end
+
+        unless result.first
+          @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
+        end
+
+        result
       end
   end
 end

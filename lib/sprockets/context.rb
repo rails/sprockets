@@ -107,8 +107,8 @@ module Sprockets
         end
 
         result || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
-        uri, stats = result
-        @dependencies.merge(stats)
+        uri, deps = result
+        @dependencies.merge(deps)
       end
 
       if compat

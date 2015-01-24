@@ -130,28 +130,48 @@ class TestResolve < Sprockets::TestCase
   test "resolve asset uri" do
     @env.append_path(fixture_path('default'))
 
-    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
-      @env.resolve("gallery.js", compat: false).first
-    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript",
-      @env.resolve("coffee/foo.js", compat: false).first
-    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml",
-      @env.resolve("manifest.js.yml", compat: false).first
+    uri, deps = resolve("gallery.js")
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript", uri
+    assert_includes deps, "file-digest:#{fixture_path('default/gallery.js')}"
+    assert_includes deps, "file-digest:#{fixture_path('default')}"
 
-    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
-      @env.resolve("gallery", accept: 'application/javascript', compat: false).first
+    uri, deps = resolve("coffee/foo.js")
+    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript", uri
+    assert_includes deps, "file-digest:#{fixture_path('default/coffee/foo.coffee')}"
+    assert_includes deps, "file-digest:#{fixture_path('default/coffee')}"
+
+    uri, deps = resolve("manifest.js.yml")
+    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml", uri
+    assert_includes deps, "file-digest:#{fixture_path('default/manifest.js.yml')}"
+    assert_includes deps, "file-digest:#{fixture_path('default')}"
+
+    uri, deps = resolve("gallery", accept: 'application/javascript')
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript", uri
+    assert_includes deps, "file-digest:#{fixture_path('default/gallery.js')}"
+    assert_includes deps, "file-digest:#{fixture_path('default')}"
   end
 
   test "resolve asset uri under load path" do
     @env.append_path(scripts = fixture_path('resolve/javascripts'))
     @env.append_path(styles = fixture_path('resolve/stylesheets'))
 
-    assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript",
-      @env.resolve('foo.js', load_paths: [scripts], compat: false).first
-    assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css",
-      @env.resolve('foo.css', load_paths: [styles], compat: false).first
+    uri, deps = resolve('foo.js', load_paths: [scripts])
+    assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript", uri
+    assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts/foo.js')}"
+    assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts')}"
 
-    refute @env.resolve('foo.js', load_paths: [styles], compat: false)
-    refute @env.resolve('foo.css', load_paths: [scripts], compat: false)
+    uri, deps = resolve('foo.css', load_paths: [styles])
+    assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css", uri
+    assert_includes deps, "file-digest:#{fixture_path('resolve/stylesheets/foo.css')}"
+    assert_includes deps, "file-digest:#{fixture_path('resolve/stylesheets')}"
+
+    uri, deps = resolve('foo.js', load_paths: [styles])
+    refute uri
+    assert_includes deps, "file-digest:#{fixture_path('resolve/stylesheets')}"
+
+    uri, deps = resolve('foo.css', load_paths: [scripts])
+    refute uri
+    assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts')}"
   end
 
   test "resolve absolute identity" do
@@ -159,8 +179,8 @@ class TestResolve < Sprockets::TestCase
 
     @env.stat_tree(fixture_path('default')).each do |path, stat|
       next unless stat.file?
-      assert uri = @env.resolve(path, compat: false).first
-      assert_equal uri, @env.resolve(uri, compat: false).first
+      assert uri = resolve(path).first
+      assert_equal uri, resolve(uri).first
     end
   end
 
@@ -182,5 +202,9 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal ["application.js", "gallery.css"],
       @env.each_logical_path("application.js", /gallery\.css/).to_a
+  end
+
+  def resolve(path, options = {})
+    @env.resolve(path, options.merge(compat: false))
   end
 end
