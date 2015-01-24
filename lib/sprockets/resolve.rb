@@ -7,74 +7,23 @@ module Sprockets
 
     attr_accessor :last_resolve_dependencies
 
-    # Public: Finds the absolute path for a given logical path by searching the
-    # environment's load paths.
-    #
-    #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js"
-    #
-    # An accept content type can be given if the logical path doesn't have a
-    # format extension.
-    #
-    #     resolve("application", accept: "application/javascript")
-    #     # => "/path/to/app/javascripts/application.js"
-    #
-    # The String path is returned or nil if no results are found.
-    def resolve(path, options = {})
-      self.last_resolve_dependencies = nil
-      logical_name, mime_type, _ = parse_path_extnames(path)
-
-      paths = options[:load_paths] || self.paths
-
-      if absolute_path?(path)
-        path = File.expand_path(path)
-        if paths_split(paths, path) && file?(path)
-          if accept = options[:accept]
-            find_best_q_match(accept, [path]) do |candidate, matcher|
-              match_mime_type?(mime_type || "application/octet-stream", matcher)
-            end
-          else
-            path
-          end
-        end
-      else
-        accepts = parse_accept_options(mime_type, options[:accept])
-        filename, _, stats = resolve_under_paths(paths, logical_name, mime_type, accepts)
-        self.last_resolve_dependencies = stats
-        filename
-      end
-    end
-
-    def resolve_relative(path, options = {})
-      options = options.dup
-
-      unless load_path = options.delete(:load_path)
-        raise ArgumentError, "missing keyword: load_path"
-      end
-
-      unless dirname = options.delete(:dirname)
-        raise ArgumentError, "missing keyword: dirname"
-      end
-
-      if path = split_relative_subpath(load_path, path, dirname)
-        resolve(path, options.merge(load_paths: [load_path]))
-      end
-    end
-
     # Public: Find Asset URI for given a logical path by searching the
     # environment's load paths.
     #
-    #     locate("application.js")
+    #     resolve("application.js")
     #     # => "file:///path/to/app/javascripts/application.js?content_type=application/javascript"
     #
     # An accept content type can be given if the logical path doesn't have a
     # format extension.
     #
-    #     locate("application", accept: "application/javascript")
+    #     resolve("application", accept: "application/javascript")
     #     # => "file:///path/to/app/javascripts/application.coffee?content_type=application/javascript"
     #
     # The String Asset URI is returned or nil if no results are found.
-    def locate(path, options = {})
+    def resolve(path, options = {})
+      options = options.dup
+      compat = options.delete(:compat) { true }
+
       self.last_resolve_dependencies = nil
 
       path = path.to_s
@@ -114,12 +63,20 @@ module Sprockets
 
       if filename
         encoding = nil if encoding == 'identity'
-        build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+      end
+
+      if uri && compat
+        path, _ = parse_asset_uri(uri)
+        path
+      else
+        uri
       end
     end
 
-    def locate_relative(path, options = {})
+    def resolve_relative(path, options = {})
       options = options.dup
+      compat = options.delete(:compat) { true }
 
       unless load_path = options.delete(:load_path)
         raise ArgumentError, "missing keyword: load_path"
@@ -130,7 +87,14 @@ module Sprockets
       end
 
       if path = split_relative_subpath(load_path, path, dirname)
-        locate(path, options.merge(load_paths: [load_path]))
+        if uri = resolve(path, options.merge(load_paths: [load_path], compat: false))
+          if compat
+            path, _ = parse_asset_uri(uri)
+            path
+          else
+            uri
+          end
+        end
       end
     end
 

@@ -87,7 +87,8 @@ module Sprockets
     # Returns filename String in compat mode, otherwise returns an Asset URI
     # string. 4.x will always return an Asset URI string.
     def resolve(path, options = {})
-      options[:compat] = true unless options.key?(:compat)
+      options = options.dup
+      compat = options.delete(:compat) { true }
 
       if environment.valid_asset_uri?(path)
         uri = path
@@ -100,15 +101,15 @@ module Sprockets
         when :absolute
           environment.build_asset_uri(path)
         when :relative
-          environment.locate_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
+          environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, :compat => false))
         when :logical
-          environment.locate(path, options)
+          environment.resolve(path, options.merge(:compat => false))
         end
 
         uri || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
 
-      if options[:compat]
+      if compat
         path, _ = environment.parse_asset_uri(uri)
         path
       else

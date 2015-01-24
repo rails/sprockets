@@ -253,7 +253,7 @@ module Sprockets
               next
             elsif stat.directory?
               next
-            elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
+            elsif uri = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
               @required << uri
             end
           end
@@ -283,7 +283,7 @@ module Sprockets
               next
             elsif stat.directory?
               @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
+            elsif uri = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
               @required << uri
             end
           end
@@ -376,7 +376,7 @@ module Sprockets
               next
             elsif stat.directory?
               next
-            elsif uri = @environment.locate(subpath)
+            elsif uri = @environment.resolve(subpath, compat: false)
               asset = @environment.load(uri)
               @dependencies.merge(asset.metadata[:dependencies])
               @links << asset.uri
@@ -408,7 +408,7 @@ module Sprockets
               next
             elsif stat.directory?
               @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif uri = @environment.locate(subpath)
+            elsif uri = @environment.resolve(subpath, compat: false)
               asset = @environment.load(uri)
               @dependencies.merge(asset.metadata[:dependencies])
               @links << asset.uri
@@ -428,9 +428,9 @@ module Sprockets
       def resolve(path, options = {})
         uri = case @environment.detect_path_type(path)
         when :relative
-          @environment.locate_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
+          @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, :compat => false))
         when :logical
-          @environment.locate(path, options)
+          @environment.resolve(path, options.merge(:compat => false))
         end
 
         uri || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])

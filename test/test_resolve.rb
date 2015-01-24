@@ -5,73 +5,153 @@ class TestResolve < Sprockets::TestCase
     @env = Sprockets::Environment.new(".")
   end
 
-  test "resolve in default environment" do
+  test "resolve compat in default environment" do
     @env.append_path(fixture_path('default'))
 
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve("gallery.js")
+      @env.resolve("gallery.js", compat: true)
     assert_equal fixture_path('default/coffee/foo.coffee'),
-      @env.resolve("coffee/foo.js")
+      @env.resolve("coffee/foo.js", compat: true)
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min")
+      @env.resolve("jquery.tmpl.min", compat: true)
     assert_equal fixture_path('default/jquery.tmpl.min.js'),
-      @env.resolve("jquery.tmpl.min.js")
+      @env.resolve("jquery.tmpl.min.js", compat: true)
     assert_equal fixture_path('default/manifest.js.yml'),
-      @env.resolve('manifest.js.yml')
-    refute @env.resolve("null")
+      @env.resolve('manifest.js.yml', compat: true)
+    refute @env.resolve("null", compat: true)
   end
 
-  test "resolve accept type list before paths" do
+  test "resolve compat accept type list before paths" do
     @env.append_path(fixture_path('resolve/javascripts'))
     @env.append_path(fixture_path('resolve/stylesheets'))
 
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: 'application/javascript')
+      @env.resolve('foo', accept: 'application/javascript', compat: true)
     assert_equal fixture_path('resolve/stylesheets/foo.css'),
-      @env.resolve('foo', accept: 'text/css')
+      @env.resolve('foo', accept: 'text/css', compat: true)
 
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: 'application/javascript, text/css')
+      @env.resolve('foo', accept: 'application/javascript, text/css', compat: true)
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: 'text/css, application/javascript')
+      @env.resolve('foo', accept: 'text/css, application/javascript', compat: true)
 
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: 'application/javascript; q=0.8, text/css')
+      @env.resolve('foo', accept: 'application/javascript; q=0.8, text/css', compat: true)
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: 'text/css; q=0.8, application/javascript')
+      @env.resolve('foo', accept: 'text/css; q=0.8, application/javascript', compat: true)
 
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: '*/*; q=0.8, application/javascript')
+      @env.resolve('foo', accept: '*/*; q=0.8, application/javascript', compat: true)
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo', accept: '*/*; q=0.8, text/css')
+      @env.resolve('foo', accept: '*/*; q=0.8, text/css', compat: true)
   end
 
-  test "resolve under load path" do
+  test "resolve compat under load path" do
     @env.append_path(scripts = fixture_path('resolve/javascripts'))
     @env.append_path(styles = fixture_path('resolve/stylesheets'))
 
     assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo.js', load_paths: [scripts])
+      @env.resolve('foo.js', load_paths: [scripts], compat: true)
     assert_equal fixture_path('resolve/stylesheets/foo.css'),
-      @env.resolve('foo.css', load_paths: [styles])
+      @env.resolve('foo.css', load_paths: [styles], compat: true)
 
-    refute @env.resolve('foo.js', load_paths: [styles])
-    refute @env.resolve('foo.css', load_paths: [scripts])
+    refute @env.resolve('foo.js', load_paths: [styles], compat: true)
+    refute @env.resolve('foo.css', load_paths: [scripts], compat: true)
   end
 
-  test "resolve absolute" do
+  test "resolve compat absolute" do
     @env.append_path(fixture_path('default'))
 
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'))
+      @env.resolve(fixture_path('default/gallery.js'), compat: true)
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/app/../gallery.js'))
+      @env.resolve(fixture_path('default/app/../gallery.js'), compat: true)
     assert_equal fixture_path('default/gallery.js'),
-      @env.resolve(fixture_path('default/gallery.js'), accept: 'application/javascript')
+      @env.resolve(fixture_path('default/gallery.js'), accept: 'application/javascript', compat: true)
 
-    refute @env.resolve(fixture_path('default/asset/POW.png'))
-    refute @env.resolve(fixture_path('default/missing'))
-    refute @env.resolve(fixture_path('default/gallery.js'), accept: 'text/css')
+    refute @env.resolve(fixture_path('default/asset/POW.png'), compat: true)
+    refute @env.resolve(fixture_path('default/missing'), compat: true)
+    refute @env.resolve(fixture_path('default/gallery.js'), accept: 'text/css', compat: true)
+  end
+
+  test "resolve compat absolute identity" do
+    @env.append_path(fixture_path('default'))
+
+    @env.stat_tree(fixture_path('default')).each do |path, stat|
+      next unless stat.file?
+      assert_equal path, @env.resolve(path, compat: true)
+    end
+  end
+
+  test "resolve compat extension before accept type" do
+    @env.append_path(fixture_path('resolve/javascripts'))
+    @env.append_path(fixture_path('resolve/stylesheets'))
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo.js', accept: 'application/javascript', compat: true)
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo.css', accept: 'text/css', compat: true)
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo.js', accept: '*/*', compat: true)
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo.css', accept: '*/*', compat: true)
+
+    assert_equal fixture_path('resolve/javascripts/foo.js'),
+      @env.resolve('foo.js', accept: 'text/css, */*', compat: true)
+    assert_equal fixture_path('resolve/stylesheets/foo.css'),
+      @env.resolve('foo.css', accept: 'application/javascript, */*', compat: true)
+  end
+
+  test "resolve compat accept type quality in paths" do
+    @env.append_path(fixture_path('resolve/javascripts'))
+
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: 'application/javascript', compat: true)
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: 'text/css', compat: true)
+
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: 'application/javascript, text/css', compat: true)
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: 'text/css, application/javascript', compat: true)
+
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: 'application/javascript; q=0.8, text/css', compat: true)
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: 'text/css; q=0.8, application/javascript', compat: true)
+
+    assert_equal fixture_path('resolve/javascripts/bar.js'),
+      @env.resolve('bar', accept: '*/*; q=0.8, application/javascript', compat: true)
+    assert_equal fixture_path('resolve/javascripts/bar.css'),
+      @env.resolve('bar', accept: '*/*; q=0.8, text/css', compat: true)
+  end
+
+  test "resolve asset uri" do
+    @env.append_path(fixture_path('default'))
+
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
+      @env.resolve("gallery.js", compat: false)
+    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript",
+      @env.resolve("coffee/foo.js", compat: false)
+    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml",
+      @env.resolve("manifest.js.yml", compat: false)
+
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
+      @env.resolve("gallery", accept: 'application/javascript', compat: false)
+  end
+
+  test "resolve asset uri under load path" do
+    @env.append_path(scripts = fixture_path('resolve/javascripts'))
+    @env.append_path(styles = fixture_path('resolve/stylesheets'))
+
+    assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript",
+      @env.resolve('foo.js', load_paths: [scripts], compat: false)
+    assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css",
+      @env.resolve('foo.css', load_paths: [styles], compat: false)
+
+    refute @env.resolve('foo.js', load_paths: [styles], compat: false)
+    refute @env.resolve('foo.css', load_paths: [scripts], compat: false)
   end
 
   test "resolve absolute identity" do
@@ -79,88 +159,8 @@ class TestResolve < Sprockets::TestCase
 
     @env.stat_tree(fixture_path('default')).each do |path, stat|
       next unless stat.file?
-      assert_equal path, @env.resolve(path)
-    end
-  end
-
-  test "resolve extension before accept type" do
-    @env.append_path(fixture_path('resolve/javascripts'))
-    @env.append_path(fixture_path('resolve/stylesheets'))
-
-    assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo.js', accept: 'application/javascript')
-    assert_equal fixture_path('resolve/stylesheets/foo.css'),
-      @env.resolve('foo.css', accept: 'text/css')
-
-    assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo.js', accept: '*/*')
-    assert_equal fixture_path('resolve/stylesheets/foo.css'),
-      @env.resolve('foo.css', accept: '*/*')
-
-    assert_equal fixture_path('resolve/javascripts/foo.js'),
-      @env.resolve('foo.js', accept: 'text/css, */*')
-    assert_equal fixture_path('resolve/stylesheets/foo.css'),
-      @env.resolve('foo.css', accept: 'application/javascript, */*')
-  end
-
-  test "resolve accept type quality in paths" do
-    @env.append_path(fixture_path('resolve/javascripts'))
-
-    assert_equal fixture_path('resolve/javascripts/bar.js'),
-      @env.resolve('bar', accept: 'application/javascript')
-    assert_equal fixture_path('resolve/javascripts/bar.css'),
-      @env.resolve('bar', accept: 'text/css')
-
-    assert_equal fixture_path('resolve/javascripts/bar.js'),
-      @env.resolve('bar', accept: 'application/javascript, text/css')
-    assert_equal fixture_path('resolve/javascripts/bar.css'),
-      @env.resolve('bar', accept: 'text/css, application/javascript')
-
-    assert_equal fixture_path('resolve/javascripts/bar.css'),
-      @env.resolve('bar', accept: 'application/javascript; q=0.8, text/css')
-    assert_equal fixture_path('resolve/javascripts/bar.js'),
-      @env.resolve('bar', accept: 'text/css; q=0.8, application/javascript')
-
-    assert_equal fixture_path('resolve/javascripts/bar.js'),
-      @env.resolve('bar', accept: '*/*; q=0.8, application/javascript')
-    assert_equal fixture_path('resolve/javascripts/bar.css'),
-      @env.resolve('bar', accept: '*/*; q=0.8, text/css')
-  end
-
-  test "locate asset uri" do
-    @env.append_path(fixture_path('default'))
-
-    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
-      @env.locate("gallery.js")
-    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript",
-      @env.locate("coffee/foo.js")
-    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml",
-      @env.locate("manifest.js.yml")
-
-    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
-      @env.locate("gallery", accept: 'application/javascript')
-  end
-
-  test "locate asset uri under load path" do
-    @env.append_path(scripts = fixture_path('resolve/javascripts'))
-    @env.append_path(styles = fixture_path('resolve/stylesheets'))
-
-    assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript",
-      @env.locate('foo.js', load_paths: [scripts])
-    assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css",
-      @env.locate('foo.css', load_paths: [styles])
-
-    refute @env.locate('foo.js', load_paths: [styles])
-    refute @env.locate('foo.css', load_paths: [scripts])
-  end
-
-  test "locate absolute identity" do
-    @env.append_path(fixture_path('default'))
-
-    @env.stat_tree(fixture_path('default')).each do |path, stat|
-      next unless stat.file?
-      assert uri = @env.locate(path)
-      assert_equal uri, @env.locate(uri)
+      assert uri = @env.resolve(path, compat: false)
+      assert_equal uri, @env.resolve(uri, compat: false)
     end
   end
 
@@ -172,7 +172,7 @@ class TestResolve < Sprockets::TestCase
     end
 
     @env.logical_paths.each do |logical_path, filename|
-      assert_equal filename, @env.resolve(logical_path),
+      assert_equal filename, @env.resolve(logical_path, compat: true),
         "Expected #{logical_path.inspect} to resolve to #{filename}"
     end
   end
