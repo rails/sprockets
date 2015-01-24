@@ -69,26 +69,30 @@ module Sprockets
     #
     attr_reader :content_type
 
-    # Given a logical path, `resolve` will find and return the fully
-    # expanded path. Relative paths will also be resolved. An optional
-    # `:content_type` restriction can be supplied to restrict the
-    # search.
+    # Public: Given a logical path, `resolve` will find and return an Asset URI.
+    # Relative paths will also be resolved. An accept type maybe given to
+    # restrict the search.
     #
-    #     resolve("foo.js")
-    #     # => "/path/to/app/javascripts/foo.js"
+    #     resolve("foo.js", compat: false)
+    #     # => "file:///path/to/app/javascripts/foo.js?type=application/javascript"
     #
-    #     resolve("./bar.js")
-    #     # => "/path/to/app/javascripts/bar.js"
+    #     resolve("./bar.js", compat: false)
+    #     # => "file:///path/to/app/javascripts/bar.js?type=application/javascript"
     #
+    # path - String logical or absolute path
+    # options
+    #   accept - String content accept type
+    #   compat - Force 2.x plain filename return type. Else return Asset URI.
+    #
+    # Returns filename String in compat mode, otherwise returns an Asset URI
+    # string. 4.x will always return an Asset URI string.
     def resolve(path, options = {})
-      path, _ = environment.parse_asset_uri(locate(path, options))
-      path
-    end
+      options[:compat] = true unless options.key?(:compat)
 
-    def locate(path, options = {})
       if environment.valid_asset_uri?(path)
-        path
+        uri = path
       else
+        # Deprecated: Use accept instead of content_type
         options[:content_type] = self.content_type if options[:content_type] == :self
         options[:accept] ||= options.delete(:content_type)
 
@@ -103,7 +107,17 @@ module Sprockets
 
         uri || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
+
+      if options[:compat]
+        path, _ = environment.parse_asset_uri(uri)
+        path
+      else
+        uri
+      end
     end
+
+    # Deprecated:
+    alias_method :new_resolve, :resolve
 
     # `depend_on` allows you to state a dependency on a file without
     # including it.
@@ -112,7 +126,9 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      @dependencies << @environment.build_file_digest_uri(resolve(path).to_s)
+      uri = resolve(path, compat: false)
+      filename, _ = environment.parse_asset_uri(uri)
+      @dependencies << @environment.build_file_digest_uri(filename)
       nil
     end
 
@@ -124,7 +140,7 @@ module Sprockets
     # file. Unlike `depend_on`, this will include recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
-      if asset = @environment.load(locate(path))
+      if asset = @environment.load(resolve(path, compat: false))
         @dependencies.merge(asset.metadata[:dependencies])
       end
       nil
@@ -140,7 +156,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      @required << locate(path, accept: @content_type, bundle: false)
+      @required << resolve(path, accept: @content_type, bundle: false, compat: false)
       nil
     end
 
@@ -148,7 +164,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed << locate(path, accept: @content_type, bundle: false)
+      @stubbed << resolve(path, accept: @content_type, bundle: false, compat: false)
       nil
     end
 
@@ -158,7 +174,7 @@ module Sprockets
     #
     # Returns an Asset or nil.
     def link_asset(path)
-      if asset = @environment.load(locate(path))
+      if asset = @environment.load(resolve(path, compat: false))
         @dependencies.merge(asset.metadata[:dependencies])
         @links << asset.uri
       end
