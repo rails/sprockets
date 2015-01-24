@@ -145,7 +145,7 @@ module Sprockets
     # Returns an Enumerator.
     def filter_logical_paths(*args)
       filters = args.flatten.map { |arg| self.class.compile_match_filter(arg) }
-      environment.logical_paths.select do |a, b|
+      environment.cached.logical_paths.select do |a, b|
         filters.any? { |f| f.call(a, b) }
       end
     end
@@ -162,6 +162,7 @@ module Sprockets
 
       filters = args.flatten.map { |arg| self.class.compile_match_filter(arg) }
 
+      environment = self.environment.cached
       environment.logical_paths do |logical_path, filename|
         if filters.any? { |f| f.call(logical_path, filename) }
           environment.find_all_linked_assets(filename) do |asset|
