@@ -210,9 +210,9 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        uri = resolve(path, accept: @content_type, bundle: false)
-        @dependencies += Set.new(@environment.last_resolve_dependencies)
+        uri, stats = resolve(path, accept: @content_type, bundle: false)
         @required << uri
+        @dependencies.merge(stats)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -253,8 +253,10 @@ module Sprockets
               next
             elsif stat.directory?
               next
-            elsif uri = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
+            elsif result = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
+              uri, stats = result
               @required << uri
+              @dependencies.merge(stats)
             end
           end
         else
@@ -283,8 +285,10 @@ module Sprockets
               next
             elsif stat.directory?
               @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif uri = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
+            elsif result = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
+              uri, stats = result
               @required << uri
+              @dependencies.merge(stats)
             end
           end
         else
@@ -306,9 +310,10 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        uri = resolve(path)
+        uri, stats = resolve(path)
         filename, _ = @environment.parse_asset_uri(uri)
         @dependencies << @environment.build_file_digest_uri(filename)
+        @dependencies.merge(stats)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -323,9 +328,10 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.load(resolve(path))
-          @dependencies.merge(asset.metadata[:dependencies])
-        end
+        uri, stats = resolve(path)
+        asset = @environment.load(uri)
+        @dependencies.merge(asset.metadata[:dependencies])
+        @dependencies.merge(stats)
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -337,7 +343,9 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << resolve(path, accept: @content_type, bundle: false)
+        uri, stats = resolve(path, accept: @content_type, bundle: false)
+        @stubbed << uri
+        @dependencies.merge(stats)
       end
 
       # Declares a linked dependency on the target asset.
@@ -349,7 +357,10 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        if asset = @environment.load(resolve(path))
+        uri, stats = resolve(path)
+        @dependencies.merge(stats)
+
+        if asset = @environment.load(uri)
           @dependencies.merge(asset.metadata[:dependencies])
           @links << asset.uri
         end
@@ -376,8 +387,10 @@ module Sprockets
               next
             elsif stat.directory?
               next
-            elsif uri = @environment.resolve(subpath, compat: false)
+            elsif result = @environment.resolve(subpath, compat: false)
+              uri, stats = result
               asset = @environment.load(uri)
+              @dependencies.merge(stats)
               @dependencies.merge(asset.metadata[:dependencies])
               @links << asset.uri
             end
@@ -408,9 +421,11 @@ module Sprockets
               next
             elsif stat.directory?
               @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif uri = @environment.resolve(subpath, compat: false)
+            elsif result = @environment.resolve(subpath, compat: false)
+              uri, stats = result
               asset = @environment.load(uri)
               @dependencies.merge(asset.metadata[:dependencies])
+              @dependencies.merge(stats)
               @links << asset.uri
             end
           end
@@ -426,14 +441,14 @@ module Sprockets
       end
 
       def resolve(path, options = {})
-        uri = case @environment.detect_path_type(path)
+        result = case @environment.detect_path_type(path)
         when :relative
           @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, :compat => false))
         when :logical
           @environment.resolve(path, options.merge(:compat => false))
         end
 
-        uri || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
+        result || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
   end
 end

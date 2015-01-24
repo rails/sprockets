@@ -5,8 +5,6 @@ module Sprockets
   module Resolve
     include URIUtils
 
-    attr_accessor :last_resolve_dependencies
-
     # Public: Find Asset URI for given a logical path by searching the
     # environment's load paths.
     #
@@ -24,8 +22,6 @@ module Sprockets
       options = options.dup
       compat = options.delete(:compat) { true }
 
-      self.last_resolve_dependencies = nil
-
       path = path.to_s
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
@@ -36,7 +32,8 @@ module Sprockets
       paths = options[:load_paths] || self.paths
 
       if valid_asset_uri?(path)
-        return path
+        # TODO
+        return path, []
       elsif absolute_path?(path)
         path = File.expand_path(path)
         if paths_split(paths, path) && file?(path)
@@ -45,6 +42,8 @@ module Sprockets
           if !accept || _type
             filename = path
             type = _type
+            # TODO
+            stats = []
           end
         end
       else
@@ -57,11 +56,10 @@ module Sprockets
 
         transformed_accepts = expand_transform_accepts(parsed_accept)
         filename, mime_type, stats = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
-        self.last_resolve_dependencies = stats
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
-      if filename
+      if filename && stats
         encoding = nil if encoding == 'identity'
         uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
       end
@@ -69,8 +67,10 @@ module Sprockets
       if uri && compat
         path, _ = parse_asset_uri(uri)
         path
+      elsif uri
+        return uri, stats
       else
-        uri
+        nil
       end
     end
 
@@ -87,12 +87,13 @@ module Sprockets
       end
 
       if path = split_relative_subpath(load_path, path, dirname)
-        if uri = resolve(path, options.merge(load_paths: [load_path], compat: false))
+        if result = resolve(path, options.merge(load_paths: [load_path], compat: false))
           if compat
+            uri, _ = result
             path, _ = parse_asset_uri(uri)
             path
           else
-            uri
+            result
           end
         end
       end

@@ -131,14 +131,14 @@ class TestResolve < Sprockets::TestCase
     @env.append_path(fixture_path('default'))
 
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
-      @env.resolve("gallery.js", compat: false)
+      @env.resolve("gallery.js", compat: false).first
     assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript",
-      @env.resolve("coffee/foo.js", compat: false)
+      @env.resolve("coffee/foo.js", compat: false).first
     assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml",
-      @env.resolve("manifest.js.yml", compat: false)
+      @env.resolve("manifest.js.yml", compat: false).first
 
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript",
-      @env.resolve("gallery", accept: 'application/javascript', compat: false)
+      @env.resolve("gallery", accept: 'application/javascript', compat: false).first
   end
 
   test "resolve asset uri under load path" do
@@ -146,9 +146,9 @@ class TestResolve < Sprockets::TestCase
     @env.append_path(styles = fixture_path('resolve/stylesheets'))
 
     assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript",
-      @env.resolve('foo.js', load_paths: [scripts], compat: false)
+      @env.resolve('foo.js', load_paths: [scripts], compat: false).first
     assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css",
-      @env.resolve('foo.css', load_paths: [styles], compat: false)
+      @env.resolve('foo.css', load_paths: [styles], compat: false).first
 
     refute @env.resolve('foo.js', load_paths: [styles], compat: false)
     refute @env.resolve('foo.css', load_paths: [scripts], compat: false)
@@ -159,8 +159,8 @@ class TestResolve < Sprockets::TestCase
 
     @env.stat_tree(fixture_path('default')).each do |path, stat|
       next unless stat.file?
-      assert uri = @env.resolve(path, compat: false)
-      assert_equal uri, @env.resolve(uri, compat: false)
+      assert uri = @env.resolve(path, compat: false).first
+      assert_equal uri, @env.resolve(uri, compat: false).first
     end
   end
 

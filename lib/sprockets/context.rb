@@ -73,10 +73,10 @@ module Sprockets
     # Relative paths will also be resolved. An accept type maybe given to
     # restrict the search.
     #
-    #     resolve("foo.js", compat: false)
+    #     resolve("foo.js")
     #     # => "file:///path/to/app/javascripts/foo.js?type=application/javascript"
     #
-    #     resolve("./bar.js", compat: false)
+    #     resolve("./bar.js")
     #     # => "file:///path/to/app/javascripts/bar.js?type=application/javascript"
     #
     # path - String logical or absolute path
@@ -97,16 +97,18 @@ module Sprockets
         options[:content_type] = self.content_type if options[:content_type] == :self
         options[:accept] ||= options.delete(:content_type)
 
-        uri = case environment.detect_path_type(path)
+        result = case environment.detect_path_type(path)
         when :absolute
-          environment.build_asset_uri(path)
+          [environment.build_asset_uri(path), []]
         when :relative
-          environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, :compat => false))
+          environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
         when :logical
-          environment.resolve(path, options.merge(:compat => false))
+          environment.resolve(path, options.merge(compat: false))
         end
 
-        uri || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
+        result || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
+        uri, stats = result
+        @dependencies.merge(stats)
       end
 
       if compat
@@ -116,9 +118,6 @@ module Sprockets
         uri
       end
     end
-
-    # Deprecated:
-    alias_method :new_resolve, :resolve
 
     # `depend_on` allows you to state a dependency on a file without
     # including it.
@@ -141,10 +140,10 @@ module Sprockets
     # file. Unlike `depend_on`, this will include recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
-      if asset = @environment.load(resolve(path, compat: false))
-        @dependencies.merge(asset.metadata[:dependencies])
-      end
-      nil
+      uri = resolve(path, compat: false)
+      asset = @environment.load(uri)
+      @dependencies.merge(asset.metadata[:dependencies])
+      asset
     end
 
     # `require_asset` declares `path` as a dependency of the file. The
@@ -175,10 +174,8 @@ module Sprockets
     #
     # Returns an Asset or nil.
     def link_asset(path)
-      if asset = @environment.load(resolve(path, compat: false))
-        @dependencies.merge(asset.metadata[:dependencies])
-        @links << asset.uri
-      end
+      asset = depend_on_asset(path)
+      @links << asset.uri
       asset
     end
 
@@ -193,9 +190,9 @@ module Sprockets
     #     $('<img>').attr('src', '<%= asset_data_uri 'avatar.jpg' %>')
     #
     def asset_data_uri(path)
-      depend_on_asset(path)
-      asset = environment.find_asset(path, accept_encoding: 'base64')
-      "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
+      asset = depend_on_asset(path)
+      data = EncodingUtils.base64(asset.source)
+      "data:#{asset.content_type};base64,#{Rack::Utils.escape(data)}"
     end
 
     # Expands logical path to full url to asset.
