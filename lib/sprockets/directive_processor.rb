@@ -210,7 +210,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        uri = locate(path, accept: @content_type, bundle: false)
+        uri = resolve(path, accept: @content_type, bundle: false)
         @dependencies += Set.new(@environment.last_resolve_dependencies)
         @required << uri
       end
@@ -306,7 +306,9 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependencies << @environment.build_file_digest_uri(resolve(path))
+        uri = resolve(path)
+        filename, _ = @environment.parse_asset_uri(uri)
+        @dependencies << @environment.build_file_digest_uri(filename)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -321,7 +323,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.load(locate(path))
+        if asset = @environment.load(resolve(path))
           @dependencies.merge(asset.metadata[:dependencies])
         end
       end
@@ -335,7 +337,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << locate(path, accept: @content_type, bundle: false)
+        @stubbed << resolve(path, accept: @content_type, bundle: false)
       end
 
       # Declares a linked dependency on the target asset.
@@ -347,7 +349,7 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        if asset = @environment.load(locate(path))
+        if asset = @environment.load(resolve(path))
           @dependencies.merge(asset.metadata[:dependencies])
           @links << asset.uri
         end
@@ -423,7 +425,7 @@ module Sprockets
         File.expand_path(path, @dirname)
       end
 
-      def locate(path, options = {})
+      def resolve(path, options = {})
         uri = case @environment.detect_path_type(path)
         when :relative
           @environment.locate_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
@@ -432,17 +434,6 @@ module Sprockets
         end
 
         uri || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
-      end
-
-      def resolve(path, options = {})
-        filename = case @environment.detect_path_type(path)
-        when :relative
-          @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
-        when :logical
-          @environment.resolve(path, options)
-        end
-
-        filename || @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
       end
   end
 end

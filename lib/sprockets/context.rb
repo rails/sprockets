@@ -81,19 +81,8 @@ module Sprockets
     #     # => "/path/to/app/javascripts/bar.js"
     #
     def resolve(path, options = {})
-      options[:content_type] = self.content_type if options[:content_type] == :self
-      options[:accept] ||= options.delete(:content_type)
-
-      filename = case environment.detect_path_type(path)
-      when :absolute
-        path
-      when :relative
-        environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
-      when :logical
-        environment.resolve(path, options)
-      end
-
-      filename || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
+      path, _ = environment.parse_asset_uri(locate(path, options))
+      path
     end
 
     def locate(path, options = {})
@@ -105,8 +94,7 @@ module Sprockets
 
         uri = case environment.detect_path_type(path)
         when :absolute
-          # TODO: Should return an Asset URI
-          path
+          environment.build_asset_uri(path)
         when :relative
           environment.locate_relative(path, options.merge(load_path: @load_path, dirname: @dirname))
         when :logical
