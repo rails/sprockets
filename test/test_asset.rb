@@ -747,6 +747,16 @@ class BundledAssetTest < Sprockets::TestCase
     end
   end
 
+  test "mtime is based on absolute dependency paths" do
+    asset_dependency = fixture_path('asset/dependencies/b.js')
+
+    sandbox asset_dependency do
+      mtime = Time.now + 1
+      File.utime mtime, mtime, asset_dependency
+      assert_equal mtime.to_i, asset('absolute_dependency_paths.js').mtime.to_i
+    end
+  end
+
   test "requiring the same file multiple times has no effect" do
     assert_equal read("asset/project.js.erb")+"\n\n\n", asset("multiple.js").to_s
   end
