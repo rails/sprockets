@@ -12,9 +12,9 @@ module Sprockets
     # load_path    - String environment path
     # logical_path - String path relative to base
     #
-    # Returns nothing.
-    def resolve_alternates(load_path, logical_path, &block)
-      super
+    # Returns candiate filenames.
+    def resolve_alternates(load_path, logical_path)
+      candidates, deps = super
 
       # bower.json can only be nested one level deep
       if !logical_path.index('/')
@@ -26,12 +26,15 @@ module Sprockets
           filename  = filenames.detect { |fn| self.file?(fn) }
 
           if filename
-            read_bower_main(dirname, filename, &block)
+            deps << build_file_digest_uri(filename)
+            read_bower_main(dirname, filename) do |path|
+              candidates << path
+            end
           end
         end
       end
 
-      nil
+      return candidates, deps
     end
 
     # Internal: Read bower.json's main directive.

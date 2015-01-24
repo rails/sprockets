@@ -94,7 +94,7 @@ module Sprockets
 
         result = case environment.detect_path_type(path)
         when :absolute
-          [environment.build_asset_uri(path), []]
+          [environment.build_asset_uri(path), [environment.build_file_digest_uri(path)]]
         when :relative
           environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
         when :logical
@@ -116,9 +116,7 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      uri = resolve(path, compat: false)
-      filename, _ = environment.parse_asset_uri(uri)
-      @dependencies << @environment.build_file_digest_uri(filename)
+      resolve(path, compat: false)
       nil
     end
 

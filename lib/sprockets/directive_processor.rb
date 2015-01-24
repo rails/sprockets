@@ -246,12 +246,11 @@ module Sprockets
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
+          paths, deps = @environment.stat_directory_with_dependencies(root)
+          @dependencies.merge(deps)
 
-          @environment.stat_directory(root).each do |subpath, stat|
-            if subpath == @filename
-              next
-            elsif stat.directory?
+          paths.each do |subpath, stat|
+            if subpath == @filename || stat.directory?
               next
             else
               uri, deps = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
@@ -281,13 +280,12 @@ module Sprockets
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
+          paths, deps = @environment.stat_sorted_tree_with_dependencies(root)
+          @dependencies.merge(deps)
 
-          @environment.stat_sorted_tree(root).each do |subpath, stat|
-            if subpath == @filename
+          paths.each do |subpath, stat|
+            if subpath == @filename || stat.directory?
               next
-            elsif stat.directory?
-              @dependencies << @environment.build_file_digest_uri(subpath)
             else
               uri, deps = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
               @dependencies.merge(deps)
@@ -316,9 +314,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        uri, deps = resolve(path)
-        filename, _ = @environment.parse_asset_uri(uri)
-        @dependencies << @environment.build_file_digest_uri(filename)
+        _, deps = resolve(path)
         @dependencies.merge(deps)
       end
 
@@ -384,12 +380,11 @@ module Sprockets
             raise ArgumentError, "link_directory argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
+          paths, deps = @environment.stat_directory_with_dependencies(root)
+          @dependencies.merge(deps)
 
-          @environment.stat_directory(root).each do |subpath, stat|
-            if subpath == @filename
-              next
-            elsif stat.directory?
+          paths.each do |subpath, stat|
+            if subpath == @filename || stat.directory?
               next
             else
               uri, deps = @environment.resolve(subpath, compat: false)
@@ -421,13 +416,12 @@ module Sprockets
             raise ArgumentError, "link_tree argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
+          paths, deps = @environment.stat_sorted_tree_with_dependencies(root)
+          @dependencies.merge(deps)
 
-          @environment.stat_sorted_tree(root).each do |subpath, stat|
-            if subpath == @filename
+          paths.each do |subpath, stat|
+            if subpath == @filename || stat.directory?
               next
-            elsif stat.directory?
-              @dependencies << @environment.build_file_digest_uri(subpath)
             else
               uri, deps = @environment.resolve(subpath, compat: false)
               @dependencies.merge(deps)

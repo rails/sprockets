@@ -36,6 +36,8 @@ class TestPathUtils < MiniTest::Test
       "server",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
+
+    assert_equal [], entries("/tmp/sprockets/missingdir")
   end
 
   def test_check_absolute_path

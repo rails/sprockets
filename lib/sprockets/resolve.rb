@@ -1,9 +1,10 @@
 require 'set'
+require 'sprockets/path_dependency_utils'
 require 'sprockets/uri_utils'
 
 module Sprockets
   module Resolve
-    include URIUtils
+    include PathDependencyUtils, URIUtils
 
     # Public: Find Asset URI for given a logical path by searching the
     # environment's load paths.
@@ -155,24 +156,38 @@ module Sprockets
       def path_matches(load_path, logical_name, logical_basename)
         candidates, deps = [], Set.new
         dirname = File.dirname(File.join(load_path, logical_name))
-        deps << build_file_digest_uri(dirname)
-        dirname_matches(dirname, logical_basename) { |candidate| candidates << candidate }
-        resolve_alternates(load_path, logical_name) { |fn| candidates << [fn, parse_path_extnames(fn)[1]] }
-        deps << build_file_digest_uri(File.join(load_path, logical_name))
-        dirname_matches(File.join(load_path, logical_name), "index") { |candidate| candidates << candidate }
+
+        result = dirname_matches(dirname, logical_basename)
+        candidates.concat(result[0])
+        deps.merge(result[1])
+
+        result = resolve_alternates(load_path, logical_name)
+        result[0].each do |fn|
+          candidates << [fn, parse_path_extnames(fn)[1]]
+        end
+        deps.merge(result[1])
+
+        result = dirname_matches(File.join(load_path, logical_name), "index")
+        candidates.concat(result[0])
+        deps.merge(result[1])
+
         return candidates.select { |fn, _| file?(fn) }, deps
       end
 
       def dirname_matches(dirname, basename)
-        self.entries(dirname).each do |entry|
+        candidates = []
+        entries, deps = self.entries_with_dependencies(dirname)
+        entries.each do |entry|
           name, type, _ = parse_path_extnames(entry)
           if basename == name
-            yield [File.join(dirname, entry), type]
+            candidates << [File.join(dirname, entry), type]
           end
         end
+        return candidates, deps
       end
 
       def resolve_alternates(load_path, logical_name)
+        return [], Set.new
       end
 
       # Internal: Returns the name, mime type and `Array` of engine extensions.
