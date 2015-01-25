@@ -401,6 +401,11 @@ module Sprockets
       end
 
       def resolve(path, options = {})
+        # Prevent absolute paths in directives
+        if @environment.absolute_path?(path)
+          raise FileOutsidePaths, "can't require absolute file: #{path}"
+        end
+
         # TODO: Maybe remove detect_path_type
         result = case @environment.detect_path_type(path)
         when :relative
@@ -408,8 +413,6 @@ module Sprockets
           @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
         when :logical
           @environment.resolve(path, options.merge(compat: false))
-        else
-          [nil, Set.new]
         end
 
         # TODO: Add env.resolve!

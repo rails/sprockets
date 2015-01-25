@@ -88,10 +88,7 @@ module Sprockets
 
     def fail_file_not_found(path, options = {})
       accept = options[:accept]
-      case detect_path_type(path)
-      when :absolute
-        raise FileOutsidePaths, "can't require absolute file: #{path}"
-      when :relative
+      if relative_path?(path)
         dirname, load_path = options[:dirname], options[:load_path]
         if dirname && load_path
           if path = split_relative_subpath(load_path, path, dirname)
