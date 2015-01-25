@@ -86,28 +86,6 @@ module Sprockets
       return uri, (deps || Set.new)
     end
 
-    def fail_file_not_found(path, options = {})
-      accept = options[:accept]
-      if relative_path?(path)
-        dirname, load_path = options[:dirname], options[:load_path]
-        if dirname && load_path
-          if path = split_relative_subpath(load_path, path, dirname)
-            message = "couldn't find file '#{path}' under '#{load_path}'"
-            message << " with type '#{accept}'" if accept
-            raise FileNotFound, message
-          else
-            raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
-          end
-        else
-          raise FileOutsidePaths, "can't require relative file: #{path}"
-        end
-      else
-        message = "couldn't find file '#{path}'"
-        message << " with type '#{accept}'" if accept
-        raise FileNotFound, message
-      end
-    end
-
     def resolve!(path, options = {})
       if valid_asset_uri?(path)
         # TODO: Update dependencies for path
@@ -124,7 +102,21 @@ module Sprockets
       end
 
       unless uri
-        fail_file_not_found(path, options)
+        accept = options[:accept]
+        if relative_path?(path)
+          dirname, load_path = options[:dirname], options[:load_path]
+          if path = split_relative_subpath(load_path, path, dirname)
+            message = "couldn't find file '#{path}' under '#{load_path}'"
+            message << " with type '#{accept}'" if accept
+            raise FileNotFound, message
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
+          end
+        else
+          message = "couldn't find file '#{path}'"
+          message << " with type '#{accept}'" if accept
+          raise FileNotFound, message
+        end
       end
 
       return uri, deps
