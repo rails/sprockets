@@ -176,6 +176,13 @@ module Sprockets
     #
     def resolve_with_compat(path, options = {})
       options = options.dup
+
+      # Support old :content_type option, prefer :accept going forward
+      if type = options.delete(:content_type)
+        type = self.content_type if type == :self
+        options[:accept] ||= type
+      end
+
       if options.delete(:compat) { true }
         uri = resolve_without_compat(path, options)
         path, _ = environment.parse_asset_uri(uri)

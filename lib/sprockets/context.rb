@@ -89,10 +89,6 @@ module Sprockets
         # TODO: Update dependencies for path
         uri = path
       else
-        # Deprecated: Use accept instead of content_type
-        options[:content_type] = self.content_type if options[:content_type] == :self
-        options[:accept] ||= options.delete(:content_type)
-
         # TODO: Maybe remove detect_path_type
         result = case environment.detect_path_type(path)
         when :absolute
