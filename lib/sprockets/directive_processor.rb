@@ -406,21 +406,7 @@ module Sprockets
           raise FileOutsidePaths, "can't require absolute file: #{path}"
         end
 
-        # TODO: Maybe remove detect_path_type
-        result = case @environment.detect_path_type(path)
-        when :relative
-          # TODO: Route relative through resolve
-          @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
-        when :logical
-          @environment.resolve(path, options.merge(compat: false))
-        end
-
-        # TODO: Add env.resolve!
-        unless result.first
-          @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
-        end
-
-        uri, deps = result
+        uri, deps = @environment.resolve!(path, options.merge(load_path: @load_path, dirname: @dirname))
         @dependencies.merge(deps)
         uri
       end

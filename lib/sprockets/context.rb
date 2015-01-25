@@ -85,28 +85,8 @@ module Sprockets
     #
     # Returns an Asset URI String.
     def resolve(path, options = {})
-      if environment.valid_asset_uri?(path)
-        # TODO: Update dependencies for path
-        uri = path
-      else
-        # TODO: Maybe remove detect_path_type
-        result = case environment.detect_path_type(path)
-        when :absolute
-          # TODO: Delegate to env.resolve
-          [environment.build_asset_uri(path), [environment.build_file_digest_uri(path)]]
-        when :relative
-          # TODO: Route relative through resolve
-          environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
-        when :logical
-          environment.resolve(path, options.merge(compat: false))
-        end
-
-        # TODO: Add env.resolve!
-        result || environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
-        uri, deps = result
-        @dependencies.merge(deps)
-      end
-
+      uri, deps = environment.resolve!(path, options.merge(load_path: @load_path, dirname: @dirname))
+      @dependencies.merge(deps)
       uri
     end
 

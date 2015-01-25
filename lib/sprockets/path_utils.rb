@@ -83,21 +83,6 @@ module Sprockets
       path =~ /^\.\.?($|#{SEPARATOR_PATTERN})/ ? true : false
     end
 
-    # Internal: Detect type of file path.
-    #
-    # path - String path.
-    #
-    # Returns :absolute, :relative or :logical
-    def detect_path_type(path)
-      if absolute_path?(path)
-        :absolute
-      elsif relative_path?(path)
-        :relative
-      else
-        :logical
-      end
-    end
-
     # Internal: Get relative path for root path and subpath.
     #
     # path    - String path

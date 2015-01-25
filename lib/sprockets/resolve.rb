@@ -108,6 +108,28 @@ module Sprockets
       end
     end
 
+    def resolve!(path, options = {})
+      if valid_asset_uri?(path)
+        # TODO: Update dependencies for path
+        uri = path
+        deps = Set.new
+      elsif absolute_path?(path)
+        # TODO: Delegate to env.resolve
+        uri, deps = [build_asset_uri(path), [build_file_digest_uri(path)]]
+      elsif relative_path?(path)
+        # TODO: Route relative through resolve
+        uri, deps = resolve_relative(path, options.merge(compat: false))
+      else
+        uri, deps = resolve(path, options.merge(compat: false))
+      end
+
+      unless uri
+        fail_file_not_found(path, options)
+      end
+
+      return uri, deps
+    end
+
     protected
       def resolve_under_paths(paths, logical_name, mime_type, accepts)
         logical_basename = File.basename(logical_name)
