@@ -30,8 +30,9 @@ module Sprockets
       paths = options[:load_paths] || self.paths
 
       if valid_asset_uri?(path)
-        # TODO: Return self dependency
-        return path, []
+        uri = path
+        filename, _ = parse_asset_uri(uri)
+        return uri, Set.new([build_file_digest_uri(filename)])
       elsif absolute_path?(path)
         path = File.expand_path(path)
         if paths_split(paths, path) && file?(path)
@@ -87,11 +88,7 @@ module Sprockets
     end
 
     def resolve!(path, options = {})
-      if valid_asset_uri?(path)
-        # TODO: Update dependencies for path
-        uri = path
-        deps = Set.new
-      elsif absolute_path?(path)
+      if absolute_path?(path)
         # TODO: Delegate to env.resolve
         uri, deps = [build_asset_uri(path), [build_file_digest_uri(path)]]
       elsif relative_path?(path)

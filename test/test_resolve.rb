@@ -58,7 +58,7 @@ class TestResolve < Sprockets::TestCase
   test "resolve absolute" do
     @env.append_path(fixture_path('default'))
 
-    gallery_js_uri  = "file://#{fixture_path('default/gallery.js')}?type=application/javascript"
+    gallery_js_uri = "file://#{fixture_path('default/gallery.js')}?type=application/javascript"
 
     assert_equal gallery_js_uri, resolve(fixture_path('default/gallery.js'))
     assert_equal gallery_js_uri, resolve(fixture_path('default/app/../gallery.js'))
@@ -160,6 +160,15 @@ class TestResolve < Sprockets::TestCase
     uri, deps = @env.resolve('foo.css', load_paths: [scripts], compat: false)
     refute uri
     assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts')}"
+  end
+
+  test "resolve uri identity with dependencies" do
+    @env.append_path(fixture_path('default'))
+
+    uri1 = "file://#{fixture_path('default/gallery.js')}?type=application/javascript"
+    uri2, deps = @env.resolve(uri1, compat: false)
+    assert_equal uri1, uri2
+    assert_includes deps, "file-digest:#{fixture_path('default/gallery.js')}"
   end
 
   test "verify all logical paths" do
