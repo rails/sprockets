@@ -1,5 +1,6 @@
 require 'sprockets_test'
 
+# TODO: Port most tests to compat: false
 class TestResolve < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new(".")

@@ -30,7 +30,7 @@ module Sprockets
       paths = options[:load_paths] || self.paths
 
       if valid_asset_uri?(path)
-        # TODO
+        # TODO: Return self dependency
         return path, []
       elsif absolute_path?(path)
         path = File.expand_path(path)
@@ -40,7 +40,7 @@ module Sprockets
           if !accept || _type
             filename = path
             type = _type
-            # TODO
+            # TODO: Return self dependency
             deps = Set.new
           end
         end
@@ -49,8 +49,8 @@ module Sprockets
         parsed_accept = parse_accept_options(mime_type, accept)
 
         if parsed_accept.empty?
-          # TODO:
-          return nil, []
+          # TODO: Double check no dependencies
+          return nil, Set.new
         end
 
         transformed_accepts = expand_transform_accepts(parsed_accept)
