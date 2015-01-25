@@ -246,21 +246,7 @@ module Sprockets
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          paths, deps = @environment.stat_directory_with_dependencies(root)
-          @dependencies.merge(deps)
-
-          paths.each do |subpath, stat|
-            if subpath == @filename || stat.directory?
-              next
-            else
-              uri, deps = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
-              @dependencies.merge(deps)
-
-              if uri
-                @required << uri
-              end
-            end
-          end
+          require_paths(*@environment.stat_directory_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "require_directory argument must be a relative path"
@@ -280,21 +266,7 @@ module Sprockets
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          paths, deps = @environment.stat_sorted_tree_with_dependencies(root)
-          @dependencies.merge(deps)
-
-          paths.each do |subpath, stat|
-            if subpath == @filename || stat.directory?
-              next
-            else
-              uri, deps = @environment.resolve(subpath, accept: @content_type, bundle: false, compat: false)
-              @dependencies.merge(deps)
-
-              if uri
-                @required << uri
-              end
-            end
-          end
+          require_paths(*@environment.stat_sorted_tree_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "require_tree argument must be a relative path"
@@ -331,9 +303,8 @@ module Sprockets
       #
       def process_depend_on_asset_directive(path)
         uri, deps = resolve(path)
-        asset = @environment.load(uri)
-        @dependencies.merge(asset.metadata[:dependencies])
         @dependencies.merge(deps)
+        load(uri)
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -360,9 +331,8 @@ module Sprockets
       #
       def process_link_directive(path)
         uri, deps = resolve(path)
-        asset = @environment.load(uri)
+        asset = load(uri)
         @dependencies.merge(deps)
-        @dependencies.merge(asset.metadata[:dependencies])
         @links << asset.uri
       end
 
@@ -380,23 +350,7 @@ module Sprockets
             raise ArgumentError, "link_directory argument must be a directory"
           end
 
-          paths, deps = @environment.stat_directory_with_dependencies(root)
-          @dependencies.merge(deps)
-
-          paths.each do |subpath, stat|
-            if subpath == @filename || stat.directory?
-              next
-            else
-              uri, deps = @environment.resolve(subpath, compat: false)
-              @dependencies.merge(deps)
-
-              if uri
-                asset = @environment.load(uri)
-                @dependencies.merge(asset.metadata[:dependencies])
-                @links << asset.uri
-              end
-            end
-          end
+          link_paths(*@environment.stat_directory_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "link_directory argument must be a relative path"
@@ -416,23 +370,7 @@ module Sprockets
             raise ArgumentError, "link_tree argument must be a directory"
           end
 
-          paths, deps = @environment.stat_sorted_tree_with_dependencies(root)
-          @dependencies.merge(deps)
-
-          paths.each do |subpath, stat|
-            if subpath == @filename || stat.directory?
-              next
-            else
-              uri, deps = @environment.resolve(subpath, compat: false)
-              @dependencies.merge(deps)
-
-              if uri
-                asset = @environment.load(uri)
-                @dependencies.merge(asset.metadata[:dependencies])
-                @links << asset.uri
-              end
-            end
-          end
+          link_paths(*@environment.stat_sorted_tree_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "link_tree argument must be a relative path"
@@ -440,24 +378,51 @@ module Sprockets
       end
 
     private
+      def require_paths(paths, deps)
+        resolve_paths(paths, deps, accept: @content_type, bundle: false) do |uri|
+          @required << uri
+        end
+      end
+
+      def link_paths(paths, deps)
+        resolve_paths(paths, deps) do |uri|
+          @links << load(uri).uri
+        end
+      end
+
+      def resolve_paths(paths, deps, options = {})
+        @dependencies.merge(deps)
+        paths.each do |subpath, stat|
+          next if subpath == @filename || stat.directory?
+          uri, deps = @environment.resolve(subpath, options.merge(compat: false))
+          @dependencies.merge(deps)
+          yield uri if uri
+        end
+      end
+
       def expand_relative_path(path)
         File.expand_path(path, @dirname)
       end
 
+      def load(uri)
+        asset = @environment.load(uri)
+        @dependencies.merge(asset.metadata[:dependencies])
+        asset
+      end
+
       def resolve(path, options = {})
+        # TODO: Maybe remove detect_path_type
         result = case @environment.detect_path_type(path)
         when :relative
+          # TODO: Route relative through resolve
           @environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
         when :logical
           @environment.resolve(path, options.merge(compat: false))
         else
-          [nil, []]
+          [nil, Set.new]
         end
 
-        unless result
-          raise [path, options].inspect
-        end
-
+        # TODO: Add env.resolve!
         unless result.first
           @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
         end

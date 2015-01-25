@@ -99,6 +99,7 @@ module Sprockets
           # TODO: Delegate to env.resolve
           [environment.build_asset_uri(path), [environment.build_file_digest_uri(path)]]
         when :relative
+          # TODO: Route relative through resolve
           environment.resolve_relative(path, options.merge(load_path: @load_path, dirname: @dirname, compat: false))
         when :logical
           environment.resolve(path, options.merge(compat: false))
@@ -111,6 +112,17 @@ module Sprockets
       end
 
       uri
+    end
+
+    # Public: Load Asset by AssetURI and track it as a dependency.
+    #
+    # uri - AssetURI
+    #
+    # Returns Asset.
+    def load(uri)
+      asset = environment.load(uri)
+      @dependencies.merge(asset.metadata[:dependencies])
+      asset
     end
 
     # `depend_on` allows you to state a dependency on a file without
@@ -132,10 +144,7 @@ module Sprockets
     # file. Unlike `depend_on`, this will include recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
-      uri = resolve(path, compat: false)
-      asset = @environment.load(uri)
-      @dependencies.merge(asset.metadata[:dependencies])
-      asset
+      load(resolve(path, compat: false))
     end
 
     # `require_asset` declares `path` as a dependency of the file. The
