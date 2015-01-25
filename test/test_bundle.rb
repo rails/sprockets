@@ -19,7 +19,7 @@ class TestStylesheetBundle < Sprockets::TestCase
     data = ".project {}\n"
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
-    assert_equal ["file-digest:#{filename}"],
+    assert_equal ["file-digest://#{filename}"],
       result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 
@@ -42,13 +42,13 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
-      "file-digest:" + fixture_path('asset'),
-      "file-digest:" + fixture_path('asset/project'),
-      "file-digest:" + fixture_path('asset/project.css'),
-      "file-digest:" + fixture_path('asset/require_self.css'),
-      "file-digest:" + fixture_path('asset/tree/all'),
-      "file-digest:" + fixture_path('asset/tree/all/b'),
-      "file-digest:" + fixture_path('asset/tree/all/b.css')
+      "file-digest://" + fixture_path('asset'),
+      "file-digest://" + fixture_path('asset/project'),
+      "file-digest://" + fixture_path('asset/project.css'),
+      "file-digest://" + fixture_path('asset/require_self.css'),
+      "file-digest://" + fixture_path('asset/tree/all'),
+      "file-digest://" + fixture_path('asset/tree/all/b'),
+      "file-digest://" + fixture_path('asset/tree/all/b.css')
     ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 
@@ -70,7 +70,7 @@ class TestStylesheetBundle < Sprockets::TestCase
     data = "var Project = {\n  find: function(id) {\n  }\n};\n"
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
-    assert_equal ["file-digest:#{filename}"],
+    assert_equal ["file-digest://#{filename}"],
       result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 
@@ -93,12 +93,12 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
-      "file-digest:" + fixture_path('asset'),
-      "file-digest:" + fixture_path('asset/application.js'),
-      "file-digest:" + fixture_path('asset/project'),
-      "file-digest:" + fixture_path('asset/project.js.erb'),
-      "file-digest:" + fixture_path('asset/users'),
-      "file-digest:" + fixture_path('asset/users.js.erb')
+      "file-digest://" + fixture_path('asset'),
+      "file-digest://" + fixture_path('asset/application.js'),
+      "file-digest://" + fixture_path('asset/project'),
+      "file-digest://" + fixture_path('asset/project.js.erb'),
+      "file-digest://" + fixture_path('asset/users'),
+      "file-digest://" + fixture_path('asset/users.js.erb')
     ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
   end
 end

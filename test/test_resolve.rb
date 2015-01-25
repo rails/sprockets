@@ -120,23 +120,23 @@ class TestResolve < Sprockets::TestCase
 
     uri, deps = @env.resolve("gallery.js", compat: false)
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript", uri
-    assert_includes deps, "file-digest:#{fixture_path('default/gallery.js')}"
-    assert_includes deps, "file-digest:#{fixture_path('default')}"
+    assert_includes deps, "file-digest://#{fixture_path('default/gallery.js')}"
+    assert_includes deps, "file-digest://#{fixture_path('default')}"
 
     uri, deps = @env.resolve("coffee/foo.js", compat: false)
     assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript", uri
-    assert_includes deps, "file-digest:#{fixture_path('default/coffee/foo.coffee')}"
-    assert_includes deps, "file-digest:#{fixture_path('default/coffee')}"
+    assert_includes deps, "file-digest://#{fixture_path('default/coffee/foo.coffee')}"
+    assert_includes deps, "file-digest://#{fixture_path('default/coffee')}"
 
     uri, deps = @env.resolve("manifest.js.yml", compat: false)
     assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml", uri
-    assert_includes deps, "file-digest:#{fixture_path('default/manifest.js.yml')}"
-    assert_includes deps, "file-digest:#{fixture_path('default')}"
+    assert_includes deps, "file-digest://#{fixture_path('default/manifest.js.yml')}"
+    assert_includes deps, "file-digest://#{fixture_path('default')}"
 
     uri, deps = @env.resolve("gallery", accept: 'application/javascript', compat: false)
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript", uri
-    assert_includes deps, "file-digest:#{fixture_path('default/gallery.js')}"
-    assert_includes deps, "file-digest:#{fixture_path('default')}"
+    assert_includes deps, "file-digest://#{fixture_path('default/gallery.js')}"
+    assert_includes deps, "file-digest://#{fixture_path('default')}"
   end
 
   test "resolve under load path with dependencies" do
@@ -145,21 +145,21 @@ class TestResolve < Sprockets::TestCase
 
     uri, deps = @env.resolve('foo.js', load_paths: [scripts], compat: false)
     assert_equal "file://#{fixture_path('resolve/javascripts/foo.js')}?type=application/javascript", uri
-    assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts/foo.js')}"
-    assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts')}"
+    assert_includes deps, "file-digest://#{fixture_path('resolve/javascripts/foo.js')}"
+    assert_includes deps, "file-digest://#{fixture_path('resolve/javascripts')}"
 
     uri, deps = @env.resolve('foo.css', load_paths: [styles], compat: false)
     assert_equal "file://#{fixture_path('resolve/stylesheets/foo.css')}?type=text/css", uri
-    assert_includes deps, "file-digest:#{fixture_path('resolve/stylesheets/foo.css')}"
-    assert_includes deps, "file-digest:#{fixture_path('resolve/stylesheets')}"
+    assert_includes deps, "file-digest://#{fixture_path('resolve/stylesheets/foo.css')}"
+    assert_includes deps, "file-digest://#{fixture_path('resolve/stylesheets')}"
 
     uri, deps = @env.resolve('foo.js', load_paths: [styles], compat: false)
     refute uri
-    assert_includes deps, "file-digest:#{fixture_path('resolve/stylesheets')}"
+    assert_includes deps, "file-digest://#{fixture_path('resolve/stylesheets')}"
 
     uri, deps = @env.resolve('foo.css', load_paths: [scripts], compat: false)
     refute uri
-    assert_includes deps, "file-digest:#{fixture_path('resolve/javascripts')}"
+    assert_includes deps, "file-digest://#{fixture_path('resolve/javascripts')}"
   end
 
   test "resolve uri identity with dependencies" do
@@ -168,7 +168,7 @@ class TestResolve < Sprockets::TestCase
     uri1 = "file://#{fixture_path('default/gallery.js')}?type=application/javascript"
     uri2, deps = @env.resolve(uri1, compat: false)
     assert_equal uri1, uri2
-    assert_includes deps, "file-digest:#{fixture_path('default/gallery.js')}"
+    assert_includes deps, "file-digest://#{fixture_path('default/gallery.js')}"
   end
 
   test "verify all logical paths" do

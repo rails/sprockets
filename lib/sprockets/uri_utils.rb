@@ -23,6 +23,51 @@ module Sprockets
   module URIUtils
     extend self
 
+    # Internal: Parse URI into component parts.
+    #
+    # uri - String uri
+    #
+    # Returns Array of components.
+    def split_uri(uri)
+      URI.split(uri)
+    end
+
+    # Internal: Join URI component parts into String.
+    #
+    # Returns String.
+    def join_uri(scheme, userinfo, host, port, registry, path, opaque, query, fragment)
+      URI::Generic.new(scheme, userinfo, host, port, registry, path, opaque, query, fragment).to_s
+    end
+
+    # Internal: Parse file: URI into component parts.
+    #
+    # uri - String uri
+    #
+    # Returns [scheme, host, path, query].
+    def split_file_uri(uri)
+      scheme, _, host, _, _, path, _, query, _ = URI.split(uri)
+
+      path = URI::Generic::DEFAULT_PARSER.unescape(path)
+      path.force_encoding(Encoding::UTF_8)
+
+      # Hack for parsing Windows "file:///C:/Users/IEUser" paths
+      path = path.gsub(/^\/([a-zA-Z]:)/, '\1')
+
+      [scheme, host, path, query]
+    end
+
+    # Internal: Join file: URI component parts into String.
+    #
+    # Returns String.
+    def join_file_uri(scheme, host, path, query)
+      str = "#{scheme}://"
+      str << host if host
+      path = "/#{path}" unless path.start_with?("/")
+      str << URI::Generic::DEFAULT_PARSER.escape(path)
+      str << "?#{query}" if query
+      str
+    end
+
     # Internal: Check if String is a valid Asset URI.
     #
     # str - Possible String asset URI.
@@ -42,22 +87,14 @@ module Sprockets
     #   parse("file:///tmp/js/application.coffee?type=application/javascript")
     #   # => "/tmp/js/application.coffee", {type: "application/javascript"}
     #
-    # str - String asset URI
+    # uri - String asset URI
     #
     # Returns String path and Hash of symbolized parameters.
-    def parse_asset_uri(str)
-      scheme, _, host, port, _, path, _, query, _ = URI.split(str)
+    def parse_asset_uri(uri)
+      scheme, _, path, query = split_file_uri(uri)
 
       unless scheme == 'file'
-        raise URI::InvalidURIError, "expected file:// scheme: #{str}"
-      end
-
-      path = URI::Generic::DEFAULT_PARSER.unescape(path)
-      path.force_encoding(Encoding::UTF_8)
-
-      # Hack for parsing Windows "file://C:/Users/IEUser" paths
-      if host && port == ""
-        path = "#{host}:#{path}"
+        raise URI::InvalidURIError, "expected file:// scheme: #{uri}"
       end
 
       params = query.to_s.split('&').reduce({}) do |h, p|
@@ -80,10 +117,7 @@ module Sprockets
     #
     # Returns String URI.
     def build_asset_uri(path, params = {})
-      query = encode_uri_query_params(params)
-      uri = "file://#{URI::Generic::DEFAULT_PARSER.escape(path)}"
-      uri << "?#{query}" if query
-      uri
+      join_file_uri("file", nil, path, encode_uri_query_params(params))
     end
 
     # Internal: Parse file-digest dependency URI.
@@ -93,18 +127,15 @@ module Sprockets
     #   parse("file-digest:/tmp/js/application.js")
     #   # => "/tmp/js/application.js"
     #
-    # str - String file-digest URI
+    # uri - String file-digest URI
     #
     # Returns String path.
-    def parse_file_digest_uri(str)
-      scheme, _, _, _, _, path, opaque, _, _ = URI.split(str)
+    def parse_file_digest_uri(uri)
+      scheme, _, path, _ = split_file_uri(uri)
 
       unless scheme == 'file-digest'
-        raise URI::InvalidURIError, "expected file-digest scheme: #{str}"
+        raise URI::InvalidURIError, "expected file-digest scheme: #{uri}"
       end
-
-      path = URI::Generic::DEFAULT_PARSER.unescape(path || opaque)
-      path.force_encoding(Encoding::UTF_8)
 
       path
     end
@@ -120,7 +151,7 @@ module Sprockets
     #
     # Returns String URI.
     def build_file_digest_uri(path)
-      "file-digest:#{URI::Generic::DEFAULT_PARSER.escape(path)}"
+      join_file_uri("file-digest", nil, path, nil)
     end
 
     # Internal: Build processor dependency URI.
