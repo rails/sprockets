@@ -210,9 +210,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        uri, deps = resolve(path, accept: @content_type, bundle: false)
-        @required << uri
-        @dependencies.merge(deps)
+        @required << resolve(path, accept: @content_type, bundle: false)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -286,8 +284,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        _, deps = resolve(path)
-        @dependencies.merge(deps)
+        resolve(path)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -302,9 +299,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        uri, deps = resolve(path)
-        @dependencies.merge(deps)
-        load(uri)
+        load(resolve(path))
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -316,9 +311,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        uri, deps = resolve(path, accept: @content_type, bundle: false)
-        @stubbed << uri
-        @dependencies.merge(deps)
+        @stubbed << resolve(path, accept: @content_type, bundle: false)
       end
 
       # Declares a linked dependency on the target asset.
@@ -330,10 +323,7 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        uri, deps = resolve(path)
-        asset = load(uri)
-        @dependencies.merge(deps)
-        @links << asset.uri
+        @links << load(resolve(path)).uri
       end
 
       # `link_directory` links all the files inside a single
@@ -427,7 +417,9 @@ module Sprockets
           @environment.fail_file_not_found(path, dirname: @dirname, load_path: @load_path, accept: options[:accept])
         end
 
-        result
+        uri, deps = result
+        @dependencies.merge(deps)
+        uri
       end
   end
 end
