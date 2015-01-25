@@ -10,13 +10,13 @@ module Sprockets
     # environment's load paths.
     #
     #     resolve("application.js")
-    #     # => "file:///path/to/app/javascripts/application.js?content_type=application/javascript"
+    #     # => "file:///path/to/app/javascripts/application.js?type=application/javascript"
     #
     # An accept content type can be given if the logical path doesn't have a
     # format extension.
     #
     #     resolve("application", accept: "application/javascript")
-    #     # => "file:///path/to/app/javascripts/application.coffee?content_type=application/javascript"
+    #     # => "file:///path/to/app/javascripts/application.coffee?type=application/javascript"
     #
     # The String Asset URI is returned or nil if no results are found.
     def resolve(path, options = {})
