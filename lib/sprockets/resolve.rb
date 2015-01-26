@@ -46,7 +46,6 @@ module Sprockets
         parsed_accept = parse_accept_options(mime_type, accept)
 
         if parsed_accept.empty?
-          # TODO: Double check no dependencies
           return nil, Set.new
         end
 

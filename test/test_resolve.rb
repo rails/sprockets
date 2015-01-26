@@ -91,6 +91,8 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal foo_js_uri, resolve('foo.js', accept: 'application/javascript')
     assert_equal foo_css_uri, resolve('foo.css', accept: 'text/css')
+    refute resolve('foo.js', accept: 'text/css')
+    refute resolve('foo.css', accept: 'application/javascript')
 
     assert_equal foo_js_uri, resolve('foo.js', accept: '*/*')
     assert_equal foo_css_uri, resolve('foo.css', accept: '*/*')
