@@ -92,7 +92,7 @@ class TestCustomProcessor < Sprockets::TestCase
     def render(context)
       data = @data
       data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.resolve($1)
+        path = context.resolve($1, compat: true)
         context.depend_on(path)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"
@@ -113,7 +113,7 @@ class TestCustomProcessor < Sprockets::TestCase
 
     @env.register_preprocessor 'text/css', :data_uris do |context, data|
       data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.resolve($1)
+        path = context.resolve($1, compat: true)
         context.depend_on(path)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"

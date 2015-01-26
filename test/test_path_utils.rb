@@ -36,6 +36,8 @@ class TestPathUtils < MiniTest::Test
       "server",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
+
+    assert_equal [], entries("/tmp/sprockets/missingdir")
   end
 
   def test_check_absolute_path
@@ -94,6 +96,13 @@ class TestPathUtils < MiniTest::Test
 
     subpath = File.expand_path("../fixtures/other/app/application.js", __FILE__)
     refute split_subpath(path, subpath)
+  end
+
+  def test_split_relative_subpath_from_root_path
+    path = File.expand_path("../fixtures/default", __FILE__)
+
+    assert_equal "application.js", split_relative_subpath(path, "../fixtures/default/application.js", __FILE__)
+    refute split_relative_subpath(path, "../fixtures/other/app/application.js", __FILE__)
   end
 
   def test_split_paths_root_from_base

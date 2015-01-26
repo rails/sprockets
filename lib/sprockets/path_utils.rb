@@ -99,6 +99,20 @@ module Sprockets
       end
     end
 
+    # Internal: Get relative path for root path and relative subpath given a
+    # base.
+    #
+    # path          - String path
+    # relative_path - String relative path
+    # base          - String absolute base
+    #
+    # Returns relative String path if subpath is a subpath of path, or nil if
+    # subpath is outside of path.
+    def split_relative_subpath(path, relative_path, base)
+      expanded_path = File.expand_path(relative_path, base)
+      split_subpath(path, expanded_path)
+    end
+
     # Internal: Detect root path and base for file in a set of paths.
     #
     # paths    - Array of String paths

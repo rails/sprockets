@@ -240,11 +240,8 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_data_url(path)
-        if asset = sprockets_environment.find_asset(path.value, accept_encoding: 'base64')
-          sprockets_dependencies << URIUtils.build_file_digest_uri(asset.filename)
-          url = "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
-          ::Sass::Script::String.new("url(" + url + ")")
-        end
+        url = sprockets_context.asset_data_uri(path.value)
+        ::Sass::Script::String.new("url(" + url + ")")
       end
 
       protected

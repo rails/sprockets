@@ -1,59 +1,25 @@
+require 'set'
+require 'sprockets/path_dependency_utils'
 require 'sprockets/uri_utils'
 
 module Sprockets
   module Resolve
-    include URIUtils
+    include PathDependencyUtils, URIUtils
 
-    # Public: Finds the absolute path for a given logical path by searching the
+    # Public: Find Asset URI for given a logical path by searching the
     # environment's load paths.
     #
     #     resolve("application.js")
-    #     # => "/path/to/app/javascripts/application.js"
+    #     # => "file:///path/to/app/javascripts/application.js?type=application/javascript"
     #
     # An accept content type can be given if the logical path doesn't have a
     # format extension.
     #
     #     resolve("application", accept: "application/javascript")
-    #     # => "/path/to/app/javascripts/application.js"
-    #
-    # The String path is returned or nil if no results are found.
-    def resolve(path, options = {})
-      logical_name, mime_type, _ = parse_path_extnames(path)
-
-      paths = options[:load_paths] || self.paths
-
-      if absolute_path?(path)
-        path = File.expand_path(path)
-        if paths_split(paths, path) && file?(path)
-          if accept = options[:accept]
-            find_best_q_match(accept, [path]) do |candidate, matcher|
-              match_mime_type?(mime_type || "application/octet-stream", matcher)
-            end
-          else
-            path
-          end
-        end
-      else
-        accepts = parse_accept_options(mime_type, options[:accept])
-        filename, _ = resolve_under_paths(paths, logical_name, mime_type, accepts)
-        filename
-      end
-    end
-
-    # Public: Find Asset URI for given a logical path by searching the
-    # environment's load paths.
-    #
-    #     locate("application.js")
-    #     # => "file:///path/to/app/javascripts/application.js?content_type=application/javascript"
-    #
-    # An accept content type can be given if the logical path doesn't have a
-    # format extension.
-    #
-    #     locate("application", accept: "application/javascript")
-    #     # => "file:///path/to/app/javascripts/application.coffee?content_type=application/javascript"
+    #     # => "file:///path/to/app/javascripts/application.coffee?type=application/javascript"
     #
     # The String Asset URI is returned or nil if no results are found.
-    def locate(path, options = {})
+    def resolve(path, options = {})
       path = path.to_s
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
@@ -64,7 +30,9 @@ module Sprockets
       paths = options[:load_paths] || self.paths
 
       if valid_asset_uri?(path)
-        return path
+        uri = path
+        filename, _ = parse_asset_uri(uri)
+        return uri, Set.new([build_file_digest_uri(filename)])
       elsif absolute_path?(path)
         path = File.expand_path(path)
         if paths_split(paths, path) && file?(path)
@@ -73,6 +41,7 @@ module Sprockets
           if !accept || _type
             filename = path
             type = _type
+            deps = Set.new
           end
         end
       else
@@ -80,33 +49,90 @@ module Sprockets
         parsed_accept = parse_accept_options(mime_type, accept)
 
         if parsed_accept.empty?
-          return
+          # TODO: Double check no dependencies
+          return nil, Set.new
         end
 
         transformed_accepts = expand_transform_accepts(parsed_accept)
-        filename, mime_type = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
+        filename, mime_type, deps = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
-      if filename
+      if filename && deps
         encoding = nil if encoding == 'identity'
-        build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+        deps << build_file_digest_uri(filename)
       end
+
+      return uri, (deps || Set.new)
+    end
+
+    # TODO: Merge into resolve
+    def resolve_relative(path, options = {})
+      options = options.dup
+
+      unless load_path = options.delete(:load_path)
+        raise ArgumentError, "missing keyword: load_path"
+      end
+
+      unless dirname = options.delete(:dirname)
+        raise ArgumentError, "missing keyword: dirname"
+      end
+
+      if path = split_relative_subpath(load_path, path, dirname)
+        uri, deps = resolve(path, options.merge(load_paths: [load_path], compat: false))
+      end
+
+      return uri, (deps || Set.new)
+    end
+
+    def resolve!(path, options = {})
+      if absolute_path?(path)
+        # TODO: Delegate to env.resolve
+        uri, deps = [build_asset_uri(path), [build_file_digest_uri(path)]]
+      elsif relative_path?(path)
+        # TODO: Route relative through resolve
+        uri, deps = resolve_relative(path, options.merge(compat: false))
+      else
+        uri, deps = resolve(path, options.merge(compat: false))
+      end
+
+      unless uri
+        accept = options[:accept]
+        if relative_path?(path)
+          dirname, load_path = options[:dirname], options[:load_path]
+          if path = split_relative_subpath(load_path, path, dirname)
+            message = "couldn't find file '#{path}' under '#{load_path}'"
+            message << " with type '#{accept}'" if accept
+            raise FileNotFound, message
+          else
+            raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
+          end
+        else
+          message = "couldn't find file '#{path}'"
+          message << " with type '#{accept}'" if accept
+          raise FileNotFound, message
+        end
+      end
+
+      return uri, deps
     end
 
     protected
       def resolve_under_paths(paths, logical_name, mime_type, accepts)
         logical_basename = File.basename(logical_name)
 
+        all_deps = Set.new
         paths.each do |load_path|
-          candidates = path_matches(load_path, logical_name, logical_basename)
+          candidates, deps = path_matches(load_path, logical_name, logical_basename)
+          all_deps.merge(deps)
           candidate = find_best_q_match(accepts, candidates) do |c, matcher|
             match_mime_type?(c[1] || "application/octet-stream", matcher)
           end
-          return candidate if candidate
+          return candidate + [all_deps] if candidate
         end
 
-        nil
+        return nil, nil, all_deps
       end
 
       def parse_accept_options(mime_type, types)
@@ -135,24 +161,40 @@ module Sprockets
       end
 
       def path_matches(load_path, logical_name, logical_basename)
-        candidates = []
+        candidates, deps = [], Set.new
         dirname = File.dirname(File.join(load_path, logical_name))
-        dirname_matches(dirname, logical_basename) { |candidate| candidates << candidate }
-        resolve_alternates(load_path, logical_name) { |fn| candidates << [fn, parse_path_extnames(fn)[1]] }
-        dirname_matches(File.join(load_path, logical_name), "index") { |candidate| candidates << candidate }
-        candidates.select { |fn, _| file?(fn) }
+
+        result = dirname_matches(dirname, logical_basename)
+        candidates.concat(result[0])
+        deps.merge(result[1])
+
+        result = resolve_alternates(load_path, logical_name)
+        result[0].each do |fn|
+          candidates << [fn, parse_path_extnames(fn)[1]]
+        end
+        deps.merge(result[1])
+
+        result = dirname_matches(File.join(load_path, logical_name), "index")
+        candidates.concat(result[0])
+        deps.merge(result[1])
+
+        return candidates.select { |fn, _| file?(fn) }, deps
       end
 
       def dirname_matches(dirname, basename)
-        self.entries(dirname).each do |entry|
+        candidates = []
+        entries, deps = self.entries_with_dependencies(dirname)
+        entries.each do |entry|
           name, type, _ = parse_path_extnames(entry)
           if basename == name
-            yield [File.join(dirname, entry), type]
+            candidates << [File.join(dirname, entry), type]
           end
         end
+        return candidates, deps
       end
 
       def resolve_alternates(load_path, logical_name)
+        return [], Set.new
       end
 
       # Internal: Returns the name, mime type and `Array` of engine extensions.

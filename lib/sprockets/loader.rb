@@ -139,9 +139,12 @@ module Sprockets
 
         # Deprecated: Avoid tracking Asset mtime
         asset[:mtime] = metadata[:dependencies].map { |u|
-          u.start_with?("file-digest:") ?
-            stat(parse_file_digest_uri(u)).mtime.to_i :
+          if u.start_with?("file-digest:")
+            s = self.stat(parse_file_digest_uri(u))
+            s ? s.mtime.to_i : 0
+          else
             0
+          end
         }.max
 
         cache.set(['asset-uri', asset[:uri]], asset, true)

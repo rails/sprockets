@@ -210,7 +210,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << locate(path, accept: @content_type, bundle: false)
+        @required << resolve(path, accept: @content_type, bundle: false)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -240,21 +240,11 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "require_directory argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
-
-          @environment.stat_directory(root).each do |subpath, stat|
-            if subpath == @filename
-              next
-            elsif stat.directory?
-              next
-            elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
-              @required << uri
-            end
-          end
+          require_paths(*@environment.stat_directory_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "require_directory argument must be a relative path"
@@ -270,21 +260,11 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "require_tree argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
-
-          @environment.stat_sorted_tree(root).each do |subpath, stat|
-            if subpath == @filename
-              next
-            elsif stat.directory?
-              @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif uri = @environment.locate(subpath, accept: @content_type, bundle: false)
-              @required << uri
-            end
-          end
+          require_paths(*@environment.stat_sorted_tree_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "require_tree argument must be a relative path"
@@ -304,7 +284,7 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        @dependencies << @environment.build_file_digest_uri(resolve(path))
+        resolve(path)
       end
 
       # Allows you to state a dependency on an asset without including
@@ -319,9 +299,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        if asset = @environment.load(locate(path))
-          @dependencies.merge(asset.metadata[:dependencies])
-        end
+        load(resolve(path))
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -333,7 +311,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << locate(path, accept: @content_type, bundle: false)
+        @stubbed << resolve(path, accept: @content_type, bundle: false)
       end
 
       # Declares a linked dependency on the target asset.
@@ -345,10 +323,7 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        if asset = @environment.load(locate(path))
-          @dependencies.merge(asset.metadata[:dependencies])
-          @links << asset.uri
-        end
+        @links << load(resolve(path)).uri
       end
 
       # `link_directory` links all the files inside a single
@@ -361,23 +336,11 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "link_directory argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
-
-          @environment.stat_directory(root).each do |subpath, stat|
-            if subpath == @filename
-              next
-            elsif stat.directory?
-              next
-            elsif uri = @environment.locate(subpath)
-              asset = @environment.load(uri)
-              @dependencies.merge(asset.metadata[:dependencies])
-              @links << asset.uri
-            end
-          end
+          link_paths(*@environment.stat_directory_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "link_directory argument must be a relative path"
@@ -393,23 +356,11 @@ module Sprockets
         if @environment.relative_path?(path)
           root = expand_relative_path(path)
 
-          unless (stats = @environment.stat(root)) && stats.directory?
+          unless (root_stat = @environment.stat(root)) && root_stat.directory?
             raise ArgumentError, "link_tree argument must be a directory"
           end
 
-          @dependencies << @environment.build_file_digest_uri(root)
-
-          @environment.stat_sorted_tree(root).each do |subpath, stat|
-            if subpath == @filename
-              next
-            elsif stat.directory?
-              @dependencies << @environment.build_file_digest_uri(subpath)
-            elsif uri = @environment.locate(subpath)
-              asset = @environment.load(uri)
-              @dependencies.merge(asset.metadata[:dependencies])
-              @links << asset.uri
-            end
-          end
+          link_paths(*@environment.stat_sorted_tree_with_dependencies(root))
         else
           # The path must be relative and start with a `./`.
           raise ArgumentError, "link_tree argument must be a relative path"
@@ -417,48 +368,47 @@ module Sprockets
       end
 
     private
+      def require_paths(paths, deps)
+        resolve_paths(paths, deps, accept: @content_type, bundle: false) do |uri|
+          @required << uri
+        end
+      end
+
+      def link_paths(paths, deps)
+        resolve_paths(paths, deps) do |uri|
+          @links << load(uri).uri
+        end
+      end
+
+      def resolve_paths(paths, deps, options = {})
+        @dependencies.merge(deps)
+        paths.each do |subpath, stat|
+          next if subpath == @filename || stat.directory?
+          uri, deps = @environment.resolve(subpath, options.merge(compat: false))
+          @dependencies.merge(deps)
+          yield uri if uri
+        end
+      end
+
       def expand_relative_path(path)
         File.expand_path(path, @dirname)
       end
 
-      def locate(path, options = {})
-        _resolve(:locate, path, options)
+      def load(uri)
+        asset = @environment.load(uri)
+        @dependencies.merge(asset.metadata[:dependencies])
+        asset
       end
 
       def resolve(path, options = {})
-        _resolve(:resolve, path, options)
-      end
-
-      # TODO: Cleanup relative resolver logic shared between context.
-      def _resolve(method, path, options = {})
+        # Prevent absolute paths in directives
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file: #{path}"
-        elsif @environment.relative_path?(path)
-          path = expand_relative_path(path)
-          if logical_path = @environment.split_subpath(@load_path, path)
-            if filename = @environment.send(method, logical_path, options.merge(load_paths: [@load_path]))
-              filename
-            else
-              accept = options[:accept]
-              message = "couldn't find file '#{logical_path}' under '#{@load_path}'"
-              message << " with type '#{accept}'" if accept
-              raise FileNotFound, message
-            end
-          else
-            raise FileOutsidePaths, "#{path} isn't under path: #{@load_path}"
-          end
-        else
-          filename = @environment.send(method, path, options)
         end
 
-        if filename
-          filename
-        else
-          accept = options[:accept]
-          message = "couldn't find file '#{path}'"
-          message << " with type '#{accept}'" if accept
-          raise FileNotFound, message
-        end
+        uri, deps = @environment.resolve!(path, options.merge(load_path: @load_path, dirname: @dirname))
+        @dependencies.merge(deps)
+        uri
       end
   end
 end
