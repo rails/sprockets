@@ -56,9 +56,6 @@ module Sprockets
 
       if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
         processor = klass
-        uri = build_processor_uri(:engine, processor, extname: ext)
-        register_processor_dependency_uri(uri, processor)
-
         self.config = hash_reassoc(config, :engines) do |engines|
           engines.merge(ext => klass)
         end
@@ -69,9 +66,6 @@ module Sprockets
         end
       else
         processor = LegacyTiltProcessor.new(klass)
-        uri = build_processor_uri(:engine, processor, extname: ext)
-        register_processor_dependency_uri(uri, processor)
-
         self.config = hash_reassoc(config, :engines) do |engines|
           engines.merge(ext => processor)
         end

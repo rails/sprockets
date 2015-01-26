@@ -97,12 +97,7 @@ module Sprockets
         raise URI::InvalidURIError, "expected file:// scheme: #{uri}"
       end
 
-      params = query.to_s.split('&').reduce({}) do |h, p|
-        k, v = p.split('=', 2)
-        h.merge(k.to_sym => v || true)
-      end
-
-      return path, params
+      return path, parse_uri_query_params(query)
     end
 
     # Internal: Build Asset URI.
@@ -154,29 +149,6 @@ module Sprockets
       join_file_uri("file-digest", nil, path, nil)
     end
 
-    # Internal: Build processor dependency URI.
-    #
-    #
-    # type - String or Symbol processor type (preprocessor, postprocessor, ...)
-    # processor - Processor callable object
-    # params - Hash of associated metadata
-    #
-    # Returns String URI.
-    def build_processor_uri(type, processor = nil, params = {})
-      if processor
-        if processor.respond_to?(:name)
-          params[:name] = processor.name.to_s
-        elsif processor && processor.class.respond_to?(:name)
-          params[:class_name] = processor.class.name.to_s
-        end
-      end
-
-      query = encode_uri_query_params(params)
-      uri = "processor:#{type}"
-      uri << "?#{query}" if query
-      uri
-    end
-
     # Internal: Serialize hash of params into query string.
     #
     # params - Hash of params to serialize
@@ -200,6 +172,18 @@ module Sprockets
       end
 
       "#{query.join('&')}" if query.any?
+    end
+
+    # Internal: Parse query string into hash of params
+    #
+    # query - String query string
+    #
+    # Return Hash of params.
+    def parse_uri_query_params(query)
+      query.to_s.split('&').reduce({}) do |h, p|
+        k, v = p.split('=', 2)
+        h.merge(k.to_sym => v || true)
+      end
     end
   end
 end

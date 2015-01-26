@@ -23,7 +23,7 @@ module Sprockets
       required.subtract(stubbed)
       assets = required.map { |uri| env.load(uri) }
 
-      dependencies = Set.new
+      dependencies = Set.new(input[:metadata][:dependencies])
       (required + stubbed).each do |uri|
         dependencies.merge(env.load(uri).metadata[:dependencies])
       end

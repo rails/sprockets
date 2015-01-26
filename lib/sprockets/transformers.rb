@@ -43,9 +43,6 @@ module Sprockets
     #
     # Returns nothing.
     def register_transformer(from, to, proc)
-      uri = build_processor_uri(:transformer, proc, from: from, to: to)
-      register_processor_dependency_uri(uri, proc)
-
       self.config = hash_reassoc(config, :transformers, from) do |transformers|
         transformers.merge(to => proc)
       end

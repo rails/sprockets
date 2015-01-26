@@ -160,13 +160,4 @@ class TestURIUtils < MiniTest::Test
       parse_file_digest_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
     end
   end
-
-  def test_build_processor_uri
-    assert_equal "processor:bundle",
-      build_processor_uri(:bundle)
-    assert_equal "processor:preprocessor?type=application/javascript&position=1&class_name=Proc",
-      build_processor_uri(:preprocessor, proc {}, type: 'application/javascript', position: 1)
-    assert_equal "processor:preprocessor?type=text/css&name=String",
-      build_processor_uri(:preprocessor, String, type: 'text/css')
-  end
 end

@@ -33,8 +33,8 @@ module Sprockets
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             digest = digest(resolve_dependencies(paths))
-            if id_uri = cache.get(['asset-uri-digest', uri, digest], true)
-              cache.get(['asset-uri', id_uri], true)
+            if id_uri = cache.get(['asset-uri-digest', VERSION, uri, digest], true)
+              cache.get(['asset-uri', VERSION, id_uri], true)
             end
           else
             load_asset_by_uri(uri, filename, params)
@@ -85,15 +85,16 @@ module Sprockets
           logical_path += mime_types[type][:extensions].first
         end
 
-        processors = processors_for(file_type, engine_extnames, params)
+        if type != file_type && !transformers[file_type][type]
+          raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
+        end
 
-        processor_dependencies = Set.new(processors.map { |processor|
-          config[:inverted_processor_dependency_uris][processor]
-        }.compact)
-
+        skip_bundle = params[:skip_bundle]
+        processors = processors_for(type, file_type, engine_extnames, skip_bundle)
         processors = unwrap_processors(processors)
 
-        dependencies = self.dependencies + processor_dependencies
+        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+        dependencies = self.dependencies + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
@@ -147,14 +148,14 @@ module Sprockets
           end
         }.max
 
-        cache.set(['asset-uri', asset[:uri]], asset, true)
-        cache.set(['asset-uri-digest', uri, asset[:dependencies_digest]], asset[:uri], true)
+        cache.set(['asset-uri', VERSION, asset[:uri]], asset, true)
+        cache.set(['asset-uri-digest', VERSION, uri, asset[:dependencies_digest]], asset[:uri], true)
 
         asset
       end
 
       def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
-        key = ['asset-uri-cache-dependencies', uri, file_digest(filename)]
+        key = ['asset-uri-cache-dependencies', VERSION, uri, file_digest(filename)]
         history = cache.get(key) || []
 
         history.each_with_index do |deps, index|
@@ -168,37 +169,6 @@ module Sprockets
         deps = asset[:metadata][:dependencies]
         cache.set(key, history.unshift(deps).take(limit))
         asset
-      end
-
-      def processors_for(file_type, engine_extnames, params)
-        type = params[:type]
-
-        processors = []
-
-        bundled_processors = params[:skip_bundle] ? [] : config[:bundle_processors][type]
-
-        if bundled_processors.any?
-          processors += bundled_processors
-        else
-          processors += config[:postprocessors][type]
-
-          if type != file_type
-            if processor = transformers[file_type][type]
-              processors += [processor]
-            else
-              raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
-            end
-          end
-
-          processors += engine_extnames.map { |ext| engines[ext] }
-          processors += config[:preprocessors][file_type]
-        end
-
-        if processors.any? || mime_type_charset_detecter(type)
-          processors += [FileReader]
-        end
-
-        processors
       end
   end
 end

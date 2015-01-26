@@ -107,6 +107,33 @@ class TestCaching < Sprockets::TestCase
     end
   end
 
+  test "asset ids are different if preprocessor is added" do
+    assert asset1 = @env1['gallery.js']
+
+    @env2.register_preprocessor 'application/javascript', MockProcessor.new('1.0')
+    assert asset2 = @env2['gallery.js']
+
+    refute_equal asset1.id, asset2.id
+  end
+
+  test "asset ids are different if postprocessor is added" do
+    assert asset1 = @env1['gallery.js']
+
+    @env2.register_postprocessor 'application/javascript', MockProcessor.new('1.0')
+    assert asset2 = @env2['gallery.js']
+
+    refute_equal asset1.id, asset2.id
+  end
+
+  test "asset ids are different if bundle processor is added" do
+    assert asset1 = @env1['gallery.js']
+
+    @env2.register_bundle_processor 'application/javascript', MockProcessor.new('1.0')
+    assert asset2 = @env2['gallery.js']
+
+    refute_equal asset1.id, asset2.id
+  end
+
   test "asset ids are different if processor cache key changes" do
     @env1.register_preprocessor 'application/javascript', MockProcessor.new('1.0')
     assert asset1 = @env1['gallery.js']
