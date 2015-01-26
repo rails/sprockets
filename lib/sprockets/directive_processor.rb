@@ -75,17 +75,12 @@ module Sprockets
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
-
-      data = input[:data]
-      result = process_source(data)
-
-      data, directives = result.values_at(:data, :directives)
-
       @required     = Set.new(input[:metadata][:required])
       @stubbed      = Set.new(input[:metadata][:stubbed])
       @links        = Set.new(input[:metadata][:links])
       @dependencies = Set.new(input[:metadata][:dependencies])
 
+      data, directives = process_source(input[:data])
       process_directives(directives)
 
       { data: data,
@@ -129,7 +124,7 @@ module Sprockets
         # Ensure body ends in a new line
         data << "\n" if data.length > 0 && data[-1] != "\n"
 
-        { data: data, directives: directives }
+        return data, directives
       end
 
       # Returns an Array of directive structures. Each structure
