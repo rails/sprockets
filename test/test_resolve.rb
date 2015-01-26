@@ -66,6 +66,10 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal "file://#{fixture_path('default/blank.gif')}?type=image/gif",
       resolve(fixture_path('default/blank.gif'))
+    assert_equal "file://#{fixture_path('default/hello.txt')}?type=text/plain",
+      resolve(fixture_path('default/hello.txt'))
+    assert_equal "file://#{fixture_path('default/README.md')}",
+      resolve(fixture_path('default/README.md'))
 
     refute resolve(fixture_path('asset/POW.png'))
     refute resolve(fixture_path('default/missing'))
