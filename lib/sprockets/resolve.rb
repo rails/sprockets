@@ -77,10 +77,7 @@ module Sprockets
     end
 
     def resolve!(path, options = {})
-      if absolute_path?(path)
-        # TODO: Delegate to env.resolve
-        uri, deps = [build_asset_uri(path), [build_file_digest_uri(path)]]
-      elsif relative_path?(path)
+      if relative_path?(path)
         # TODO: Route relative through resolve
         uri, deps = resolve_relative(path, options.merge(compat: false))
       else
