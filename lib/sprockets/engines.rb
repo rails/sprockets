@@ -75,6 +75,10 @@ module Sprockets
           end
         end
       end
+
+      self.config = hash_reassoc(config, :precomputed_extnames) do
+        compute_extname_map
+      end
     end
   end
 end

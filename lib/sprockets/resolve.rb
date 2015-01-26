@@ -185,26 +185,20 @@ module Sprockets
       #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)
-        mime_type       = nil
-        engine_extnames = []
-        len = path.length
+        result = nil
 
-        path_extnames(path).reverse_each do |extname|
-          if engines.key?(extname)
-            mime_type = engine_mime_types[extname]
-            engine_extnames.unshift(extname)
-            len -= extname.length
-          elsif mime_exts.key?(extname)
-            mime_type = mime_exts[extname]
-            len -= extname.length
-            break
-          else
+        extnames = path_extnames(path)
+        extnames.each_with_index.reverse_each do |extname, index|
+          key = extnames[index..-1].join
+          if r = config[:precomputed_extnames][key]
+            name = path[0...-key.length]
+            result = [name, r[:type], r[:engines]]
+          elsif result
             break
           end
         end
 
-        name = path[0, len]
-        return [name, mime_type, engine_extnames]
+        result || [path, nil, []]
       end
   end
 end
