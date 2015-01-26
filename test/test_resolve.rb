@@ -64,7 +64,10 @@ class TestResolve < Sprockets::TestCase
     assert_equal gallery_js_uri, resolve(fixture_path('default/app/../gallery.js'))
     assert_equal gallery_js_uri, resolve(fixture_path('default/gallery.js'), accept: 'application/javascript')
 
-    refute resolve(fixture_path('default/asset/POW.png'))
+    assert_equal "file://#{fixture_path('default/blank.gif')}?type=image/gif",
+      resolve(fixture_path('default/blank.gif'))
+
+    refute resolve(fixture_path('asset/POW.png'))
     refute resolve(fixture_path('default/missing'))
     refute resolve(fixture_path('default/gallery.js'), accept: 'text/css')
   end
