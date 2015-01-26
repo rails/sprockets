@@ -30,7 +30,7 @@ module Sprockets
       elsif absolute_path?(path)
         resolve_absolute_path(paths, path, accept, skip_bundle)
       elsif relative_path?(path)
-        resolve_relative_path([options[:load_path]], path, options[:dirname], accept, skip_bundle)
+        resolve_relative_path(paths, path, options[:base_path], accept, skip_bundle)
       else
         resolve_logical_path(paths, path, accept, skip_bundle)
       end
@@ -40,9 +40,6 @@ module Sprockets
       uri, deps = resolve(path, options.merge(compat: false))
 
       unless uri
-        if relative_path?(path) && !split_relative_subpath(options[:load_path], path, options[:dirname])
-          raise FileOutsidePaths, "#{path} isn't under path: #{options[:load_path]}"
-        end
         message = "couldn't find file '#{path}'"
         message << " with type '#{options[:accept]}'" if options[:accept]
         raise FileNotFound, message
@@ -76,8 +73,10 @@ module Sprockets
       end
 
       def resolve_relative_path(paths, path, dirname, accept, skip_bundle)
-        if path = split_relative_subpath(paths.first, path, dirname)
-          resolve_logical_path(paths, path, accept, skip_bundle)
+        filename = File.expand_path(path, dirname)
+        load_path, _ = paths_split(paths, dirname)
+        if load_path && logical_path = split_subpath(load_path, filename)
+          resolve_logical_path([load_path], logical_path, accept, skip_bundle)
         else
           [nil, Set.new]
         end

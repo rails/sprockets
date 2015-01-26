@@ -86,6 +86,21 @@ class TestResolve < Sprockets::TestCase
     end
   end
 
+  test "resolve relative" do
+    @env.append_path(fixture_path('default'))
+
+    gallery_js_uri = "file://#{fixture_path('default/gallery.js')}?type=application/javascript"
+
+    assert_equal gallery_js_uri, resolve("./gallery.js", base_path: fixture_path('default'))
+    assert_equal gallery_js_uri, resolve("../gallery.js", base_path: fixture_path('default/app'))
+    assert_equal gallery_js_uri, resolve("./../gallery.js", base_path: fixture_path('default/app'))
+    assert_equal gallery_js_uri, resolve("../../gallery.js", base_path: fixture_path('default/vendor/gems'))
+
+    refute resolve("./missing.js", base_path: fixture_path('default'))
+    refute resolve("../asset/application.js", base_path: fixture_path('default'))
+    refute resolve("../default/gallery.js", base_path: fixture_path('app'))
+  end
+
   test "resolve extension before accept type" do
     @env.append_path(fixture_path('resolve/javascripts'))
     @env.append_path(fixture_path('resolve/stylesheets'))

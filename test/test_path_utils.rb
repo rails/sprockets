@@ -94,15 +94,11 @@ class TestPathUtils < MiniTest::Test
     subpath = File.expand_path("../fixtures/default/app/application.js", __FILE__)
     assert_equal "app/application.js", split_subpath(path, subpath)
 
+    subpath = File.expand_path("../fixtures/default", __FILE__)
+    assert_equal "", split_subpath(path, subpath)
+
     subpath = File.expand_path("../fixtures/other/app/application.js", __FILE__)
     refute split_subpath(path, subpath)
-  end
-
-  def test_split_relative_subpath_from_root_path
-    path = File.expand_path("../fixtures/default", __FILE__)
-
-    assert_equal "application.js", split_relative_subpath(path, "../fixtures/default/application.js", __FILE__)
-    refute split_relative_subpath(path, "../fixtures/other/app/application.js", __FILE__)
   end
 
   def test_split_paths_root_from_base
@@ -114,6 +110,10 @@ class TestPathUtils < MiniTest::Test
 
     filename = File.expand_path("../fixtures/default/app/application.js", __FILE__)
     expected = [paths.first, "app/application.js"]
+    assert_equal expected, paths_split(paths, filename)
+
+    filename = File.expand_path("../fixtures/default", __FILE__)
+    expected = [paths.first, ""]
     assert_equal expected, paths_split(paths, filename)
 
     filename = File.expand_path("../fixtures/other/app/application.js", __FILE__)

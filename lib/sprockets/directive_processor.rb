@@ -71,7 +71,6 @@ module Sprockets
     def _call(input)
       @environment  = input[:environment]
       @uri          = input[:uri]
-      @load_path    = input[:load_path]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
       @content_type = input[:content_type]
@@ -373,7 +372,7 @@ module Sprockets
           raise FileOutsidePaths, "can't require absolute file: #{path}"
         end
 
-        uri, deps = @environment.resolve!(path, options.merge(load_path: @load_path, dirname: @dirname))
+        uri, deps = @environment.resolve!(path, options.merge(base_path: @dirname))
         @dependencies.merge(deps)
         uri
       end

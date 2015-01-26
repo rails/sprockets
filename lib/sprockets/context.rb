@@ -85,7 +85,7 @@ module Sprockets
     #
     # Returns an Asset URI String.
     def resolve(path, options = {})
-      uri, deps = environment.resolve!(path, options.merge(load_path: @load_path, dirname: @dirname))
+      uri, deps = environment.resolve!(path, options.merge(base_path: @dirname))
       @dependencies.merge(deps)
       uri
     end
