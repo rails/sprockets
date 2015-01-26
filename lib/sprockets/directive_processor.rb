@@ -232,18 +232,8 @@ module Sprockets
       #     //= require_directory "./javascripts"
       #
       def process_require_directory_directive(path = ".")
-        if @environment.relative_path?(path)
-          root = expand_relative_path(path)
-
-          unless (root_stat = @environment.stat(root)) && root_stat.directory?
-            raise ArgumentError, "require_directory argument must be a directory"
-          end
-
-          require_paths(*@environment.stat_directory_with_dependencies(root))
-        else
-          # The path must be relative and start with a `./`.
-          raise ArgumentError, "require_directory argument must be a relative path"
-        end
+        path = expand_relative_dirname(:require_directory, path)
+        require_paths(*@environment.stat_directory_with_dependencies(path))
       end
 
       # `require_tree` requires all the nested files in a directory.
@@ -252,18 +242,8 @@ module Sprockets
       #     //= require_tree "./public"
       #
       def process_require_tree_directive(path = ".")
-        if @environment.relative_path?(path)
-          root = expand_relative_path(path)
-
-          unless (root_stat = @environment.stat(root)) && root_stat.directory?
-            raise ArgumentError, "require_tree argument must be a directory"
-          end
-
-          require_paths(*@environment.stat_sorted_tree_with_dependencies(root))
-        else
-          # The path must be relative and start with a `./`.
-          raise ArgumentError, "require_tree argument must be a relative path"
-        end
+        path = expand_relative_dirname(:require_tree, path)
+        require_paths(*@environment.stat_sorted_tree_with_dependencies(path))
       end
 
       # Allows you to state a dependency on a file without
@@ -328,18 +308,8 @@ module Sprockets
       #     //= link_directory "./fonts"
       #
       def process_link_directory_directive(path = ".")
-        if @environment.relative_path?(path)
-          root = expand_relative_path(path)
-
-          unless (root_stat = @environment.stat(root)) && root_stat.directory?
-            raise ArgumentError, "link_directory argument must be a directory"
-          end
-
-          link_paths(*@environment.stat_directory_with_dependencies(root))
-        else
-          # The path must be relative and start with a `./`.
-          raise ArgumentError, "link_directory argument must be a relative path"
-        end
+        path = expand_relative_dirname(:link_directory, path)
+        link_paths(*@environment.stat_directory_with_dependencies(path))
       end
 
       # `link_tree` links all the nested files in a directory.
@@ -348,18 +318,8 @@ module Sprockets
       #     //= link_tree "./images"
       #
       def process_link_tree_directive(path = ".")
-        if @environment.relative_path?(path)
-          root = expand_relative_path(path)
-
-          unless (root_stat = @environment.stat(root)) && root_stat.directory?
-            raise ArgumentError, "link_tree argument must be a directory"
-          end
-
-          link_paths(*@environment.stat_sorted_tree_with_dependencies(root))
-        else
-          # The path must be relative and start with a `./`.
-          raise ArgumentError, "link_tree argument must be a relative path"
-        end
+        path = expand_relative_dirname(:link_tree, path)
+        link_paths(*@environment.stat_sorted_tree_with_dependencies(path))
       end
 
     private
@@ -385,8 +345,20 @@ module Sprockets
         end
       end
 
-      def expand_relative_path(path)
-        File.expand_path(path, @dirname)
+      def expand_relative_dirname(directive, path)
+        if @environment.relative_path?(path)
+          path = File.expand_path(path, @dirname)
+          stat = @environment.stat(path)
+
+          if stat && stat.directory?
+            path
+          else
+            raise ArgumentError, "#{directive} argument must be a directory"
+          end
+        else
+          # The path must be relative and start with a `./`.
+          raise ArgumentError, "#{directive} argument must be a relative path"
+        end
       end
 
       def load(uri)
