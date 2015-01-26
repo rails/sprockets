@@ -53,7 +53,6 @@ Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
 Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript'
 
 require 'nokogiri'
-Sprockets.register_mime_type 'application/ruby+builder', extensions: ['.builder']
 
 HtmlBuilderProcessor = proc { |input|
   instance_eval <<-EOS
@@ -63,7 +62,8 @@ HtmlBuilderProcessor = proc { |input|
     builder.to_html
   EOS
 }
-Sprockets.register_engine '.builder', HtmlBuilderProcessor, mime_type: 'text/html'
+Sprockets.register_mime_type 'application/html+builder', extensions: ['.html.builder']
+Sprockets.register_transformer 'application/html+builder', 'text/html', HtmlBuilderProcessor
 
 XmlBuilderProcessor = proc { |input|
   instance_eval <<-EOS
@@ -73,7 +73,8 @@ XmlBuilderProcessor = proc { |input|
     builder.to_xml
   EOS
 }
-# Sprockets.register_engine '.builder', XmlBuilderProcessor, mime_type: 'application/xml'
+Sprockets.register_mime_type 'application/xml+builder', extensions: ['.xml.builder']
+Sprockets.register_transformer 'application/xml+builder', 'application/xml', XmlBuilderProcessor
 
 require 'sprockets/jst_processor'
 Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'

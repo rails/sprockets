@@ -272,6 +272,7 @@ $app.run(function($templateCache) {
   end
 
   test "find html builder asset" do
+    skip
     assert asset = @env.find_asset("nokogiri-html.html")
     assert_equal "text/html", asset.content_type
     assert_equal <<-HTML, asset.to_s
@@ -280,21 +281,22 @@ $app.run(function($templateCache) {
     HTML
   end
 
-#   test "find xml builder asset" do
-#     assert asset = @env.find_asset("nokogiri-xml.xml")
-#     assert_equal "application/xml", asset.content_type
-#     assert_equal <<-XML, asset.to_s
-# <?xml version="1.0"?>
-# <root>
-#   <products>
-#     <widget>
-#       <id>10</id>
-#       <name>Awesome widget</name>
-#     </widget>
-#   </products>
-# </root>
-#     XML
-#   end
+  test "find xml builder asset" do
+    skip
+    assert asset = @env.find_asset("nokogiri-xml.xml")
+    assert_equal "application/xml", asset.content_type
+    assert_equal <<-XML, asset.to_s
+<?xml version="1.0"?>
+<root>
+  <products>
+    <widget>
+      <id>10</id>
+      <name>Awesome widget</name>
+    </widget>
+  </products>
+</root>
+    XML
+  end
 
   test "svg transformer for extension" do
     assert asset = @env.find_asset("logo.svg")
