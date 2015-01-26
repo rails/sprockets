@@ -50,8 +50,8 @@ class TestContext < Sprockets::TestCase
 
   test "resolve with content type" do
     assert_equal [
-      fixture_path("context/foo.js"),
-      fixture_path("context/foo.js")
+      "file://#{fixture_path("context/foo.js")}?type=application/javascript",
+      "file://#{fixture_path("context/foo.js")}?type=application/javascript"
     ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end
@@ -67,7 +67,8 @@ class TestCustomProcessor < Sprockets::TestCase
     env = input[:environment]
     manifest = YAML.load(input[:data])
     paths = manifest['require'].map do |logical_path|
-      env.locate(env.resolve(logical_path))
+      uri, _ = env.resolve(logical_path)
+      uri
     end
     { data: "", required: paths }
   end
@@ -83,7 +84,8 @@ class TestCustomProcessor < Sprockets::TestCase
     env = input[:environment]
     data = input[:data]
     data.gsub(/url\(\"(.+?)\"\)/) do
-      path = env.resolve($1)
+      uri, _ = env.resolve($1)
+      path, _ = env.parse_asset_uri(uri)
       data = Base64.encode64(File.open(path, "rb") { |f| f.read })
       "url(data:image/png;base64,#{data})"
     end
@@ -103,7 +105,8 @@ class TestCustomProcessor < Sprockets::TestCase
     @env.register_preprocessor 'text/css' do |input|
       env = input[:environment]
       input[:data].gsub(/url\(\"(.+?)\"\)/) do
-        path = env.resolve($1)
+        uri, _ = env.resolve($1)
+        path, _ = env.parse_asset_uri(uri)
         data = Base64.encode64(File.open(path, "rb") { |f| f.read })
         "url(data:image/png;base64,#{data})"
       end

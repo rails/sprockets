@@ -56,13 +56,6 @@ module Sprockets
         if_none_match = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
       end
 
-      if !if_match && !if_none_match && env['HTTP_ACCEPT_ENCODING']
-        # Accept-Encoding negotiation is only enabled for non-fingerprinted
-        # assets. Avoids the "Apache ETag gzip" bug. Just Google it.
-        # https://issues.apache.org/bugzilla/show_bug.cgi?id=39727
-        options[:accept_encoding] = env['HTTP_ACCEPT_ENCODING']
-      end
-
       asset = find_asset(path, options)
 
       if asset.nil?
@@ -244,11 +237,6 @@ module Sprockets
 
       def headers(env, asset, length)
         headers = {}
-
-        # Set content encoding
-        if asset.encoding
-          headers["Content-Encoding"] = asset.encoding
-        end
 
         # Set content length header
         headers["Content-Length"] = length.to_s

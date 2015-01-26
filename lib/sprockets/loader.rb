@@ -2,6 +2,7 @@ require 'sprockets/asset'
 require 'sprockets/digest_utils'
 require 'sprockets/engines'
 require 'sprockets/errors'
+require 'sprockets/file_reader'
 require 'sprockets/mime'
 require 'sprockets/path_utils'
 require 'sprockets/processing'
@@ -32,8 +33,8 @@ module Sprockets
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             digest = digest(resolve_dependencies(paths))
-            if id_uri = cache.get(['asset-uri-digest', uri, digest], true)
-              cache.get(['asset-uri', id_uri], true)
+            if id_uri = cache.get(['asset-uri-digest', VERSION, uri, digest], true)
+              cache.get(['asset-uri', VERSION, id_uri], true)
             end
           else
             load_asset_by_uri(uri, filename, params)
@@ -84,21 +85,19 @@ module Sprockets
           logical_path += mime_types[type][:extensions].first
         end
 
-        processors = processors_for(file_type, engine_extnames, params)
+        if type != file_type && !transformers[file_type][type]
+          raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
+        end
 
-        processor_dependencies = Set.new(processors.map { |processor|
-          config[:inverted_processor_dependency_uris][processor]
-        }.compact)
-
+        skip_bundle = params[:skip_bundle]
+        processors = processors_for(type, file_type, engine_extnames, skip_bundle)
         processors = unwrap_processors(processors)
 
-        dependencies = self.dependencies
-        dependencies += Set.new([build_file_digest_uri(filename)])
-        dependencies += processor_dependencies
+        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+        dependencies = self.dependencies + [processors_dep_uri]
 
-        # Read into memory and process if theres a processor pipeline or the
-        # content type is text.
-        if processors.any? || mime_type_charset_detecter(type)
+        # Read into memory and process if theres a processor pipeline
+        if processors.any?
           result = call_processors(processors, {
             environment: self,
             cache: self.cache,
@@ -107,7 +106,6 @@ module Sprockets
             load_path: load_path,
             name: name,
             content_type: type,
-            data: read_file(filename, type),
             map: SourceMap::Map.new,
             metadata: { dependencies: dependencies }
           })
@@ -141,14 +139,14 @@ module Sprockets
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
-        cache.set(['asset-uri', asset[:uri]], asset, true)
-        cache.set(['asset-uri-digest', uri, asset[:dependencies_digest]], asset[:uri], true)
+        cache.set(['asset-uri', VERSION, asset[:uri]], asset, true)
+        cache.set(['asset-uri-digest', VERSION, uri, asset[:dependencies_digest]], asset[:uri], true)
 
         asset
       end
 
       def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
-        key = ['asset-uri-cache-dependencies', uri, file_digest(filename)]
+        key = ['asset-uri-cache-dependencies', VERSION, uri, file_digest(filename)]
         history = cache.get(key) || []
 
         history.each_with_index do |deps, index|
@@ -162,35 +160,6 @@ module Sprockets
         deps = asset[:metadata][:dependencies]
         cache.set(key, history.unshift(deps).take(limit))
         asset
-      end
-
-      def processors_for(file_type, engine_extnames, params)
-        type = params[:type]
-
-        if type != file_type
-          if processor = transformers[file_type][type]
-            transformers = [processor]
-          else
-            raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
-          end
-        else
-          transformers = []
-        end
-
-        processed_processors = config[:preprocessors][file_type] +
-          engine_extnames.reverse.map { |ext| engines[ext] } +
-          transformers +
-          config[:postprocessors][type]
-
-        bundled_processors = params[:skip_bundle] ? [] : config[:bundle_processors][type]
-
-        processors = bundled_processors.any? ? bundled_processors : processed_processors
-
-        if processor = encoding_processor_for(params[:encoding])
-          processors += [processor]
-        end
-
-        processors.reverse
       end
   end
 end

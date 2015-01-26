@@ -171,35 +171,70 @@ module Sprockets
       end
     end
 
+    # Internal: Get processor defined cached key.
+    #
+    # processor - Processor function
+    #
+    # Returns JSON serializable key or nil.
+    def processor_cache_key(processor)
+      processor = unwrap_processor(processor)
+      processor.cache_key if processor.respond_to?(:cache_key)
+    end
+
     protected
-      def resolve_processor_cache_key_uri(uri)
-        return unless processor = config[:processor_dependency_uris][uri]
-        processor = unwrap_processor(processor)
-        processor.cache_key if processor.respond_to?(:cache_key)
+      def resolve_processors_cache_key_uri(uri)
+        params = parse_uri_query_params(uri[11..-1])
+        params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
+        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:skip_bundle])
+        processors.map { |processor| processor_cache_key(processor) }
+      end
+
+      def build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+        engines = engine_extnames.join(',') if engine_extnames.any?
+        query = encode_uri_query_params(
+          type: type,
+          file_type: file_type,
+          engines: engines,
+          skip_bundle: skip_bundle
+        )
+        "processors:#{query}"
+      end
+
+      def processors_for(type, file_type, engine_extnames, skip_bundle)
+        processors = []
+
+        bundled_processors = skip_bundle ? [] : config[:bundle_processors][type]
+
+        if bundled_processors.any?
+          processors += bundled_processors
+        else
+          processors += config[:postprocessors][type]
+
+          if type != file_type && processor = transformers[file_type][type]
+            processors += [processor]
+          end
+
+          processors += engine_extnames.map { |ext| engines[ext] }
+          processors += config[:preprocessors][file_type]
+        end
+
+        if processors.any? || mime_type_charset_detecter(type)
+          processors += [FileReader]
+        end
+
+        processors
       end
 
     private
       def register_config_processor(type, mime_type, processor = nil, &block)
         processor ||= block
 
-        pos = config[type][mime_type].size
-        uri = build_processor_uri(type, processor, type: mime_type, pos: pos)
-        register_processor_dependency_uri(uri, processor)
-
         self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.push(processor)
+          processors.unshift(processor)
           processors
         end
       end
 
-      def register_processor_dependency_uri(uri, processor)
-        self.config = hash_reassoc(config, :processor_dependency_uris) do |uris|
-          uris.merge(uri => processor)
-        end
-        self.config = hash_reassoc(config, :inverted_processor_dependency_uris) do |uris|
-          uris.merge(processor => uri)
-        end
-      end
 
       def unregister_config_processor(type, mime_type, proccessor)
         self.config = hash_reassoc(config, type, mime_type) do |processors|

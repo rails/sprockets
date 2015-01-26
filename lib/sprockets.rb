@@ -17,7 +17,9 @@ module Sprockets
   autoload :EcoProcessor,            'sprockets/eco_processor'
   autoload :EjsProcessor,            'sprockets/ejs_processor'
   autoload :ERBProcessor,            'sprockets/erb_processor'
+  autoload :ERBTemplate,             'sprockets/erb_template'
   autoload :ES6to5Processor,         'sprockets/es6to5_processor'
+  autoload :FileReader,              'sprockets/file_reader'
   autoload :JstProcessor,            'sprockets/jst_processor'
   autoload :SassCompressor,          'sprockets/sass_compressor'
   autoload :SassProcessor,           'sprockets/sass_processor'
@@ -51,7 +53,6 @@ module Sprockets
     dependency_resolvers: {}.freeze,
     compressors: Hash.new { |h, k| {}.freeze }.freeze,
     digest_class: Digest::SHA256,
-    encodings: {}.freeze,
     engine_mime_types: {}.freeze,
     engines: {}.freeze,
     inverted_transformers: Hash.new { |h, k| {}.freeze }.freeze,
@@ -60,8 +61,6 @@ module Sprockets
     paths: [].freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
-    processor_dependency_uris: {}.freeze,
-    inverted_processor_dependency_uris: {}.freeze,
     root: File.expand_path('..', __FILE__).freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""
@@ -108,11 +107,6 @@ module Sprockets
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/font-woff', extensions: ['.woff']
 
-  # HTTP content encodings
-  register_encoding :deflate, EncodingUtils::DEFLATE
-  register_encoding :gzip,    EncodingUtils::GZIP
-  register_encoding :base64,  EncodingUtils::BASE64
-
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
@@ -140,45 +134,42 @@ module Sprockets
   }
   register_bundle_metadata_reducer 'application/javascript', :map, :+
 
-  register_compressor 'text/css', :sass, LazyProcessor.new { SassCompressor }
-  register_compressor 'text/css', :scss, LazyProcessor.new { SassCompressor }
-  register_compressor 'text/css', :yui, LazyProcessor.new { YUICompressor }
-  register_compressor 'application/javascript', :closure, LazyProcessor.new { ClosureCompressor }
-  register_compressor 'application/javascript', :uglifier, LazyProcessor.new { UglifierCompressor }
-  register_compressor 'application/javascript', :uglify, LazyProcessor.new { UglifierCompressor }
-  register_compressor 'application/javascript', :yui, LazyProcessor.new { YUICompressor }
+  register_compressor 'text/css', :sass, LazyProcessor.new(:SassCompressor) { SassCompressor }
+  register_compressor 'text/css', :scss, LazyProcessor.new(:SassCompressor) { SassCompressor }
+  register_compressor 'text/css', :yui, LazyProcessor.new(:YUICompressor) { YUICompressor }
+  register_compressor 'application/javascript', :closure, LazyProcessor.new(:ClosureCompressor) { ClosureCompressor }
+  register_compressor 'application/javascript', :uglifier, LazyProcessor.new(:UglifierCompressor) { UglifierCompressor }
+  register_compressor 'application/javascript', :uglify, LazyProcessor.new(:UglifierCompressor) { UglifierCompressor }
+  register_compressor 'application/javascript', :yui, LazyProcessor.new(:YUICompressor) { YUICompressor }
 
   # 6to5, TheFuture™ is now
   register_mime_type 'text/ecmascript-6', extensions: ['.es6'], charset: :unicode
-  register_transformer 'text/ecmascript-6', 'application/javascript',  LazyProcessor.new { ES6to5Processor }
+  register_transformer 'text/ecmascript-6', 'application/javascript',  LazyProcessor.new(:ES6to5Processor) { ES6to5Processor }
   register_preprocessor 'text/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee']
-  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new { CoffeeScriptProcessor }
+  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new(:CoffeeScriptProcessor) { CoffeeScriptProcessor }
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
   # JST engines
   register_mime_type 'text/eco', extensions: ['.eco']
   register_mime_type 'text/ejs', extensions: ['.ejs']
-  register_engine '.jst',    LazyProcessor.new { JstProcessor }, mime_type: 'application/javascript'
-  register_engine '.eco',    LazyProcessor.new { EcoProcessor },  mime_type: 'application/javascript'
-  register_engine '.ejs',    LazyProcessor.new { EjsProcessor },  mime_type: 'application/javascript'
+  register_engine '.jst',    LazyProcessor.new(:JstProcessor) { JstProcessor }, mime_type: 'application/javascript'
+  register_engine '.eco',    LazyProcessor.new(:EcoProcessor) { EcoProcessor },  mime_type: 'application/javascript'
+  register_engine '.ejs',    LazyProcessor.new(:EjsProcessor) { EjsProcessor },  mime_type: 'application/javascript'
 
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass']
   register_mime_type 'text/scss', extensions: ['.scss']
-  register_transformer 'text/sass', 'text/css', LazyProcessor.new { SassProcessor }
-  register_transformer 'text/scss', 'text/css', LazyProcessor.new { ScssProcessor }
+  register_transformer 'text/sass', 'text/css', LazyProcessor.new(:SassProcessor) { SassProcessor }
+  register_transformer 'text/scss', 'text/css', LazyProcessor.new(:ScssProcessor) { ScssProcessor }
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Other
-  register_engine '.erb',    LazyProcessor.new { ERBProcessor }, mime_type: 'text/plain'
+  register_engine '.erb',    LazyProcessor.new(:ERBProcessor) { ERBProcessor }, mime_type: 'text/plain'
 
-  register_dependency_resolver 'sprockets-version' do
-    VERSION
-  end
   register_dependency_resolver 'environment-version' do |env|
     env.version
   end
@@ -188,11 +179,10 @@ module Sprockets
   register_dependency_resolver 'file-digest' do |env, str|
     env.file_digest(env.parse_file_digest_uri(str))
   end
-  register_dependency_resolver 'processor' do |env, str|
-    env.resolve_processor_cache_key_uri(str)
+  register_dependency_resolver 'processors' do |env, str|
+    env.resolve_processors_cache_key_uri(str)
   end
 
-  depend_on 'sprockets-version'
   depend_on 'environment-version'
   depend_on 'environment-paths'
 end

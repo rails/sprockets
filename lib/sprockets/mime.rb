@@ -98,45 +98,5 @@ module Sprockets
         data
       end
     end
-
-    # Public: Mapping of supported HTTP Content/Transfer encodings
-    #
-    # key   - String name
-    # value - Method/Proc to encode data
-    #
-    # Returns Hash.
-    def encodings
-      config[:encodings]
-    end
-
-    # Public: Register a new encoding.
-    #
-    # Examples
-    #
-    #   register_encoding :gzip, EncodingUtils::GZIP
-    #
-    # key    - String name
-    # encode - Method/Proc to encode data
-    #
-    # Returns nothing.
-    def register_encoding(name, encode)
-      self.config = hash_reassoc(config, :encodings) do |encodings|
-        encodings.merge(name.to_s => encode)
-      end
-    end
-
-    private
-      # Internal: Get a postprocessor to perform the encoding.
-      #
-      # encoding - String encoding.
-      #
-      # Returns an encoding Processor Proc.
-      def encoding_processor_for(encoding)
-        if encoder = self.encodings[encoding]
-          proc do |input|
-            { data: encoder.call(input[:data]), encoding: encoding }
-          end
-        end
-      end
   end
 end

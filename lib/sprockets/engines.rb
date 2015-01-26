@@ -50,9 +50,6 @@ module Sprockets
     #     environment.register_engine '.coffee', CoffeeScriptProcessor
     #
     def register_engine(ext, klass, options = {})
-      uri = build_processor_uri(:engine, klass, extname: ext)
-      register_processor_dependency_uri(uri, klass)
-
       self.config = hash_reassoc(config, :engines) do |engines|
         engines.merge(ext => klass)
       end

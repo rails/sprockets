@@ -116,6 +116,7 @@ module Sprockets
 
       return to_enum(__method__, *args) unless block_given?
 
+      environment = self.environment.cached
       args.flatten.each do |path|
         environment.find_all_linked_assets(path) do |asset|
           yield asset

@@ -19,6 +19,7 @@ module Sprockets
       @entries = Hash.new { |h, k| h[k] = _entries(k) }
       @uris    = Hash.new { |h, k| h[k] = _load(k) }
 
+      @processor_cache_keys  = Hash.new { |h, k| h[k] = _processor_cache_key(k) }
       @resolved_dependencies = Hash.new { |h, k| h[k] = _resolve_dependency(k) }
     end
 
@@ -44,6 +45,12 @@ module Sprockets
     alias_method :_load, :load
     def load(uri)
       @uris[uri]
+    end
+
+    # Internal: Cache Environment#processor_cache_key
+    alias_method :_processor_cache_key, :processor_cache_key
+    def processor_cache_key(str)
+      @processor_cache_keys[str]
     end
 
     # Internal: Cache Environment#resolve_dependency

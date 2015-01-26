@@ -425,7 +425,7 @@ def self.call(input)
   required = Set.new(input[:metadata][:required])
 
   # Manually add "foo.js" asset uri to our bundle
-  required << input[:environment].locate("foo.js")
+  required << input[:environment].resolve("foo.js")
 
   { required: required }
 end

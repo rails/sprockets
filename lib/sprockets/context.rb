@@ -64,58 +64,36 @@ module Sprockets
     #
     attr_reader :content_type
 
-    # Internal
-    # TODO: Cleanup relative resolver logic shared between directive processor.
-    def _resolve(method, path, options = {})
-      if environment.absolute_path?(path)
-        filename = path
-      elsif environment.relative_path?(path)
-        path = File.expand_path(path, @dirname)
-        if logical_path = @environment.split_subpath(load_path, path)
-          if filename = environment.send(method, logical_path, options.merge(load_paths: [load_path]))
-            accept = options[:accept]
-            message = "couldn't find file '#{logical_path}' under '#{load_path}'"
-            message << " with type '#{accept}'" if accept
-            raise FileNotFound, message
-          end
-        else
-          raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
-        end
-      else
-        filename = environment.send(method, path, options)
-      end
-
-      if filename
-        filename
-      else
-        accept = options[:accept]
-        message = "couldn't find file '#{path}'"
-        message << " with type '#{accept}'" if accept
-        raise FileNotFound, message
-      end
-    end
-
-    # Given a logical path, `resolve` will find and return the fully
-    # expanded path. Relative paths will also be resolved. An optional
-    # `:content_type` restriction can be supplied to restrict the
-    # search.
+    # Public: Given a logical path, `resolve` will find and return an Asset URI.
+    # Relative paths will also be resolved. An accept type maybe given to
+    # restrict the search.
     #
     #     resolve("foo.js")
-    #     # => "/path/to/app/javascripts/foo.js"
+    #     # => "file:///path/to/app/javascripts/foo.js?type=application/javascript"
     #
     #     resolve("./bar.js")
-    #     # => "/path/to/app/javascripts/bar.js"
+    #     # => "file:///path/to/app/javascripts/bar.js?type=application/javascript"
     #
+    # path - String logical or absolute path
+    # options
+    #   accept - String content accept type
+    #
+    # Returns an Asset URI String.
     def resolve(path, options = {})
-      _resolve(:resolve, path, options)
+      uri, deps = environment.resolve!(path, options.merge(base_path: @dirname))
+      @dependencies.merge(deps)
+      uri
     end
 
-    def locate(path, options = {})
-      if environment.valid_asset_uri?(path)
-        path
-      else
-        _resolve(:locate, path, options)
-      end
+    # Public: Load Asset by AssetURI and track it as a dependency.
+    #
+    # uri - AssetURI
+    #
+    # Returns Asset.
+    def load(uri)
+      asset = environment.load(uri)
+      @dependencies.merge(asset.metadata[:dependencies])
+      asset
     end
 
     # `depend_on` allows you to state a dependency on a file without
@@ -125,7 +103,7 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      @dependencies << @environment.build_file_digest_uri(resolve(path).to_s)
+      resolve(path)
       nil
     end
 
@@ -137,10 +115,7 @@ module Sprockets
     # file. Unlike `depend_on`, this will include recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
-      if asset = @environment.load(locate(path))
-        @dependencies.merge(asset.metadata[:dependencies])
-      end
-      nil
+      load(resolve(path))
     end
 
     # `require_asset` declares `path` as a dependency of the file. The
@@ -153,7 +128,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      @required << locate(path, accept: @content_type, bundle: false)
+      @required << resolve(path, accept: @content_type, bundle: false)
       nil
     end
 
@@ -161,7 +136,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed << locate(path, accept: @content_type, bundle: false)
+      @stubbed << resolve(path, accept: @content_type, bundle: false)
       nil
     end
 
@@ -171,10 +146,8 @@ module Sprockets
     #
     # Returns an Asset or nil.
     def link_asset(path)
-      if asset = @environment.load(locate(path))
-        @dependencies.merge(asset.metadata[:dependencies])
-        @links << asset.uri
-      end
+      asset = depend_on_asset(path)
+      @links << asset.uri
       asset
     end
 
@@ -189,9 +162,9 @@ module Sprockets
     #     $('<img>').attr('src', '<%= asset_data_uri 'avatar.jpg' %>')
     #
     def asset_data_uri(path)
-      depend_on_asset(path)
-      asset = environment.find_asset(path, accept_encoding: 'base64')
-      "data:#{asset.content_type};base64,#{Rack::Utils.escape(asset.to_s)}"
+      asset = depend_on_asset(path)
+      data = EncodingUtils.base64(asset.source)
+      "data:#{asset.content_type};base64,#{Rack::Utils.escape(data)}"
     end
 
     # Expands logical path to full url to asset.

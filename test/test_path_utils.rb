@@ -37,6 +37,8 @@ class TestPathUtils < MiniTest::Test
       "source-maps",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
+
+    assert_equal [], entries("/tmp/sprockets/missingdir")
   end
 
   def test_check_absolute_path
@@ -93,6 +95,9 @@ class TestPathUtils < MiniTest::Test
     subpath = File.expand_path("../fixtures/default/app/application.js", __FILE__)
     assert_equal "app/application.js", split_subpath(path, subpath)
 
+    subpath = File.expand_path("../fixtures/default", __FILE__)
+    assert_equal "", split_subpath(path, subpath)
+
     subpath = File.expand_path("../fixtures/other/app/application.js", __FILE__)
     refute split_subpath(path, subpath)
   end
@@ -106,6 +111,10 @@ class TestPathUtils < MiniTest::Test
 
     filename = File.expand_path("../fixtures/default/app/application.js", __FILE__)
     expected = [paths.first, "app/application.js"]
+    assert_equal expected, paths_split(paths, filename)
+
+    filename = File.expand_path("../fixtures/default", __FILE__)
+    expected = [paths.first, ""]
     assert_equal expected, paths_split(paths, filename)
 
     filename = File.expand_path("../fixtures/other/app/application.js", __FILE__)
