@@ -26,9 +26,6 @@ module Sprockets
       deflater.finish
     end
 
-    # Public: Alias for CodingUtils.deflate
-    DEFLATE = method(:deflate)
-
     # Internal: Unmarshal optionally deflated data.
     #
     # Checks leading marshal header to see if the bytes are uncompressed
@@ -67,9 +64,6 @@ module Sprockets
       io.string
     end
 
-    # Public: Alias for CodingUtils.gzip
-    GZIP = method(:gzip)
-
     # Public: Use base64 to encode data.
     #
     # str - String data
@@ -78,9 +72,6 @@ module Sprockets
     def base64(str)
       Base64.strict_encode64(str)
     end
-
-    # Public: Alias for CodingUtils.base64
-    BASE64 = method(:base64)
 
 
     ## Charset encodings ##

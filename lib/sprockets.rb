@@ -57,7 +57,6 @@ module Sprockets
     dependency_resolvers: {}.freeze,
     compressors: Hash.new { |h, k| {}.freeze }.freeze,
     digest_class: Digest::SHA256,
-    encodings: {}.freeze,
     engine_mime_types: {}.freeze,
     engines: {}.freeze,
     inverted_transformers: Hash.new { |h, k| {}.freeze }.freeze,
@@ -113,11 +112,6 @@ module Sprockets
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/font-woff', extensions: ['.woff']
-
-  # HTTP content encodings
-  register_encoding :deflate, EncodingUtils::DEFLATE
-  register_encoding :gzip,    EncodingUtils::GZIP
-  register_encoding :base64,  EncodingUtils::BASE64
 
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(

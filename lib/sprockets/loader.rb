@@ -175,10 +175,6 @@ module Sprockets
 
         processors = []
 
-        if processor = encoding_processor_for(params[:encoding])
-          processors += [processor]
-        end
-
         bundled_processors = params[:skip_bundle] ? [] : config[:bundle_processors][type]
 
         if bundled_processors.any?

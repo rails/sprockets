@@ -146,15 +146,6 @@ module Sprockets
       source
     end
 
-    # Public: HTTP encoding for Asset, "deflate", "gzip", etc.
-    #
-    # Note: This is not the Ruby Encoding of the source. See Asset#charset.
-    #
-    # Returns a String or nil if encoding is "identity".
-    def encoding
-      metadata[:encoding]
-    end
-
     # Public: Get charset of source.
     #
     # Returns a String charset name or nil if binary.

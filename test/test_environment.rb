@@ -337,64 +337,6 @@ $app.run(function($templateCache) {
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
-  test "find asset with no encoding" do
-    assert asset = @env.find_asset("gallery.js")
-    assert_equal nil, asset.encoding
-    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
-    assert_equal 18, asset.length
-    assert_equal "828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab", asset.hexdigest
-  end
-
-  test "find asset with unknown encoding" do
-    assert asset = @env.find_asset("gallery.js", accept_encoding: "zepto")
-    assert_equal nil, asset.encoding
-    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
-    assert_equal 18, asset.length
-    assert_equal "828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab", asset.hexdigest
-  end
-
-  test "find asset with identity encoding" do
-    assert asset = @env.find_asset("gallery.js", accept_encoding: "identity")
-    assert_equal nil, asset.encoding
-    assert_equal [118, 97, 114, 32, 71, 97, 108, 108], asset.to_s.bytes.take(8)
-    assert_equal 18, asset.length
-    assert_equal "828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab", asset.hexdigest
-  end
-
-  test "find deflate asset" do
-    assert asset = @env.find_asset("gallery.js", accept_encoding: "deflate")
-    assert_equal 'deflate', asset.encoding
-    assert_equal [43, 75, 44, 82, 112, 79, 204, 201], asset.to_s.bytes.take(8)
-    assert_equal 20, asset.length
-    assert_equal "d8025c5cd4255b8c3c45faae8f07f209d3f02e9f6c8837a24ba4d0c07d9e7c20", asset.hexdigest
-  end
-
-  test "find gzipped asset" do
-    assert asset = @env.find_asset("gallery.js", accept_encoding: "gzip")
-    assert_equal 'gzip', asset.encoding
-    assert_equal [31, 139, 8, 0], asset.to_s.bytes.take(4)
-    assert_equal 38, asset.length
-    assert_equal "85d1160d6a4383a91434b003ed0abcd1f66361417f5942155ddffc3aa621be89", asset.hexdigest
-  end
-
-  test "find base64 asset" do
-    assert asset = @env.find_asset("gallery.js", accept_encoding: "base64")
-    assert_equal 'base64', asset.encoding
-    assert_equal "dmFyIEdh", asset.to_s[0, 8]
-    assert_equal 24, asset.length
-    assert_equal "a8785bd0621f3c9efa12916dd328bc68c8ba2fb5022dc98adbbc23a755c782c7", asset.hexdigest
-  end
-
-  test "find asset by uri with deflate encoding" do
-    uri = "file://#{fixture_path('default/gallery.js')}?type=application/javascript&encoding=deflate"
-    assert asset = @env.load(uri)
-    assert_equal fixture_path('default/gallery.js'), asset.filename
-    assert_equal 'application/javascript', asset.content_type
-    assert_equal 'deflate', asset.encoding
-    assert_equal 'd8025c5cd4255b8c3c45faae8f07f209d3f02e9f6c8837a24ba4d0c07d9e7c20', asset.etag
-    assert_match uri, asset.uri
-  end
-
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end

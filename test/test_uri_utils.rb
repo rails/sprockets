@@ -101,8 +101,6 @@ class TestURIUtils < MiniTest::Test
   def test_parse_query_params
     assert_equal ["/usr/local/var/github/app/assets/javascripts/application.coffee", {type: 'application/javascript'}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript")
-    assert_equal ["/usr/local/var/github/app/assets/images/logo.png", {encoding: 'gzip'}],
-      parse_asset_uri("file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip")
     assert_equal ["/usr/local/var/github/app/assets/stylesheets/users.css", {type: 'text/css', flag: true}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&flag")
   end
@@ -131,10 +129,6 @@ class TestURIUtils < MiniTest::Test
       build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', flag: true)
     assert_equal "file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css",
       build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', flag: false)
-    assert_equal "file:///usr/local/var/github/app/assets/images/logo.png?encoding=gzip",
-      build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: 'gzip')
-    assert_equal "file:///usr/local/var/github/app/assets/images/logo.png",
-      build_asset_uri("/usr/local/var/github/app/assets/images/logo.png", encoding: nil)
   end
 
   def test_raise_error_when_invalid_param_value

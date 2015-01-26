@@ -24,9 +24,6 @@ module Sprockets
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
 
-      available_encodings = self.encodings.keys + ['identity']
-      encoding = find_best_q_match(options[:accept_encoding], available_encodings)
-
       paths = options[:load_paths] || self.paths
 
       if valid_asset_uri?(path)
@@ -59,8 +56,7 @@ module Sprockets
       end
 
       if filename && deps
-        encoding = nil if encoding == 'identity'
-        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle, encoding: encoding)
+        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle)
         deps << build_file_digest_uri(filename)
       end
 
