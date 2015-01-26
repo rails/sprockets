@@ -172,15 +172,22 @@ module Sprockets
       end
     end
 
+    # Internal: Get processor defined cached key.
+    #
+    # processor - Processor function
+    #
+    # Returns JSON serializable key or nil.
+    def processor_cache_key(processor)
+      processor = unwrap_processor(processor)
+      processor.cache_key if processor.respond_to?(:cache_key)
+    end
+
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
         params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
         processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:skip_bundle])
-        processors.map do |processor|
-          processor = unwrap_processor(processor)
-          processor.cache_key if processor.respond_to?(:cache_key)
-        end
+        processors.map { |processor| processor_cache_key(processor) }
       end
 
       def build_processors_uri(type, file_type, engine_extnames, skip_bundle)
