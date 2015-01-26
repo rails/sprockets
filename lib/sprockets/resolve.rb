@@ -21,91 +21,84 @@ module Sprockets
     # The String Asset URI is returned or nil if no results are found.
     def resolve(path, options = {})
       path = path.to_s
+      paths = options[:load_paths] || self.paths
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
 
-      paths = options[:load_paths] || self.paths
-
       if valid_asset_uri?(path)
-        uri = path
-        filename, _ = parse_asset_uri(uri)
-        return uri, Set.new([build_file_digest_uri(filename)])
+        resolve_asset_uri(path)
       elsif absolute_path?(path)
-        path = File.expand_path(path)
-        if paths_split(paths, path) && file?(path)
-          mime_type = parse_path_extnames(path)[1]
-          _type = resolve_transform_type(mime_type, accept)
-          if !accept || _type
-            filename = path
-            type = _type
-            deps = Set.new
-          end
-        end
+        resolve_absolute_path(paths, path, accept, skip_bundle)
+      elsif relative_path?(path)
+        resolve_relative_path([options[:load_path]], path, options[:dirname], accept, skip_bundle)
       else
-        logical_name, mime_type, _ = parse_path_extnames(path)
-        parsed_accept = parse_accept_options(mime_type, accept)
-        transformed_accepts = expand_transform_accepts(parsed_accept)
-        filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
-        type = resolve_transform_type(mime_type, parsed_accept) if filename
+        resolve_logical_path(paths, path, accept, skip_bundle)
       end
-
-      if filename && deps
-        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle)
-        deps << build_file_digest_uri(filename)
-      end
-
-      return uri, (deps || Set.new)
-    end
-
-    # TODO: Merge into resolve
-    def resolve_relative(path, options = {})
-      options = options.dup
-
-      unless load_path = options.delete(:load_path)
-        raise ArgumentError, "missing keyword: load_path"
-      end
-
-      unless dirname = options.delete(:dirname)
-        raise ArgumentError, "missing keyword: dirname"
-      end
-
-      if path = split_relative_subpath(load_path, path, dirname)
-        uri, deps = resolve(path, options.merge(load_paths: [load_path], compat: false))
-      end
-
-      return uri, (deps || Set.new)
     end
 
     def resolve!(path, options = {})
-      if relative_path?(path)
-        # TODO: Route relative through resolve
-        uri, deps = resolve_relative(path, options.merge(compat: false))
-      else
-        uri, deps = resolve(path, options.merge(compat: false))
-      end
+      uri, deps = resolve(path, options.merge(compat: false))
 
       unless uri
-        accept = options[:accept]
-        if relative_path?(path)
-          dirname, load_path = options[:dirname], options[:load_path]
-          if path = split_relative_subpath(load_path, path, dirname)
-            message = "couldn't find file '#{path}' under '#{load_path}'"
-            message << " with type '#{accept}'" if accept
-            raise FileNotFound, message
-          else
-            raise FileOutsidePaths, "#{path} isn't under path: #{load_path}"
-          end
-        else
-          message = "couldn't find file '#{path}'"
-          message << " with type '#{accept}'" if accept
-          raise FileNotFound, message
+        if relative_path?(path) && !split_relative_subpath(options[:load_path], path, options[:dirname])
+          raise FileOutsidePaths, "#{path} isn't under path: #{options[:load_path]}"
         end
+        message = "couldn't find file '#{path}'"
+        message << " with type '#{options[:accept]}'" if options[:accept]
+        raise FileNotFound, message
       end
 
       return uri, deps
     end
 
     protected
+      def resolve_asset_uri(uri)
+        filename, _ = parse_asset_uri(uri)
+        return uri, Set.new([build_file_digest_uri(filename)])
+      end
+
+      def resolve_absolute_path(paths, filename, accept, skip_bundle)
+        deps = Set.new
+        filename = File.expand_path(filename)
+
+        # Ensure path is under load paths
+        return nil, deps unless paths_split(paths, filename)
+
+        mime_type = parse_path_extnames(filename)[1]
+        type = resolve_transform_type(mime_type, accept)
+        return nil, deps if accept && !type
+
+        return nil, deps unless file?(filename)
+
+        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle)
+        deps << build_file_digest_uri(filename)
+        return uri, deps
+      end
+
+      def resolve_relative_path(paths, path, dirname, accept, skip_bundle)
+        if path = split_relative_subpath(paths.first, path, dirname)
+          resolve_logical_path(paths, path, accept, skip_bundle)
+        else
+          [nil, Set.new]
+        end
+      end
+
+      def resolve_logical_path(paths, logical_path, accept, skip_bundle)
+        logical_name, mime_type, _ = parse_path_extnames(logical_path)
+        parsed_accept = parse_accept_options(mime_type, accept)
+        transformed_accepts = expand_transform_accepts(parsed_accept)
+        filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
+
+        if filename
+          deps << build_file_digest_uri(filename)
+          type = resolve_transform_type(mime_type, parsed_accept)
+          uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle)
+          return uri, deps
+        else
+          return nil, deps
+        end
+      end
+
       def resolve_under_paths(paths, logical_name, accepts)
         all_deps = Set.new
         return nil, nil, all_deps if accepts.empty?
