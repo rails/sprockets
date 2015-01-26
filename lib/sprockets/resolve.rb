@@ -44,13 +44,8 @@ module Sprockets
       else
         logical_name, mime_type, _ = parse_path_extnames(path)
         parsed_accept = parse_accept_options(mime_type, accept)
-
-        if parsed_accept.empty?
-          return nil, Set.new
-        end
-
         transformed_accepts = expand_transform_accepts(parsed_accept)
-        filename, mime_type, deps = resolve_under_paths(paths, logical_name, mime_type, transformed_accepts)
+        filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
         type = resolve_transform_type(mime_type, parsed_accept) if filename
       end
 
@@ -114,10 +109,11 @@ module Sprockets
     end
 
     protected
-      def resolve_under_paths(paths, logical_name, mime_type, accepts)
-        logical_basename = File.basename(logical_name)
-
+      def resolve_under_paths(paths, logical_name, accepts)
         all_deps = Set.new
+        return nil, nil, all_deps if accepts.empty?
+
+        logical_basename = File.basename(logical_name)
         paths.each do |load_path|
           candidates, deps = path_matches(load_path, logical_name, logical_basename)
           all_deps.merge(deps)
