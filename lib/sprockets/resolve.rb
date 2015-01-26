@@ -36,6 +36,8 @@ module Sprockets
       end
     end
 
+    # Public: Same as resolve() but raises a FileNotFound exception instead of
+    # nil if no assets are found.
     def resolve!(path, options = {})
       uri, deps = resolve(path, options.merge(compat: false))
 
