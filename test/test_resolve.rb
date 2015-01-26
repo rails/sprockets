@@ -162,6 +162,14 @@ class TestResolve < Sprockets::TestCase
     assert_includes deps, "file-digest://#{fixture_path('resolve/javascripts')}"
   end
 
+  test "resolve absolute with dependencies" do
+    @env.append_path(fixture_path('default'))
+
+    uri, deps = @env.resolve(fixture_path('default/gallery.js'), compat: false)
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript", uri
+    assert_includes deps, "file-digest://#{fixture_path('default/gallery.js')}"
+  end
+
   test "resolve uri identity with dependencies" do
     @env.append_path(fixture_path('default'))
 

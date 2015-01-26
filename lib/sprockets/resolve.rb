@@ -41,7 +41,6 @@ module Sprockets
           if !accept || _type
             filename = path
             type = _type
-            # TODO: Return self dependency
             deps = Set.new
           end
         end
