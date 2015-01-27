@@ -100,6 +100,30 @@ Sprockets.register_postprocessor 'text/css', proc { |input|
   { selector_count: input[:data].scan(/\{/).size }
 }
 
+SourceMapTransformer = proc { |input|
+  accept = case input[:content_type]
+  when "application/sourcemap+json; type=js"
+    accept = "application/javascript"
+  when "application/sourcemap+json; type=css"
+    accept = "text/css"
+  else
+    fail input[:content_type]
+  end
+
+  uri, _ = input[:environment].resolve!(input[:filename], accept: accept)
+  asset = input[:environment].load(uri)
+
+  JSON.generate({
+    "version" => 3,
+    "file" => asset.logical_path,
+    "mappings" => ";#{asset.bytesize}"
+  })
+}
+Sprockets.register_mime_type 'application/sourcemap+json; type=js', extensions: ['.js.map']
+Sprockets.register_mime_type 'application/sourcemap+json; type=css', extensions: ['.css.map']
+Sprockets.register_transformer 'application/javascript', 'application/sourcemap+json; type=js', SourceMapTransformer
+Sprockets.register_transformer 'text/css', 'application/sourcemap+json; type=css', SourceMapTransformer
+
 
 class Sprockets::TestCase < MiniTest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
