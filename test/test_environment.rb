@@ -337,26 +337,6 @@ $app.run(function($templateCache) {
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
-  test "find source map for js asset" do
-    assert asset = @env.find_asset("gallery.js.map")
-    assert map = JSON.parse(asset.source)
-    assert_equal({
-      "version" => 3,
-      "file" => "gallery.js",
-      "mappings" => ";18"
-    }, map)
-  end
-
-  test "find source map for css asset" do
-    assert asset = @env.find_asset("gallery.css.map")
-    assert map = JSON.parse(asset.source)
-    assert_equal({
-      "version" => 3,
-      "file" => "gallery.css",
-      "mappings" => ";27"
-    }, map)
-  end
-
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end

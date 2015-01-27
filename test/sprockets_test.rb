@@ -102,9 +102,9 @@ Sprockets.register_postprocessor 'text/css', proc { |input|
 
 SourceMapTransformer = proc { |input|
   accept = case input[:content_type]
-  when "application/sourcemap+json; type=js"
+  when "application/js-sourcemap+json"
     accept = "application/javascript"
-  when "application/sourcemap+json; type=css"
+  when "application/css-sourcemap+json"
     accept = "text/css"
   else
     fail input[:content_type]
@@ -119,10 +119,10 @@ SourceMapTransformer = proc { |input|
     "mappings" => ";#{asset.bytesize}"
   })
 }
-Sprockets.register_mime_type 'application/sourcemap+json; type=js', extensions: ['.js.map']
-Sprockets.register_mime_type 'application/sourcemap+json; type=css', extensions: ['.css.map']
-Sprockets.register_transformer 'application/javascript', 'application/sourcemap+json; type=js', SourceMapTransformer
-Sprockets.register_transformer 'text/css', 'application/sourcemap+json; type=css', SourceMapTransformer
+Sprockets.register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map']
+Sprockets.register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map']
+Sprockets.register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapTransformer
+Sprockets.register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapTransformer
 
 
 class Sprockets::TestCase < MiniTest::Test

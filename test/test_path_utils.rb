@@ -34,6 +34,7 @@ class TestPathUtils < MiniTest::Test
       "resolve",
       "sass",
       "server",
+      "source-maps",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
 
