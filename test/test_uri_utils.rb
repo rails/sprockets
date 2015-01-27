@@ -103,6 +103,8 @@ class TestURIUtils < MiniTest::Test
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript")
     assert_equal ["/usr/local/var/github/app/assets/stylesheets/users.css", {type: 'text/css', flag: true}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css&flag")
+    assert_equal ["/usr/local/var/github/app/assets/views/users.html", {type: 'text/html; charset=utf-8'}],
+      parse_asset_uri("file:///usr/local/var/github/app/assets/views/users.html?type=text/html;%20charset=utf-8")
   end
 
   def test_asset_uri_raise_erorr_when_invalid_uri_scheme
@@ -129,6 +131,8 @@ class TestURIUtils < MiniTest::Test
       build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', flag: true)
     assert_equal "file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css",
       build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', flag: false)
+    assert_equal "file:///usr/local/var/github/app/assets/views/users.html?type=text/html;%20charset=utf-8",
+      build_asset_uri("/usr/local/var/github/app/assets/views/users.html", type: 'text/html; charset=utf-8')
   end
 
   def test_raise_error_when_invalid_param_value

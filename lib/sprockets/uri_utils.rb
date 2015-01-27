@@ -182,6 +182,7 @@ module Sprockets
     def parse_uri_query_params(query)
       query.to_s.split('&').reduce({}) do |h, p|
         k, v = p.split('=', 2)
+        v = URI::Generic::DEFAULT_PARSER.unescape(v) if v
         h.merge(k.to_sym => v || true)
       end
     end
