@@ -1,10 +1,11 @@
 require 'set'
+require 'sprockets/http_utils'
 require 'sprockets/path_dependency_utils'
 require 'sprockets/uri_utils'
 
 module Sprockets
   module Resolve
-    include PathDependencyUtils, URIUtils
+    include HTTPUtils, PathDependencyUtils, URIUtils
 
     # Public: Find Asset URI for given a logical path by searching the
     # environment's load paths.

@@ -1,8 +1,9 @@
+require 'sprockets/http_utils'
 require 'sprockets/utils'
 
 module Sprockets
   module Transformers
-    include Utils
+    include HTTPUtils, Utils
 
     # Public: Two level mapping of a source mime type to a target mime type.
     #
