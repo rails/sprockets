@@ -1,7 +1,5 @@
 require 'source_map'
 require 'sprockets/engines'
-require 'sprockets/legacy_proc_processor'
-require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
 require 'sprockets/processor_utils'
 require 'sprockets/uri_utils'
