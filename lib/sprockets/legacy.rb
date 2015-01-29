@@ -1,5 +1,6 @@
 require 'sprockets/asset'
 require 'sprockets/base'
+require 'sprockets/cached_environment'
 require 'sprockets/context'
 require 'sprockets/manifest'
 require 'sprockets/resolve'
@@ -10,6 +11,9 @@ module Sprockets
   autoload :ERBTemplate, 'sprockets/erb_template'
   autoload :SassTemplate, 'sprockets/sass_template'
   autoload :ScssTemplate, 'sprockets/sass_template'
+
+  # Deprecated
+  Index = CachedEnvironment
 
   class Base
     include Resolve
