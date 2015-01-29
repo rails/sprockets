@@ -10,12 +10,11 @@ require 'sprockets/path_dependency_utils'
 require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
-require 'sprockets/uri_utils'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils, PathDependencyUtils, PathDigestUtils, DigestUtils, URIUtils
+    include PathUtils, PathDependencyUtils, PathDigestUtils, DigestUtils
     include Configuration
     include Server
     include Resolve, Loader
