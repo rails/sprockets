@@ -1,10 +1,11 @@
 require 'sprockets/utils'
+require 'sprockets/processor_utils'
 
 module Sprockets
   # `Compressing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Compressing
-    include Utils
+    include ProcessorUtils, Utils
 
     def compressors
       config[:compressors]
@@ -20,7 +21,7 @@ module Sprockets
     # Return CSS compressor or nil if none is set
     def css_compressor
       if defined? @css_compressor
-        unwrap_processor(@css_compressor)
+        @css_compressor
       end
     end
 
@@ -47,7 +48,7 @@ module Sprockets
     # Return JS compressor or nil if none is set
     def js_compressor
       if defined? @js_compressor
-        unwrap_processor(@js_compressor)
+        @js_compressor
       end
     end
 

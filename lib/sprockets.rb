@@ -10,22 +10,10 @@ module Sprockets
 
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
-  autoload :ClosureCompressor,       'sprockets/closure_compressor'
-  autoload :CoffeeScriptProcessor,   'sprockets/coffee_script_processor'
+  autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
   autoload :Context,                 'sprockets/context'
   autoload :DirectiveProcessor,      'sprockets/directive_processor'
-  autoload :EcoProcessor,            'sprockets/eco_processor'
-  autoload :EjsProcessor,            'sprockets/ejs_processor'
-  autoload :ERBProcessor,            'sprockets/erb_processor'
-  autoload :ERBTemplate,             'sprockets/erb_template'
-  autoload :ES6to5Processor,         'sprockets/es6to5_processor'
   autoload :FileReader,              'sprockets/file_reader'
-  autoload :JstProcessor,            'sprockets/jst_processor'
-  autoload :SassCompressor,          'sprockets/sass_compressor'
-  autoload :SassProcessor,           'sprockets/sass_processor'
-  autoload :ScssProcessor,           'sprockets/sass_processor'
-  autoload :UglifierCompressor,      'sprockets/uglifier_compressor'
-  autoload :YUICompressor,           'sprockets/yui_compressor'
 
   # Internal utilities
   autoload :ArgumentError,           'sprockets/errors'
@@ -36,9 +24,11 @@ module Sprockets
   autoload :Error,                   'sprockets/errors'
   autoload :FileNotFound,            'sprockets/errors'
   autoload :HTTPUtils,               'sprockets/http_utils'
-  autoload :LazyProcessor,           'sprockets/lazy_processor'
   autoload :PathUtils,               'sprockets/path_utils'
   autoload :Utils,                   'sprockets/utils'
+
+  require 'sprockets/processor_utils'
+  extend ProcessorUtils
 
   # Extend Sprockets module to provide global registry
   require 'sprockets/configuration'
@@ -144,42 +134,42 @@ module Sprockets
   }
   register_bundle_metadata_reducer 'application/javascript', :map, :+
 
-  register_compressor 'text/css', :sass, LazyProcessor.new(:SassCompressor) { SassCompressor }
-  register_compressor 'text/css', :scss, LazyProcessor.new(:SassCompressor) { SassCompressor }
-  register_compressor 'text/css', :yui, LazyProcessor.new(:YUICompressor) { YUICompressor }
-  register_compressor 'application/javascript', :closure, LazyProcessor.new(:ClosureCompressor) { ClosureCompressor }
-  register_compressor 'application/javascript', :uglifier, LazyProcessor.new(:UglifierCompressor) { UglifierCompressor }
-  register_compressor 'application/javascript', :uglify, LazyProcessor.new(:UglifierCompressor) { UglifierCompressor }
-  register_compressor 'application/javascript', :yui, LazyProcessor.new(:YUICompressor) { YUICompressor }
+  register_compressor 'text/css', :sass, autoload_processor(:SassCompressor, 'sprockets/sass_compressor')
+  register_compressor 'text/css', :scss, autoload_processor(:SassCompressor, 'sprockets/sass_compressor')
+  register_compressor 'text/css', :yui, autoload_processor(:YUICompressor, 'sprockets/yui_compressor')
+  register_compressor 'application/javascript', :closure, autoload_processor(:ClosureCompressor, 'sprockets/closure_compressor')
+  register_compressor 'application/javascript', :uglifier, autoload_processor(:UglifierCompressor, 'sprockets/uglifier_compressor')
+  register_compressor 'application/javascript', :uglify, autoload_processor(:UglifierCompressor, 'sprockets/uglifier_compressor')
+  register_compressor 'application/javascript', :yui, autoload_processor(:YUICompressor, 'sprockets/yui_compressor')
 
   # 6to5, TheFuture™ is now
   register_mime_type 'text/ecmascript-6', extensions: ['.es6'], charset: :unicode
-  register_transformer 'text/ecmascript-6', 'application/javascript',  LazyProcessor.new(:ES6to5Processor) { ES6to5Processor }
+  register_transformer 'text/ecmascript-6', 'application/javascript', autoload_processor(:ES6to5Processor, 'sprockets/es6to5_processor')
   register_preprocessor 'text/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
   # register_mime_type 'application/coffeescript+ruby', extensions: ['.coffee.erb', '.js.coffee.erb']
-  register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new(:CoffeeScriptProcessor) { CoffeeScriptProcessor }
+  register_transformer 'text/coffeescript', 'application/javascript', autoload_processor(:CoffeeScriptProcessor, 'sprockets/coffee_script_processor')
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
   # JST engines
-  register_engine '.jst',    LazyProcessor.new(:JstProcessor) { JstProcessor }, mime_type: 'application/javascript'
-  register_engine '.eco',    LazyProcessor.new(:EcoProcessor) { EcoProcessor },  mime_type: 'application/javascript'
-  register_engine '.ejs',    LazyProcessor.new(:EjsProcessor) { EjsProcessor },  mime_type: 'application/javascript'
+  register_engine '.jst', autoload_processor(:JstProcessor, 'sprockets/jst_processor'), mime_type: 'application/javascript'
+  register_engine '.eco', autoload_processor(:EcoProcessor, 'sprockets/eco_processor'), mime_type: 'application/javascript'
+  register_engine '.ejs', autoload_processor(:EjsProcessor, 'sprockets/ejs_processor'), mime_type: 'application/javascript'
 
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
   register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
   # register_mime_type 'text/sass+ruby', extensions: ['.sass.erb', '.css.sass.erb']
   # register_mime_type 'text/scss+ruby', extensions: ['.scss.erb', '.css.scss.erb']
-  register_transformer 'text/sass', 'text/css', LazyProcessor.new(:SassProcessor) { SassProcessor }
-  register_transformer 'text/scss', 'text/css', LazyProcessor.new(:ScssProcessor) { ScssProcessor }
+  register_transformer 'text/sass', 'text/css', autoload_processor(:SassProcessor, 'sprockets/sass_processor')
+  register_transformer 'text/scss', 'text/css', autoload_processor(:ScssProcessor, 'sprockets/sass_processor')
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Other
-  register_engine '.erb',    LazyProcessor.new(:ERBProcessor) { ERBProcessor }, mime_type: 'text/plain'
+  register_engine '.erb', autoload_processor(:ERBProcessor, 'sprockets/erb_processor'), mime_type: 'text/plain'
 
   register_dependency_resolver 'environment-version' do |env|
     env.version

@@ -2,6 +2,7 @@ require 'source_map'
 require 'sprockets/engines'
 require 'sprockets/lazy_processor'
 require 'sprockets/mime'
+require 'sprockets/processor_utils'
 require 'sprockets/uri_utils'
 require 'sprockets/utils'
 
@@ -9,7 +10,7 @@ module Sprockets
   # `Processing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Processing
-    include URIUtils, Utils
+    include ProcessorUtils, URIUtils, Utils
 
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
@@ -145,7 +146,7 @@ module Sprockets
     # mime_type - String MIME type
     #
     # Returns an Array of [initial, reducer_proc] pairs.
-    def unwrap_bundle_reducers(mime_type)
+    def load_bundle_reducers(mime_type)
       self.bundle_reducers['*/*'].merge(self.bundle_reducers[mime_type])
     end
 
@@ -171,22 +172,12 @@ module Sprockets
       end
     end
 
-    # Internal: Get processor defined cached key.
-    #
-    # processor - Processor function
-    #
-    # Returns JSON serializable key or nil.
-    def processor_cache_key(processor)
-      processor = unwrap_processor(processor)
-      processor.cache_key if processor.respond_to?(:cache_key)
-    end
-
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
         params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
         processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:skip_bundle])
-        processors.map { |processor| processor_cache_key(processor) }
+        processors_cache_keys(processors)
       end
 
       def build_processors_uri(type, file_type, engine_extnames, skip_bundle)
@@ -235,20 +226,11 @@ module Sprockets
         end
       end
 
-
       def unregister_config_processor(type, mime_type, proccessor)
         self.config = hash_reassoc(config, type, mime_type) do |processors|
           processors.delete(proccessor)
           processors
         end
-      end
-
-      def unwrap_processors(processors)
-        processors.map { |p| unwrap_processor(p) }
-      end
-
-      def unwrap_processor(processor)
-        processor.respond_to?(:unwrap) ? processor.unwrap : processor
       end
   end
 end
