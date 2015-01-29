@@ -81,6 +81,16 @@ module Sprockets
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
   register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: :unicode
 
+  # Ruby extensions
+  # register_mime_type 'application/css+ruby', extensions: ['.css.erb'], charset: :css
+  # register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
+  # register_mime_type 'application/javascript+ruby', extensions: ['.js.erb'], charset: :unicode
+  register_mime_type 'application/json+ruby', extensions: ['.json.erb'], charset: :unicode
+  # register_mime_type 'application/plain+ruby', extensions: ['.txt.erb', '.text.erb']
+  register_mime_type 'application/ruby', extensions: ['.rb']
+  register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
+  # register_mime_type 'application/yaml+ruby', extensions: ['.yml.erb', '.yaml.erb'], charset: :unicode
+
   # Common image types
   register_mime_type 'image/x-icon', extensions: ['.ico']
   register_mime_type 'image/bmp', extensions: ['.bmp']
@@ -148,7 +158,8 @@ module Sprockets
   register_preprocessor 'text/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Mmm, CoffeeScript
-  register_mime_type 'text/coffeescript', extensions: ['.coffee']
+  register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
+  # register_mime_type 'application/coffeescript+ruby', extensions: ['.coffee.erb', '.js.coffee.erb']
   register_transformer 'text/coffeescript', 'application/javascript', LazyProcessor.new(:CoffeeScriptProcessor) { CoffeeScriptProcessor }
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
@@ -158,8 +169,10 @@ module Sprockets
   register_engine '.ejs',    LazyProcessor.new(:EjsProcessor) { EjsProcessor },  mime_type: 'application/javascript'
 
   # CSS engines
-  register_mime_type 'text/sass', extensions: ['.sass']
-  register_mime_type 'text/scss', extensions: ['.scss']
+  register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
+  register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
+  # register_mime_type 'text/sass+ruby', extensions: ['.sass.erb', '.css.sass.erb']
+  # register_mime_type 'text/scss+ruby', extensions: ['.scss.erb', '.css.scss.erb']
   register_transformer 'text/sass', 'text/css', LazyProcessor.new(:SassProcessor) { SassProcessor }
   register_transformer 'text/scss', 'text/css', LazyProcessor.new(:ScssProcessor) { ScssProcessor }
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
