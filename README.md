@@ -339,7 +339,7 @@ For an example, in a CSS file you might reference an external image that always
 needs to be compiled along with the css file.
 
 ``` css
-/* link "logo.png" */
+/*= link "logo.png" */
 .logo {
   background-image: url(logo.png)
 }
