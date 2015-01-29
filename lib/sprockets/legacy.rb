@@ -1,4 +1,5 @@
 require 'sprockets/asset'
+require 'sprockets/base'
 require 'sprockets/context'
 require 'sprockets/manifest'
 require 'sprockets/resolve'
@@ -10,7 +11,7 @@ module Sprockets
   autoload :SassTemplate, 'sprockets/sass_template'
   autoload :ScssTemplate, 'sprockets/sass_template'
 
-  module Legacy
+  class Base
     include Resolve
 
     # Deprecated: Change default return type of resolve() to return 2.x
@@ -201,7 +202,7 @@ module Sprockets
     # Returns Time.
     def mtime
       Time.at(@mtime)
-    end    
+    end
   end
 
   class Context

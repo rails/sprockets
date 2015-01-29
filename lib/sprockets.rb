@@ -152,3 +152,5 @@ module Sprockets
   depend_on 'environment-version'
   depend_on 'environment-paths'
 end
+
+require 'sprockets/legacy'
