@@ -1,11 +1,10 @@
 require 'sprockets/utils'
-require 'sprockets/processor_utils'
 
 module Sprockets
   # `Compressing` is an internal mixin whose public methods are exposed on
   # the `Environment` and `CachedEnvironment` classes.
   module Compressing
-    include ProcessorUtils, Utils
+    include Utils
 
     def compressors
       config[:compressors]
