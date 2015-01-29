@@ -451,21 +451,24 @@ submit a pull request.
 
 **3.0.0**
 
+* New processor API. Tilt interface is deprecated.
+* Improved file store caching backend.
 * MIME Types now accept charset custom charset detecters. Improves support for UTF-16/32 files.
 * Environment#version no longer affects asset digests. Only used for busting the asset cache.
 * Removed builtin support for LESS.
-* Removed include directive support.
-* Deprecated BundledAsset#to_a. Use BundledAsset#included to access debugging subcomponents.
+* Removed `//= include` directive support.
+* Deprecated `BundledAsset#to_a`. Use `BundledAsset#included` to access debugging subcomponents.
 * Support circular dependencies. For parity with ES6 modules.
 * Manifest compilation will no longer generate .gz files by default. [Mixing
   Content-Encoding and ETags is just a bad
   idea](https://issues.apache.org/bugzilla/show_bug.cgi?id=39727)
-* Added linked or referenced assets. When an asset is compiled, any of its links
-  will be compiled as well.
+* Added linked or referenced assets. When an asset is compiled, any of its links will be compiled as well.
+* Introduce some limitations around enumerating all logical paths. 4.x will deprecate it and favor linked manifests for compliation.
 * Add Asset integrity attribute for Subresource Integrity
-* Default digest changed to SHA256. Configuring digest_class is deprecated.
-* Rename Asset#digest to Asset#hexdigest. Asset#digest is deprecated and will
+* Default digest changed to SHA256. Configuring `digest_class` is deprecated.
+* Rename `Asset#digest` to `Asset#hexdigest`. `Asset#digest` is deprecated and will
   return a raw byte String in 4.x.
+* Added transitional compatibility flag to `Environment#resolve(path, compat: true)`. 2.x mode operates with `compat: true` and 4.x with `compat: false`
 
 **2.12.3** (October 28, 2014)
 
