@@ -3,6 +3,12 @@ require 'sprockets/manifest'
 require 'sprockets/resolve'
 
 module Sprockets
+  autoload :EcoTemplate, 'sprockets/eco_template'
+  autoload :EjsTemplate, 'sprockets/ejs_template'
+  autoload :ERBTemplate, 'sprockets/erb_template'
+  autoload :SassTemplate, 'sprockets/sass_template'
+  autoload :ScssTemplate, 'sprockets/sass_template'
+
   module Legacy
     include Resolve
 

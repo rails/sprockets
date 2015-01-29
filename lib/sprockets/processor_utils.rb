@@ -1,3 +1,5 @@
+require 'sprockets/autoload_processor'
+
 module Sprockets
   # Functional utilities for dealing with Processor functions.
   #
@@ -14,13 +16,32 @@ module Sprockets
   module ProcessorUtils
     extend self
 
+    # Internal: Setup autoload and wrapper for lazy loaded processor.
+    #
+    #   Sprockets.autoload_processor :CoffeeScriptProcessor, 'sprockets/coffee_script_processor'
+    #
+    # mod      - Symbol name of processor class/module
+    # filename - String require path for module
+    #
+    # Returns AutoloadProcessor.
+    def autoload_processor(mod, filename)
+      autoload(mod, filename)
+      AutoloadProcessor.new(self, mod)
+    end
+
     # Public: Compose processors in right to left order.
     #
     # processors - Array of processors callables
     #
     # Returns a composed Proc.
     def compose_processors(*processors)
-      method(:call_processors).to_proc.curry[processors]
+      context = self
+      obj = method(:call_processors).to_proc.curry[processors]
+      metaclass = (class << obj; self; end)
+      metaclass.send(:define_method, :cache_key) do
+        context.processors_cache_keys(processors)
+      end
+      obj
     end
 
     # Public: Invoke list of processors in right to left order.
@@ -53,6 +74,24 @@ module Sprockets
       end
 
       metadata.merge(data: data)
+    end
+
+    # Internal: Get processor defined cached key.
+    #
+    # processor - Processor function
+    #
+    # Returns JSON serializable key or nil.
+    def processor_cache_key(processor)
+      processor.cache_key if processor.respond_to?(:cache_key)
+    end
+
+    # Internal: Get combined cache keys for set of processors.
+    #
+    # processors - Array of processor functions
+    #
+    # Returns Array of JSON serializable keys.
+    def processors_cache_keys(processors)
+      processors.map { |processor| processor_cache_key(processor) }
     end
   end
 end

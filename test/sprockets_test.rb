@@ -22,6 +22,12 @@ end
 
 # Popular extensions for testing but not part of Sprockets core
 
+module Sprockets
+  register_engine '.missing', autoload_processor(:MissingProcessor, 'sprockets/missing_processor')
+  register_postprocessor 'text/invalid', autoload_processor(:MissingProcessor, 'sprockets/missing_processor')
+  register_preprocessor 'text/invalid', autoload_processor(:MissingProcessor, 'sprockets/missing_processor')
+end
+
 Sprockets.register_dependency_resolver "rand" do
   rand(2**100)
 end

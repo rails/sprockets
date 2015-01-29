@@ -8,6 +8,18 @@ require 'sprockets/uglifier_compressor'
 class TestProcessorUtils < MiniTest::Test
   include Sprockets::ProcessorUtils
 
+  class Processor
+    def initialize(cache_key = nil, &block)
+      @cache_key, @proc = cache_key, block
+    end
+
+    attr_reader :cache_key
+
+    def call(*args)
+      @proc.call(*args)
+    end
+  end
+
   def test_compose_nothing
     a = compose_processors()
 
@@ -147,5 +159,64 @@ class TestProcessorUtils < MiniTest::Test
     assert_raises(TypeError) do
       b.call(input)
     end
+  end
+
+  def test_compose_class_processors
+    a = Processor.new { |input| { data: input[:data] + ",a" } }
+    b = Processor.new { |input| { data: input[:data] + ",b" } }
+    c = compose_processors(b, a)
+
+    input = { data: " " }
+    assert result = c.call(input)
+    assert_equal " ,a,b", result[:data]
+  end
+
+  def test_compose_processors_cache_keys
+    a = Processor.new("a")
+    b = Processor.new("b")
+    c = compose_processors(b, a)
+
+    assert_equal "a", a.cache_key
+    assert_equal "b", b.cache_key
+    assert_equal ["b", "a"], c.cache_key
+  end
+
+  def test_compose_processors_missing_cache_keys
+    a = Processor.new("a")
+    b = proc {}
+    c = Processor.new("c")
+    e = compose_processors(c, b, a)
+
+    assert_equal "a", a.cache_key
+    assert_equal "c", c.cache_key
+    assert_equal ["c", nil, "a"], e.cache_key
+  end
+
+  def test_multiple_array_compose_cache_keys
+    a = Processor.new("a")
+    b = Processor.new("b")
+    c = Processor.new("c")
+    d = Processor.new("d")
+    e = compose_processors(d, c, b, a)
+
+    assert_equal "a", a.cache_key
+    assert_equal "b", b.cache_key
+    assert_equal "c", c.cache_key
+    assert_equal "d", d.cache_key
+    assert_equal ["d", "c", "b", "a"], e.cache_key
+  end
+
+  def test_multiple_functional_compose_cache_keys
+    a = Processor.new("a")
+    b = Processor.new("b")
+    c = Processor.new("c")
+    d = Processor.new("d")
+    e = compose_processors(d, compose_processors(c, compose_processors(b, compose_processors(a))))
+
+    assert_equal "a", a.cache_key
+    assert_equal "b", b.cache_key
+    assert_equal "c", c.cache_key
+    assert_equal "d", d.cache_key
+    assert_equal ["d", ["c", ["b", ["a"]]]], e.cache_key
   end
 end

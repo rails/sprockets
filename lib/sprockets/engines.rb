@@ -54,7 +54,7 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
-      if klass.class == Sprockets::LazyProcessor || klass.respond_to?(:call)
+      if klass.class == Sprockets::AutoloadProcessor || klass.respond_to?(:call)
         processor = klass
         self.config = hash_reassoc(config, :engines) do |engines|
           engines.merge(ext => klass)

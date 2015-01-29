@@ -91,7 +91,6 @@ module Sprockets
 
         skip_bundle = params[:skip_bundle]
         processors = processors_for(type, file_type, engine_extnames, skip_bundle)
-        processors = unwrap_processors(processors)
 
         processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
         dependencies = self.dependencies + [processors_dep_uri]

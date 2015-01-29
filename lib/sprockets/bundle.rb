@@ -28,7 +28,7 @@ module Sprockets
         dependencies.merge(env.load(uri).metadata[:dependencies])
       end
 
-      env.process_bundle_reducers(assets, env.unwrap_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
+      env.process_bundle_reducers(assets, env.load_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
     end
   end
 end
