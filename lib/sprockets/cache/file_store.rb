@@ -1,6 +1,7 @@
-require 'digest/md5'
 require 'fileutils'
 require 'logger'
+require 'sprockets/encoding_utils'
+require 'sprockets/path_utils'
 require 'zlib'
 
 module Sprockets
