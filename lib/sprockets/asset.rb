@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'sprockets/digest_utils'
 
 module Sprockets
   class Asset
