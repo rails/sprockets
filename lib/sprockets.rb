@@ -153,8 +153,6 @@ module Sprockets
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
   # JST engines
-  register_mime_type 'text/eco', extensions: ['.eco']
-  register_mime_type 'text/ejs', extensions: ['.ejs']
   register_engine '.jst',    LazyProcessor.new(:JstProcessor) { JstProcessor }, mime_type: 'application/javascript'
   register_engine '.eco',    LazyProcessor.new(:EcoProcessor) { EcoProcessor },  mime_type: 'application/javascript'
   register_engine '.ejs',    LazyProcessor.new(:EjsProcessor) { EjsProcessor },  mime_type: 'application/javascript'

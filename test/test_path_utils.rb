@@ -131,6 +131,35 @@ class TestPathUtils < MiniTest::Test
     assert_equal [".min", ".js", ".erb"], path_extnames("jquery.min.js.erb")
   end
 
+  def test_match_path_extname
+    extensions = { ".txt" => "text/plain" }
+    assert_equal [".txt", "text/plain"], match_path_extname("hello.txt", extensions)
+    assert_equal [".txt", "text/plain"], match_path_extname("sub/hello.txt", extensions)
+    refute match_path_extname("hello.text", extensions)
+
+    extensions = { ".js" => "application/javascript" }
+    assert_equal [".js", "application/javascript"], match_path_extname("jquery.js", extensions)
+    assert_equal [".js", "application/javascript"], match_path_extname("jquery.min.js", extensions)
+    refute match_path_extname("jquery.js.erb", extensions)
+    refute match_path_extname("jquery.min.js.erb", extensions)
+
+    extensions = { ".js" => "application/javascript", ".js.erb" => "application/javascript+ruby" }
+    assert_equal [".js", "application/javascript"], match_path_extname("jquery.js", extensions)
+    assert_equal [".js", "application/javascript"], match_path_extname("jquery.min.js", extensions)
+    assert_equal [".js.erb", "application/javascript+ruby"], match_path_extname("jquery.js.erb", extensions)
+    assert_equal [".js.erb", "application/javascript+ruby"], match_path_extname("jquery.min.js.erb", extensions)
+    refute match_path_extname("jquery.min.coffee.erb", extensions)
+
+    extensions = { ".js.map" => "application/json", ".css.map" => "application/json" }
+    assert_equal [".js.map", "application/json"], match_path_extname("jquery.js.map", extensions)
+    assert_equal [".js.map", "application/json"], match_path_extname("jquery.min.js.map", extensions)
+    assert_equal [".css.map", "application/json"], match_path_extname("jquery-ui.css.map", extensions)
+    assert_equal [".css.map", "application/json"], match_path_extname("jquery-ui.min.css.map", extensions)
+    refute match_path_extname("jquery.map", extensions)
+    refute match_path_extname("jquery.map.js", extensions)
+    refute match_path_extname("jquery.map.css", extensions)
+  end
+
   def test_path_parents
     root = File.expand_path("../..", __FILE__)
 

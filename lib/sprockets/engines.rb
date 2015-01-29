@@ -58,6 +58,10 @@ module Sprockets
           mime_types.merge(ext.to_s => options[:mime_type])
         end
       end
+
+      self.config = hash_reassoc(config, :_extnames) do
+        compute_extname_map
+      end
     end
   end
 end

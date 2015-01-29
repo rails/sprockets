@@ -30,7 +30,7 @@ NoopProcessor = proc { |input| input[:data] }
 Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
 Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html'
 
-Sprockets.register_mime_type 'text/ng-template', extensions: ['.ngt']
+# Sprockets.register_mime_type 'text/ng-template', extensions: ['.ngt']
 AngularProcessor = proc { |input|
   <<-EOS
 $app.run(function($templateCache) {
@@ -50,7 +50,6 @@ Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
 Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript'
 
 require 'nokogiri'
-Sprockets.register_mime_type 'application/ruby+builder', extensions: ['.builder']
 
 HtmlBuilderProcessor = proc { |input|
   instance_eval <<-EOS
@@ -60,7 +59,8 @@ HtmlBuilderProcessor = proc { |input|
     builder.to_html
   EOS
 }
-Sprockets.register_engine '.builder', HtmlBuilderProcessor, mime_type: 'text/html'
+Sprockets.register_mime_type 'application/html+builder', extensions: ['.html.builder']
+Sprockets.register_transformer 'application/html+builder', 'text/html', HtmlBuilderProcessor
 
 XmlBuilderProcessor = proc { |input|
   instance_eval <<-EOS
@@ -70,7 +70,8 @@ XmlBuilderProcessor = proc { |input|
     builder.to_xml
   EOS
 }
-# Sprockets.register_engine '.builder', XmlBuilderProcessor, mime_type: 'application/xml'
+Sprockets.register_mime_type 'application/xml+builder', extensions: ['.xml.builder']
+Sprockets.register_transformer 'application/xml+builder', 'application/xml', XmlBuilderProcessor
 
 require 'sprockets/jst_processor'
 Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'
@@ -95,6 +96,30 @@ Sprockets.register_bundle_metadata_reducer 'text/css', :selector_count, :+
 Sprockets.register_postprocessor 'text/css', proc { |input|
   { selector_count: input[:data].scan(/\{/).size }
 }
+
+SourceMapTransformer = proc { |input|
+  accept = case input[:content_type]
+  when "application/js-sourcemap+json"
+    accept = "application/javascript"
+  when "application/css-sourcemap+json"
+    accept = "text/css"
+  else
+    fail input[:content_type]
+  end
+
+  uri, _ = input[:environment].resolve!(input[:filename], accept: accept)
+  asset = input[:environment].load(uri)
+
+  JSON.generate({
+    "version" => 3,
+    "file" => asset.logical_path,
+    "mappings" => ";#{asset.bytesize}"
+  })
+}
+Sprockets.register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map']
+Sprockets.register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map']
+Sprockets.register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapTransformer
+Sprockets.register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapTransformer
 
 
 class Sprockets::TestCase < MiniTest::Test

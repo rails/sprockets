@@ -124,6 +124,25 @@ module Sprockets
       File.basename(path).scan(/\.[^.]+/)
     end
 
+    # Internal: Match path extnames against available extensions.
+    #
+    # path       - String
+    # extensions - Hash of String extnames to values
+    #
+    # Returns [String extname, Object value] or nil nothing matched.
+    def match_path_extname(path, extensions)
+      match, key = nil, ""
+      path_extnames(path).reverse_each do |extname|
+        key.prepend(extname)
+        if value = extensions[key]
+          match = [key.dup, value]
+        elsif match
+          break
+        end
+      end
+      match
+    end
+
     # Internal: Returns all parents for path
     #
     # path - String absolute filename or directory
