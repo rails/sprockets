@@ -175,10 +175,7 @@ module Sprockets
     #
     # Returns String.
     def inspect
-      "#<#{self.class}:#{id} " +
-        "filename=#{filename.inspect}, " +
-        "digest=#{digest.inspect}" +
-        ">"
+      "#<#{self.class}:#{object_id} #{uri.inspect}>"
     end
 
     # Public: Implements Object#hash so Assets can be used as a Hash key or
