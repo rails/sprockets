@@ -1,3 +1,4 @@
+require 'pathname'
 require 'sprockets/asset'
 require 'sprockets/base'
 require 'sprockets/cached_environment'

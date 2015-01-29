@@ -1,6 +1,4 @@
-require 'base64'
 require 'fileutils'
-require 'pathname'
 
 module Sprockets
   class Asset
