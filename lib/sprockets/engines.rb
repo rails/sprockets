@@ -1,4 +1,3 @@
-require 'sprockets/lazy_processor'
 require 'sprockets/legacy_tilt_processor'
 require 'sprockets/utils'
 
