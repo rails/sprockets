@@ -70,7 +70,7 @@ module Sprockets
         mime_types.merge(mime_type => type)
       end
 
-      self.config = hash_reassoc(config, :precomputed_extnames) do
+      self.config = hash_reassoc(config, :_extnames) do
         compute_extname_map
       end
     end
@@ -105,21 +105,21 @@ module Sprockets
       end
     end
 
-    def compute_extname_map
-      graph = {}
+    private
+      def compute_extname_map
+        graph = {}
 
-      ([[nil, nil]] + mime_exts.to_a).each do |format_extname, format_type|
-        3.times do |n|
-          engines.keys.permutation(n).each do |engine_extnames|
-            key = "#{format_extname}#{engine_extnames.join}"
-            type = format_type || engine_mime_types[engine_extnames.first]
-            graph[key] = {type: type, engines: engine_extnames}
+        ([[nil, nil]] + mime_exts.to_a).each do |format_extname, format_type|
+          3.times do |n|
+            engines.keys.permutation(n).each do |engine_extnames|
+              key = "#{format_extname}#{engine_extnames.join}"
+              type = format_type || engine_mime_types[engine_extnames.first]
+              graph[key] = {type: type, engines: engine_extnames}
+            end
           end
         end
+
+        graph
       end
-
-      graph
-    end
-
   end
 end

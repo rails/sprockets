@@ -185,7 +185,7 @@ module Sprockets
       #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)
-        extname, value = match_path_extname(path, config[:precomputed_extnames])
+        extname, value = match_path_extname(path, config[:_extnames])
         if extname
           name = path[0...-extname.length]
           return name, value[:type], value[:engines]
