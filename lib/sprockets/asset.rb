@@ -171,7 +171,7 @@ module Sprockets
     #
     # Returns String.
     def inspect
-      "#<#{self.class}:#{object_id} #{uri.inspect}>"
+      "#<#{self.class}:#{object_id.to_s(16)} #{uri.inspect}>"
     end
 
     # Public: Implements Object#hash so Assets can be used as a Hash key or

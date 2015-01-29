@@ -1,5 +1,5 @@
-require 'sprockets/digest_utils'
 require 'logger'
+require 'sprockets/digest_utils'
 
 module Sprockets
   # Public: Wrapper interface to backend cache stores. Ensures a consistent API

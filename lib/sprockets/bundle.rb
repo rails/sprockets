@@ -1,3 +1,4 @@
+require 'set'
 require 'sprockets/utils'
 
 module Sprockets
