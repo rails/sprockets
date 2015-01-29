@@ -49,13 +49,6 @@ module Sprockets
     # Public: Returns String path of asset.
     attr_reader :filename
 
-    # Deprecated: Use #filename instead.
-    #
-    # Returns Pathname.
-    def pathname
-      @pathname ||= Pathname.new(filename)
-    end
-
     # Internal: Unique asset object ID.
     #
     # Returns a String.
@@ -97,36 +90,6 @@ module Sprockets
       metadata[:included]
     end
 
-    # Deprecated: Expand asset into an `Array` of parts.
-    #
-    # Appending all of an assets body parts together should give you
-    # the asset's contents as a whole.
-    #
-    # This allows you to link to individual files for debugging
-    # purposes.
-    #
-    # Use Asset#included instead. Keeping a full copy of the bundle's processed
-    # assets in memory (and in cache) is expensive and redundant. The common use
-    # case is to relink to the assets anyway.
-    #
-    # Returns Array of Assets.
-    def to_a
-      if metadata[:included]
-        metadata[:included].map { |uri| @environment.load(uri) }
-      else
-        [self]
-      end
-    end
-
-    # Deprecated: Get all required Assets.
-    #
-    # See Asset#to_a
-    #
-    # Returns Array of Assets.
-    def dependencies
-      to_a.reject { |a| a.filename.eql?(self.filename) }
-    end
-
     # Public: Return `String` of concatenated source.
     #
     # Returns String.
@@ -158,15 +121,6 @@ module Sprockets
       metadata[:length]
     end
     alias_method :bytesize, :length
-
-    # Deprecated: Returns Time of the last time the source was modified.
-    #
-    # Time resolution is normalized to the nearest second.
-    #
-    # Returns Time.
-    def mtime
-      Time.at(@mtime)
-    end
 
     # Public: Returns String hexdigest of source.
     def hexdigest
