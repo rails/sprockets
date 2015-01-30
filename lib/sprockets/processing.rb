@@ -202,7 +202,9 @@ module Sprockets
           processors += config[:postprocessors][type]
 
           if type != file_type && processor = transformers[file_type][type]
+            processors += config[:preprocessors][type]
             processors += [processor]
+            processors += config[:postprocessors][file_type]
           end
 
           processors += engine_extnames.map { |ext| engines[ext] }
