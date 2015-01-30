@@ -20,18 +20,16 @@ module Sprockets
     #     # => "file:///path/to/app/javascripts/application.coffee?type=application/javascript"
     #
     # The String Asset URI is returned or nil if no results are found.
-    def resolve(path, options = {})
-      path = path.to_s
-      paths = options[:load_paths] || self.paths
-      accept = options[:accept]
-      skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
+    def resolve(path, load_paths: self.paths, accept: nil, bundle: true, base_path: nil)
+      paths = load_paths
+      skip_bundle = !bundle
 
       if valid_asset_uri?(path)
         resolve_asset_uri(path)
       elsif absolute_path?(path)
         resolve_absolute_path(paths, path, accept, skip_bundle)
       elsif relative_path?(path)
-        resolve_relative_path(paths, path, options[:base_path], accept, skip_bundle)
+        resolve_relative_path(paths, path, base_path, accept, skip_bundle)
       else
         resolve_logical_path(paths, path, accept, skip_bundle)
       end
@@ -39,12 +37,12 @@ module Sprockets
 
     # Public: Same as resolve() but raises a FileNotFound exception instead of
     # nil if no assets are found.
-    def resolve!(path, options = {})
-      uri, deps = resolve(path, options)
+    def resolve!(path, **kargs)
+      uri, deps = resolve(path, **kargs)
 
       unless uri
         message = "couldn't find file '#{path}'"
-        message << " with type '#{options[:accept]}'" if options[:accept]
+        message << " with type '#{kargs[:accept]}'" if kargs[:accept]
         raise FileNotFound, message
       end
 
