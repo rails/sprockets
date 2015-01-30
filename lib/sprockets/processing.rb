@@ -16,6 +16,7 @@ module Sprockets
     def preprocessors
       config[:preprocessors]
     end
+    alias_method :processors, :preprocessors
 
     # Postprocessors are ran after Preprocessors and Engine processors.
     def postprocessors
@@ -35,6 +36,7 @@ module Sprockets
     def register_preprocessor(*args, &block)
       register_config_processor(:preprocessors, *args, &block)
     end
+    alias_method :register_processor, :register_preprocessor
 
     # Registers a new Postprocessor `klass` for `mime_type`.
     #
@@ -57,6 +59,7 @@ module Sprockets
     def unregister_preprocessor(*args)
       unregister_config_processor(:preprocessors, *args)
     end
+    alias_method :unregister_processor, :unregister_preprocessor
 
     # Remove Postprocessor `klass` for `mime_type`.
     #
@@ -201,7 +204,9 @@ module Sprockets
           processors += config[:postprocessors][type]
 
           if type != file_type && processor = transformers[file_type][type]
+            processors += config[:preprocessors][type]
             processors += [processor]
+            processors += config[:postprocessors][file_type]
           end
 
           processors += engine_extnames.map { |ext| engines[ext] }

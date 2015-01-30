@@ -552,7 +552,7 @@ class TestEnvironment < Sprockets::TestCase
 
     assert asset = @env.find_asset("logo.png")
     assert_equal "image/png", asset.content_type
-    assert_equal [:pre_svg, :post_png], asset.metadata[:test]
+    assert_equal [:pre_svg, :post_svg, :pre_png, :post_png], asset.metadata[:test]
   end
 
   test "access selector count metadata" do
