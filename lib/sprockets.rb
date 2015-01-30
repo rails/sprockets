@@ -51,7 +51,7 @@ module Sprockets
     paths: [].freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
-    root: File.expand_path('..', __FILE__).freeze,
+    root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""
   }.freeze
