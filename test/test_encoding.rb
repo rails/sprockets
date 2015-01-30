@@ -1,4 +1,3 @@
-# encoding: utf-8
 require "sprockets_test"
 
 class AssetEncodingTest < Sprockets::TestCase
