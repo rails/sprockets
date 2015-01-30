@@ -42,10 +42,6 @@ module Sprockets
         return forbidden_response
       end
 
-      # Look up the asset.
-      options = {}
-      options[:bundle] = !body_only?(env)
-
       if fingerprint
         if_match = fingerprint
       elsif env['HTTP_IF_MATCH']
@@ -56,7 +52,8 @@ module Sprockets
         if_none_match = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
       end
 
-      asset = find_asset(path, options)
+      # Look up the asset.
+      asset = find_asset(path, bundle: !body_only?(env))
 
       if asset.nil?
         status = :not_found

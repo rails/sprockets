@@ -33,8 +33,8 @@ module Sprockets
       instance.call(input)
     end
 
-    def initialize(options = {})
-      @namespace = options[:namespace] || self.class.default_namespace
+    def initialize(namespace: self.class.default_namespace)
+      @namespace = namespace
     end
 
     def call(input)

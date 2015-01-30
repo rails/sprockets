@@ -666,7 +666,7 @@ class TestCached < Sprockets::TestCase
 
   test "does not allow new mime types to be added" do
     assert_raises RuntimeError do
-      @env.register_mime_type "application/javascript", ".jst"
+      @env.register_mime_type "application/javascript", extensions: [".jst"]
     end
   end
 

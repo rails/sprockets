@@ -74,13 +74,13 @@ module Sprockets
     #     resolve("./bar.js")
     #     # => "file:///path/to/app/javascripts/bar.js?type=application/javascript"
     #
-    # path - String logical or absolute path
-    # options
-    #   accept - String content accept type
+    # path   - String logical or absolute path
+    # accept - String content accept type
     #
     # Returns an Asset URI String.
-    def resolve(path, options = {})
-      uri, deps = environment.resolve!(path, options.merge(base_path: @dirname))
+    def resolve(path, **kargs)
+      kargs[:base_path] = @dirname
+      uri, deps = environment.resolve!(path, **kargs)
       @dependencies.merge(deps)
       uri
     end
