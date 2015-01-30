@@ -36,22 +36,15 @@ module Sprockets
 
     # Public: Register a new mime type.
     #
-    # mime_type - String MIME Type
-    # options - Hash
-    #   extensions: Array of String extnames
-    #   charset: Proc/Method that detects the charset of a file.
-    #            See EncodingUtils.
+    # mime_type  - String MIME Type
+    # extensions - Array of String extnames
+    # charset    - Proc/Method that detects the charset of a file.
+    #              See EncodingUtils.
     #
     # Returns nothing.
-    def register_mime_type(mime_type, options = {})
-      # Legacy extension argument, will be removed from 4.x
-      if options.is_a?(String)
-        options = { extensions: [options] }
-      end
+    def register_mime_type(mime_type, extensions: [], charset: nil)
+      extnames = Array(extensions)
 
-      extnames = Array(options[:extensions])
-
-      charset = options[:charset]
       charset ||= :default if mime_type.start_with?('text/')
       charset = EncodingUtils::CHARSET_DETECT[charset] if charset.is_a?(Symbol)
 

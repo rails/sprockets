@@ -48,13 +48,13 @@ module Sprockets
     #
     #     environment.register_engine '.coffee', CoffeeScriptProcessor
     #
-    def register_engine(ext, klass, options = {})
+    def register_engine(ext, klass, mime_type: nil)
       self.config = hash_reassoc(config, :engines) do |engines|
         engines.merge(ext => klass)
       end
-      if options[:mime_type]
+      if mime_type
         self.config = hash_reassoc(config, :engine_mime_types) do |mime_types|
-          mime_types.merge(ext.to_s => options[:mime_type])
+          mime_types.merge(ext.to_s => mime_type)
         end
       end
 
