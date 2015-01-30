@@ -90,3 +90,109 @@ versions of any Sprockets extensions so they opt into these new cache APIs.
 
 You can replace this with ERB usage `<%= environment.find_asset("foo") %>`. This
 will also allow you to put the contents anywhere you want in the file.
+
+## Extension Changes
+
+If you're a Sprockets plugin author you should definitely take some time to
+migrate to the new processor API. You can relax for now since 3.x will still
+support the old Tilt interface. 4.x will be the hard break away. Hopefully our
+existing extensions still work on both 2.x and 3.x (unless you're using private
+apis or monkey patching things).
+
+So whats wrong with Tilt, why bother?
+
+It was probably a good decision at the time, but we've out grown the constraints
+of the Tilt template interface. After all, it was primarily designed for dynamic
+HTML template engines, not assets like JS and CSS or binary assets like images.
+Sprockets would like to have other metadata passed between processors besides
+simple Strings. Passing source maps was one of the primary motivators.
+
+Instead of a Tilt template interface, we now have a uniform Processor interface
+across every part of the pipeline.
+
+Similar to Rack, a processor is a any "callable" (an object that responds to
+`call`). This maybe a simple Proc or a full class that defines a `def
+self.call(input)` method. The `call` method accepts an `input` Hash and returns
+a Hash of metadata.
+
+If you just care about modifying the input data, the simplest processor looks
+like
+
+``` ruby
+proc do |input|
+  # Take input data, remove all semicolons and return a string
+  input[:data].gsub(";", "")
+end
+```
+
+A `proc` works well for quick user defined processors, but you might want to use
+a full class for your extension.
+
+``` ruby
+class MyProcessor
+  def initialize(options = {})
+    @options = options
+  end
+
+  def call(input)
+  end
+end
+
+# A initializer pattern can allow users to configure application specific
+# options for your processor
+MyProcessor.new(style: :minimal)
+```
+
+`call(input)` is the only required method to implement, you can also provide a
+`cache_key` method. This allows the processor to bust asset caches after a
+library upgrade or configuration changes.
+
+``` ruby
+class MyProcessor
+  def initialize(options = {})
+    @options = options
+  end
+
+  def cache_key
+    ['3', @options]
+  end
+
+  def call(input)
+  end
+end
+```
+
+`cache_key` may return any simple JSON serializable value to use to
+differentiate caches. This may just be a static version identifier you change
+every gem release or configuration options declared on setup.
+
+Heres a pretty standard processor boilerplate thats used internally for
+Sprockets.
+
+``` ruby
+class MyProcessor
+  VERSION = '3'
+
+  def self.instance
+    @instance ||= new
+  end
+
+  def self.call(input)
+    instance.call(input)
+  end
+
+  def self.cache_key
+    instance.cache_key
+  end
+
+  attr_reader :cache_key
+
+  def initialize(options = {})
+    @cache_key = [self.class.name, VERSION, options].freeze
+  end
+
+  def call(input)
+    # process input
+  end
+end
+```
