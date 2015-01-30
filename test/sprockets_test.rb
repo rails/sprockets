@@ -129,7 +129,7 @@ Sprockets.register_transformer 'text/css', 'application/css-sourcemap+json', Sou
 
 
 class Sprockets::TestCase < MiniTest::Test
-  FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
+  FIXTURE_ROOT = File.join(__dir__, "fixtures")
 
   def self.test(name, &block)
     define_method("test_#{name.inspect}", &block)
