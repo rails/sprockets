@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "uglifier", "~> 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"
 
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0.0'
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
