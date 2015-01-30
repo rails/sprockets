@@ -107,6 +107,12 @@ module Sprockets
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/font-woff', extensions: ['.woff']
 
+  require 'sprockets/source_map_processor'
+  register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map']
+  register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map']
+  register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapProcessor
+  register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapProcessor
+
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
