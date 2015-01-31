@@ -40,7 +40,6 @@ class TestSourceMaps < Sprockets::TestCase
     assert_match "(function() {", asset.source
     assert_match "Math.sqrt", asset.source
 
-    skip "Needs multistep transformers"
     assert asset = @env.find_asset("coffee/main.js.map")
     assert_equal fixture_path('source-maps/coffee/main.coffee'), asset.filename
 
@@ -80,7 +79,6 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert_match "nav a {", asset.source
 
-    skip "Needs multistep transformers"
     asset = silence_warnings do
       @env.find_asset("sass/main.css.map")
     end
