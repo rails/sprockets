@@ -39,9 +39,9 @@ module Sprockets
   self.config = {
     bundle_processors: Hash.new { |h, k| [].freeze }.freeze,
     bundle_reducers: Hash.new { |h, k| {}.freeze }.freeze,
+    compressors: Hash.new { |h, k| {}.freeze }.freeze,
     dependencies: Set.new.freeze,
     dependency_resolvers: {}.freeze,
-    compressors: Hash.new { |h, k| {}.freeze }.freeze,
     digest_class: Digest::SHA256,
     engine_mime_types: {}.freeze,
     engines: {}.freeze,
@@ -51,6 +51,7 @@ module Sprockets
     paths: [].freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
+    registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
     root: File.expand_path('..', __FILE__).freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""
