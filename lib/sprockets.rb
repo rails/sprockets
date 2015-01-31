@@ -73,14 +73,14 @@ module Sprockets
   register_mime_type 'text/yaml', extensions: ['.yml', '.yaml'], charset: :unicode
 
   # Ruby extensions
-  # register_mime_type 'application/css+ruby', extensions: ['.css.erb'], charset: :css
-  # register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
-  # register_mime_type 'application/javascript+ruby', extensions: ['.js.erb'], charset: :unicode
+  register_mime_type 'application/css+ruby', extensions: ['.css.erb'], charset: :css
+  register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
+  register_mime_type 'application/javascript+ruby', extensions: ['.js.erb'], charset: :unicode
   register_mime_type 'application/json+ruby', extensions: ['.json.erb'], charset: :unicode
-  # register_mime_type 'application/plain+ruby', extensions: ['.txt.erb', '.text.erb']
+  register_mime_type 'application/plain+ruby', extensions: ['.txt.erb', '.text.erb']
   register_mime_type 'application/ruby', extensions: ['.rb']
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
-  # register_mime_type 'application/yaml+ruby', extensions: ['.yml.erb', '.yaml.erb'], charset: :unicode
+  register_mime_type 'application/yaml+ruby', extensions: ['.yml.erb', '.yaml.erb'], charset: :unicode
 
   # Common image types
   register_mime_type 'image/x-icon', extensions: ['.ico']
@@ -156,7 +156,7 @@ module Sprockets
 
   # Mmm, CoffeeScript
   register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
-  # register_mime_type 'application/coffeescript+ruby', extensions: ['.coffee.erb', '.js.coffee.erb']
+  register_mime_type 'application/coffeescript+ruby', extensions: ['.coffee.erb', '.js.coffee.erb']
   register_transformer 'text/coffeescript', 'application/javascript', autoload_processor(:CoffeeScriptProcessor, 'sprockets/coffee_script_processor')
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
@@ -170,15 +170,20 @@ module Sprockets
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
   register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
-  # register_mime_type 'text/sass+ruby', extensions: ['.sass.erb', '.css.sass.erb']
-  # register_mime_type 'text/scss+ruby', extensions: ['.scss.erb', '.css.scss.erb']
+  register_mime_type 'text/sass+ruby', extensions: ['.sass.erb', '.css.sass.erb']
+  register_mime_type 'text/scss+ruby', extensions: ['.scss.erb', '.css.scss.erb']
   register_transformer 'text/sass', 'text/css', autoload_processor(:SassProcessor, 'sprockets/sass_processor')
   register_transformer 'text/scss', 'text/css', autoload_processor(:ScssProcessor, 'sprockets/sass_processor')
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
-  # Other
-  register_engine '.erb', autoload_processor(:ERBProcessor, 'sprockets/erb_processor'), mime_type: 'text/plain'
+  # ERB
+  register_transformer 'application/coffeescript+ruby', 'text/coffeescript', autoload_processor(:ERBProcessor, 'sprockets/erb_processor')
+  register_transformer 'application/css+ruby', 'text/css', autoload_processor(:ERBProcessor, 'sprockets/erb_processor')
+  register_transformer 'application/html+ruby', 'text/html', autoload_processor(:ERBProcessor, 'sprockets/erb_processor')
+  register_transformer 'application/javascript+ruby', 'application/javascript', autoload_processor(:ERBProcessor, 'sprockets/erb_processor')
+  register_transformer 'application/plain+ruby', 'text/plain', autoload_processor(:ERBProcessor, 'sprockets/erb_processor')
+  register_transformer 'application/yaml+ruby', 'text/yaml', autoload_processor(:ERBProcessor, 'sprockets/erb_processor')
 
   register_dependency_resolver 'environment-version' do |env|
     env.version

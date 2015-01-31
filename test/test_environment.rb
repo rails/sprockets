@@ -70,7 +70,7 @@ module EnvironmentTests
     assert_equal fixture_path('default/gallery.js'), asset.filename
 
     assert asset = @env.find_asset("gallery", accept: 'text/css, application/javascript')
-    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+    assert_equal fixture_path('default/gallery.js'), asset.filename
 
     assert asset = @env.find_asset("coffee/foo", accept: "application/javascript")
     assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
@@ -237,22 +237,22 @@ module EnvironmentTests
   end
 
   test "find erb assets" do
-    assert asset = @env.find_asset("erb/a")
-    assert_equal "text/plain", asset.content_type
-
-    assert asset = @env.find_asset("erb/b")
-    assert_equal "text/plain", asset.content_type
-
-    assert asset = @env.find_asset("erb/c")
-    assert_equal "application/javascript", asset.content_type
-
-    assert asset = @env.find_asset("erb/d")
-    assert_equal "text/css", asset.content_type
-
-    assert asset = @env.find_asset("erb/e")
+    assert asset = @env.find_asset("erb/a.html")
     assert_equal "text/html", asset.content_type
 
-    assert asset = @env.find_asset("erb/f")
+    assert asset = @env.find_asset("erb/b.txt")
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("erb/c.js")
+    assert_equal "application/javascript", asset.content_type
+
+    assert asset = @env.find_asset("erb/d.css")
+    assert_equal "text/css", asset.content_type
+
+    assert asset = @env.find_asset("erb/e.html")
+    assert_equal "text/html", asset.content_type
+
+    assert asset = @env.find_asset("erb/f.yaml")
     assert_equal "text/yaml", asset.content_type
   end
 
