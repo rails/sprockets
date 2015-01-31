@@ -52,15 +52,6 @@ module EnvironmentTests
     assert_equal "hello2: world\n", context.call("JST2['hello2']", :name => "world")
   end
 
-  test "angular templates" do
-    assert asset = @env["ng-view.js"]
-    assert_equal <<-JS, asset.to_s
-$app.run(function($templateCache) {
-  $templateCache.put('ng-view.html', "<div ng-view></div>");
-});
-    JS
-  end
-
   test "asset_data_uri helper" do
     assert asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s

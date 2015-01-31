@@ -34,26 +34,16 @@ end
 
 NoopProcessor = proc { |input| input[:data] }
 Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
-Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html'
-
-# Sprockets.register_mime_type 'text/ng-template', extensions: ['.ngt']
-AngularProcessor = proc { |input|
-  <<-EOS
-$app.run(function($templateCache) {
-  $templateCache.put('#{input[:name]}.html', #{input[:data].chomp.inspect});
-});
-  EOS
-}
-Sprockets.register_engine '.ngt', AngularProcessor, mime_type: 'application/javascript'
+Sprockets.register_transformer 'text/haml', 'text/html', NoopProcessor
 
 Sprockets.register_mime_type 'text/mustache', extensions: ['.mustache']
-Sprockets.register_engine '.mustache', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_transformer 'text/mustache', 'application/javascript-function', NoopProcessor
 
 Sprockets.register_mime_type 'text/x-handlebars-template', extensions: ['.handlebars']
-Sprockets.register_engine '.handlebars', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_transformer 'text/x-handlebars-template', 'application/javascript-function', NoopProcessor
 
 Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
-Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_transformer 'application/dart', 'application/javascript', NoopProcessor
 
 require 'nokogiri'
 

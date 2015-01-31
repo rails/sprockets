@@ -1044,10 +1044,6 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee", accept: "application/javascript")
     assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee", accept: "application/javascript")
 
-    assert_equal "foo-ng.js", logical_path("foo-ng.ngt")
-    assert_equal "bar-ng.js", logical_path("bar-ng.ngt.haml")
-    assert_equal "baz-ng.js", logical_path("baz-ng.js.ngt")
-
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
     assert_equal "traceur.js", logical_path("traceur.es6", accept: "application/javascript")
   end
@@ -1109,10 +1105,6 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("all.coffee/plain.js")
     assert_equal "application/javascript", content_type("all.coffee/hot.coffee", accept: "application/javascript")
     assert_equal "application/javascript", content_type("all.coffee/index.coffee", accept: "application/javascript")
-
-    assert_equal "application/javascript", content_type("foo-ng.ngt")
-    assert_equal "application/javascript", content_type("bar-ng.ngt.haml")
-    assert_equal "application/javascript", content_type("baz-ng.js.ngt")
 
     assert_equal nil, content_type("sprite.css.embed")
 
