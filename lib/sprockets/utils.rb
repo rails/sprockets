@@ -154,5 +154,33 @@ module Sprockets
 
       nodes
     end
+
+    # Internal: Post-order Depth-First search algorithm that gathers all paths
+    # along the way.
+    #
+    # TODO: Rename function.
+    #
+    # path   - Initial Array node path
+    # block  -
+    #   node - Current node to get children of
+    #
+    # Returns an Array of node Arrays.
+    def dfs_paths(path)
+      paths = []
+      stack, seen = [path], Set.new
+
+      while path = stack.pop
+        if !seen.include?(path.last)
+          seen.add(path.last)
+          paths << path if path.size > 1
+
+          Array(yield path.last).reverse_each do |node|
+            stack.push(path + [node])
+          end
+        end
+      end
+
+      paths
+    end
   end
 end

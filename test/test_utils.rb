@@ -105,7 +105,7 @@ class TestUtils < MiniTest::Test
   end
 
   def test_post_order_depth_first_search
-    m = Array.new
+    m = []
     m[11] = [4, 5, 10]
     m[4]  = [2, 3]
     m[10] = [8, 9]
@@ -114,7 +114,7 @@ class TestUtils < MiniTest::Test
 
     assert_equal Set.new(0..11), dfs(11) { |n| m[n] }
 
-    m = Array.new
+    m = []
     m[11] = [4, 5, 10]
     m[4]  = [2, 3]
     m[3]  = [1]
@@ -125,6 +125,32 @@ class TestUtils < MiniTest::Test
     m[6]  = [5]
 
     assert_equal Set.new(0..11), dfs(11) { |n| m[n] }
+  end
+
+  def test_post_order_depth_first_find_all_paths
+    m = []
+    m[0] = [1]
+    m[1] = [2]
+    m[2] = [3]
+    m[3] = [4, 5]
+    m[4] = [1]
+
+    assert_equal [
+      [0, 1],
+      [0, 1, 2],
+      [0, 1, 2, 3],
+      [0, 1, 2, 3, 4],
+      [0, 1, 2, 3, 5]
+    ], dfs_paths([0]) { |n| m[n] }
+
+    assert_equal [
+      [1, 2],
+      [1, 2, 3],
+      [1, 2, 3, 4],
+      [1, 2, 3, 5]
+    ], dfs_paths([1]) { |n| m[n] }
+
+    assert_equal [], dfs_paths([5]) { |n| m[n] }
   end
 
   module Functions
