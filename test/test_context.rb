@@ -63,7 +63,7 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   require 'yaml'
-  YamlProcessor = proc do |input|
+  YamlBundleProcessor = proc do |input|
     env = input[:environment]
     manifest = YAML.load(input[:data])
     paths = manifest['require'].map do |logical_path|
@@ -74,7 +74,8 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#require" do
-    @env.register_engine '.yml', YamlProcessor
+    @env.register_mime_type 'text/yaml+bundle', extensions: ['.bundle.yml']
+    @env.register_transformer 'text/yaml+bundle', 'application/javascript', YamlBundleProcessor
 
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
   end
@@ -92,7 +93,8 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#resolve and Context#depend_on" do
-    @env.register_engine '.embed', DataUriProcessor
+    @env.register_mime_type 'text/css+embed', extensions: ['.css.embed']
+    @env.register_transformer 'text/css+embed', 'text/css', DataUriProcessor
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
       @env["sprite.css"].to_s.lines.to_a[0..1].join
