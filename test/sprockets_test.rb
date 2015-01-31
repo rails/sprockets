@@ -36,10 +36,10 @@ Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
 Sprockets.register_transformer 'text/haml', 'text/html', NoopProcessor
 
 Sprockets.register_mime_type 'text/mustache', extensions: ['.mustache']
-Sprockets.register_transformer 'text/mustache', 'application/javascript-function', NoopProcessor
+Sprockets.register_transformer 'text/mustache', 'application/javascript+function', NoopProcessor
 
 Sprockets.register_mime_type 'text/x-handlebars-template', extensions: ['.handlebars']
-Sprockets.register_transformer 'text/x-handlebars-template', 'application/javascript-function', NoopProcessor
+Sprockets.register_transformer 'text/x-handlebars-template', 'application/javascript+function', NoopProcessor
 
 Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
 Sprockets.register_transformer 'application/dart', 'application/javascript', NoopProcessor
@@ -67,9 +67,6 @@ XmlBuilderProcessor = proc { |input|
 }
 Sprockets.register_mime_type 'application/xml+builder', extensions: ['.xml.builder']
 Sprockets.register_transformer 'application/xml+builder', 'application/xml', XmlBuilderProcessor
-
-require 'sprockets/jst_processor'
-Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'
 
 SVG2PNG = proc { |input|
   "\x89\x50\x4e\x47\xd\xa\x1a\xa#{input[:data]}"

@@ -1019,7 +1019,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
 
     assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
     assert_equal "application.css", logical_path("application.scss", accept: "text/css")
-    assert_equal "hello.js", logical_path("hello.jst.ejs")
+    assert_equal "hello.js", logical_path("hello.jst.ejs", accept: "application/javascript")
 
     assert_equal "bower/main.js", logical_path("bower/main.js")
     assert_equal "bower/bower.json", logical_path("bower/bower.json")
@@ -1081,7 +1081,7 @@ class AssetContentTypeTest < Sprockets::TestCase
 
     assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
     assert_equal "text/css", content_type("application.scss", accept: "text/css")
-    assert_equal "application/javascript", content_type("hello.jst.ejs")
+    assert_equal "application/javascript", content_type("hello.jst.ejs", accept: "application/javascript")
 
     assert_equal "application/javascript", content_type("bower/main.js")
     assert_equal "application/json", content_type("bower/bower.json")

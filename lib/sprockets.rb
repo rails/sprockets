@@ -161,9 +161,11 @@ module Sprockets
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
   # JST engines
-  register_engine '.jst', autoload_processor(:JstProcessor, 'sprockets/jst_processor'), mime_type: 'application/javascript'
-  register_engine '.eco', autoload_processor(:EcoProcessor, 'sprockets/eco_processor'), mime_type: 'application/javascript'
-  register_engine '.ejs', autoload_processor(:EjsProcessor, 'sprockets/ejs_processor'), mime_type: 'application/javascript'
+  register_mime_type 'text/eco', extensions: ['.eco', '.jst.eco']
+  register_mime_type 'text/ejs', extensions: ['.ejs', '.jst.ejs']
+  register_transformer 'text/eco', 'application/javascript+function', autoload_processor(:EcoProcessor, 'sprockets/eco_processor')
+  register_transformer 'text/ejs', 'application/javascript+function', autoload_processor(:EjsProcessor, 'sprockets/ejs_processor')
+  register_transformer 'application/javascript+function', 'application/javascript', autoload_processor(:JstProcessor, 'sprockets/jst_processor')
 
   # CSS engines
   register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']

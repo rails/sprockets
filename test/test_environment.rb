@@ -46,12 +46,6 @@ module EnvironmentTests
     assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
-  test "another ejs templates" do
-    assert asset = @env["hello2.js"]
-    context = ExecJS.compile(asset.to_s)
-    assert_equal "hello2: world\n", context.call("JST2['hello2']", :name => "world")
-  end
-
   test "asset_data_uri helper" do
     assert asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
@@ -445,6 +439,13 @@ class TestEnvironment < Sprockets::TestCase
   test "changing paths" do
     @env.clear_paths
     @env.append_path(fixture_path('asset'))
+  end
+
+  test "change jst template namespace" do
+    @env.register_transformer 'application/javascript+function', 'application/javascript', Sprockets::JstProcessor.new(namespace: 'this.JST2')
+    assert asset = @env["hello.js"]
+    context = ExecJS.compile(asset.to_s)
+    assert_equal "hello: world\n", context.call("JST2['hello']", :name => "world")
   end
 
   test "register bundle processor" do
