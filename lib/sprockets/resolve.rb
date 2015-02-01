@@ -188,8 +188,7 @@ module Sprockets
       def parse_path_extnames(path)
         extname, value = match_path_extname(path, config[:_extnames])
         if extname
-          name = path[0...-extname.length]
-          return name, value[:type], value[:engines]
+          return path.chomp(extname), value[:type], value[:engines]
         else
           return path, nil, []
         end
