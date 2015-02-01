@@ -848,7 +848,6 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "link_tree requires all descendant files in alphabetical order" do
-    skip "waiting on link_tree with accept type"
     assert_equal normalize_uris(asset("link/all_with_require.js").links),
       normalize_uris(asset("link/all_with_require_tree.js").links)
   end
@@ -880,11 +879,10 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "link_directory requires all child files in alphabetical order" do
-    skip "waiting on link_directory with accept type"
     assert_equal [
       "file://#{fixture_path("asset/link/all/README.md")}?id=xxx",
       "file://#{fixture_path("asset/link/all/b.css")}?type=text/css&id=xxx",
-      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript+ruby&id=xxx"
     ], normalize_uris(asset("link/all_with_require_directory.js").links)
   end
 
