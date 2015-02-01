@@ -306,9 +306,15 @@ module Sprockets
       #
       #     //= link_directory "./fonts"
       #
-      def process_link_directory_directive(path = ".")
+      # Use caution when linking against JS or CSS assets. Include an explicit
+      # extension or content type in these cases
+      #
+      #     //= link_directory "./scripts" .js
+      #
+      def process_link_directory_directive(path = ".", accept = nil)
         path = expand_relative_dirname(:link_directory, path)
-        link_paths(*@environment.stat_directory_with_dependencies(path))
+        accept = expand_accept_shorthand(accept)
+        link_paths(*@environment.stat_directory_with_dependencies(path), accept)
       end
 
       # `link_tree` links all the nested files in a directory.
@@ -316,20 +322,38 @@ module Sprockets
       #
       #     //= link_tree "./images"
       #
-      def process_link_tree_directive(path = ".")
+      # Use caution when linking against JS or CSS assets. Include an explicit
+      # extension or content type in these cases
+      #
+      #     //= link_tree "./styles" .css
+      #
+      def process_link_tree_directive(path = ".", accept = nil)
         path = expand_relative_dirname(:link_tree, path)
-        link_paths(*@environment.stat_sorted_tree_with_dependencies(path))
+        accept = expand_accept_shorthand(accept)
+        link_paths(*@environment.stat_sorted_tree_with_dependencies(path), accept)
       end
 
     private
+      def expand_accept_shorthand(accept)
+        if accept.nil?
+          nil
+        elsif accept.include?("/")
+          accept
+        elsif accept.start_with?(".")
+          @environment.mime_exts[accept]
+        else
+          @environment.mime_exts[".#{accept}"]
+        end
+      end
+
       def require_paths(paths, deps)
         resolve_paths(paths, deps, accept: @content_type, bundle: false) do |uri|
           @required << uri
         end
       end
 
-      def link_paths(paths, deps)
-        resolve_paths(paths, deps) do |uri|
+      def link_paths(paths, deps, accept)
+        resolve_paths(paths, deps, accept: accept) do |uri|
           @links << load(uri).uri
         end
       end

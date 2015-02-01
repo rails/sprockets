@@ -984,12 +984,26 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     ], normalize_uris(asset("link/all_with_require_directory.js").links)
   end
 
+  test "link_directory as app/js requires all child files in alphabetical order" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/all_with_require_directory_as_js.js").links)
+  end
+
   test "link_tree respects order of child dependencies" do
     assert_equal [
       "file://#{fixture_path("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
       "file://#{fixture_path("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
       "file://#{fixture_path("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/require_tree_alpha.js").links)
+  end
+
+  test "link_tree as app/js respects order of child dependencies" do
+    assert_equal [
+      "file://#{fixture_path("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
+    ], normalize_uris(asset("link/require_tree_alpha_as_js.js").links)
   end
 
   test "link_asset with uri" do
