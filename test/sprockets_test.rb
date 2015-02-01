@@ -90,6 +90,11 @@ SVG2PNG = proc { |input|
 }
 Sprockets.register_transformer 'image/svg+xml', 'image/png', SVG2PNG
 
+PNG2GIF = proc { |input|
+  "\x47\x49\x46\x38\x37\61#{input[:data]}"
+}
+Sprockets.register_transformer 'image/png', 'image/gif', PNG2GIF
+
 CSS2HTMLIMPORT = proc { |input|
   "<style>#{input[:data]}</style>"
 }
