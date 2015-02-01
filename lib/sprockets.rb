@@ -45,7 +45,6 @@ module Sprockets
     digest_class: Digest::SHA256,
     engine_mime_types: {}.freeze,
     engines: {}.freeze,
-    inverted_transformers: Hash.new { |h, k| {}.freeze }.freeze,
     mime_exts: {}.freeze,
     mime_types: {}.freeze,
     paths: [].freeze,

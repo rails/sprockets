@@ -18,18 +18,6 @@ module Sprockets
       config[:transformers]
     end
 
-    # Internal: Two level mapping of target mime type to source mime type.
-    #
-    #   environment.inverted_transformers
-    #   # => { 'application/javascript' => {
-    #            'text/coffeescript' => ConvertCoffeeScriptToJavaScript
-    #          }
-    #        }
-    #
-    def inverted_transformers
-      config[:inverted_transformers]
-    end
-
     # Public: Register a transformer from and to a mime type.
     #
     # from - String mime type
@@ -48,56 +36,7 @@ module Sprockets
       self.config = hash_reassoc(config, :registered_transformers, from) do |transformers|
         transformers.merge(to => proc)
       end
-
-      registered_transformers = self.config[:registered_transformers]
-      transformers = Hash.new { {} }
-      inverted_transformers = Hash.new { {} }
-
-      registered_transformers.keys.flat_map do |key|
-        dfs_paths([key]) { |k| registered_transformers[k].keys }
-      end.each do |types|
-        src, dst = types.first, types.last
-        processor = compose_transformers(registered_transformers, types)
-
-        transformers[src] = {} unless transformers.key?(src)
-        transformers[src][dst] = processor
-
-        inverted_transformers[dst] = {} unless inverted_transformers.key?(dst)
-        inverted_transformers[dst][src] = processor
-      end
-
-      self.config = hash_reassoc(config, :transformers) { transformers }
-      self.config = hash_reassoc(config, :inverted_transformers) { inverted_transformers }
-    end
-
-    # Internal: Compose multiple transformer steps into a single processor
-    # function.
-    #
-    # transformers - Two level Hash of a source mime type to a target mime type
-    # types - Array of mime type steps
-    #
-    # Returns Processor.
-    def compose_transformers(transformers, types)
-      if types.length < 2
-        raise ArgumentError, "too few transform types: #{types.inspect}"
-      end
-
-      processors = []
-      enum = types.each
-
-      loop do
-        src, dst = enum.next, enum.peek
-        unless processor = transformers[src][dst]
-          raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
-        end
-        processors << processor
-      end
-
-      if processors.size > 1
-        compose_processors(*processors.reverse)
-      elsif processors.size == 1
-        processors.first
-      end
+      compute_transformers!
     end
 
     # Internal: Resolve target mime type that the source type should be
@@ -136,11 +75,66 @@ module Sprockets
       accepts = []
       parsed_accepts.each do |(type, q)|
         accepts.push([type, q])
-        inverted_transformers[type].keys.each do |subtype|
+        config[:inverted_transformers][type].each do |subtype|
           accepts.push([subtype, q * 0.8])
         end
       end
       accepts
     end
+
+    # Internal: Compose multiple transformer steps into a single processor
+    # function.
+    #
+    # transformers - Two level Hash of a source mime type to a target mime type
+    # types - Array of mime type steps
+    #
+    # Returns Processor.
+    def compose_transformers(transformers, types)
+      if types.length < 2
+        raise ArgumentError, "too few transform types: #{types.inspect}"
+      end
+
+      processors = []
+      enum = types.each
+
+      loop do
+        src, dst = enum.next, enum.peek
+        unless processor = transformers[src][dst]
+          raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
+        end
+        processors.concat config[:postprocessors][src]
+        processors << processor
+        processors.concat config[:preprocessors][dst]
+      end
+
+      if processors.size > 1
+        compose_processors(*processors.reverse)
+      elsif processors.size == 1
+        processors.first
+      end
+    end
+
+    private
+      def compute_transformers!
+        registered_transformers = self.config[:registered_transformers]
+        transformers = Hash.new { {} }
+        inverted_transformers = Hash.new { Set.new }
+
+        registered_transformers.keys.flat_map do |key|
+          dfs_paths([key]) { |k| registered_transformers[k].keys }
+        end.each do |types|
+          src, dst = types.first, types.last
+          processor = compose_transformers(registered_transformers, types)
+
+          transformers[src] = {} unless transformers.key?(src)
+          transformers[src][dst] = processor
+
+          inverted_transformers[dst] = Set.new unless inverted_transformers.key?(dst)
+          inverted_transformers[dst] << src
+        end
+
+        self.config = hash_reassoc(config, :transformers) { transformers }
+        self.config = hash_reassoc(config, :inverted_transformers) { inverted_transformers }
+      end
   end
 end
