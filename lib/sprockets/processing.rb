@@ -199,22 +199,20 @@ module Sprockets
         bundled_processors = skip_bundle ? [] : config[:bundle_processors][type]
 
         if bundled_processors.any?
-          processors += bundled_processors
+          processors.concat bundled_processors
         else
-          processors += config[:postprocessors][type]
+          processors.concat config[:postprocessors][type]
 
           if type != file_type && processor = transformers[file_type][type]
-            processors += config[:preprocessors][type]
-            processors += [processor]
-            processors += config[:postprocessors][file_type]
+            processors << processor
           end
 
-          processors += engine_extnames.map { |ext| engines[ext] }
-          processors += config[:preprocessors][file_type]
+          processors.concat engine_extnames.map { |ext| engines[ext] }
+          processors.concat config[:preprocessors][file_type]
         end
 
         if processors.any? || mime_type_charset_detecter(type)
-          processors += [FileReader]
+          processors << FileReader
         end
 
         processors
@@ -228,6 +226,8 @@ module Sprockets
           processors.unshift(processor)
           processors
         end
+
+        compute_transformers!
       end
 
       def unregister_config_processor(type, mime_type, proccessor)
@@ -235,6 +235,8 @@ module Sprockets
           processors.delete(proccessor)
           processors
         end
+
+        compute_transformers!
       end
   end
 end

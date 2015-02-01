@@ -528,14 +528,20 @@ class TestEnvironment < Sprockets::TestCase
     @env.register_preprocessor 'image/svg+xml', proc { |input|
       { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_svg] }
     }
-    @env.register_preprocessor 'image/png', proc { |input|
-      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_png] }
-    }
     @env.register_postprocessor 'image/svg+xml', proc { |input|
       { data: input[:data], test: Array(input[:metadata][:test]) + [:post_svg] }
     }
+    @env.register_preprocessor 'image/png', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_png] }
+    }
     @env.register_postprocessor 'image/png', proc { |input|
       { data: input[:data], test: Array(input[:metadata][:test]) + [:post_png] }
+    }
+    @env.register_preprocessor 'image/gif', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:pre_gif] }
+    }
+    @env.register_postprocessor 'image/gif', proc { |input|
+      { data: input[:data], test: Array(input[:metadata][:test]) + [:post_gif] }
     }
 
     assert asset = @env.find_asset("logo.svg")
@@ -545,6 +551,10 @@ class TestEnvironment < Sprockets::TestCase
     assert asset = @env.find_asset("logo.png")
     assert_equal "image/png", asset.content_type
     assert_equal [:pre_svg, :post_svg, :pre_png, :post_png], asset.metadata[:test]
+
+    assert asset = @env.find_asset("logo.gif")
+    assert_equal "image/gif", asset.content_type
+    assert_equal [:pre_svg, :post_svg, :pre_png, :post_png, :pre_gif, :post_gif], asset.metadata[:test]
   end
 
   test "access selector count metadata" do
