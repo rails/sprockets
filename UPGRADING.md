@@ -68,6 +68,18 @@ that links to ever asset you need in production.
 //= link_tree ./images
 ```
 
+**Caution** Unlink `require` directives, links should have an explicit content
+type or file extension. When using `link_directory` or `link_tree` prefer
+setting a format as well.
+
+``` js
+// A mime type or file extension can be given as a second parameter to
+// link_directory or link_tree
+//
+//= link_directory ./scripts .js
+//= link_tree ./styles text/css
+```
+
 Then compiling `manifest` will ensure all the subresources are compiled as well.
 
 ``` ruby
