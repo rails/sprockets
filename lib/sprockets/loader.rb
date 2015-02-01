@@ -1,6 +1,5 @@
 require 'sprockets/asset'
 require 'sprockets/digest_utils'
-require 'sprockets/engines'
 require 'sprockets/errors'
 require 'sprockets/file_reader'
 require 'sprockets/mime'
@@ -16,7 +15,7 @@ module Sprockets
   # object.
   module Loader
     include DigestUtils, PathUtils, ProcessorUtils, URIUtils
-    include Engines, Mime, Processing, Resolve, Transformers
+    include Mime, Processing, Resolve, Transformers
 
     # Public: Load Asset by AssetURI.
     #
@@ -77,7 +76,7 @@ module Sprockets
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
-        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path, file_type = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
         name = logical_path
 
@@ -90,9 +89,9 @@ module Sprockets
         end
 
         skip_bundle = params[:skip_bundle]
-        processors = processors_for(type, file_type, engine_extnames, skip_bundle)
+        processors = processors_for(type, file_type, skip_bundle)
 
-        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+        processors_dep_uri = build_processors_uri(type, file_type, skip_bundle)
         dependencies = self.dependencies + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline

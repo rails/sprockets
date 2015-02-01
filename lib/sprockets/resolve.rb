@@ -62,7 +62,7 @@ module Sprockets
         # Ensure path is under load paths
         return nil, deps unless paths_split(paths, filename)
 
-        mime_type = parse_path_extnames(filename)[1]
+        _, mime_type = match_path_extname(filename, mime_exts)
         type = resolve_transform_type(mime_type, accept)
         return nil, deps if accept && !type
 
@@ -84,7 +84,7 @@ module Sprockets
       end
 
       def resolve_logical_path(paths, logical_path, accept, skip_bundle)
-        logical_name, mime_type, _ = parse_path_extnames(logical_path)
+        logical_name, mime_type = parse_path_extnames(logical_path)
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
         filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
@@ -151,7 +151,7 @@ module Sprockets
 
         result = resolve_alternates(load_path, logical_name)
         result[0].each do |fn|
-          candidates << [fn, parse_path_extnames(fn)[1]]
+          candidates << [fn, match_path_extname(fn, mime_exts)[1]]
         end
         deps.merge(result[1])
 
@@ -166,7 +166,7 @@ module Sprockets
         candidates = []
         entries, deps = self.entries_with_dependencies(dirname)
         entries.each do |entry|
-          name, type, _ = parse_path_extnames(entry)
+          name, type = parse_path_extnames(entry)
           if basename == name
             candidates << [File.join(dirname, entry), type]
           end
@@ -178,18 +178,18 @@ module Sprockets
         return [], Set.new
       end
 
-      # Internal: Returns the name, mime type and `Array` of engine extensions.
+      # Internal: Returns the name and mime type.
       #
       #     "foo.coffee.erb"
-      #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
+      #     # => ["foo", "application/javascript"]
       #
       def parse_path_extnames(path)
-        extname, value = match_path_extname(path, config[:_extnames])
+        extname, type = match_path_extname(path, mime_exts)
         if extname
           name = path[0...-extname.length]
-          return name, value[:type], value[:engines]
+          return name, type
         else
-          return path, nil, []
+          return path, nil
         end
       end
   end

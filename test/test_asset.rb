@@ -952,7 +952,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert_equal "application/javascript", asset.content_type
   end
 
-  test "asset falls back to engines default mime type" do
+  test "asset falls back to files default mime type" do
     asset = asset("default_mime_type.js")
     assert_equal "application/javascript", asset.content_type
   end

@@ -1,5 +1,4 @@
 require 'source_map'
-require 'sprockets/engines'
 require 'sprockets/mime'
 require 'sprockets/processor_utils'
 require 'sprockets/uri_utils'
@@ -177,23 +176,20 @@ module Sprockets
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
-        params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
-        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:skip_bundle])
+        processors = processors_for(params[:type], params[:file_type], params[:skip_bundle])
         processors_cache_keys(processors)
       end
 
-      def build_processors_uri(type, file_type, engine_extnames, skip_bundle)
-        engines = engine_extnames.join(',') if engine_extnames.any?
+      def build_processors_uri(type, file_type, skip_bundle)
         query = encode_uri_query_params(
           type: type,
           file_type: file_type,
-          engines: engines,
           skip_bundle: skip_bundle
         )
         "processors:#{query}"
       end
 
-      def processors_for(type, file_type, engine_extnames, skip_bundle)
+      def processors_for(type, file_type, skip_bundle)
         processors = []
 
         bundled_processors = skip_bundle ? [] : config[:bundle_processors][type]
@@ -202,12 +198,9 @@ module Sprockets
           processors.concat bundled_processors
         else
           processors.concat config[:postprocessors][type]
-
           if type != file_type && processor = transformers[file_type][type]
             processors << processor
           end
-
-          processors.concat engine_extnames.map { |ext| engines[ext] }
           processors.concat config[:preprocessors][file_type]
         end
 

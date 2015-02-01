@@ -26,7 +26,6 @@ class TestPathUtils < MiniTest::Test
       "default",
       "directives",
       "encoding",
-      "engines",
       "errors",
       "octicons",
       "paths",

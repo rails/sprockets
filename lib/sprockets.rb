@@ -43,8 +43,6 @@ module Sprockets
     dependencies: Set.new.freeze,
     dependency_resolvers: {}.freeze,
     digest_class: Digest::SHA256,
-    engine_mime_types: {}.freeze,
-    engines: {}.freeze,
     mime_exts: {}.freeze,
     mime_types: {}.freeze,
     paths: [].freeze,
@@ -159,14 +157,14 @@ module Sprockets
   register_transformer 'text/coffeescript', 'application/javascript', autoload_processor(:CoffeeScriptProcessor, 'sprockets/coffee_script_processor')
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
-  # JST engines
+  # JST processors
   register_mime_type 'text/eco', extensions: ['.eco', '.jst.eco']
   register_mime_type 'text/ejs', extensions: ['.ejs', '.jst.ejs']
   register_transformer 'text/eco', 'application/javascript+function', autoload_processor(:EcoProcessor, 'sprockets/eco_processor')
   register_transformer 'text/ejs', 'application/javascript+function', autoload_processor(:EjsProcessor, 'sprockets/ejs_processor')
   register_transformer 'application/javascript+function', 'application/javascript', autoload_processor(:JstProcessor, 'sprockets/jst_processor')
 
-  # CSS engines
+  # CSS processors
   register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
   register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
   register_mime_type 'text/sass+ruby', extensions: ['.sass.erb', '.css.sass.erb']
