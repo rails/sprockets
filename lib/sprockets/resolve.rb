@@ -84,7 +84,8 @@ module Sprockets
       end
 
       def resolve_logical_path(paths, logical_path, accept, skip_bundle)
-        logical_name, mime_type = parse_path_extnames(logical_path)
+        extname, mime_type = match_path_extname(logical_path, mime_exts)
+        logical_name = logical_path.chomp(extname)
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
         filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
@@ -166,8 +167,8 @@ module Sprockets
         candidates = []
         entries, deps = self.entries_with_dependencies(dirname)
         entries.each do |entry|
-          name, type = parse_path_extnames(entry)
-          if basename == name
+          extname, type = match_path_extname(entry, mime_exts)
+          if basename == entry.chomp(extname)
             candidates << [File.join(dirname, entry), type]
           end
         end
@@ -176,21 +177,6 @@ module Sprockets
 
       def resolve_alternates(load_path, logical_name)
         return [], Set.new
-      end
-
-      # Internal: Returns the name and mime type.
-      #
-      #     "foo.coffee.erb"
-      #     # => ["foo", "application/javascript"]
-      #
-      def parse_path_extnames(path)
-        extname, type = match_path_extname(path, mime_exts)
-        if extname
-          name = path[0...-extname.length]
-          return name, type
-        else
-          return path, nil
-        end
       end
   end
 end
