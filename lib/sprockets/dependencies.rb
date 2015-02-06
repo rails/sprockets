@@ -66,7 +66,7 @@ module Sprockets
       if resolver = dependency_resolvers[scheme]
         resolver.call(self, str)
       else
-        raise TypeError, "unknown cache scheme: #{scheme}"
+        nil
       end
     end
   end
