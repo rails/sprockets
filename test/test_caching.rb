@@ -144,6 +144,21 @@ class TestCaching < Sprockets::TestCase
     refute_equal asset1.id, asset2.id
   end
 
+  test "unknown cache keys are ignored" do
+    @env1.register_dependency_resolver 'foo-version' do |env|
+      1
+    end
+    @env1.depend_on 'foo-version'
+
+    assert asset1 = @env1['gallery.js']
+    assert asset1.metadata[:dependencies].include?('foo-version')
+
+    assert asset2 = @env2['gallery.js']
+    refute asset2.metadata[:dependencies].include?('foo-version')
+
+    refute_equal asset1.id, asset2.id
+  end
+
   test "assets from different load paths are not equal" do
     # Normalize test fixture mtimes
     mtime = File.stat(fixture_path("default/app/main.js")).mtime.to_i
