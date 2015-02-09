@@ -6,18 +6,11 @@ class TestCoffeeScriptProcessor < Sprockets::TestCase
     input = {
       content_type: 'application/javascript',
       data: "square = (n) -> n * n",
-      cache: Sprockets::Cache.new
-    }
-    assert Sprockets::CoffeeScriptProcessor.call(input).match(/var square/)
-  end
-
-  test "compile coffee-script template with source map" do
-    input = {
-      content_type: 'application/javascript',
-      data: "square = (n) -> n * n",
       name: 'squared',
       cache: Sprockets::Cache.new,
-      map: SourceMap::Map.new
+      metadata: {
+        map: SourceMap::Map.new
+      }
     }
     result = Sprockets::CoffeeScriptProcessor.call(input)
     assert result[:data].match(/var square/)

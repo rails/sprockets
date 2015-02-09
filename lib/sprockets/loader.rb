@@ -105,8 +105,16 @@ module Sprockets
             load_path: load_path,
             name: name,
             content_type: type,
-            map: SourceMap::Map.new,
-            metadata: { dependencies: dependencies }
+            metadata: {
+              dependencies: dependencies,
+              map: SourceMap::Map.new([
+                SourceMap::Mapping.new(
+                  name,
+                  SourceMap::Offset.new(0, 0),
+                  SourceMap::Offset.new(0, 0)
+                )
+              ])
+            }
           })
           source = result.delete(:data)
           metadata = result.merge!(

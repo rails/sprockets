@@ -24,13 +24,8 @@ module Sprockets
         ::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:name]])
       end
 
-      if input[:map]
-        map = input[:map] | SourceMap::Map.from_json(result['v3SourceMap'])
-        { data: result['js'],
-          map: map }
-      else
-        result['js']
-      end
+      map = input[:metadata][:map] | SourceMap::Map.from_json(result['v3SourceMap'])
+      { data: result['js'], map: map }
     end
   end
 end
