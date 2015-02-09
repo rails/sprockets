@@ -76,6 +76,7 @@ module Sprockets
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
+        full_logical_path = logical_path
         extname, file_type = match_path_extname(logical_path, mime_exts)
         logical_path = logical_path.chomp(extname)
         logical_path = normalize_logical_path(logical_path)
@@ -97,23 +98,25 @@ module Sprockets
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
+          source_path = full_logical_path # TODO: Use foo.source.js
           result = call_processors(processors, {
             environment: self,
             cache: self.cache,
             uri: uri,
             filename: filename,
             load_path: load_path,
+            source_path: source_path,
             name: name,
             content_type: type,
             metadata: {
               dependencies: dependencies,
               map: SourceMap::Map.new([
                 SourceMap::Mapping.new(
-                  name,
+                  source_path,
                   SourceMap::Offset.new(0, 0),
                   SourceMap::Offset.new(0, 0)
                 )
-              ])
+              ], logical_path)
             }
           })
           source = result.delete(:data)

@@ -13,11 +13,7 @@ module Sprockets
       uri, _ = input[:environment].resolve!(input[:filename], accept: accept)
       asset = input[:environment].load(uri)
 
-      JSON.generate({
-        "version" => 3,
-        "file" => asset.logical_path,
-        "mappings" => ";#{asset.bytesize}"
-      })
+      asset.metadata[:map].to_json
     end
   end
 end

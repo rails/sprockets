@@ -21,7 +21,7 @@ module Sprockets
       data = input[:data]
 
       result = input[:cache].fetch(self.cache_key + [data]) do
-        ::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:name]])
+        ::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
       end
 
       map = input[:metadata][:map] | SourceMap::Map.from_json(result['v3SourceMap'])
