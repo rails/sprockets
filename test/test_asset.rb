@@ -653,9 +653,6 @@ class BundledAssetTest < Sprockets::TestCase
 
       asset_jquery = asset('stub-jquery.js', :bundle => false)
 
-      refute asset('stub-frameworks.js').included.include?(asset_jquery.uri)
-      assert asset('stub-app.js').included.include?(asset_jquery.uri)
-
       old_asset_frameworks_uri = asset('stub-frameworks.js').uri
       old_asset_app_uri        = asset('stub-app.js').uri
 
@@ -663,10 +660,6 @@ class BundledAssetTest < Sprockets::TestCase
 
       # jquery never changed
       assert_equal asset_jquery.uri, asset('stub-jquery.js', :bundle => false).uri
-
-      # jquery moved from app to frameworks
-      assert asset('stub-frameworks.js').included.include?(asset_jquery.uri)
-      refute asset('stub-app.js').included.include?(asset_jquery.uri)
 
       refute_equal old_asset_frameworks_uri, asset('stub-frameworks.js').uri
       refute_equal old_asset_app_uri, asset('stub-app.js').uri

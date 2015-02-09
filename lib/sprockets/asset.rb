@@ -80,14 +80,6 @@ module Sprockets
       metadata[:links] || Set.new
     end
 
-    # Public: Get all internally required assets that were concated into this
-    # asset.
-    #
-    # Returns Array of String asset URIs.
-    def included
-      metadata[:included]
-    end
-
     # Public: Return `String` of concatenated source.
     #
     # Returns String.
