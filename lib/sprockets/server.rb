@@ -53,7 +53,7 @@ module Sprockets
       end
 
       # Look up the asset.
-      asset = find_asset(path, bundle: !body_only?(env))
+      asset = find_asset(path)
 
       if asset.nil?
         status = :not_found
@@ -204,11 +204,6 @@ module Sprockets
           gsub("\n", '\\\\000a ').
           gsub('"',  '\\\\0022 ').
           gsub('/',  '\\\\002f ')
-      end
-
-      # Test if `?body=1` or `body=true` query param is set
-      def body_only?(env)
-        env["QUERY_STRING"].to_s =~ /body=(1|t)/
       end
 
       def cache_headers(env, etag)
