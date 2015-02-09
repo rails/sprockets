@@ -15,8 +15,10 @@ module Sprockets
     def self.call(input)
       env  = input[:environment]
       type = input[:content_type]
+      dependencies = Set.new(input[:metadata][:dependencies])
 
-      processed_uri = env.build_asset_uri(input[:filename], type: type, skip_bundle: true)
+      processed_uri, deps = env.resolve(input[:filename], accept: type, bundle: false)
+      dependencies.merge(deps)
 
       find_required = proc { |uri| env.load(uri).metadata[:required] }
       required = Utils.dfs(processed_uri, &find_required)
@@ -24,7 +26,6 @@ module Sprockets
       required.subtract(stubbed)
       assets = required.map { |uri| env.load(uri) }
 
-      dependencies = Set.new(input[:metadata][:dependencies])
       (required + stubbed).each do |uri|
         dependencies.merge(env.load(uri).metadata[:dependencies])
       end
