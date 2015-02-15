@@ -179,25 +179,29 @@ module Sprockets
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
         params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
-        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:skip_bundle])
+        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:pipeline])
         processors_cache_keys(processors)
       end
 
-      def build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+      def build_processors_uri(type, file_type, engine_extnames, pipeline)
         engines = engine_extnames.join(',') if engine_extnames.any?
         query = encode_uri_query_params(
           type: type,
           file_type: file_type,
           engines: engines,
-          skip_bundle: skip_bundle
+          pipeline: pipeline
         )
         "processors:#{query}"
       end
 
-      def processors_for(type, file_type, engine_extnames, skip_bundle)
+      def processors_for(type, file_type, engine_extnames, pipeline)
         processors = []
 
-        bundled_processors = skip_bundle ? [] : config[:bundle_processors][type]
+        if pipeline == "source"
+          return processors
+        end
+
+        bundled_processors = pipeline == "self" ? [] : config[:bundle_processors][type]
 
         if bundled_processors.any?
           processors.concat bundled_processors

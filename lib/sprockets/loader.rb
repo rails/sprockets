@@ -89,10 +89,10 @@ module Sprockets
           raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
         end
 
-        skip_bundle = params[:skip_bundle]
-        processors = processors_for(type, file_type, engine_extnames, skip_bundle)
+        pipeline = params[:pipeline]
+        processors = processors_for(type, file_type, engine_extnames, pipeline)
 
-        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, pipeline)
         dependencies = self.dependencies + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline

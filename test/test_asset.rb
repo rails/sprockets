@@ -318,19 +318,19 @@ class ProcessedAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
-    @asset = @env.find_asset('application.js', :bundle => false)
-    @bundle = false
+    @asset = @env.find_asset('application.js', pipeline: "self")
+    @self = true
   end
 
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&id=xxx",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=self&id=xxx",
       normalize_uri(@asset.uri)
   end
 
   test "logical path can find itself" do
-    assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
+    assert_equal @asset, @env.find_asset(@asset.logical_path, pipeline: "self")
   end
 
   test "content type" do
@@ -389,7 +389,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:bundle => @bundle}.merge(options))
+    @env.find_asset(logical_path, {:pipeline => @self ? "self" : nil}.merge(options))
   end
 end
 
@@ -402,7 +402,7 @@ class BundledAssetTest < Sprockets::TestCase
     @env.cache = {}
 
     @asset = @env['application.js']
-    @bundle = true
+    @self = false
   end
 
   include AssetTests
@@ -705,7 +705,7 @@ class BundledAssetTest < Sprockets::TestCase
       write(app, "//= stub stub-frameworks\n//= require stub-jquery\napp = {};")
       write(jquery, "jquery = {};")
 
-      asset_jquery = asset('stub-jquery.js', :bundle => false)
+      asset_jquery = asset('stub-jquery.js', pipeline: "self")
 
       refute asset('stub-frameworks.js').included.include?(asset_jquery.uri)
       assert asset('stub-app.js').included.include?(asset_jquery.uri)
@@ -716,7 +716,7 @@ class BundledAssetTest < Sprockets::TestCase
       write(frameworks, "//= require stub-jquery\nframeworks = {};")
 
       # jquery never changed
-      assert_equal asset_jquery.uri, asset('stub-jquery.js', :bundle => false).uri
+      assert_equal asset_jquery.uri, asset('stub-jquery.js', pipeline: "self").uri
 
       # jquery moved from app to frameworks
       assert asset('stub-frameworks.js').included.include?(asset_jquery.uri)
@@ -1100,7 +1100,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:bundle => @bundle}.merge(options))
+    @env.find_asset(logical_path, {:pipeline => @self ? "self" : nil}.merge(options))
   end
 
   def read(logical_path)

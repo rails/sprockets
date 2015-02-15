@@ -44,12 +44,12 @@ module Sprockets
 
       # Look up the asset.
       options = {}
-      options[:bundle] = !body_only?(env)
+      options[:pipeline] = "self" if body_only?(env)
 
       # 2.x/3.x compatibility hack. Just ignore fingerprints on ?body=1 requests.
       # 3.x/4.x prefers strong validation of fingerprint to body contents, but
       # 2.x just ignored it.
-      if options[:bundle] == false
+      if options[:pipeline] == "self"
         fingerprint = nil
       end
 

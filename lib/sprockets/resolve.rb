@@ -24,17 +24,25 @@ module Sprockets
       path = path.to_s
       paths = options[:load_paths] || self.paths
       accept = options[:accept]
-      skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
 
       if valid_asset_uri?(path)
-        resolve_asset_uri(path)
+        uri, deps = resolve_asset_uri(path)
       elsif absolute_path?(path)
-        resolve_absolute_path(paths, path, accept, skip_bundle)
+        filename, type, deps = resolve_absolute_path(paths, path, accept)
       elsif relative_path?(path)
-        resolve_relative_path(paths, path, options[:base_path], accept, skip_bundle)
+        filename, type, deps = resolve_relative_path(paths, path, options[:base_path], accept)
       else
-        resolve_logical_path(paths, path, accept, skip_bundle)
+        filename, type, deps = resolve_logical_path(paths, path, accept)
       end
+
+      if filename
+        params = {}
+        params[:type] = type if type
+        params[:pipeline] = options[:pipeline] if options[:pipeline]
+        uri = build_asset_uri(filename, params)
+      end
+
+      return uri, deps
     end
 
     # Public: Same as resolve() but raises a FileNotFound exception instead of
@@ -57,35 +65,34 @@ module Sprockets
         return uri, Set.new([build_file_digest_uri(filename)])
       end
 
-      def resolve_absolute_path(paths, filename, accept, skip_bundle)
+      def resolve_absolute_path(paths, filename, accept)
         deps = Set.new
         filename = File.expand_path(filename)
 
         # Ensure path is under load paths
-        return nil, deps unless paths_split(paths, filename)
+        return nil, nil, deps unless paths_split(paths, filename)
 
         mime_type = parse_path_extnames(filename)[1]
         type = resolve_transform_type(mime_type, accept)
-        return nil, deps if accept && !type
+        return nil, nil, deps if accept && !type
 
-        return nil, deps unless file?(filename)
+        return nil, nil, deps unless file?(filename)
 
-        uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle)
         deps << build_file_digest_uri(filename)
-        return uri, deps
+        return filename, type, deps
       end
 
-      def resolve_relative_path(paths, path, dirname, accept, skip_bundle)
+      def resolve_relative_path(paths, path, dirname, accept)
         filename = File.expand_path(path, dirname)
         load_path, _ = paths_split(paths, dirname)
         if load_path && logical_path = split_subpath(load_path, filename)
-          resolve_logical_path([load_path], logical_path, accept, skip_bundle)
+          resolve_logical_path([load_path], logical_path, accept)
         else
-          [nil, Set.new]
+          return nil, nil, Set.new
         end
       end
 
-      def resolve_logical_path(paths, logical_path, accept, skip_bundle)
+      def resolve_logical_path(paths, logical_path, accept)
         logical_name, mime_type, _ = parse_path_extnames(logical_path)
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
@@ -94,10 +101,9 @@ module Sprockets
         if filename
           deps << build_file_digest_uri(filename)
           type = resolve_transform_type(mime_type, parsed_accept)
-          uri = build_asset_uri(filename, type: type, skip_bundle: skip_bundle)
-          return uri, deps
+          return filename, type, deps
         else
-          return nil, deps
+          return nil, nil, deps
         end
       end
 

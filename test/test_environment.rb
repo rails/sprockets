@@ -445,6 +445,18 @@ $app.run(function($templateCache) {
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)
   end
+
+  test "source pipeline skips all processoring" do
+    assert asset = @env.find_asset("missing_require.js", pipeline: "source")
+    assert_equal "// =require \"notfound\"\n", asset.source
+    assert_equal "application/javascript", asset.content_type
+  end
+
+  test "source pipeline on existing source asset" do
+    assert asset = @env.find_asset("hello.txt", pipeline: "source")
+    assert_equal "Hello world\n", asset.source
+    assert_equal "text/plain", asset.content_type
+  end
 end
 
 class WhitespaceProcessor
