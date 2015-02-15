@@ -156,15 +156,6 @@ module Sprockets
       end
     end
 
-    # Internal: Gather all bundle reducer functions for MIME type.
-    #
-    # mime_type - String MIME type
-    #
-    # Returns an Array of [initial, reducer_proc] pairs.
-    def load_bundle_reducers(mime_type)
-      self.bundle_reducers['*/*'].merge(self.bundle_reducers[mime_type])
-    end
-
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])

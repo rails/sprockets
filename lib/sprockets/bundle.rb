@@ -30,7 +30,8 @@ module Sprockets
         dependencies.merge(env.load(uri).metadata[:dependencies])
       end
 
-      process_bundle_reducers(assets, env.load_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
+      reducers = Hash[env.match_mime_type_keys(env.bundle_reducers, type).flat_map(&:to_a)]
+      process_bundle_reducers(assets, reducers).merge(dependencies: dependencies, included: assets.map(&:uri))
     end
 
     # Internal: Run bundle reducers on set of Assets producing a reduced

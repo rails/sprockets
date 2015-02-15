@@ -10,6 +10,22 @@ class TestHTTPUtils < MiniTest::Test
     refute match_mime_type?("text/html", "application/json")
   end
 
+  def test_match_mime_type_keys
+    h = {
+      "text/html" => 1,
+      "text/plain" => 2,
+      "application/json" => 3,
+      "text/*" => 4,
+      "*/*" => 5,
+      "*" => 6
+    }
+
+    assert_equal [6, 5, 4, 1], match_mime_type_keys(h, "text/html")
+    assert_equal [6, 5, 4, 2], match_mime_type_keys(h, "text/plain")
+    assert_equal [6, 5, 3], match_mime_type_keys(h, "application/json")
+    assert_equal [6, 5], match_mime_type_keys(h, "application/javascript")
+  end
+
   def test_parse_q_values
     assert_equal [], parse_q_values(nil)
 
