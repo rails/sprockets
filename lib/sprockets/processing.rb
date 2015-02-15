@@ -165,28 +165,6 @@ module Sprockets
       self.bundle_reducers['*/*'].merge(self.bundle_reducers[mime_type])
     end
 
-    # Internal: Run bundle reducers on set of Assets producing a reduced
-    # metadata Hash.
-    #
-    # assets - Array of Assets
-    # reducers - Array of [initial, reducer_proc] pairs
-    #
-    # Returns reduced asset metadata Hash.
-    def process_bundle_reducers(assets, reducers)
-      initial = {}
-      reducers.each do |k, (v, _)|
-        initial[k] = v if v
-      end
-
-      assets.reduce(initial) do |h, asset|
-        reducers.each do |k, (_, block)|
-          value = k == :data ? asset.source : asset.metadata[k]
-          h[k]  = h.key?(k) ? block.call(h[k], value) : value
-        end
-        h
-      end
-    end
-
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
