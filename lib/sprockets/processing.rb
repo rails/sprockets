@@ -12,6 +12,18 @@ module Sprockets
   module Processing
     include ProcessorUtils, URIUtils, Utils
 
+    def pipelines
+      config[:pipelines]
+    end
+
+    def register_pipeline(name, proc = nil, &block)
+      proc ||= block
+
+      self.config = hash_reassoc(config, :pipelines) do |pipelines|
+        pipelines.merge(name.to_sym => proc)
+      end
+    end
+
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
     def preprocessors
@@ -195,26 +207,30 @@ module Sprockets
       end
 
       def processors_for(type, file_type, engine_extnames, pipeline)
+        pipeline ||= :default
+        config[:pipelines][pipeline.to_sym].call(self, type, file_type, engine_extnames)
+      end
+
+      def default_processors_for(type, file_type, engine_extnames)
+        bundled_processors = config[:bundle_processors][type]
+        if bundled_processors.any?
+          bundled_processors
+        else
+          self_processors_for(type, file_type, engine_extnames)
+        end
+      end
+
+      def self_processors_for(type, file_type, engine_extnames)
         processors = []
 
-        if pipeline == "source"
-          return processors
+        processors.concat config[:postprocessors][type]
+
+        if type != file_type && processor = transformers[file_type][type]
+          processors << processor
         end
 
-        bundled_processors = pipeline == "self" ? [] : config[:bundle_processors][type]
-
-        if bundled_processors.any?
-          processors.concat bundled_processors
-        else
-          processors.concat config[:postprocessors][type]
-
-          if type != file_type && processor = transformers[file_type][type]
-            processors << processor
-          end
-
-          processors.concat engine_extnames.map { |ext| engines[ext] }
-          processors.concat config[:preprocessors][file_type]
-        end
+        processors.concat engine_extnames.map { |ext| engines[ext] }
+        processors.concat config[:preprocessors][file_type]
 
         if processors.any? || mime_type_charset_detecter(type)
           processors << FileReader
