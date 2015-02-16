@@ -1,5 +1,3 @@
-require 'closure-compiler'
-
 module Sprockets
   # Public: Closure Compiler minifier.
   #
@@ -34,11 +32,11 @@ module Sprockets
     attr_reader :cache_key
 
     def initialize(options = {})
-      @compiler = ::Closure::Compiler.new(options)
+      @compiler = Autoload::Closure::Compiler.new(options)
       @cache_key = [
         self.class.name,
-        ::Closure::VERSION,
-        ::Closure::COMPILER_VERSION,
+        Autoload::Closure::VERSION,
+        Autoload::Closure::COMPILER_VERSION,
         VERSION,
         options
       ].freeze

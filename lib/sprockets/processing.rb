@@ -238,7 +238,7 @@ module Sprockets
 
       def wrap_processor(klass, proc)
         if !proc
-          if klass.class == Sprockets::AutoloadProcessor || klass.respond_to?(:call)
+          if klass.respond_to?(:call)
             klass
           else
             LegacyTiltProcessor.new(klass)

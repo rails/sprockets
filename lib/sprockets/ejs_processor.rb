@@ -1,5 +1,3 @@
-require 'ejs'
-
 module Sprockets
   # Processor engine class for the EJS compiler. Depends on the `ejs` gem.
   #
@@ -24,7 +22,7 @@ module Sprockets
     def self.call(input)
       data = input[:data]
       input[:cache].fetch(cache_key + [data]) do
-        ::EJS.compile(data)
+        Autoload::EJS.compile(data)
       end
     end
   end

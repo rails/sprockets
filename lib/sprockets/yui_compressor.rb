@@ -1,5 +1,3 @@
-require 'yui/compressor'
-
 module Sprockets
   # Public: YUI compressor.
   #
@@ -37,7 +35,7 @@ module Sprockets
       @options = options
       @cache_key = [
         self.class.name,
-        ::YUI::Compressor::VERSION,
+        Autoload::YUI::Compressor::VERSION,
         VERSION,
         options
       ].freeze
@@ -50,12 +48,12 @@ module Sprockets
       when 'application/javascript'
         key = @cache_key + [input[:content_type], input[:data]]
         input[:cache].fetch(key) do
-          ::YUI::JavaScriptCompressor.new(@options).compress(data)
+          Autoload::YUI::JavaScriptCompressor.new(@options).compress(data)
         end
       when 'text/css'
         key = @cache_key + [input[:content_type], input[:data]]
         input[:cache].fetch(key) do
-          ::YUI::CssCompressor.new(@options).compress(data)
+          Autoload::YUI::CssCompressor.new(@options).compress(data)
         end
       else
         data

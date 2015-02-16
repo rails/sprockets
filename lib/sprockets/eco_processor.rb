@@ -1,5 +1,3 @@
-require 'eco'
-
 module Sprockets
   # Processor engine class for the Eco compiler. Depends on the `eco` gem.
   #
@@ -12,7 +10,7 @@ module Sprockets
     VERSION = '1'
 
     def self.cache_key
-      @cache_key ||= [name, ::Eco::Source::VERSION, VERSION].freeze
+      @cache_key ||= [name, Autoload::Eco::Source::VERSION, VERSION].freeze
     end
 
     # Compile template data with Eco compiler.
@@ -25,7 +23,7 @@ module Sprockets
     def self.call(input)
       data = input[:data]
       input[:cache].fetch(cache_key + [data]) do
-        ::Eco.compile(data)
+        Autoload::Eco.compile(data)
       end
     end
   end

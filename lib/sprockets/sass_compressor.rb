@@ -1,5 +1,3 @@
-require 'sass'
-
 module Sprockets
   # Public: Sass CSS minifier.
   #
@@ -27,7 +25,7 @@ module Sprockets
       instance.call(input)
     end
 
-    def cache_key
+    def self.cache_key
       instance.cache_key
     end
 
@@ -37,7 +35,7 @@ module Sprockets
       @options = options
       @cache_key = [
         self.class.name,
-        ::Sass::VERSION,
+        Autoload::Sass::VERSION,
         VERSION,
         options
       ].freeze
@@ -52,7 +50,7 @@ module Sprockets
           read_cache: false,
           style: :compressed
         }.merge(@options)
-        ::Sass::Engine.new(data, options).render
+        Autoload::Sass::Engine.new(data, options).render
       end
     end
   end
