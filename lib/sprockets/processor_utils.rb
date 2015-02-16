@@ -26,7 +26,11 @@ module Sprockets
     # Returns AutoloadProcessor.
     def autoload_processor(mod, filename)
       autoload(mod, filename)
-      AutoloadProcessor.new(self, mod)
+      if autoload?(mod)
+        AutoloadProcessor.new(self, mod)
+      else
+        const_get(mod)
+      end
     end
 
     # Public: Compose processors in right to left order.
