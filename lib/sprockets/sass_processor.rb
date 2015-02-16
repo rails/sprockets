@@ -1,5 +1,4 @@
 require 'rack/utils'
-require 'sass'
 require 'uri'
 
 module Sprockets
@@ -11,6 +10,8 @@ module Sprockets
   #   https://github.com/rails/sass-rails
   #
   class SassProcessor
+    autoload :CacheStore, 'sprockets/sass_cache_store'
+
     # Internal: Defines default sass syntax to use. Exposed so the ScssProcessor
     # may override it.
     def self.syntax
@@ -45,7 +46,7 @@ module Sprockets
       @cache_key = [
         self.class.name,
         VERSION,
-        Sass::VERSION,
+        Autoload::Sass::VERSION,
         @cache_version
       ].freeze
 
@@ -71,9 +72,9 @@ module Sprockets
         }
       }
 
-      engine = ::Sass::Engine.new(input[:data], options)
+      engine = Autoload::Sass::Engine.new(input[:data], options)
 
-      css = Utils.module_include(::Sass::Script::Functions, @functions) do
+      css = Utils.module_include(Autoload::Sass::Script::Functions, @functions) do
         engine.render
       end
 
@@ -114,7 +115,7 @@ module Sprockets
         query    = "?#{query}" if query
         fragment = "##{fragment}" if fragment
 
-        ::Sass::Script::String.new("#{path}#{query}#{fragment}", :string)
+        Autoload::Sass::Script::String.new("#{path}#{query}#{fragment}", :string)
       end
 
       # Public: Generate a asset url() link.
@@ -123,7 +124,7 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_url(path, options = {})
-        ::Sass::Script::String.new("url(#{asset_path(path, options).value})")
+        Autoload::Sass::Script::String.new("url(#{asset_path(path, options).value})")
       end
 
       # Public: Generate url for image path.
@@ -241,7 +242,7 @@ module Sprockets
       # Returns a Sass::Script::String.
       def asset_data_url(path)
         url = sprockets_context.asset_data_uri(path.value)
-        ::Sass::Script::String.new("url(" + url + ")")
+        Autoload::Sass::Script::String.new("url(" + url + ")")
       end
 
       protected
@@ -268,27 +269,6 @@ module Sprockets
         end
 
     end
-
-    # Internal: Cache wrapper for Sprockets cache adapter.
-    class CacheStore < ::Sass::CacheStores::Base
-      VERSION = '1'
-
-      def initialize(cache, version)
-        @cache, @version = cache, "#{VERSION}/#{version}"
-      end
-
-      def _store(key, version, sha, contents)
-        @cache.set("#{@version}/#{version}/#{key}/#{sha}", contents)
-      end
-
-      def _retrieve(key, version, sha)
-        @cache.get("#{@version}/#{version}/#{key}/#{sha}")
-      end
-
-      def path_to(key)
-        key
-      end
-    end
   end
 
   class ScssProcessor < SassProcessor
@@ -299,7 +279,4 @@ module Sprockets
 
   # Deprecated: Use Sprockets::SassProcessor::Functions instead.
   SassFunctions = SassProcessor::Functions
-
-  # Deprecated: Use Sprockets::SassProcessor::CacheStore instead.
-  SassCacheStore = SassProcessor::CacheStore
 end

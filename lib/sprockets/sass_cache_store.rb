@@ -1,2 +1,29 @@
-# Deprecated: Require sprockets/sass_processor instead
-require 'sprockets/sass_processor'
+require 'sass'
+
+module Sprockets
+  class SassProcessor
+    # Internal: Cache wrapper for Sprockets cache adapter.
+    class CacheStore < ::Sass::CacheStores::Base
+      VERSION = '1'
+
+      def initialize(cache, version)
+        @cache, @version = cache, "#{VERSION}/#{version}"
+      end
+
+      def _store(key, version, sha, contents)
+        @cache.set("#{@version}/#{version}/#{key}/#{sha}", contents)
+      end
+
+      def _retrieve(key, version, sha)
+        @cache.get("#{@version}/#{version}/#{key}/#{sha}")
+      end
+
+      def path_to(key)
+        key
+      end
+    end
+  end
+
+  # Deprecated: Use Sprockets::SassProcessor::CacheStore instead.
+  SassCacheStore = SassProcessor::CacheStore
+end

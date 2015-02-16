@@ -1,4 +1,5 @@
 require 'sprockets/version'
+require 'sprockets/autoload'
 
 module Sprockets
   # Environment
@@ -113,28 +114,38 @@ module Sprockets
   register_bundle_metadata_reducer 'application/javascript', :data, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
 
-  register_compressor 'text/css', :sass, autoload_processor(:SassCompressor, 'sprockets/sass_compressor')
-  register_compressor 'text/css', :scss, autoload_processor(:SassCompressor, 'sprockets/sass_compressor')
-  register_compressor 'text/css', :yui, autoload_processor(:YUICompressor, 'sprockets/yui_compressor')
-  register_compressor 'application/javascript', :closure, autoload_processor(:ClosureCompressor, 'sprockets/closure_compressor')
-  register_compressor 'application/javascript', :uglifier, autoload_processor(:UglifierCompressor, 'sprockets/uglifier_compressor')
-  register_compressor 'application/javascript', :uglify, autoload_processor(:UglifierCompressor, 'sprockets/uglifier_compressor')
-  register_compressor 'application/javascript', :yui, autoload_processor(:YUICompressor, 'sprockets/yui_compressor')
+  require 'sprockets/closure_compressor'
+  require 'sprockets/sass_compressor'
+  require 'sprockets/uglifier_compressor'
+  require 'sprockets/yui_compressor'
+  register_compressor 'text/css', :sass, SassCompressor
+  register_compressor 'text/css', :scss, SassCompressor
+  register_compressor 'text/css', :yui, YUICompressor
+  register_compressor 'application/javascript', :closure, ClosureCompressor
+  register_compressor 'application/javascript', :uglifier, UglifierCompressor
+  register_compressor 'application/javascript', :uglify, UglifierCompressor
+  register_compressor 'application/javascript', :yui, YUICompressor
 
   # Mmm, CoffeeScript
-  register_engine '.coffee', autoload_processor(:CoffeeScriptProcessor, 'sprockets/coffee_script_processor'), mime_type: 'application/javascript'
+  require 'sprockets/coffee_script_processor'
+  register_engine '.coffee', CoffeeScriptProcessor, mime_type: 'application/javascript'
 
   # JST engines
-  register_engine '.jst', autoload_processor(:JstProcessor, 'sprockets/jst_processor'), mime_type: 'application/javascript'
-  register_engine '.eco', autoload_processor(:EcoProcessor, 'sprockets/eco_processor'), mime_type: 'application/javascript'
-  register_engine '.ejs', autoload_processor(:EjsProcessor, 'sprockets/ejs_processor'), mime_type: 'application/javascript'
+  require 'sprockets/eco_processor'
+  require 'sprockets/ejs_processor'
+  require 'sprockets/jst_processor'
+  register_engine '.jst', JstProcessor, mime_type: 'application/javascript'
+  register_engine '.eco', EcoProcessor, mime_type: 'application/javascript'
+  register_engine '.ejs', EjsProcessor, mime_type: 'application/javascript'
 
   # CSS engines
-  register_engine '.sass', autoload_processor(:SassProcessor, 'sprockets/sass_processor'), mime_type: 'text/css'
-  register_engine '.scss', autoload_processor(:ScssProcessor, 'sprockets/sass_processor'), mime_type: 'text/css'
+  require 'sprockets/sass_processor'
+  register_engine '.sass', SassProcessor, mime_type: 'text/css'
+  register_engine '.scss', ScssProcessor, mime_type: 'text/css'
 
   # Other
-  register_engine '.erb', autoload_processor(:ERBProcessor, 'sprockets/erb_processor'), mime_type: 'text/plain'
+  require 'sprockets/erb_processor'
+  register_engine '.erb', ERBProcessor, mime_type: 'text/plain'
 
   register_dependency_resolver 'environment-version' do |env|
     env.version

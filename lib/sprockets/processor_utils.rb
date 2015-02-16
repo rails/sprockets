@@ -1,5 +1,3 @@
-require 'sprockets/autoload_processor'
-
 module Sprockets
   # Functional utilities for dealing with Processor functions.
   #
@@ -15,23 +13,6 @@ module Sprockets
   # function composition. The composition helpers here can help.
   module ProcessorUtils
     extend self
-
-    # Internal: Setup autoload and wrapper for lazy loaded processor.
-    #
-    #   Sprockets.autoload_processor :CoffeeScriptProcessor, 'sprockets/coffee_script_processor'
-    #
-    # mod      - Symbol name of processor class/module
-    # filename - String require path for module
-    #
-    # Returns AutoloadProcessor.
-    def autoload_processor(mod, filename)
-      autoload(mod, filename)
-      if autoload?(mod)
-        AutoloadProcessor.new(self, mod)
-      else
-        const_get(mod)
-      end
-    end
 
     # Public: Compose processors in right to left order.
     #
