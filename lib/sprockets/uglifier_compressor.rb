@@ -1,5 +1,3 @@
-require 'uglifier'
-
 module Sprockets
   # Public: Uglifier/Uglify compressor.
   #
@@ -35,7 +33,7 @@ module Sprockets
 
     def initialize(options = {})
       # Feature detect Uglifier 2.0 option support
-      if Uglifier::DEFAULTS[:copyright]
+      if Autoload::Uglifier::DEFAULTS[:copyright]
         # Uglifier < 2.x
         options[:copyright] ||= false
       else
@@ -43,11 +41,11 @@ module Sprockets
         options[:copyright] ||= :none
       end
 
-      @uglifier = ::Uglifier.new(options)
+      @uglifier = Autoload::Uglifier.new(options)
 
       @cache_key = [
         self.class.name,
-        ::Uglifier::VERSION,
+        Autoload::Uglifier::VERSION,
         VERSION,
         options
       ].freeze

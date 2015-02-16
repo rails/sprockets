@@ -3,11 +3,6 @@ require "sprockets"
 require "sprockets/environment"
 require "fileutils"
 
-require "coffee_script"
-require "eco"
-require "ejs"
-require "erb"
-
 old_verbose, $VERBOSE = $VERBOSE, false
 Encoding.default_external = 'UTF-8'
 Encoding.default_internal = 'UTF-8'
@@ -21,11 +16,6 @@ ensure
 end
 
 # Popular extensions for testing but not part of Sprockets core
-
-module Sprockets
-  register_postprocessor 'text/invalid', autoload_processor(:MissingProcessor, 'sprockets/missing_processor')
-  register_preprocessor 'text/invalid', autoload_processor(:MissingProcessor, 'sprockets/missing_processor')
-end
 
 Sprockets.register_dependency_resolver "rand" do
   rand(2**100)

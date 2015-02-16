@@ -1,9 +1,6 @@
-require '6to5'
-
 module Sprockets
   class ES6to5Processor
     VERSION = '1'
-    SOURCE_VERSION = ::ES6to5.version
 
     def self.instance
       @instance ||= new
@@ -21,7 +18,7 @@ module Sprockets
 
       @cache_key = [
         self.class.name,
-        SOURCE_VERSION,
+        Autoload::ES6to5.version,
         VERSION,
         @options
       ].freeze
@@ -31,7 +28,7 @@ module Sprockets
       data = input[:data]
 
       result = input[:cache].fetch(@cache_key + [data]) do
-        ES6to5.transform(data, @options)
+        Autoload::ES6to5.transform(data, @options)
       end
 
       result['code']

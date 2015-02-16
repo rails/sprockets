@@ -156,9 +156,12 @@ module Sprockets
       #
       # Returns a String with a length less than 100 characters.
       def peek_key(key)
-        if key.is_a?(String)
+        case key
+        when Integer
+          key.to_s
+        when String
           key[0, PEEK_SIZE].inspect
-        elsif key.is_a?(Array)
+        when Array
           str = []
           key.each { |k| str << peek_key(k) }
           str.join(':')[0, PEEK_SIZE]

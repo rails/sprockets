@@ -1,4 +1,5 @@
 require 'sprockets/version'
+require 'sprockets/autoload'
 
 module Sprockets
   # Environment
@@ -115,40 +116,51 @@ module Sprockets
   register_bundle_metadata_reducer '*/*', :links, :+
   register_bundle_metadata_reducer 'application/javascript', :map, :+
 
-  register_compressor 'text/css', :sass, autoload_processor(:SassCompressor, 'sprockets/sass_compressor')
-  register_compressor 'text/css', :scss, autoload_processor(:SassCompressor, 'sprockets/sass_compressor')
-  register_compressor 'text/css', :yui, autoload_processor(:YUICompressor, 'sprockets/yui_compressor')
-  register_compressor 'application/javascript', :closure, autoload_processor(:ClosureCompressor, 'sprockets/closure_compressor')
-  register_compressor 'application/javascript', :uglifier, autoload_processor(:UglifierCompressor, 'sprockets/uglifier_compressor')
-  register_compressor 'application/javascript', :uglify, autoload_processor(:UglifierCompressor, 'sprockets/uglifier_compressor')
-  register_compressor 'application/javascript', :yui, autoload_processor(:YUICompressor, 'sprockets/yui_compressor')
+  require 'sprockets/closure_compressor'
+  require 'sprockets/sass_compressor'
+  require 'sprockets/uglifier_compressor'
+  require 'sprockets/yui_compressor'
+  register_compressor 'text/css', :sass, SassCompressor
+  register_compressor 'text/css', :scss, SassCompressor
+  register_compressor 'text/css', :yui, YUICompressor
+  register_compressor 'application/javascript', :closure, ClosureCompressor
+  register_compressor 'application/javascript', :uglifier, UglifierCompressor
+  register_compressor 'application/javascript', :uglify, UglifierCompressor
+  register_compressor 'application/javascript', :yui, YUICompressor
 
   # 6to5, TheFuture™ is now
+  require 'sprockets/es6to5_processor'
   register_mime_type 'application/ecmascript-6', extensions: ['.es6'], charset: :unicode
-  register_transformer 'application/ecmascript-6', 'application/javascript', autoload_processor(:ES6to5Processor, 'sprockets/es6to5_processor')
+  register_transformer 'application/ecmascript-6', 'application/javascript', ES6to5Processor
   register_preprocessor 'application/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Mmm, CoffeeScript
+  require 'sprockets/coffee_script_processor'
   register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
-  register_transformer 'text/coffeescript', 'application/javascript', autoload_processor(:CoffeeScriptProcessor, 'sprockets/coffee_script_processor')
+  register_transformer 'text/coffeescript', 'application/javascript', CoffeeScriptProcessor
   register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
   # JST processors
+  require 'sprockets/eco_processor'
+  require 'sprockets/ejs_processor'
+  require 'sprockets/jst_processor'
   register_mime_type 'text/eco', extensions: ['.eco', '.jst.eco']
   register_mime_type 'text/ejs', extensions: ['.ejs', '.jst.ejs']
-  register_transformer 'text/eco', 'application/javascript+function', autoload_processor(:EcoProcessor, 'sprockets/eco_processor')
-  register_transformer 'text/ejs', 'application/javascript+function', autoload_processor(:EjsProcessor, 'sprockets/ejs_processor')
-  register_transformer 'application/javascript+function', 'application/javascript', autoload_processor(:JstProcessor, 'sprockets/jst_processor')
+  register_transformer 'text/eco', 'application/javascript+function', EcoProcessor
+  register_transformer 'text/ejs', 'application/javascript+function', EjsProcessor
+  register_transformer 'application/javascript+function', 'application/javascript', JstProcessor
 
   # CSS processors
+  require 'sprockets/sass_processor'
   register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
   register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
-  register_transformer 'text/sass', 'text/css', autoload_processor(:SassProcessor, 'sprockets/sass_processor')
-  register_transformer 'text/scss', 'text/css', autoload_processor(:ScssProcessor, 'sprockets/sass_processor')
+  register_transformer 'text/sass', 'text/css', SassProcessor
+  register_transformer 'text/scss', 'text/css', ScssProcessor
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # ERB
+  require 'sprockets/erb_processor'
   register_transformer_suffix(%w(
     application/ecmascript-6
     application/javascript
@@ -161,7 +173,7 @@ module Sprockets
     text/sass
     text/scss
     text/yaml
-  ), 'application/\2+ruby', '.erb', autoload_processor(:ERBProcessor, 'sprockets/erb_processor'))
+  ), 'application/\2+ruby', '.erb', ERBProcessor)
 
   register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']

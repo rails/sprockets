@@ -1,4 +1,3 @@
-require 'coffee_script'
 require 'source_map'
 
 module Sprockets
@@ -11,17 +10,16 @@ module Sprockets
   #
   module CoffeeScriptProcessor
     VERSION = '2'
-    SOURCE_VERSION = ::CoffeeScript::Source.version
 
     def self.cache_key
-      @cache_key ||= [name, SOURCE_VERSION, VERSION].freeze
+      @cache_key ||= [name, Autoload::CoffeeScript::Source.version, VERSION].freeze
     end
 
     def self.call(input)
       data = input[:data]
 
       result = input[:cache].fetch(self.cache_key + [data]) do
-        ::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
+        Autoload::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
       end
 
       map = input[:metadata][:map] | SourceMap::Map.from_json(result['v3SourceMap'])
