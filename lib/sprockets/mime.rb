@@ -81,7 +81,7 @@ module Sprockets
     #
     # Returns Proc detector or nil if none is available.
     def mime_type_charset_detecter(mime_type)
-      if type = mime_types[mime_type]
+      if type = config[:mime_types][mime_type]
         if detect = type[:charset]
           return detect
         end
@@ -109,11 +109,11 @@ module Sprockets
       def compute_extname_map
         graph = {}
 
-        ([[nil, nil]] + mime_exts.to_a).each do |format_extname, format_type|
+        ([[nil, nil]] + config[:mime_exts].to_a).each do |format_extname, format_type|
           3.times do |n|
-            engines.keys.permutation(n).each do |engine_extnames|
+            config[:engines].keys.permutation(n).each do |engine_extnames|
               key = "#{format_extname}#{engine_extnames.join}"
-              type = format_type || engine_mime_types[engine_extnames.first]
+              type = format_type || config[:engine_mime_types][engine_extnames.first]
               graph[key] = {type: type, engines: engine_extnames}
             end
           end

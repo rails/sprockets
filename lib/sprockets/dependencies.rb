@@ -63,7 +63,7 @@ module Sprockets
     # Returns resolved Object.
     def resolve_dependency(str)
       scheme = str[/([^:]+)/, 1]
-      if resolver = dependency_resolvers[scheme]
+      if resolver = config[:dependency_resolvers][scheme]
         resolver.call(self, str)
       else
         nil

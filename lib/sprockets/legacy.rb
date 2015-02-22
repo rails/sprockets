@@ -100,7 +100,7 @@ module Sprockets
 
       seen = Set.new
 
-      self.paths.each do |load_path|
+      paths.each do |load_path|
         stat_tree(load_path).each do |filename, stat|
           next unless stat.file?
 

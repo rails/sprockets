@@ -22,7 +22,7 @@ module Sprockets
     # The String Asset URI is returned or nil if no results are found.
     def resolve(path, options = {})
       path = path.to_s
-      paths = options[:load_paths] || self.paths
+      paths = options[:load_paths] || config[:paths]
       accept = options[:accept]
       skip_bundle = options.key?(:bundle) ? !options[:bundle] : false
 

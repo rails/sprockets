@@ -71,7 +71,7 @@ module Sprockets
           raise FileNotFound, "could not find file: #{filename}"
         end
 
-        load_path, logical_path = paths_split(self.paths, filename)
+        load_path, logical_path = paths_split(config[:paths], filename)
 
         unless load_path
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
@@ -82,10 +82,10 @@ module Sprockets
         name = logical_path
 
         if type = params[:type]
-          logical_path += mime_types[type][:extensions].first
+          logical_path += config[:mime_types][type][:extensions].first
         end
 
-        if type != file_type && !transformers[file_type][type]
+        if type != file_type && !config[:transformers][file_type][type]
           raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
         end
 
@@ -93,7 +93,7 @@ module Sprockets
         processors = processors_for(type, file_type, engine_extnames, skip_bundle)
 
         processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
-        dependencies = self.dependencies + [processors_dep_uri]
+        dependencies = config[:dependencies] + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
