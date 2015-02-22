@@ -68,7 +68,7 @@ module Sprockets
     #
     # Returns Proc detector or nil if none is available.
     def mime_type_charset_detecter(mime_type)
-      if type = mime_types[mime_type]
+      if type = config[:mime_types][mime_type]
         if detect = type[:charset]
           return detect
         end

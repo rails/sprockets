@@ -20,7 +20,7 @@ module Sprockets
     #     # => "file:///path/to/app/javascripts/application.coffee?type=application/javascript"
     #
     # The String Asset URI is returned or nil if no results are found.
-    def resolve(path, load_paths: self.paths, accept: nil, bundle: true, base_path: nil)
+    def resolve(path, load_paths: config[:paths], accept: nil, bundle: true, base_path: nil)
       paths = load_paths
       skip_bundle = !bundle
 
