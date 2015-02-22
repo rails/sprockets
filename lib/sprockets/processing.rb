@@ -110,12 +110,6 @@ module Sprockets
       unregister_config_processor(:bundle_processors, *args)
     end
 
-    # Internal: Two dimensional Hash of reducer functions for a given mime type
-    # and asset metadata key.
-    def bundle_reducers
-      config[:bundle_reducers]
-    end
-
     # Public: Register bundle metadata reducer function.
     #
     # Examples
@@ -194,7 +188,7 @@ module Sprockets
 
         processors.concat config[:postprocessors][type]
 
-        if type != file_type && processor = transformers[file_type][type]
+        if type != file_type && processor = config[:transformers][file_type][type]
           processors << processor
         end
 

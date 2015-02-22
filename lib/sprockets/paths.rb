@@ -35,7 +35,7 @@ module Sprockets
     # Paths at the end of the `Array` have the least priority.
     def prepend_path(path)
       self.config = hash_reassoc(config, :paths) do |paths|
-        path = File.expand_path(path, root).freeze
+        path = File.expand_path(path, config[:root]).freeze
         paths.unshift(path)
       end
     end
@@ -45,7 +45,7 @@ module Sprockets
     # Paths at the beginning of the `Array` have a higher priority.
     def append_path(path)
       self.config = hash_reassoc(config, :paths) do |paths|
-        path = File.expand_path(path, root).freeze
+        path = File.expand_path(path, config[:root]).freeze
         paths.push(path)
       end
     end

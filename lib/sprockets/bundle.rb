@@ -30,7 +30,7 @@ module Sprockets
         dependencies.merge(env.load(uri).metadata[:dependencies])
       end
 
-      reducers = Hash[env.match_mime_type_keys(env.bundle_reducers, type).flat_map(&:to_a)]
+      reducers = Hash[env.match_mime_type_keys(env.config[:bundle_reducers], type).flat_map(&:to_a)]
       process_bundle_reducers(assets, reducers).merge(dependencies: dependencies, included: assets.map(&:uri))
     end
 
