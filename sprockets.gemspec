@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rack", "~> 1.0"
   s.add_dependency "sourcemap"
 
-  s.add_development_dependency "babel-transpiler", "~> 4.0"
+  s.add_development_dependency "babel-transpiler", "~> 0.6"
   s.add_development_dependency "closure-compiler", "~> 1.1"
   s.add_development_dependency "coffee-script-source", "~> 1.6"
   s.add_development_dependency "coffee-script", "~> 2.2"
