@@ -128,10 +128,10 @@ module Sprockets
   register_compressor 'application/javascript', :uglify, UglifierCompressor
   register_compressor 'application/javascript', :yui, YUICompressor
 
-  # 6to5, TheFuture™ is now
-  require 'sprockets/es6to5_processor'
+  # Babel, TheFuture™ is now
+  require 'sprockets/babel_processor'
   register_mime_type 'application/ecmascript-6', extensions: ['.es6'], charset: :unicode
-  register_transformer 'application/ecmascript-6', 'application/javascript', ES6to5Processor
+  register_transformer 'application/ecmascript-6', 'application/javascript', BabelProcessor
   register_preprocessor 'application/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   # Mmm, CoffeeScript
