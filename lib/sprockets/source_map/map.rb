@@ -1,12 +1,14 @@
 require 'json'
+require 'sprockets/source_map_utils'
 require 'sprockets/source_map/mapping'
 require 'sprockets/source_map/offset'
-require 'sprockets/source_map/vlq'
 
 module Sprockets
   module SourceMap
     class Map
       include Enumerable
+      include SourceMapUtils
+      extend SourceMapUtils
 
       def self.from_json(json)
         from_hash JSON.parse(json)
@@ -36,7 +38,7 @@ module Sprockets
         original_column = 0
         name_id         = 0
 
-        VLQ.decode_mappings(str).each_with_index do |group, index|
+        vlq_decode_mappings(str).each_with_index do |group, index|
           generated_column = 0
           generated_line   = index + 1
 
@@ -218,7 +220,7 @@ module Sprockets
             end
           end
 
-          VLQ.encode_mappings(ary)
+          vlq_encode_mappings(ary)
         end
     end
   end
