@@ -1,5 +1,6 @@
 require 'sprockets_test'
 require 'sprockets/cache'
+require 'sprockets/source_map'
 require 'sprockets/uglifier_compressor'
 
 class TestUglifierCompressor < Sprockets::TestCase
@@ -9,7 +10,7 @@ class TestUglifierCompressor < Sprockets::TestCase
       data: "function foo() {\n  return true;\n}",
       cache: Sprockets::Cache.new,
       metadata: {
-        map: SourceMap::Map.new
+        map: Sprockets::SourceMap::Map.new
       }
     }
     output = "function foo(){return!0}"

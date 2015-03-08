@@ -1,5 +1,6 @@
 require 'sprockets_test'
 require 'sprockets/coffee_script_processor'
+require 'sprockets/source_map'
 
 class TestCoffeeScriptProcessor < Sprockets::TestCase
   test "compile coffee-script template to js" do
@@ -9,7 +10,7 @@ class TestCoffeeScriptProcessor < Sprockets::TestCase
       name: 'squared',
       cache: Sprockets::Cache.new,
       metadata: {
-        map: SourceMap::Map.new
+        map: Sprockets::SourceMap::Map.new
       }
     }
     result = Sprockets::CoffeeScriptProcessor.call(input)

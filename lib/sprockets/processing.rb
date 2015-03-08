@@ -1,4 +1,3 @@
-require 'source_map'
 require 'sprockets/mime'
 require 'sprockets/processor_utils'
 require 'sprockets/uri_utils'
