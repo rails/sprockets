@@ -179,7 +179,7 @@ binding.
 If the `coffee-script` gem is available to your application, you can
 use CoffeeScript to write JavaScript assets in Sprockets. Note that
 the CoffeeScript compiler is written in JavaScript, and you will need
-an [ExecJS](https://github.com/sstephenson/execjs)-supported runtime
+an [ExecJS](https://github.com/rails/execjs)-supported runtime
 on your system to invoke it.
 
 To write JavaScript assets with CoffeeScript, use the extension
@@ -378,7 +378,7 @@ Sprockets 2.x was originally design around [Tilt](https://github.com/rtomayko/ti
 
 Similar to Rack, a processor is a any "callable" (an object that responds to `call`). This maybe a simple Proc or a full class that defines a `def self.call(input)` method. The `call` method accepts an `input` Hash and returns a Hash of metadata.
 
-Also see [`Sprockets::ProcessorUtils`](https://github.com/sstephenson/sprockets/blob/master/lib/sprockets/processor_utils.rb) for public helper methods.
+Also see [`Sprockets::ProcessorUtils`](https://github.com/rails/sprockets/blob/master/lib/sprockets/processor_utils.rb) for public helper methods.
 
 ### input Hash
 
@@ -386,7 +386,7 @@ The `input` Hash defines the following public fields.
 
 * `:data` - String asset contents
 * `:environment` - Current `Sprockets::Environment` instance.
-* `:cache` - A `Sprockets::Cache` instance. See [`Sprockets::Cache#fetch`](https://github.com/sstephenson/sprockets/blob/master/lib/sprockets/cache.rb).
+* `:cache` - A `Sprockets::Cache` instance. See [`Sprockets::Cache#fetch`](https://github.com/rails/sprockets/blob/master/lib/sprockets/cache.rb).
 * `:uri` - String Asset URI.
 * `:filename` - String full path to original file.
 * `:load_path` - String current load path for filename.
@@ -436,14 +436,14 @@ end
 ### Contributing
 
 The Sprockets source code is [hosted on
-GitHub](https://github.com/sstephenson/sprockets). You can check out a
+GitHub](https://github.com/rails/sprockets). You can check out a
 copy of the latest code using Git:
 
-    $ git clone https://github.com/sstephenson/sprockets
+    $ git clone https://github.com/rails/sprockets
 
 If you've found a bug or have a question, please open an issue on the
 [Sprockets issue
-tracker](https://github.com/sstephenson/sprockets/issues). Or, clone
+tracker](https://github.com/rails/sprockets/issues). Or, clone
 the Sprockets repository, write a failing test case, fix the bug and
 submit a pull request.
 
