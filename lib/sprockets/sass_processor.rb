@@ -79,11 +79,13 @@ module Sprockets
       end
 
       # Track all imported files
+      sass_dependencies = Set.new([input[:filename]])
       engine.dependencies.map do |dependency|
+        sass_dependencies << dependency.options[:filename]
         context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.options[:filename])
       end
 
-      context.metadata.merge(data: css)
+      context.metadata.merge(data: css, sass_dependencies: sass_dependencies)
     end
 
     # Public: Functions injected into Sass context during Sprockets evaluation.

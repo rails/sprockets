@@ -142,6 +142,7 @@ module Sprockets
   require 'sprockets/sass_processor'
   register_engine '.sass', SassProcessor, mime_type: 'text/css'
   register_engine '.scss', ScssProcessor, mime_type: 'text/css'
+  register_bundle_metadata_reducer 'text/css', :sass_dependencies, :+
 
   # Other
   require 'sprockets/erb_processor'
