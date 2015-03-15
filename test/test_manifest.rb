@@ -191,6 +191,26 @@ class TestManifest < Sprockets::TestCase
     assert_equal gallery_digest_path, data['assets']['gallery.css']
   end
 
+  test "compile with transformed asset" do
+    assert svg_digest_path = @env['logo.svg'].digest_path
+    assert png_digest_path = @env['logo.png'].digest_path
+
+    assert !File.exist?("#{@dir}/#{svg_digest_path}")
+    assert !File.exist?("#{@dir}/#{png_digest_path}")
+
+    @manifest.compile('logo.svg', 'logo.png')
+
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/#{svg_digest_path}")
+    assert File.exist?("#{@dir}/#{png_digest_path}")
+
+    data = JSON.parse(File.read(@manifest.filename))
+    assert data['files'][svg_digest_path]
+    assert data['files'][png_digest_path]
+    assert_equal svg_digest_path, data['assets']['logo.svg']
+    assert_equal png_digest_path, data['assets']['logo.png']
+  end
+
   test "compile asset with links" do
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 
