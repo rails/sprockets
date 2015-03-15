@@ -44,13 +44,19 @@ module Sprockets
     def self.process_bundle_reducers(assets, reducers)
       initial = {}
       reducers.each do |k, (v, _)|
-        initial[k] = v if v
+        initial[k] = v if !v.nil?
       end
 
       assets.reduce(initial) do |h, asset|
         reducers.each do |k, (_, block)|
           value = k == :data ? asset.source : asset.metadata[k]
-          h[k]  = h.key?(k) ? block.call(h[k], value) : value
+          if h.key?(k)
+            if !value.nil?
+              h[k] = block.call(h[k], value)
+            end
+          else
+            h[k] = value
+          end
         end
         h
       end
