@@ -260,7 +260,7 @@ a:link {
   test "track sass dependencies metadata" do
     asset = nil
     silence_warnings do
-      asset = @env.find_asset('sass/import_partial.scss')
+      asset = @env.find_asset('sass/import_partial.css')
     end
     assert asset
     assert_equal [
