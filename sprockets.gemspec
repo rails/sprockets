@@ -32,6 +32,6 @@ Gem::Specification.new do |s|
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
-  s.homepage = "https://github.com/sstephenson/sprockets"
+  s.homepage = "https://github.com/rails/sprockets"
   s.rubyforge_project = "sprockets"
 end

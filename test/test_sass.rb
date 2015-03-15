@@ -256,6 +256,18 @@ a:link {
       assert trace.include?(":5")
     end
   end
+
+  test "track sass dependencies metadata" do
+    asset = nil
+    silence_warnings do
+      asset = @env.find_asset('sass/import_partial.css')
+    end
+    assert asset
+    assert_equal [
+      fixture_path('sass/_rounded.scss'),
+      fixture_path('sass/import_partial.sass')
+    ], asset.metadata[:sass_dependencies].to_a.sort
+  end
 end
 
 class TestSassCompressor < TestBaseSass

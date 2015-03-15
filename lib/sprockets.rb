@@ -158,6 +158,7 @@ module Sprockets
   register_transformer 'text/scss', 'text/css', ScssProcessor
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_bundle_metadata_reducer 'text/css', :sass_dependencies, :+
 
   # ERB
   require 'sprockets/erb_processor'
