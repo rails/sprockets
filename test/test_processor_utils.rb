@@ -20,10 +20,82 @@ class TestProcessorUtils < MiniTest::Test
     end
   end
 
+  def test_call_nothing
+    a = proc {}
+
+    input = { data: " " }.freeze
+    assert result = call_processor(a, input)
+    assert_equal " ", result[:data]
+  end
+
+  def test_call_function
+    a = proc { |input| { data: input[:data] + ",a" } }
+
+    input = { data: " " }.freeze
+    assert result = call_processor(a, input)
+    assert_equal " ,a", result[:data]
+  end
+
+  def test_call_single_function
+    a = proc { |input| { data: input[:data] + ",a" } }
+
+    input = { data: " " }.freeze
+    assert result = call_processors([a], input)
+    assert_equal " ,a", result[:data]
+  end
+
+  def test_call_hash_return
+    a = proc { |input| { data: input[:data] + ",a" } }
+    b = proc { |input| { data: input[:data] + ",b" } }
+
+    input = { data: " " }.freeze
+    assert result = call_processors([b, a], input)
+    assert_equal " ,a,b", result[:data]
+  end
+
+  def test_call_string_return
+    a = proc { |input| input[:data] + ",a" }
+    b = proc { |input| input[:data] + ",b" }
+
+    input = { data: " " }.freeze
+    assert result = call_processors([b, a], input)
+    assert_equal " ,a,b", result[:data]
+  end
+
+  def test_call_noop_return
+    a = proc { |input| input[:data] + ",a" }
+    b = proc { |input| nil }
+
+    input = { data: " " }.freeze
+    assert result = call_processors([a, b], input)
+    assert_equal " ,a", result[:data]
+    assert result = call_processors([b, a], input)
+    assert_equal " ,a", result[:data]
+  end
+
+  def test_call_metadata
+    a = proc { |input| { a: true } }
+    b = proc { |input| { b: true } }
+
+    input = {}
+    assert result = call_processors([a, b], input)
+    assert result[:a]
+    assert result[:b]
+  end
+
+  def test_call_metadata_merge
+    a = proc { |input| { trace: input[:metadata][:trace] + [:a] } }
+    b = proc { |input| { trace: input[:metadata][:trace] + [:b] } }
+
+    input = { metadata: { trace: [] }.freeze }.freeze
+    assert result = call_processors([b, a], input)
+    assert_equal [:a, :b], result[:trace]
+  end
+
   def test_compose_nothing
     a = compose_processors()
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = a.call(input)
     assert_equal " ", result[:data]
   end
@@ -32,7 +104,7 @@ class TestProcessorUtils < MiniTest::Test
     a = proc { |input| { data: input[:data] + ",a" } }
     b = compose_processors(a)
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = b.call(input)
     assert_equal " ,a", result[:data]
   end
@@ -42,7 +114,7 @@ class TestProcessorUtils < MiniTest::Test
     b = proc { |input| { data: input[:data] + ",b" } }
     c = compose_processors(b, a)
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = c.call(input)
     assert_equal " ,a,b", result[:data]
   end
@@ -52,7 +124,7 @@ class TestProcessorUtils < MiniTest::Test
     b = proc { |input| input[:data] + ",b" }
     c = compose_processors(b, a)
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = c.call(input)
     assert_equal " ,a,b", result[:data]
   end
@@ -61,9 +133,9 @@ class TestProcessorUtils < MiniTest::Test
     a = proc { |input| input[:data] + ",a" }
     b = proc { |input| nil }
     c = compose_processors(a, b)
-    d = compose_processors(a, b)
+    d = compose_processors(b, a)
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = c.call(input)
     assert_equal " ,a", result[:data]
     assert result = d.call(input)
@@ -86,7 +158,7 @@ class TestProcessorUtils < MiniTest::Test
     b = proc { |input| { trace: input[:metadata][:trace] + [:b] } }
     c = compose_processors(b, a)
 
-    input = { metadata: { trace: [] } }
+    input = { metadata: { trace: [] }.freeze }.freeze
     assert result = c.call(input)
     assert_equal [:a, :b], result[:trace]
   end
@@ -98,7 +170,7 @@ class TestProcessorUtils < MiniTest::Test
     d = proc { |input| { data: input[:data] + ",d" } }
     e = compose_processors(d, compose_processors(c, compose_processors(b, compose_processors(a))))
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = e.call(input)
     assert_equal " ,a,b,c,d", result[:data]
   end
@@ -110,7 +182,7 @@ class TestProcessorUtils < MiniTest::Test
     d = proc { |input| { trace: input[:metadata][:trace] + [:d] } }
     e = compose_processors(d, compose_processors(c, compose_processors(b, compose_processors(a))))
 
-    input = { metadata: { trace: [].freeze } }
+    input = { metadata: { trace: [].freeze }.freeze }.freeze
     assert result = e.call(input)
     assert_equal [:a, :b, :c, :d], result[:trace]
   end
@@ -134,7 +206,7 @@ class TestProcessorUtils < MiniTest::Test
     d = proc { |input| { trace: input[:metadata][:trace] + [:d] } }
     e = compose_processors(d, c, b, a)
 
-    input = { metadata: { trace: [] } }
+    input = { metadata: { trace: [].freeze }.freeze }.freeze
     assert result = e.call(input)
     assert_equal [:a, :b, :c, :d], result[:trace]
   end
@@ -146,7 +218,7 @@ class TestProcessorUtils < MiniTest::Test
       content_type: 'application/javascript',
       data: "self.square = (n) -> n * n",
       cache: Sprockets::Cache.new
-    }
+    }.freeze
     assert result = processor.call(input)
     assert_match "self.square=function", result[:data]
   end
@@ -155,7 +227,7 @@ class TestProcessorUtils < MiniTest::Test
     a = proc { |input| Object.new }
     b = compose_processors(a)
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert_raises(TypeError) do
       b.call(input)
     end
@@ -166,7 +238,7 @@ class TestProcessorUtils < MiniTest::Test
     b = Processor.new { |input| { data: input[:data] + ",b" } }
     c = compose_processors(b, a)
 
-    input = { data: " " }
+    input = { data: " " }.freeze
     assert result = c.call(input)
     assert_equal " ,a,b", result[:data]
   end
