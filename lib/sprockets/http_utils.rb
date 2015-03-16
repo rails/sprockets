@@ -4,7 +4,7 @@ module Sprockets
   module HTTPUtils
     extend self
 
-    # Internal: Test mime type against mime range.
+    # Public: Test mime type against mime range.
     #
     #    match_mime_type?('text/html', 'text/*') => true
     #    match_mime_type?('text/plain', '*') => true
@@ -16,6 +16,22 @@ module Sprockets
       v1, v2 = value.split('/', 2)
       m1, m2 = matcher.split('/', 2)
       (m1 == '*' || v1 == m1) && (m2.nil? || m2 == '*' || m2 == v2)
+    end
+
+    # Public: Return values from Hash where the key matches the mime type.
+    #
+    # hash      - Hash of String matcher keys to Object values
+    # mime_type - String mime type
+    #
+    # Returns Array of Object values.
+    def match_mime_type_keys(hash, mime_type)
+      type, subtype = mime_type.split('/', 2)
+      [
+        hash["*"],
+        hash["*/*"],
+        hash["#{type}/*"],
+        hash["#{type}/#{subtype}"]
+      ].compact
     end
 
     # Internal: Parse Accept header quality values.
