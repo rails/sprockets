@@ -193,17 +193,13 @@ module Sprockets
       #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)
-        type, engines = nil, []
+        engines = []
         extname, value = match_path_extname(path, config[:_extnames])
 
         if extname
           path = path.chomp(extname)
-          type = value[:type]
-          engines = value[:engines]
+          type, engines, pipeline = value.values_at(:type, :engines, :pipeline)
         end
-
-        pipeline = pipelines.keys.map(&:to_s).detect { |t| File.extname(path) == ".#{t}" }
-        path = path.chomp(".#{pipeline}") if pipeline
 
         return path, type, engines, pipeline
       end
