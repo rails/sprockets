@@ -20,6 +20,10 @@ module AssetTests
     assert @asset.pathname.exist?
   end
 
+  test "logical path can find itself" do
+    assert_equal @asset, @env[@asset.logical_path]
+  end
+
   test "mtime" do
     assert @asset.mtime
   end
@@ -175,10 +179,6 @@ class TextStaticAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
-  end
-
   test "content type" do
     assert_equal "text/plain", @asset.content_type
   end
@@ -212,8 +212,8 @@ class BinaryStaticAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
+  test "logical path" do
+    assert_equal "POW.png", @asset.logical_path
   end
 
   test "content type" do
@@ -329,8 +329,8 @@ class ProcessedAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env.find_asset(@asset.logical_path, pipeline: "self")
+  test "logical path" do
+    assert_equal "application.self.js", @asset.logical_path
   end
 
   test "content type" do
@@ -412,8 +412,8 @@ class BundledAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
+  test "logical path" do
+    assert_equal "application.js", @asset.logical_path
   end
 
   test "content type" do

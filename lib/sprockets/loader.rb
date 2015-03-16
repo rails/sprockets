@@ -81,6 +81,10 @@ module Sprockets
         logical_path = normalize_logical_path(logical_path)
         name = logical_path
 
+        if pipeline = params[:pipeline]
+          logical_path += ".#{pipeline}"
+        end
+
         if type = params[:type]
           logical_path += config[:mime_types][type][:extensions].first
         end
@@ -89,7 +93,6 @@ module Sprockets
           raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
         end
 
-        pipeline = params[:pipeline]
         processors = processors_for(type, file_type, engine_extnames, pipeline)
 
         processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, pipeline)
