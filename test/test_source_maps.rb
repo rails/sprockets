@@ -21,6 +21,7 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert asset = @env.find_asset("coffee/main.js.map")
     assert_equal fixture_path('source-maps/coffee/main.coffee'), asset.filename
+    assert_equal "coffee/main.js.map", asset.logical_path
 
     # Dummy data, make it real in 4.x
     assert map = JSON.parse(asset.source)
@@ -41,6 +42,7 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert asset = @env.find_asset("coffee/precompiled/main.js.map")
     assert_equal fixture_path('source-maps/coffee/precompiled/main.js.map'), asset.filename
+    assert_equal "coffee/precompiled/main.js.map", asset.logical_path
 
     assert map = JSON.parse(asset.source)
     assert_equal 3, map['version']
@@ -63,6 +65,7 @@ class TestSourceMaps < Sprockets::TestCase
     end
     assert asset
     assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
+    assert_equal "sass/main.css.map", asset.logical_path
 
     # Dummy data, make it real in 4.x
     assert map = JSON.parse(asset.source)
@@ -88,6 +91,7 @@ class TestSourceMaps < Sprockets::TestCase
     end
     assert asset
     assert_equal fixture_path('source-maps/sass/precompiled/main.css.map'), asset.filename
+    assert_equal "sass/precompiled/main.css.map", asset.logical_path
 
     assert map = JSON.parse(asset.source)
     assert_equal 3, map['version']
