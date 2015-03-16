@@ -11,7 +11,6 @@ module Sprockets
 
   # Processing
   autoload :Bundle,                  'sprockets/bundle'
-  autoload :CoffeeScriptTemplate,    'sprockets/coffee_script_template'
   autoload :Context,                 'sprockets/context'
   autoload :DirectiveProcessor,      'sprockets/directive_processor'
   autoload :FileReader,              'sprockets/file_reader'

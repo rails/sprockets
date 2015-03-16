@@ -7,6 +7,7 @@ require 'sprockets/manifest'
 require 'sprockets/resolve'
 
 module Sprockets
+  autoload :CoffeeScriptTemplate, 'sprockets/coffee_script_template'
   autoload :EcoTemplate, 'sprockets/eco_template'
   autoload :EjsTemplate, 'sprockets/ejs_template'
   autoload :ERBTemplate, 'sprockets/erb_template'
