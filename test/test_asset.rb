@@ -310,6 +310,83 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 end
 
+class SourceAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @pipeline = "source"
+    @asset = @env.find_asset('application.js', pipeline: "source")
+  end
+
+  include AssetTests
+
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=source&id=xxx",
+      normalize_uri(@asset.uri)
+  end
+
+  test "logical path" do
+    assert_equal "application.source.js", @asset.logical_path
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 109, @asset.length
+  end
+
+  test "source digest" do
+    # DEPRECATED: Will be byte digest in 4.x
+    assert_equal "6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea", @asset.digest
+  end
+
+  test "source hexdigest" do
+    assert_equal "6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.base64digest
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii_F2-o?ct=application/javascript", @asset.integrity
+  end
+
+  test "splat" do
+    assert_equal [@asset], @asset.to_a
+  end
+
+  test "dependencies" do
+    assert_equal [], @asset.dependencies
+  end
+
+  test "to_s" do
+    assert_equal "// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
+  end
+
+  test "each" do
+    body = ""
+    @asset.each { |part| body << part }
+    assert_equal "// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+  end
+
+  test "to_a" do
+    body = ""
+    @asset.to_a.each do |asset|
+      body << asset.to_s
+    end
+    assert_equal "\// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+  end
+
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+  end
+end
+
 class ProcessedAssetTest < Sprockets::TestCase
   include FreshnessTests
 
@@ -318,8 +395,8 @@ class ProcessedAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
+    @pipeline = "self"
     @asset = @env.find_asset('application.js', pipeline: "self")
-    @self = true
   end
 
   include AssetTests
@@ -389,7 +466,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:pipeline => @self ? "self" : nil}.merge(options))
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
   end
 end
 
@@ -401,8 +478,8 @@ class BundledAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
+    @pipeline = nil
     @asset = @env['application.js']
-    @self = false
   end
 
   include AssetTests
@@ -1100,7 +1177,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:pipeline => @self ? "self" : nil}.merge(options))
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
   end
 
   def read(logical_path)
