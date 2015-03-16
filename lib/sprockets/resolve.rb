@@ -30,14 +30,15 @@ module Sprockets
       elsif absolute_path?(path)
         filename, type, deps = resolve_absolute_path(paths, path, accept)
       elsif relative_path?(path)
-        filename, type, deps = resolve_relative_path(paths, path, options[:base_path], accept)
+        filename, type, pipeline, deps = resolve_relative_path(paths, path, options[:base_path], accept)
       else
-        filename, type, deps = resolve_logical_path(paths, path, accept)
+        filename, type, pipeline, deps = resolve_logical_path(paths, path, accept)
       end
 
       if filename
         params = {}
         params[:type] = type if type
+        params[:pipeline] = pipeline if pipeline
         params[:pipeline] = options[:pipeline] if options[:pipeline]
         uri = build_asset_uri(filename, params)
       end
@@ -72,7 +73,7 @@ module Sprockets
         # Ensure path is under load paths
         return nil, nil, deps unless paths_split(paths, filename)
 
-        mime_type = parse_path_extnames(filename)[1]
+        _, mime_type, _, _ = parse_path_extnames(filename)
         type = resolve_transform_type(mime_type, accept)
         return nil, nil, deps if accept && !type
 
@@ -93,7 +94,7 @@ module Sprockets
       end
 
       def resolve_logical_path(paths, logical_path, accept)
-        logical_name, mime_type, _ = parse_path_extnames(logical_path)
+        logical_name, mime_type, _, pipeline = parse_path_extnames(logical_path)
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
         filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
@@ -101,9 +102,9 @@ module Sprockets
         if filename
           deps << build_file_digest_uri(filename)
           type = resolve_transform_type(mime_type, parsed_accept)
-          return filename, type, deps
+          return filename, type, pipeline, deps
         else
-          return nil, nil, deps
+          return nil, nil, nil, deps
         end
       end
 
@@ -174,7 +175,7 @@ module Sprockets
         candidates = []
         entries, deps = self.entries_with_dependencies(dirname)
         entries.each do |entry|
-          name, type, _ = parse_path_extnames(entry)
+          name, type, _, _ = parse_path_extnames(entry)
           if basename == name
             candidates << [File.join(dirname, entry), type]
           end
@@ -192,12 +193,19 @@ module Sprockets
       #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
       #
       def parse_path_extnames(path)
+        type, engines = nil, []
         extname, value = match_path_extname(path, config[:_extnames])
+
         if extname
-          return path.chomp(extname), value[:type], value[:engines]
-        else
-          return path, nil, []
+          path = path.chomp(extname)
+          type = value[:type]
+          engines = value[:engines]
         end
+
+        pipeline = pipelines.keys.map(&:to_s).detect { |t| File.extname(path) == ".#{t}" }
+        path = path.chomp(".#{pipeline}") if pipeline
+
+        return path, type, engines, pipeline
       end
   end
 end

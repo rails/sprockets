@@ -77,7 +77,7 @@ module Sprockets
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
-        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path, file_type, engine_extnames, _ = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
         name = logical_path
 

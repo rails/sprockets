@@ -450,10 +450,18 @@ $app.run(function($templateCache) {
     assert asset = @env.find_asset("missing_require.js", pipeline: "source")
     assert_equal "// =require \"notfound\"\n", asset.source
     assert_equal "application/javascript", asset.content_type
+
+    assert asset = @env.find_asset("missing_require.source.js")
+    assert_equal "// =require \"notfound\"\n", asset.source
+    assert_equal "application/javascript", asset.content_type
   end
 
   test "source pipeline on existing source asset" do
     assert asset = @env.find_asset("hello.txt", pipeline: "source")
+    assert_equal "Hello world\n", asset.source
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("hello.source.txt")
     assert_equal "Hello world\n", asset.source
     assert_equal "text/plain", asset.content_type
   end

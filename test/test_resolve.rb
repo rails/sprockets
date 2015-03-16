@@ -203,6 +203,33 @@ class TestResolve < Sprockets::TestCase
     assert_includes deps, "file-digest://#{fixture_path('default/gallery.js')}"
   end
 
+  test "resolve with pipeline" do
+    @env.append_path(fixture_path('default'))
+
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript&pipeline=source",
+      resolve("gallery.js", pipeline: "source")
+    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript&pipeline=source",
+      resolve("coffee/foo.js", pipeline: "source")
+    assert_equal "file://#{fixture_path('default/jquery.tmpl.min.js')}?type=application/javascript&pipeline=source",
+      resolve("jquery.tmpl.min", pipeline: "source")
+    assert_equal "file://#{fixture_path('default/jquery.tmpl.min.js')}?type=application/javascript&pipeline=source",
+      resolve("jquery.tmpl.min.js", pipeline: "source")
+    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml&pipeline=source",
+      resolve('manifest.js.yml', pipeline: "source")
+    refute resolve("null", pipeline: "source")
+
+    assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript&pipeline=source",
+      resolve("gallery.source.js")
+    assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript&pipeline=source",
+      resolve("coffee/foo.source.js")
+    assert_equal "file://#{fixture_path('default/jquery.tmpl.min.js')}?type=application/javascript&pipeline=source",
+      resolve("jquery.tmpl.min.source")
+    assert_equal "file://#{fixture_path('default/jquery.tmpl.min.js')}?type=application/javascript&pipeline=source",
+      resolve("jquery.tmpl.min.source.js")
+    assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml&pipeline=source",
+      resolve('manifest.js.source.yml')
+  end
+
   test "verify all logical paths" do
     Dir.entries(Sprockets::TestCase::FIXTURE_ROOT).each do |dir|
       unless %w( . ..).include?(dir)
