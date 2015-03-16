@@ -21,11 +21,18 @@ module Sprockets
     # Returns a composed Proc.
     def compose_processors(*processors)
       context = self
-      obj = method(:call_processors).to_proc.curry[processors]
+
+      if processors.length == 1
+        obj = method(:call_processor).to_proc.curry[processors.first]
+      else
+        obj = method(:call_processors).to_proc.curry[processors]
+      end
+
       metaclass = (class << obj; self; end)
       metaclass.send(:define_method, :cache_key) do
         context.processors_cache_keys(processors)
       end
+
       obj
     end
 
@@ -42,23 +49,37 @@ module Sprockets
     # Returns a Hash with :data and other processor metadata key/values.
     def call_processors(processors, input)
       data = input[:data] || ""
-      metadata = input[:metadata] || {}
+      metadata = (input[:metadata] || {}).dup
 
       processors.reverse_each do |processor|
-        result = processor.call(input.merge(data: data, metadata: metadata))
-        case result
-        when NilClass
-        when Hash
-          data = result.delete(:data) if result.key?(:data)
-          metadata.merge!(result)
-        when String
-          data = result
-        else
-          raise TypeError, "invalid processor return type: #{result.class}"
-        end
+        result = call_processor(processor, input.merge(data: data, metadata: metadata))
+        data = result.delete(:data)
+        metadata.merge!(result)
       end
 
       metadata.merge(data: data)
+    end
+
+    # Public: Invoke processor.
+    #
+    # processor - Processor callables
+    # input - Hash of input data to pass to processor
+    #
+    # Returns a Hash with :data and other processor metadata key/values.
+    def call_processor(processor, input)
+      metadata = (input[:metadata] || {}).dup
+      metadata[:data] = input[:data]
+
+      case result = processor.call({data: "", metadata: {}}.merge(input))
+      when NilClass
+        metadata
+      when Hash
+        metadata.merge(result)
+      when String
+        metadata.merge(data: result)
+      else
+        raise TypeError, "invalid processor return type: #{result.class}"
+      end
     end
 
     # Internal: Get processor defined cached key.
