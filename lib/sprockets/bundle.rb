@@ -30,7 +30,36 @@ module Sprockets
         dependencies.merge(env.load(uri).metadata[:dependencies])
       end
 
-      env.process_bundle_reducers(assets, env.load_bundle_reducers(type)).merge(dependencies: dependencies, included: assets.map(&:uri))
+      reducers = Hash[env.match_mime_type_keys(env.config[:bundle_reducers], type).flat_map(&:to_a)]
+      process_bundle_reducers(assets, reducers).merge(dependencies: dependencies, included: assets.map(&:uri))
+    end
+
+    # Internal: Run bundle reducers on set of Assets producing a reduced
+    # metadata Hash.
+    #
+    # assets - Array of Assets
+    # reducers - Array of [initial, reducer_proc] pairs
+    #
+    # Returns reduced asset metadata Hash.
+    def self.process_bundle_reducers(assets, reducers)
+      initial = {}
+      reducers.each do |k, (v, _)|
+        initial[k] = v if !v.nil?
+      end
+
+      assets.reduce(initial) do |h, asset|
+        reducers.each do |k, (_, block)|
+          value = k == :data ? asset.source : asset.metadata[k]
+          if h.key?(k)
+            if !value.nil?
+              h[k] = block.call(h[k], value)
+            end
+          else
+            h[k] = value
+          end
+        end
+        h
+      end
     end
   end
 end

@@ -138,43 +138,6 @@ module Sprockets
       end
     end
 
-    # Internal: Gather all bundle reducer functions for MIME type.
-    #
-    # mime_type - String MIME type
-    #
-    # Returns an Array of [initial, reducer_proc] pairs.
-    def load_bundle_reducers(mime_type)
-      config[:bundle_reducers]['*/*'].merge(config[:bundle_reducers][mime_type])
-    end
-
-    # Internal: Run bundle reducers on set of Assets producing a reduced
-    # metadata Hash.
-    #
-    # assets - Array of Assets
-    # reducers - Array of [initial, reducer_proc] pairs
-    #
-    # Returns reduced asset metadata Hash.
-    def process_bundle_reducers(assets, reducers)
-      initial = {}
-      reducers.each do |k, (v, _)|
-        initial[k] = v if !v.nil?
-      end
-
-      assets.reduce(initial) do |h, asset|
-        reducers.each do |k, (_, block)|
-          value = k == :data ? asset.source : asset.metadata[k]
-          if h.key?(k)
-            if !value.nil?
-              h[k] = block.call(h[k], value)
-            end
-          else
-            h[k] = value
-          end
-        end
-        h
-      end
-    end
-
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
