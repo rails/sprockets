@@ -27,7 +27,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal({
       "version" => 3,
       "file" => "coffee/main.js",
-      "mappings" => ";859"
+      "mappings" => ";875"
     }, map)
   end
 
