@@ -12,7 +12,7 @@ class TestRakeTask < Sprockets::TestCase
       env.append_path(fixture_path('default'))
     end
 
-    @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
+    @dir = File.join(Dir::tmpdir, 'sprockets/custom_manifest')
 
     @manifest = Sprockets::Manifest.new(@env, @dir)
 
@@ -39,7 +39,7 @@ class TestRakeTask < Sprockets::TestCase
 
     @rake[:assets].invoke
 
-    assert Dir["#{@dir}/manifest-*.json"].first
+    assert Dir["#{@dir}/.sprockets-manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
@@ -66,7 +66,7 @@ class TestRakeTask < Sprockets::TestCase
 
     @rake[:assets].invoke
 
-    assert Dir["#{@dir}/manifest-*.json"].first
+    assert Dir["#{@dir}/.sprockets-manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
@@ -83,7 +83,7 @@ class TestRakeTask < Sprockets::TestCase
 
     @rake[:assets].invoke
 
-    assert Dir["#{@dir}/manifest-*.json"].first
+    assert Dir["#{@dir}/.sprockets-manifest-*.json"].first
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 end

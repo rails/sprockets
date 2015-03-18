@@ -30,6 +30,12 @@ module Sprockets
 
       @directory, @filename = args[0], args[1]
 
+      # Name of a new manifest
+      @new_manifest_name = ".sprockets-manifest-#{SecureRandom.hex(16)}.json"
+
+      # Whether the manifest file is using the old manifest.json naming convention
+      @legacy_manifest = false
+
       # Expand paths
       @directory = File.expand_path(@directory) if @directory
       @filename  = File.expand_path(@filename) if @filename
@@ -45,11 +51,15 @@ module Sprockets
       # If directory is given w/o filename, pick a random manifest.json location
       if @directory && @filename.nil?
         # Find the first manifest.json in the directory
-        filenames = Dir[File.join(@directory, "manifest*.json")]
+        filenames = Dir[File.join(@directory, ".sprockets-manifest*.json")]
+        legacy_filenames = Dir[File.join(@directory, "manifest*.json")]
         if filenames.any?
           @filename = filenames.first
+        elsif legacy_filenames.any?
+          @filename = legacy_filenames.first
+          @legacy_manifest = true
         else
-          @filename = File.join(@directory, "manifest-#{SecureRandom.hex(16)}.json")
+          @filename = File.join(@directory,@new_manifest_name)
         end
       end
 
@@ -232,12 +242,18 @@ module Sprockets
       nil
     end
 
+    # The path to the filename to write out - for legacy manifest.json files
+    # this will be a new .sprockets-manifest.json file
+    def output_filename
+      @legacy_manifest ? @new_manifest_name : @filename
+    end
+
     protected
       # Persist manfiest back to FS
       def save
         data = json_encode(@data)
-        FileUtils.mkdir_p File.dirname(filename)
-        PathUtils.atomic_write(filename) do |f|
+        FileUtils.mkdir_p File.dirname(output_filename)
+        PathUtils.atomic_write(output_filename) do |f|
           f.write(data)
         end
       end
