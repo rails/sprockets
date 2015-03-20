@@ -12,9 +12,11 @@ class TestRakeTask < Sprockets::TestCase
       env.append_path(fixture_path('default'))
     end
 
-    @dir = File.join(Dir::tmpdir, 'sprockets/custom_manifest')
+    @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
 
-    @manifest = Sprockets::Manifest.new(@env, @dir)
+    @manifest_custom_dir = Sprockets::Manifest.new(@env, @dir)
+
+    @manifest_custom_path = Sprockets::Manifest.new(@env, @dir, File.join(@dir, 'manifest.json'))
 
     Rake::SprocketsTask.new do |t|
       t.environment = @env
@@ -53,10 +55,10 @@ class TestRakeTask < Sprockets::TestCase
     assert !File.exist?("#{@dir}/#{digest_path}")
   end
 
-  test "custom manifest" do
+  test "custom manifest directory" do
     Rake::SprocketsTask.new do |t|
       t.environment = nil
-      t.manifest    = @manifest
+      t.manifest    = @manifest_custom_dir
       t.assets      = ['application.js']
       t.log_level   = :fatal
     end
@@ -70,10 +72,27 @@ class TestRakeTask < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
+  test "custom manifest path" do
+    Rake::SprocketsTask.new do |t|
+      t.environment = nil
+      t.manifest    = @manifest_custom_path
+      t.assets      = ['application.js']
+      t.log_level   = :fatal
+    end
+
+    digest_path = @env['application.js'].digest_path
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    @rake[:assets].invoke
+
+    assert Dir["#{@dir}/manifest.json"].first
+    assert File.exist?("#{@dir}/#{digest_path}")
+  end
+
   test "lazy custom manifest" do
     Rake::SprocketsTask.new do |t|
       t.environment = nil
-      t.manifest    = lambda { @manifest }
+      t.manifest    = lambda { @manifest_custom_dir }
       t.assets      = ['application.js']
       t.log_level   = :fatal
     end

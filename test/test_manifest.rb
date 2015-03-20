@@ -59,7 +59,7 @@ class TestManifest < Sprockets::TestCase
     assert_match @manifest_regexp, manifest.output_filename
   end
 
-  test "specify manifest directory with existing .sprockets-manifest-123.json" do
+  test "specify manifest directory with existing .sprockets-manifest-*.json" do
     dir  = Dir::tmpdir
     path = File.join(dir, ".sprockets-manifest-#{SecureRandom.hex(16)}.json")
 
