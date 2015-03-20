@@ -53,9 +53,9 @@ module Sprockets
         # Find the first manifest.json in the directory
         filenames = Dir[File.join(@directory, ".sprockets-manifest*.json")]
         legacy_filenames = Dir[File.join(@directory, "manifest*.json")]
-        if filenames.any?
+        if filenames.select{ |f| f[/.sprockets-manifest-[0-9a-f]{32}.json/] }.any?
           @filename = filenames.first
-        elsif legacy_filenames.any?
+        elsif legacy_filenames.select{ |f| f[/.sprockets-manifest-[0-9a-f]{32}.json/] }.any?
           @filename = legacy_filenames.first
           @legacy_manifest = true
         else
