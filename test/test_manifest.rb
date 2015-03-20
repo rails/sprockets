@@ -40,7 +40,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_match @manifest_regexp, manifest.output_filename
+    assert_match @manifest_regexp, manifest.output_path
   end
 
   test "specify manifest directory with existing legacy manifest.json" do
@@ -56,7 +56,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_match @manifest_regexp, manifest.output_filename
+    assert_match @manifest_regexp, manifest.output_path
   end
 
   test "specify manifest directory with existing .sprockets-manifest-*.json" do
@@ -71,7 +71,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_equal path, manifest.output_filename
+    assert_equal path, manifest.output_path
   end
 
   test "specify manifest directory and seperate location" do
@@ -85,7 +85,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir, path)
 
     assert_equal dir, manifest.directory
-    assert_equal path, manifest.output_filename
+    assert_equal path, manifest.output_path
   end
 
   test "compile asset" do
@@ -120,6 +120,28 @@ class TestManifest < Sprockets::TestCase
     manifest.compile('application.js')
     assert File.directory?(manifest.directory)
     assert File.file?(manifest.filename)
+  end
+
+  test "compile with legacy manifest" do
+    root  = File.join(Dir::tmpdir, 'public')
+    dir   = File.join(root, 'assets')
+    path  = File.join(root, "manifest-#{SecureRandom.hex(16)}.json")
+
+    system "rm -rf #{root}"
+    assert !File.exist?(root)
+
+    system "rm -rf #{dir}/.sprockets-manifest*.json"
+    system "rm -rf #{dir}/manifest*.json"
+    FileUtils.mkdir_p(dir)
+    File.open(path, 'w') { |f| f.write "{}" }
+
+
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    manifest.compile('application.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.output_path)
+    assert_match @manifest_regexp, manifest.output_path
   end
 
   test "compile asset with absolute path" do

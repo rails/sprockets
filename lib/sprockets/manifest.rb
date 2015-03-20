@@ -19,7 +19,7 @@ module Sprockets
     # path to the manifest json file. The file may or may not already exist. The
     # dirname of the `filename` will be used to write compiled assets to.
     # Otherwise, if the path is a directory, the filename will default a random
-    # "manifest-123.json" file in that directory.
+    # ".sprockets-manifest-*.json" file in that directory.
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
@@ -33,7 +33,7 @@ module Sprockets
       # Name of a new manifest
       @new_manifest_name = ".sprockets-manifest-#{SecureRandom.hex(16)}.json"
 
-      # Whether the manifest file is using the old manifest.json naming convention
+      # Whether the manifest file is using the old manifest-*.json naming convention
       @legacy_manifest = false
 
       # Expand paths
@@ -48,13 +48,14 @@ module Sprockets
       # Default dir to the directory of the filename
       @directory ||= File.dirname(@filename) if @filename
 
-      # If directory is given w/o filename, pick a random manifest.json location
+      # If directory is given w/o filename, pick a random manifest location
       if @directory && @filename.nil?
-        # Find the first manifest.json in the directory
         filenames = Dir[File.join(@directory, ".sprockets-manifest*.json")]
         legacy_filenames = Dir[File.join(@directory, "manifest*.json")]
+        # Find the first manifest file in the directory
         if filenames.select{ |f| f[/.sprockets-manifest-[0-9a-f]{32}.json/] }.any?
           @filename = filenames.first
+        # Look for a legacy filename if none found
         elsif legacy_filenames.select{ |f| f[/.sprockets-manifest-[0-9a-f]{32}.json/] }.any?
           @filename = legacy_filenames.first
           @legacy_manifest = true
@@ -244,16 +245,16 @@ module Sprockets
 
     # The path to the filename to write out - for legacy manifest.json files
     # this will be a new .sprockets-manifest.json file
-    def output_filename
-      @legacy_manifest ? @new_manifest_name : @filename
+    def output_path
+      @legacy_manifest ? File.join(@directory,@new_manifest_name) : @filename
     end
 
     protected
       # Persist manfiest back to FS
       def save
         data = json_encode(@data)
-        FileUtils.mkdir_p File.dirname(output_filename)
-        PathUtils.atomic_write(output_filename) do |f|
+        FileUtils.mkdir_p File.dirname(output_path)
+        PathUtils.atomic_write(output_path) do |f|
           f.write(data)
         end
       end
