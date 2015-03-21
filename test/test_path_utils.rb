@@ -28,6 +28,7 @@ class TestPathUtils < MiniTest::Test
       "encoding",
       "engines",
       "errors",
+      "manifest_utils",
       "octicons",
       "paths",
       "public",

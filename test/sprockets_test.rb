@@ -116,7 +116,7 @@ SourceMapTransformer = proc { |input|
   JSON.generate({
     "version" => 3,
     "file" => asset.logical_path,
-    "mappings" => ";#{asset.bytesize}"
+    "mappings" => ";123"
   })
 }
 Sprockets.register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map']

@@ -9,6 +9,14 @@ compatible with 3.x.
 
 ## Application Changes
 
+### public/assets/manifest-abc123.json location
+
+JSON manifests are now written out to `.sprockets-manifest-abc123.json` to
+prevent collisions with assets actually called `manifest`. If any old manifests
+exists they will automatically be renamed. Just note if you were depending on
+the `manifests-abc123.json` name in a deployment related task, you'll see this
+new file showing up.
+
 ### Preference for asset manifest and links
 
 Previously, Sprockets had no idea what files you wanted to statically compile

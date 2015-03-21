@@ -28,7 +28,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal({
       "version" => 3,
       "file" => "coffee/main.js",
-      "mappings" => ";859"
+      "mappings" => ";123"
     }, map)
   end
 
@@ -72,7 +72,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal({
       "version" => 3,
       "file" => "sass/main.css",
-      "mappings" => ";168"
+      "mappings" => ";123"
     }, map)
   end
 
