@@ -9,8 +9,6 @@ class TestManifest < Sprockets::TestCase
       env.append_path(fixture_path('default'))
     end
     @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
-    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
-    @manifest_regexp = %r{.sprockets-manifest-[a-f0-9]{32}.json}
   end
 
   def teardown
@@ -40,7 +38,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_match @manifest_regexp, manifest.output_path
+    assert_match %r{.sprockets-manifest-[a-f0-9]{32}.json}, manifest.output_path
   end
 
   test "specify manifest directory with existing legacy manifest.json" do
@@ -56,7 +54,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_match @manifest_regexp, manifest.output_path
+    assert_match %r{.sprockets-manifest-[a-f0-9]{32}.json}, manifest.output_path
   end
 
   test "specify manifest directory with existing .sprockets-manifest-*.json" do
@@ -89,18 +87,20 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile asset" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     digest_path = @env['application.js'].digest_path
 
     assert !File.exist?("#{@dir}/#{digest_path}")
 
-    @manifest.compile('application.js')
-    assert File.directory?(@manifest.directory)
-    assert File.file?(@manifest.filename)
+    manifest.compile('application.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.filename)
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][digest_path]
     assert_equal "application.js", data['files'][digest_path]['logical_path']
     assert data['files'][digest_path]['size'] > 230
@@ -108,6 +108,8 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile to directory and seperate location" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     root  = File.join(Dir::tmpdir, 'public')
     dir   = File.join(root, 'assets')
     path  = File.join(root, 'manifests', 'manifest-123.json')
@@ -135,44 +137,47 @@ class TestManifest < Sprockets::TestCase
     FileUtils.mkdir_p(dir)
     File.open(path, 'w') { |f| f.write "{}" }
 
-
     manifest = Sprockets::Manifest.new(@env, dir)
 
     manifest.compile('application.js')
     assert File.directory?(manifest.directory)
     assert File.file?(manifest.output_path)
-    assert_match @manifest_regexp, manifest.output_path
+    assert_match %r{.sprockets-manifest-[a-f0-9]{32}.json}, manifest.output_path
   end
 
   test "compile asset with absolute path" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     digest_path = @env['application.js'].digest_path
 
     assert !File.exist?("#{@dir}/#{digest_path}")
 
-    @manifest.compile(fixture_path('default/application.js.coffee'))
+    manifest.compile(fixture_path('default/application.js.coffee'))
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][digest_path]
     assert_equal digest_path, data['assets']['application.js']
   end
 
   test "compile multiple assets" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     app_digest_path = @env['application.js'].digest_path
     gallery_digest_path = @env['gallery.css'].digest_path
 
     assert !File.exist?("#{@dir}/#{app_digest_path}")
     assert !File.exist?("#{@dir}/#{gallery_digest_path}")
 
-    @manifest.compile('application.js', 'gallery.css')
+    manifest.compile('application.js', 'gallery.css')
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{app_digest_path}")
     assert File.exist?("#{@dir}/#{gallery_digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][app_digest_path]
     assert data['files'][gallery_digest_path]
     assert_equal app_digest_path, data['assets']['application.js']
@@ -180,21 +185,23 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile asset with links" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     main_digest_path = @env['gallery-link.js'].digest_path
     dep_digest_path  = @env['gallery.js'].digest_path
 
     assert !File.exist?("#{@dir}/#{main_digest_path}")
     assert !File.exist?("#{@dir}/#{dep_digest_path}")
 
-    @manifest.compile('gallery-link.js')
-    assert File.directory?(@manifest.directory)
-    assert File.file?(@manifest.filename)
+    manifest.compile('gallery-link.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.filename)
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{main_digest_path}")
     assert File.exist?("#{@dir}/#{dep_digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][main_digest_path]
     assert data['files'][dep_digest_path]
     assert_equal "gallery-link.js", data['files'][main_digest_path]['logical_path']
@@ -204,6 +211,8 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile nested asset with links" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     main_digest_path   = @env['explore-link.js'].digest_path
     dep_digest_path    = @env['gallery-link.js'].digest_path
     subdep_digest_path = @env['gallery.js'].digest_path
@@ -212,16 +221,16 @@ class TestManifest < Sprockets::TestCase
     assert !File.exist?("#{@dir}/#{dep_digest_path}")
     assert !File.exist?("#{@dir}/#{subdep_digest_path}")
 
-    @manifest.compile('explore-link.js')
-    assert File.directory?(@manifest.directory)
-    assert File.file?(@manifest.filename)
+    manifest.compile('explore-link.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.filename)
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{main_digest_path}")
     assert File.exist?("#{@dir}/#{dep_digest_path}")
     assert File.exist?("#{@dir}/#{subdep_digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][main_digest_path]
     assert data['files'][dep_digest_path]
     assert data['files'][subdep_digest_path]
@@ -234,19 +243,21 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile with regex" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     app_digest_path = @env['application.js'].digest_path
     gallery_digest_path = @env['gallery.css'].digest_path
 
     assert !File.exist?("#{@dir}/#{app_digest_path}")
     assert !File.exist?("#{@dir}/#{gallery_digest_path}")
 
-    @manifest.compile('gallery.css', /application.js/)
+    manifest.compile('gallery.css', /application.js/)
 
     assert File.exist?("#{@dir}/manifest.json")
     assert File.exist?("#{@dir}/#{app_digest_path}")
     assert File.exist?("#{@dir}/#{gallery_digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][app_digest_path]
     assert data['files'][gallery_digest_path]
     assert_equal app_digest_path, data['assets']['application.js']
@@ -254,18 +265,20 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "recompile asset" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
 
     sandbox filename do
       assert !File.exist?("#{@dir}/#{digest_path}"), Dir["#{@dir}/*"].inspect
 
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
 
       assert File.exist?("#{@dir}/manifest.json")
       assert File.exist?("#{@dir}/#{digest_path}")
 
-      data = JSON.parse(File.read(@manifest.filename))
+      data = JSON.parse(File.read(manifest.filename))
       assert data['files'][digest_path]
       assert_equal digest_path, data['assets']['application.js']
 
@@ -274,13 +287,13 @@ class TestManifest < Sprockets::TestCase
       File.utime(mtime, mtime, filename)
       new_digest_path = @env['application.js'].digest_path
 
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
 
       assert File.exist?("#{@dir}/manifest.json")
       assert File.exist?("#{@dir}/#{digest_path}")
       assert File.exist?("#{@dir}/#{new_digest_path}")
 
-      data = JSON.parse(File.read(@manifest.filename))
+      data = JSON.parse(File.read(manifest.filename))
       assert data['files'][digest_path]
       assert data['files'][new_digest_path]
       assert_equal new_digest_path, data['assets']['application.js']
@@ -288,30 +301,34 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "remove asset" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     digest_path = @env['application.js'].digest_path
 
-    @manifest.compile('application.js')
+    manifest.compile('application.js')
     assert File.exist?("#{@dir}/#{digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['files'][digest_path]
     assert data['assets']['application.js']
 
-    @manifest.remove(digest_path)
+    manifest.remove(digest_path)
 
     assert !File.exist?("#{@dir}/#{digest_path}")
 
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert !data['files'][digest_path]
     assert !data['assets']['application.js']
   end
 
   test "remove old asset" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
 
     sandbox filename do
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{digest_path}")
 
       File.open(filename, 'w') { |f| f.write "change;" }
@@ -319,13 +336,13 @@ class TestManifest < Sprockets::TestCase
       File.utime(mtime, mtime, filename)
       new_digest_path = @env['application.js'].digest_path
 
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{new_digest_path}")
 
-      @manifest.remove(digest_path)
+      manifest.remove(digest_path)
       assert !File.exist?("#{@dir}/#{digest_path}")
 
-      data = JSON.parse(File.read(@manifest.filename))
+      data = JSON.parse(File.read(manifest.filename))
       assert !data['files'][digest_path]
       assert data['files'][new_digest_path]
       assert_equal new_digest_path, data['assets']['application.js']
@@ -333,11 +350,13 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "remove old backups" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     digest_path = @env['application.js'].digest_path
     filename = fixture_path('default/application.js.coffee')
 
     sandbox filename do
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{digest_path}")
 
       File.open(filename, 'w') { |f| f.write "a;" }
@@ -345,7 +364,7 @@ class TestManifest < Sprockets::TestCase
       File.utime(mtime, mtime, filename)
       new_digest_path1 = @env['application.js'].digest_path
 
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{new_digest_path1}")
 
       File.open(filename, 'w') { |f| f.write "b;" }
@@ -353,7 +372,7 @@ class TestManifest < Sprockets::TestCase
       File.utime(mtime, mtime, filename)
       new_digest_path2 = @env['application.js'].digest_path
 
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{new_digest_path2}")
 
       File.open(filename, 'w') { |f| f.write "c;" }
@@ -361,17 +380,17 @@ class TestManifest < Sprockets::TestCase
       File.utime(mtime, mtime, filename)
       new_digest_path3 = @env['application.js'].digest_path
 
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{new_digest_path3}")
 
-      @manifest.clean(1, 0)
+      manifest.clean(1, 0)
 
       assert !File.exist?("#{@dir}/#{digest_path}")
       assert !File.exist?("#{@dir}/#{new_digest_path1}")
       assert File.exist?("#{@dir}/#{new_digest_path2}")
       assert File.exist?("#{@dir}/#{new_digest_path3}")
 
-      data = JSON.parse(File.read(@manifest.filename))
+      data = JSON.parse(File.read(manifest.filename))
       assert !data['files'][digest_path]
       assert !data['files'][new_digest_path1]
       assert data['files'][new_digest_path2]
@@ -383,11 +402,11 @@ class TestManifest < Sprockets::TestCase
   test "test manifest does not exist" do
     assert !File.exist?("#{@dir}/manifest.json")
 
-    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
-    @manifest.compile('application.js')
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['assets']['application.js']
   end
 
@@ -398,11 +417,11 @@ class TestManifest < Sprockets::TestCase
     File.open("#{@dir}/manifest.json", 'w') { |f| f.write "" }
     assert_equal "", File.read("#{@dir}/manifest.json")
 
-    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
-    @manifest.compile('application.js')
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['assets']['application.js']
   end
 
@@ -413,35 +432,37 @@ class TestManifest < Sprockets::TestCase
     File.open("#{@dir}/manifest.json", 'w') { |f| f.write "not valid json;" }
     assert_equal "not valid json;", File.read("#{@dir}/manifest.json")
 
-    @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
-    @manifest.compile('application.js')
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    manifest.compile('application.js')
 
     assert File.exist?("#{@dir}/manifest.json")
-    data = JSON.parse(File.read(@manifest.filename))
+    data = JSON.parse(File.read(manifest.filename))
     assert data['assets']['application.js']
   end
 
   test "nil environment raises compilation error" do
     assert !File.exist?("#{@dir}/manifest.json")
 
-    @manifest = Sprockets::Manifest.new(nil, File.join(@dir, 'manifest.json'))
+    manifest = Sprockets::Manifest.new(nil, File.join(@dir, 'manifest.json'))
     assert_raises Sprockets::Error do
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
     end
   end
 
   test "no environment raises compilation error" do
     assert !File.exist?("#{@dir}/manifest.json")
 
-    @manifest = Sprockets::Manifest.new(File.join(@dir, 'manifest.json'))
+    manifest = Sprockets::Manifest.new(File.join(@dir, 'manifest.json'))
     assert_raises Sprockets::Error do
-      @manifest.compile('application.js')
+      manifest.compile('application.js')
     end
   end
 
   test "find all filenames matching fnmatch filters" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     paths = []
-    @manifest.find("mobile/*.js").each do |asset|
+    manifest.find("mobile/*.js").each do |asset|
       paths << asset.logical_path
     end
 
@@ -451,8 +472,10 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "iterate over each logical path matches index files" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     paths = []
-    @manifest.find("coffee.js").each do |asset|
+    manifest.find("coffee.js").each do |asset|
       paths << asset.logical_path
     end
     assert paths.include?("coffee.js")
@@ -460,8 +483,10 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "each logical path enumerator matching fnmatch filters" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     paths = []
-    enum = @manifest.find("mobile/*.js")
+    enum = manifest.find("mobile/*.js")
     enum.to_a.each do |asset|
       paths << asset.logical_path
     end
@@ -472,8 +497,10 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "iterate over each logical path matching regexp filters" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     paths = []
-    @manifest.find(/mobile\/.*\.js/).each do |asset|
+    manifest.find(/mobile\/.*\.js/).each do |asset|
       paths << asset.logical_path
     end
 
@@ -483,8 +510,10 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "iterate over each logical path matching proc filters" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     paths = []
-    @manifest.find(proc { |fn| fn.match("mobile/") && File.extname(fn) == '.js' }).each do |asset|
+    manifest.find(proc { |fn| fn.match("mobile/") && File.extname(fn) == '.js' }).each do |asset|
       paths << asset.logical_path
     end
 
@@ -494,8 +523,10 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "iterate over each logical path matching proc filters with full path arg" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
     paths = []
-    @manifest.find(proc { |_, fn| fn.match(fixture_path('default/mobile')) }).each do |asset|
+    manifest.find(proc { |_, fn| fn.match(fixture_path('default/mobile')) }).each do |asset|
       paths << asset.logical_path
     end
 
