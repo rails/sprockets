@@ -27,6 +27,7 @@ class TestPathUtils < MiniTest::Test
       "directives",
       "encoding",
       "errors",
+      "manifest_utils",
       "octicons",
       "paths",
       "public",
