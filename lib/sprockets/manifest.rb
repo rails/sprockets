@@ -1,6 +1,6 @@
 require 'json'
-require 'securerandom'
 require 'time'
+require 'sprockets/manifest_utils'
 
 module Sprockets
   # The Manifest logs the contents of assets compiled to a single directory. It
@@ -13,13 +13,15 @@ module Sprockets
   # that don't have sprockets loaded. See `#assets` and `#files` for more
   # infomation about the structure.
   class Manifest
+    include ManifestUtils
+
     attr_reader :environment
 
     # Create new Manifest associated with an `environment`. `filename` is a full
     # path to the manifest json file. The file may or may not already exist. The
     # dirname of the `filename` will be used to write compiled assets to.
     # Otherwise, if the path is a directory, the filename will default a random
-    # "manifest-123.json" file in that directory.
+    # ".sprockets-manifest-*.json" file in that directory.
     #
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
@@ -29,6 +31,9 @@ module Sprockets
       end
 
       @directory, @filename = args[0], args[1]
+
+      # Whether the manifest file is using the old manifest-*.json naming convention
+      @legacy_manifest = false
 
       # Expand paths
       @directory = File.expand_path(@directory) if @directory
@@ -42,14 +47,14 @@ module Sprockets
       # Default dir to the directory of the filename
       @directory ||= File.dirname(@filename) if @filename
 
-      # If directory is given w/o filename, pick a random manifest.json location
+      # If directory is given w/o filename, pick a random manifest location
+      @rename_filename = nil
       if @directory && @filename.nil?
-        # Find the first manifest.json in the directory
-        filenames = Dir[File.join(@directory, "manifest*.json")]
-        if filenames.any?
-          @filename = filenames.first
-        else
-          @filename = File.join(@directory, "manifest-#{SecureRandom.hex(16)}.json")
+        @filename = find_directory_manifest(@directory)
+
+        # If legacy manifest name autodetected, mark to rename on save
+        if File.basename(@filename).start_with?("manifest")
+          @rename_filename = File.join(@directory, generate_manifest_path)
         end
       end
 
@@ -228,15 +233,20 @@ module Sprockets
       nil
     end
 
-    protected
-      # Persist manfiest back to FS
-      def save
-        data = json_encode(@data)
-        FileUtils.mkdir_p File.dirname(filename)
-        PathUtils.atomic_write(filename) do |f|
-          f.write(data)
-        end
+    # Persist manfiest back to FS
+    def save
+      if @rename_filename
+        FileUtils.mv(@filename, @rename_filename)
+        @filename = @rename_filename
+        @rename_filename = nil
       end
+
+      data = json_encode(@data)
+      FileUtils.mkdir_p File.dirname(@filename)
+      PathUtils.atomic_write(@filename) do |f|
+        f.write(data)
+      end
+    end
 
     private
       def json_decode(obj)

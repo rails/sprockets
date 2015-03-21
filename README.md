@@ -469,6 +469,7 @@ submit a pull request.
 * Rename `Asset#digest` to `Asset#hexdigest`. `Asset#digest` is deprecated and will
   return a raw byte String in 4.x.
 * Added transitional compatibility flag to `Environment#resolve(path, compat: true)`. 2.x mode operates with `compat: true` and 4.x with `compat: false`
+* `manifest-abc123.json` renamed to `.sprockets-abc123.json`
 
 **2.12.3** (October 28, 2014)
 
