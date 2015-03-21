@@ -131,6 +131,8 @@ class TestURIUtils < MiniTest::Test
       build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', flag: true)
     assert_equal "file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css",
       build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: 'text/css', flag: false)
+    assert_equal "file:///usr/local/var/github/app/assets/stylesheets/users.css?type=css",
+      build_asset_uri("/usr/local/var/github/app/assets/stylesheets/users.css", type: :css)
     assert_equal "file:///usr/local/var/github/app/assets/views/users.html?type=text/html;%20charset=utf-8",
       build_asset_uri("/usr/local/var/github/app/assets/views/users.html", type: 'text/html; charset=utf-8')
   end

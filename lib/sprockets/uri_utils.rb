@@ -161,8 +161,8 @@ module Sprockets
         case value
         when Integer
           query << "#{key}=#{value}"
-        when String
-          query << "#{key}=#{URI::Generic::DEFAULT_PARSER.escape(value)}"
+        when String, Symbol
+          query << "#{key}=#{URI::Generic::DEFAULT_PARSER.escape(value.to_s)}"
         when TrueClass
           query << "#{key}"
         when FalseClass, NilClass
