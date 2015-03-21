@@ -179,6 +179,15 @@ class TextStaticAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
+  test "logical path" do
+    assert_equal "log.txt", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "log-66a045b452102c59d840ec097d59d9467e13a3f34f6494e539ffd32c1bb35f18.txt",
+      @asset.digest_path
+  end
+
   test "content type" do
     assert_equal "text/plain", @asset.content_type
   end
@@ -214,6 +223,11 @@ class BinaryStaticAssetTest < Sprockets::TestCase
 
   test "logical path" do
     assert_equal "POW.png", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -331,6 +345,11 @@ class SourceAssetTest < Sprockets::TestCase
     assert_equal "application.source.js", @asset.logical_path
   end
 
+  test "digest path" do
+    assert_equal "application.source-6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea.js",
+      @asset.digest_path
+  end
+
   test "content type" do
     assert_equal "application/javascript", @asset.content_type
   end
@@ -408,6 +427,11 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   test "logical path" do
     assert_equal "application.self.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application.self-6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5.js",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -491,6 +515,11 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "logical path" do
     assert_equal "application.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -1150,8 +1179,9 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert asset("project.js").hexdigest
   end
 
-  test "asset digest path" do
-    assert_match(/project-\w+\.js/, asset("project.js").digest_path)
+  test "project digest path" do
+    assert_equal "project-9f8d317511370805ee292b685e9bcc4227bb901f8fd6ce82157d1845651ff6da.js",
+      asset("project.js").digest_path
   end
 
   test "multiple charset defintions are stripped from css bundle" do
