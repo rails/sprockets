@@ -8,8 +8,9 @@ class TestManifest < Sprockets::TestCase
     @env = Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
     end
-    @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
+    @dir = File.join(Dir::tmpdir, 'sprockets/custom_manifest')
     @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    @manifest_regexp = %r{.sprockets-manifest-[a-f0-9]{32}.json}
   end
 
   def teardown
@@ -30,21 +31,23 @@ class TestManifest < Sprockets::TestCase
     assert_equal filename, manifest.path
   end
 
-  test "specify manifest directory yields random manifest-*.json" do
+  test "specify manifest directory yields random .sprockets-manifest-*.json" do
     dir = Dir::tmpdir
 
+    system "rm -rf #{dir}/.sprockets-manifest*.json"
     system "rm -rf #{dir}/manifest*.json"
     assert !File.exist?("#{dir}/manifest.json")
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_match %r{manifest-[a-f0-9]+\.json}, manifest.filename
+    assert_match @manifest_regexp, manifest.output_path
   end
 
-  test "specify manifest directory with existing manifest.json" do
+  test "specify manifest directory with existing legacy manifest.json" do
     dir  = Dir::tmpdir
-    path = File.join(dir, 'manifest.json')
+    path = File.join(dir, "manifest-#{SecureRandom.hex(16)}.json")
 
+    system "rm -rf #{dir}/.sprockets-manifest*.json"
     system "rm -rf #{dir}/manifest*.json"
     FileUtils.mkdir_p(dir)
     File.open(path, 'w') { |f| f.write "{}" }
@@ -53,13 +56,14 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_equal path, manifest.filename
+    assert_match @manifest_regexp, manifest.output_path
   end
 
-  test "specify manifest directory with existing manifest-123.json" do
+  test "specify manifest directory with existing .sprockets-manifest-*.json" do
     dir  = Dir::tmpdir
-    path = File.join(dir, 'manifest-123.json')
+    path = File.join(dir, ".sprockets-manifest-#{SecureRandom.hex(16)}.json")
 
+    system "rm -rf #{dir}/.sprockets-manifest*.json"
     system "rm -rf #{dir}/manifest*.json"
     File.open(path, 'w') { |f| f.write "{}" }
 
@@ -67,7 +71,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir)
 
     assert_equal dir, manifest.directory
-    assert_equal path, manifest.filename
+    assert_equal path, manifest.output_path
   end
 
   test "specify manifest directory and seperate location" do
@@ -81,7 +85,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, dir, path)
 
     assert_equal dir, manifest.directory
-    assert_equal path, manifest.filename
+    assert_equal path, manifest.output_path
   end
 
   test "compile asset" do
@@ -116,6 +120,28 @@ class TestManifest < Sprockets::TestCase
     manifest.compile('application.js')
     assert File.directory?(manifest.directory)
     assert File.file?(manifest.filename)
+  end
+
+  test "compile with legacy manifest" do
+    root  = File.join(Dir::tmpdir, 'public')
+    dir   = File.join(root, 'assets')
+    path  = File.join(root, "manifest-#{SecureRandom.hex(16)}.json")
+
+    system "rm -rf #{root}"
+    assert !File.exist?(root)
+
+    system "rm -rf #{dir}/.sprockets-manifest*.json"
+    system "rm -rf #{dir}/manifest*.json"
+    FileUtils.mkdir_p(dir)
+    File.open(path, 'w') { |f| f.write "{}" }
+
+
+    manifest = Sprockets::Manifest.new(@env, dir)
+
+    manifest.compile('application.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.output_path)
+    assert_match @manifest_regexp, manifest.output_path
   end
 
   test "compile asset with absolute path" do
