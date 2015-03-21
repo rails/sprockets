@@ -1,6 +1,6 @@
 require 'json'
-require 'securerandom'
 require 'time'
+require 'sprockets/manifest_utils'
 
 module Sprockets
   # The Manifest logs the contents of assets compiled to a single directory. It
@@ -13,6 +13,8 @@ module Sprockets
   # that don't have sprockets loaded. See `#assets` and `#files` for more
   # infomation about the structure.
   class Manifest
+    include ManifestUtils
+
     attr_reader :environment
 
     # Create new Manifest associated with an `environment`. `filename` is a full
@@ -29,9 +31,6 @@ module Sprockets
       end
 
       @directory, @filename = args[0], args[1]
-
-      # Name of a new manifest
-      @new_manifest_name = ".sprockets-manifest-#{SecureRandom.hex(16)}.json"
 
       # Whether the manifest file is using the old manifest-*.json naming convention
       @legacy_manifest = false
@@ -50,18 +49,9 @@ module Sprockets
 
       # If directory is given w/o filename, pick a random manifest location
       if @directory && @filename.nil?
-        filenames = Dir[File.join(@directory, ".sprockets-manifest*.json")]
-        legacy_filenames = Dir[File.join(@directory, "manifest*.json")]
-        # Find the first manifest file in the directory
-        if filenames.select{ |f| f[/.sprockets-manifest-[0-9a-f]{32}.json/] }.any?
-          @filename = filenames.first
-        # Look for a legacy filename if none found
-        elsif legacy_filenames.select{ |f| f[/.sprockets-manifest-[0-9a-f]{32}.json/] }.any?
-          @filename = legacy_filenames.first
-          @legacy_manifest = true
-        else
-          @filename = File.join(@directory,@new_manifest_name)
-        end
+        @filename = find_directory_manifest(@directory)
+        @legacy_manifest = @filename.start_with?("manifest")
+        @new_manifest_name = generate_manifest_path
       end
 
       unless @directory && @filename
