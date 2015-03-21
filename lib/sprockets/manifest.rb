@@ -48,14 +48,8 @@ module Sprockets
       @directory ||= File.dirname(@filename) if @filename
 
       # If directory is given w/o filename, pick a random manifest location
-      @rename_filename = nil
       if @directory && @filename.nil?
         @filename = find_directory_manifest(@directory)
-
-        # If legacy manifest name autodetected, mark to rename on save
-        if File.basename(@filename).start_with?("manifest")
-          @rename_filename = File.join(@directory, generate_manifest_path)
-        end
       end
 
       unless @directory && @filename
@@ -235,12 +229,6 @@ module Sprockets
 
     # Persist manfiest back to FS
     def save
-      if @rename_filename
-        FileUtils.mv(@filename, @rename_filename)
-        @filename = @rename_filename
-        @rename_filename = nil
-      end
-
       data = json_encode(@data)
       FileUtils.mkdir_p File.dirname(@filename)
       PathUtils.atomic_write(@filename) do |f|

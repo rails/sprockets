@@ -40,34 +40,6 @@ class TestManifest < Sprockets::TestCase
     assert_match(/^\.sprockets-manifest-[a-f0-9]{32}.json/, File.basename(manifest.filename))
   end
 
-  test "specify manifest directory with existing legacy manifest-abc213.json" do
-    path = File.join(@dir, "manifest-#{SecureRandom.hex(16)}.json")
-
-    File.open(path, 'w') { |f| f.write "{}" }
-
-    manifest = Sprockets::Manifest.new(@env, @dir)
-
-    assert_equal @dir, manifest.directory
-    assert_match(/^manifest-[a-f0-9]{32}.json/, File.basename(manifest.filename))
-
-    manifest.save
-    assert_match(/^\.sprockets-manifest-[a-f0-9]{32}.json/, File.basename(manifest.filename))
-  end
-
-  test "specify manifest directory with existing legacy manifest.json" do
-    path = File.join(@dir, "manifest.json")
-
-    File.open(path, 'w') { |f| f.write "{}" }
-
-    manifest = Sprockets::Manifest.new(@env, @dir)
-
-    assert_equal @dir, manifest.directory
-    assert_equal "manifest.json", File.basename(manifest.filename)
-
-    manifest.save
-    assert_match(/^\.sprockets-manifest-[a-f0-9]{32}.json/, File.basename(manifest.filename))
-  end
-
   test "specify manifest directory with existing .sprockets-manifest-*.json" do
     path = File.join(@dir, ".sprockets-manifest-#{SecureRandom.hex(16)}.json")
     File.open(path, 'w') { |f| f.write "{}" }
