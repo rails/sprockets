@@ -48,10 +48,14 @@ module Sprockets
       @directory ||= File.dirname(@filename) if @filename
 
       # If directory is given w/o filename, pick a random manifest location
+      @rename_filename = nil
       if @directory && @filename.nil?
         @filename = find_directory_manifest(@directory)
-        @legacy_manifest = @filename.start_with?("manifest")
-        @new_manifest_name = generate_manifest_path
+
+        # If legacy manifest name autodetected, mark to rename on save
+        if File.basename(@filename).start_with?("manifest")
+          @rename_filename = File.join(@directory, generate_manifest_path)
+        end
       end
 
       unless @directory && @filename
@@ -233,21 +237,20 @@ module Sprockets
       nil
     end
 
-    # The path to the filename to write out - for legacy manifest.json files
-    # this will be a new .sprockets-manifest.json file
-    def output_path
-      @legacy_manifest ? File.join(@directory,@new_manifest_name) : @filename
-    end
-
-    protected
-      # Persist manfiest back to FS
-      def save
-        data = json_encode(@data)
-        FileUtils.mkdir_p File.dirname(output_path)
-        PathUtils.atomic_write(output_path) do |f|
-          f.write(data)
-        end
+    # Persist manfiest back to FS
+    def save
+      if @rename_filename
+        FileUtils.mv(@filename, @rename_filename)
+        @filename = @rename_filename
+        @rename_filename = nil
       end
+
+      data = json_encode(@data)
+      FileUtils.mkdir_p File.dirname(@filename)
+      PathUtils.atomic_write(@filename) do |f|
+        f.write(data)
+      end
+    end
 
     private
       def json_decode(obj)
