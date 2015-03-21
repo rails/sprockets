@@ -46,10 +46,12 @@ module Sprockets
       options = {}
       options[:pipeline] = :self if body_only?(env)
 
+      asset = find_asset(path, options)
+
       # 2.x/3.x compatibility hack. Just ignore fingerprints on ?body=1 requests.
       # 3.x/4.x prefers strong validation of fingerprint to body contents, but
       # 2.x just ignored it.
-      if options[:pipeline] == :self
+      if asset && parse_asset_uri(asset.uri)[1][:pipeline] == "self"
         fingerprint = nil
       end
 
@@ -62,8 +64,6 @@ module Sprockets
       if env['HTTP_IF_NONE_MATCH']
         if_none_match = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
       end
-
-      asset = find_asset(path, options)
 
       if asset.nil?
         status = :not_found

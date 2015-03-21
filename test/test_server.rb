@@ -47,6 +47,13 @@ class TestServer < Sprockets::TestCase
     assert_equal "var foo;\n", last_response.body
   end
 
+  test "serve single self file" do
+    get "/assets/foo.self.js"
+    assert_equal 200, last_response.status
+    assert_equal "9", last_response.headers['Content-Length']
+    assert_equal "var foo;\n", last_response.body
+  end
+
   test "serve single source file from cached environment" do
     get "/cached/javascripts/foo.js"
     assert_equal "var foo;\n", last_response.body
@@ -60,6 +67,14 @@ class TestServer < Sprockets::TestCase
 
   test "serve source file body that has dependencies" do
     get "/assets/application.js?body=true"
+    assert_equal 200, last_response.status
+    assert_equal "\n(function() {\n  application.boot();\n})();\n",
+      last_response.body
+    assert_equal "43", last_response.headers['Content-Length']
+  end
+
+  test "serve source file self that has dependencies" do
+    get "/assets/application.self.js"
     assert_equal 200, last_response.status
     assert_equal "\n(function() {\n  application.boot();\n})();\n",
       last_response.body
@@ -221,11 +236,33 @@ class TestServer < Sprockets::TestCase
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
+  test "fingerprint digest of file self" do
+    get "/assets/application.self.js"
+    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+
+    get "/assets/application.self-#{digest}.js"
+    assert_equal 200, last_response.status
+    assert_equal "\n(function() {\n  application.boot();\n})();\n", last_response.body
+    assert_equal "43", last_response.headers['Content-Length']
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+  end
+
   test "using non-body fingerprint for body only request" do
     get "/assets/application.js"
     digest = last_response.headers['ETag'][/"(.+)"/, 1]
 
     get "/assets/application-#{digest}.js?body=1"
+    assert_equal 200, last_response.status
+    assert_equal "\n(function() {\n  application.boot();\n})();\n", last_response.body
+    assert_equal "43", last_response.headers['Content-Length']
+    assert_match %r{max-age}, last_response.headers['Cache-Control']
+  end
+
+  test "using non-body fingerprint for self only request" do
+    get "/assets/application.js"
+    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+
+    get "/assets/application.self-#{digest}.js"
     assert_equal 200, last_response.status
     assert_equal "\n(function() {\n  application.boot();\n})();\n", last_response.body
     assert_equal "43", last_response.headers['Content-Length']
