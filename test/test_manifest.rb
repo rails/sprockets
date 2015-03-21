@@ -8,7 +8,7 @@ class TestManifest < Sprockets::TestCase
     @env = Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
     end
-    @dir = File.join(Dir::tmpdir, 'sprockets/custom_manifest')
+    @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
     @manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
     @manifest_regexp = %r{.sprockets-manifest-[a-f0-9]{32}.json}
   end
