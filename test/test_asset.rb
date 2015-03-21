@@ -316,8 +316,8 @@ class SourceAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
-    @pipeline = "source"
-    @asset = @env.find_asset('application.js', pipeline: "source")
+    @pipeline = :source
+    @asset = @env.find_asset('application.js', pipeline: :source)
   end
 
   include AssetTests
@@ -395,8 +395,8 @@ class ProcessedAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
-    @pipeline = "self"
-    @asset = @env.find_asset('application.js', pipeline: "self")
+    @pipeline = :self
+    @asset = @env.find_asset('application.js', pipeline: :self)
   end
 
   include AssetTests
@@ -782,7 +782,7 @@ class BundledAssetTest < Sprockets::TestCase
       write(app, "//= stub stub-frameworks\n//= require stub-jquery\napp = {};")
       write(jquery, "jquery = {};")
 
-      asset_jquery = asset('stub-jquery.js', pipeline: "self")
+      asset_jquery = asset('stub-jquery.js', pipeline: :self)
 
       refute asset('stub-frameworks.js').included.include?(asset_jquery.uri)
       assert asset('stub-app.js').included.include?(asset_jquery.uri)
@@ -793,7 +793,7 @@ class BundledAssetTest < Sprockets::TestCase
       write(frameworks, "//= require stub-jquery\nframeworks = {};")
 
       # jquery never changed
-      assert_equal asset_jquery.uri, asset('stub-jquery.js', pipeline: "self").uri
+      assert_equal asset_jquery.uri, asset('stub-jquery.js', pipeline: :self).uri
 
       # jquery moved from app to frameworks
       assert asset('stub-frameworks.js').included.include?(asset_jquery.uri)

@@ -207,16 +207,16 @@ class TestResolve < Sprockets::TestCase
     @env.append_path(fixture_path('default'))
 
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript&pipeline=source",
-      resolve("gallery.js", pipeline: "source")
+      resolve("gallery.js", pipeline: :source)
     assert_equal "file://#{fixture_path('default/coffee/foo.coffee')}?type=application/javascript&pipeline=source",
-      resolve("coffee/foo.js", pipeline: "source")
+      resolve("coffee/foo.js", pipeline: :source)
     assert_equal "file://#{fixture_path('default/jquery.tmpl.min.js')}?type=application/javascript&pipeline=source",
-      resolve("jquery.tmpl.min", pipeline: "source")
+      resolve("jquery.tmpl.min", pipeline: :source)
     assert_equal "file://#{fixture_path('default/jquery.tmpl.min.js')}?type=application/javascript&pipeline=source",
-      resolve("jquery.tmpl.min.js", pipeline: "source")
+      resolve("jquery.tmpl.min.js", pipeline: :source)
     assert_equal "file://#{fixture_path('default/manifest.js.yml')}?type=text/yaml&pipeline=source",
-      resolve('manifest.js.yml', pipeline: "source")
-    refute resolve("null", pipeline: "source")
+      resolve('manifest.js.yml', pipeline: :source)
+    refute resolve("null", pipeline: :source)
 
     assert_equal "file://#{fixture_path('default/gallery.js')}?type=application/javascript&pipeline=source",
       resolve("gallery.source.js")
