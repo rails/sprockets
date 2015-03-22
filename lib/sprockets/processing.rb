@@ -12,6 +12,18 @@ module Sprockets
   module Processing
     include ProcessorUtils, URIUtils, Utils
 
+    def pipelines
+      config[:pipelines]
+    end
+
+    def register_pipeline(name, proc = nil, &block)
+      proc ||= block
+
+      self.config = hash_reassoc(config, :pipelines) do |pipelines|
+        pipelines.merge(name.to_sym => proc)
+      end
+    end
+
     # Preprocessors are ran before Postprocessors and Engine
     # processors.
     def preprocessors
@@ -142,38 +154,46 @@ module Sprockets
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
         params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
-        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:skip_bundle])
+        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:pipeline])
         processors_cache_keys(processors)
       end
 
-      def build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+      def build_processors_uri(type, file_type, engine_extnames, pipeline)
         engines = engine_extnames.join(',') if engine_extnames.any?
         query = encode_uri_query_params(
           type: type,
           file_type: file_type,
           engines: engines,
-          skip_bundle: skip_bundle
+          pipeline: pipeline
         )
         "processors:#{query}"
       end
 
-      def processors_for(type, file_type, engine_extnames, skip_bundle)
+      def processors_for(type, file_type, engine_extnames, pipeline)
+        pipeline ||= :default
+        config[:pipelines][pipeline.to_sym].call(self, type, file_type, engine_extnames)
+      end
+
+      def default_processors_for(type, file_type, engine_extnames)
+        bundled_processors = config[:bundle_processors][type]
+        if bundled_processors.any?
+          bundled_processors
+        else
+          self_processors_for(type, file_type, engine_extnames)
+        end
+      end
+
+      def self_processors_for(type, file_type, engine_extnames)
         processors = []
 
-        bundled_processors = skip_bundle ? [] : config[:bundle_processors][type]
+        processors.concat config[:postprocessors][type]
 
-        if bundled_processors.any?
-          processors.concat bundled_processors
-        else
-          processors.concat config[:postprocessors][type]
-
-          if type != file_type && processor = config[:transformers][file_type][type]
-            processors << processor
-          end
-
-          processors.concat engine_extnames.map { |ext| config[:engines][ext] }
-          processors.concat config[:preprocessors][file_type]
+        if type != file_type && processor = config[:transformers][file_type][type]
+          processors << processor
         end
+
+        processors.concat engine_extnames.map { |ext| engines[ext] }
+        processors.concat config[:preprocessors][file_type]
 
         if processors.any? || mime_type_charset_detecter(type)
           processors << FileReader

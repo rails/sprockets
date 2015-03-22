@@ -77,9 +77,13 @@ module Sprockets
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
-        logical_path, file_type, engine_extnames = parse_path_extnames(logical_path)
+        logical_path, file_type, engine_extnames, _ = parse_path_extnames(logical_path)
         logical_path = normalize_logical_path(logical_path)
         name = logical_path
+
+        if pipeline = params[:pipeline]
+          logical_path += ".#{pipeline}"
+        end
 
         if type = params[:type]
           logical_path += config[:mime_types][type][:extensions].first
@@ -89,10 +93,9 @@ module Sprockets
           raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
         end
 
-        skip_bundle = params[:skip_bundle]
-        processors = processors_for(type, file_type, engine_extnames, skip_bundle)
+        processors = processors_for(type, file_type, engine_extnames, pipeline)
 
-        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, skip_bundle)
+        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, pipeline)
         dependencies = config[:dependencies] + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline

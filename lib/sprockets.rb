@@ -48,6 +48,7 @@ module Sprockets
     mime_exts: {}.freeze,
     mime_types: {}.freeze,
     paths: [].freeze,
+    pipelines: {}.freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
     registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
@@ -96,6 +97,18 @@ module Sprockets
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/font-woff', extensions: ['.woff']
+
+  register_pipeline :source do |env|
+    []
+  end
+
+  register_pipeline :self do |env, type, file_type, engine_extnames|
+    env.self_processors_for(type, file_type, engine_extnames)
+  end
+
+  register_pipeline :default do |env, type, file_type, engine_extnames|
+    env.default_processors_for(type, file_type, engine_extnames)
+  end
 
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(
