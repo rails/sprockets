@@ -113,7 +113,13 @@ module Sprockets
   end
 
   register_pipeline :default do |env, type, file_type|
-    env.default_processors_for(type, file_type)
+    # TODO: Hack for to inject source map transformer
+    if (type == "application/js-sourcemap+json" && file_type != "application/js-sourcemap+json") ||
+        (type == "application/css-sourcemap+json" && file_type != "application/css-sourcemap+json")
+      [SourceMapProcessor]
+    else
+      env.default_processors_for(type, file_type)
+    end
   end
 
   require 'sprockets/directive_processor'

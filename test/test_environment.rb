@@ -427,6 +427,28 @@ module EnvironmentTests
     assert_equal "text/plain", asset.content_type
     assert_equal "hello.source.txt", asset.logical_path
   end
+
+  test "find source for concatenated asset" do
+    assert asset = @env.find_asset("application.source.coffee")
+    assert_equal "text/coffeescript", asset.content_type
+    assert_equal "application.source.coffee", asset.logical_path
+
+    assert asset = @env.find_asset("application.js")
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "application.js", asset.logical_path
+
+    assert asset = @env.find_asset("application.self.js")
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "application.self.js", asset.logical_path
+
+    assert asset = @env.find_asset("project.self.js")
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "project.self.js", asset.logical_path
+
+    assert asset = @env.find_asset("application.js.map")
+    assert_equal "application/js-sourcemap+json", asset.content_type
+    assert_equal "application.js.map", asset.logical_path
+  end
 end
 
 class WhitespaceProcessor
