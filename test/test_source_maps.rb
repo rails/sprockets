@@ -42,6 +42,8 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert asset = @env.find_asset("coffee/main.js.map")
     assert_equal fixture_path('source-maps/coffee/main.coffee'), asset.filename
+    assert_equal "coffee/main.js.map", asset.logical_path
+    assert_equal "application/js-sourcemap+json", asset.content_type
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -63,6 +65,8 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert asset = @env.find_asset("coffee/precompiled/main.js.map")
     assert_equal fixture_path('source-maps/coffee/precompiled/main.js.map'), asset.filename
+    assert_equal "coffee/precompiled/main.js.map", asset.logical_path
+    assert_equal "application/js-sourcemap+json", asset.content_type
 
     assert map = JSON.parse(asset.source)
     assert_equal 3, map['version']
@@ -85,6 +89,8 @@ class TestSourceMaps < Sprockets::TestCase
     end
     assert asset
     assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
+    assert_equal "sass/main.css.map", asset.logical_path
+    assert_equal "application/css-sourcemap+json", asset.content_type
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -111,6 +117,8 @@ class TestSourceMaps < Sprockets::TestCase
     end
     assert asset
     assert_equal fixture_path('source-maps/sass/precompiled/main.css.map'), asset.filename
+    assert_equal "sass/precompiled/main.css.map", asset.logical_path
+    assert_equal "application/css-sourcemap+json", asset.content_type
 
     assert map = JSON.parse(asset.source)
     assert_equal 3, map['version']

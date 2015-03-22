@@ -148,8 +148,13 @@ class TextStaticAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
+  test "logical path" do
+    assert_equal "log.txt", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "log-66a045b452102c59d840ec097d59d9467e13a3f34f6494e539ffd32c1bb35f18.txt",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -185,8 +190,13 @@ class BinaryStaticAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
+  test "logical path" do
+    assert_equal "POW.png", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -274,6 +284,65 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 end
 
+class SourceAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @pipeline = :source
+    @asset = @env.find_asset('application.js', pipeline: :source)
+  end
+
+  include AssetTests
+
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=source&id=xxx",
+      normalize_uri(@asset.uri)
+  end
+
+  test "logical path" do
+    assert_equal "application.source.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application.source-6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea.js",
+      @asset.digest_path
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 109, @asset.length
+  end
+
+  test "source digest" do
+    assert_equal [106, 232, 1, 224, 40, 19, 191, 32, 154, 132, 168, 155, 140, 91, 94, 223, 94, 183, 112, 202, 158, 66, 83, 197, 104, 52, 192, 138, 47, 197, 219, 234], @asset.digest.bytes.to_a
+  end
+
+  test "source hexdigest" do
+    assert_equal "6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.base64digest
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii_F2-o?ct=application/javascript", @asset.integrity
+  end
+
+  test "to_s" do
+    assert_equal "// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
+  end
+
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+  end
+end
+
 class ProcessedAssetTest < Sprockets::TestCase
   include FreshnessTests
 
@@ -282,19 +351,24 @@ class ProcessedAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
-    @asset = @env.find_asset('application.js', :bundle => false)
-    @bundle = false
+    @pipeline = :self
+    @asset = @env.find_asset('application.js', pipeline: :self)
   end
 
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&skip_bundle&id=xxx",
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=self&id=xxx",
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env.find_asset(@asset.logical_path, :bundle => false)
+  test "logical path" do
+    assert_equal "application.self.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application.self-6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5.js",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -336,7 +410,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:bundle => @bundle}.merge(options))
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
   end
 end
 
@@ -348,8 +422,8 @@ class BundledAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
     @env.cache = {}
 
+    @pipeline = nil
     @asset = @env['application.js']
-    @bundle = true
   end
 
   include AssetTests
@@ -359,8 +433,13 @@ class BundledAssetTest < Sprockets::TestCase
       normalize_uri(@asset.uri)
   end
 
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
+  test "logical path" do
+    assert_equal "application.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js",
+      @asset.digest_path
   end
 
   test "content type" do
@@ -651,7 +730,7 @@ class BundledAssetTest < Sprockets::TestCase
       write(app, "//= stub stub-frameworks\n//= require stub-jquery\napp = {};")
       write(jquery, "jquery = {};")
 
-      asset_jquery = asset('stub-jquery.js', :bundle => false)
+      asset_jquery = asset('stub-jquery.js', pipeline: :self)
 
       old_asset_frameworks_uri = asset('stub-frameworks.js').uri
       old_asset_app_uri        = asset('stub-app.js').uri
@@ -659,7 +738,7 @@ class BundledAssetTest < Sprockets::TestCase
       write(frameworks, "//= require stub-jquery\nframeworks = {};")
 
       # jquery never changed
-      assert_equal asset_jquery.uri, asset('stub-jquery.js', :bundle => false).uri
+      assert_equal asset_jquery.uri, asset('stub-jquery.js', pipeline: :self).uri
 
       refute_equal old_asset_frameworks_uri, asset('stub-frameworks.js').uri
       refute_equal old_asset_app_uri, asset('stub-app.js').uri
@@ -968,8 +1047,9 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert asset("project.js").hexdigest
   end
 
-  test "asset digest path" do
-    assert_match(/project-\w+\.js/, asset("project.js").digest_path)
+  test "project digest path" do
+    assert_equal "project-9f8d317511370805ee292b685e9bcc4227bb901f8fd6ce82157d1845651ff6da.js",
+      asset("project.js").digest_path
   end
 
   test "multiple charset defintions are stripped from css bundle" do
@@ -995,7 +1075,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:bundle => @bundle}.merge(options))
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
   end
 
   def read(logical_path)

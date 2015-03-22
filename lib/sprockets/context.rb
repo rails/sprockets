@@ -128,7 +128,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
-      @required << resolve(path, accept: @content_type, bundle: false)
+      @required << resolve(path, accept: @content_type, pipeline: :self)
       nil
     end
 
@@ -136,7 +136,7 @@ module Sprockets
     # `path` must be an asset which may or may not already be included
     # in the bundle.
     def stub_asset(path)
-      @stubbed << resolve(path, accept: @content_type, bundle: false)
+      @stubbed << resolve(path, accept: @content_type, pipeline: :self)
       nil
     end
 

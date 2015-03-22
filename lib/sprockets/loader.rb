@@ -80,8 +80,13 @@ module Sprockets
         full_logical_path = logical_path
         extname, file_type = match_path_extname(logical_path, mime_exts)
         logical_path = logical_path.chomp(extname)
+
         logical_path = normalize_logical_path(logical_path)
         name = logical_path
+
+        if pipeline = params[:pipeline]
+          logical_path += ".#{pipeline}"
+        end
 
         if type = params[:type]
           logical_path += config[:mime_types][type][:extensions].first
@@ -91,10 +96,9 @@ module Sprockets
           raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
         end
 
-        skip_bundle = params[:skip_bundle]
-        processors = processors_for(type, file_type, skip_bundle)
+        processors = processors_for(type, file_type, pipeline)
 
-        processors_dep_uri = build_processors_uri(type, file_type, skip_bundle)
+        processors_dep_uri = build_processors_uri(type, file_type, pipeline)
         dependencies = config[:dependencies] + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline

@@ -15,7 +15,7 @@ module Sprockets
   # id - Unique fingerprint of the entire asset and all its metadata. Assets
   #      will only have the same id if they serialize to an identical value.
   #
-  # skip_bundle - Boolean if bundle processors should be skipped.
+  # pipeline - String name of pipeline.
   #
   # encoding - A content encoding such as "gzip" or "deflate". NOT a charset
   #            like "utf-8".
@@ -161,8 +161,8 @@ module Sprockets
         case value
         when Integer
           query << "#{key}=#{value}"
-        when String
-          query << "#{key}=#{URI::Generic::DEFAULT_PARSER.escape(value)}"
+        when String, Symbol
+          query << "#{key}=#{URI::Generic::DEFAULT_PARSER.escape(value.to_s)}"
         when TrueClass
           query << "#{key}"
         when FalseClass, NilClass

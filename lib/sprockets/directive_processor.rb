@@ -202,7 +202,7 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << resolve(path, accept: @content_type, bundle: false)
+        @required << resolve(path, accept: @content_type, pipeline: :self)
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -283,7 +283,7 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << resolve(path, accept: @content_type, bundle: false)
+        @stubbed << resolve(path, accept: @content_type, pipeline: :self)
       end
 
       # Declares a linked dependency on the target asset.
@@ -345,7 +345,7 @@ module Sprockets
       end
 
       def require_paths(paths, deps)
-        resolve_paths(paths, deps, accept: @content_type, bundle: false) do |uri|
+        resolve_paths(paths, deps, accept: @content_type, pipeline: :self) do |uri|
           @required << uri
         end
       end

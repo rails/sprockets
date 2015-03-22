@@ -46,6 +46,8 @@ module Sprockets
     mime_exts: {}.freeze,
     mime_types: {}.freeze,
     paths: [].freeze,
+    pipelines: {}.freeze,
+    pipeline_exts: {}.freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
     registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
@@ -101,6 +103,18 @@ module Sprockets
   register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map']
   register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapProcessor
   register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapProcessor
+
+  register_pipeline :source do |env|
+    []
+  end
+
+  register_pipeline :self do |env, type, file_type|
+    env.self_processors_for(type, file_type)
+  end
+
+  register_pipeline :default do |env, type, file_type|
+    env.default_processors_for(type, file_type)
+  end
 
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])

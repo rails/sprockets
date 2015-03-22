@@ -403,6 +403,30 @@ module EnvironmentTests
     script = @env["coffee"].to_s
     assert_equal "undefined", ExecJS.exec(script)
   end
+
+  test "source pipeline skips all processoring" do
+    assert asset = @env.find_asset("missing_require.js", pipeline: :source)
+    assert_equal "// =require \"notfound\"\n", asset.source
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "missing_require.source.js", asset.logical_path
+
+    assert asset = @env.find_asset("missing_require.source.js")
+    assert_equal "// =require \"notfound\"\n", asset.source
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "missing_require.source.js", asset.logical_path
+  end
+
+  test "source pipeline on existing source asset" do
+    assert asset = @env.find_asset("hello.txt", pipeline: :source)
+    assert_equal "Hello world\n", asset.source
+    assert_equal "text/plain", asset.content_type
+    assert_equal "hello.source.txt", asset.logical_path
+
+    assert asset = @env.find_asset("hello.source.txt")
+    assert_equal "Hello world\n", asset.source
+    assert_equal "text/plain", asset.content_type
+    assert_equal "hello.source.txt", asset.logical_path
+  end
 end
 
 class WhitespaceProcessor
