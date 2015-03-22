@@ -107,8 +107,14 @@ module Sprockets
     # Returns a JSON serializable object or nil if there was a cache miss.
     def get(key, local = false)
       expanded_key = expand_key(key)
-      value = @fetch_cache.get(expanded_key) if local
-      value = @cache_wrapper.get(expanded_key) if value.nil?
+
+      if local && value = @fetch_cache.get(expanded_key)
+        return value
+      end
+
+      value = @cache_wrapper.get(expanded_key)
+      @fetch_cache.set(expanded_key, value) if local
+
       value
     end
 
@@ -126,7 +132,7 @@ module Sprockets
     # Returns the value argument.
     def set(key, value, local = false)
       expanded_key = expand_key(key)
-      @fetch_cache.set(expanded_key, value)
+      @fetch_cache.set(expanded_key, value) if local
       @cache_wrapper.set(expanded_key, value)
     end
 
