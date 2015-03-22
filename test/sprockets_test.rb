@@ -147,4 +147,12 @@ class Sprockets::TestCase < MiniTest::Test
       File.utime(mtime, mtime, filename) if mtime
     end
   end
+
+  def normalize_uri(uri)
+    uri.sub(/id=\w+/, 'id=xxx')
+  end
+
+  def normalize_uris(uris)
+    uris.to_a.map { |uri| normalize_uri(uri) }.sort
+  end
 end

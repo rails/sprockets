@@ -1,3 +1,5 @@
+require 'set'
+
 module Sprockets
   class SourceMapProcessor
     def self.call(input)
@@ -10,10 +12,20 @@ module Sprockets
         fail input[:content_type]
       end
 
-      uri, _ = input[:environment].resolve!(input[:filename], accept: accept)
-      asset = input[:environment].load(uri)
+      links = Set.new(input[:metadata][:links])
 
-      asset.metadata[:map].to_json
+      env = input[:environment]
+
+      uri, _ = env.resolve!(input[:filename], accept: accept)
+      asset = env.load(uri)
+      map = asset.metadata[:map]
+
+      map.sources.each do |source|
+        uri, _ = env.resolve!(source, pipeline: :source)
+        links << env.load(uri).uri
+      end
+
+      { data: map.to_json, links: links }
     end
   end
 end

@@ -48,14 +48,6 @@ module AssetTests
       assert !File.exist?(target)
     end
   end
-
-  def normalize_uri(uri)
-    uri.sub(/id=\w+/, 'id=xxx')
-  end
-
-  def normalize_uris(uris)
-    uris.to_a.map { |uri| normalize_uri(uri) }.sort
-  end
 end
 
 module FreshnessTests

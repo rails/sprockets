@@ -44,6 +44,9 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/coffee/main.coffee'), asset.filename
     assert_equal "coffee/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
+    assert_equal [
+      "file://#{fixture_path('source-maps/coffee/main.coffee')}?type=text/coffeescript&pipeline=source&id=xxx"
+    ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -91,6 +94,9 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
+    assert_equal [
+      "file://#{fixture_path('source-maps/sass/main.scss')}?type=text/scss&pipeline=source&id=xxx"
+    ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
