@@ -60,7 +60,7 @@ module Sprockets
     # cache - A compatible backend cache store instance.
     def initialize(cache = nil, logger = self.class.default_logger)
       @cache_wrapper = get_cache_wrapper(cache)
-      @fetch_cache   = Cache::MemoryStore.new(1024)
+      @fetch_cache   = Cache::MemoryStore.new(4096)
       @logger        = logger
     end
 
