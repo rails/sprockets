@@ -14,7 +14,7 @@ class TestSourceMaps < Sprockets::TestCase
   test "builds a source map for js files" do
     asset = @env['child.js']
     map = asset.metadata[:map]
-    assert_equal ['child.js'], map.sources
+    assert_equal ['child.source.js'], map.sources
   end
 
   test "builds a minified source map" do
@@ -23,13 +23,13 @@ class TestSourceMaps < Sprockets::TestCase
     asset = @env['application.js']
     map = asset.metadata[:map]
     assert map.all? {|mapping| mapping.generated.line == 1 }
-    assert_equal %w(project.coffee users.coffee application.coffee), map.sources
+    assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), map.sources
   end
 
   test "builds a source map with js dependency" do
     asset = @env['parent.js']
     map = asset.metadata[:map]
-    assert_equal %w(child.js users.coffee parent.js), map.sources
+    assert_equal %w(child.source.js users.source.coffee parent.source.js), map.sources
   end
 
   test "compile coffeescript source map" do
@@ -53,7 +53,7 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "",
       "mappings" => "AADA;AAAA,MAAA,sDAAA;IAAA,gBAAA;;AAAA,EAAA,MAAA,GAAA,EAAA,CAAA;;AAAA,EAAA,QAAA,GAAA,IAAA,CAAA;;AAAA,EAAA,IAAA,QAAA;AAAA,IAAA,MAAA,GAAA,CAAA,EAAA,CAAA;GAAA;;AAAA,EAAA,MAAA,GAAA,SAAA,CAAA,GAAA;WAAA,CAAA,GAAA,EAAA;EAAA,CAAA,CAAA;;AAAA,EAAA,IAAA,GAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA;;AAAA,EAAA,IAAA,GAAA;AAAA,IAAA,IAAA,EAAA,IAAA,CAAA,IAAA;AAAA,IAAA,MAAA,EAAA,MAAA;AAAA,IAAA,IAAA,EAAA,SAAA,CAAA,GAAA;aAAA,CAAA,GAAA,MAAA,CAAA,CAAA,EAAA;IAAA,CAAA;GAAA,CAAA;;AAAA,EAAA,IAAA,GAAA,SAAA,GAAA;AAAA,QAAA,eAAA;AAAA,IAAA,uBAAA,+DAAA,CAAA;WAAA,KAAA,CAAA,MAAA,EAAA,OAAA,EAAA;EAAA,CAAA,CAAA;;AAAA,EAAA,IAAA,8CAAA;AAAA,IAAA,KAAA,CAAA,YAAA,CAAA,CAAA;GAAA;;AAAA,EAAA,KAAA;;AAAA;SAAA,sCAAA;oBAAA;AAAA,mBAAA,IAAA,CAAA,IAAA,CAAA,GAAA,EAAA,CAAA;AAAA;;MAAA,CAAA;AAAA",
-      "sources" => ["coffee/main.coffee"],
+      "sources" => ["coffee/main.source.coffee"],
       "names" => []
     }, map)
   end
@@ -103,7 +103,7 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "sass/main.css",
       "mappings" => "",
-      "sources" => ["sass/main.scss"],
+      "sources" => ["sass/main.source.scss"],
       "names" => []
     }, map)
   end

@@ -21,7 +21,7 @@ module Sprockets
       map = asset.metadata[:map]
 
       map.sources.each do |source|
-        uri, _ = env.resolve!(source, pipeline: :source)
+        uri, _ = env.resolve!(source)
         links << env.load(uri).uri
       end
 
