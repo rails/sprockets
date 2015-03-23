@@ -3,19 +3,20 @@ require 'shellwords'
 require 'tmpdir'
 
 class TestSprockets < Sprockets::TestCase
+  parallelize_me!
+
   def setup
+    super
     @env = Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
     end
 
-    @dir = File.join(Dir::tmpdir, 'sprockets')
+    @dir = Dir.mktmpdir("sprockets")
   end
 
   def teardown
-    # FileUtils.rm_rf(@dir)
-    # wtf, dunno
-    system "rm -rf #{@dir}"
-    assert Dir["#{@dir}/*"].empty?
+    FileUtils.rm_rf @dir
+    super
   end
 
   test "show version for -v flag" do

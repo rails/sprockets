@@ -8,7 +8,7 @@ module Sprockets
   module PathUtils
     extend self
 
-    # Internal: Like `File.stat`.
+    # Public: Like `File.stat`.
     #
     # path - String file or directory path
     #
@@ -21,7 +21,7 @@ module Sprockets
       end
     end
 
-    # Internal: Like `File.file?`.
+    # Public: Like `File.file?`.
     #
     # path - String file path.
     #
@@ -34,7 +34,20 @@ module Sprockets
       end
     end
 
-    # Internal: A version of `Dir.entries` that filters out `.` files and `~`
+    # Public: Like `File.directory?`.
+    #
+    # path - String file path.
+    #
+    # Returns true path exists and is a directory.
+    def directory?(path)
+      if stat = self.stat(path)
+        stat.directory?
+      else
+        false
+      end
+    end
+
+    # Public: A version of `Dir.entries` that filters out `.` files and `~`
     # swap files.
     #
     # path - String directory path
@@ -48,7 +61,7 @@ module Sprockets
       end
     end
 
-    # Internal: Check if path is absolute or relative.
+    # Public: Check if path is absolute or relative.
     #
     # path - String path.
     #
@@ -73,7 +86,7 @@ module Sprockets
       SEPARATOR_PATTERN = "#{Regexp.quote(File::SEPARATOR)}"
     end
 
-    # Internal: Check if path is explicitly relative.
+    # Public: Check if path is explicitly relative.
     # Starts with "./" or "../".
     #
     # path - String path.
@@ -178,7 +191,7 @@ module Sprockets
       nil
     end
 
-    # Internal: Stat all the files under a directory.
+    # Public: Stat all the files under a directory.
     #
     # dir - A String directory
     #
@@ -196,7 +209,7 @@ module Sprockets
       nil
     end
 
-    # Internal: Recursive stat all the files under a directory.
+    # Public: Recursive stat all the files under a directory.
     #
     # dir - A String directory
     #
@@ -215,7 +228,7 @@ module Sprockets
       nil
     end
 
-    # Internal: Recursive stat all the files under a directory in alphabetical
+    # Public: Recursive stat all the files under a directory in alphabetical
     # order.
     #
     # dir - A String directory
@@ -237,7 +250,7 @@ module Sprockets
       nil
     end
 
-    # Internal: Write to a file atomically. Useful for situations where you
+    # Public: Write to a file atomically. Useful for situations where you
     # don't want other processes or threads to see half-written files.
     #
     #   Utils.atomic_write('important.file') do |file|

@@ -103,7 +103,11 @@ module Sprockets
     # the dependency file with invalidate the cache of the
     # source file.
     def depend_on(path)
-      resolve(path)
+      if environment.absolute_path?(path) && environment.directory?(path)
+        @dependencies << environment.build_file_digest_uri(path)
+      else
+        resolve(path)
+      end
       nil
     end
 

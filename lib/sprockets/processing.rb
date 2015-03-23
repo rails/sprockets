@@ -1,3 +1,6 @@
+require 'sprockets/file_reader'
+require 'sprockets/legacy_proc_processor'
+require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
 require 'sprockets/processor_utils'
 require 'sprockets/uri_utils'

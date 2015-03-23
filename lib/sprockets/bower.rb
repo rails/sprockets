@@ -19,9 +19,8 @@ module Sprockets
       # bower.json can only be nested one level deep
       if !logical_path.index('/')
         dirname = File.join(load_path, logical_path)
-        stat    = self.stat(dirname)
 
-        if stat && stat.directory?
+        if directory?(dirname)
           filenames = POSSIBLE_BOWER_JSONS.map { |basename| File.join(dirname, basename) }
           filename  = filenames.detect { |fn| self.file?(fn) }
 
