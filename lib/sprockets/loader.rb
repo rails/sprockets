@@ -55,7 +55,7 @@ module Sprockets
         asset = load_asset_by_uri(uri, filename, params)
 
         if id && asset[:id] != id
-          raise VersionNotFound, "could not find specified id: #{id}"
+          raise VersionNotFound, "could not find specified id: #{uri}##{id}"
         end
 
         asset

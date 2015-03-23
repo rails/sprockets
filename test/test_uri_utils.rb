@@ -89,6 +89,10 @@ class TestURIUtils < MiniTest::Test
     refute valid_asset_uri?("/usr/local/var/github/app/assets/javascripts/application.js")
   end
 
+  def test_validate_with_invalid_uri_error
+    refute valid_asset_uri?("file:///[]")
+  end
+
   def test_parse_file_paths
     assert_equal ["/usr/local/var/github/app/assets/javascripts/application.js", {}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
