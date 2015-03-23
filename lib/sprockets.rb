@@ -1,5 +1,6 @@
 require 'sprockets/version'
 require 'sprockets/autoload'
+require 'sprockets/errors'
 
 module Sprockets
   # Environment
@@ -16,13 +17,9 @@ module Sprockets
   autoload :FileReader,              'sprockets/file_reader'
 
   # Internal utilities
-  autoload :ArgumentError,           'sprockets/errors'
   autoload :Cache,                   'sprockets/cache'
-  autoload :ContentTypeMismatch,     'sprockets/errors'
   autoload :DigestUtils,             'sprockets/digest_utils'
   autoload :EncodingUtils,           'sprockets/encoding_utils'
-  autoload :Error,                   'sprockets/errors'
-  autoload :FileNotFound,            'sprockets/errors'
   autoload :HTTPUtils,               'sprockets/http_utils'
   autoload :PathUtils,               'sprockets/path_utils'
   autoload :Utils,                   'sprockets/utils'
