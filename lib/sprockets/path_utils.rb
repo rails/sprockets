@@ -34,6 +34,19 @@ module Sprockets
       end
     end
 
+    # Internal: Like `File.directory?`.
+    #
+    # path - String file path.
+    #
+    # Returns true path exists and is a directory.
+    def directory?(path)
+      if stat = self.stat(path)
+        stat.directory?
+      else
+        false
+      end
+    end
+
     # Internal: A version of `Dir.entries` that filters out `.` files and `~`
     # swap files.
     #

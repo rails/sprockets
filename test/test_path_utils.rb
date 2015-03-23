@@ -18,6 +18,11 @@ class TestPathUtils < MiniTest::Test
     assert_equal false, file?(File.expand_path("../fixtures", __FILE__))
   end
 
+  def test_directory
+    assert_equal true, directory?(File.expand_path("../fixtures", __FILE__))
+    assert_equal false, directory?(File.expand_path("../fixtures/default/hello.txt", __FILE__))
+  end
+
   def test_entries
     assert_equal [
       "asset",
