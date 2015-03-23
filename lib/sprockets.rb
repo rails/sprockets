@@ -1,28 +1,11 @@
 require 'sprockets/version'
 require 'sprockets/autoload'
+require 'sprockets/cache'
+require 'sprockets/environment'
 require 'sprockets/errors'
+require 'sprockets/manifest'
 
 module Sprockets
-  # Environment
-  autoload :Asset,                   'sprockets/asset'
-  autoload :Base,                    'sprockets/base'
-  autoload :Environment,             'sprockets/environment'
-  autoload :Manifest,                'sprockets/manifest'
-
-  # Processing
-  autoload :Bundle,                  'sprockets/bundle'
-  autoload :Context,                 'sprockets/context'
-  autoload :DirectiveProcessor,      'sprockets/directive_processor'
-  autoload :FileReader,              'sprockets/file_reader'
-
-  # Internal utilities
-  autoload :Cache,                   'sprockets/cache'
-  autoload :DigestUtils,             'sprockets/digest_utils'
-  autoload :EncodingUtils,           'sprockets/encoding_utils'
-  autoload :HTTPUtils,               'sprockets/http_utils'
-  autoload :PathUtils,               'sprockets/path_utils'
-  autoload :Utils,                   'sprockets/utils'
-
   require 'sprockets/processor_utils'
   extend ProcessorUtils
 
