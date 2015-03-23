@@ -3,6 +3,8 @@ require 'shellwords'
 require 'tmpdir'
 
 class TestSprockets < Sprockets::TestCase
+  parallelize_me!
+
   def setup
     super
     @env = Sprockets::Environment.new(".") do |env|
