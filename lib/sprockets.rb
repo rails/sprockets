@@ -6,7 +6,6 @@ module Sprockets
   # Environment
   autoload :Asset,                   'sprockets/asset'
   autoload :Base,                    'sprockets/base'
-  autoload :CachedEnvironment,       'sprockets/cached_environment'
   autoload :Environment,             'sprockets/environment'
   autoload :Manifest,                'sprockets/manifest'
 
