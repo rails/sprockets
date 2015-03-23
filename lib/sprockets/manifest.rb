@@ -240,6 +240,7 @@ module Sprockets
     # Persist manfiest back to FS
     def save
       if @rename_filename
+        logger.info "Renaming #{@filename} to #{@rename_filename}"
         FileUtils.mv(@filename, @rename_filename)
         @filename = @rename_filename
         @rename_filename = nil
