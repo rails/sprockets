@@ -291,6 +291,12 @@ module Sprockets
       end
     end
 
+    def self.simple_logical_path?(str)
+      str.is_a?(String) &&
+        !PathUtils.absolute_path?(str) &&
+        str !~ /\*|\*\*|\?|\[|\]|\{|\}/
+    end
+
     # Deprecated: Filter logical paths in environment. Useful for selecting what
     # files you want to compile.
     #
