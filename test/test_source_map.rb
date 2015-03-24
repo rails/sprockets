@@ -38,9 +38,9 @@ class TestSourceMap < MiniTest::Test
     assert_equal 'script.js', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert_equal hash['sources'],  map.sources
-    assert_equal hash['names'],    map.names
-    assert_equal hash['mappings'], map.to_s
+    assert_equal hash['sources'],  map.as_json['sources']
+    assert_equal hash['names'],    map.as_json['names']
+    assert_equal hash['mappings'], map.as_json['mappings']
 
     assert_equal hash, map.as_json
     assert_equal hash.to_json, map.to_json
@@ -73,9 +73,13 @@ class TestSourceMap < MiniTest::Test
     assert_equal 'example.coffee', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert_equal hash['sources'],  map.sources
-    assert_equal hash['names'],    map.names
-    assert_equal hash['mappings'], map.to_s
+    assert_equal hash['sources'],  map.as_json['sources']
+    assert_equal hash['names'],    map.as_json['names']
+    assert_equal hash['mappings'], map.as_json['mappings']
+
+    assert_equal hash, map.as_json
+    assert_equal hash.to_json, map.to_json
+    assert_equal hash.to_json, JSON.generate(map)
   end
 
   def test_map3
@@ -104,24 +108,13 @@ class TestSourceMap < MiniTest::Test
     assert_equal 'example.js', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert_equal hash['sources'],  map.sources
-    assert_equal hash['names'],    map.names
-    assert_equal hash['mappings'], map.to_s
-  end
+    assert_equal hash['sources'],  map.as_json['sources']
+    assert_equal hash['names'],    map.as_json['names']
+    assert_equal hash['mappings'], map.as_json['mappings']
 
-  def test_to_s
-    assert_equal "ACmBA;ACUA", @mappings.to_s
-
-    empty_map = Map.new([])
-    assert_equal "", empty_map.to_s
-  end
-
-  def test_sources
-    assert_equal ["a.js", "b.js", "c.js"], @mappings.sources
-  end
-
-  def test_names
-    assert_equal [], @mappings.names
+    assert_equal hash, map.as_json
+    assert_equal hash.to_json, map.to_json
+    assert_equal hash.to_json, JSON.generate(map)
   end
 
   def test_eql
@@ -201,7 +194,7 @@ class TestSourceMap < MiniTest::Test
     })
 
     mappings3 = mappings1 | mappings2
-    assert_equal 'CAAA,WAAA,GAAA,KAAA,MAAO,WAAA,MACL,OAAM,eAER,IAAW,KAAX,CAAG,SAHH,KAAA', mappings3.to_s
+    assert_equal 'CAAA,WAAA,GAAA,KAAA,MAAO,WAAA,MACL,OAAM,eAER,IAAW,KAAX,CAAG,SAHH,KAAA', mappings3.as_json["mappings"]
   end
 
   def test_pipe_identity

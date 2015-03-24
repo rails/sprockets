@@ -21,10 +21,13 @@ module Sprockets
 
     def initialize(mappings = [], filename = nil)
       @mappings, @filename = mappings, filename
+      @sources = @mappings.map { |m| m[:source] }.uniq.compact
+      @names   = @mappings.map { |m| m[:name] }.uniq.compact
     end
 
     attr_reader :filename
     attr_reader :mappings
+    attr_reader :sources, :names
 
     def size
       @mappings.size
@@ -36,18 +39,6 @@ module Sprockets
 
     def each(&block)
       @mappings.each(&block)
-    end
-
-    def to_s
-      encode_vlq_mappings(self.mappings)
-    end
-
-    def sources
-      @sources ||= @mappings.map { |m| m[:source] }.uniq.compact
-    end
-
-    def names
-      @names ||= @mappings.map { |m| m[:name] }.uniq.compact
     end
 
     def ==(other)
@@ -108,9 +99,9 @@ module Sprockets
       {
         "version"   => 3,
         "file"      => filename,
-        "mappings"  => to_s,
-        "sources"   => sources,
-        "names"     => names
+        "mappings"  => encode_vlq_mappings(self.mappings, sources: self.sources, names: self.names),
+        "sources"   => self.sources,
+        "names"     => self.names
       }
     end
 

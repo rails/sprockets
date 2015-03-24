@@ -34,6 +34,8 @@ class TestSourceMapUtils < MiniTest::Test
   end
 
   def test_encode_vlq_mappings
+    assert_equal "", encode_vlq_mappings([])
+
     mappings = [
       {source: 'a.js', generated: [0, 0], original: [0, 0]},
       {source: 'b.js', generated: [1, 0], original: [20, 0]},
