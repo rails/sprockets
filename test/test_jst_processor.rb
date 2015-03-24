@@ -1,8 +1,9 @@
-require 'sprockets_test'
+require 'minitest/autorun'
+require 'sprockets/cache'
 require 'sprockets/jst_processor'
 
-class TestJstProcessor < Sprockets::TestCase
-  test "export js template in JST" do
+class TestJstProcessor < MiniTest::Test
+  def test_export_js_template_in_JST
     input = {
       name: 'users/show',
       content_type: 'application/javascript',
@@ -18,7 +19,7 @@ class TestJstProcessor < Sprockets::TestCase
     assert_equal output, Sprockets::JstProcessor.call(input)
   end
 
-  test "export js template in TEMPLATES" do
+  def test_export_js_template_in_TEMPLATES
     input = {
       name: 'users/show',
       content_type: 'application/javascript',

@@ -1,9 +1,9 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/uglifier_compressor'
 
-class TestUglifierCompressor < Sprockets::TestCase
-  test "compress javascript" do
+class TestUglifierCompressor < MiniTest::Test
+  def test_compress_javascript
     input = {
       content_type: 'application/javascript',
       data: "function foo() {\n  return true;\n}",
@@ -13,7 +13,7 @@ class TestUglifierCompressor < Sprockets::TestCase
     assert_equal output, Sprockets::UglifierCompressor.call(input)
   end
 
-  test "cache key" do
+  def test_cache_key
     assert Sprockets::UglifierCompressor.cache_key
   end
 end

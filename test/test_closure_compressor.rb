@@ -1,8 +1,9 @@
-require 'sprockets_test'
+require 'minitest/autorun'
+require 'sprockets/cache'
 require 'sprockets/closure_compressor'
 
-class TestClosureCompressor < Sprockets::TestCase
-  test "compress javascript" do
+class TestClosureCompressor < MiniTest::Test
+  def test_compress_javascript
     input = {
       :data => "function foo() {\n  return true;\n}",
       :cache => Sprockets::Cache.new
@@ -16,7 +17,7 @@ class TestClosureCompressor < Sprockets::TestCase
     end
   end
 
-  test "cache key" do
+  def test_cache_key
     assert Sprockets::ClosureCompressor.cache_key
   end
 end

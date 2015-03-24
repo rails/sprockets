@@ -1,6 +1,10 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'tmpdir'
 require 'fileutils'
+require 'sprockets/cache'
+require 'sprockets/cache/file_store'
+require 'sprockets/cache/memory_store'
+require 'sprockets/cache/null_store'
 
 module CacheStoreNullTests
   def test_read
@@ -67,7 +71,7 @@ module CacheStoreTests
   end
 end
 
-class TestNullStore < Sprockets::TestCase
+class TestNullStore < MiniTest::Test
   def setup
     @_store = Sprockets::Cache::NullStore.new
     @store = Sprockets::Cache.new(Sprockets::Cache::NullStore.new)
@@ -81,7 +85,7 @@ class TestNullStore < Sprockets::TestCase
   include CacheStoreNullTests
 end
 
-class TestMemoryStore < Sprockets::TestCase
+class TestMemoryStore < MiniTest::Test
   def setup
     @_store = Sprockets::Cache::MemoryStore.new
     @store = Sprockets::Cache.new(@_store)
@@ -94,7 +98,7 @@ class TestMemoryStore < Sprockets::TestCase
   include CacheStoreTests
 end
 
-class TestZeroMemoryStore < Sprockets::TestCase
+class TestZeroMemoryStore < MiniTest::Test
   def setup
     @_store = Sprockets::Cache::MemoryStore.new(0)
     @store = Sprockets::Cache.new(@_store)
@@ -107,7 +111,7 @@ class TestZeroMemoryStore < Sprockets::TestCase
   include CacheStoreNullTests
 end
 
-class TestFileStore < Sprockets::TestCase
+class TestFileStore < MiniTest::Test
   def setup
     @root = Dir::mktmpdir "sprockets-file-store"
     @_store = Sprockets::Cache::FileStore.new(@root)
@@ -135,7 +139,7 @@ class TestFileStore < Sprockets::TestCase
   include CacheStoreTests
 end
 
-class TestZeroFileStore < Sprockets::TestCase
+class TestZeroFileStore < MiniTest::Test
   def setup
     @tmpdir = Dir::mktmpdir "sprockets-file-store-zero"
     @_store = Sprockets::Cache::FileStore.new(@tmpdir, 0)
