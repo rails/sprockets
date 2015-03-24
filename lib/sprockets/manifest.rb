@@ -121,13 +121,23 @@ module Sprockets
 
       return to_enum(__method__, *args) unless block_given?
 
-      filters = args.flatten.map { |arg| self.class.compile_match_filter(arg) }
+      paths, filters = args.flatten.partition { |arg| self.class.simple_logical_path?(arg) }
+      filters = filters.map { |arg| self.class.compile_match_filter(arg) }
 
       environment = self.environment.cached
-      environment.logical_paths do |logical_path, filename|
-        if filters.any? { |f| f.call(logical_path, filename) }
-          environment.find_all_linked_assets(filename) do |asset|
-            yield asset
+
+      paths.each do |path|
+        environment.find_all_linked_assets(path) do |asset|
+          yield asset
+        end
+      end
+
+      if filters.any?
+        environment.logical_paths do |logical_path, filename|
+          if filters.any? { |f| f.call(logical_path, filename) }
+            environment.find_all_linked_assets(filename) do |asset|
+              yield asset
+            end
           end
         end
       end
