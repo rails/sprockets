@@ -23,6 +23,55 @@ module Sprockets
       end
     end
 
+    # Public: Decode VLQ mappings and match up sources and symbol names.
+    #
+    # str     - VLQ string from 'mappings' attribute
+    # sources - Array of Strings from 'sources' attribute
+    # names   - Array of Strings from 'names' attribute
+    #
+    # Returns an Array of Mappings.
+    def decode_vlq_mappings(str, sources: [], names: [])
+      mappings = []
+
+      source_id       = 0
+      original_line   = 1
+      original_column = 0
+      name_id         = 0
+
+      vlq_decode_mappings(str).each_with_index do |group, index|
+        generated_column = 0
+        generated_line   = index + 1
+
+        group.each do |segment|
+          generated_column += segment[0]
+          generated = [generated_line, generated_column]
+
+          if segment.size >= 4
+            source_id        += segment[1]
+            original_line    += segment[2]
+            original_column  += segment[3]
+
+            source   = sources[source_id]
+            original = [original_line, original_column]
+          else
+            # TODO: Research this case
+            next
+          end
+
+          if segment[4]
+            name_id += segment[4]
+            name     = names[name_id]
+          end
+
+          mapping = {source: source, generated: generated, original: original}
+          mapping[:name] = name if name
+          mappings << mapping
+        end
+      end
+
+      mappings
+    end
+
     # Public: Encode mappings Hash into a VLQ encoded String.
     #
     # mappings - Array of Hash mapping objects
@@ -30,7 +79,7 @@ module Sprockets
     # names    - Array of String names (default: mappings name order)
     #
     # Returns a VLQ encoded String.
-    def vlq_encode_mappings_hash(mappings, sources: nil, names: nil)
+    def encode_vlq_mappings(mappings, sources: nil, names: nil)
       sources ||= mappings.map { |m| m[:source] }.uniq.compact
       names   ||= mappings.map { |m| m[:name] }.uniq.compact
 

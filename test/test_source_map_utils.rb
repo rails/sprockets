@@ -14,13 +14,32 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal(1, compare_source_offsets([5, 0], [1, 4]))
   end
 
-  def test_vlq_encode_mappings_hash
+  def test_decode_vlq_mappings
+    mappings = "AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe"
+    sources  = ["script.js"],
+    names    = ["hello", "console", "log"]
+
+    assert_equal([
+      {source: ["script.js"], generated: [1, 0], original: [3, 0], name: "hello"},
+      {source: ["script.js"], generated: [1, 8], original: [3, 9], name: "hello"},
+      {source: ["script.js"], generated: [1, 14], original: [3, 14]},
+      {source: ["script.js"], generated: [1, 16], original: [3, 17]},
+      {source: ["script.js"], generated: [1, 17], original: [4, 2], name: "console"},
+      {source: ["script.js"], generated: [1, 24], original: [4, 2], name: "log"},
+      {source: ["script.js"], generated: [1, 28], original: [4, 2]},
+      {source: ["script.js"], generated: [1, 29], original: [4, 14]},
+      {source: ["script.js"], generated: [1, 44], original: [4, 2]},
+      {source: ["script.js"], generated: [1, 45], original: [3, 17]}
+    ], decode_vlq_mappings(mappings, sources: sources, names: names))
+  end
+
+  def test_encode_vlq_mappings
     mappings = [
       {source: 'a.js', generated: [0, 0], original: [0, 0]},
       {source: 'b.js', generated: [1, 0], original: [20, 0]},
       {source: 'c.js', generated: [2, 0], original: [30, 0]}
     ]
-    assert_equal "ACmBA;ACUA", vlq_encode_mappings_hash(mappings)
+    assert_equal "ACmBA;ACUA", encode_vlq_mappings(mappings)
   end
 
   TESTS = {

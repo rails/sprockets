@@ -16,55 +16,7 @@ module Sprockets
       sources = hash['sources']
       names   = hash['names']
 
-      mappings = decode_vlq_mappings(str, sources, names)
-      new(mappings, hash['file'])
-    end
-
-    # Internal: Decode VLQ mappings and match up sources and symbol names.
-    #
-    # str     - VLQ string from 'mappings' attribute
-    # sources - Array of Strings from 'sources' attribute
-    # names   - Array of Strings from 'names' attribute
-    #
-    # Returns an Array of Mappings.
-    def self.decode_vlq_mappings(str, sources = [], names = [])
-      mappings = []
-
-      source_id       = 0
-      original_line   = 1
-      original_column = 0
-      name_id         = 0
-
-      vlq_decode_mappings(str).each_with_index do |group, index|
-        generated_column = 0
-        generated_line   = index + 1
-
-        group.each do |segment|
-          generated_column += segment[0]
-          generated = [generated_line, generated_column]
-
-          if segment.size >= 4
-            source_id        += segment[1]
-            original_line    += segment[2]
-            original_column  += segment[3]
-
-            source   = sources[source_id]
-            original = [original_line, original_column]
-          else
-            # TODO: Research this case
-            next
-          end
-
-          if segment[4]
-            name_id += segment[4]
-            name     = names[name_id]
-          end
-
-          mappings << {source: source, generated: generated, original: original, name: name}
-        end
-      end
-
-      mappings
+      new(decode_vlq_mappings(str, sources: sources, names: names), hash['file'])
     end
 
     def initialize(mappings = [], filename = nil)
@@ -72,6 +24,7 @@ module Sprockets
     end
 
     attr_reader :filename
+    attr_reader :mappings
 
     def size
       @mappings.size
@@ -86,7 +39,7 @@ module Sprockets
     end
 
     def to_s
-      vlq_encode_mappings_hash(self.mappings)
+      encode_vlq_mappings(self.mappings)
     end
 
     def sources
@@ -181,8 +134,5 @@ module Sprockets
       str << ">"
       str
     end
-
-    protected
-      attr_reader :mappings
   end
 end
