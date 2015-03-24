@@ -1,3 +1,5 @@
+require 'json'
+
 module Sprockets
   module SourceMapUtils
     extend self
@@ -44,6 +46,34 @@ module Sprockets
       when 1
         bsearch_mappings(mappings, offset, mid + 1, to)
       end
+    end
+
+    # Public: Encode mappings to Source Map JSON.
+    #
+    # mappings - Array of Hash or String VLQ encoded mappings
+    # sources  - Array of String sources
+    # names    - Array of String names
+    # filename - String filename
+    #
+    # Returns JSON String.
+    def encode_json_source_map(mappings, sources: nil, names: nil, filename: nil)
+      case mappings
+      when String
+      when Array
+        sources ||= mappings.map { |m| m[:source] }.uniq.compact
+        names   ||= mappings.map { |m| m[:name] }.uniq.compact
+        mappings = encode_vlq_mappings(mappings, sources: sources, names: names)
+      else
+        raise TypeError, "could not encode mappings: #{mappings}"
+      end
+
+      JSON.generate({
+        "version"   => 3,
+        "file"      => filename,
+        "mappings"  => mappings,
+        "sources"   => sources,
+        "names"     => names
+      })
     end
 
     # Public: Decode VLQ mappings and match up sources and symbol names.

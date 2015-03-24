@@ -27,7 +27,24 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal [20, 0], bsearch_mappings(mappings, [1, 0])[:original]
     assert_equal [30, 0], bsearch_mappings(mappings, [2, 0])[:original]
   end
-  
+
+  def test_encode_json_source_map
+    mappings_hash = [
+      {source: 'a.js', generated: [0, 0], original: [0, 0]},
+      {source: 'b.js', generated: [1, 0], original: [20, 0]},
+      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+    ]
+    mappings_str = "ACmBA;ACUA"
+
+    sources  = ["a.js", "b.js", "c.js"]
+    names    = []
+
+    assert_equal '{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}',
+      encode_json_source_map(mappings_hash, sources: sources, names: names, filename: "hello.js")
+    assert_equal '{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}',
+      encode_json_source_map(mappings_str, sources: sources, names: names, filename: "hello.js")
+  end
+
   def test_decode_vlq_mappings
     mappings = "AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe"
     sources  = ["script.js"],

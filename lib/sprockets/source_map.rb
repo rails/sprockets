@@ -1,4 +1,3 @@
-require 'json'
 require 'sprockets/source_map_utils'
 
 module Sprockets
@@ -60,20 +59,6 @@ module Sprockets
       end
 
       self.class.new(mappings, other.filename)
-    end
-
-    def as_json(*)
-      {
-        "version"   => 3,
-        "file"      => filename || "",
-        "mappings"  => encode_vlq_mappings(self.mappings, sources: self.sources, names: self.names),
-        "sources"   => self.sources,
-        "names"     => self.names
-      }
-    end
-
-    def to_json(*a)
-      as_json.to_json(*a)
     end
   end
 end

@@ -82,7 +82,7 @@ module Sprockets
           digest << obj.name
         elsif klass == SourceMap
           digest << 'SourceMap'
-          queue << obj.as_json
+          queue << obj.mappings
         else
           raise TypeError, "couldn't digest #{klass}"
         end

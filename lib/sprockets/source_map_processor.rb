@@ -25,7 +25,9 @@ module Sprockets
         links << env.load(uri).uri
       end
 
-      { data: SourceMap.new(map, asset.logical_path).to_json, links: links }
+      json = Sprockets::SourceMapUtils.encode_json_source_map(map, filename: asset.logical_path)
+
+      { data: json, links: links }
     end
   end
 end
