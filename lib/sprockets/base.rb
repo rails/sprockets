@@ -14,7 +14,7 @@ require 'sprockets/server'
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
   class Base
-    include PathUtils, PathDependencyUtils, PathDigestUtils, DigestUtils
+    include PathUtils, PathDependencyUtils, PathDigestUtils, DigestUtils, SourceMapUtils
     include Configuration
     include Server
     include Resolve, Loader
