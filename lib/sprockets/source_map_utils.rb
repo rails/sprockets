@@ -23,6 +23,29 @@ module Sprockets
       end
     end
 
+    # Public: Search Array of mappings for closest offset.
+    #
+    # mappings - Array of mapping Hash objects
+    # offset  - Array [line, column]
+    #
+    # Returns mapping Hash object.
+    def bsearch_mappings(mappings, offset, from = 0, to = mappings.size - 1)
+      mid = (from + to) / 2
+
+      if from > to
+        return from < 1 ? nil : mappings[from-1]
+      end
+
+      case compare_source_offsets(offset, mappings[mid][:generated])
+      when 0
+        mappings[mid]
+      when -1
+        bsearch_mappings(mappings, offset, from, mid - 1)
+      when 1
+        bsearch_mappings(mappings, offset, mid + 1, to)
+      end
+    end
+
     # Public: Decode VLQ mappings and match up sources and symbol names.
     #
     # str     - VLQ string from 'mappings' attribute

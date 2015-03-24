@@ -54,33 +54,12 @@ module Sprockets
       mappings = []
 
       other.mappings.each do |m|
-        om = bsearch(m[:original])
+        om = bsearch_mappings(@mappings, m[:original])
         next unless om
         mappings << om.merge(generated: m[:generated])
       end
 
       self.class.new(mappings, other.filename)
-    end
-
-    def bsearch(offset, from = 0, to = self.mappings.size - 1)
-      mid = (from + to) / 2
-
-      # We haven't found a match
-      if from > to
-        return from < 1 ? nil : self.mappings[from-1]
-      end
-
-      # We found an exact match
-      case compare_source_offsets(offset, self.mappings[mid][:generated])
-      when 0
-        self.mappings[mid]
-
-      # We need to filter more
-      when -1
-        bsearch(offset, from, mid - 1)
-      when 1
-        bsearch(offset, mid + 1, to)
-      end
     end
 
     def as_json(*)

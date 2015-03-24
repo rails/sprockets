@@ -203,14 +203,6 @@ class TestSourceMap < MiniTest::Test
     assert_equal @mappings, identity_map | @mappings
   end
 
-  def test_bsearch
-    assert_equal [0, 0], @mappings.bsearch([0, 0])[:original]
-    assert_equal [0, 0], @mappings.bsearch([0, 5])[:original]
-    assert_equal [20, 0], @mappings.bsearch([1, 0])[:original]
-    assert_equal [20, 0], @mappings.bsearch([1, 0])[:original]
-    assert_equal [30, 0], @mappings.bsearch([2, 0])[:original]
-  end
-
   def test_inspect
     assert_equal "#<Sprockets::SourceMap mappings=[\"0:0->a.js@0:0\", \"1:0->b.js@20:0\", \"2:0->c.js@30:0\"]>", @mappings.inspect
   end
