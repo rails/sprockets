@@ -2,6 +2,7 @@ require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
 require 'set'
+require 'sprockets/source_map'
 
 module Sprockets
   # Internal: Hash functions and digest related utilities. Mixed into
