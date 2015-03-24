@@ -29,10 +29,6 @@ module Sprockets
     attr_reader :mappings
     attr_reader :sources, :names
 
-    def size
-      @mappings.size
-    end
-
     def [](i)
       @mappings[i]
     end
@@ -74,7 +70,7 @@ module Sprockets
       self.class.new(mappings, other.filename)
     end
 
-    def bsearch(offset, from = 0, to = size - 1)
+    def bsearch(offset, from = 0, to = self.mappings.size - 1)
       mid = (from + to) / 2
 
       # We haven't found a match
