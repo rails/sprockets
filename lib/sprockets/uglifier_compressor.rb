@@ -60,8 +60,8 @@ module Sprockets
         @uglifier.compile_with_map(data)
       end
 
-      map = input[:metadata][:map] | SourceMap.from_json(map)
-      { data: js, map: map }
+      map = SourceMap.new(input[:metadata][:map] || []) | SourceMap.from_json(map)
+      { data: js, map: map.mappings }
     end
   end
 end

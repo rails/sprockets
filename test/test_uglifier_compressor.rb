@@ -10,7 +10,7 @@ class TestUglifierCompressor < MiniTest::Test
       data: "function foo() {\n  return true;\n}",
       cache: Sprockets::Cache.new,
       metadata: {
-        map: Sprockets::SourceMap.new
+        mapping: []
       }
     }
     output = "function foo(){return!0}"

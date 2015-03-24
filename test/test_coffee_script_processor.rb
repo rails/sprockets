@@ -10,14 +10,12 @@ class TestCoffeeScriptProcessor < MiniTest::Test
       data: "square = (n) -> n * n",
       name: 'squared',
       cache: Sprockets::Cache.new,
-      metadata: {
-        map: Sprockets::SourceMap.new
-      }
+      metadata: { mapping: [] }
     }
     result = Sprockets::CoffeeScriptProcessor.call(input)
     assert result[:data].match(/var square/)
-    assert_equal 19, result[:map].mappings.size
-    assert_equal [], result[:map].sources
+    assert_equal 19, result[:map].size
+    assert_equal [], Sprockets::SourceMap.new(result[:map]).sources
   end
 
   def test_cache_key

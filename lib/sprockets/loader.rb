@@ -115,11 +115,9 @@ module Sprockets
             content_type: type,
             metadata: {
               dependencies: dependencies,
-              map: SourceMap.new([
-                { source: source_path,
-                  generated: [0, 0],
-                  original: [0, 0] }
-              ], logical_path)
+              map: [
+                {source: source_path, generated: [0, 0], original: [0, 0]}
+              ]
             }
           })
           source = result.delete(:data)

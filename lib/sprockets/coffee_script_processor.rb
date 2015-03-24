@@ -23,8 +23,8 @@ module Sprockets
         Autoload::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
       end
 
-      map = input[:metadata][:map] | Sprockets::SourceMap.from_json(result['v3SourceMap'])
-      { data: result['js'], map: map }
+      map = SourceMap.new(input[:metadata][:map] || []) | Sprockets::SourceMap.from_json(result['v3SourceMap'])
+      { data: result['js'], map: map.mappings }
     end
   end
 end

@@ -18,14 +18,14 @@ module Sprockets
 
       uri, _ = env.resolve!(input[:filename], accept: accept)
       asset = env.load(uri)
-      map = asset.metadata[:map]
+      map = asset.metadata[:map] || []
 
-      map.sources.each do |source|
+      SourceMap.new(map).sources.each do |source|
         uri, _ = env.resolve!(source)
         links << env.load(uri).uri
       end
 
-      { data: map.to_json, links: links }
+      { data: SourceMap.new(map, asset.logical_path).to_json, links: links }
     end
   end
 end

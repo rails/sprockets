@@ -65,7 +65,7 @@ module Sprockets
     def as_json(*)
       {
         "version"   => 3,
-        "file"      => filename,
+        "file"      => filename || "",
         "mappings"  => encode_vlq_mappings(self.mappings, sources: self.sources, names: self.names),
         "sources"   => self.sources,
         "names"     => self.names
