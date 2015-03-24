@@ -116,11 +116,9 @@ module Sprockets
             metadata: {
               dependencies: dependencies,
               map: SourceMap.new([
-                SourceMap::Mapping.new(
-                  source_path,
-                  [0, 0],
-                  [0, 0]
-                )
+                { source: source_path,
+                  generated: [0, 0],
+                  original: [0, 0] }
               ], logical_path)
             }
           })

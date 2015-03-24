@@ -1,6 +1,5 @@
 require 'json'
 require 'sprockets/source_map_utils'
-require 'sprockets/source_map/mapping'
 
 module Sprockets
   class SourceMap
@@ -61,7 +60,7 @@ module Sprockets
             name     = names[name_id]
           end
 
-          mappings << Mapping.new(source, generated, original, name)
+          mappings << {source: source, generated: generated, original: original, name: name}
         end
       end
 
@@ -91,11 +90,11 @@ module Sprockets
     end
 
     def sources
-      @sources ||= @mappings.map(&:source).uniq.compact
+      @sources ||= @mappings.map { |m| m[:source] }.uniq.compact
     end
 
     def names
-      @names ||= @mappings.map(&:name).uniq.compact
+      @names ||= @mappings.map { |m| m[:name] }.uniq.compact
     end
 
     def ==(other)
@@ -110,12 +109,9 @@ module Sprockets
 
     def +(other)
       mappings = @mappings.dup
-      offset   = @mappings.any? ? @mappings.last.generated[0]+1 : 0
+      offset   = @mappings.any? ? @mappings.last[:generated][0]+1 : 0
       other.each do |m|
-        mappings << Mapping.new(
-          m.source, [m.generated[0] + offset, m.generated[1]],
-          m.original, m.name
-        )
+        mappings << m.merge(generated: [m[:generated][0] + offset, m[:generated][1]])
       end
       self.class.new(mappings, other.filename)
     end
@@ -126,13 +122,9 @@ module Sprockets
       mappings = []
 
       other.each do |m|
-        om = bsearch(m.original)
+        om = bsearch(m[:original])
         next unless om
-
-        mappings << Mapping.new(
-          om.source, m.generated,
-          om.original, om.name
-        )
+        mappings << om.merge(generated: m[:generated])
       end
 
       self.class.new(mappings, other.filename)
@@ -147,7 +139,7 @@ module Sprockets
       end
 
       # We found an exact match
-      case compare_offsets(offset, self[mid].generated)
+      case compare_offsets(offset, self[mid][:generated])
       when 0
         self[mid]
 
@@ -179,7 +171,13 @@ module Sprockets
     def inspect
       str = "#<#{self.class}"
       str << " filename=#{filename.inspect}" if filename
-      str << " mappings=#{mappings.map(&:to_s).inspect}" if mappings.any?
+      mappings = self.mappings.map { |mapping|
+        s = "#{mapping[:generated][0]}:#{mapping[:generated][1]}"
+        s << "->#{mapping[:source]}@#{mapping[:original][0]}:#{mapping[:original][1]}"
+        s << "##{mapping[:name]}" if mapping[:name]
+        s
+      }
+      str << " mappings=#{mappings.inspect}" if mappings.any?
       str << ">"
       str
     end
@@ -193,7 +191,7 @@ module Sprockets
         source_column    = 0
         name_id          = 0
 
-        by_lines = @mappings.group_by { |m| m.generated[0] }
+        by_lines = @mappings.group_by { |m| m[:generated][0] }
 
         sources_index = Hash[sources.each_with_index.to_a]
         names_index   = Hash[names.each_with_index.to_a]
@@ -203,17 +201,17 @@ module Sprockets
 
           (by_lines[line] || []).map do |mapping|
             group = []
-            group << mapping.generated[1] - generated_column
-            group << sources_index[mapping.source] - source_id
-            group << mapping.original[0] - source_line
-            group << mapping.original[1] - source_column
-            group << names_index[mapping.name] - name_id if mapping.name
+            group << mapping[:generated][1] - generated_column
+            group << sources_index[mapping[:source]] - source_id
+            group << mapping[:original][0] - source_line
+            group << mapping[:original][1] - source_column
+            group << names_index[mapping[:name]] - name_id if mapping[:name]
 
-            generated_column = mapping.generated[1]
-            source_id        = sources_index[mapping.source]
-            source_line      = mapping.original[0]
-            source_column    = mapping.original[1]
-            name_id          = names_index[mapping.name] if mapping.name
+            generated_column = mapping[:generated][1]
+            source_id        = sources_index[mapping[:source]]
+            source_line      = mapping[:original][0]
+            source_column    = mapping[:original][1]
+            name_id          = names_index[mapping[:name]] if mapping[:name]
 
             group
           end
