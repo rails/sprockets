@@ -1,4 +1,5 @@
 require 'rack/utils'
+require 'sprockets/autoload'
 require 'uri'
 
 module Sprockets

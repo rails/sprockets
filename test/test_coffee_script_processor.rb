@@ -1,9 +1,10 @@
-require 'sprockets_test'
+require 'minitest/autorun'
+require 'sprockets/cache'
 require 'sprockets/coffee_script_processor'
 require 'sprockets/source_map'
 
-class TestCoffeeScriptProcessor < Sprockets::TestCase
-  test "compile coffee-script template to js" do
+class TestCoffeeScriptProcessor < MiniTest::Test
+  def test_compile_coffee_script_template_to_js
     input = {
       content_type: 'application/javascript',
       data: "square = (n) -> n * n",
@@ -19,7 +20,7 @@ class TestCoffeeScriptProcessor < Sprockets::TestCase
     assert_equal [], result[:map].sources
   end
 
-  test "cache key" do
+  def test_cache_key
     assert Sprockets::CoffeeScriptProcessor.cache_key
   end
 end

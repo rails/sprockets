@@ -1,5 +1,4 @@
 require 'sprockets/version'
-require 'sprockets/autoload'
 require 'sprockets/cache'
 require 'sprockets/environment'
 require 'sprockets/errors'

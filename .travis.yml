@@ -9,5 +9,14 @@ rvm:
   - 2.1
   - 2.2
 
+matrix:
+  include:
+    test_isolated
+
+matrix:
+  include:
+    - rvm: 2.2
+      script: bundle exec rake test_isolated
+
 notifications:
   email: false

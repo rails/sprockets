@@ -1,8 +1,10 @@
-require 'sprockets_test'
+require 'minitest/autorun'
+require 'sprockets'
+require 'sprockets/cache'
 require 'sprockets/erb_processor'
 
-class TestERBProcessor < Sprockets::TestCase
-  test "compile js erb template" do
+class TestERBProcessor < MiniTest::Test
+  def tset_compile_js_erb_template
     environment = Sprockets::Environment.new
 
     input = {
@@ -18,11 +20,12 @@ class TestERBProcessor < Sprockets::TestCase
     assert_equal output, Sprockets::ERBProcessor.call(input)[:data]
   end
 
-  test "compile erb template with depend_on call" do
-    environment = Sprockets::Environment.new(FIXTURE_ROOT)
-    environment.append_path fixture_path('default')
+  def test_compile_erb_template_with_depend_on_call
+    root = File.expand_path("../fixtures", __FILE__)
+    environment = Sprockets::Environment.new(root)
+    environment.append_path 'default'
 
-    path = fixture_path('default/gallery.js')
+    path = "#{root}/default/gallery.js"
     input = {
       environment: environment,
       filename: "foo.js.erb",
@@ -38,7 +41,7 @@ class TestERBProcessor < Sprockets::TestCase
     assert_equal "file-digest://#{path}", result[:dependencies].first
   end
 
-  test "pass custom erb helpers to template" do
+  def test_pass_custom_erb_helpers_to_template
     environment = Sprockets::Environment.new
 
     template = Sprockets::ERBProcessor.new do

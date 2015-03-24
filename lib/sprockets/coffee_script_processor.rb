@@ -1,3 +1,4 @@
+require 'sprockets/autoload'
 require 'sprockets/source_map'
 
 module Sprockets

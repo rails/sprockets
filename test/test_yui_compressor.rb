@@ -1,9 +1,9 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/yui_compressor'
 
-class TestYUICompressor < Sprockets::TestCase
-  test "compress javascript" do
+class TestYUICompressor < MiniTest::Test
+  def test_compress_javascript
     input = {
       content_type: 'application/javascript',
       data: "function foo() {\n  return true;\n}",
@@ -18,7 +18,7 @@ class TestYUICompressor < Sprockets::TestCase
     end
   end
 
-  test "compress css" do
+  def test_compress_css
     input = {
       content_type: 'text/css',
       data: "h1 {\n  color: red;\n}\n",
@@ -33,7 +33,7 @@ class TestYUICompressor < Sprockets::TestCase
     end
   end
 
-  test "cache key" do
+  def test_cache_key
     assert Sprockets::YUICompressor.cache_key
   end
 end

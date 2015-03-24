@@ -1,3 +1,5 @@
+require 'sprockets/autoload'
+
 module Sprockets
   # Processor engine class for the EJS compiler. Depends on the `ejs` gem.
   #
