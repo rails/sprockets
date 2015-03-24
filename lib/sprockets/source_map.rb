@@ -33,10 +33,6 @@ module Sprockets
       @mappings[i]
     end
 
-    def each(&block)
-      @mappings.each(&block)
-    end
-
     def ==(other)
       eql?(other)
     end
@@ -50,7 +46,7 @@ module Sprockets
     def +(other)
       mappings = @mappings.dup
       offset   = @mappings.any? ? @mappings.last[:generated][0]+1 : 0
-      other.each do |m|
+      other.mappings.each do |m|
         mappings << m.merge(generated: [m[:generated][0] + offset, m[:generated][1]])
       end
       self.class.new(mappings, other.filename)
@@ -61,7 +57,7 @@ module Sprockets
 
       mappings = []
 
-      other.each do |m|
+      other.mappings.each do |m|
         om = bsearch(m[:original])
         next unless om
         mappings << om.merge(generated: m[:generated])
