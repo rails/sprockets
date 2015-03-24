@@ -75,22 +75,5 @@ module Sprockets
     def to_json(*a)
       as_json.to_json(*a)
     end
-
-    # Public: Get a pretty inspect output for debugging purposes.
-    #
-    # Returns a String.
-    def inspect
-      str = "#<#{self.class}"
-      str << " filename=#{filename.inspect}" if filename
-      mappings = self.mappings.map { |mapping|
-        s = "#{mapping[:generated][0]}:#{mapping[:generated][1]}"
-        s << "->#{mapping[:source]}@#{mapping[:original][0]}:#{mapping[:original][1]}"
-        s << "##{mapping[:name]}" if mapping[:name]
-        s
-      }
-      str << " mappings=#{mappings.inspect}" if mappings.any?
-      str << ">"
-      str
-    end
   end
 end

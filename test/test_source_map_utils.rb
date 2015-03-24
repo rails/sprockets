@@ -27,7 +27,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal [20, 0], bsearch_mappings(mappings, [1, 0])[:original]
     assert_equal [30, 0], bsearch_mappings(mappings, [2, 0])[:original]
   end
-
+  
   def test_decode_vlq_mappings
     mappings = "AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe"
     sources  = ["script.js"],
