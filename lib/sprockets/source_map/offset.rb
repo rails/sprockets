@@ -1,5 +1,5 @@
 module Sprockets
-  module SourceMap
+  class SourceMap
     # Public: Offset is an immutable structure representing a position in
     # a source file.
     class Offset

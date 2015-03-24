@@ -11,7 +11,7 @@ class TestCoffeeScriptProcessor < MiniTest::Test
       name: 'squared',
       cache: Sprockets::Cache.new,
       metadata: {
-        map: Sprockets::SourceMap::Map.new
+        map: Sprockets::SourceMap.new
       }
     }
     result = Sprockets::CoffeeScriptProcessor.call(input)

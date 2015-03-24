@@ -115,7 +115,7 @@ module Sprockets
             content_type: type,
             metadata: {
               dependencies: dependencies,
-              map: SourceMap::Map.new([
+              map: SourceMap.new([
                 SourceMap::Mapping.new(
                   source_path,
                   SourceMap::Offset.new(0, 0),

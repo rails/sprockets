@@ -1,8 +1,10 @@
 require 'minitest/autorun'
-require 'sprockets/source_map/map'
+require 'sprockets/source_map'
 
 class TestSourceMap < MiniTest::Test
-  include Sprockets::SourceMap
+  Map = Sprockets::SourceMap
+  Mapping = Sprockets::SourceMap::Mapping
+  Offset = Sprockets::SourceMap::Offset
 
   def setup
     @mappings = Map.new([
@@ -219,6 +221,6 @@ class TestSourceMap < MiniTest::Test
   end
 
   def test_inspect
-    assert_equal "#<Sprockets::SourceMap::Map mappings=[\"0:0->a.js@0:0\", \"1:0->b.js@20:0\", \"2:0->c.js@30:0\"]>", @mappings.inspect
+    assert_equal "#<Sprockets::SourceMap mappings=[\"0:0->a.js@0:0\", \"1:0->b.js@20:0\", \"2:0->c.js@30:0\"]>", @mappings.inspect
   end
 end

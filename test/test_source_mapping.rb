@@ -3,7 +3,8 @@ require 'sprockets/source_map/mapping'
 require 'sprockets/source_map/offset'
 
 class TestSourceMapping < MiniTest::Test
-  include Sprockets::SourceMap
+  Mapping = Sprockets::SourceMap::Mapping
+  Offset = Sprockets::SourceMap::Offset
 
   def setup
     @mapping = Mapping.new("a.js", Offset.new(1, 5), Offset.new(2, 0), "foo")

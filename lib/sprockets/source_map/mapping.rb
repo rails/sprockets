@@ -1,7 +1,7 @@
 require 'sprockets/source_map/offset'
 
 module Sprockets
-  module SourceMap
+  class SourceMap
     class Mapping < Struct.new(:source, :generated, :original, :name)
       # Public: Get a simple string representation of the mapping.
       #

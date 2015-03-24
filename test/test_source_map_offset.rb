@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require 'sprockets/source_map/offset'
 
 class TestSourceMapOffset < MiniTest::Test
-  include Sprockets::SourceMap
+  Offset = Sprockets::SourceMap::Offset
 
   def setup
     @offset = Offset.new(1, 5)
