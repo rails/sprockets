@@ -5,11 +5,12 @@ require 'sprockets/configuration'
 require 'sprockets/digest_utils'
 require 'sprockets/errors'
 require 'sprockets/loader'
-require 'sprockets/path_digest_utils'
 require 'sprockets/path_dependency_utils'
+require 'sprockets/path_digest_utils'
 require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
+require 'sprockets/source_map_utils'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
