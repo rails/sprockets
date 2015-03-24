@@ -22,7 +22,7 @@ class TestSourceMap < MiniTest::Test
     }
     map = Map.from_hash(hash)
 
-    assert mapping = map[0]
+    assert mapping = map.mappings[0]
     assert_equal 1, mapping[:generated][0]
     assert_equal 0, mapping[:generated][1]
     assert_equal 3, mapping[:original][0]
@@ -30,7 +30,7 @@ class TestSourceMap < MiniTest::Test
     assert_equal 'script.js', mapping[:source]
     assert_equal 'hello', mapping[:name]
 
-    assert mapping = map[-1]
+    assert mapping = map.mappings[-1]
     assert_equal 1, mapping[:generated][0]
     assert_equal 45, mapping[:generated][1]
     assert_equal 3, mapping[:original][0]
@@ -57,7 +57,7 @@ class TestSourceMap < MiniTest::Test
     }
     map = Map.from_hash(hash)
 
-    assert mapping = map[0]
+    assert mapping = map.mappings[0]
     assert_equal 6, mapping[:generated][0]
     assert_equal 2, mapping[:generated][1]
     assert_equal 2, mapping[:original][0]
@@ -65,7 +65,7 @@ class TestSourceMap < MiniTest::Test
     assert_equal 'example.coffee', mapping[:source]
     assert_equal 'number', mapping[:name]
 
-    assert mapping = map[-1]
+    assert mapping = map.mappings[-1]
     assert_equal 43, mapping[:generated][0]
     assert_equal 6, mapping[:generated][1]
     assert_equal 28, mapping[:original][0]
@@ -92,7 +92,7 @@ class TestSourceMap < MiniTest::Test
     }
     map = Map.from_hash(hash)
 
-    assert mapping = map[0]
+    assert mapping = map.mappings[0]
     assert_equal 1, mapping[:generated][0]
     assert_equal 0, mapping[:generated][1]
     assert_equal 2, mapping[:original][0]
@@ -100,7 +100,7 @@ class TestSourceMap < MiniTest::Test
     assert_equal 'example.js', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert mapping = map[-1]
+    assert mapping = map.mappings[-1]
     assert_equal 1, mapping[:generated][0]
     assert_equal 289, mapping[:generated][1]
     assert_equal 2, mapping[:original][0]
@@ -156,10 +156,10 @@ class TestSourceMap < MiniTest::Test
       {source: 'd.js', generated: [0, 0], original: [0, 0]}
     ])
     mappings3 = @mappings + mappings2
-    assert_equal 0, mappings3[0][:generated][0]
-    assert_equal 1, mappings3[1][:generated][0]
-    assert_equal 2, mappings3[2][:generated][0]
-    assert_equal 3, mappings3[3][:generated][0]
+    assert_equal 0, mappings3.mappings[0][:generated][0]
+    assert_equal 1, mappings3.mappings[1][:generated][0]
+    assert_equal 2, mappings3.mappings[2][:generated][0]
+    assert_equal 3, mappings3.mappings[3][:generated][0]
   end
 
   def test_add_identity

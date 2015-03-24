@@ -29,10 +29,6 @@ module Sprockets
     attr_reader :mappings
     attr_reader :sources, :names
 
-    def [](i)
-      @mappings[i]
-    end
-
     def ==(other)
       eql?(other)
     end
@@ -71,13 +67,13 @@ module Sprockets
 
       # We haven't found a match
       if from > to
-        return from < 1 ? nil : self[from-1]
+        return from < 1 ? nil : self.mappings[from-1]
       end
 
       # We found an exact match
-      case compare_source_offsets(offset, self[mid][:generated])
+      case compare_source_offsets(offset, self.mappings[mid][:generated])
       when 0
-        self[mid]
+        self.mappings[mid]
 
       # We need to filter more
       when -1
