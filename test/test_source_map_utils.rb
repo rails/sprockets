@@ -4,6 +4,155 @@ require 'sprockets/source_map_utils'
 class TestSourceMapUtils < MiniTest::Test
   include Sprockets::SourceMapUtils
 
+  def test_map
+    hash = {
+      'version' => 3,
+      'file' => "script.min.js",
+      'mappings' => "AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe",
+      'sources' => ["script.js"],
+      'names' => ["hello", "console", "log"]
+    }
+    map = hash.merge(
+      'mappings' => decode_vlq_mappings(hash['mappings'], sources: hash['sources'], names: hash['names'])
+    )
+
+    assert mapping = map['mappings'][0]
+    assert_equal 1, mapping[:generated][0]
+    assert_equal 0, mapping[:generated][1]
+    assert_equal 3, mapping[:original][0]
+    assert_equal 0, mapping[:original][1]
+    assert_equal 'script.js', mapping[:source]
+    assert_equal 'hello', mapping[:name]
+
+    assert mapping = map['mappings'][-1]
+    assert_equal 1, mapping[:generated][0]
+    assert_equal 45, mapping[:generated][1]
+    assert_equal 3, mapping[:original][0]
+    assert_equal 17, mapping[:original][1]
+    assert_equal 'script.js', mapping[:source]
+    assert_equal nil, mapping[:name]
+
+    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "script.min.js")
+  end
+
+  def test_map2
+    hash = {
+      'version' => 3,
+      'file' => "example.js",
+      'mappings' => ";;;;;EACAA;;EACAC;;EAGA;IAAA;;;EAGAC;IAAS;;;EAGTC;;EAGAC;IACE;IACA;IACA;MAAQ;;;;EAGVC;;;IACE;;;EAGF;IAAA;;;EAGAC;;;IAAQ;;MAAA",
+      'sources' => ["example.coffee"],
+      'names' => ["number", "opposite", "square", "list", "math", "race", "cubes"]
+    }
+    map = hash.merge(
+      'mappings' => decode_vlq_mappings(hash['mappings'], sources: hash['sources'], names: hash['names'])
+    )
+
+    assert mapping = map['mappings'][0]
+    assert_equal 6, mapping[:generated][0]
+    assert_equal 2, mapping[:generated][1]
+    assert_equal 2, mapping[:original][0]
+    assert_equal 0, mapping[:original][1]
+    assert_equal 'example.coffee', mapping[:source]
+    assert_equal 'number', mapping[:name]
+
+    assert mapping = map['mappings'][-1]
+    assert_equal 43, mapping[:generated][0]
+    assert_equal 6, mapping[:generated][1]
+    assert_equal 28, mapping[:original][0]
+    assert_equal 8, mapping[:original][1]
+    assert_equal 'example.coffee', mapping[:source]
+    assert_equal nil, mapping[:name]
+
+    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "example.js")
+  end
+
+  def test_map3
+    hash = {
+      'version' => 3,
+      'file' => "example.min.js",
+      'mappings' => "AACC,SAAQ,EAAG,CAAA,IACCA,CADD,CACOC,CADP,CACaC,CADb,CAC0CC,CAWpDA,EAAA,CAASA,QAAQ,CAACC,CAAD,CAAI,CACnB,MAAOA,EAAP,CAAWA,CADQ,CAIrBJ,EAAA,CAAO,CAAC,CAAD,CAAI,CAAJ,CAAO,CAAP,CAAU,CAAV,CAAa,CAAb,CAEPC,EAAA,CAAO,MACCI,IAAAC,KADD,QAEGH,CAFH,MAGCI,QAAQ,CAACH,CAAD,CAAI,CAChB,MAAOA,EAAP,CAAWD,CAAA,CAAOC,CAAP,CADK,CAHb,CAcc,YAArB,GAAI,MAAOI,MAAX,EAA8C,IAA9C,GAAoCA,KAApC,EACEC,KAAA,CAAM,YAAN,CAGO,UAAQ,EAAG,CAAA,IACdC,CADc,CACVC,CADU,CACJC,CACdA,EAAA,CAAW,EACNF,EAAA,CAAK,CAAV,KAAaC,CAAb,CAAoBX,CAAAa,OAApB,CAAiCH,CAAjC,CAAsCC,CAAtC,CAA4CD,CAAA,EAA5C,CACER,CACA,CADMF,CAAA,CAAKU,CAAL,CACN,CAAAE,CAAAE,KAAA,CAAcb,CAAAM,KAAA,CAAUL,CAAV,CAAd,CAEF,OAAOU,EAPW,CAAX,CAAA,EApCC,CAAX,CAAAG,KAAA,CA8CO,IA9CP",
+      'sources' => ["example.js"],
+      'names' => ["list","math","num","square","x","Math","sqrt","cube","elvis","alert","_i","_len","_results","length","push","call"]
+    }
+    map = hash.merge(
+      'mappings' => decode_vlq_mappings(hash['mappings'], sources: hash['sources'], names: hash['names'])
+    )
+
+    assert mapping = map['mappings'][0]
+    assert_equal 1, mapping[:generated][0]
+    assert_equal 0, mapping[:generated][1]
+    assert_equal 2, mapping[:original][0]
+    assert_equal 1, mapping[:original][1]
+    assert_equal 'example.js', mapping[:source]
+    assert_equal nil, mapping[:name]
+
+    assert mapping = map['mappings'][-1]
+    assert_equal 1, mapping[:generated][0]
+    assert_equal 289, mapping[:generated][1]
+    assert_equal 2, mapping[:original][0]
+    assert_equal 1, mapping[:original][1]
+    assert_equal 'example.js', mapping[:source]
+    assert_equal nil, mapping[:name]
+
+    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "example.min.js")
+  end
+
+  def test_add_source_maps
+    mappings = [
+      {source: 'a.js', generated: [0, 0], original: [0, 0]},
+      {source: 'b.js', generated: [1, 0], original: [20, 0]},
+      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+    ]
+
+    assert_equal mappings, add_source_maps([], mappings)
+    assert_equal mappings, add_source_maps(mappings, [])
+
+    mappings2 = [
+      {source: 'd.js', generated: [0, 0], original: [0, 0]}
+    ]
+    mappings3 = add_source_maps(mappings, mappings2)
+    assert_equal 0, mappings3[0][:generated][0]
+    assert_equal 1, mappings3[1][:generated][0]
+    assert_equal 2, mappings3[2][:generated][0]
+    assert_equal 3, mappings3[3][:generated][0]
+  end
+
+  def test_combine_source_maps
+    mappings = [
+      {source: 'a.js', generated: [0, 0], original: [0, 0]},
+      {source: 'b.js', generated: [1, 0], original: [20, 0]},
+      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+    ]
+    assert_equal mappings, combine_source_maps([], mappings)
+
+    mappings1 = decode_json_source_map(%{
+      {
+        "version": 3,
+        "file": "index.js",
+        "sourceRoot": "",
+        "sources": [
+          "index.coffee"
+        ],
+        "names": [],
+        "mappings": ";AAAA;AAAA,MAAA,IAAA;;AAAA,EAAA,IAAA,GAAO,SAAA,GAAA;WACL,KAAA,CAAM,aAAN,EADK;EAAA,CAAP,CAAA;;AAGA,EAAA,IAAW,IAAX;AAAA,IAAG,IAAH,CAAA,CAAA,CAAA;GAHA;AAAA"
+      }
+    })["mappings"]
+
+    mappings2 = decode_json_source_map(%{
+      {
+        "version":3,
+        "file":"index.min.js",
+        "sources":["index.js"],
+        "names":["test","alert","call","this"],
+        "mappings":"CACA,WACE,GAAIA,KAEJA,MAAO,WACL,MAAOC,OAAM,eAGf,IAAI,KAAM,CACRD,SAGDE,KAAKC"
+      }
+    })["mappings"]
+
+    mappings3 = combine_source_maps(mappings1, mappings2)
+    assert_equal 'CAAA,WAAA,GAAA,KAAA,MAAO,WAAA,MACL,OAAM,eAER,IAAW,KAAX,CAAG,SAHH,KAAA',
+      encode_vlq_mappings(mappings3)
+  end
+
   def test_compare_offsets
     assert_equal(0, compare_source_offsets([1, 5], [1, 5]))
     assert_equal(-1, compare_source_offsets([1, 5], [2, 0]))
@@ -26,6 +175,19 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal [20, 0], bsearch_mappings(mappings, [1, 0])[:original]
     assert_equal [20, 0], bsearch_mappings(mappings, [1, 0])[:original]
     assert_equal [30, 0], bsearch_mappings(mappings, [2, 0])[:original]
+  end
+
+  def test_decode_json_source_map
+    assert_equal({
+      "version" => 3,
+      "file" => "hello.js",
+      "mappings" => [
+        {source: 'b.js', generated: [1, 0], original: [20, 0]},
+        {source: 'c.js', generated: [2, 0], original: [30, 0]}
+      ],
+      "sources" => ["a.js", "b.js", "c.js"],
+      "names" => []
+    }, decode_json_source_map('{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}'))
   end
 
   def test_encode_json_source_map

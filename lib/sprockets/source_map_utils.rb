@@ -4,6 +4,32 @@ module Sprockets
   module SourceMapUtils
     extend self
 
+    # TODO: Document
+    def add_source_maps(a, b)
+      mappings = a.dup
+      offset   = a.any? ? a.last[:generated][0]+1 : 0
+      b.each do |m|
+        mappings << m.merge(generated: [m[:generated][0] + offset, m[:generated][1]])
+      end
+      mappings
+    end
+
+    # TODO: Document
+    def combine_source_maps(a, b)
+      a ||= []
+      return b.dup if a.empty?
+
+      mappings = []
+
+      b.each do |m|
+        om = bsearch_mappings(a, m[:original])
+        next unless om
+        mappings << om.merge(generated: m[:generated])
+      end
+
+      mappings
+    end
+
     # Public: Compare two source map offsets.
     #
     # Compatible with Array#sort.
@@ -46,6 +72,17 @@ module Sprockets
       when 1
         bsearch_mappings(mappings, offset, mid + 1, to)
       end
+    end
+
+    # Public: Decode Source Map JSON into Ruby objects.
+    #
+    # json - String source map JSON
+    #
+    # Returns Hash.
+    def decode_json_source_map(json)
+      map = JSON.parse(json)
+      map['mappings'] = decode_vlq_mappings(map['mappings'], sources: map['sources'], names: map['names'])
+      map
     end
 
     # Public: Encode mappings to Source Map JSON.

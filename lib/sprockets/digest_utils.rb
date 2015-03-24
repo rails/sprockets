@@ -2,7 +2,6 @@ require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
 require 'set'
-require 'sprockets/source_map'
 
 module Sprockets
   # Internal: Hash functions and digest related utilities. Mixed into
@@ -80,9 +79,6 @@ module Sprockets
         elsif klass == Encoding
           digest << 'Encoding'
           digest << obj.name
-        elsif klass == SourceMap
-          digest << 'SourceMap'
-          queue << obj.mappings
         else
           raise TypeError, "couldn't digest #{klass}"
         end

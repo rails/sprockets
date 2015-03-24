@@ -7,7 +7,6 @@ require 'sprockets/path_utils'
 require 'sprockets/processing'
 require 'sprockets/processor_utils'
 require 'sprockets/resolve'
-require 'sprockets/source_map'
 require 'sprockets/transformers'
 require 'sprockets/uri_utils'
 

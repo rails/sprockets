@@ -1,5 +1,5 @@
 require 'sprockets/autoload'
-require 'sprockets/source_map'
+require 'sprockets/source_map_utils'
 
 module Sprockets
   # Processor engine class for the CoffeeScript compiler.
@@ -19,12 +19,13 @@ module Sprockets
     def self.call(input)
       data = input[:data]
 
-      result = input[:cache].fetch(self.cache_key + [data]) do
-        Autoload::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
+      js, map = input[:cache].fetch(self.cache_key + [data]) do
+        result = Autoload::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
+        [result['js'], SourceMapUtils.decode_json_source_map(result['v3SourceMap'])['mappings']]
       end
 
-      map = SourceMap.new(input[:metadata][:map] || []) | Sprockets::SourceMap.from_json(result['v3SourceMap'])
-      { data: result['js'], map: map.mappings }
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
+      { data: js, map: map }
     end
   end
 end

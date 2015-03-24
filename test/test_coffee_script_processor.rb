@@ -1,7 +1,6 @@
 require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/coffee_script_processor'
-require 'sprockets/source_map'
 
 class TestCoffeeScriptProcessor < MiniTest::Test
   def test_compile_coffee_script_template_to_js

@@ -1,6 +1,5 @@
 require 'minitest/autorun'
 require 'sprockets/cache'
-require 'sprockets/source_map'
 require 'sprockets/uglifier_compressor'
 
 class TestUglifierCompressor < MiniTest::Test
