@@ -1,3 +1,5 @@
+require 'sprockets/autoload'
+
 module Sprockets
   # Public: Sass CSS minifier.
   #

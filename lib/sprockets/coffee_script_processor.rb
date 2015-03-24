@@ -1,3 +1,5 @@
+require 'sprockets/autoload'
+
 module Sprockets
   # Processor engine class for the CoffeeScript compiler.
   # Depends on the `coffee-script` and `coffee-script-source` gems.

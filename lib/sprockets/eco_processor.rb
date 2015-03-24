@@ -1,3 +1,5 @@
+require 'sprockets/autoload'
+
 module Sprockets
   # Processor engine class for the Eco compiler. Depends on the `eco` gem.
   #
