@@ -16,7 +16,8 @@ matrix:
 
 matrix:
   include:
-    - script: bundle exec rake test_isolated
+    - rvm: 2.2
+      script: bundle exec rake test_isolated
 
 notifications:
   email: false
