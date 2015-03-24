@@ -5,13 +5,22 @@ class TestSourceMapUtils < MiniTest::Test
   include Sprockets::SourceMapUtils
 
   def test_compare_offsets
-    assert_equal(0, compare_offsets([1, 5], [1, 5]))
-    assert_equal(-1, compare_offsets([1, 5], [2, 0]))
-    assert_equal(-1, compare_offsets([1, 5], [1, 6]))
-    assert_equal(-1, compare_offsets([1, 5], [5, 6]))
-    assert_equal(1, compare_offsets([1, 5], [1, 4]))
-    assert_equal(1, compare_offsets([2, 0], [1, 4]))
-    assert_equal(1, compare_offsets([5, 0], [1, 4]))
+    assert_equal(0, compare_source_offsets([1, 5], [1, 5]))
+    assert_equal(-1, compare_source_offsets([1, 5], [2, 0]))
+    assert_equal(-1, compare_source_offsets([1, 5], [1, 6]))
+    assert_equal(-1, compare_source_offsets([1, 5], [5, 6]))
+    assert_equal(1, compare_source_offsets([1, 5], [1, 4]))
+    assert_equal(1, compare_source_offsets([2, 0], [1, 4]))
+    assert_equal(1, compare_source_offsets([5, 0], [1, 4]))
+  end
+
+  def test_vlq_encode_mappings_hash
+    mappings = [
+      {source: 'a.js', generated: [0, 0], original: [0, 0]},
+      {source: 'b.js', generated: [1, 0], original: [20, 0]},
+      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+    ]
+    assert_equal "ACmBA;ACUA", vlq_encode_mappings_hash(mappings)
   end
 
   TESTS = {

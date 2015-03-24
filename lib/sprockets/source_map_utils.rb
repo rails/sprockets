@@ -10,7 +10,7 @@ module Sprockets
     # b - Array [line, column]
     #
     # Returns -1 if a < b, 0 if a == b and 1 if a > b.
-    def compare_offsets(a, b)
+    def compare_source_offsets(a, b)
       diff = a[0] - b[0]
       diff = a[1] - b[1] if diff == 0
 
@@ -21,6 +21,51 @@ module Sprockets
       else
         0
       end
+    end
+
+    # Public: Encode mappings Hash into a VLQ encoded String.
+    #
+    # mappings - Array of Hash mapping objects
+    # sources  - Array of String sources (default: mappings source order)
+    # names    - Array of String names (default: mappings name order)
+    #
+    # Returns a VLQ encoded String.
+    def vlq_encode_mappings_hash(mappings, sources: nil, names: nil)
+      sources ||= mappings.map { |m| m[:source] }.uniq.compact
+      names   ||= mappings.map { |m| m[:name] }.uniq.compact
+
+      sources_index = Hash[sources.each_with_index.to_a]
+      names_index   = Hash[names.each_with_index.to_a]
+
+      source_id     = 0
+      source_line   = 1
+      source_column = 0
+      name_id       = 0
+
+      by_lines = mappings.group_by { |m| m[:generated][0] }
+
+      ary = (1..(by_lines.keys.max || 1)).map do |line|
+        generated_column = 0
+
+        (by_lines[line] || []).map do |mapping|
+          group = []
+          group << mapping[:generated][1] - generated_column
+          group << sources_index[mapping[:source]] - source_id
+          group << mapping[:original][0] - source_line
+          group << mapping[:original][1] - source_column
+          group << names_index[mapping[:name]] - name_id if mapping[:name]
+
+          generated_column = mapping[:generated][1]
+          source_id        = sources_index[mapping[:source]]
+          source_line      = mapping[:original][0]
+          source_column    = mapping[:original][1]
+          name_id          = names_index[mapping[:name]] if mapping[:name]
+
+          group
+        end
+      end
+
+      vlq_encode_mappings(ary)
     end
 
     # Public: Base64 VLQ encoding

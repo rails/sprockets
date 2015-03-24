@@ -86,7 +86,7 @@ module Sprockets
     end
 
     def to_s
-      @string ||= build_vlq_string
+      vlq_encode_mappings_hash(self.mappings)
     end
 
     def sources
@@ -139,7 +139,7 @@ module Sprockets
       end
 
       # We found an exact match
-      case compare_offsets(offset, self[mid][:generated])
+      case compare_source_offsets(offset, self[mid][:generated])
       when 0
         self[mid]
 
@@ -184,40 +184,5 @@ module Sprockets
 
     protected
       attr_reader :mappings
-
-      def build_vlq_string
-        source_id        = 0
-        source_line      = 1
-        source_column    = 0
-        name_id          = 0
-
-        by_lines = @mappings.group_by { |m| m[:generated][0] }
-
-        sources_index = Hash[sources.each_with_index.to_a]
-        names_index   = Hash[names.each_with_index.to_a]
-
-        ary = (1..(by_lines.keys.max || 1)).map do |line|
-          generated_column = 0
-
-          (by_lines[line] || []).map do |mapping|
-            group = []
-            group << mapping[:generated][1] - generated_column
-            group << sources_index[mapping[:source]] - source_id
-            group << mapping[:original][0] - source_line
-            group << mapping[:original][1] - source_column
-            group << names_index[mapping[:name]] - name_id if mapping[:name]
-
-            generated_column = mapping[:generated][1]
-            source_id        = sources_index[mapping[:source]]
-            source_line      = mapping[:original][0]
-            source_column    = mapping[:original][1]
-            name_id          = names_index[mapping[:name]] if mapping[:name]
-
-            group
-          end
-        end
-
-        vlq_encode_mappings(ary)
-      end
   end
 end
