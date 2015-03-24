@@ -2,6 +2,27 @@ module Sprockets
   module SourceMapUtils
     extend self
 
+    # Public: Compare two source map offsets.
+    #
+    # Compatible with Array#sort.
+    #
+    # a - Array [line, column]
+    # b - Array [line, column]
+    #
+    # Returns -1 if a < b, 0 if a == b and 1 if a > b.
+    def compare_offsets(a, b)
+      diff = a[0] - b[0]
+      diff = a[1] - b[1] if diff == 0
+
+      if diff < 0
+        -1
+      elsif diff > 0
+        1
+      else
+        0
+      end
+    end
+
     # Public: Base64 VLQ encoding
     #
     # Adopted from ConradIrwin/ruby-source_map

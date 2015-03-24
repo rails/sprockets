@@ -118,8 +118,8 @@ module Sprockets
               map: SourceMap.new([
                 SourceMap::Mapping.new(
                   source_path,
-                  SourceMap::Offset.new(0, 0),
-                  SourceMap::Offset.new(0, 0)
+                  [0, 0],
+                  [0, 0]
                 )
               ], logical_path)
             }

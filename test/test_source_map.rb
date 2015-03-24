@@ -4,13 +4,12 @@ require 'sprockets/source_map'
 class TestSourceMap < MiniTest::Test
   Map = Sprockets::SourceMap
   Mapping = Sprockets::SourceMap::Mapping
-  Offset = Sprockets::SourceMap::Offset
 
   def setup
     @mappings = Map.new([
-      Mapping.new('a.js', Offset.new(0, 0), Offset.new(0, 0)),
-      Mapping.new('b.js', Offset.new(1, 0), Offset.new(20, 0)),
-      Mapping.new('c.js', Offset.new(2, 0), Offset.new(30, 0))
+      Mapping.new('a.js', [0, 0], [0, 0]),
+      Mapping.new('b.js', [1, 0], [20, 0]),
+      Mapping.new('c.js', [2, 0], [30, 0])
     ])
   end
 
@@ -25,18 +24,18 @@ class TestSourceMap < MiniTest::Test
     map = Map.from_hash(hash)
 
     assert mapping = map[0]
-    assert_equal 1, mapping.generated.line
-    assert_equal 0, mapping.generated.column
-    assert_equal 3, mapping.original.line
-    assert_equal 0, mapping.original.column
+    assert_equal 1, mapping.generated[0]
+    assert_equal 0, mapping.generated[1]
+    assert_equal 3, mapping.original[0]
+    assert_equal 0, mapping.original[1]
     assert_equal 'script.js', mapping.source
     assert_equal 'hello', mapping.name
 
     assert mapping = map[-1]
-    assert_equal 1, mapping.generated.line
-    assert_equal 45, mapping.generated.column
-    assert_equal 3, mapping.original.line
-    assert_equal 17, mapping.original.column
+    assert_equal 1, mapping.generated[0]
+    assert_equal 45, mapping.generated[1]
+    assert_equal 3, mapping.original[0]
+    assert_equal 17, mapping.original[1]
     assert_equal 'script.js', mapping.source
     assert_equal nil, mapping.name
 
@@ -60,18 +59,18 @@ class TestSourceMap < MiniTest::Test
     map = Map.from_hash(hash)
 
     assert mapping = map[0]
-    assert_equal 6, mapping.generated.line
-    assert_equal 2, mapping.generated.column
-    assert_equal 2, mapping.original.line
-    assert_equal 0, mapping.original.column
+    assert_equal 6, mapping.generated[0]
+    assert_equal 2, mapping.generated[1]
+    assert_equal 2, mapping.original[0]
+    assert_equal 0, mapping.original[1]
     assert_equal 'example.coffee', mapping.source
     assert_equal 'number', mapping.name
 
     assert mapping = map[-1]
-    assert_equal 43, mapping.generated.line
-    assert_equal 6, mapping.generated.column
-    assert_equal 28, mapping.original.line
-    assert_equal 8, mapping.original.column
+    assert_equal 43, mapping.generated[0]
+    assert_equal 6, mapping.generated[1]
+    assert_equal 28, mapping.original[0]
+    assert_equal 8, mapping.original[1]
     assert_equal 'example.coffee', mapping.source
     assert_equal nil, mapping.name
 
@@ -91,18 +90,18 @@ class TestSourceMap < MiniTest::Test
     map = Map.from_hash(hash)
 
     assert mapping = map[0]
-    assert_equal 1, mapping.generated.line
-    assert_equal 0, mapping.generated.column
-    assert_equal 2, mapping.original.line
-    assert_equal 1, mapping.original.column
+    assert_equal 1, mapping.generated[0]
+    assert_equal 0, mapping.generated[1]
+    assert_equal 2, mapping.original[0]
+    assert_equal 1, mapping.original[1]
     assert_equal 'example.js', mapping.source
     assert_equal nil, mapping.name
 
     assert mapping = map[-1]
-    assert_equal 1, mapping.generated.line
-    assert_equal 289, mapping.generated.column
-    assert_equal 2, mapping.original.line
-    assert_equal 1, mapping.original.column
+    assert_equal 1, mapping.generated[0]
+    assert_equal 289, mapping.generated[1]
+    assert_equal 2, mapping.original[0]
+    assert_equal 1, mapping.original[1]
     assert_equal 'example.js', mapping.source
     assert_equal nil, mapping.name
 
@@ -130,23 +129,23 @@ class TestSourceMap < MiniTest::Test
     map1 = @mappings
     map2 = @mappings.dup
     map3 = Map.new([
-      Mapping.new('a.js', Offset.new(0, 0), Offset.new(0, 0)),
-      Mapping.new('b.js', Offset.new(1, 0), Offset.new(20, 0)),
-      Mapping.new('c.js', Offset.new(2, 0), Offset.new(30, 0))
+      Mapping.new('a.js', [0, 0], [0, 0]),
+      Mapping.new('b.js', [1, 0], [20, 0]),
+      Mapping.new('c.js', [2, 0], [30, 0])
     ])
     map4 = Map.new
     map5 = Map.new([
-      Mapping.new('a.js', Offset.new(0, 0), Offset.new(0, 0))
+      Mapping.new('a.js', [0, 0], [0, 0])
     ])
     map6 = Map.new([
-      Mapping.new('a.js', Offset.new(0, 0), Offset.new(0, 0)),
-      Mapping.new('b.js', Offset.new(1, 0), Offset.new(20, 0)),
-      Mapping.new('z.js', Offset.new(2, 0), Offset.new(30, 0))
+      Mapping.new('a.js', [0, 0], [0, 0]),
+      Mapping.new('b.js', [1, 0], [20, 0]),
+      Mapping.new('z.js', [2, 0], [30, 0])
     ])
     map7 = Map.new([
-      Mapping.new('a.js', Offset.new(0, 0), Offset.new(0, 0)),
-      Mapping.new('b.js', Offset.new(1, 0), Offset.new(20, 0)),
-      Mapping.new('c.js', Offset.new(2, 0), Offset.new(30, 0))
+      Mapping.new('a.js', [0, 0], [0, 0]),
+      Mapping.new('b.js', [1, 0], [20, 0]),
+      Mapping.new('c.js', [2, 0], [30, 0])
     ], 'bar.js')
 
     assert map1.eql?(map1)
@@ -162,13 +161,13 @@ class TestSourceMap < MiniTest::Test
 
   def test_add
     mappings2 = Map.new([
-      Mapping.new('d.js', Offset.new(0, 0), Offset.new(0, 0))
+      Mapping.new('d.js', [0, 0], [0, 0])
     ])
     mappings3 = @mappings + mappings2
-    assert_equal 0, mappings3[0].generated.line
-    assert_equal 1, mappings3[1].generated.line
-    assert_equal 2, mappings3[2].generated.line
-    assert_equal 3, mappings3[3].generated.line
+    assert_equal 0, mappings3[0].generated[0]
+    assert_equal 1, mappings3[1].generated[0]
+    assert_equal 2, mappings3[2].generated[0]
+    assert_equal 3, mappings3[3].generated[0]
   end
 
   def test_add_identity
@@ -213,11 +212,11 @@ class TestSourceMap < MiniTest::Test
   end
 
   def test_bsearch
-    assert_equal Offset.new(0, 0), @mappings.bsearch(Offset.new(0, 0)).original
-    assert_equal Offset.new(0, 0), @mappings.bsearch(Offset.new(0, 5)).original
-    assert_equal Offset.new(20, 0), @mappings.bsearch(Offset.new(1, 0)).original
-    assert_equal Offset.new(20, 0), @mappings.bsearch(Offset.new(1, 0)).original
-    assert_equal Offset.new(30, 0), @mappings.bsearch(Offset.new(2, 0)).original
+    assert_equal [0, 0], @mappings.bsearch([0, 0]).original
+    assert_equal [0, 0], @mappings.bsearch([0, 5]).original
+    assert_equal [20, 0], @mappings.bsearch([1, 0]).original
+    assert_equal [20, 0], @mappings.bsearch([1, 0]).original
+    assert_equal [30, 0], @mappings.bsearch([2, 0]).original
   end
 
   def test_inspect

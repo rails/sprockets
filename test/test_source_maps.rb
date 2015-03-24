@@ -22,7 +22,7 @@ class TestSourceMaps < Sprockets::TestCase
 
     asset = @env['application.js']
     map = asset.metadata[:map]
-    assert map.all? {|mapping| mapping.generated.line == 1 }
+    assert map.all? {|mapping| mapping.generated[0] == 1 }
     assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), map.sources
   end
 

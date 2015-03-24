@@ -4,6 +4,16 @@ require 'sprockets/source_map_utils'
 class TestSourceMapUtils < MiniTest::Test
   include Sprockets::SourceMapUtils
 
+  def test_compare_offsets
+    assert_equal(0, compare_offsets([1, 5], [1, 5]))
+    assert_equal(-1, compare_offsets([1, 5], [2, 0]))
+    assert_equal(-1, compare_offsets([1, 5], [1, 6]))
+    assert_equal(-1, compare_offsets([1, 5], [5, 6]))
+    assert_equal(1, compare_offsets([1, 5], [1, 4]))
+    assert_equal(1, compare_offsets([2, 0], [1, 4]))
+    assert_equal(1, compare_offsets([5, 0], [1, 4]))
+  end
+
   TESTS = {
     'A'          => [0],
     'C'          => [1],

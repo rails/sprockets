@@ -1,7 +1,6 @@
 require 'json'
 require 'sprockets/source_map_utils'
 require 'sprockets/source_map/mapping'
-require 'sprockets/source_map/offset'
 
 module Sprockets
   class SourceMap
@@ -43,7 +42,7 @@ module Sprockets
 
         group.each do |segment|
           generated_column += segment[0]
-          generated = Offset.new(generated_line, generated_column)
+          generated = [generated_line, generated_column]
 
           if segment.size >= 4
             source_id        += segment[1]
@@ -51,7 +50,7 @@ module Sprockets
             original_column  += segment[3]
 
             source   = sources[source_id]
-            original = Offset.new(original_line, original_column)
+            original = [original_line, original_column]
           else
             # TODO: Research this case
             next
@@ -111,10 +110,10 @@ module Sprockets
 
     def +(other)
       mappings = @mappings.dup
-      offset   = @mappings.any? ? @mappings.last.generated.line+1 : 0
+      offset   = @mappings.any? ? @mappings.last.generated[0]+1 : 0
       other.each do |m|
         mappings << Mapping.new(
-          m.source, m.generated + offset,
+          m.source, [m.generated[0] + offset, m.generated[1]],
           m.original, m.name
         )
       end
@@ -148,13 +147,14 @@ module Sprockets
       end
 
       # We found an exact match
-      if offset == self[mid].generated
+      case compare_offsets(offset, self[mid].generated)
+      when 0
         self[mid]
 
       # We need to filter more
-      elsif offset < self[mid].generated
+      when -1
         bsearch(offset, from, mid - 1)
-      elsif offset > self[mid].generated
+      when 1
         bsearch(offset, mid + 1, to)
       end
     end
@@ -193,7 +193,7 @@ module Sprockets
         source_column    = 0
         name_id          = 0
 
-        by_lines = @mappings.group_by { |m| m.generated.line }
+        by_lines = @mappings.group_by { |m| m.generated[0] }
 
         sources_index = Hash[sources.each_with_index.to_a]
         names_index   = Hash[names.each_with_index.to_a]
@@ -203,16 +203,16 @@ module Sprockets
 
           (by_lines[line] || []).map do |mapping|
             group = []
-            group << mapping.generated.column - generated_column
+            group << mapping.generated[1] - generated_column
             group << sources_index[mapping.source] - source_id
-            group << mapping.original.line - source_line
-            group << mapping.original.column - source_column
+            group << mapping.original[0] - source_line
+            group << mapping.original[1] - source_column
             group << names_index[mapping.name] - name_id if mapping.name
 
-            generated_column = mapping.generated.column
+            generated_column = mapping.generated[1]
             source_id        = sources_index[mapping.source]
-            source_line      = mapping.original.line
-            source_column    = mapping.original.column
+            source_line      = mapping.original[0]
+            source_column    = mapping.original[1]
             name_id          = names_index[mapping.name] if mapping.name
 
             group

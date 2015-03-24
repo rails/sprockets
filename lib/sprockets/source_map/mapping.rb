@@ -1,5 +1,3 @@
-require 'sprockets/source_map/offset'
-
 module Sprockets
   class SourceMap
     class Mapping < Struct.new(:source, :generated, :original, :name)
@@ -7,20 +5,9 @@ module Sprockets
       #
       # Returns a String.
       def to_s
-        str = "#{generated.line}:#{generated.column}"
-        str << "->#{source}@#{original.line}:#{original.column}"
+        str = "#{generated[0]}:#{generated[1]}"
+        str << "->#{source}@#{original[0]}:#{original[1]}"
         str << "##{name}" if name
-        str
-      end
-
-      # Public: Get a pretty inspect output for debugging purposes.
-      #
-      # Returns a String.
-      def inspect
-        str = "#<#{self.class} source=#{source.inspect}"
-        str << " generated=#{generated}, original=#{original}"
-        str << " name=#{name.inspect}" if name
-        str << ">"
         str
       end
     end

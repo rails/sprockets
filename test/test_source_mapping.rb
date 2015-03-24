@@ -1,21 +1,19 @@
 require 'minitest/autorun'
 require 'sprockets/source_map/mapping'
-require 'sprockets/source_map/offset'
 
 class TestSourceMapping < MiniTest::Test
   Mapping = Sprockets::SourceMap::Mapping
-  Offset = Sprockets::SourceMap::Offset
 
   def setup
-    @mapping = Mapping.new("a.js", Offset.new(1, 5), Offset.new(2, 0), "foo")
+    @mapping = Mapping.new("a.js", [1, 5], [2, 0], "foo")
   end
 
   def test_equal
     assert @mapping.dup == @mapping
-    assert Mapping.new("b.js", Offset.new(1, 5), Offset.new(2, 0), "foo") != @mapping
-    assert Mapping.new("a.js", Offset.new(1, 5), Offset.new(2, 0), "bar") != @mapping
-    assert Mapping.new("a.js", Offset.new(1, 6), Offset.new(2, 0), "foo") != @mapping
-    assert Mapping.new("a.js", Offset.new(1, 5), Offset.new(3, 0), "foo") != @mapping
+    assert Mapping.new("b.js", [1, 5], [2, 0], "foo") != @mapping
+    assert Mapping.new("a.js", [1, 5], [2, 0], "bar") != @mapping
+    assert Mapping.new("a.js", [1, 6], [2, 0], "foo") != @mapping
+    assert Mapping.new("a.js", [1, 5], [3, 0], "foo") != @mapping
   end
 
   def test_source
@@ -23,11 +21,11 @@ class TestSourceMapping < MiniTest::Test
   end
 
   def test_generated
-    assert_equal Offset.new(1, 5), @mapping.generated
+    assert_equal [1, 5], @mapping.generated
   end
 
   def test_original
-    assert_equal Offset.new(2, 0), @mapping.original
+    assert_equal [2, 0], @mapping.original
   end
 
   def test_name
@@ -36,9 +34,5 @@ class TestSourceMapping < MiniTest::Test
 
   def test_to_s
     assert_equal "1:5->a.js@2:0#foo", @mapping.to_s
-  end
-
-  def test_inspect
-    assert_equal "#<Sprockets::SourceMap::Mapping source=\"a.js\" generated=1:5, original=2 name=\"foo\">", @mapping.inspect
   end
 end
