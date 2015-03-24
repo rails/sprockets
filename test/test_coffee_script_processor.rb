@@ -15,7 +15,7 @@ class TestCoffeeScriptProcessor < MiniTest::Test
     result = Sprockets::CoffeeScriptProcessor.call(input)
     assert result[:data].match(/var square/)
     assert_equal 19, result[:map].size
-    assert_equal [], Sprockets::SourceMap.new(result[:map]).sources
+    assert_equal [], result[:map].map { |m| m[:source] }.uniq.compact
   end
 
   def test_cache_key

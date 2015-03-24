@@ -20,13 +20,10 @@ module Sprockets
 
     def initialize(mappings = [], filename = nil)
       @mappings, @filename = mappings, filename
-      @sources = @mappings.map { |m| m[:source] }.uniq.compact
-      @names   = @mappings.map { |m| m[:name] }.uniq.compact
     end
 
     attr_reader :filename
     attr_reader :mappings
-    attr_reader :sources, :names
 
     def ==(other)
       eql?(other)

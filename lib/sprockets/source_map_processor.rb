@@ -20,7 +20,7 @@ module Sprockets
       asset = env.load(uri)
       map = asset.metadata[:map] || []
 
-      SourceMap.new(map).sources.each do |source|
+      map.map { |m| m[:source] }.uniq.compact.each do |source|
         uri, _ = env.resolve!(source)
         links << env.load(uri).uri
       end

@@ -13,8 +13,8 @@ class TestSourceMaps < Sprockets::TestCase
 
   test "builds a source map for js files" do
     asset = @env['child.js']
-    map = Sprockets::SourceMap.new(asset.metadata[:map])
-    assert_equal ['child.source.js'], map.sources
+    map = asset.metadata[:map]
+    assert_equal ['child.source.js'], map.map { |m| m[:source] }.uniq.compact
   end
 
   test "builds a minified source map" do
@@ -23,13 +23,13 @@ class TestSourceMaps < Sprockets::TestCase
     asset = @env['application.js']
     map = asset.metadata[:map]
     assert map.all? { |mapping| mapping[:generated][0] == 1 }
-    # assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), Sprockets::SourceMap.new(map).sources
+    # assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), map.map { |m| m[:source] }.uniq.compact
   end
 
   test "builds a source map with js dependency" do
     asset = @env['parent.js']
     map = asset.metadata[:map]
-    assert_equal %w(child.source.js users.source.coffee parent.source.js), Sprockets::SourceMap.new(map).sources
+    assert_equal %w(child.source.js users.source.coffee parent.source.js), map.map { |m| m[:source] }.uniq.compact
   end
 
   test "compile coffeescript source map" do
