@@ -1,6 +1,6 @@
-require 'sprockets_test'
+require 'minitest/autorun'
 
-class TestRequire < Sprockets::TestCase
+class TestRequire < MiniTest::Test
   parallelize_me!
 
   ROOT = File.expand_path("../..", __FILE__)
@@ -8,7 +8,7 @@ class TestRequire < Sprockets::TestCase
   Dir["#{ROOT}/lib/**/*.rb"].each do |fn|
     next if File.basename(fn) == "version.rb"
 
-    test "require individual library files #{fn}" do
+    define_method "test_require_individual_library_files: #{fn}" do
       system "ruby", fn
       assert $?.success?, "Failed to load #{fn.inspect}"
     end
