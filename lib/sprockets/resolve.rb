@@ -151,12 +151,9 @@ module Sprockets
       end
 
       def path_matches(load_path, logical_name, logical_basename)
-        candidates, deps = [], Set.new
-        dirname = File.dirname(File.join(load_path, logical_name))
-
-        result = dirname_matches(dirname, logical_basename)
-        candidates.concat(result[0])
-        deps.merge(result[1])
+        dirname    = File.dirname(File.join(load_path, logical_name))
+        candidates = dirname_matches(dirname, logical_basename)
+        deps       = dependency_set(dirname)
 
         result = resolve_alternates(load_path, logical_name)
         result[0].each do |fn|
@@ -164,23 +161,24 @@ module Sprockets
         end
         deps.merge(result[1])
 
-        result = dirname_matches(File.join(load_path, logical_name), "index")
-        candidates.concat(result[0])
-        deps.merge(result[1])
+        dirname = File.join(load_path, logical_name)
+        result = dirname_matches(dirname, "index")
+        candidates.concat(result)
+        deps.merge(dependency_set(dirname))
 
         return candidates.select { |fn, _| file?(fn) }, deps
       end
 
       def dirname_matches(dirname, basename)
         candidates = []
-        entries, deps = self.entries_with_dependencies(dirname)
+        entries = self.entries(dirname)
         entries.each do |entry|
           name, type, _, _ = parse_path_extnames(entry)
           if basename == name
             candidates << [File.join(dirname, entry), type]
           end
         end
-        return candidates, deps
+        candidates
       end
 
       def resolve_alternates(load_path, logical_name)
