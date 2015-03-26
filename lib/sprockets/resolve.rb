@@ -162,8 +162,11 @@ module Sprockets
         deps.merge(result[1])
 
         dirname = File.join(load_path, logical_name)
-        result = dirname_matches(dirname, "index")
-        candidates.concat(result)
+        if directory? dirname
+          result = dirname_matches(dirname, "index")
+          candidates.concat(result)
+        end
+
         deps.merge(file_digest_dependency_set(dirname))
 
         return candidates.select { |fn, _| file?(fn) }, deps
