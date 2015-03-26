@@ -150,7 +150,7 @@ module Sprockets
       def path_matches(load_path, logical_name, logical_basename)
         dirname    = File.dirname(File.join(load_path, logical_name))
         candidates = dirname_matches(dirname, logical_basename)
-        deps       = dependency_set(dirname)
+        deps       = file_digest_dependency_set(dirname)
 
         result = resolve_alternates(load_path, logical_name)
         result[0].each do |fn|
@@ -161,7 +161,7 @@ module Sprockets
         dirname = File.join(load_path, logical_name)
         result = dirname_matches(dirname, "index")
         candidates.concat(result)
-        deps.merge(dependency_set(dirname))
+        deps.merge(file_digest_dependency_set(dirname))
 
         return candidates.select { |fn, _| file?(fn) }, deps
       end

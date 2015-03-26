@@ -41,16 +41,7 @@ module Sprockets
     #
     # Returns an Array of entry names and a Set of dependency URIs.
     def entries_with_dependencies(path)
-      return entries(path), dependency_set(path)
-    end
-
-    # Internal: returns a set of dependencies for a particular path.
-    #
-    # path - String directory path
-    #
-    # Returns a Set of dependency URIs.
-    def dependency_set(path)
-      Set.new([build_file_digest_uri(path)])
+      return entries(path), file_digest_dependency_set(path)
     end
 
     # Internal: List directory filenames and associated Stats under a
@@ -62,7 +53,16 @@ module Sprockets
     #
     # Returns an Array of filenames and a Set of dependency URIs.
     def stat_directory_with_dependencies(dir)
-      return stat_directory(dir).to_a, dependency_set(dir)
+      return stat_directory(dir).to_a, file_digest_dependency_set(dir)
+    end
+
+    # Internal: Returns a set of dependencies for a particular path.
+    #
+    # path - String directory path
+    #
+    # Returns a Set of dependency URIs.
+    def file_digest_dependency_set(path)
+      Set.new([build_file_digest_uri(path)])
     end
 
     # Internal: List directory filenames and associated Stats under an entire
