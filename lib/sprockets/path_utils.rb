@@ -156,6 +156,30 @@ module Sprockets
       match
     end
 
+    # Internal: Match paths in a directory against available extensions.
+    #
+    # path       - String directory
+    # basename   - String basename of target file
+    # extensions - Hash of String extnames to values
+    #
+    # Examples
+    #
+    #     exts = { ".js" => "application/javascript" }
+    #     find_matching_path_for_extensions("app/assets", "application", exts)
+    #     # => ["app/assets/application.js", "application/javascript"]
+    #
+    # Returns an Array of [String path, Object value] matches.
+    def find_matching_path_for_extensions(path, basename, extensions)
+      matches = []
+      entries(path).each do |entry|
+        extname, value = match_path_extname(entry, extensions)
+        if basename == entry.chomp(extname)
+          matches << [File.join(path, entry), value]
+        end
+      end
+      matches
+    end
+
     # Internal: Returns all parents for path
     #
     # path - String absolute filename or directory

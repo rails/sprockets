@@ -149,7 +149,7 @@ module Sprockets
 
       def path_matches(load_path, logical_name, logical_basename)
         dirname    = File.dirname(File.join(load_path, logical_name))
-        candidates = dirname_matches(dirname, logical_basename)
+        candidates = find_matching_path_for_extensions(dirname, logical_basename, self.mime_exts)
         deps       = file_digest_dependency_set(dirname)
 
         result = resolve_alternates(load_path, logical_name)
@@ -159,23 +159,11 @@ module Sprockets
         deps.merge(result[1])
 
         dirname = File.join(load_path, logical_name)
-        result = dirname_matches(dirname, "index")
+        result = find_matching_path_for_extensions(dirname, "index", self.mime_exts)
         candidates.concat(result)
         deps.merge(file_digest_dependency_set(dirname))
 
         return candidates.select { |fn, _| file?(fn) }, deps
-      end
-
-      def dirname_matches(dirname, basename)
-        candidates = []
-        entries = self.entries(dirname)
-        entries.each do |entry|
-          extname, type = match_path_extname(entry, mime_exts)
-          if basename == entry.chomp(extname)
-            candidates << [File.join(dirname, entry), type]
-          end
-        end
-        candidates
       end
 
       def resolve_alternates(load_path, logical_name)

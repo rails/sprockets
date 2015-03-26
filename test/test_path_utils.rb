@@ -165,6 +165,22 @@ class TestPathUtils < MiniTest::Test
     refute match_path_extname("jquery.map.css", extensions)
   end
 
+  def test_find_matching_path_for_extensions
+    dirname = File.expand_path("../fixtures/default", __FILE__)
+
+    extensions = { ".js" => "application/javascript", ".coffee" => "text/coffeescript" }
+    assert_equal [
+      ["#{dirname}/application.coffee", "text/coffeescript"]
+    ], find_matching_path_for_extensions(dirname, "application", extensions)
+
+    extensions = { ".txt" => "text/plain", ".jst.ejs" => "application/ejs" }
+    assert_equal [
+      ["#{dirname}/hello.jst.ejs", "application/ejs"],
+      ["#{dirname}/hello.txt", "text/plain"]
+    ], find_matching_path_for_extensions(dirname, "hello", extensions)
+
+  end
+
   def test_path_parents
     root = File.expand_path("../..", __FILE__)
 
