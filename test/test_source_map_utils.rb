@@ -97,24 +97,36 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "example.min.js")
   end
 
-  def test_add_source_maps
+  def test_concat_source_maps
     mappings = [
       {source: 'a.js', generated: [0, 0], original: [0, 0]},
       {source: 'b.js', generated: [1, 0], original: [20, 0]},
       {source: 'c.js', generated: [2, 0], original: [30, 0]}
-    ]
+    ].freeze
 
-    assert_equal mappings, add_source_maps([], mappings)
-    assert_equal mappings, add_source_maps(mappings, [])
+    assert_equal mappings, concat_source_maps(nil, mappings)
+    assert_equal mappings, concat_source_maps(mappings, nil)
+
+    assert_equal mappings, concat_source_maps([], mappings)
+    assert_equal mappings, concat_source_maps(mappings, [])
 
     mappings2 = [
       {source: 'd.js', generated: [0, 0], original: [0, 0]}
-    ]
-    mappings3 = add_source_maps(mappings, mappings2)
-    assert_equal 0, mappings3[0][:generated][0]
-    assert_equal 1, mappings3[1][:generated][0]
-    assert_equal 2, mappings3[2][:generated][0]
-    assert_equal 3, mappings3[3][:generated][0]
+    ].freeze
+
+    assert_equal [
+      {source: 'a.js', generated: [0, 0], original: [0, 0]},
+      {source: 'b.js', generated: [1, 0], original: [20, 0]},
+      {source: 'c.js', generated: [2, 0], original: [30, 0]},
+      {source: 'd.js', generated: [3, 0], original: [0, 0]}
+    ], concat_source_maps(mappings, mappings2)
+
+    assert_equal [
+      {source: 'd.js', generated: [0, 0], original: [0, 0]},
+      {source: 'a.js', generated: [1, 0], original: [0, 0]},
+      {source: 'b.js', generated: [2, 0], original: [20, 0]},
+      {source: 'c.js', generated: [3, 0], original: [30, 0]}
+    ], concat_source_maps(mappings2, mappings)
   end
 
   def test_combine_source_maps
@@ -124,6 +136,7 @@ class TestSourceMapUtils < MiniTest::Test
       {source: 'c.js', generated: [2, 0], original: [30, 0]}
     ]
     assert_equal mappings, combine_source_maps([], mappings)
+    assert_equal mappings, combine_source_maps(nil, mappings)
 
     mappings1 = decode_json_source_map(%{
       {

@@ -4,8 +4,23 @@ module Sprockets
   module SourceMapUtils
     extend self
 
-    # TODO: Document
-    def add_source_maps(a, b)
+    # Public: Concatenate two source maps.
+    #
+    # For an example, if two js scripts are concatenated, the individual source
+    # maps for those files can be concatenated to map back to the originals.
+    #
+    # Examples
+    #
+    #     script3 = "#{script1}#{script2}"
+    #     map3    = concat_source_maps(map1, map2)
+    #
+    # a - Array of source mapping Hashes
+    # b - Array of source mapping Hashes
+    #
+    # Returns a new Array of source mapping Hashes.
+    def concat_source_maps(a, b)
+      a ||= []
+      b ||= []
       mappings = a.dup
       offset   = a.any? ? a.last[:generated][0]+1 : 0
       b.each do |m|
@@ -14,7 +29,22 @@ module Sprockets
       mappings
     end
 
-    # TODO: Document
+    # Public: Combine two seperate source map transformations into a single
+    # mapping.
+    #
+    # Source transformations may happen in discrete steps producing separate
+    # source maps. These steps can be combined into a single mapping back to
+    # the source.
+    #
+    # For an example, CoffeeScript may transform a file producing a map. Then
+    # Uglifier processes the result and produces another map. The CoffeeScript
+    # map can be combined with the Uglifier map so the source lines of the
+    # minified output can be traced back to the original CoffeeScript file.
+    #
+    # a - Array of source mapping Hashes
+    # b - Array of source mapping Hashes
+    #
+    # Returns a new Array of source mapping Hashes.
     def combine_source_maps(a, b)
       a ||= []
       return b.dup if a.empty?
