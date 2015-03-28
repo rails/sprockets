@@ -111,7 +111,10 @@ module Sprockets
     #
     # Returns urlsafe base64 String.
     def pack_urlsafe_base64digest(bin)
-      pack_base64digest(bin).tr('+/', '-_').tr('=', '')
+      str = pack_base64digest(bin)
+      str.tr!('+/'.freeze, '-_'.freeze)
+      str.tr!('='.freeze, ''.freeze)
+      str
     end
 
     # Internal: Maps digest class to the named information hash algorithm name.
