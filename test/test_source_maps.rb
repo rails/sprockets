@@ -17,13 +17,19 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal ['child.source.js'], map.map { |m| m[:source] }.uniq.compact
   end
 
+  test "builds a concatenated source map" do
+    asset = @env['application.js']
+    map = asset.metadata[:map]
+    assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), map.map { |m| m[:source] }.uniq.compact
+  end
+
   test "builds a minified source map" do
     @env.js_compressor = :uglifier
 
     asset = @env['application.js']
     map = asset.metadata[:map]
     assert map.all? { |mapping| mapping[:generated][0] == 1 }
-    # assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), map.map { |m| m[:source] }.uniq.compact
+    assert_equal %w(project.source.coffee users.source.coffee application.source.coffee), map.map { |m| m[:source] }.uniq.compact
   end
 
   test "builds a source map with js dependency" do
