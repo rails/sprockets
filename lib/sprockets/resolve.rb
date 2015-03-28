@@ -146,7 +146,8 @@ module Sprockets
       def resolve_alts_under_path(load_path, logical_name, mime_exts)
         filenames, deps = self.resolve_alternates(load_path, logical_name)
         return filenames.map { |fn|
-          [fn, match_path_extname(fn, mime_exts)[1]]
+          _, mime_type = match_path_extname(fn, mime_exts)
+          [fn, mime_type]
         }, deps
       end
 

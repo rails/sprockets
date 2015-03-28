@@ -194,6 +194,15 @@ module EnvironmentTests
       @env.find_asset("requirejs.js", accept: 'application/javascript').filename
   end
 
+  test "bower main with invalid files" do
+    assert @env.find_asset("zeroclipboard/FILEFILE")
+    assert @env.find_asset("zeroclipboard/mimetype.unknown")
+    assert @env.find_asset("zeroclipboard/zc.js")
+
+    assert @env.find_asset("zeroclipboard.js")
+    refute @env.find_asset("zeroclipboard.unknown")
+  end
+
   test "find bundled asset in environment" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
