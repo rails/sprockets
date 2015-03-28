@@ -67,7 +67,7 @@ module Sprockets
         # Ensure path is under load paths
         return nil, nil, deps unless paths_split(paths, filename)
 
-        _, mime_type = match_path_extname(filename, mime_exts)
+        _, mime_type = match_path_extname(filename, config[:mime_exts])
         type = resolve_transform_type(mime_type, accept)
         return nil, nil, deps if accept && !type
 
@@ -90,10 +90,13 @@ module Sprockets
       def resolve_logical_path(paths, logical_path, accept)
         extname, mime_type = match_path_extname(logical_path, config[:mime_exts])
         logical_name = logical_path.chomp(extname)
+
         extname, pipeline = match_path_extname(logical_name, config[:pipeline_exts])
         logical_name = logical_name.chomp(extname)
+
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
+
         filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
 
         if filename
@@ -106,20 +109,55 @@ module Sprockets
       end
 
       def resolve_under_paths(paths, logical_name, accepts)
-        all_deps = Set.new
-        return nil, nil, all_deps if accepts.empty?
+        deps = Set.new
+        return nil, nil, deps if accepts.empty?
 
-        logical_basename = File.basename(logical_name)
+        mime_exts = config[:mime_exts]
         paths.each do |load_path|
-          candidates, deps = path_matches(load_path, logical_name, logical_basename)
-          all_deps.merge(deps)
+          # TODO: Allow new path resolves to be registered
+          fns = [
+            method(:resolve_main_under_path),
+            method(:resolve_alts_under_path),
+            method(:resolve_index_under_path)
+          ]
+
+          candidates = []
+          fns.each do |fn|
+            result = fn.call(load_path, logical_name, mime_exts)
+            candidates.concat(result[0])
+            deps.merge(result[1])
+          end
+
           candidate = find_best_q_match(accepts, candidates) do |c, matcher|
             match_mime_type?(c[1] || "application/octet-stream", matcher)
           end
-          return candidate + [all_deps] if candidate
+          return candidate + [deps] if candidate
         end
 
-        return nil, nil, all_deps
+        return nil, nil, deps
+      end
+
+      def resolve_main_under_path(load_path, logical_name, mime_exts)
+        dirname    = File.dirname(File.join(load_path, logical_name))
+        candidates = find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
+        return candidates, [build_file_digest_uri(dirname)]
+      end
+
+      def resolve_alts_under_path(load_path, logical_name, mime_exts)
+        filenames, deps = self.resolve_alternates(load_path, logical_name)
+        return filenames.map { |fn|
+          [fn, match_path_extname(fn, mime_exts)[1]]
+        }, deps
+      end
+
+      def resolve_index_under_path(load_path, logical_name, mime_exts)
+        dirname = File.join(load_path, logical_name)
+        deps = [build_file_digest_uri(dirname)]
+        candidates = []
+        if directory?(dirname)
+          candidates = find_matching_path_for_extensions(dirname, "index", mime_exts)
+        end
+        return candidates, deps
       end
 
       def parse_accept_options(mime_type, types)
@@ -145,28 +183,6 @@ module Sprockets
         dirname, basename = File.split(path)
         path = dirname if basename == 'index'
         path
-      end
-
-      def path_matches(load_path, logical_name, logical_basename)
-        dirname    = File.dirname(File.join(load_path, logical_name))
-        candidates = find_matching_path_for_extensions(dirname, logical_basename, self.mime_exts)
-        deps       = file_digest_dependency_set(dirname)
-
-        result = resolve_alternates(load_path, logical_name)
-        result[0].each do |fn|
-          candidates << [fn, match_path_extname(fn, mime_exts)[1]]
-        end
-        deps.merge(result[1])
-
-        dirname = File.join(load_path, logical_name)
-        if directory?(dirname)
-          result = find_matching_path_for_extensions(dirname, "index", self.mime_exts)
-          candidates.concat(result)
-        end
-
-        deps.merge(file_digest_dependency_set(dirname))
-
-        return candidates.select { |fn, _| file?(fn) }, deps
       end
 
       def resolve_alternates(load_path, logical_name)

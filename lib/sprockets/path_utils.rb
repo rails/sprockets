@@ -176,7 +176,10 @@ module Sprockets
       entries(path).each do |entry|
         extname, value = match_path_extname(entry, extensions)
         if basename == entry.chomp(extname)
-          matches << [File.join(path, entry), value]
+          filename = File.join(path, entry)
+          if file?(filename)
+            matches << [filename, value]
+          end
         end
       end
       matches
