@@ -21,7 +21,9 @@ module Sprockets
       map = asset.metadata[:map] || []
 
       map.map { |m| m[:source] }.uniq.compact.each do |source|
-        uri, _ = env.resolve!(source)
+        # TODO: Resolve should expect fingerprints
+        fingerprint = source[/-([0-9a-f]{7,128})\.[^.]+\z/, 1]
+        uri, _ = env.resolve!(source.sub("-#{fingerprint}", ""))
         links << env.load(uri).uri
       end
 

@@ -1098,7 +1098,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application.debug-b362f37c6b9a195da7d81b782e343d0bf9cc146926a550549c63fd93fc029670.js",
+    assert_equal "application.debug-818d2228e758fba767c9d621ff7911063206065db55f2df026d657899466b48e.js",
       @asset.digest_path
   end
 
@@ -1107,23 +1107,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "length" do
-    assert_equal 199, @asset.length
-  end
-
-  test "source digest" do
-    assert_equal [179, 98, 243, 124, 107, 154, 25, 93, 167, 216, 27, 120, 46, 52, 61, 11, 249, 204, 20, 105, 38, 165, 80, 84, 156, 99, 253, 147, 252, 2, 150, 112], @asset.digest.bytes.to_a
-  end
-
-  test "source hexdigest" do
-    assert_equal "b362f37c6b9a195da7d81b782e343d0bf9cc146926a550549c63fd93fc029670", @asset.hexdigest
-  end
-
-  test "source base64digest" do
-    assert_equal "s2LzfGuaGV2n2Bt4LjQ9C/nMFGkmpVBUnGP9k/wClnA=", @asset.base64digest
-  end
-
-  test "integrity" do
-    assert_equal "ni:///sha-256;s2LzfGuaGV2n2Bt4LjQ9C_nMFGkmpVBUnGP9k_wClnA?ct=application/javascript", @asset.integrity
+    assert_equal 264, @asset.length
   end
 
   test "charset is UTF-8" do
@@ -1131,7 +1115,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "to_s" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js.map", @asset.to_s
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-7e76cc32f67cc6307711e7a92e1c5ad9214a4b9ad1b0faf9eedeca95e962da28.map", @asset.to_s
   end
 
   def asset(logical_path, options = {})

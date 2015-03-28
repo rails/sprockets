@@ -101,7 +101,10 @@ module Sprockets
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
-          source_path = "#{name}.source#{extname}"
+          source_uri, _ = resolve!(filename, pipeline: :source)
+          source_asset = load(source_uri)
+
+          source_path = source_asset.digest_path
 
           result = call_processors(processors, {
             environment: self,
