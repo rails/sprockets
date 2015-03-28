@@ -1075,6 +1075,74 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 end
 
+
+class DebugAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @pipeline = :debug
+    @asset = @env.find_asset('application.js', pipeline: :debug)
+  end
+
+  include AssetTests
+
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=debug&id=xxx",
+      normalize_uri(@asset.uri)
+  end
+
+  test "logical path" do
+    assert_equal "application.debug.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application.debug-b362f37c6b9a195da7d81b782e343d0bf9cc146926a550549c63fd93fc029670.js",
+      @asset.digest_path
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 199, @asset.length
+  end
+
+  test "source digest" do
+    assert_equal [179, 98, 243, 124, 107, 154, 25, 93, 167, 216, 27, 120, 46, 52, 61, 11, 249, 204, 20, 105, 38, 165, 80, 84, 156, 99, 253, 147, 252, 2, 150, 112], @asset.digest.bytes.to_a
+  end
+
+  test "source hexdigest" do
+    assert_equal "b362f37c6b9a195da7d81b782e343d0bf9cc146926a550549c63fd93fc029670", @asset.hexdigest
+  end
+
+  test "source base64digest" do
+    assert_equal "s2LzfGuaGV2n2Bt4LjQ9C/nMFGkmpVBUnGP9k/wClnA=", @asset.base64digest
+  end
+
+  test "integrity" do
+    assert_equal "ni:///sha-256;s2LzfGuaGV2n2Bt4LjQ9C_nMFGkmpVBUnGP9k_wClnA?ct=application/javascript", @asset.integrity
+  end
+
+  test "charset is UTF-8" do
+    assert_equal 'utf-8', @asset.charset
+  end
+
+  test "to_s" do
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js.map", @asset.to_s
+  end
+
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+  end
+
+  def read(logical_path)
+    File.read(fixture_path(logical_path))
+  end
+end
+
 class AssetLogicalPathTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new

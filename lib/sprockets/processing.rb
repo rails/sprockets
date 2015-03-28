@@ -170,7 +170,11 @@ module Sprockets
 
       def processors_for(type, file_type, pipeline)
         pipeline ||= :default
-        config[:pipelines][pipeline.to_sym].call(self, type, file_type)
+        if fn = config[:pipelines][pipeline.to_sym]
+          fn.call(self, type, file_type)
+        else
+          raise Error, "no pipeline: #{pipeline}"
+        end
       end
 
       def default_processors_for(type, file_type)

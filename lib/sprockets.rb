@@ -100,6 +100,11 @@ module Sprockets
     end
   end
 
+  require 'sprockets/source_map_comment_processor'
+  register_pipeline :debug do
+    [SourceMapCommentProcessor]
+  end
+
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
