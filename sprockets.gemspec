@@ -1,4 +1,4 @@
-$:.unshift  File.join(__dir__, "lib")
+$:.unshift File.expand_path("../lib", __FILE__)
 require "sprockets/version"
 
 Gem::Specification.new do |s|
