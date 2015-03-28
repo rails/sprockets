@@ -1,0 +1,4 @@
+{
+  "name": "zeroclipboard",
+  "main": ["./missing.js", "./mimetype.unknown", "./FILEFILE", "zc.js"]
+}

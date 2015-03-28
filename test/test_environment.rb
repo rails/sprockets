@@ -209,6 +209,15 @@ $app.run(function($templateCache) {
       @env.find_asset("requirejs.js", accept: 'application/javascript').filename
   end
 
+  test "bower main with invalid files" do
+    assert @env.find_asset("zeroclipboard/FILEFILE")
+    assert @env.find_asset("zeroclipboard/mimetype.unknown")
+    assert @env.find_asset("zeroclipboard/zc.js")
+
+    assert @env.find_asset("zeroclipboard.js")
+    refute @env.find_asset("zeroclipboard.unknown")
+  end
+
   test "find bundled asset in environment" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
@@ -409,7 +418,7 @@ $app.run(function($templateCache) {
   end
 
   FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
-  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 9
+  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 10
 
   test "iterate over each logical path" do
     paths = []
