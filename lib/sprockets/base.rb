@@ -51,7 +51,7 @@ module Sprockets
         # negligently reset thus appearing as if the file hasn't changed on
         # disk. Also, the mtime is only read to the nearest second. Its
         # also possible the file was updated more than once in a given second.
-        cache.fetch(['file_digest', path, stat.mtime.to_i]) do
+        cache.fetch("file_digest:#{path}:#{stat.mtime.to_i}") do
           self.stat_digest(path, stat)
         end
       end

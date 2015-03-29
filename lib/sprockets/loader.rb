@@ -25,15 +25,15 @@ module Sprockets
     def load(uri)
       filename, params = parse_asset_uri(uri)
       if params.key?(:id)
-        asset = cache.fetch(['asset-uri', VERSION, uri]) do
+        asset = cache.fetch("asset-uri:#{VERSION}#{uri}") do
           load_asset_by_id_uri(uri, filename, params)
         end
       else
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
           if paths
             digest = digest(resolve_dependencies(paths))
-            if id_uri = cache.get(['asset-uri-digest', VERSION, uri, digest], true)
-              cache.get(['asset-uri', VERSION, id_uri], true)
+            if id_uri = cache.get("asset-uri-digest:#{VERSION}:#{uri}:#{digest}", true)
+              cache.get("asset-uri:#{VERSION}:#{id_uri}", true)
             end
           else
             load_asset_by_uri(uri, filename, params)
@@ -152,14 +152,14 @@ module Sprockets
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
 
-        cache.set(['asset-uri', VERSION, asset[:uri]], asset, true)
-        cache.set(['asset-uri-digest', VERSION, uri, asset[:dependencies_digest]], asset[:uri], true)
+        cache.set("asset-uri:#{VERSION}:#{asset[:uri]}", asset, true)
+        cache.set("asset-uri-digest:#{VERSION}:#{uri}:#{asset[:dependencies_digest]}", asset[:uri], true)
 
         asset
       end
 
       def fetch_asset_from_dependency_cache(uri, filename, limit = 3)
-        key = ['asset-uri-cache-dependencies', VERSION, uri, file_digest(filename)]
+        key = "asset-uri-cache-dependencies:#{VERSION}:#{uri}:#{file_digest(filename)}"
         history = cache.get(key) || []
 
         history.each_with_index do |deps, index|
