@@ -26,7 +26,7 @@ module Sprockets
     def load(uri)
       filename, params = parse_asset_uri(uri)
       if params.key?(:id)
-        asset = cache.fetch(['asset-uri', uri]) do
+        asset = cache.fetch(['asset-uri', VERSION, uri]) do
           load_asset_by_id_uri(uri, filename, params)
         end
       else
