@@ -114,17 +114,22 @@ module Sprockets
         raise ArgumentError, "too few transform types: #{types.inspect}"
       end
 
+      i = 0
       processors = []
-      enum = types.each
 
       loop do
-        src, dst = enum.next, enum.peek
+        src = types[i]
+        dst = types[i+1]
+        break unless src && dst
+
         unless processor = transformers[src][dst]
           raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
         end
         processors.concat config[:postprocessors][src]
         processors << processor
         processors.concat config[:preprocessors][dst]
+
+        i += 1
       end
 
       if processors.size > 1
