@@ -76,7 +76,7 @@ that links to ever asset you need in production.
 //= link_tree ./images
 ```
 
-**Caution** Unlink `require` directives, links should have an explicit content
+**Caution** Unlike `require` directives, links should have an explicit content
 type or file extension. When using `link_directory` or `link_tree` prefer
 setting a format as well.
 
