@@ -147,9 +147,10 @@ module Sprockets
       end
 
       if hash_name = NI_HASH_ALGORITHMS[digest_class]
-        uri = "ni:///#{hash_name};#{pack_urlsafe_base64digest(digest)}"
-        uri << "?ct=#{content_type}" if content_type
-        uri
+        value = ""
+        value << "type:#{content_type} " if content_type
+        value << "#{hash_name}-#{pack_base64digest(digest)}"
+        value
       end
     end
   end
