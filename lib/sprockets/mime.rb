@@ -112,7 +112,7 @@ module Sprockets
         ([nil] + pipelines.keys.map(&:to_s)).each do |pipeline|
           pipeline_extname = ".#{pipeline}" if pipeline
           ([[nil, nil]] + config[:mime_exts].to_a).each do |format_extname, format_type|
-            3.times do |n|
+            4.times do |n|
               config[:engines].keys.permutation(n).each do |engine_extnames|
                 key = "#{pipeline_extname}#{format_extname}#{engine_extnames.join}"
                 type = format_type || config[:engine_mime_types][engine_extnames.first]
