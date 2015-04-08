@@ -57,6 +57,8 @@ module Sprockets
       charset ||= :default if mime_type.start_with?('text/')
       charset = EncodingUtils::CHARSET_DETECT[charset] if charset.is_a?(Symbol)
 
+      self.computed_config = {}
+
       self.config = hash_reassoc(config, :mime_exts) do |mime_exts|
         extnames.each do |extname|
           mime_exts[extname] = mime_type
@@ -68,10 +70,6 @@ module Sprockets
         type = { extensions: extnames }
         type[:charset] = charset if charset
         mime_types.merge(mime_type => type)
-      end
-
-      self.config = hash_reassoc(config, :_extnames) do
-        compute_extname_map
       end
     end
 
@@ -106,13 +104,17 @@ module Sprockets
     end
 
     private
+      def extname_map
+        self.computed_config[:_extnames] ||= compute_extname_map
+      end
+
       def compute_extname_map
         graph = {}
 
         ([nil] + pipelines.keys.map(&:to_s)).each do |pipeline|
           pipeline_extname = ".#{pipeline}" if pipeline
           ([[nil, nil]] + config[:mime_exts].to_a).each do |format_extname, format_type|
-            3.times do |n|
+            4.times do |n|
               config[:engines].keys.permutation(n).each do |engine_extnames|
                 key = "#{pipeline_extname}#{format_extname}#{engine_extnames.join}"
                 type = format_type || config[:engine_mime_types][engine_extnames.first]
