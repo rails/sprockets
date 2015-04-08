@@ -262,7 +262,6 @@ module Sprockets
     # Returns nothing.
     def atomic_write(filename)
       randomname = [
-        File.dirname(filename),
         Thread.current.object_id,
         Process.pid,
         rand(1000000)
