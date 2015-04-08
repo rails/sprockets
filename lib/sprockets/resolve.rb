@@ -195,7 +195,7 @@ module Sprockets
       #
       def parse_path_extnames(path)
         engines = []
-        extname, value = match_path_extname(path, config[:_extnames])
+        extname, value = match_path_extname(path, extname_map)
 
         if extname
           path = path.chomp(extname)

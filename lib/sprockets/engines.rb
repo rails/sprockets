@@ -53,6 +53,8 @@ module Sprockets
     def register_engine(ext, klass, options = {})
       ext = Sprockets::Utils.normalize_extension(ext)
 
+      self.computed_config = {}
+
       if klass.respond_to?(:call)
         processor = klass
         self.config = hash_reassoc(config, :engines) do |engines|
@@ -73,10 +75,6 @@ module Sprockets
             mime_types.merge(ext.to_s => klass.default_mime_type)
           end
         end
-      end
-
-      self.config = hash_reassoc(config, :_extnames) do
-        compute_extname_map
       end
     end
   end

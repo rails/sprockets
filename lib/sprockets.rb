@@ -34,6 +34,7 @@ module Sprockets
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""
   }.freeze
+  self.computed_config = {}
 
   @context_class = Context
 
