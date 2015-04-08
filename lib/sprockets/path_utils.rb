@@ -288,12 +288,14 @@ module Sprockets
     #
     # Returns nothing.
     def atomic_write(filename)
-      tmpname = [
-        File.dirname(filename),
+      dirname, basename = File.split(filename)
+      basename = [
+        basename,
         Thread.current.object_id,
         Process.pid,
         rand(1000000)
       ].join('.')
+      tmpname = File.join(dirname, basename)
 
       File.open(tmpname, 'wb+') do |f|
         yield f
