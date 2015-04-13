@@ -449,7 +449,7 @@ submit a pull request.
 
 ### Version History
 
-**3.0.0**
+**3.0.0** (April 12, 2015)
 
 * New processor API. Tilt interface is deprecated.
 * Improved file store caching backend.
