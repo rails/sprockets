@@ -110,7 +110,7 @@ module Sprockets
     def depend_on(path)
       path = path.to_s if path.is_a?(Pathname)
 
-      if environment.absolute_path?(path) && environment.directory?(path)
+      if environment.absolute_path?(path) && environment.stat(path)
         @dependencies << environment.build_file_digest_uri(path)
       else
         resolve(path, compat: false)
