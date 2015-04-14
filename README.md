@@ -449,6 +449,10 @@ submit a pull request.
 
 ### Version History
 
+**3.0.1** (April 14, 2015)
+
+* Fixed `Context#depend_on` with paths outside the load path
+
 **3.0.0** (April 12, 2015)
 
 * New processor API. Tilt interface is deprecated.
