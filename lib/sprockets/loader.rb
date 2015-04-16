@@ -144,9 +144,9 @@ module Sprockets
         asset[:mtime] = metadata[:dependencies].map { |u|
           if u.start_with?("file-digest:")
             s = self.stat(parse_file_digest_uri(u))
-            s ? s.mtime.to_i : 0
+            s ? s.mtime.to_i : 1211698800
           else
-            0
+            1211698800
           end
         }.max
 
