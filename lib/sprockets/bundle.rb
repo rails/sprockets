@@ -44,7 +44,11 @@ module Sprockets
     def self.process_bundle_reducers(assets, reducers)
       initial = {}
       reducers.each do |k, (v, _)|
-        initial[k] = v if !v.nil?
+        if v.respond_to?(:call)
+          initial[k] = v.call
+        elsif !v.nil?
+          initial[k] = v
+        end
       end
 
       assets.reduce(initial) do |h, asset|
