@@ -90,15 +90,15 @@ module Sprockets
     # Internal: Accumulate asset source to buffer and append a trailing
     # semicolon if necessary.
     #
-    # buf   - String memo
-    # asset - Asset
+    # buf    - String buffer to append to
+    # source - String source to append
     #
-    # Returns appended buffer String.
+    # Returns buf String.
     def concat_javascript_sources(buf, source)
       if string_end_with_semicolon?(buf)
-        buf + source
+        buf << source
       else
-        buf + ";\n" + source
+        buf << ";\n" << source
       end
     end
 
