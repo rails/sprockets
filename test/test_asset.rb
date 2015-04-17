@@ -1270,6 +1270,9 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
     assert_equal "traceur.js", logical_path("traceur.es6")
     assert_equal "traceur.js", logical_path("traceur.js.es6")
+
+    assert_equal "corelib/core/hash/shared/index.js", logical_path("corelib/core/hash/shared/index.coffee")
+
   end
 
   def logical_path(path)
