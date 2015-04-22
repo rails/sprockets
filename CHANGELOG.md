@@ -1,3 +1,4 @@
+* Changed HTML encoding fallback from ISO-8859-1 to default external.
 
 **3.0.1** (April 14, 2015)
 
