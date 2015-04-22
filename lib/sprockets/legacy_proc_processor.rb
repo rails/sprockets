@@ -29,7 +29,7 @@ module Sprockets
     def call(input)
       context = input[:environment].context_class.new(input)
       data = @proc.call(context, input[:data])
-      context.metadata.merge(data: data)
+      context.metadata.merge(data: data.to_str)
     end
   end
 end
