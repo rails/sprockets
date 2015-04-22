@@ -110,6 +110,7 @@ module Sprockets
             content_type: type,
             metadata: { dependencies: dependencies }
           })
+          validate_processor_result!(result)
           source = result.delete(:data)
           metadata = result.merge!(
             charset: source.encoding.name.downcase,

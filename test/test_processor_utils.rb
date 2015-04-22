@@ -291,4 +291,26 @@ class TestProcessorUtils < MiniTest::Test
     assert_equal "d", d.cache_key
     assert_equal ["d", ["c", ["b", ["a"]]]], e.cache_key
   end
+
+  def test_validate_processor_result
+    validate_processor_result!({data: "hello"})
+    validate_processor_result!({data: "hello", foo: nil})
+    validate_processor_result!({data: "hello", foo: 1})
+    validate_processor_result!({data: "hello", foo: "bye"})
+    validate_processor_result!({data: "hello", foo: :bye})
+    validate_processor_result!({data: "hello", foo: [1, 2, 3]})
+    validate_processor_result!({data: "hello", foo: Set.new([1, 2, 3])})
+    validate_processor_result!({data: "hello", foo: {bar: 1}})
+
+    my_string = Class.new(String)
+    assert_raises(TypeError) { validate_processor_result!(nil) }
+    assert_raises(TypeError) { validate_processor_result!({}) }
+    assert_raises(TypeError) { validate_processor_result!({data: 123}) }
+    assert_raises(TypeError) { validate_processor_result!({data: "hello", "foo" => 1}) }
+    assert_raises(TypeError) { validate_processor_result!({data: my_string.new("hello")}) }
+    assert_raises(TypeError) { validate_processor_result!({data: "hello", foo: Object.new}) }
+    assert_raises(TypeError) { validate_processor_result!({data: "hello", foo: [Object.new]}) }
+    assert_raises(TypeError) { validate_processor_result!({data: "hello", foo: Set.new([Object.new])}) }
+    assert_raises(TypeError) { validate_processor_result!({data: "hello", foo: {bar: Object.new}}) }
+  end
 end

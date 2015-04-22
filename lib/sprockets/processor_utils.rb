@@ -1,3 +1,5 @@
+require 'set'
+
 module Sprockets
   # Functional utilities for dealing with Processor functions.
   #
@@ -98,6 +100,72 @@ module Sprockets
     # Returns Array of JSON serializable keys.
     def processors_cache_keys(processors)
       processors.map { |processor| processor_cache_key(processor) }
+    end
+
+    # Internal: Set of all "simple" value types allowed to be returned in
+    # processor metadata.
+    VALID_METADATA_VALUE_TYPES = Set.new([
+      String,
+      Symbol,
+      Fixnum,
+      Bignum,
+      TrueClass,
+      FalseClass,
+      NilClass
+    ]).freeze
+
+    # Internal: Set of all nested compound metadata types that can nest values.
+    VALID_METADATA_COMPOUND_TYPES = Set.new([
+      Array,
+      Hash,
+      Set
+    ]).freeze
+
+    # Internal: Set of all allowed metadata types.
+    VALID_METADATA_TYPES = (VALID_METADATA_VALUE_TYPES + VALID_METADATA_COMPOUND_TYPES).freeze
+
+    # Internal: Validate returned result of calling a processor pipeline and
+    # raise a friendly user error message.
+    #
+    # result - Metadata Hash returned from call_processors
+    #
+    # Returns result or raises a TypeError.
+    def validate_processor_result!(result)
+      if !result.instance_of?(Hash)
+        raise TypeError, "processor metadata result was expected to be a Hash, but was #{result.class}"
+      end
+
+      if !result[:data].instance_of?(String)
+        raise TypeError, "processor :data was expected to be a String, but as #{result[:data].class}"
+      end
+
+      result.each do |key, value|
+        if !key.instance_of?(Symbol)
+          raise TypeError, "processor metadata[#{key.inspect}] expected to be a Symbol"
+        end
+
+        if !valid_processor_metadata_value?(value)
+          raise TypeError, "processor metadata[:#{key}] returned a complex type: #{value.inspect}\n" +
+            "Only #{VALID_METADATA_TYPES.to_a.join(", ")} maybe used."
+        end
+      end
+
+      result
+    end
+
+    # Internal: Validate object is in validate metadata whitelist.
+    #
+    # value - Any Object
+    #
+    # Returns true if class is in whitelist otherwise false.
+    def valid_processor_metadata_value?(value)
+      if VALID_METADATA_VALUE_TYPES.include?(value.class)
+        true
+      elsif VALID_METADATA_COMPOUND_TYPES.include?(value.class)
+        value.all? { |v| valid_processor_metadata_value?(v) }
+      else
+        false
+      end
     end
   end
 end
