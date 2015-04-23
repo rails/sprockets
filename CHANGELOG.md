@@ -1,3 +1,5 @@
+* Ensure legacy Tilt handlers return String class data. Fixes issues with Haml
+  Tilt handler.
 * Type check and improve error messages raised on bad processor returned results.
 * Changed HTML encoding fallback from ISO-8859-1 to default external.
 
