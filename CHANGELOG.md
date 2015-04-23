@@ -1,7 +1,9 @@
 * Ensure legacy Tilt handlers return String class data. Fixes issues with Haml
   Tilt handler.
 * Type check and improve error messages raised on bad processor returned results.
+* Improve error message for relative paths not under load path.
 * Changed HTML encoding fallback from ISO-8859-1 to default external.
+* Avoid falling back to 0 mtimes which may cause warnings with tar
 
 **3.0.1** (April 14, 2015)
 
