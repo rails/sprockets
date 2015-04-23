@@ -1,3 +1,5 @@
+**3.0.2** (April 22, 2015)
+
 * Ensure legacy Tilt handlers return String class data. Fixes issues with Haml
   Tilt handler.
 * Type check and improve error messages raised on bad processor returned results.
