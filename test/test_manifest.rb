@@ -507,8 +507,8 @@ class TestManifest < Sprockets::TestCase
     manifest.find("coffee.js").each do |asset|
       paths << asset.logical_path
     end
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee/index.js")
+    assert paths.include?("coffee/index.js")
+    assert !paths.include?("coffee.js")
   end
 
   test "each logical path enumerator matching fnmatch filters" do
