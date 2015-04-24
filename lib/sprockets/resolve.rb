@@ -151,12 +151,6 @@ module Sprockets
         accepts
       end
 
-      def normalize_logical_path(path)
-        dirname, basename = File.split(path)
-        path = dirname if basename == 'index'
-        path
-      end
-
       def path_matches(load_path, logical_name, logical_basename)
         dirname    = File.dirname(File.join(load_path, logical_name))
         candidates = dirname_matches(dirname, logical_basename)

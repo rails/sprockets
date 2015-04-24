@@ -78,7 +78,6 @@ module Sprockets
         end
 
         logical_path, file_type, engine_extnames, _ = parse_path_extnames(logical_path)
-        logical_path = normalize_logical_path(logical_path)
         name = logical_path
 
         if pipeline = params[:pipeline]
