@@ -230,9 +230,9 @@ module Sprockets
           # Sort by timestamp
           Time.parse(attrs['mtime'])
         }.reverse.each_with_index.drop_while { |(_, attrs), index|
-          age = [0, Time.now - Time.parse(attrs['mtime'])].max
+          _age = [0, Time.now - Time.parse(attrs['mtime'])].max
           # Keep if under age or within the count limit
-          age < age || index < count
+          _age < age || index < count
         }.each { |(path, _), _|
            # Remove old assets
           remove(path)
