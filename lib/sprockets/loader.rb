@@ -25,8 +25,13 @@ module Sprockets
     def load(uri)
       filename, params = parse_asset_uri(uri)
       if params.key?(:id)
-        asset = cache.fetch("asset-uri:#{VERSION}#{uri}") do
-          load_asset_by_id_uri(uri, filename, params)
+        unless asset = cache.get("asset-uri:#{VERSION}:#{uri}", true)
+          id = params.delete(:id)
+          uri_without_id = build_asset_uri(filename, params)
+          asset = load_asset_by_uri(uri_without_id, filename, params)
+          if asset[:id] != id
+            @logger.warn "Sprockets load error: Tried to find #{uri}, but latest was id #{asset[:id]}"
+          end
         end
       else
         asset = fetch_asset_from_dependency_cache(uri, filename) do |paths|
@@ -44,28 +49,7 @@ module Sprockets
     end
 
     private
-      def load_asset_by_id_uri(uri, filename, params)
-        # Internal assertion, should be routed through load_asset_by_uri
-        unless id = params.delete(:id)
-          raise ArgumentError, "expected uri to have an id: #{uri}"
-        end
-
-        uri = build_asset_uri(filename, params)
-        asset = load_asset_by_uri(uri, filename, params)
-
-        if id && asset[:id] != id
-          raise VersionNotFound, "could not find specified id: #{uri}##{id}"
-        end
-
-        asset
-      end
-
       def load_asset_by_uri(uri, filename, params)
-        # Internal assertion, should be routed through load_asset_by_id_uri
-        if params.key?(:id)
-          raise ArgumentError, "expected uri to have no id: #{uri}"
-        end
-
         unless file?(filename)
           raise FileNotFound, "could not find file: #{filename}"
         end
@@ -122,6 +106,7 @@ module Sprockets
               ]
             }
           })
+          validate_processor_result!(result)
           source = result.delete(:data)
           metadata = result.merge!(
             charset: source.encoding.name.downcase,
@@ -129,6 +114,7 @@ module Sprockets
             length: source.bytesize
           )
         else
+          dependencies << build_file_digest_uri(filename)
           metadata = {
             digest: file_digest(filename),
             length: self.stat(filename).size,

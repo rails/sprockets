@@ -16,10 +16,18 @@ class TestLoader < Sprockets::TestCase
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
     assert_equal '828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab', asset.etag
+    assert_equal 'fb5e02d42c57b8ce6c4834cebc8532a67b802cf71412deff3d6e37fa8c2f1e7a', asset.id
 
     assert asset = @env.load("file://#{fixture_path('default/gallery.css.erb')}?type=text/css")
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
+    assert_equal '3d956df6d377af06bd6e258477b0f0e44748ca0388c3b79286e8cb52a010ec90', asset.id
+
+    bad_id = "0000000000000000000000000000000000000000"
+    assert asset = @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=#{bad_id}")
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+    assert_equal 'fb5e02d42c57b8ce6c4834cebc8532a67b802cf71412deff3d6e37fa8c2f1e7a', asset.id
 
     assert_raises Sprockets::FileNotFound do
       @env.load("file://#{fixture_path('default/missing.js')}?type=application/javascript")
@@ -27,10 +35,6 @@ class TestLoader < Sprockets::TestCase
 
     assert_raises Sprockets::ConversionError do
       @env.load("file://#{fixture_path('default/gallery.js')}?type=text/css")
-    end
-
-    assert_raises Sprockets::VersionNotFound do
-      @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=0000000000000000000000000000000000000000")
     end
   end
 end

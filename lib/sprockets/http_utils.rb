@@ -76,7 +76,9 @@ module Sprockets
         end
       end
 
-      matches.sort_by { |match, quality| -quality }.map { |match, quality| match }
+      matches.sort_by! { |match, quality| -quality }
+      matches.map! { |match, quality| match }
+      matches
     end
 
     # Internal: Find the best qvalue match from an Array of available options.

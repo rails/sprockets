@@ -51,7 +51,7 @@ module Sprockets
       path.force_encoding(Encoding::UTF_8)
 
       # Hack for parsing Windows "file:///C:/Users/IEUser" paths
-      path = path.gsub(/^\/([a-zA-Z]:)/, '\1')
+      path.gsub!(/^\/([a-zA-Z]:)/, '\1')
 
       [scheme, host, path, query]
     end
@@ -183,7 +183,8 @@ module Sprockets
       query.to_s.split('&').reduce({}) do |h, p|
         k, v = p.split('=', 2)
         v = URI::Generic::DEFAULT_PARSER.unescape(v) if v
-        h.merge(k.to_sym => v || true)
+        h[k.to_sym] = v || true
+        h
       end
     end
   end

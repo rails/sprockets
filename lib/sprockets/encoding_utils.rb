@@ -104,7 +104,7 @@ module Sprockets
         charlock_detect(str)
       end
 
-      # Fallback to UTF-8
+      # Fallback to environment's external encoding
       if str.encoding == Encoding::BINARY
         str.force_encoding(Encoding.default_external)
       end
@@ -233,7 +233,10 @@ module Sprockets
       nil
     end
 
-    # Public: Detect charset from HTML document. Defaults to ISO-8859-1.
+    # Public: Detect charset from HTML document.
+    #
+    # Attempts to parse any Unicode BOM otherwise attempt Charlock detection
+    # and finally falls back to the environment's external encoding.
     #
     # str - String.
     #
@@ -246,9 +249,9 @@ module Sprockets
         charlock_detect(str)
       end
 
-      # Fallback to ISO-8859-1
+      # Fallback to environment's external encoding
       if str.encoding == Encoding::BINARY
-        str.force_encoding(Encoding::ISO_8859_1)
+        str.force_encoding(Encoding.default_external)
       end
 
       str

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'minitest/autorun'
 require 'sprockets/encoding_utils'
 
@@ -183,5 +184,63 @@ class TestDigestUtils < MiniTest::Test
     assert_equal Encoding::UTF_16LE, str.encoding
     assert_equal 42, str.bytesize
     assert_equal "\n\nh1 { color: red; }\n", str.encode(Encoding::UTF_8)
+  end
+
+  def test_detect_html_charset
+    assert_equal Encoding.default_external, Encoding::UTF_8
+
+    path = File.expand_path("../fixtures/encoding/utf8-charset.html", __FILE__)
+    str = File.binread(path)
+    assert_equal Encoding::BINARY, str.encoding
+    assert_equal 10, str.bytesize
+    str = detect_html(str)
+    assert_equal Encoding::UTF_8, str.encoding
+    assert_equal 10, str.bytesize
+    assert_equal "<p>☃</p>", str.encode(Encoding::UTF_8)
+
+    path = File.expand_path("../fixtures/encoding/utf8_bom.html", __FILE__)
+    str = File.binread(path)
+    str.force_encoding(Encoding::UTF_8)
+    assert_equal 13, str.bytesize
+    str = detect_html(str)
+    assert_equal Encoding::UTF_8, str.encoding
+    assert_equal 10, str.bytesize
+    assert_equal "<p>☃</p>", str.encode(Encoding::UTF_8)
+
+    path = File.expand_path("../fixtures/encoding/utf16le.html", __FILE__)
+    str = File.binread(path)
+    assert_equal Encoding::BINARY, str.encoding
+    assert_equal 18, str.bytesize
+    str = detect_html(str)
+    assert_equal Encoding::UTF_16LE, str.encoding
+    assert_equal 16, str.bytesize
+    assert_equal "<p>☃</p>", str.encode(Encoding::UTF_8)
+
+    path = File.expand_path("../fixtures/encoding/utf16be.html", __FILE__)
+    str = File.binread(path)
+    str.force_encoding(Encoding::UTF_16BE)
+    assert_equal 18, str.bytesize
+    str = detect_html(str)
+    assert_equal Encoding::UTF_16BE, str.encoding
+    assert_equal 16, str.bytesize
+    assert_equal "<p>☃</p>", str.encode(Encoding::UTF_8)
+
+    path = File.expand_path("../fixtures/encoding/utf32be.html", __FILE__)
+    str = File.binread(path)
+    assert_equal Encoding::BINARY, str.encoding
+    assert_equal 36, str.bytesize
+    str = detect_html(str)
+    assert_equal Encoding::UTF_32BE, str.encoding
+    assert_equal 32, str.bytesize
+    assert_equal "<p>☃</p>", str.encode(Encoding::UTF_8)
+
+    path = File.expand_path("../fixtures/encoding/utf32le.html", __FILE__)
+    str = File.binread(path)
+    assert_equal Encoding::BINARY, str.encoding
+    assert_equal 36, str.bytesize
+    str = detect_html(str)
+    assert_equal Encoding::UTF_32LE, str.encoding
+    assert_equal 32, str.bytesize
+    assert_equal "<p>☃</p>", str.encode(Encoding::UTF_8)
   end
 end

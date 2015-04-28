@@ -8,5 +8,4 @@ module Sprockets
   class ConversionError         < NotFound; end
   class FileNotFound            < NotFound; end
   class FileOutsidePaths        < NotFound; end
-  class VersionNotFound         < NotFound; end
 end

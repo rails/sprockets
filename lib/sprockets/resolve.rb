@@ -47,7 +47,14 @@ module Sprockets
 
       unless uri
         message = "couldn't find file '#{path}'"
+
+        if relative_path?(path) && kargs[:base_path]
+          load_path, _ = paths_split(config[:paths], kargs[:base_path])
+          message << " under '#{load_path}'"
+        end
+
         message << " with type '#{kargs[:accept]}'" if kargs[:accept]
+
         raise FileNotFound, message
       end
 

@@ -612,6 +612,37 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal [:pre_svg, :post_svg, :pre_png, :post_png, :pre_gif, :post_gif], asset.metadata[:test]
   end
 
+  test "processor returning a non-string data" do
+    @env.register_postprocessor 'application/javascript', proc { |input|
+      { data: 42 }
+    }
+
+    assert_raises TypeError do
+      @env.find_asset("application.js")
+    end
+  end
+
+  test "processor returning a subclassed string data" do
+    my_string = Class.new(String)
+    @env.register_postprocessor 'application/javascript', proc { |input|
+      { data: my_string.new("foo") }
+    }
+
+    assert_raises TypeError do
+      @env.find_asset("application.js")
+    end
+  end
+
+  test "processor returning a complex metadata type" do
+    @env.register_postprocessor 'application/javascript', proc { |input|
+      { data: "hello", foo: Object.new }
+    }
+
+    assert_raises TypeError do
+      @env.find_asset("application.js")
+    end
+  end
+
   test "access selector count metadata" do
     assert asset = @env.find_asset("mobile.css")
     assert_equal 2, asset.metadata[:selector_count]
