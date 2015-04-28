@@ -1,3 +1,6 @@
+require 'sprockets/autoload'
+require 'sprockets/path_utils'
+
 module Sprockets
   class BabelProcessor
     VERSION = '1'
@@ -13,7 +16,7 @@ module Sprockets
     def initialize(options = {})
       @options = options.merge({
         'blacklist' => (options['blacklist'] || []) + ['useStrict'],
-        'sourceMap' => true
+        'sourceMap' => false
       }).freeze
 
       @cache_key = [
@@ -29,7 +32,12 @@ module Sprockets
       data = input[:data]
 
       result = input[:cache].fetch(@cache_key + [data]) do
-        Autoload::Babel::Transpiler.transform(data, @options)
+        Autoload::Babel::Transpiler.transform(data, @options.merge(
+          'sourceRoot' => input[:load_path],
+          'moduleRoot' => '',
+          'filename' => input[:filename],
+          'filenameRelative' => PathUtils.split_subpath(input[:load_path], input[:filename])
+        ))
       end
 
       result['code']
