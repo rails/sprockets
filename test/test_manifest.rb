@@ -327,7 +327,7 @@ class TestManifest < Sprockets::TestCase
     end
   end
 
-  test "remove old backups" do
+  test "remove old backups(count)" do
     manifest = Sprockets::Manifest.new(@env, @dir)
 
     digest_path = @env['application.js'].digest_path
@@ -370,6 +370,53 @@ class TestManifest < Sprockets::TestCase
 
       data = JSON.parse(File.read(manifest.filename))
       assert !data['files'][digest_path]
+      assert !data['files'][new_digest_path1]
+      assert data['files'][new_digest_path2]
+      assert data['files'][new_digest_path3]
+      assert_equal new_digest_path3, data['assets']['application.js']
+    end
+  end
+
+  test "remove old backups(age)" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
+    filename = fixture_path('default/application.js.coffee')
+
+    sandbox filename do
+
+      File.open(filename, 'w') { |f| f.write "a;" }
+      mtime = Time.local(2014, 4, 26, 12, 0, 0)
+      File.utime(mtime, mtime, filename)
+      new_digest_path1 = @env['application.js'].digest_path
+
+      manifest.compile('application.js')
+      assert File.exist?("#{@dir}/#{new_digest_path1}")
+
+      File.open(filename, 'w') { |f| f.write "b;" }
+      mtime = Time.local(2014, 4, 27, 8, 0, 0)
+      File.utime(mtime, mtime, filename)
+      new_digest_path2 = @env['application.js'].digest_path
+
+      manifest.compile('application.js')
+      assert File.exist?("#{@dir}/#{new_digest_path2}")
+
+      File.open(filename, 'w') { |f| f.write "c;" }
+      mtime = Time.local(2014, 4, 27, 9, 0, 0)
+      File.utime(mtime, mtime, filename)
+      new_digest_path3 = @env['application.js'].digest_path
+
+      manifest.compile('application.js')
+      assert File.exist?("#{@dir}/#{new_digest_path3}")
+
+      Time.stub(:now, Time.local(2014, 4, 27, 12, 0, 0)) do
+        manifest.clean(0, 60 * 60 * 24)
+      end
+
+      assert !File.exist?("#{@dir}/#{new_digest_path1}")
+      assert File.exist?("#{@dir}/#{new_digest_path2}")
+      assert File.exist?("#{@dir}/#{new_digest_path3}")
+
+      data = JSON.parse(File.read(manifest.filename))
       assert !data['files'][new_digest_path1]
       assert data['files'][new_digest_path2]
       assert data['files'][new_digest_path3]
