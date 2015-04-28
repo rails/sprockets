@@ -1,3 +1,5 @@
+* Only warn when specified asset version can not be loaded.
+
 **3.0.2** (April 22, 2015)
 
 * Ensure legacy Tilt handlers return String class data. Fixes issues with Haml
