@@ -1,3 +1,4 @@
+* Fix static asset mtime fallback
 * Only warn when specified asset version can not be loaded.
 
 **3.0.2** (April 22, 2015)

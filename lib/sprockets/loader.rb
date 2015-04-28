@@ -102,6 +102,7 @@ module Sprockets
             length: source.bytesize
           )
         else
+          dependencies << build_file_digest_uri(filename)
           metadata = {
             digest: file_digest(filename),
             length: self.stat(filename).size,
@@ -129,11 +130,12 @@ module Sprockets
         asset[:mtime] = metadata[:dependencies].map { |u|
           if u.start_with?("file-digest:")
             s = self.stat(parse_file_digest_uri(u))
-            s ? s.mtime.to_i : 1211698800
+            s ? s.mtime.to_i : nil
           else
-            1211698800
+            nil
           end
-        }.max
+        }.compact.max
+        asset[:mtime] ||= self.stat(filename).mtime.to_i
 
         cache.set("asset-uri:#{VERSION}:#{asset[:uri]}", asset, true)
         cache.set("asset-uri-digest:#{VERSION}:#{uri}:#{asset[:dependencies_digest]}", asset[:uri], true)
