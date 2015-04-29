@@ -271,6 +271,25 @@ class TestManifest < Sprockets::TestCase
     assert_equal subdep_digest_path, data['assets']['gallery.js']
   end
 
+  test "compile index asset" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['coffee.js'].digest_path
+    assert_match /coffee\/index-\w+.js/, digest_path
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('coffee.js')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "coffee/index.js", data['files'][digest_path]['logical_path']
+    assert_equal digest_path, data['assets']['coffee/index.js']
+    assert_equal digest_path, data['assets']['coffee.js']
+  end
+
   test "compile with regex" do
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 

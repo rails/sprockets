@@ -303,6 +303,16 @@ module Sprockets
         str !~ /\*|\*\*|\?|\[|\]|\{|\}/
     end
 
+    def self.compute_alias_logical_path(path)
+      dirname, basename = File.split(path)
+      extname = File.extname(basename)
+      if File.basename(basename, extname) == 'index'
+        "#{dirname}#{extname}"
+      else
+        nil
+      end
+    end
+
     # Deprecated: Filter logical paths in environment. Useful for selecting what
     # files you want to compile.
     #
