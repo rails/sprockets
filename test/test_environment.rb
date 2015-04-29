@@ -428,7 +428,7 @@ $app.run(function($templateCache) {
 
     assert paths.include?("application.js")
     assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee/index.js")
+    assert paths.include?("coffee.js")
     assert !paths.include?("coffee")
   end
 
@@ -444,7 +444,7 @@ $app.run(function($templateCache) {
 
     assert paths.include?("application.js")
     assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee/index.js")
+    assert paths.include?("coffee.js")
     assert !paths.include?("coffee")
 
     assert filenames.any? { |p| p =~ /application.js.coffee/ }

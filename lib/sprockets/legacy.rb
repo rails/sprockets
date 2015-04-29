@@ -107,6 +107,7 @@ module Sprockets
 
           path = split_subpath(load_path, filename)
           path, mime_type, _, _ = parse_path_extnames(path)
+          path = normalize_logical_path(path)
           path += mime_types[mime_type][:extensions].first if mime_type
 
           if !seen.include?(path)
@@ -125,6 +126,12 @@ module Sprockets
 
     def cache_set(key, value)
       cache.set(key, value)
+    end
+
+    def normalize_logical_path(path)
+      dirname, basename = File.split(path)
+      path = dirname if basename == 'index'
+      path
     end
 
     private
