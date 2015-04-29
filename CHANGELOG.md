@@ -1,3 +1,8 @@
+**3.0.3** (April 27, 2015)
+
+* Fix static asset mtime fallback
+* Only warn when specified asset version can not be loaded.
+
 **3.0.2** (April 22, 2015)
 
 * Ensure legacy Tilt handlers return String class data. Fixes issues with Haml

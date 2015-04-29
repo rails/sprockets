@@ -21,16 +21,17 @@ class TestLoader < Sprockets::TestCase
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
 
+    bad_id = "0000000000000000000000000000000000000000"
+    assert asset = @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=#{bad_id}")
+    assert_equal fixture_path('default/gallery.js'), asset.filename
+    assert_equal 'application/javascript', asset.content_type
+
     assert_raises Sprockets::FileNotFound do
       @env.load("file://#{fixture_path('default/missing.js')}?type=application/javascript")
     end
 
     assert_raises Sprockets::ConversionError do
       @env.load("file://#{fixture_path('default/gallery.js')}?type=text/css")
-    end
-
-    assert_raises Sprockets::VersionNotFound do
-      @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=0000000000000000000000000000000000000000")
     end
   end
 end
