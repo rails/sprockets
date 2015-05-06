@@ -78,7 +78,7 @@ class TestNullStore < MiniTest::Test
   end
 
   def test_inspect
-    assert_equal "#<Sprockets::Cache local=#<Sprockets::Cache::MemoryStore size=0/4096> store=#<Sprockets::Cache::NullStore>>", @store.inspect
+    assert_equal "#<Sprockets::Cache local=#<Sprockets::Cache::MemoryStore size=0/1024> store=#<Sprockets::Cache::NullStore>>", @store.inspect
     assert_equal "#<Sprockets::Cache::NullStore>", @_store.inspect
   end
 
