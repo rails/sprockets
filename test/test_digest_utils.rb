@@ -76,7 +76,9 @@ class TestDigestUtils < MiniTest::Test
     assert_equal "sha-512-+uuYUxxe7oWIShQrWEmMn/fixz/rxDP4qcAZddXLDM3nN8/tpk1ZC2jXQk6N+mXE65jwfzNVUJL/qjA3y9KbuQ==",
       integrity_uri(sha512.digest)
 
-    assert_equal "type:application/javascript sha-256-bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF+pI=",
-      integrity_uri(sha256, "application/javascript")
+    # echo -n "alert('Hello, world.');" | openssl dgst -sha256 -binary | openssl enc -base64 -A
+    sha256 = Digest::SHA256.new.update("alert('Hello, world.');")
+    assert_equal "sha-256-qznLcsROx4GACP2dm0UCKCzCG+HiZ1guq6ZZDob/Tng=",
+      integrity_uri(sha256)
   end
 end

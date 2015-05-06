@@ -260,7 +260,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "type:image/png sha-256-HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.integrity
+    assert_equal "sha-256-HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.integrity
   end
 
   test "splat" do
@@ -372,7 +372,7 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "type:application/javascript sha-256-augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.integrity
+    assert_equal "sha-256-augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.integrity
   end
 
   test "splat" do
@@ -456,7 +456,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "type:application/javascript sha-256-al//iegyjxWOd2QrU+Mlwk7YRKa81aluwPkAQ4TpyaU=", @asset.integrity
+    assert_equal "sha-256-al//iegyjxWOd2QrU+Mlwk7YRKa81aluwPkAQ4TpyaU=", @asset.integrity
   end
 
   test "charset is UTF-8" do
@@ -544,7 +544,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "type:application/javascript sha-256-lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.integrity
+    assert_equal "sha-256-lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.integrity
   end
 
   test "charset is UTF-8" do

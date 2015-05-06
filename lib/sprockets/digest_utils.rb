@@ -129,13 +129,10 @@ module Sprockets
     # Internal: Generate a "named information" URI for use in the `integrity`
     # attribute of an asset tag as per the subresource integrity specification.
     #
-    # digest       - The String byte digest of the asset content.
-    # content_type - The content-type the asset will be served with. This *must*
-    #                be accurate if provided. Otherwise, subresource integrity
-    #                will block the loading of the asset.
+    # digest - The String byte digest of the asset content.
     #
     # Returns a String or nil if hash algorithm is incompatible.
-    def integrity_uri(digest, content_type = nil)
+    def integrity_uri(digest)
       case digest
       when Digest::Base
         digest_class = digest.class
@@ -147,10 +144,7 @@ module Sprockets
       end
 
       if hash_name = NI_HASH_ALGORITHMS[digest_class]
-        value = ""
-        value << "type:#{content_type} " if content_type
-        value << "#{hash_name}-#{pack_base64digest(digest)}"
-        value
+        "#{hash_name}-#{pack_base64digest(digest)}"
       end
     end
   end
