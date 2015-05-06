@@ -12,7 +12,7 @@ module Sprockets
     VERSION = '1'
 
     def self.cache_key
-      @cache_key ||= [name, Autoload::Eco::Source::VERSION, VERSION].freeze
+      @cache_key ||= "#{name}:#{Autoload::Eco::Source::VERSION}:#{VERSION}".freeze
     end
 
     # Compile template data with Eco compiler.
@@ -24,7 +24,7 @@ module Sprockets
     #
     def self.call(input)
       data = input[:data]
-      input[:cache].fetch(cache_key + [data]) do
+      input[:cache].fetch([cache_key, data]) do
         Autoload::Eco.compile(data)
       end
     end

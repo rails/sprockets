@@ -11,7 +11,7 @@ module Sprockets
     VERSION = '1'
 
     def self.cache_key
-      @cache_key ||= [name, VERSION].freeze
+      @cache_key ||= "#{name}:#{VERSION}".freeze
     end
 
     # Compile template data with EJS compiler.
@@ -23,7 +23,7 @@ module Sprockets
     #
     def self.call(input)
       data = input[:data]
-      input[:cache].fetch(cache_key + [data]) do
+      input[:cache].fetch([cache_key, data]) do
         Autoload::EJS.compile(data)
       end
     end

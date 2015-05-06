@@ -12,12 +12,12 @@ module Sprockets
     VERSION = '1'
 
     def self.cache_key
-      @cache_key ||= [name, Autoload::CoffeeScript::Source.version, VERSION].freeze
+      @cache_key ||= "#{name}:#{Autoload::CoffeeScript::Source.version}:#{VERSION}".freeze
     end
 
     def self.call(input)
       data = input[:data]
-      input[:cache].fetch(self.cache_key + [data]) do
+      input[:cache].fetch([self.cache_key, data]) do
         Autoload::CoffeeScript.compile(data)
       end
     end
