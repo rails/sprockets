@@ -40,16 +40,13 @@ module Sprockets
     end
 
     def call(input)
-      data = input[:data]
-      input[:cache].fetch([@cache_key, data]) do
-        options = {
-          syntax: :scss,
-          cache: false,
-          read_cache: false,
-          style: :compressed
-        }.merge(@options)
-        Autoload::Sass::Engine.new(data, options).render
-      end
+      options = {
+        syntax: :scss,
+        cache: false,
+        read_cache: false,
+        style: :compressed
+      }.merge(@options)
+      Autoload::Sass::Engine.new(input[:data], options).render
     end
   end
 end
