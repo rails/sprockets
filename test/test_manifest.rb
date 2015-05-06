@@ -275,7 +275,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 
     digest_path = @env['coffee.js'].digest_path
-    assert_match /coffee\/index-\w+.js/, digest_path
+    assert_match(/coffee\/index-\w+.js/, digest_path)
 
     assert !File.exist?("#{@dir}/#{digest_path}")
 
