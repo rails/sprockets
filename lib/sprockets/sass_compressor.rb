@@ -35,18 +35,17 @@ module Sprockets
     attr_reader :cache_key
 
     def initialize(options = {})
-      @options = options
-      @cache_key = "#{self.class.name}:#{Autoload::Sass::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
-    end
-
-    def call(input)
-      options = {
+      @options = {
         syntax: :scss,
         cache: false,
         read_cache: false,
         style: :compressed
-      }.merge(@options)
-      Autoload::Sass::Engine.new(input[:data], options).render
+      }.merge(options).freeze
+      @cache_key = "#{self.class.name}:#{Autoload::Sass::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
+    end
+
+    def call(input)
+      Autoload::Sass::Engine.new(input[:data], @options).render
     end
   end
 end
