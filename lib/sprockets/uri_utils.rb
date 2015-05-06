@@ -17,9 +17,6 @@ module Sprockets
   #
   # pipeline - String name of pipeline.
   #
-  # encoding - A content encoding such as "gzip" or "deflate". NOT a charset
-  #            like "utf-8".
-  #
   module URIUtils
     extend self
 
