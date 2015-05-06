@@ -48,15 +48,9 @@ module Sprockets
 
       case input[:content_type]
       when 'application/javascript'
-        key = @cache_key + [input[:content_type], input[:data]]
-        input[:cache].fetch(key) do
-          Autoload::YUI::JavaScriptCompressor.new(@options).compress(data)
-        end
+        Autoload::YUI::JavaScriptCompressor.new(@options).compress(data)
       when 'text/css'
-        key = @cache_key + [input[:content_type], input[:data]]
-        input[:cache].fetch(key) do
-          Autoload::YUI::CssCompressor.new(@options).compress(data)
-        end
+        Autoload::YUI::CssCompressor.new(@options).compress(data)
       else
         data
       end

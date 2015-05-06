@@ -54,10 +54,7 @@ module Sprockets
     end
 
     def call(input)
-      data = input[:data]
-      input[:cache].fetch(@cache_key + [data]) do
-        @uglifier.compile(data)
-      end
+      @uglifier.compile(input[:data])
     end
   end
 end
