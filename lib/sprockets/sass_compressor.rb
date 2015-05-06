@@ -1,4 +1,5 @@
 require 'sprockets/autoload'
+require 'sprockets/digest_utils'
 
 module Sprockets
   # Public: Sass CSS minifier.
@@ -35,17 +36,12 @@ module Sprockets
 
     def initialize(options = {})
       @options = options
-      @cache_key = [
-        self.class.name,
-        Autoload::Sass::VERSION,
-        VERSION,
-        options
-      ].freeze
+      @cache_key = "#{self.class.name}:#{Autoload::Sass::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
       data = input[:data]
-      input[:cache].fetch(@cache_key + [data]) do
+      input[:cache].fetch([@cache_key, data]) do
         options = {
           syntax: :scss,
           cache: false,

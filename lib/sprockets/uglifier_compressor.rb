@@ -1,4 +1,5 @@
 require 'sprockets/autoload'
+require 'sprockets/digest_utils'
 
 module Sprockets
   # Public: Uglifier/Uglify compressor.
@@ -44,13 +45,7 @@ module Sprockets
       end
 
       @uglifier = Autoload::Uglifier.new(options)
-
-      @cache_key = [
-        self.class.name,
-        Autoload::Uglifier::VERSION,
-        VERSION,
-        options
-      ].freeze
+      @cache_key = "#{self.class.name}:#{Autoload::Uglifier::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)

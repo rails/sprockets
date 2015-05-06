@@ -1,4 +1,5 @@
 require 'sprockets/autoload'
+require 'sprockets/digest_utils'
 
 module Sprockets
   # Public: Closure Compiler minifier.
@@ -35,13 +36,7 @@ module Sprockets
 
     def initialize(options = {})
       @compiler = Autoload::Closure::Compiler.new(options)
-      @cache_key = [
-        self.class.name,
-        Autoload::Closure::VERSION,
-        Autoload::Closure::COMPILER_VERSION,
-        VERSION,
-        options
-      ].freeze
+      @cache_key = "#{self.class.name}:#{Autoload::Closure::VERSION}:#{Autoload::Closure::COMPILER_VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
