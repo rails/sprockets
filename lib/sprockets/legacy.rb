@@ -128,6 +128,12 @@ module Sprockets
       cache.set(key, value)
     end
 
+    def normalize_logical_path(path)
+      dirname, basename = File.split(path)
+      path = dirname if basename == 'index'
+      path
+    end
+
     private
       # Deprecated: Seriously.
       def matches_filter(filters, logical_path, filename)
@@ -295,6 +301,16 @@ module Sprockets
       str.is_a?(String) &&
         !PathUtils.absolute_path?(str) &&
         str !~ /\*|\*\*|\?|\[|\]|\{|\}/
+    end
+
+    def self.compute_alias_logical_path(path)
+      dirname, basename = File.split(path)
+      extname = File.extname(basename)
+      if File.basename(basename, extname) == 'index'
+        "#{dirname}#{extname}"
+      else
+        nil
+      end
     end
 
     # Deprecated: Filter logical paths in environment. Useful for selecting what

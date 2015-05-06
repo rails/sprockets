@@ -1243,7 +1243,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "bower/main.js", logical_path("bower/main.js")
     assert_equal "bower/bower.json", logical_path("bower/bower.json")
 
-    assert_equal "coffee.js", logical_path("coffee/index.js")
+    assert_equal "coffee/index.js", logical_path("coffee/index.js")
     assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee")
 
     assert_equal "jquery.js", logical_path("jquery.js")
@@ -1253,7 +1253,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "jquery.foo.min.js", logical_path("jquery.foo.min.js")
     assert_equal "jquery.tmpl.js", logical_path("jquery.tmpl.js")
     assert_equal "jquery.tmpl.min.js", logical_path("jquery.tmpl.min.js")
-    assert_equal "jquery.ext.js", logical_path("jquery.ext/index.js")
+    assert_equal "jquery.ext/index.js", logical_path("jquery.ext/index.js")
     assert_equal "jquery.ext/form.js", logical_path("jquery.ext/form.js")
     assert_equal "jquery-coffee.min.js", logical_path("jquery-coffee.min.coffee")
     assert_equal "jquery-custom.min.js", logical_path("jquery-custom.min.js.erb")
@@ -1261,7 +1261,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
 
     assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
     assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
-    assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee")
+    assert_equal "all.coffee/index.js", logical_path("all.coffee/index.coffee")
 
     assert_equal "foo-ng.js", logical_path("foo-ng.ngt")
     assert_equal "bar-ng.js", logical_path("bar-ng.ngt.haml")

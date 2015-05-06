@@ -411,7 +411,7 @@ $app.run(function($templateCache) {
   end
 
   test "mobile index logical path shorthand" do
-    assert_equal "mobile.js",
+    assert_equal "mobile/index.js",
       @env[fixture_path("default/mobile/index.js")].logical_path
     assert_equal "mobile-min/index.min.js",
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path

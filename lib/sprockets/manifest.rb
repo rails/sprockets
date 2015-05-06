@@ -169,6 +169,10 @@ module Sprockets
         }
         assets[asset.logical_path] = asset.digest_path
 
+        if alias_logical_path = self.class.compute_alias_logical_path(asset.logical_path)
+          assets[alias_logical_path] = asset.digest_path
+        end
+
         target = File.join(dir, asset.digest_path)
 
         if File.exist?(target)
