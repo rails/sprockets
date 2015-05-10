@@ -346,6 +346,12 @@ $app.run(function($templateCache) {
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
+  test "asset with + character" do
+    assert asset = @env.find_asset("+plus.js")
+    assert_equal "+plus.js", asset.logical_path
+    assert_equal "application/javascript", asset.content_type
+  end
+
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end
