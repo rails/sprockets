@@ -1,4 +1,4 @@
-**3.1.0**
+**3.1.0** (March 10, 2015)
 
 * Removed "index" logical path normalization. Asset#logical_path is always the
   full logical path to the index file.
