@@ -5,6 +5,7 @@
 * Fixed static asset mtimes
 * Fix manifest cleanup by age
 * Removed redundant minifier level cache
+* Updated SRI format according to spec changes
 
 **3.0.3** (April 27, 2015)
 
