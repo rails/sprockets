@@ -117,13 +117,11 @@ module Sprockets
       str
     end
 
-    # Internal: Maps digest class to the named information hash algorithm name.
-    #
-    # http://www.iana.org/assignments/named-information/named-information.xhtml
-    NI_HASH_ALGORITHMS = {
-      Digest::SHA256 => 'sha-256'.freeze,
-      Digest::SHA384 => 'sha-384'.freeze,
-      Digest::SHA512 => 'sha-512'.freeze
+    # Internal: Maps digest class to the CSP hash algorithm name.
+    HASH_ALGORITHMS = {
+      Digest::SHA256 => 'sha256'.freeze,
+      Digest::SHA384 => 'sha384'.freeze,
+      Digest::SHA512 => 'sha512'.freeze
     }
 
     # Internal: Generate a "named information" URI for use in the `integrity`
@@ -143,7 +141,7 @@ module Sprockets
         raise TypeError, "unknown digest: #{digest.inspect}"
       end
 
-      if hash_name = NI_HASH_ALGORITHMS[digest_class]
+      if hash_name = HASH_ALGORITHMS[digest_class]
         "#{hash_name}-#{pack_base64digest(digest)}"
       end
     end
