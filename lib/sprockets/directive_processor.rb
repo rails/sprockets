@@ -78,6 +78,7 @@ module Sprockets
       @stubbed      = Set.new(input[:metadata][:stubbed])
       @links        = Set.new(input[:metadata][:links])
       @dependencies = Set.new(input[:metadata][:dependencies])
+      @aliases      = (input[:metadata][:aliases] || {}).dup
 
       data, directives = process_source(input[:data])
       process_directives(directives)
@@ -86,6 +87,7 @@ module Sprockets
         required: @required,
         stubbed: @stubbed,
         links: @links,
+        aliases: @aliases,
         dependencies: @dependencies }
     end
 
@@ -398,6 +400,7 @@ module Sprockets
 
         uri, deps = @environment.resolve!(path, options.merge(base_path: @dirname))
         @dependencies.merge(deps)
+        @aliases[path] = uri if uri && options.empty?
         uri
       end
   end

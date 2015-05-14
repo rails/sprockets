@@ -105,6 +105,7 @@ module Sprockets
   register_bundle_metadata_reducer '*/*', :data, proc { "" }, :concat
   register_bundle_metadata_reducer 'application/javascript', :data, proc { "" }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
+  register_bundle_metadata_reducer '*/*', :aliases, proc { {} }, :merge!
 
   require 'sprockets/closure_compressor'
   require 'sprockets/sass_compressor'
