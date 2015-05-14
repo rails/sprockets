@@ -1,3 +1,12 @@
+**3.1.0** (May 10, 2015)
+
+* Removed "index" logical path normalization. Asset#logical_path is always the
+  full logical path to the index file.
+* Fixed static asset mtimes
+* Fix manifest cleanup by age
+* Removed redundant minifier level cache
+* Updated SRI format according to spec changes
+
 **3.0.3** (April 27, 2015)
 
 * Fix static asset mtime fallback

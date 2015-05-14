@@ -220,7 +220,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;HaLlnfddM9i3TD1x_u3mmPID8TZRLLqrIMaKW969WAA?ct=image/png", @asset.integrity
+    assert_equal "sha256-HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.integrity
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
@@ -323,7 +323,7 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii_F2-o?ct=application/javascript", @asset.integrity
+    assert_equal "sha256-augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.integrity
   end
 
   test "to_s" do
@@ -384,7 +384,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;al__iegyjxWOd2QrU-Mlwk7YRKa81aluwPkAQ4TpyaU?ct=application/javascript", @asset.integrity
+    assert_equal "sha256-al//iegyjxWOd2QrU+Mlwk7YRKa81aluwPkAQ4TpyaU=", @asset.integrity
   end
 
   test "charset is UTF-8" do
@@ -455,7 +455,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "integrity" do
-    assert_equal "ni:///sha-256;lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9_YWUkGzGpQ?ct=application/javascript", @asset.integrity
+    assert_equal "sha256-lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.integrity
   end
 
   test "charset is UTF-8" do
@@ -1155,7 +1155,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "bower/main.js", logical_path("bower/main.js")
     assert_equal "bower/bower.json", logical_path("bower/bower.json")
 
-    assert_equal "coffee.js", logical_path("coffee/index.js")
+    assert_equal "coffee/index.js", logical_path("coffee/index.js")
     assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee", accept: "application/javascript")
 
     assert_equal "jquery.js", logical_path("jquery.js")
@@ -1165,7 +1165,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "jquery.foo.min.js", logical_path("jquery.foo.min.js")
     assert_equal "jquery.tmpl.js", logical_path("jquery.tmpl.js")
     assert_equal "jquery.tmpl.min.js", logical_path("jquery.tmpl.min.js")
-    assert_equal "jquery.ext.js", logical_path("jquery.ext/index.js")
+    assert_equal "jquery.ext/index.js", logical_path("jquery.ext/index.js")
     assert_equal "jquery.ext/form.js", logical_path("jquery.ext/form.js")
     assert_equal "jquery-coffee.min.js", logical_path("jquery-coffee.min.coffee", accept: "application/javascript")
     assert_equal "jquery-custom.min.js", logical_path("jquery-custom.min.js.erb", accept: "application/javascript")
@@ -1173,7 +1173,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
 
     assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
     assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee", accept: "application/javascript")
-    assert_equal "all.coffee.js", logical_path("all.coffee/index.coffee", accept: "application/javascript")
+    assert_equal "all.coffee/index.js", logical_path("all.coffee/index.coffee", accept: "application/javascript")
 
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
     assert_equal "traceur.js", logical_path("traceur.es6", accept: "application/javascript")

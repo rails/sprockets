@@ -187,12 +187,6 @@ module Sprockets
         accepts
       end
 
-      def normalize_logical_path(path)
-        dirname, basename = File.split(path)
-        path = dirname if basename == 'index'
-        path
-      end
-
       def resolve_alternates(load_path, logical_name)
         return [], Set.new
       end

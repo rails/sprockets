@@ -66,17 +66,19 @@ class TestDigestUtils < MiniTest::Test
     sha256 = Digest::SHA256.new.update("alert(1)")
     sha512 = Digest::SHA512.new.update("alert(1)")
 
-    assert_equal "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI",
+    assert_equal "sha256-bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF+pI=",
       integrity_uri(sha256)
-    assert_equal "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI",
+    assert_equal "sha256-bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF+pI=",
       integrity_uri(sha256.digest)
 
-    assert_equal "ni:///sha-512;-uuYUxxe7oWIShQrWEmMn_fixz_rxDP4qcAZddXLDM3nN8_tpk1ZC2jXQk6N-mXE65jwfzNVUJL_qjA3y9KbuQ",
+    assert_equal "sha512-+uuYUxxe7oWIShQrWEmMn/fixz/rxDP4qcAZddXLDM3nN8/tpk1ZC2jXQk6N+mXE65jwfzNVUJL/qjA3y9KbuQ==",
       integrity_uri(sha512)
-    assert_equal "ni:///sha-512;-uuYUxxe7oWIShQrWEmMn_fixz_rxDP4qcAZddXLDM3nN8_tpk1ZC2jXQk6N-mXE65jwfzNVUJL_qjA3y9KbuQ",
+    assert_equal "sha512-+uuYUxxe7oWIShQrWEmMn/fixz/rxDP4qcAZddXLDM3nN8/tpk1ZC2jXQk6N+mXE65jwfzNVUJL/qjA3y9KbuQ==",
       integrity_uri(sha512.digest)
 
-    assert_equal "ni:///sha-256;bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF-pI?ct=application/javascript",
-      integrity_uri(sha256, "application/javascript")
+    # echo -n "alert('Hello, world.');" | openssl dgst -sha256 -binary | openssl enc -base64 -A
+    sha256 = Digest::SHA256.new.update("alert('Hello, world.');")
+    assert_equal "sha256-qznLcsROx4GACP2dm0UCKCzCG+HiZ1guq6ZZDob/Tng=",
+      integrity_uri(sha256)
   end
 end

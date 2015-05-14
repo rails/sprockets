@@ -337,6 +337,12 @@ module EnvironmentTests
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
+  test "asset with + character" do
+    assert asset = @env.find_asset("+plus.js")
+    assert_equal "+plus.js", asset.logical_path
+    assert_equal "application/javascript", asset.content_type
+  end
+
   test "missing static path returns nil" do
     assert_nil @env[fixture_path("default/missing.png")]
   end
@@ -402,7 +408,7 @@ module EnvironmentTests
   end
 
   test "mobile index logical path shorthand" do
-    assert_equal "mobile.js",
+    assert_equal "mobile/index.js",
       @env[fixture_path("default/mobile/index.js")].logical_path
     assert_equal "mobile-min/index.min.js",
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path

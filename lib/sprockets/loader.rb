@@ -62,8 +62,6 @@ module Sprockets
 
         extname, file_type = match_path_extname(logical_path, mime_exts)
         logical_path = logical_path.chomp(extname)
-
-        logical_path = normalize_logical_path(logical_path)
         name = logical_path
 
         if pipeline = params[:pipeline]
@@ -131,7 +129,7 @@ module Sprockets
           content_type: type,
           source: source,
           metadata: metadata,
-          integrity: integrity_uri(metadata[:digest], type),
+          integrity: integrity_uri(metadata[:digest]),
           dependencies_digest: digest(resolve_dependencies(metadata[:dependencies]))
         }
 

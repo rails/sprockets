@@ -44,12 +44,7 @@ module Sprockets
     #
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
-      @cache_key = [
-        self.class.name,
-        VERSION,
-        Autoload::Sass::VERSION,
-        @cache_version
-      ].freeze
+      @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::Sass::VERSION}:#{@cache_version}".freeze
 
       @functions = Module.new do
         include Functions

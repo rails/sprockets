@@ -13,13 +13,13 @@ module Sprockets
     VERSION = '2'
 
     def self.cache_key
-      @cache_key ||= [name, Autoload::CoffeeScript::Source.version, VERSION].freeze
+      @cache_key ||= "#{name}:#{Autoload::CoffeeScript::Source.version}:#{VERSION}".freeze
     end
 
     def self.call(input)
       data = input[:data]
 
-      js, map = input[:cache].fetch(self.cache_key + [data]) do
+      js, map = input[:cache].fetch([self.cache_key, data]) do
         result = Autoload::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
         [result['js'], SourceMapUtils.decode_json_source_map(result['v3SourceMap'])['mappings']]
       end

@@ -117,25 +117,20 @@ module Sprockets
       str
     end
 
-    # Internal: Maps digest class to the named information hash algorithm name.
-    #
-    # http://www.iana.org/assignments/named-information/named-information.xhtml
-    NI_HASH_ALGORITHMS = {
-      Digest::SHA256 => 'sha-256'.freeze,
-      Digest::SHA384 => 'sha-384'.freeze,
-      Digest::SHA512 => 'sha-512'.freeze
+    # Internal: Maps digest class to the CSP hash algorithm name.
+    HASH_ALGORITHMS = {
+      Digest::SHA256 => 'sha256'.freeze,
+      Digest::SHA384 => 'sha384'.freeze,
+      Digest::SHA512 => 'sha512'.freeze
     }
 
     # Internal: Generate a "named information" URI for use in the `integrity`
     # attribute of an asset tag as per the subresource integrity specification.
     #
-    # digest       - The String byte digest of the asset content.
-    # content_type - The content-type the asset will be served with. This *must*
-    #                be accurate if provided. Otherwise, subresource integrity
-    #                will block the loading of the asset.
+    # digest - The String byte digest of the asset content.
     #
     # Returns a String or nil if hash algorithm is incompatible.
-    def integrity_uri(digest, content_type = nil)
+    def integrity_uri(digest)
       case digest
       when Digest::Base
         digest_class = digest.class
@@ -146,10 +141,8 @@ module Sprockets
         raise TypeError, "unknown digest: #{digest.inspect}"
       end
 
-      if hash_name = NI_HASH_ALGORITHMS[digest_class]
-        uri = "ni:///#{hash_name};#{pack_urlsafe_base64digest(digest)}"
-        uri << "?ct=#{content_type}" if content_type
-        uri
+      if hash_name = HASH_ALGORITHMS[digest_class]
+        "#{hash_name}-#{pack_base64digest(digest)}"
       end
     end
   end

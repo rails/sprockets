@@ -1,4 +1,5 @@
 require 'sprockets/autoload'
+require 'sprockets/digest_utils'
 
 module Sprockets
   # Public: YUI compressor.
@@ -35,12 +36,7 @@ module Sprockets
 
     def initialize(options = {})
       @options = options
-      @cache_key = [
-        self.class.name,
-        Autoload::YUI::Compressor::VERSION,
-        VERSION,
-        options
-      ].freeze
+      @cache_key = "#{self.class.name}:#{Autoload::YUI::Compressor::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
@@ -48,15 +44,9 @@ module Sprockets
 
       case input[:content_type]
       when 'application/javascript'
-        key = @cache_key + [input[:content_type], input[:data]]
-        input[:cache].fetch(key) do
-          Autoload::YUI::JavaScriptCompressor.new(@options).compress(data)
-        end
+        Autoload::YUI::JavaScriptCompressor.new(@options).compress(data)
       when 'text/css'
-        key = @cache_key + [input[:content_type], input[:data]]
-        input[:cache].fetch(key) do
-          Autoload::YUI::CssCompressor.new(@options).compress(data)
-        end
+        Autoload::YUI::CssCompressor.new(@options).compress(data)
       else
         data
       end

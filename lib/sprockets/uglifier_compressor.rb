@@ -1,4 +1,5 @@
 require 'sprockets/autoload'
+require 'sprockets/digest_utils'
 require 'sprockets/source_map_utils'
 
 module Sprockets
@@ -45,29 +46,18 @@ module Sprockets
       end
 
       @uglifier = Autoload::Uglifier.new(options)
-
-      @cache_key = [
-        self.class.name,
-        Autoload::Uglifier::VERSION,
-        VERSION,
-        options
-      ].freeze
+      @cache_key = "#{self.class.name}:#{Autoload::Uglifier::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
-      data = input[:data]
-
-      result = input[:cache].fetch(@cache_key + [data]) do
-        js, map = @uglifier.compile_with_map(data)
-        [js, SourceMapUtils.decode_json_source_map(map)["mappings"]]
-      end
+      js, map = @uglifier.compile_with_map(input[:data])
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        result[1]
+        SourceMapUtils.decode_json_source_map(map)["mappings"]
       )
 
-      { data: result[0], map: map }
+      { data: js, map: map }
     end
   end
 end
