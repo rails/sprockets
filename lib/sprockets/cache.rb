@@ -97,7 +97,7 @@ module Sprockets
     # Public: Low level API to retrieve item directly from the backend cache
     # store.
     #
-    # This API may be used publicaly, but may have undefined behavior
+    # This API may be used publicly, but may have undefined behavior
     # depending on the backend store being used. Prefer the
     # Cache#fetch API over using this.
     #
@@ -120,7 +120,7 @@ module Sprockets
 
     # Public: Low level API to set item directly to the backend cache store.
     #
-    # This API may be used publicaly, but may have undefined behavior
+    # This API may be used publicly, but may have undefined behavior
     # depending on the backend store being used. Prefer the
     # Cache#fetch API over using this.
     #
