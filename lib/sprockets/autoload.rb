@@ -1,5 +1,6 @@
 module Sprockets
   module Autoload
+    autoload :Babel, 'sprockets/autoload/babel'
     autoload :Closure, 'sprockets/autoload/closure'
     autoload :CoffeeScript, 'sprockets/autoload/coffee_script'
     autoload :Eco, 'sprockets/autoload/eco'

@@ -46,21 +46,6 @@ module EnvironmentTests
     assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
   end
 
-  test "another ejs templates" do
-    assert asset = @env["hello2.js"]
-    context = ExecJS.compile(asset.to_s)
-    assert_equal "hello2: world\n", context.call("JST2['hello2']", :name => "world")
-  end
-
-  test "angular templates" do
-    assert asset = @env["ng-view.js"]
-    assert_equal <<-JS, asset.to_s
-$app.run(function($templateCache) {
-  $templateCache.put('ng-view.html', "<div ng-view></div>");
-});
-    JS
-  end
-
   test "asset_data_uri helper" do
     assert asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
@@ -85,12 +70,12 @@ $app.run(function($templateCache) {
     assert_equal fixture_path('default/gallery.js'), asset.filename
 
     assert asset = @env.find_asset("gallery", accept: 'text/css, application/javascript')
-    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+    assert_equal fixture_path('default/gallery.js'), asset.filename
 
     assert asset = @env.find_asset("coffee/foo", accept: "application/javascript")
     assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
 
-    assert asset = @env.find_asset("coffee/foo.coffee", accept: "application/javascript")
+    assert asset = @env.find_asset("coffee/foo.js", accept: "application/javascript")
     assert_equal fixture_path('default/coffee/foo.coffee'), asset.filename
 
     assert asset = @env.find_asset("jquery.tmpl.min", accept: 'application/javascript')
@@ -261,23 +246,29 @@ $app.run(function($templateCache) {
   end
 
   test "find erb assets" do
-    assert asset = @env.find_asset("erb/a")
-    assert_equal "text/plain", asset.content_type
-
-    assert asset = @env.find_asset("erb/b")
-    assert_equal "text/plain", asset.content_type
-
-    assert asset = @env.find_asset("erb/c")
-    assert_equal "application/javascript", asset.content_type
-
-    assert asset = @env.find_asset("erb/d")
-    assert_equal "text/css", asset.content_type
-
-    assert asset = @env.find_asset("erb/e")
+    assert asset = @env.find_asset("erb/a.html")
     assert_equal "text/html", asset.content_type
 
-    assert asset = @env.find_asset("erb/f")
+    assert asset = @env.find_asset("erb/b.txt")
+    assert_equal "text/plain", asset.content_type
+
+    assert asset = @env.find_asset("erb/c.js")
+    assert_equal "application/javascript", asset.content_type
+
+    assert asset = @env.find_asset("erb/d.css")
+    assert_equal "text/css", asset.content_type
+
+    assert asset = @env.find_asset("erb/e.html")
+    assert_equal "text/html", asset.content_type
+
+    assert asset = @env.find_asset("erb/f.yaml")
     assert_equal "text/yaml", asset.content_type
+  end
+
+  test "es6 asset" do
+    assert asset = @env.find_asset("future.js")
+    assert_match(/var square/, asset.to_s)
+    assert_match(/function/, asset.to_s)
   end
 
   test "find html builder asset" do
@@ -409,11 +400,11 @@ $app.run(function($templateCache) {
 
   test "asset logical path for absolute path" do
     assert_equal "gallery.js",
-      @env[fixture_path("default/gallery.js")].logical_path
+      @env.find_asset(fixture_path("default/gallery.js")).logical_path
     assert_equal "application.js",
-      @env[fixture_path("default/application.js.coffee")].logical_path
+      @env.find_asset(fixture_path("default/application.coffee"), accept: "application/javascript").logical_path
     assert_equal "mobile/a.js",
-      @env[fixture_path("default/mobile/a.js")].logical_path
+      @env.find_asset(fixture_path("default/mobile/a.js")).logical_path
   end
 
   test "mobile index logical path shorthand" do
@@ -421,39 +412,6 @@ $app.run(function($templateCache) {
       @env[fixture_path("default/mobile/index.js")].logical_path
     assert_equal "mobile-min/index.min.js",
       @env[fixture_path("default/mobile-min/index.min.js")].logical_path
-  end
-
-  FIXTURE_ROOT = Sprockets::TestCase::FIXTURE_ROOT
-  FILES_IN_PATH = Dir["#{FIXTURE_ROOT}/default/**/*"].size - 10
-
-  test "iterate over each logical path" do
-    paths = []
-    paths = @env.logical_paths.to_a.map(&:first)
-    assert_equal FILES_IN_PATH, paths.length
-    assert_equal paths.size, paths.uniq.size, "has duplicates"
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee")
-  end
-
-  test "iterate over each logical path and filename" do
-    paths = []
-    filenames = []
-    @env.logical_paths.each do |logical_path, filename|
-      paths << logical_path
-      filenames << filename
-    end
-    assert_equal FILES_IN_PATH, paths.length
-    assert_equal paths.size, paths.uniq.size, "has duplicates"
-
-    assert paths.include?("application.js")
-    assert paths.include?("coffee/foo.js")
-    assert paths.include?("coffee.js")
-    assert !paths.include?("coffee")
-
-    assert filenames.any? { |p| p =~ /application.js.coffee/ }
   end
 
   test "CoffeeScript files are compiled in a closure" do
@@ -483,6 +441,28 @@ $app.run(function($templateCache) {
     assert_equal "Hello world\n", asset.source
     assert_equal "text/plain", asset.content_type
     assert_equal "hello.source.txt", asset.logical_path
+  end
+
+  test "find source for concatenated asset" do
+    assert asset = @env.find_asset("application.source.coffee")
+    assert_equal "text/coffeescript", asset.content_type
+    assert_equal "application.source.coffee", asset.logical_path
+
+    assert asset = @env.find_asset("application.js")
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "application.js", asset.logical_path
+
+    assert asset = @env.find_asset("application.self.js")
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "application.self.js", asset.logical_path
+
+    assert asset = @env.find_asset("project.self.js")
+    assert_equal "application/javascript", asset.content_type
+    assert_equal "project.self.js", asset.logical_path
+
+    assert asset = @env.find_asset("application.js.map")
+    assert_equal "application/js-sourcemap+json", asset.content_type
+    assert_equal "application.js.map", asset.logical_path
   end
 end
 
@@ -522,6 +502,13 @@ class TestEnvironment < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
   end
 
+  test "change jst template namespace" do
+    @env.register_transformer 'application/javascript+function', 'application/javascript', Sprockets::JstProcessor.new(namespace: 'this.JST2')
+    assert asset = @env["hello.js"]
+    context = ExecJS.compile(asset.to_s)
+    assert_equal "hello: world\n", context.call("JST2['hello']", :name => "world")
+  end
+
   test "register bundle processor" do
     old_size = @env.bundle_processors['text/css'].size
     @env.register_bundle_processor 'text/css', WhitespaceProcessor
@@ -532,46 +519,6 @@ class TestEnvironment < Sprockets::TestCase
     assert !@env.compressors['text/css'][:whitespace]
     @env.register_compressor 'text/css', :whitespace, WhitespaceCompressor
     assert @env.compressors['text/css'][:whitespace]
-  end
-
-  test "register global block preprocessor" do
-    old_size = new_environment.preprocessors['text/css'].size
-    Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.preprocessors['text/css'].size
-    Sprockets.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.preprocessors['text/css'].size
-  end
-
-  test "unregister custom block preprocessor" do
-    old_size = @env.preprocessors['text/css'].size
-    @env.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.preprocessors['text/css'].size
-    @env.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, @env.preprocessors['text/css'].size
-  end
-
-  test "unregister custom block postprocessor" do
-    old_size = @env.postprocessors['text/css'].size
-    @env.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.postprocessors['text/css'].size
-    @env.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, @env.postprocessors['text/css'].size
-  end
-
-  test "register global block postprocessor" do
-    old_size = new_environment.postprocessors['text/css'].size
-    Sprockets.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.postprocessors['text/css'].size
-    Sprockets.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.postprocessors['text/css'].size
-  end
-
-  test "unregister custom block bundle processor" do
-    old_size = @env.bundle_processors['text/css'].size
-    @env.register_bundle_processor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.bundle_processors['text/css'].size
-    @env.unregister_bundle_processor('text/css', :foo)
-    assert_equal old_size, @env.bundle_processors['text/css'].size
   end
 
   test "register global bundle processor" do
@@ -813,7 +760,7 @@ class TestCached < Sprockets::TestCase
 
   test "does not allow new mime types to be added" do
     assert_raises RuntimeError do
-      @env.register_mime_type "application/javascript", ".jst"
+      @env.register_mime_type "application/javascript", extensions: [".jst"]
     end
   end
 

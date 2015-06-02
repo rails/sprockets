@@ -1,5 +1,6 @@
 require 'sprockets/autoload'
 require 'sprockets/digest_utils'
+require 'sprockets/source_map_utils'
 
 module Sprockets
   # Public: Uglifier/Uglify compressor.
@@ -15,7 +16,7 @@ module Sprockets
   #       Sprockets::UglifierCompressor.new(comments: :copyright)
   #
   class UglifierCompressor
-    VERSION = '1'
+    VERSION = '2'
 
     # Public: Return singleton instance with default options.
     #
@@ -49,7 +50,14 @@ module Sprockets
     end
 
     def call(input)
-      @uglifier.compile(input[:data])
+      js, map = @uglifier.compile_with_map(input[:data])
+
+      map = SourceMapUtils.combine_source_maps(
+        input[:metadata][:map],
+        SourceMapUtils.decode_json_source_map(map)["mappings"]
+      )
+
+      { data: js, map: map }
     end
   end
 end

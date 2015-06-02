@@ -15,19 +15,6 @@ module AssetTests
     assert_equal @asset, @env.load(@asset.uri)
   end
 
-  test "pathname is a Pathname that exists" do
-    assert_kind_of Pathname, @asset.pathname
-    assert @asset.pathname.exist?
-  end
-
-  test "logical path can find itself" do
-    assert_equal @asset, @env[@asset.logical_path]
-  end
-
-  test "mtime" do
-    assert @asset.mtime
-  end
-
   test "length is source length" do
     assert_equal @asset.to_s.length, @asset.length
   end
@@ -40,28 +27,11 @@ module AssetTests
     assert_kind_of Set, @asset.links
   end
 
-  test "dependencies are an Array" do
-    assert_kind_of Array, @asset.dependencies
-  end
-
-  test "splat asset" do
-    assert_kind_of Array, @asset.to_a
-  end
-
-  test "to_a body parts equals to_s" do
-    source = ""
-    @asset.to_a.each do |asset|
-      source << asset.to_s
-    end
-    assert_equal @asset.to_s, source
-  end
-
   test "write to file" do
     target = fixture_path('asset/tmp.js')
     begin
       @asset.write_to(target)
       assert File.exist?(target)
-      assert_equal @asset.mtime, File.mtime(target)
     ensure
       FileUtils.rm(target) if File.exist?(target)
       assert !File.exist?(target)
@@ -73,19 +43,10 @@ module AssetTests
     begin
       @asset.write_to(target)
       assert File.exist?(target)
-      assert_equal @asset.mtime, File.mtime(target)
     ensure
       FileUtils.rm(target) if File.exist?(target)
       assert !File.exist?(target)
     end
-  end
-
-  def normalize_uri(uri)
-    uri.sub(/id=\w+/, 'id=xxx')
-  end
-
-  def normalize_uris(uris)
-    uris.to_a.map { |uri| normalize_uri(uri) }.sort
   end
 end
 
@@ -135,13 +96,13 @@ module FreshnessTests
       asset      = asset('test-main.js')
       old_digest = asset.hexdigest
       old_uri    = asset.uri
-      assert_equal "a;", asset.to_s
+      assert_equal "a;\n", asset.to_s
 
       write(dep, "b;")
       asset = asset('test-main.js')
       refute_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
-      assert_equal "b;", asset.to_s
+      assert_equal "b;\n", asset.to_s
     end
   end
 
@@ -247,8 +208,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.digest
+    assert_equal [29, 162, 229, 157, 247, 93, 51, 216, 183, 76, 61, 113, 254, 237, 230, 152, 242, 3, 241, 54, 81, 44, 186, 171, 32, 198, 138, 91, 222, 189, 88, 0], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
@@ -261,14 +221,6 @@ class BinaryStaticAssetTest < Sprockets::TestCase
 
   test "integrity" do
     assert_equal "sha256-HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.integrity
-  end
-
-  test "splat" do
-    assert_equal [@asset], @asset.to_a
-  end
-
-  test "dependencies" do
-    assert_equal [], @asset.dependencies
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
@@ -359,8 +311,7 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea", @asset.digest
+    assert_equal [106, 232, 1, 224, 40, 19, 191, 32, 154, 132, 168, 155, 140, 91, 94, 223, 94, 183, 112, 202, 158, 66, 83, 197, 104, 52, 192, 138, 47, 197, 219, 234], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
@@ -375,30 +326,8 @@ class SourceAssetTest < Sprockets::TestCase
     assert_equal "sha256-augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.integrity
   end
 
-  test "splat" do
-    assert_equal [@asset], @asset.to_a
-  end
-
-  test "dependencies" do
-    assert_equal [], @asset.dependencies
-  end
-
   test "to_s" do
     assert_equal "// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
-  end
-
-  test "each" do
-    body = ""
-    @asset.each { |part| body << part }
-    assert_equal "// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
-  end
-
-  test "to_a" do
-    body = ""
-    @asset.to_a.each do |asset|
-      body << asset.to_s
-    end
-    assert_equal "\// =require \"project\"\n// =require \"users\"\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
   def asset(logical_path, options = {})
@@ -443,8 +372,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "6a5fff89e8328f158e77642b53e325c24ed844a6bcd5a96ec0f9004384e9c9a5", @asset.digest
+    assert_equal [106, 95, 255, 137, 232, 50, 143, 21, 142, 119, 100, 43, 83, 227, 37, 194, 78, 216, 68, 166, 188, 213, 169, 110, 192, 249, 0, 67, 132, 233, 201, 165], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
@@ -463,14 +391,6 @@ class ProcessedAssetTest < Sprockets::TestCase
     assert_equal 'utf-8', @asset.charset
   end
 
-  test "splat" do
-    assert_equal [@asset], @asset.to_a
-  end
-
-  test "dependencies" do
-    assert_equal [], @asset.dependencies
-  end
-
   test "to_s" do
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
@@ -478,14 +398,6 @@ class ProcessedAssetTest < Sprockets::TestCase
   test "each" do
     body = ""
     @asset.each { |part| body << part }
-    assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
-  end
-
-  test "to_a" do
-    body = ""
-    @asset.to_a.each do |asset|
-      body << asset.to_s
-    end
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
@@ -531,8 +443,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    # DEPRECATED: Will be byte digest in 4.x
-    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.digest
+    assert_equal [149, 91, 45, 221, 208, 209, 68, 155, 28, 97, 113, 36, 184, 59, 70, 48, 14, 218, 222, 192, 109, 86, 17, 4, 247, 246, 22, 82, 65, 179, 26, 148], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
@@ -813,9 +724,6 @@ class BundledAssetTest < Sprockets::TestCase
 
       asset_jquery = asset('stub-jquery.js', pipeline: :self)
 
-      refute asset('stub-frameworks.js').included.include?(asset_jquery.uri)
-      assert asset('stub-app.js').included.include?(asset_jquery.uri)
-
       old_asset_frameworks_uri = asset('stub-frameworks.js').uri
       old_asset_app_uri        = asset('stub-app.js').uri
 
@@ -824,42 +732,8 @@ class BundledAssetTest < Sprockets::TestCase
       # jquery never changed
       assert_equal asset_jquery.uri, asset('stub-jquery.js', pipeline: :self).uri
 
-      # jquery moved from app to frameworks
-      assert asset('stub-frameworks.js').included.include?(asset_jquery.uri)
-      refute asset('stub-app.js').included.include?(asset_jquery.uri)
-
       refute_equal old_asset_frameworks_uri, asset('stub-frameworks.js').uri
       refute_equal old_asset_app_uri, asset('stub-app.js').uri
-    end
-  end
-
-  test "mtime is based on required assets" do
-    required_asset = fixture_path('asset/dependencies/b.js')
-
-    sandbox required_asset do
-      mtime = Time.now + 1
-      File.utime mtime, mtime, required_asset
-      assert_equal mtime.to_i, asset('required_assets.js').mtime.to_i
-    end
-  end
-
-  test "mtime is based on dependency paths" do
-    asset_dependency = fixture_path('asset/dependencies/b.js')
-
-    sandbox asset_dependency do
-      mtime = Time.now + 1
-      File.utime mtime, mtime, asset_dependency
-      assert_equal mtime.to_i, asset('dependency_paths.js').mtime.to_i
-    end
-  end
-
-  test "mtime is based on absolute dependency paths" do
-    asset_dependency = fixture_path('asset/dependencies/b.js')
-
-    sandbox asset_dependency do
-      mtime = Time.now + 1
-      File.utime mtime, mtime, asset_dependency
-      assert_equal mtime.to_i, asset('absolute_dependency_paths.js').mtime.to_i
     end
   end
 
@@ -871,20 +745,6 @@ class BundledAssetTest < Sprockets::TestCase
     assert_raises Sprockets::FileNotFound do
       asset("mismatch.js")
     end
-  end
-
-  test "splatted asset includes itself" do
-    assert_equal [fixture_path("asset/project.js.erb")], asset("project.js").to_a.map(&:filename)
-  end
-
-  test "splatted asset with child dependencies" do
-    assert_equal [fixture_path("asset/project.js.erb"), fixture_path("asset/users.js.erb"), fixture_path("asset/application.js")],
-      asset("application.js").to_a.map(&:filename)
-  end
-
-  test "asset dependencies with child dependencies" do
-    assert_equal [fixture_path("asset/project.js.erb"), fixture_path("asset/users.js.erb")],
-      asset("application.js").dependencies.map(&:filename)
   end
 
   test "bundling joins files with blank line" do
@@ -1086,7 +946,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert_equal [
       "file://#{fixture_path("asset/link/all/README.md")}?id=xxx",
       "file://#{fixture_path("asset/link/all/b.css")}?type=text/css&id=xxx",
-      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript+ruby&id=xxx"
     ], normalize_uris(asset("link/all_with_require_directory.js").links)
   end
 
@@ -1156,7 +1016,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert_equal "application/javascript", asset.content_type
   end
 
-  test "asset falls back to engines default mime type" do
+  test "asset falls back to files default mime type" do
     asset = asset("default_mime_type.js")
     assert_equal "application/javascript", asset.content_type
   end
@@ -1215,6 +1075,58 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 end
 
+
+class DebugAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @pipeline = :debug
+    @asset = @env.find_asset('application.js', pipeline: :debug)
+  end
+
+  include AssetTests
+
+  test "uri" do
+    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=debug&id=xxx",
+      normalize_uri(@asset.uri)
+  end
+
+  test "logical path" do
+    assert_equal "application.debug.js", @asset.logical_path
+  end
+
+  test "digest path" do
+    assert_equal "application.debug-818d2228e758fba767c9d621ff7911063206065db55f2df026d657899466b48e.js",
+      @asset.digest_path
+  end
+
+  test "content type" do
+    assert_equal "application/javascript", @asset.content_type
+  end
+
+  test "length" do
+    assert_equal 264, @asset.length
+  end
+
+  test "charset is UTF-8" do
+    assert_equal 'utf-8', @asset.charset
+  end
+
+  test "to_s" do
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-7e76cc32f67cc6307711e7a92e1c5ad9214a4b9ad1b0faf9eedeca95e962da28.map", @asset.to_s
+  end
+
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+  end
+
+  def read(logical_path)
+    File.read(fixture_path(logical_path))
+  end
+end
+
 class AssetLogicalPathTest < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
@@ -1227,24 +1139,24 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "application.js", logical_path("application.js")
     assert_equal "application.css", logical_path("application.css")
 
-    assert_equal "application.js", logical_path("application.js.erb")
-    assert_equal "application.js", logical_path("application.js.coffee")
-    assert_equal "application.css", logical_path("application.css.scss")
-    assert_equal "project.js", logical_path("project.js.coffee.erb")
+    assert_equal "application.js", logical_path("application.js.erb", accept: "application/javascript")
+    assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
+    assert_equal "application.css", logical_path("application.scss", accept: "text/css")
+    assert_equal "project.js", logical_path("project.coffee.erb", accept: "application/javascript")
 
-    assert_equal "store.css", logical_path("store.css.erb")
+    assert_equal "store.css", logical_path("store.css.erb", accept: "text/css")
     assert_equal "store.foo", logical_path("store.foo")
-    assert_equal "files.txt", logical_path("files.erb")
+    assert_equal "files.html", logical_path("files.erb", accept: "text/html")
 
-    assert_equal "application.js", logical_path("application.coffee")
-    assert_equal "application.css", logical_path("application.scss")
-    assert_equal "hello.js", logical_path("hello.jst.ejs")
+    assert_equal "application.js", logical_path("application.coffee", accept: "application/javascript")
+    assert_equal "application.css", logical_path("application.scss", accept: "text/css")
+    assert_equal "hello.js", logical_path("hello.jst.ejs", accept: "application/javascript")
 
     assert_equal "bower/main.js", logical_path("bower/main.js")
     assert_equal "bower/bower.json", logical_path("bower/bower.json")
 
     assert_equal "coffee/index.js", logical_path("coffee/index.js")
-    assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee")
+    assert_equal "coffee/foo.js", logical_path("coffee/foo.coffee", accept: "application/javascript")
 
     assert_equal "jquery.js", logical_path("jquery.js")
     assert_equal "jquery.min.js", logical_path("jquery.min.js")
@@ -1255,28 +1167,23 @@ class AssetLogicalPathTest < Sprockets::TestCase
     assert_equal "jquery.tmpl.min.js", logical_path("jquery.tmpl.min.js")
     assert_equal "jquery.ext/index.js", logical_path("jquery.ext/index.js")
     assert_equal "jquery.ext/form.js", logical_path("jquery.ext/form.js")
-    assert_equal "jquery-coffee.min.js", logical_path("jquery-coffee.min.coffee")
-    assert_equal "jquery-custom.min.js", logical_path("jquery-custom.min.js.erb")
+    assert_equal "jquery-coffee.min.js", logical_path("jquery-coffee.min.coffee", accept: "application/javascript")
+    assert_equal "jquery-custom.min.js", logical_path("jquery-custom.min.js.erb", accept: "application/javascript")
     assert_equal "jquery.js.min", logical_path("jquery.js.min")
 
     assert_equal "all.coffee/plain.js", logical_path("all.coffee/plain.js")
-    assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee")
-    assert_equal "all.coffee/index.js", logical_path("all.coffee/index.coffee")
-
-    assert_equal "foo-ng.js", logical_path("foo-ng.ngt")
-    assert_equal "bar-ng.js", logical_path("bar-ng.ngt.haml")
-    assert_equal "baz-ng.js", logical_path("baz-ng.js.ngt")
+    assert_equal "all.coffee/hot.js", logical_path("all.coffee/hot.coffee", accept: "application/javascript")
+    assert_equal "all.coffee/index.js", logical_path("all.coffee/index.coffee", accept: "application/javascript")
 
     assert_equal "sprite.css.embed", logical_path("sprite.css.embed")
-    assert_equal "traceur.js", logical_path("traceur.es6")
-    assert_equal "traceur.js", logical_path("traceur.js.es6")
+    assert_equal "traceur.js", logical_path("traceur.es6", accept: "application/javascript")
   end
 
-  def logical_path(path)
+  def logical_path(path, options = {})
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      assert asset = @env.find_asset(filename, options), "couldn't find asset: #{filename}"
       asset.logical_path
     end
   end
@@ -1294,24 +1201,24 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("application.js")
     assert_equal "text/css", content_type("application.css")
 
-    assert_equal "application/javascript", content_type("application.js.erb")
-    assert_equal "application/javascript", content_type("application.js.coffee")
-    assert_equal "text/css", content_type("application.css.scss")
-    assert_equal "application/javascript", content_type("project.js.coffee.erb")
+    assert_equal "application/javascript", content_type("application.js.erb", accept: "application/javascript")
+    assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
+    assert_equal "text/css", content_type("application.scss", accept: "text/css")
+    assert_equal "application/javascript", content_type("project.coffee.erb", accept: "application/javascript")
 
-    assert_equal "text/css", content_type("store.css.erb")
-    assert_equal "text/plain", content_type("files.erb")
+    assert_equal "text/css", content_type("store.css.erb", accept: "text/css")
+    assert_equal "text/html", content_type("files.erb", accept: "text/html")
     assert_equal nil, content_type("store.foo")
 
-    assert_equal "application/javascript", content_type("application.coffee")
-    assert_equal "text/css", content_type("application.scss")
-    assert_equal "application/javascript", content_type("hello.jst.ejs")
+    assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
+    assert_equal "text/css", content_type("application.scss", accept: "text/css")
+    assert_equal "application/javascript", content_type("hello.jst.ejs", accept: "application/javascript")
 
     assert_equal "application/javascript", content_type("bower/main.js")
     assert_equal "application/json", content_type("bower/bower.json")
 
     assert_equal "application/javascript", content_type("coffee/index.js")
-    assert_equal "application/javascript", content_type("coffee/foo.coffee")
+    assert_equal "application/javascript", content_type("coffee/foo.coffee", accept: "application/javascript")
 
     assert_equal "application/javascript", content_type("jquery.js")
     assert_equal "application/javascript", content_type("jquery.min.js")
@@ -1322,29 +1229,24 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("jquery.tmpl.min.js")
     assert_equal "application/javascript", content_type("jquery.ext/index.js")
     assert_equal "application/javascript", content_type("jquery.ext/form.js")
-    assert_equal "application/javascript", content_type("jquery-coffee.min.coffee")
-    assert_equal "application/javascript", content_type("jquery-custom.min.js.erb")
+    assert_equal "application/javascript", content_type("jquery-coffee.min.coffee", accept: "application/javascript")
+    assert_equal "application/javascript", content_type("jquery-custom.min.js.erb", accept: "application/javascript")
     assert_equal nil, content_type("jquery.js.min")
 
     assert_equal "application/javascript", content_type("all.coffee/plain.js")
-    assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
-    assert_equal "application/javascript", content_type("all.coffee/index.coffee")
-
-    assert_equal "application/javascript", content_type("foo-ng.ngt")
-    assert_equal "application/javascript", content_type("bar-ng.ngt.haml")
-    assert_equal "application/javascript", content_type("baz-ng.js.ngt")
+    assert_equal "application/javascript", content_type("all.coffee/hot.coffee", accept: "application/javascript")
+    assert_equal "application/javascript", content_type("all.coffee/index.coffee", accept: "application/javascript")
 
     assert_equal nil, content_type("sprite.css.embed")
 
-    assert_equal "application/javascript", content_type("traceur.es6")
-    assert_equal "application/javascript", content_type("traceur.js.es6")
+    assert_equal "application/javascript", content_type("traceur.es6", accept: "application/javascript")
   end
 
-  def content_type(path)
+  def content_type(path, options = {})
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      assert asset = @env.find_asset(filename), "couldn't find asset: #{filename}"
+      assert asset = @env.find_asset(filename, options), "couldn't find asset: #{filename}"
       asset.content_type
     end
   end

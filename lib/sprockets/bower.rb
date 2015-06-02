@@ -27,7 +27,9 @@ module Sprockets
           if filename
             deps << build_file_digest_uri(filename)
             read_bower_main(dirname, filename) do |path|
-              candidates << path
+              if file?(path)
+                candidates << path
+              end
             end
           end
         end

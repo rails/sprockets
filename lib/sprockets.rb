@@ -22,20 +22,18 @@ module Sprockets
     dependencies: Set.new.freeze,
     dependency_resolvers: {}.freeze,
     digest_class: Digest::SHA256,
-    engine_mime_types: {}.freeze,
-    engines: {}.freeze,
     mime_exts: {}.freeze,
     mime_types: {}.freeze,
     paths: [].freeze,
     pipelines: {}.freeze,
+    pipeline_exts: {}.freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
     registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
-    root: File.expand_path('..', __FILE__).freeze,
+    root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""
   }.freeze
-  self.computed_config = {}
 
   @context_class = Context
 
@@ -46,6 +44,7 @@ module Sprockets
   # Common asset text types
   register_mime_type 'application/javascript', extensions: ['.js'], charset: :unicode
   register_mime_type 'application/json', extensions: ['.json'], charset: :unicode
+  register_mime_type 'application/ruby', extensions: ['.rb']
   register_mime_type 'application/xml', extensions: ['.xml']
   register_mime_type 'text/css', extensions: ['.css'], charset: :css
   register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: :html
@@ -78,25 +77,38 @@ module Sprockets
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/font-woff', extensions: ['.woff']
 
+  require 'sprockets/source_map_processor'
+  register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map']
+  register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map']
+  register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapProcessor
+  register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapProcessor
+
   register_pipeline :source do |env|
     []
   end
 
-  register_pipeline :self do |env, type, file_type, engine_extnames|
-    env.self_processors_for(type, file_type, engine_extnames)
+  register_pipeline :self do |env, type, file_type|
+    env.self_processors_for(type, file_type)
   end
 
-  register_pipeline :default do |env, type, file_type, engine_extnames|
-    env.default_processors_for(type, file_type, engine_extnames)
+  register_pipeline :default do |env, type, file_type|
+    # TODO: Hack for to inject source map transformer
+    if (type == "application/js-sourcemap+json" && file_type != "application/js-sourcemap+json") ||
+        (type == "application/css-sourcemap+json" && file_type != "application/css-sourcemap+json")
+      [SourceMapProcessor]
+    else
+      env.default_processors_for(type, file_type)
+    end
+  end
+
+  require 'sprockets/source_map_comment_processor'
+  register_pipeline :debug do
+    [SourceMapCommentProcessor]
   end
 
   require 'sprockets/directive_processor'
-  register_preprocessor 'text/css', DirectiveProcessor.new(
-    comments: ["//", ["/*", "*/"]]
-  )
-  register_preprocessor 'application/javascript', DirectiveProcessor.new(
-    comments: ["//", ["/*", "*/"]] + ["#", ["###", "###"]]
-  )
+  register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
 
   require 'sprockets/bundle'
   register_bundle_processor 'application/javascript', Bundle
@@ -105,6 +117,7 @@ module Sprockets
   register_bundle_metadata_reducer '*/*', :data, proc { "" }, :concat
   register_bundle_metadata_reducer 'application/javascript', :data, proc { "" }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
+  register_bundle_metadata_reducer 'application/javascript', :map, SourceMapUtils.method(:concat_source_maps)
 
   require 'sprockets/closure_compressor'
   require 'sprockets/sass_compressor'
@@ -118,27 +131,57 @@ module Sprockets
   register_compressor 'application/javascript', :uglify, UglifierCompressor
   register_compressor 'application/javascript', :yui, YUICompressor
 
+  # Babel, TheFuture™ is now
+  require 'sprockets/babel_processor'
+  register_mime_type 'application/ecmascript-6', extensions: ['.es6'], charset: :unicode
+  register_transformer 'application/ecmascript-6', 'application/javascript', BabelProcessor
+  register_preprocessor 'application/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+
   # Mmm, CoffeeScript
   require 'sprockets/coffee_script_processor'
-  register_engine '.coffee', CoffeeScriptProcessor, mime_type: 'application/javascript'
+  register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
+  register_transformer 'text/coffeescript', 'application/javascript', CoffeeScriptProcessor
+  register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 
-  # JST engines
+  # JST processors
   require 'sprockets/eco_processor'
   require 'sprockets/ejs_processor'
   require 'sprockets/jst_processor'
-  register_engine '.jst', JstProcessor, mime_type: 'application/javascript'
-  register_engine '.eco', EcoProcessor, mime_type: 'application/javascript'
-  register_engine '.ejs', EjsProcessor, mime_type: 'application/javascript'
+  register_mime_type 'text/eco', extensions: ['.eco', '.jst.eco']
+  register_mime_type 'text/ejs', extensions: ['.ejs', '.jst.ejs']
+  register_transformer 'text/eco', 'application/javascript+function', EcoProcessor
+  register_transformer 'text/ejs', 'application/javascript+function', EjsProcessor
+  register_transformer 'application/javascript+function', 'application/javascript', JstProcessor
 
-  # CSS engines
+  # CSS processors
   require 'sprockets/sass_processor'
-  register_engine '.sass', SassProcessor, mime_type: 'text/css'
-  register_engine '.scss', ScssProcessor, mime_type: 'text/css'
+  register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
+  register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
+  register_transformer 'text/sass', 'text/css', SassProcessor
+  register_transformer 'text/scss', 'text/css', ScssProcessor
+  register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_bundle_metadata_reducer 'text/css', :sass_dependencies, Set.new, :+
 
-  # Other
+  # ERB
   require 'sprockets/erb_processor'
-  register_engine '.erb', ERBProcessor, mime_type: 'text/plain'
+  register_transformer_suffix(%w(
+    application/ecmascript-6
+    application/javascript
+    application/json
+    application/xml
+    text/coffeescript
+    text/css
+    text/html
+    text/plain
+    text/sass
+    text/scss
+    text/yaml
+  ), 'application/\2+ruby', '.erb', ERBProcessor)
+
+  register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
+  register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
+
 
   register_dependency_resolver 'environment-version' do |env|
     env.version
@@ -156,5 +199,3 @@ module Sprockets
   depend_on 'environment-version'
   depend_on 'environment-paths'
 end
-
-require 'sprockets/legacy'

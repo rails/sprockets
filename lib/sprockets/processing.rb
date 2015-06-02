@@ -1,7 +1,4 @@
-require 'sprockets/engines'
 require 'sprockets/file_reader'
-require 'sprockets/legacy_proc_processor'
-require 'sprockets/legacy_tilt_processor'
 require 'sprockets/mime'
 require 'sprockets/processor_utils'
 require 'sprockets/uri_utils'
@@ -19,6 +16,10 @@ module Sprockets
 
     def register_pipeline(name, proc = nil, &block)
       proc ||= block
+
+      self.config = hash_reassoc(config, :pipeline_exts) do |pipeline_exts|
+        pipeline_exts.merge(".#{name}".freeze => name.to_sym)
+      end
 
       self.config = hash_reassoc(config, :pipelines) do |pipelines|
         pipelines.merge(name.to_sym => proc)
@@ -154,46 +155,44 @@ module Sprockets
     protected
       def resolve_processors_cache_key_uri(uri)
         params = parse_uri_query_params(uri[11..-1])
-        params[:engine_extnames] = params[:engines] ? params[:engines].split(',') : []
-        processors = processors_for(params[:type], params[:file_type], params[:engine_extnames], params[:pipeline])
+        processors = processors_for(params[:type], params[:file_type], params[:pipeline])
         processors_cache_keys(processors)
       end
 
-      def build_processors_uri(type, file_type, engine_extnames, pipeline)
-        engines = engine_extnames.join(',') if engine_extnames.any?
+      def build_processors_uri(type, file_type, pipeline)
         query = encode_uri_query_params(
           type: type,
           file_type: file_type,
-          engines: engines,
           pipeline: pipeline
         )
         "processors:#{query}"
       end
 
-      def processors_for(type, file_type, engine_extnames, pipeline)
+      def processors_for(type, file_type, pipeline)
         pipeline ||= :default
-        config[:pipelines][pipeline.to_sym].call(self, type, file_type, engine_extnames)
+        if fn = config[:pipelines][pipeline.to_sym]
+          fn.call(self, type, file_type)
+        else
+          raise Error, "no pipeline: #{pipeline}"
+        end
       end
 
-      def default_processors_for(type, file_type, engine_extnames)
+      def default_processors_for(type, file_type)
         bundled_processors = config[:bundle_processors][type]
         if bundled_processors.any?
           bundled_processors
         else
-          self_processors_for(type, file_type, engine_extnames)
+          self_processors_for(type, file_type)
         end
       end
 
-      def self_processors_for(type, file_type, engine_extnames)
+      def self_processors_for(type, file_type)
         processors = []
 
         processors.concat config[:postprocessors][type]
-
         if type != file_type && processor = config[:transformers][file_type][type]
           processors << processor
         end
-
-        processors.concat engine_extnames.map { |ext| engines[ext] }
         processors.concat config[:preprocessors][file_type]
 
         if processors.any? || mime_type_charset_detecter(type)
@@ -204,9 +203,8 @@ module Sprockets
       end
 
     private
-      def register_config_processor(type, mime_type, klass, proc = nil, &block)
-        proc ||= block
-        processor = wrap_processor(klass, proc)
+      def register_config_processor(type, mime_type, processor = nil, &block)
+        processor ||= block
 
         self.config = hash_reassoc(config, type, mime_type) do |processors|
           processors.unshift(processor)
@@ -216,33 +214,13 @@ module Sprockets
         compute_transformers!
       end
 
-      def unregister_config_processor(type, mime_type, klass)
-        if klass.is_a?(String) || klass.is_a?(Symbol)
-          klass = config[type][mime_type].detect do |cls|
-            cls.respond_to?(:name) && cls.name == "Sprockets::LegacyProcProcessor (#{klass})"
-          end
-        end
-
+      def unregister_config_processor(type, mime_type, proccessor)
         self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.delete(klass)
+          processors.delete(proccessor)
           processors
         end
 
         compute_transformers!
-      end
-
-      def wrap_processor(klass, proc)
-        if !proc
-          if klass.respond_to?(:call)
-            klass
-          else
-            LegacyTiltProcessor.new(klass)
-          end
-        elsif proc.respond_to?(:arity) && proc.arity == 2
-          LegacyProcProcessor.new(klass.to_s, proc)
-        else
-          proc
-        end
       end
   end
 end

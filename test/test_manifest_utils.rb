@@ -15,11 +15,5 @@ class TestManifestUtils < MiniTest::Test
 
     assert_equal "#{root}/default/.sprockets-manifest-f4bf345974645583d284686ddfb7625e.json",
       find_directory_manifest("#{root}/default")
-
-    assert_equal "#{root}/legacy/manifest-02f33520c330d408567423cefa7a03ba.json",
-      find_directory_manifest("#{root}/legacy")
-
-    assert_equal "#{root}/legacy2/manifest.json",
-      find_directory_manifest("#{root}/legacy2")
   end
 end

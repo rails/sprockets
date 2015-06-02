@@ -20,27 +20,21 @@ module Sprockets
     #     # => "file:///path/to/app/javascripts/application.coffee?type=application/javascript"
     #
     # The String Asset URI is returned or nil if no results are found.
-    def resolve(path, options = {})
-      path = path.to_s
-      paths = options[:load_paths] || config[:paths]
-      accept = options[:accept]
+    def resolve(path, load_paths: config[:paths], accept: nil, pipeline: nil, base_path: nil)
+      paths = load_paths
 
       if valid_asset_uri?(path)
         uri, deps = resolve_asset_uri(path)
       elsif absolute_path?(path)
         filename, type, deps = resolve_absolute_path(paths, path, accept)
       elsif relative_path?(path)
-        filename, type, pipeline, deps = resolve_relative_path(paths, path, options[:base_path], accept)
+        filename, type, path_pipeline, deps = resolve_relative_path(paths, path, base_path, accept)
       else
-        filename, type, pipeline, deps = resolve_logical_path(paths, path, accept)
+        filename, type, path_pipeline, deps = resolve_logical_path(paths, path, accept)
       end
 
       if filename
-        params = {}
-        params[:type] = type if type
-        params[:pipeline] = pipeline if pipeline
-        params[:pipeline] = options[:pipeline] if options[:pipeline]
-        uri = build_asset_uri(filename, params)
+        uri = build_asset_uri(filename, type: type, pipeline: pipeline || path_pipeline)
       end
 
       return uri, deps
@@ -48,18 +42,18 @@ module Sprockets
 
     # Public: Same as resolve() but raises a FileNotFound exception instead of
     # nil if no assets are found.
-    def resolve!(path, options = {})
-      uri, deps = resolve(path, options.merge(compat: false))
+    def resolve!(path, **kargs)
+      uri, deps = resolve(path, **kargs)
 
       unless uri
         message = "couldn't find file '#{path}'"
 
-        if relative_path?(path) && options[:base_path]
-          load_path, _ = paths_split(config[:paths], options[:base_path])
+        if relative_path?(path) && kargs[:base_path]
+          load_path, _ = paths_split(config[:paths], kargs[:base_path])
           message << " under '#{load_path}'"
         end
 
-        message << " with type '#{options[:accept]}'" if options[:accept]
+        message << " with type '#{kargs[:accept]}'" if kargs[:accept]
 
         raise FileNotFound, message
       end
@@ -80,7 +74,7 @@ module Sprockets
         # Ensure path is under load paths
         return nil, nil, deps unless paths_split(paths, filename)
 
-        _, mime_type, _, _ = parse_path_extnames(filename)
+        _, mime_type = match_path_extname(filename, config[:mime_exts])
         type = resolve_transform_type(mime_type, accept)
         return nil, nil, deps if accept && !type
 
@@ -96,14 +90,20 @@ module Sprockets
         if load_path && logical_path = split_subpath(load_path, filename)
           resolve_logical_path([load_path], logical_path, accept)
         else
-          return nil, nil, Set.new
+          return nil, nil, nil, Set.new
         end
       end
 
       def resolve_logical_path(paths, logical_path, accept)
-        logical_name, mime_type, _, pipeline = parse_path_extnames(logical_path)
+        extname, mime_type = match_path_extname(logical_path, config[:mime_exts])
+        logical_name = logical_path.chomp(extname)
+
+        extname, pipeline = match_path_extname(logical_name, config[:pipeline_exts])
+        logical_name = logical_name.chomp(extname)
+
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
+
         filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
 
         if filename
@@ -116,20 +116,56 @@ module Sprockets
       end
 
       def resolve_under_paths(paths, logical_name, accepts)
-        all_deps = Set.new
-        return nil, nil, all_deps if accepts.empty?
+        deps = Set.new
+        return nil, nil, deps if accepts.empty?
 
-        logical_basename = File.basename(logical_name)
+        mime_exts = config[:mime_exts]
         paths.each do |load_path|
-          candidates, deps = path_matches(load_path, logical_name, logical_basename)
-          all_deps.merge(deps)
+          # TODO: Allow new path resolves to be registered
+          fns = [
+            method(:resolve_main_under_path),
+            method(:resolve_alts_under_path),
+            method(:resolve_index_under_path)
+          ]
+
+          candidates = []
+          fns.each do |fn|
+            result = fn.call(load_path, logical_name, mime_exts)
+            candidates.concat(result[0])
+            deps.merge(result[1])
+          end
+
           candidate = find_best_q_match(accepts, candidates) do |c, matcher|
             match_mime_type?(c[1] || "application/octet-stream", matcher)
           end
-          return candidate + [all_deps] if candidate
+          return candidate + [deps] if candidate
         end
 
-        return nil, nil, all_deps
+        return nil, nil, deps
+      end
+
+      def resolve_main_under_path(load_path, logical_name, mime_exts)
+        dirname    = File.dirname(File.join(load_path, logical_name))
+        candidates = find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
+        return candidates, [build_file_digest_uri(dirname)]
+      end
+
+      def resolve_alts_under_path(load_path, logical_name, mime_exts)
+        filenames, deps = self.resolve_alternates(load_path, logical_name)
+        return filenames.map { |fn|
+          _, mime_type = match_path_extname(fn, mime_exts)
+          [fn, mime_type]
+        }, deps
+      end
+
+      def resolve_index_under_path(load_path, logical_name, mime_exts)
+        dirname = File.join(load_path, logical_name)
+        deps = [build_file_digest_uri(dirname)]
+        candidates = []
+        if directory?(dirname)
+          candidates = find_matching_path_for_extensions(dirname, "index", mime_exts)
+        end
+        return candidates, deps
       end
 
       def parse_accept_options(mime_type, types)
@@ -151,59 +187,8 @@ module Sprockets
         accepts
       end
 
-      def path_matches(load_path, logical_name, logical_basename)
-        dirname    = File.dirname(File.join(load_path, logical_name))
-        candidates = dirname_matches(dirname, logical_basename)
-        deps       = file_digest_dependency_set(dirname)
-
-        result = resolve_alternates(load_path, logical_name)
-        result[0].each do |fn|
-          candidates << [fn, parse_path_extnames(fn)[1]]
-        end
-        deps.merge(result[1])
-
-        dirname = File.join(load_path, logical_name)
-        if directory? dirname
-          result = dirname_matches(dirname, "index")
-          candidates.concat(result)
-        end
-
-        deps.merge(file_digest_dependency_set(dirname))
-
-        return candidates.select { |fn, _| file?(fn) }, deps
-      end
-
-      def dirname_matches(dirname, basename)
-        candidates = []
-        entries = self.entries(dirname)
-        entries.each do |entry|
-          name, type, _, _ = parse_path_extnames(entry)
-          if basename == name
-            candidates << [File.join(dirname, entry), type]
-          end
-        end
-        candidates
-      end
-
       def resolve_alternates(load_path, logical_name)
         return [], Set.new
-      end
-
-      # Internal: Returns the name, mime type and `Array` of engine extensions.
-      #
-      #     "foo.js.coffee.erb"
-      #     # => ["foo", "application/javascript", [".coffee", ".erb"]]
-      #
-      def parse_path_extnames(path)
-        engines = []
-        extname, value = match_path_extname(path, extname_map)
-
-        if extname
-          path = path.chomp(extname)
-          type, engines, pipeline = value.values_at(:type, :engines, :pipeline)
-        end
-
-        return path, type, engines, pipeline
       end
   end
 end
