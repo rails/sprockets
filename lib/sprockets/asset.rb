@@ -19,7 +19,6 @@ module Sprockets
       @content_type = attributes[:content_type]
       @filename     = attributes[:filename]
       @id           = attributes[:id]
-      @integrity    = attributes[:integrity]
       @load_path    = attributes[:load_path]
       @logical_path = attributes[:logical_path]
       @metadata     = attributes[:metadata]
@@ -140,7 +139,9 @@ module Sprockets
     end
 
     # Public: A "named information" URL for subresource integrity.
-    attr_reader :integrity
+    def integrity
+      DigestUtils.integrity_uri(metadata[:digest])
+    end
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
     # compatible body objects.
