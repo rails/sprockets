@@ -49,6 +49,11 @@ class TestDigestUtils < MiniTest::Test
     assert_equal "6e11c72f7cf6bc383152dd16ddd5903aba6bb1c99d6b6639a4bb0b838185fa92", pack_hexdigest(digest.digest)
   end
 
+  def test_unpack_hexdigest
+    digest = Digest::SHA256.new.update("alert(1)")
+    assert_equal digest.digest, unpack_hexdigest(digest.hexdigest)
+  end
+
   def test_pack_base64_digest
     digest = Digest::SHA256.new.update("alert(1)")
 
@@ -80,5 +85,16 @@ class TestDigestUtils < MiniTest::Test
     sha256 = Digest::SHA256.new.update("alert('Hello, world.');")
     assert_equal "sha256-qznLcsROx4GACP2dm0UCKCzCG+HiZ1guq6ZZDob/Tng=",
       integrity_uri(sha256)
+  end
+
+  def test_hexdigest_integrity_uri
+    sha256 = Digest::SHA256.new.update("alert(1)").hexdigest
+    sha512 = Digest::SHA512.new.update("alert(1)").hexdigest
+
+    assert_equal "sha256-bhHHL3z2vDgxUt0W3dWQOrprscmda2Y5pLsLg4GF+pI=",
+      hexdigest_integrity_uri(sha256)
+
+    assert_equal "sha512-+uuYUxxe7oWIShQrWEmMn/fixz/rxDP4qcAZddXLDM3nN8/tpk1ZC2jXQk6N+mXE65jwfzNVUJL/qjA3y9KbuQ==",
+      hexdigest_integrity_uri(sha512)
   end
 end
