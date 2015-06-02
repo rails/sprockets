@@ -129,7 +129,6 @@ module Sprockets
           content_type: type,
           source: source,
           metadata: metadata,
-          integrity: integrity_uri(metadata[:digest]),
           dependencies_digest: digest(resolve_dependencies(metadata[:dependencies]))
         }
 

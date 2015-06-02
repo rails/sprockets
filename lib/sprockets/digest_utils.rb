@@ -96,6 +96,15 @@ module Sprockets
       bin.unpack('H*').first
     end
 
+    # Internal: Unpack a hex encoded digest string into binary bytes.
+    #
+    # hex - String hex
+    #
+    # Returns binary String.
+    def unpack_hexdigest(hex)
+      [hex].pack('H*')
+    end
+
     # Internal: Pack a binary digest to a base64 encoded string.
     #
     # bin - String bytes
@@ -124,8 +133,8 @@ module Sprockets
       Digest::SHA512 => 'sha512'.freeze
     }
 
-    # Internal: Generate a "named information" URI for use in the `integrity`
-    # attribute of an asset tag as per the subresource integrity specification.
+    # Public: Generate hash for use in the `integrity` attribute of an asset tag
+    # as per the subresource integrity specification.
     #
     # digest - The String byte digest of the asset content.
     #
@@ -144,6 +153,16 @@ module Sprockets
       if hash_name = HASH_ALGORITHMS[digest_class]
         "#{hash_name}-#{pack_base64digest(digest)}"
       end
+    end
+
+    # Public: Generate hash for use in the `integrity` attribute of an asset tag
+    # as per the subresource integrity specification.
+    #
+    # digest - The String hexbyte digest of the asset content.
+    #
+    # Returns a String or nil if hash algorithm is incompatible.
+    def hexdigest_integrity_uri(hexdigest)
+      integrity_uri(unpack_hexdigest(hexdigest))
     end
   end
 end

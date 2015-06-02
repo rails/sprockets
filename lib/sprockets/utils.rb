@@ -95,11 +95,11 @@ module Sprockets
     #
     # Returns buf String.
     def concat_javascript_sources(buf, source)
-      if string_end_with_semicolon?(buf)
-        buf << source
-      else
-        buf << ";\n" << source
+      if buf.bytesize > 0
+        buf << ";" unless string_end_with_semicolon?(buf)
+        buf << "\n" unless buf.end_with?("\n")
       end
+      buf << source
     end
 
     # Internal: Inject into target module for the duration of the block.

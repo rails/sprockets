@@ -145,7 +145,11 @@ module Sprockets
           'mtime'        => Time.now.iso8601,
           'size'         => asset.bytesize,
           'digest'       => asset.hexdigest,
-          'integrity'    => asset.integrity
+
+          # Deprecated: Remove beta integrity attribute in next release.
+          # Callers should DigestUtils.hexdigest_integrity_uri to compute the
+          # digest themselves.
+          'integrity'    => DigestUtils.hexdigest_integrity_uri(asset.hexdigest)
         }
         assets[asset.logical_path] = asset.digest_path
 
