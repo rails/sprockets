@@ -2,6 +2,7 @@
 
 * Updated SRI integrity to align with spec changes
 * Deprecated Manifest integrity attribute
+* Cleanup concatenating JS sources with newlines
 
 **3.1.0** (May 10, 2015)
 

@@ -102,10 +102,12 @@ class TestUtils < MiniTest::Test
   def test_concat_javascript_sources
     assert_equal "var foo;\n", concat_javascript_sources("", "var foo;\n".freeze)
     assert_equal "\nvar foo;\n", concat_javascript_sources("\n", "var foo;\n".freeze)
-    assert_equal " var foo;\n", concat_javascript_sources(" ", "var foo;\n".freeze)
+    assert_equal " \nvar foo;\n", concat_javascript_sources(" ", "var foo;\n".freeze)
 
     assert_equal "var foo;\nvar bar;\n", concat_javascript_sources("var foo;\n", "var bar;\n".freeze)
     assert_equal "var foo;\nvar bar", concat_javascript_sources("var foo", "var bar".freeze)
+    assert_equal "var foo;\nvar bar;", concat_javascript_sources("var foo;", "var bar;".freeze)
+    assert_equal "var foo;\nvar bar;", concat_javascript_sources("var foo", "var bar;".freeze)
   end
 
   def test_post_order_depth_first_search
