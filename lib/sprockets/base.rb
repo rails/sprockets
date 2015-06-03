@@ -81,6 +81,37 @@ module Sprockets
       nil
     end
 
+    def find_all_linked_assets2(path, options = {})
+      return to_enum(__method__, path, options) unless block_given?
+
+      asset = find_asset(path, options)
+      return unless asset
+
+      aliases = {}
+      aliases.merge!(detect_aliases(asset))
+
+      yield path, asset
+      stack = asset.links.to_a
+
+      while uri = stack.shift
+        asset = load(uri)
+        aliases.merge!(detect_aliases(asset))
+        yield asset.logical_path, asset
+        aliases.select { |_, u| u == uri }.keys.each do |alias_path|
+          yield alias_path, asset
+        end
+        stack = asset.links.to_a + stack
+      end
+
+      nil
+    end
+
+    def detect_aliases(asset)
+      aliases = asset.metadata[:aliases] || {}
+      aliases = Hash[aliases.map { |path, uri| [path, load(uri).uri] }]
+      aliases
+    end
+
     # Preferred `find_asset` shorthand.
     #
     #     environment['application.js']

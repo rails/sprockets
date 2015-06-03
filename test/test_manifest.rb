@@ -274,6 +274,24 @@ class TestManifest < Sprockets::TestCase
   test "compile index asset" do
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 
+    digest_path = @env['coffee/index.js'].digest_path
+    assert_match(/coffee\/index-\w+.js/, digest_path)
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('coffee/index.js')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "coffee/index.js", data['files'][digest_path]['logical_path']
+    assert_equal digest_path, data['assets']['coffee/index.js']
+  end
+
+  test "compile index asset by alias" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
     digest_path = @env['coffee.js'].digest_path
     assert_match(/coffee\/index-\w+.js/, digest_path)
 
@@ -288,6 +306,103 @@ class TestManifest < Sprockets::TestCase
     assert_equal "coffee/index.js", data['files'][digest_path]['logical_path']
     assert_equal digest_path, data['assets']['coffee/index.js']
     assert_equal digest_path, data['assets']['coffee.js']
+  end
+
+  test "compile bower asset by alias" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['qunit.js'].digest_path
+    assert_match(/qunit\/qunit-\w+.js/, digest_path)
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('qunit.js')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "qunit/qunit.js", data['files'][digest_path]['logical_path']
+    assert_equal digest_path, data['assets']['qunit/qunit.js']
+    assert_equal digest_path, data['assets']['qunit.js']
+  end
+
+  test "compile image jpeg asset" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['beach.jpeg'].digest_path
+    assert_match(/beach-\w+.jpg/, digest_path)
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('beach.jpeg')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "beach.jpg", data['files'][digest_path]['logical_path']
+    assert_equal digest_path, data['assets']['beach.jpeg']
+    assert_equal digest_path, data['assets']['beach.jpg']
+  end
+
+  test "compile image jpg asset by alias" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['beach.jpg'].digest_path
+    assert_match(/beach-\w+.jpg/, digest_path)
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('beach.jpg')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "beach.jpg", data['files'][digest_path]['logical_path']
+    assert_equal digest_path, data['assets']['beach.jpg']
+  end
+
+  test "compile asset with aliased links" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    main_digest_path = @env['alias-link.js'].digest_path
+    dep1_digest_path = @env['coffee.js'].digest_path
+    dep2_digest_path = @env['qunit.css'].digest_path
+    dep3_digest_path = @env['beach.jpeg'].digest_path
+
+    assert !File.exist?("#{@dir}/#{main_digest_path}")
+    assert !File.exist?("#{@dir}/#{dep1_digest_path}")
+    assert !File.exist?("#{@dir}/#{dep2_digest_path}")
+    assert !File.exist?("#{@dir}/#{dep3_digest_path}")
+
+    manifest.compile('alias-link.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.filename)
+
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/#{main_digest_path}")
+    assert File.exist?("#{@dir}/#{dep1_digest_path}")
+    assert File.exist?("#{@dir}/#{dep2_digest_path}")
+    assert File.exist?("#{@dir}/#{dep3_digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][main_digest_path]
+    assert data['files'][dep1_digest_path]
+    assert data['files'][dep2_digest_path]
+    assert data['files'][dep3_digest_path]
+    assert_equal "alias-link.js", data['files'][main_digest_path]['logical_path']
+    assert_equal "coffee/index.js", data['files'][dep1_digest_path]['logical_path']
+    assert_equal "qunit/qunit.css", data['files'][dep2_digest_path]['logical_path']
+    assert_equal "beach.jpg", data['files'][dep3_digest_path]['logical_path']
+    assert_equal main_digest_path, data['assets']['alias-link.js']
+    assert_equal dep1_digest_path, data['assets']['coffee/index.js']
+    assert_equal dep1_digest_path, data['assets']['coffee.js']
+    assert_equal dep2_digest_path, data['assets']['qunit/qunit.css']
+    assert_equal dep2_digest_path, data['assets']['qunit.css']
+    assert_equal dep3_digest_path, data['assets']['beach.jpg']
+    assert_equal dep3_digest_path, data['assets']['beach.jpeg']
   end
 
   test "compile with regex" do

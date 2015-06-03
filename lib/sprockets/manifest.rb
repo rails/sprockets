@@ -127,8 +127,8 @@ module Sprockets
       environment = self.environment.cached
 
       paths.each do |path|
-        environment.find_all_linked_assets(path) do |asset|
-          yield asset
+        environment.find_all_linked_assets2(path) do |p, asset|
+          yield asset, p
         end
       end
 
@@ -159,7 +159,7 @@ module Sprockets
 
       filenames = []
 
-      find(*args) do |asset|
+      find(*args) do |asset, path|
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
           'mtime'        => asset.mtime.iso8601,
@@ -172,10 +172,7 @@ module Sprockets
           'integrity'    => DigestUtils.hexdigest_integrity_uri(asset.hexdigest)
         }
         assets[asset.logical_path] = asset.digest_path
-
-        if alias_logical_path = self.class.compute_alias_logical_path(asset.logical_path)
-          assets[alias_logical_path] = asset.digest_path
-        end
+        assets[path] = asset.digest_path if path
 
         target = File.join(dir, asset.digest_path)
 
