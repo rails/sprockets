@@ -18,7 +18,7 @@ module Sprockets
     # Defaults to `Digest::MD5`.
     attr_reader :digest_class
 
-    # Assign a `Digest` implementation class. This maybe any Ruby
+    # Assign a `Digest` implementation class. This may be any Ruby
     # `Digest::` implementation such as `Digest::MD5` or
     # `Digest::SHA1`.
     #
