@@ -33,6 +33,8 @@
 
 **3.0.0** (April 12, 2015)
 
+[Guide to upgrading from Sprockets 2.x to 3.x](https://github.com/rails/sprockets/blob/master/UPGRADING.md)
+
 * New processor API. Tilt interface is deprecated.
 * Improved file store caching backend.
 * MIME Types now accept charset custom charset detecters. Improves support for UTF-16/32 files.
