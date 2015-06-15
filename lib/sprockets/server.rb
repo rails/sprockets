@@ -23,7 +23,7 @@ module Sprockets
       start_time = Time.now.to_f
       time_elapsed = lambda { ((Time.now.to_f - start_time) * 1000).to_i }
 
-      if env['REQUEST_METHOD'] != 'GET'
+      if env['REQUEST_METHOD'] != 'GET' && env['REQUEST_METHOD'] != 'HEAD'
         return method_not_allowed_response
       end
 
