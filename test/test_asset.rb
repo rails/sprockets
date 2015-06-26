@@ -77,6 +77,19 @@ module AssetTests
       assert !File.exist?(target)
     end
   end
+
+  test "do not gzip assets that are already gzipped" do
+    @asset = @env.find_asset('archive.tar.gz')
+    target = fixture_path('asset/tmp.tar.gz')
+    begin
+      @asset.write_to(target)
+      assert File.exist?(target)
+      assert_equal Digest::MD5.hexdigest(@asset.to_s), Digest::MD5.hexdigest(File.read(target))
+    ensure
+      FileUtils.rm(target) if File.exist?(target)
+      assert !File.exist?(target)
+    end
+  end
 end
 
 module FreshnessTests

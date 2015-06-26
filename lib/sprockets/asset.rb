@@ -139,7 +139,9 @@ module Sprockets
     # Save asset to disk.
     def write_to(filename, options = {})
       # Gzip contents if filename has '.gz'
-      options[:compress] ||= File.extname(filename) == '.gz'
+      unless options.key?(:compress)
+        options[:compress] = File.extname(filename) == '.gz' && File.extname(logical_path) != '.gz'
+      end
 
       FileUtils.mkdir_p File.dirname(filename)
 
