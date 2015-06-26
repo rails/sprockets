@@ -36,8 +36,6 @@ module Sprockets
     def find_directory_manifest(dirname)
       entries = File.directory?(dirname) ? Dir.entries(dirname) : []
       entry = entries.find { |e| e =~ MANIFEST_RE } ||
-        # Deprecated: Will be removed in 4.x
-        entries.find { |e| e =~ LEGACY_MANIFEST_RE } ||
         generate_manifest_path
       File.join(dirname, entry)
     end

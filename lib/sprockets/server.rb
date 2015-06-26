@@ -42,19 +42,6 @@ module Sprockets
         return forbidden_response
       end
 
-      # Look up the asset.
-      options = {}
-      options[:pipeline] = :self if body_only?(env)
-
-      asset = find_asset(path, options)
-
-      # 2.x/3.x compatibility hack. Just ignore fingerprints on ?body=1 requests.
-      # 3.x/4.x prefers strong validation of fingerprint to body contents, but
-      # 2.x just ignored it.
-      if asset && parse_asset_uri(asset.uri)[1][:pipeline] == "self"
-        fingerprint = nil
-      end
-
       if fingerprint
         if_match = fingerprint
       elsif env['HTTP_IF_MATCH']
@@ -64,6 +51,9 @@ module Sprockets
       if env['HTTP_IF_NONE_MATCH']
         if_none_match = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
       end
+
+      # Look up the asset.
+      asset = find_asset(path)
 
       if asset.nil?
         status = :not_found
@@ -214,11 +204,6 @@ module Sprockets
           gsub("\n", '\\\\000a ').
           gsub('"',  '\\\\0022 ').
           gsub('/',  '\\\\002f ')
-      end
-
-      # Test if `?body=1` or `body=true` query param is set
-      def body_only?(env)
-        env["QUERY_STRING"].to_s =~ /body=(1|t)/
       end
 
       def cache_headers(env, etag)

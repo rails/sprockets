@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rack", "~> 1.0"
 
+  s.add_development_dependency "babel-transpiler", "~> 0.6"
   s.add_development_dependency "closure-compiler", "~> 1.1"
   s.add_development_dependency "coffee-script-source", "~> 1.6"
   s.add_development_dependency "coffee-script", "~> 2.2"
@@ -27,7 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "uglifier", "~> 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"
 
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0.0'
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]

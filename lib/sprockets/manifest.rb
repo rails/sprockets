@@ -48,14 +48,8 @@ module Sprockets
       @directory ||= File.dirname(@filename) if @filename
 
       # If directory is given w/o filename, pick a random manifest location
-      @rename_filename = nil
       if @directory && @filename.nil?
         @filename = find_directory_manifest(@directory)
-
-        # If legacy manifest name autodetected, mark to rename on save
-        if File.basename(@filename).start_with?("manifest")
-          @rename_filename = File.join(@directory, generate_manifest_path)
-        end
       end
 
       unless @directory && @filename
@@ -121,24 +115,10 @@ module Sprockets
 
       return to_enum(__method__, *args) unless block_given?
 
-      paths, filters = args.flatten.partition { |arg| self.class.simple_logical_path?(arg) }
-      filters = filters.map { |arg| self.class.compile_match_filter(arg) }
-
       environment = self.environment.cached
-
-      paths.each do |path|
+      args.flatten.each do |path|
         environment.find_all_linked_assets(path) do |asset|
           yield asset
-        end
-      end
-
-      if filters.any?
-        environment.logical_paths do |logical_path, filename|
-          if filters.any? { |f| f.call(logical_path, filename) }
-            environment.find_all_linked_assets(filename) do |asset|
-              yield asset
-            end
-          end
         end
       end
 
@@ -162,7 +142,7 @@ module Sprockets
       find(*args) do |asset|
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
-          'mtime'        => asset.mtime.iso8601,
+          'mtime'        => Time.now.iso8601,
           'size'         => asset.bytesize,
           'digest'       => asset.hexdigest,
 
@@ -172,10 +152,6 @@ module Sprockets
           'integrity'    => DigestUtils.hexdigest_integrity_uri(asset.hexdigest)
         }
         assets[asset.logical_path] = asset.digest_path
-
-        if alias_logical_path = self.class.compute_alias_logical_path(asset.logical_path)
-          assets[alias_logical_path] = asset.digest_path
-        end
 
         target = File.join(dir, asset.digest_path)
 
@@ -257,13 +233,6 @@ module Sprockets
 
     # Persist manfiest back to FS
     def save
-      if @rename_filename
-        logger.info "Renaming #{@filename} to #{@rename_filename}"
-        FileUtils.mv(@filename, @rename_filename)
-        @filename = @rename_filename
-        @rename_filename = nil
-      end
-
       data = json_encode(@data)
       FileUtils.mkdir_p File.dirname(@filename)
       PathUtils.atomic_write(@filename) do |f|

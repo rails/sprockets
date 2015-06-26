@@ -1,6 +1,5 @@
 require 'sprockets/compressing'
 require 'sprockets/dependencies'
-require 'sprockets/engines'
 require 'sprockets/mime'
 require 'sprockets/paths'
 require 'sprockets/processing'
@@ -9,18 +8,15 @@ require 'sprockets/utils'
 
 module Sprockets
   module Configuration
-    include Paths, Mime, Engines, Transformers, Processing, Compressing, Dependencies, Utils
+    include Paths, Mime, Transformers, Processing, Compressing, Dependencies, Utils
 
     def initialize_configuration(parent)
       @config = parent.config
-      @computed_config = parent.computed_config
       @logger = parent.logger
       @context_class = Class.new(parent.context_class)
     end
 
     attr_reader :config
-
-    attr_accessor :computed_config
 
     def config=(config)
       raise TypeError, "can't assign mutable config" unless config.frozen?

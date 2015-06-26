@@ -1,6 +1,5 @@
 require 'sprockets/asset'
 require 'sprockets/digest_utils'
-require 'sprockets/engines'
 require 'sprockets/errors'
 require 'sprockets/file_reader'
 require 'sprockets/mime'
@@ -16,7 +15,7 @@ module Sprockets
   # object.
   module Loader
     include DigestUtils, PathUtils, ProcessorUtils, URIUtils
-    include Engines, Mime, Processing, Resolve, Transformers
+    include Mime, Processing, Resolve, Transformers
 
     # Public: Load Asset by AssetURI.
     #
@@ -46,7 +45,7 @@ module Sprockets
           end
         end
       end
-      Asset.new(self, asset)
+      Asset.new(asset)
     end
 
     private
@@ -61,7 +60,8 @@ module Sprockets
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
-        logical_path, file_type, engine_extnames, _ = parse_path_extnames(logical_path)
+        extname, file_type = match_path_extname(logical_path, mime_exts)
+        logical_path = logical_path.chomp(extname)
         name = logical_path
 
         if pipeline = params[:pipeline]
@@ -76,22 +76,33 @@ module Sprockets
           raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
         end
 
-        processors = processors_for(type, file_type, engine_extnames, pipeline)
+        processors = processors_for(type, file_type, pipeline)
 
-        processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, pipeline)
+        processors_dep_uri = build_processors_uri(type, file_type, pipeline)
         dependencies = config[:dependencies] + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
+          source_uri, _ = resolve!(filename, pipeline: :source)
+          source_asset = load(source_uri)
+
+          source_path = source_asset.digest_path
+
           result = call_processors(processors, {
             environment: self,
             cache: self.cache,
             uri: uri,
             filename: filename,
             load_path: load_path,
+            source_path: source_path,
             name: name,
             content_type: type,
-            metadata: { dependencies: dependencies }
+            metadata: {
+              dependencies: dependencies,
+              map: [
+                {source: source_path, generated: [0, 0], original: [0, 0]}
+              ]
+            }
           })
           validate_processor_result!(result)
           source = result.delete(:data)
@@ -123,17 +134,6 @@ module Sprockets
 
         asset[:id]  = pack_hexdigest(digest(asset))
         asset[:uri] = build_asset_uri(filename, params.merge(id: asset[:id]))
-
-        # Deprecated: Avoid tracking Asset mtime
-        asset[:mtime] = metadata[:dependencies].map { |u|
-          if u.start_with?("file-digest:")
-            s = self.stat(parse_file_digest_uri(u))
-            s ? s.mtime.to_i : nil
-          else
-            nil
-          end
-        }.compact.max
-        asset[:mtime] ||= self.stat(filename).mtime.to_i
 
         cache.set("asset-uri:#{VERSION}:#{asset[:uri]}", asset, true)
         cache.set("asset-uri-digest:#{VERSION}:#{uri}:#{asset[:dependencies_digest]}", asset[:uri], true)
