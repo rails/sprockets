@@ -120,7 +120,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal({
       "version" => 3,
       "file" => "sass/main.css",
-      "mappings" => "",
+      "mappings" => "AADA,MAAA;EAAA,MAAA,EAAA,CAAA;EAAA,OAAA,EAAA,CAAA;EAAA,UAAA,EAAA,IAAA;AAAA,MAAA;EAAA,OAAA,EAAA,YAAA;AAAA,KAAA;EAAA,OAAA,EAAA,KAAA;EAAA,OAAA,EAAA,QAAA;EAAA,eAAA,EAAA,IAAA",
       "sources" => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
       "names" => []
     }, map)

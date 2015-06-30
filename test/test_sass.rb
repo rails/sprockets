@@ -160,8 +160,7 @@ li {
   end
 
   test "@import css file from load path" do
-    assert_equal <<-EOS, render('sass/import_load_path.scss')
-    EOS
+    assert_equal "\n", render('sass/import_load_path.scss')
   end
 
   test "process css file" do
@@ -277,9 +276,10 @@ class TestSassCompressor < TestBaseSass
       compressed   = "p{margin:0;padding:0}\n"
       input = {
         data: uncompressed,
+        metadata: {},
         cache: Sprockets::Cache.new
       }
-      assert_equal compressed, Sprockets::SassCompressor.call(input)
+      assert_equal compressed, Sprockets::SassCompressor.call(input)[:data]
     end
   end
 end
