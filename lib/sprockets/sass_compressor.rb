@@ -1,5 +1,6 @@
 require 'sprockets/autoload'
 require 'sprockets/digest_utils'
+require 'sprockets/source_map_utils'
 
 module Sprockets
   # Public: Sass CSS minifier.
@@ -45,7 +46,19 @@ module Sprockets
     end
 
     def call(input)
-      Autoload::Sass::Engine.new(input[:data], @options).render
+      css, map = Autoload::Sass::Engine.new(
+        input[:data],
+        @options.merge(filename: 'filename')
+      ).render_with_sourcemap('')
+
+      css = css.sub("/*# sourceMappingURL= */\n", '')
+
+      map = SourceMapUtils.combine_source_maps(
+        input[:metadata][:map],
+        SourceMapUtils.decode_json_source_map(map.to_json(css_uri: 'uri'))["mappings"]
+      )
+
+      { data: css, map: map }
     end
   end
 end
