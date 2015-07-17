@@ -58,7 +58,7 @@ doing something custom.
 ```
 
 Since links are composable, you can use them to define a single "manifest" file
-that links to ever asset you need in production.
+that links to every asset you need in production.
 
 ``` js
 // app/assets/manifest.js
