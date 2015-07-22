@@ -1,6 +1,7 @@
 require 'sprockets/autoload'
 require 'sprockets/digest_utils'
 require 'sprockets/source_map_utils'
+require 'sprockets/sass_importer'
 
 module Sprockets
   # Public: Sass CSS minifier.
@@ -40,7 +41,8 @@ module Sprockets
         syntax: :scss,
         cache: false,
         read_cache: false,
-        style: :compressed
+        style: :compressed,
+        importer: SassImporter.new(''),
       }.merge(options).freeze
       @cache_key = "#{self.class.name}:#{Autoload::Sass::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
