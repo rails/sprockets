@@ -1,5 +1,7 @@
 require 'sprockets/autoload'
 require 'sprockets/path_utils'
+require 'sprockets/source_map_utils'
+require 'json'
 
 module Sprockets
   class BabelProcessor
@@ -16,7 +18,7 @@ module Sprockets
     def initialize(options = {})
       @options = options.merge({
         'blacklist' => (options['blacklist'] || []) + ['useStrict'],
-        'sourceMap' => false
+        'sourceMap' => true
       }).freeze
 
       @cache_key = [
@@ -40,7 +42,10 @@ module Sprockets
         ))
       end
 
-      result['code']
+      map = SourceMapUtils.decode_json_source_map(JSON.generate(result['map']))
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map["mappings"])
+
+      { data: result['code'], map: map }
     end
   end
 end
