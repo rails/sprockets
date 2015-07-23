@@ -95,6 +95,51 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal 779, map['mappings'].size
   end
 
+  test "compile babel source map" do
+    assert asset = @env.find_asset("babel/main.js")
+    assert_equal fixture_path('source-maps/babel/main.es6'), asset.filename
+    assert_equal "application/javascript", asset.content_type
+
+    assert_match "var SkinnedMesh = (function (_THREE$Mesh)", asset.source
+    assert_match "_defineProperty({}, Symbol.iterator", asset.source
+
+    assert asset = @env.find_asset("babel/main.js.map")
+    assert_equal fixture_path('source-maps/babel/main.es6'), asset.filename
+    assert_equal "babel/main.js.map", asset.logical_path
+    assert_equal "application/js-sourcemap+json", asset.content_type
+    assert_equal [
+      "file://#{fixture_path('source-maps/babel/main.es6')}?type=application/ecmascript-6&pipeline=source&id=xxx"
+    ], normalize_uris(asset.links)
+
+    assert map = JSON.parse(asset.source)
+    assert_equal({
+      "version" => 3,
+      "file" => "babel/main.js",
+      "mappings" => ";;;;;;;;;;AADA,IAAA,IAAA,GAAA,KAAA,CAAA,GAAA,CAAA,UAAA,CAAA;SAAA,CAAA,GAAA,CAAA;CAAA,CAAA,CAAA;AAAA,IAAA,IAAA,GAAA,KAAA,CAAA,GAAA,CAAA,UAAA,CAAA,EAAA,CAAA;SAAA,CAAA,GAAA,CAAA;CAAA,CAAA,CAAA;;IAAA,WAAA;YAAA,WAAA;;AAAA,WAAA,WAAA,CAAA,QAAA,EAAA,SAAA,EAAA;0BAAA,WAAA;;AAAA,+BAAA,WAAA,6CAAA,QAAA,EAAA,SAAA,EAAA;GAAA;;eAAA,WAAA;;WAAA,gBAAA,MAAA,EAAA;AAAA,iCAAA,WAAA,wCAAA;KAAA;;;WAAA,yBAAA;AAAA,aAAA,IAAA,KAAA,CAAA,OAAA,EAAA,CAAA;KAAA;;;SAAA,WAAA;GAAA,KAAA,CAAA,IAAA;;AAAA,IAAA,SAAA,uBAAA,MAAA,CAAA,QAAA,0BAAA;MAAA,GAAA,EAAA,GAAA,EAAA,IAAA;;;;AAAA,WAAA,GAAA,CAAA,EAAA,GAAA,GAAA,CAAA;;;AAAA,YAAA,GAAA,GAAA;;AAAA,WAAA,GAAA,GAAA,CAAA;AAAA,WAAA,IAAA,IAAA,CAAA;;eAAA,GAAA;;;;;;;;;;;CAAA,EAAA,CAAA",
+      "sources" => ["babel/main.source-1acb9cf16a3e1ce0fe0a38491472a14a6a97281ceace4b67ec16a904be5fa1b9.es6"],
+      "names"=>[]
+    }, map)
+  end
+
+  test "use precompiled babel source map" do
+    assert asset = @env.find_asset("babel/precompiled/main.js")
+    assert_equal fixture_path('source-maps/babel/precompiled/main.js'), asset.filename
+    assert_equal "application/javascript", asset.content_type
+
+    assert_match "var SkinnedMesh = (function (_THREE$Mesh)", asset.source
+    assert_match "_defineProperty({}, Symbol.iterator", asset.source
+
+    assert asset = @env.find_asset("babel/precompiled/main.js.map")
+    assert_equal fixture_path('source-maps/babel/precompiled/main.js.map'), asset.filename
+    assert_equal "babel/precompiled/main.js.map", asset.logical_path
+    assert_equal "application/js-sourcemap+json", asset.content_type
+
+    assert map = JSON.parse(asset.source)
+    assert_equal 3, map['version']
+    assert_equal "main.es6", map['file']
+    assert_equal 694, map['mappings'].size
+  end
+
   test "compile scss source map" do
     asset = silence_warnings do
       @env.find_asset("sass/main.css")

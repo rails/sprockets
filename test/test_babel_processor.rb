@@ -7,10 +7,13 @@ class TestBabelProcessor < MiniTest::Test
     input = {
       content_type: 'application/ecmascript-6',
       data: "const square = (n) => n * n",
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.call(input)
+    assert js = Sprockets::BabelProcessor.call(input)[:data]
     assert_match(/var square/, js)
     assert_match(/function/, js)
   end
@@ -19,10 +22,13 @@ class TestBabelProcessor < MiniTest::Test
     input = {
       content_type: 'application/ecmascript-6',
       data: "var square = (n) => n * n",
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.call(input)
+    assert js = Sprockets::BabelProcessor.call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
 var square = function square(n) {
   return n * n;
@@ -34,10 +40,13 @@ var square = function square(n) {
     input = {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.new('modules' => 'common').call(input)
+    assert js = Sprockets::BabelProcessor.new('modules' => 'common').call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
 require("foo");
     JS
@@ -47,10 +56,13 @@ require("foo");
     input = {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.new('modules' => 'amd').call(input)
+    assert js = Sprockets::BabelProcessor.new('modules' => 'amd').call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
 define(["exports", "foo"], function (exports, _foo) {});
     JS
@@ -60,12 +72,13 @@ define(["exports", "foo"], function (exports, _foo) {});
     input = {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
+      metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.new('modules' => 'amd', 'moduleIds' => true).call(input)
+    assert js = Sprockets::BabelProcessor.new('modules' => 'amd', 'moduleIds' => true).call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
 define("mod", ["exports", "foo"], function (exports, _foo) {});
     JS
@@ -75,10 +88,13 @@ define("mod", ["exports", "foo"], function (exports, _foo) {});
     input = {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.new('modules' => 'system').call(input)
+    assert js = Sprockets::BabelProcessor.new('modules' => 'system').call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
 System.register(["foo"], function (_export) {
   return {
@@ -93,12 +109,13 @@ System.register(["foo"], function (_export) {
     input = {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
+      metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
       cache: Sprockets::Cache.new
     }
 
-    assert js = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(input)
+    assert js = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
 System.register("mod", ["foo"], function (_export) {
   return {
