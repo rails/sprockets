@@ -7,6 +7,7 @@ module Sprockets
     autoload :EJS, 'sprockets/autoload/ejs'
     autoload :JSMinC, 'sprockets/autoload/jsminc'    
     autoload :Sass, 'sprockets/autoload/sass'
+    autoload :SassC, 'sprockets/autoload/sassc'
     autoload :Uglifier, 'sprockets/autoload/uglifier'
     autoload :YUI, 'sprockets/autoload/yui'
   end
