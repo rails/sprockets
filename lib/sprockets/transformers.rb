@@ -109,7 +109,7 @@ module Sprockets
     # types - Array of mime type steps
     #
     # Returns Processor.
-    def compose_transformers(transformers, types)
+    def compose_transformers(transformers, types, preprocessors, postprocessors)
       if types.length < 2
         raise ArgumentError, "too few transform types: #{types.inspect}"
       end
@@ -120,9 +120,9 @@ module Sprockets
         unless processor = transformers[src][dst]
           raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
         end
-        processors.concat config[:postprocessors][src]
+        processors.concat postprocessors[src]
         processors << processor
-        processors.concat config[:preprocessors][dst]
+        processors.concat preprocessors[dst]
       end
 
       if processors.size > 1
@@ -142,7 +142,9 @@ module Sprockets
           dfs_paths([key]) { |k| registered_transformers[k].keys }
         end.each do |types|
           src, dst = types.first, types.last
-          processor = compose_transformers(registered_transformers, types)
+          preprocessors = self.config[:preprocessors]
+          postprocessors = self.config[:postprocessors]
+          processor = compose_transformers(registered_transformers, types, preprocessors, postprocessors)
 
           transformers[src] = {} unless transformers.key?(src)
           transformers[src][dst] = processor

@@ -137,18 +137,21 @@ class TestTransformers < Sprockets::TestCase
       }
     }
 
-    processor = @env.compose_transformers(transformers, ["image/svg", "image/png"])
+    preprocessors = @env.config[:preprocessors]
+    postprocessors = @env.config[:postprocessors]
+
+    processor = @env.compose_transformers(transformers, ["image/svg", "image/png"], preprocessors, postprocessors)
     assert_equal({data: ",svg->png"}, processor.call({data: ""}))
 
-    processor = @env.compose_transformers(transformers, ["image/svg", "image/png", "image/gif"])
+    processor = @env.compose_transformers(transformers, ["image/svg", "image/png", "image/gif"], preprocessors, postprocessors)
     assert_equal({data: ",svg->png,png->gif"}, processor.call({data: ""}))
 
     assert_raises(Sprockets::ArgumentError) do
-      @env.compose_transformers(transformers, ["image/svg"])
+      @env.compose_transformers(transformers, ["image/svg"], preprocessors, postprocessors)
     end
 
     assert_raises(Sprockets::ArgumentError) do
-      @env.compose_transformers(transformers, ["image/svg", "image/jif"])
+      @env.compose_transformers(transformers, ["image/svg", "image/jif"], preprocessors, postprocessors)
     end
   end
 end
