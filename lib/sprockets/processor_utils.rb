@@ -16,26 +16,34 @@ module Sprockets
   module ProcessorUtils
     extend self
 
+    class CompositeProcessor < Struct.new(:processor_strategy, :param, :processors) # :nodoc:
+      SINGULAR = lambda { |param, input| ProcessorUtils.call_processor param, input }
+      PLURAL   = lambda { |param, input| ProcessorUtils.call_processors param, input }
+
+      def self.create(processors)
+        if processors.length == 1
+          new SINGULAR, processors.first, processors
+        else
+          new PLURAL, processors, processors
+        end
+      end
+
+      def call(input)
+        processor_strategy.call param, input
+      end
+
+      def cache_key
+        ProcessorUtils.processors_cache_keys(processors)
+      end
+    end
+
     # Public: Compose processors in right to left order.
     #
     # processors - Array of processors callables
     #
     # Returns a composed Proc.
     def compose_processors(*processors)
-      context = self
-
-      if processors.length == 1
-        obj = method(:call_processor).to_proc.curry[processors.first]
-      else
-        obj = method(:call_processors).to_proc.curry[processors]
-      end
-
-      metaclass = (class << obj; self; end)
-      metaclass.send(:define_method, :cache_key) do
-        context.processors_cache_keys(processors)
-      end
-
-      obj
+      CompositeProcessor.create processors
     end
 
     # Public: Invoke list of processors in right to left order.
