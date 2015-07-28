@@ -66,17 +66,6 @@ class TestUtils < MiniTest::Test
     assert h.frozen?
     assert h[:foo].frozen?
     assert h[:foo][:bar].frozen?
-
-    h = hash_reassoc({foo: {bar: {baz: "biz".freeze}.freeze}.freeze}.freeze, :foo, :bar, :baz) do |value|
-      assert_equal "biz", value
-      refute value.frozen?
-      "foo"
-    end
-    assert_equal({foo: {bar: {baz: "foo"}}}, h)
-    assert h.frozen?
-    assert h[:foo].frozen?
-    assert h[:foo][:bar].frozen?
-    assert h[:foo][:bar][:baz].frozen?
   end
 
   def test_string_ends_with_semicolon

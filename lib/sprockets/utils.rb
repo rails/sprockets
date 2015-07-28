@@ -45,7 +45,8 @@ module Sprockets
     # Similar to Hash#store for nested frozen hashes.
     #
     # hash  - Hash
-    # key   - Object keys. Use multiple keys for nested hashes.
+    # key_a - Object key. Use multiple keys for nested hashes.
+    # key_b - Object key. Use multiple keys for nested hashes.
     # block - Receives current value at key.
     #
     # Examples
@@ -56,13 +57,13 @@ module Sprockets
     #     end
     #
     # Returns duplicated frozen Hash.
-    def hash_reassoc(hash, *keys, &block)
-      if keys.size == 1
-        hash_reassoc1(hash, keys[0], &block)
-      else
-        hash_reassoc1(hash, keys[0]) do |value|
-          hash_reassoc(value, *keys[1..-1], &block)
+    def hash_reassoc(hash, key_a, key_b = nil, &block)
+      if key_b
+        hash_reassoc1(hash, key_a) do |value|
+          hash_reassoc(value, key_b, &block)
         end
+      else
+        hash_reassoc1(hash, key_a, &block)
       end
     end
 
