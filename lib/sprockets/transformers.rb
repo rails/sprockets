@@ -154,19 +154,19 @@ module Sprockets
         inverted_transformers = Hash.new { Set.new }
         incoming_edges = all.group_by(&:from)
 
-        paths = all.flat_map do |t|
-          dfs_paths([t]) { |k| incoming_edges.fetch(k.to, []) }
-        end
+        all.each do |t|
+          traversals = dfs_paths([t]) { |k| incoming_edges.fetch(k.to, []) }
 
-        paths.each do |procs|
-          src, dst = procs.first.from, procs.last.to
-          processor = compose_transformer_list procs, preprocessors, postprocessors
+          traversals.each do |nodes|
+            src, dst = nodes.first.from, nodes.last.to
+            processor = compose_transformer_list nodes, preprocessors, postprocessors
 
-          transformers[src] = {} unless transformers.key?(src)
-          transformers[src][dst] = processor
+            transformers[src] = {} unless transformers.key?(src)
+            transformers[src][dst] = processor
 
-          inverted_transformers[dst] = Set.new unless inverted_transformers.key?(dst)
-          inverted_transformers[dst] << src
+            inverted_transformers[dst] = Set.new unless inverted_transformers.key?(dst)
+            inverted_transformers[dst] << src
+          end
         end
 
         self.config = hash_reassoc(config, :transformers) { transformers }
