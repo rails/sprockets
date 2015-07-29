@@ -148,17 +148,19 @@ module Sprockets
         registered_transformers.each_with_object(hash) do |t,h|
           h[t.from][t.to] = t
         end
+        froms = registered_transformers.group_by(&:from)
+        tos = registered_transformers.group_by(&:to)
         preprocessors = self.config[:preprocessors]
         postprocessors = self.config[:postprocessors]
-        _compute_transformers! hash, preprocessors, postprocessors
+        _compute_transformers! hash, froms, tos, preprocessors, postprocessors
       end
 
-      def _compute_transformers!(registered_transformers, preprocessors, postprocessors)
+      def _compute_transformers!(registered_transformers, froms, tos, preprocessors, postprocessors)
         transformers = Hash.new { {} }
         inverted_transformers = Hash.new { Set.new }
 
-        paths = registered_transformers.keys.flat_map do |key|
-          dfs_paths([key]) { |k| registered_transformers[k].keys }
+        paths = froms.keys.flat_map do |key|
+          dfs_paths([key]) { |k| froms.key?(k) ? froms[k].map(&:to) : [] }
         end
 
         paths.each do |types|
