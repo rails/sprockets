@@ -173,7 +173,7 @@ module Sprockets
       while path = stack.pop
         if !seen.include?(path.last)
           seen.add(path.last)
-          paths << path if path.size > 1
+          paths << path
 
           Array(yield path.last).reverse_each do |node|
             stack.push(path + [node])

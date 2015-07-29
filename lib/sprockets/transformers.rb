@@ -116,21 +116,17 @@ module Sprockets
         raise ArgumentError, "too few transform types: #{types.inspect}"
       end
 
-      processors = convert_to_processors types, transformers
-
-      compose_transformer_list processors, preprocessors, postprocessors
-    end
-
-    private
-    def convert_to_processors types, transformers
-      types.each_cons(2).map { |src, dst|
+      processors = types.each_cons(2).map { |src, dst|
         unless processor = transformers[src][dst]
           raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
         end
         processor
       }
+
+      compose_transformer_list processors, preprocessors, postprocessors
     end
 
+    private
       def compose_transformer_list(transformers, preprocessors, postprocessors)
         processors = []
 
@@ -148,30 +144,23 @@ module Sprockets
       end
 
       def compute_transformers!(registered_transformers)
-        hash = Hash.new { |h,k| h[k] = {} }
-        registered_transformers.each_with_object(hash) do |t,h|
-          h[t.from][t.to] = t
-        end
-        froms = registered_transformers.group_by(&:from)
-        tos = registered_transformers.group_by(&:to)
         preprocessors = self.config[:preprocessors]
         postprocessors = self.config[:postprocessors]
-        _compute_transformers! hash, registered_transformers, froms, tos, preprocessors, postprocessors
+        _compute_transformers! registered_transformers, preprocessors, postprocessors
       end
 
-      def _compute_transformers!(registered_transformers, all, froms, tos, preprocessors, postprocessors)
+      def _compute_transformers!(all, preprocessors, postprocessors)
         transformers = Hash.new { {} }
         inverted_transformers = Hash.new { Set.new }
+        incoming_edges = all.group_by(&:from)
 
         paths = all.flat_map do |t|
-          dfs_paths([t.from]) { |k| froms.key?(k) ? froms[k].map(&:to) : [] }
+          dfs_paths([t]) { |k| incoming_edges.fetch(k.to, []) }
         end
 
-        procs = paths.map { |types| convert_to_processors types, registered_transformers }
-
-        procs.each do |proc|
-          src, dst = proc.first.from, proc.last.to
-          processor = compose_transformer_list proc, preprocessors, postprocessors
+        paths.each do |procs|
+          src, dst = procs.first.from, procs.last.to
+          processor = compose_transformer_list procs, preprocessors, postprocessors
 
           transformers[src] = {} unless transformers.key?(src)
           transformers[src][dst] = processor
