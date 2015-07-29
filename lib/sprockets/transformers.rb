@@ -116,25 +116,33 @@ module Sprockets
         raise ArgumentError, "too few transform types: #{types.inspect}"
       end
 
-      processors = []
-
-      types.each_cons(2) do |src, dst|
+      processors = types.each_cons(2).map { |src, dst|
         unless processor = transformers[src][dst]
           raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
         end
-        processors.concat postprocessors[processor.from]
-        processors << processor.proc
-        processors.concat preprocessors[processor.to]
-      end
+        processor
+      }
 
-      if processors.size > 1
-        compose_processors(*processors.reverse)
-      elsif processors.size == 1
-        processors.first
-      end
+      compose_transformer_list processors, preprocessors, postprocessors
     end
 
     private
+      def compose_transformer_list(transformers, preprocessors, postprocessors)
+        processors = []
+
+        transformers.each do |processor|
+          processors.concat postprocessors[processor.from]
+          processors << processor.proc
+          processors.concat preprocessors[processor.to]
+        end
+
+        if processors.size > 1
+          compose_processors(*processors.reverse)
+        elsif processors.size == 1
+          processors.first
+        end
+      end
+
       def compute_transformers!(registered_transformers)
         hash = Hash.new { |h,k| h[k] = {} }
         registered_transformers.each_with_object(hash) do |t,h|
