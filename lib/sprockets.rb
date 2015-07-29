@@ -29,7 +29,7 @@ module Sprockets
     pipeline_exts: {}.freeze,
     postprocessors: Hash.new { |h, k| [].freeze }.freeze,
     preprocessors: Hash.new { |h, k| [].freeze }.freeze,
-    registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    registered_transformers: [].freeze,
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: ""

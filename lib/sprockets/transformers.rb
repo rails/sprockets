@@ -18,6 +18,8 @@ module Sprockets
       config[:transformers]
     end
 
+    Transformer = Struct.new :from, :to, :proc
+
     # Public: Register a transformer from and to a mime type.
     #
     # from - String mime type
@@ -33,8 +35,8 @@ module Sprockets
     #
     # Returns nothing.
     def register_transformer(from, to, proc)
-      self.config = hash_reassoc(config, :registered_transformers, from) do |transformers|
-        transformers.merge(to => proc)
+      self.config = hash_reassoc(config, :registered_transformers) do |transformers|
+        transformers << Transformer.new(from, to, proc)
       end
       compute_transformers!(self.config[:registered_transformers])
     end
@@ -120,9 +122,9 @@ module Sprockets
         unless processor = transformers[src][dst]
           raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
         end
-        processors.concat postprocessors[src]
-        processors << processor
-        processors.concat preprocessors[dst]
+        processors.concat postprocessors[processor.from]
+        processors << processor.proc
+        processors.concat preprocessors[processor.to]
       end
 
       if processors.size > 1
@@ -134,15 +136,25 @@ module Sprockets
 
     private
       def compute_transformers!(registered_transformers)
+        hash = Hash.new { |h,k| h[k] = {} }
+        registered_transformers.each_with_object(hash) do |t,h|
+          h[t.from][t.to] = t
+        end
+        preprocessors = self.config[:preprocessors]
+        postprocessors = self.config[:postprocessors]
+        _compute_transformers! hash, preprocessors, postprocessors
+      end
+
+      def _compute_transformers!(registered_transformers, preprocessors, postprocessors)
         transformers = Hash.new { {} }
         inverted_transformers = Hash.new { Set.new }
 
-        registered_transformers.keys.flat_map do |key|
+        paths = registered_transformers.keys.flat_map do |key|
           dfs_paths([key]) { |k| registered_transformers[k].keys }
-        end.each do |types|
+        end
+
+        paths.each do |types|
           src, dst = types.first, types.last
-          preprocessors = self.config[:preprocessors]
-          postprocessors = self.config[:postprocessors]
           processor = compose_transformers(registered_transformers, types, preprocessors, postprocessors)
 
           transformers[src] = {} unless transformers.key?(src)
