@@ -144,17 +144,13 @@ module Sprockets
       end
 
       def compute_transformers!(registered_transformers)
-        preprocessors = self.config[:preprocessors]
-        postprocessors = self.config[:postprocessors]
-        _compute_transformers! registered_transformers, preprocessors, postprocessors
-      end
-
-      def _compute_transformers!(all, preprocessors, postprocessors)
-        transformers = Hash.new { {} }
+        preprocessors         = self.config[:preprocessors]
+        postprocessors        = self.config[:postprocessors]
+        transformers          = Hash.new { {} }
         inverted_transformers = Hash.new { Set.new }
-        incoming_edges = all.group_by(&:from)
+        incoming_edges        = registered_transformers.group_by(&:from)
 
-        all.each do |t|
+        registered_transformers.each do |t|
           traversals = dfs_paths([t]) { |k| incoming_edges.fetch(k.to, []) }
 
           traversals.each do |nodes|
