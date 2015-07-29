@@ -50,6 +50,7 @@ module Sprockets
     #
     def register_preprocessor(*args, &block)
       register_config_processor(:preprocessors, *args, &block)
+      compute_transformers!(self.config[:registered_transformers])
     end
     alias_method :register_processor, :register_preprocessor
 
@@ -65,6 +66,7 @@ module Sprockets
     #
     def register_postprocessor(*args, &block)
       register_config_processor(:postprocessors, *args, &block)
+      compute_transformers!(self.config[:registered_transformers])
     end
 
     # Remove Preprocessor `klass` for `mime_type`.
@@ -73,6 +75,7 @@ module Sprockets
     #
     def unregister_preprocessor(*args)
       unregister_config_processor(:preprocessors, *args)
+      compute_transformers!(self.config[:registered_transformers])
     end
     alias_method :unregister_processor, :unregister_preprocessor
 
@@ -82,6 +85,7 @@ module Sprockets
     #
     def unregister_postprocessor(*args)
       unregister_config_processor(:postprocessors, *args)
+      compute_transformers!(self.config[:registered_transformers])
     end
 
     # Bundle Processors are ran on concatenated assets rather than
@@ -210,8 +214,6 @@ module Sprockets
           processors.unshift(processor)
           processors
         end
-
-        compute_transformers!(self.config[:registered_transformers])
       end
 
       def unregister_config_processor(type, mime_type, proccessor)
@@ -219,8 +221,6 @@ module Sprockets
           processors.delete(proccessor)
           processors
         end
-
-        compute_transformers!(self.config[:registered_transformers])
       end
   end
 end
