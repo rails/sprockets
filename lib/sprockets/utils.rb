@@ -168,16 +168,16 @@ module Sprockets
     # Returns an Array of node Arrays.
     def dfs_paths(path)
       paths = []
-      stack, seen = [path], Set.new
+      stack = [path]
+      seen  = Set.new
 
       while path = stack.pop
-        if !seen.include?(path.last)
-          seen.add(path.last)
-          paths << path
+        seen.add(path.last)
+        paths << path
 
-          Array(yield path.last).reverse_each do |node|
-            stack.push(path + [node])
-          end
+        children = yield path.last
+        children.reverse_each do |node|
+          stack.push(path + [node]) unless seen.include?(node)
         end
       end
 

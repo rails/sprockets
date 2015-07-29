@@ -137,7 +137,7 @@ class TestUtils < MiniTest::Test
       [0, 1, 2, 3],
       [0, 1, 2, 3, 4],
       [0, 1, 2, 3, 5]
-    ], dfs_paths([0]) { |n| m[n] }
+    ], dfs_paths([0]) { |n| m[n] || [] }
 
     assert_equal [
       [1],
@@ -145,9 +145,9 @@ class TestUtils < MiniTest::Test
       [1, 2, 3],
       [1, 2, 3, 4],
       [1, 2, 3, 5]
-    ], dfs_paths([1]) { |n| m[n] }
+    ], dfs_paths([1]) { |n| m[n] || [] }
 
-    assert_equal [[5]], dfs_paths([5]) { |n| m[n] }
+    assert_equal [[5]], dfs_paths([5]) { |n| m[n] || [] }
   end
 
   module Functions
