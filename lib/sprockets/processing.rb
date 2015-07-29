@@ -211,7 +211,7 @@ module Sprockets
           processors
         end
 
-        compute_transformers!
+        compute_transformers!(self.config[:registered_transformers])
       end
 
       def unregister_config_processor(type, mime_type, proccessor)
@@ -220,7 +220,7 @@ module Sprockets
           processors
         end
 
-        compute_transformers!
+        compute_transformers!(self.config[:registered_transformers])
       end
   end
 end

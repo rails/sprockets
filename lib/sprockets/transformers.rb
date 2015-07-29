@@ -36,7 +36,7 @@ module Sprockets
       self.config = hash_reassoc(config, :registered_transformers, from) do |transformers|
         transformers.merge(to => proc)
       end
-      compute_transformers!
+      compute_transformers!(self.config[:registered_transformers])
     end
 
     # Internal: Register transformer for existing type adding a suffix.
@@ -133,8 +133,7 @@ module Sprockets
     end
 
     private
-      def compute_transformers!
-        registered_transformers = self.config[:registered_transformers]
+      def compute_transformers!(registered_transformers)
         transformers = Hash.new { {} }
         inverted_transformers = Hash.new { Set.new }
 
