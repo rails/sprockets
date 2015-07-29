@@ -116,17 +116,21 @@ module Sprockets
         raise ArgumentError, "too few transform types: #{types.inspect}"
       end
 
-      processors = types.each_cons(2).map { |src, dst|
-        unless processor = transformers[src][dst]
-          raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
-        end
-        processor
-      }
+      processors = convert_to_processors types, transformers
 
       compose_transformer_list processors, preprocessors, postprocessors
     end
 
     private
+    def convert_to_processors types, transformers
+      types.each_cons(2).map { |src, dst|
+        unless processor = transformers[src][dst]
+          raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
+        end
+        processor
+      }
+    end
+
       def compose_transformer_list(transformers, preprocessors, postprocessors)
         processors = []
 
@@ -163,9 +167,11 @@ module Sprockets
           dfs_paths([t.from]) { |k| froms.key?(k) ? froms[k].map(&:to) : [] }
         end
 
-        paths.each do |types|
-          src, dst = types.first, types.last
-          processor = compose_transformers(registered_transformers, types, preprocessors, postprocessors)
+        procs = paths.map { |types| convert_to_processors types, registered_transformers }
+
+        procs.each do |proc|
+          src, dst = proc.first.from, proc.last.to
+          processor = compose_transformer_list proc, preprocessors, postprocessors
 
           transformers[src] = {} unless transformers.key?(src)
           transformers[src][dst] = processor
