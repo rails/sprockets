@@ -128,30 +128,26 @@ class TestTransformers < Sprockets::TestCase
   end
 
   test "compose transformers" do
-    transformers = {
-      "image/svg" => {
-        "image/png" => proc { |input| { data: input[:data] + ",svg->png" } }
-      },
-      "image/png" => {
-        "image/gif" => proc { |input| { data: input[:data] + ",png->gif" } }
-      }
+    @env.register_transformer "image/svg", "image/png", proc { |input|
+      { data: input[:data] + ",svg->png" }
     }
 
-    preprocessors = @env.config[:preprocessors]
-    postprocessors = @env.config[:postprocessors]
+    @env.register_transformer "image/png", "image/gif", proc { |input|
+      { data: input[:data] + ",png->gif" }
+    }
 
-    processor = @env.compose_transformers(transformers, ["image/svg", "image/png"], preprocessors, postprocessors)
-    assert_equal({data: ",svg->png"}, processor.call({data: ""}))
+    data = @env.config[:transformers]['image/svg']['image/png'].call(data: '')
+    assert_equal({data: ",svg->png"}, data)
 
-    processor = @env.compose_transformers(transformers, ["image/svg", "image/png", "image/gif"], preprocessors, postprocessors)
-    assert_equal({data: ",svg->png,png->gif"}, processor.call({data: ""}))
+    data = @env.config[:transformers]['image/svg']['image/gif'].call(data: '')
+    assert_equal({data: ",svg->png,png->gif"}, data)
 
     assert_raises(Sprockets::ArgumentError) do
-      @env.compose_transformers(transformers, ["image/svg"], preprocessors, postprocessors)
+      @env.compose_transformers(nil, ["image/svg"], nil, nil)
     end
 
     assert_raises(Sprockets::ArgumentError) do
-      @env.compose_transformers(transformers, ["image/svg", "image/jif"], preprocessors, postprocessors)
+      @env.compose_transformers(Hash.new { {} }, ["image/svg", "image/jif"], nil, nil)
     end
   end
 end
