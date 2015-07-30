@@ -451,6 +451,10 @@ submit a pull request.
 
 Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGELOG.md)
 
+## Build Status
+
+[![Build Status](https://travis-ci.org/rails/sprockets.svg?branch=master)](https://travis-ci.org/rails/sprockets)
+
 ## License
 
 Copyright &copy; 2014 Sam Stephenson <<sstephenson@gmail.com>>
