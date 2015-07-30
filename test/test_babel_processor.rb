@@ -80,7 +80,7 @@ define(["exports", "foo"], function (exports, _foo) {});
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'amd', 'moduleIds' => true).call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
-define("mod", ["exports", "foo"], function (exports, _foo) {});
+define("#{File.expand_path("../fixtures/mod", __FILE__)}", ["exports", "foo"], function (exports, _foo) {});
     JS
   end
 
@@ -117,7 +117,7 @@ System.register(["foo"], function (_export) {
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(input)[:data]
     assert_equal <<-JS.chomp, js.strip
-System.register("mod", ["foo"], function (_export) {
+System.register("#{File.expand_path("../fixtures/mod", __FILE__)}", ["foo"], function (_export) {
   return {
     setters: [function (_foo) {}],
     execute: function () {}

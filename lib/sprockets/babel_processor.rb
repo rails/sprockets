@@ -36,7 +36,6 @@ module Sprockets
       result = input[:cache].fetch(@cache_key + [data]) do
         Autoload::Babel::Transpiler.transform(data, @options.merge(
           'sourceRoot' => input[:load_path],
-          'moduleRoot' => '',
           'filename' => input[:filename],
           'filenameRelative' => PathUtils.split_subpath(input[:load_path], input[:filename])
         ))
