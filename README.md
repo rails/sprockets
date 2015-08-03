@@ -156,6 +156,9 @@ environment.js_compressor  = :uglify
 environment.css_compressor = :scss
 ```
 
+If you are using Sprockets directly with Rack app, don't forget to add
+`uglifier` and `sass` gems to your Gemfile when using above options.
+
 ### Styling with Sass and SCSS
 
 [Sass](http://sass-lang.com/) is a language that compiles to CSS and
