@@ -28,13 +28,13 @@ module Sprockets
       elsif absolute_path?(path)
         filename, type, deps = resolve_absolute_path(paths, path, accept)
       elsif relative_path?(path)
-        filename, type, path_pipeline, deps = resolve_relative_path(paths, path, base_path, accept)
+        filename, type, path_pipeline, deps, index_alias = resolve_relative_path(paths, path, base_path, accept)
       else
-        filename, type, path_pipeline, deps = resolve_logical_path(paths, path, accept)
+        filename, type, path_pipeline, deps, index_alias = resolve_logical_path(paths, path, accept)
       end
 
       if filename
-        uri = build_asset_uri(filename, type: type, pipeline: pipeline || path_pipeline)
+        uri = build_asset_uri(filename, type: type, pipeline: pipeline || path_pipeline, index_alias: index_alias)
       end
 
       return uri, deps
@@ -104,12 +104,12 @@ module Sprockets
         parsed_accept = parse_accept_options(mime_type, accept)
         transformed_accepts = expand_transform_accepts(parsed_accept)
 
-        filename, mime_type, deps = resolve_under_paths(paths, logical_name, transformed_accepts)
+        filename, mime_type, deps, index_alias = resolve_under_paths(paths, logical_name, transformed_accepts)
 
         if filename
           deps << build_file_digest_uri(filename)
           type = resolve_transform_type(mime_type, parsed_accept)
-          return filename, type, pipeline, deps
+          return filename, type, pipeline, deps, index_alias
         else
           return nil, nil, nil, deps
         end
@@ -136,9 +136,9 @@ module Sprockets
           end
 
           candidate = find_best_q_match(accepts, candidates) do |c, matcher|
-            match_mime_type?(c[1] || "application/octet-stream", matcher)
+            match_mime_type?(c[:type] || "application/octet-stream", matcher)
           end
-          return candidate + [deps] if candidate
+          return candidate[:filename], candidate[:type], deps, candidate[:index_alias] if candidate
         end
 
         return nil, nil, deps
@@ -147,14 +147,16 @@ module Sprockets
       def resolve_main_under_path(load_path, logical_name, mime_exts)
         dirname    = File.dirname(File.join(load_path, logical_name))
         candidates = find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
-        return candidates, [build_file_digest_uri(dirname)]
+        return candidates.map { |c|
+          { filename: c[0], type: c[1] }
+        }, [build_file_digest_uri(dirname)]
       end
 
       def resolve_alts_under_path(load_path, logical_name, mime_exts)
         filenames, deps = self.resolve_alternates(load_path, logical_name)
         return filenames.map { |fn|
           _, mime_type = match_path_extname(fn, mime_exts)
-          [fn, mime_type]
+          { filename: fn, type: mime_type }
         }, deps
       end
 
@@ -165,7 +167,9 @@ module Sprockets
         if directory?(dirname)
           candidates = find_matching_path_for_extensions(dirname, "index", mime_exts)
         end
-        return candidates, deps
+        return candidates.map { |c|
+          { filename: c[0], type: c[1], index_alias: c[0].sub(/\/index/, '') }
+        }, deps
       end
 
       def parse_accept_options(mime_type, types)

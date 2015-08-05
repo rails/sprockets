@@ -86,6 +86,71 @@ class TestManifest < Sprockets::TestCase
     assert_equal digest_path, data['assets']['application.js']
   end
 
+  test "compile index asset" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['coffee/index.js'].digest_path
+    assert_match(/coffee\/index-\w+.js/, digest_path)
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('coffee/index.js')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "coffee/index.js", data['files'][digest_path]['logical_path']
+    assert_equal digest_path, data['assets']['coffee/index.js']
+  end
+
+  test "compile index asset by alias" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['coffee.js'].digest_path
+    assert_match(/coffee-\w+.js/, digest_path)
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+
+    manifest.compile('coffee.js')
+
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal "coffee.js", data['files'][digest_path]['logical_path']
+    assert !data['assets']['coffee/index.js']
+    assert_equal digest_path, data['assets']['coffee.js']
+  end
+
+
+  test "compile asset with aliased index links" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    main_digest_path = @env['alias-index-link.js'].digest_path
+    dep_digest_path = @env['coffee.js'].digest_path
+
+    assert !File.exist?("#{@dir}/#{main_digest_path}")
+    assert !File.exist?("#{@dir}/#{dep_digest_path}")
+
+    manifest.compile('alias-index-link.js')
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.filename)
+
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/#{main_digest_path}")
+    assert File.exist?("#{@dir}/#{dep_digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+
+    assert data['files'][main_digest_path]
+    assert data['files'][dep_digest_path]
+    assert_equal "alias-index-link.js", data['files'][main_digest_path]['logical_path']
+    assert_equal "coffee.js", data['files'][dep_digest_path]['logical_path']
+    assert_equal main_digest_path, data['assets']['alias-index-link.js']
+    assert_equal dep_digest_path, data['assets']['coffee.js']
+  end
+
   test "compile to directory and seperate location" do
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 
