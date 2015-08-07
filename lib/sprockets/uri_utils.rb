@@ -48,7 +48,7 @@ module Sprockets
       path.force_encoding(Encoding::UTF_8)
 
       # Hack for parsing Windows "file:///C:/Users/IEUser" paths
-      path.gsub!(/^\/([a-zA-Z]:)/, '\1')
+      path.gsub!(/^\/([a-zA-Z]:)/, '\1'.freeze)
 
       [scheme, host, path, query]
     end
@@ -125,7 +125,7 @@ module Sprockets
     def parse_file_digest_uri(uri)
       scheme, _, path, _ = split_file_uri(uri)
 
-      unless scheme == 'file-digest'
+      unless scheme == 'file-digest'.freeze
         raise URI::InvalidURIError, "expected file-digest scheme: #{uri}"
       end
 
@@ -143,7 +143,7 @@ module Sprockets
     #
     # Returns String URI.
     def build_file_digest_uri(path)
-      join_file_uri("file-digest", nil, path, nil)
+      join_file_uri('file-digest'.freeze, nil, path, nil)
     end
 
     # Internal: Serialize hash of params into query string.
