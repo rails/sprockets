@@ -62,7 +62,14 @@ module Sprockets
     #
     # Returns resolved Object.
     def resolve_dependency(str)
-      scheme = str[/([^:]+)/, 1]
+      # Optimize for the most common scheme to
+      # save 22k allocations on an average Spree app.
+      scheme = if str.start_with?('file-digest:'.freeze)
+        'file-digest'.freeze
+      else
+        str[/([^:]+)/, 1]
+      end
+
       if resolver = config[:dependency_resolvers][scheme]
         resolver.call(self, str)
       else
