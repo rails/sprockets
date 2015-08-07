@@ -51,6 +51,10 @@ OptionParser.new do |opts|
   opts.on("--noenv", "Disables .sprocketsrc file") do
   end
 
+  opts.on("--cache=DIRECTORY", "Enables the FileStore cache using the specified directory") do |directory|
+    environment.cache = Sprockets::Cache::FileStore.new(directory)
+  end
+
   opts.on_tail("-h", "--help", "Shows this help message") do
     opts.show_usage
   end
