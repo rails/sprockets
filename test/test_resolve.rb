@@ -21,6 +21,20 @@ class TestResolve < Sprockets::TestCase
     refute resolve("null")
   end
 
+  test "resolve index assets" do
+    @env.append_path(fixture_path('index-assets'))
+
+    assert_equal "file://#{fixture_path('index-assets/bar/index.js')}?type=application/javascript",
+      resolve("bar/index.js")
+    assert_equal "file://#{fixture_path('index-assets/bar/index.js')}?type=application/javascript&index_alias=#{fixture_path('index-assets/bar.js')}",
+      resolve("bar.js")
+
+    assert_equal "file://#{fixture_path('index-assets/index/foo/index.js')}?type=application/javascript",
+      resolve("index/foo/index.js")
+    assert_equal "file://#{fixture_path('index-assets/index/foo/index.js')}?type=application/javascript&index_alias=#{fixture_path('index-assets/index/foo.js')}",
+      resolve("index/foo.js")
+  end
+
   test "resolve accept type list before paths" do
     @env.append_path(fixture_path('resolve/javascripts'))
     @env.append_path(fixture_path('resolve/stylesheets'))
