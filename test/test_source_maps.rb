@@ -195,3 +195,50 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal 172, map['mappings'].size
   end
 end
+
+
+class TestSassSourceMaps < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env = Sprockets::Environment.new(".") do |env|
+      require 'sprockets/sassc_compressor'
+      require 'sprockets/sassc_processor'
+      env.register_compressor 'text/css', :sass, Sprockets::SasscCompressor
+      env.register_compressor 'text/css', :scss, Sprockets::SasscCompressor
+      env.register_transformer 'text/sass', 'text/css', Sprockets::SasscProcessor
+      env.register_transformer 'text/scss', 'text/css', Sprockets::ScsscProcessor
+      env.append_path fixture_path('source-maps')
+    end
+  end
+
+  test "compile scss source map" do
+    asset = silence_warnings do
+      @env.find_asset("sass/main.css")
+    end
+    assert asset
+    assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
+    assert_equal "text/css", asset.content_type
+
+    assert_match "nav a {", asset.source
+
+    asset = silence_warnings do
+      @env.find_asset("sass/main.css.map")
+    end
+    assert asset
+    assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
+    assert_equal "sass/main.css.map", asset.logical_path
+    assert_equal "application/css-sourcemap+json", asset.content_type
+    assert_equal [
+      "file://#{fixture_path('source-maps/sass/main.scss')}?type=text/scss&pipeline=source&id=xxx"
+    ], normalize_uris(asset.links)
+
+    assert map = JSON.parse(asset.source)
+    assert_equal({
+      "version" => 3,
+      "file" => "sass/main.css",
+      "mappings" => "AADA,GAAA,CAAA,EAAA,CAAA;EAAA,MAAA,EAAA,CAAA;EAAA,OAAA,EAAA,CAAA;EAAA,UAAA,EAAA,IAAA,GAAA;;AAAA,GAAA,CAAA,EAAA,CAAA;EAAA,OAAA,EAAA,YAAA,GAAA;;AAAA,GAAA,CAAA,CAAA,CAAA;EAAA,OAAA,EAAA,KAAA;EAAA,OAAA,EAAA,GAAA,CAAA,IAAA;EAAA,eAAA,EAAA,IAAA,GAAA",
+      "sources" => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
+      "names" => []
+    }, map)
+  end
+end
