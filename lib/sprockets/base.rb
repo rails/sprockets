@@ -10,6 +10,7 @@ require 'sprockets/path_dependency_utils'
 require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
+require 'sprockets/loader'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -48,9 +49,10 @@ module Sprockets
         # Caveat: Digests are cached by the path's current mtime. Its possible
         # for a files contents to have changed and its mtime to have been
         # negligently reset thus appearing as if the file hasn't changed on
-        # disk. Also, the mtime is only read to the nearest second. Its
+        # disk. Also, the mtime is only read to the nearest second. It's
         # also possible the file was updated more than once in a given second.
-        cache.fetch("file_digest:#{path}:#{stat.mtime.to_i}") do
+        key = UnloadedAsset.new(path, self).file_digest_key(stat.mtime.to_i)
+        cache.fetch(key) do
           self.stat_digest(path, stat)
         end
       end

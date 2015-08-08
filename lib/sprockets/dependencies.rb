@@ -51,13 +51,6 @@ module Sprockets
     end
     alias_method :depend_on, :add_dependency
 
-    # Internal: Resolve set of dependency URIs.
-    #
-    # Returns Array of resolved Objects.
-    def resolve_dependencies(uris)
-      uris.map { |uri| resolve_dependency(uri) }
-    end
-
     # Internal: Resolve dependency URIs.
     #
     # Returns resolved Object.
