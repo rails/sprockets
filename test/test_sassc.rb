@@ -270,7 +270,7 @@ class TestSasscCompressor < TestBaseSass
         metadata: {},
         cache: Sprockets::Cache.new
       }
-      assert_equal compressed, Sprockets::SasscCompressor.call(input)
+      assert_equal compressed, Sprockets::SasscCompressor.call(input)[:data]
     end
   end
 end
