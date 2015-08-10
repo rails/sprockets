@@ -32,6 +32,7 @@ class TestPathUtils < MiniTest::Test
       "directives",
       "encoding",
       "errors",
+      "index-assets",
       "manifest_utils",
       "octicons",
       "paths",

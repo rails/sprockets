@@ -54,7 +54,8 @@ module Sprockets
           raise FileNotFound, "could not find file: #{filename}"
         end
 
-        load_path, logical_path = paths_split(config[:paths], filename)
+        path_to_split = params[:index_alias] || filename
+        load_path, logical_path = paths_split(config[:paths], path_to_split)
 
         unless load_path
           raise FileOutsidePaths, "#{filename} is no longer under a load path: #{self.paths.join(', ')}"
