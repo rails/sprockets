@@ -86,7 +86,7 @@ module Sprockets
       data = File.binread(filename)
 
       if detect = mime_type_charset_detecter(content_type)
-        detect.call(data).encode(Encoding::UTF_8, :universal_newline => true)
+        detect.call(data).encode(Encoding::UTF_8, universal_newline: true)
       else
         data
       end

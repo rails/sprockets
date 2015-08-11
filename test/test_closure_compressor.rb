@@ -5,8 +5,8 @@ require 'sprockets/closure_compressor'
 class TestClosureCompressor < MiniTest::Test
   def test_compress_javascript
     input = {
-      :data => "function foo() {\n  return true;\n}",
-      :cache => Sprockets::Cache.new
+      data: "function foo() {\n  return true;\n}",
+      cache: Sprockets::Cache.new
     }
     output = "function foo(){return!0};\n"
 
