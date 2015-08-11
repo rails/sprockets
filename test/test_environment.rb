@@ -37,13 +37,13 @@ module EnvironmentTests
   test "eco templates" do
     asset = @env["goodbye.js"]
     context = ExecJS.compile(asset.to_s)
-    assert_equal "Goodbye world\n", context.call("JST['goodbye']", :name => "world")
+    assert_equal "Goodbye world\n", context.call("JST['goodbye']", name: "world")
   end
 
   test "ejs templates" do
     assert asset = @env["hello.js"]
     context = ExecJS.compile(asset.to_s)
-    assert_equal "hello: world\n", context.call("JST['hello']", :name => "world")
+    assert_equal "hello: world\n", context.call("JST['hello']", name: "world")
   end
 
   test "asset_data_uri helper" do
@@ -506,7 +506,7 @@ class TestEnvironment < Sprockets::TestCase
     @env.register_transformer 'application/javascript+function', 'application/javascript', Sprockets::JstProcessor.new(namespace: 'this.JST2')
     assert asset = @env["hello.js"]
     context = ExecJS.compile(asset.to_s)
-    assert_equal "hello: world\n", context.call("JST2['hello']", :name => "world")
+    assert_equal "hello: world\n", context.call("JST2['hello']", name: "world")
   end
 
   test "register bundle processor" do

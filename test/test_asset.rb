@@ -331,7 +331,7 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
   end
 end
 
@@ -402,7 +402,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
   end
 end
 
@@ -1067,7 +1067,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
   end
 
   def read(logical_path)
@@ -1119,7 +1119,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {:pipeline => @pipeline}.merge(options))
+    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
   end
 
   def read(logical_path)

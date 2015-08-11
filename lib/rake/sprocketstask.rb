@@ -124,7 +124,7 @@ module Rake
         end
       end
 
-      task :clobber => ["clobber_#{name}"]
+      task clobber: ["clobber_#{name}"]
 
       desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
       task "clean_#{name}" do
@@ -133,7 +133,7 @@ module Rake
         end
       end
 
-      task :clean => ["clean_#{name}"]
+      task clean: ["clean_#{name}"]
     end
 
     private
