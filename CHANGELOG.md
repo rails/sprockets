@@ -1,3 +1,7 @@
+**3.3.0** (August 12, 2015)
+
+* Change internal cache lookup to use relative asset paths instead of absolute paths.
+
 **3.2.0** (June 2, 2015)
 
 * Updated SRI integrity to align with spec changes
