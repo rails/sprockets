@@ -106,6 +106,33 @@ class TestPerformance < Sprockets::TestCase
     assert_no_cache_set_calls
   end
 
+  test "moving root of project after generation is still freaky fast" do
+    env1 = new_environment
+    env1.cache = Cache.new
+
+    env1["mobile.js"]
+    assert_no_redundant_processor_calls
+    assert_no_redundant_bundle_processor_calls
+    assert_no_redundant_cache_set_calls
+
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        `cp -R #{File.join(fixture_path("default"), "*")} .`
+        env2       = new_environment("./default")
+        env2.cache = env1.cache
+
+        reset_stats!
+
+        env2["mobile.js"]
+        assert_no_redundant_stat_calls
+        assert_no_processor_calls
+        assert_no_bundle_processor_calls
+        assert_no_redundant_cache_get_calls
+        assert_no_cache_set_calls
+      end
+    end
+  end
+
   test "loading from instance cache" do
     env = @env.cached
     env["mobile.js"]
@@ -404,10 +431,10 @@ class TestPerformance < Sprockets::TestCase
     end
   end
 
-  def new_environment
+  def new_environment(path = fixture_path('default'))
     Sprockets::Environment.new(".") do |env|
       env.cache = Cache.new
-      env.append_path(fixture_path('default'))
+      env.append_path(path)
       env.register_preprocessor 'application/javascript', proc { |input|
         $processor_calls[input[:filename]] ||= []
         $processor_calls[input[:filename]] << caller
