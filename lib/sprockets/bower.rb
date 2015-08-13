@@ -17,7 +17,7 @@ module Sprockets
       candidates, deps = super
 
       # bower.json can only be nested one level deep
-      if !logical_path.index('/')
+      if !logical_path.index('/'.freeze)
         dirname = File.join(load_path, logical_path)
 
         if directory?(dirname)

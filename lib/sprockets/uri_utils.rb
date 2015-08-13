@@ -59,7 +59,7 @@ module Sprockets
     def join_file_uri(scheme, host, path, query)
       str = "#{scheme}://"
       str << host if host
-      path = "/#{path}" unless path.start_with?("/")
+      path = "/#{path}" unless path.start_with?("/".freeze)
       str << URI::Generic::DEFAULT_PARSER.escape(path)
       str << "?#{query}" if query
       str
@@ -72,7 +72,7 @@ module Sprockets
     # Returns true or false.
     def valid_asset_uri?(str)
       # Quick prefix check before attempting a full parse
-      str.start_with?("file://") && parse_asset_uri(str) ? true : false
+      str.start_with?("file://".freeze) && parse_asset_uri(str) ? true : false
     rescue URI::InvalidURIError
       false
     end
@@ -168,7 +168,7 @@ module Sprockets
         end
       end
 
-      "#{query.join('&')}" if query.any?
+      "#{query.join('&'.freeze)}" if query.any?
     end
 
     # Internal: Parse query string into hash of params
@@ -177,8 +177,8 @@ module Sprockets
     #
     # Return Hash of params.
     def parse_uri_query_params(query)
-      query.to_s.split('&').reduce({}) do |h, p|
-        k, v = p.split('=', 2)
+      query.to_s.split('&'.freeze).reduce({}) do |h, p|
+        k, v = p.split('='.freeze, 2)
         v = URI::Generic::DEFAULT_PARSER.unescape(v) if v
         h[k.to_sym] = v || true
         h
