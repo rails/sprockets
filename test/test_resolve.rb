@@ -33,6 +33,11 @@ class TestResolve < Sprockets::TestCase
       resolve("index/foo/index.js")
     assert_equal "file://#{fixture_path('index-assets/index/foo/index.js')}?type=application/javascript&index_alias=#{fixture_path('index-assets/index/foo.js')}",
       resolve("index/foo.js")
+
+    assert_equal "file://#{fixture_path('index-assets/baz/index.js.erb')}?type=application/javascript",
+      resolve("baz/index.js")
+    assert_equal "file://#{fixture_path('index-assets/baz/index.js.erb')}?type=application/javascript&index_alias=#{fixture_path('index-assets/baz.js.erb')}",
+      resolve("baz.js")
   end
 
   test "resolve accept type list before paths" do

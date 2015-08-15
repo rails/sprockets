@@ -168,7 +168,7 @@ module Sprockets
           candidates = find_matching_path_for_extensions(dirname, "index", mime_exts)
         end
         return candidates.map { |c|
-          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.\w{2,4})$/, '\1') }
+          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.[^\/]+)$/, '\1') }
         }, deps
       end
 
