@@ -325,7 +325,7 @@ module Sprockets
       #           "processors:type=text/css&file_type=text/css&pipeline=self",
       #           "file-digest:///Full/path/app/assets/stylesheets"]
       #
-      # Returns back array of things that the given uri dpends on
+      # Returns back array of things that the given uri depends on
       # For example the environment version, if you're using a different version of sprockets
       # then the dependencies should be different, this is used only for generating cache key
       # for example the "environment-version" may be resolved to "environment-1.0-3.2.0" for
