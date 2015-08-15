@@ -361,7 +361,7 @@ module Sprockets
       # This method attempts to retrieve the last `limit` number of histories of an asset
       # from the cache a "history" which is an array of unresolved "dependencies" that the asset needs
       # to compile. In this case A dependency can refer to either an asset i.e. index.js
-      # may rely on jquery.js (so jquery.js is a depndency), or other factors that may affect
+      # may rely on jquery.js (so jquery.js is a dependency), or other factors that may affect
       # compilation, such as the VERSION of sprockets (i.e. the environment) and what "processors"
       # are used.
       #
