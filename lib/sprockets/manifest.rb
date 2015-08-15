@@ -225,7 +225,7 @@ module Sprockets
     end
 
     # Wipe directive
-    def clobber
+    def delete
       FileUtils.rm_r(directory) if File.exist?(directory)
       logger.info "Removed #{directory}"
       nil

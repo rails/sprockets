@@ -16,8 +16,8 @@ module Rake
   class SprocketsTask < Rake::TaskLib
     # Name of the task. Defaults to "assets".
     #
-    # The name will also be used to suffix the clean and clobber
-    # tasks, "clean_assets" and "clobber_assets".
+    # The name will also be used to suffix the clean and delete
+    # tasks, "clean_assets" and "delete_assets".
     attr_accessor :name
 
     # `Environment` instance used for finding assets.
@@ -118,13 +118,13 @@ module Rake
       end
 
       desc name == :assets ? "Remove all assets" : "Remove all #{name} assets"
-      task "clobber_#{name}" do
+      task "delete_#{name}" do
         with_logger do
-          manifest.clobber
+          manifest.delete
         end
       end
 
-      task clobber: ["clobber_#{name}"]
+      task delete: ["delete_#{name}"]
 
       desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
       task "clean_#{name}" do

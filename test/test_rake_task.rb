@@ -45,13 +45,13 @@ class TestRakeTask < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
-  test "clobber" do
+  test "delete" do
     digest_path = @env['application.js'].digest_path
 
     @rake[:assets].invoke
     assert File.exist?("#{@dir}/#{digest_path}")
 
-    @rake[:clobber_assets].invoke
+    @rake[:delete_assets].invoke
     assert !File.exist?("#{@dir}/#{digest_path}")
   end
 
