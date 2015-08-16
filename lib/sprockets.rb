@@ -144,7 +144,7 @@ module Sprockets
     env.version
   end
   register_dependency_resolver 'environment-paths' do |env|
-    env.paths
+    env.paths.map {|path| env.compress_from_root(path) }
   end
   register_dependency_resolver 'file-digest' do |env, str|
     env.file_digest(env.parse_file_digest_uri(str))

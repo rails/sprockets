@@ -11,6 +11,7 @@ require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
 require 'sprockets/loader'
+require 'sprockets/uri_tar'
 
 module Sprockets
   # `Base` class for `Environment` and `Cached`.
@@ -96,6 +97,14 @@ module Sprockets
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
         "root=#{root.to_s.inspect}, " +
         "paths=#{paths.inspect}>"
+    end
+
+    def compress_from_root(uri)
+      URITar.new(uri, self).compress
+    end
+
+    def expand_from_root(uri)
+      URITar.new(uri, self).expand
     end
   end
 end
