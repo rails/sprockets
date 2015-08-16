@@ -13,8 +13,8 @@ module Sprockets
     # Returns true if the given value is a mime match for the given mime match
     # specification, false otherwise.
     def match_mime_type?(value, matcher)
-      v1, v2 = value.split('/', 2)
-      m1, m2 = matcher.split('/', 2)
+      v1, v2 = value.split('/'.freeze, 2)
+      m1, m2 = matcher.split('/'.freeze, 2)
       (m1 == '*' || v1 == m1) && (m2.nil? || m2 == '*' || m2 == v2)
     end
 
