@@ -20,3 +20,13 @@ matrix:
 
 notifications:
   email: false
+  irc:
+    on_success: change
+    on_failure: always
+    channels:
+      - "irc.freenode.org#rails-contrib"
+  campfire:
+    on_success: change
+    on_failure: always
+    rooms:
+      - secure: "bJyiK4EXGfm0EhAId/QqIEdhPCx8BjxUKvx1h0+wgrsUm8BDoEN7tg2wqoGWU2KfzqLdx77wZVQXbmksOgmNcMGKJed5uNNMpAG4B+AQYTEX0odFRgOZKdkMtypga9CNIkKVgeSKhd6BY+g2AV6wvJ0Jq056uXpGkqK5OEFOpQc="
