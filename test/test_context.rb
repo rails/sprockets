@@ -68,7 +68,7 @@ class TestCustomProcessor < Sprockets::TestCase
       @data = block.call
     end
 
-    def render(context)
+    def render(context, locals = {})
       manifest = YAML.load(@data)
       manifest['require'].each do |logical_path|
         context.require_asset(logical_path)
@@ -89,7 +89,7 @@ class TestCustomProcessor < Sprockets::TestCase
       @data = block.call
     end
 
-    def render(context)
+    def render(context, locals = {})
       data = @data
       data.gsub(/url\(\"(.+?)\"\)/) do
         path = context.resolve($1, compat: true)

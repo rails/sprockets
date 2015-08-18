@@ -10,7 +10,7 @@ class AlertProcessor
     @data = block.call
   end
 
-  def render(context)
+  def render(context, locals = {})
     "alert(#{@data.inspect});"
   end
 end
@@ -20,7 +20,7 @@ class StringProcessor
     @data = block.call
   end
 
-  def render(context)
+  def render(context, locals = {})
     @data.gsub(/#\{.*?\}/, "moo")
   end
 end
