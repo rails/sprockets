@@ -1,5 +1,7 @@
 # Sprockets: Rack-based asset packaging
 
+[![Build Status](https://travis-ci.org/rails/sprockets.svg?branch=master)](https://travis-ci.org/rails/sprockets)
+
 Sprockets is a Ruby library for compiling and serving web assets.
 It features declarative dependency management for JavaScript and CSS
 assets, as well as a powerful preprocessor pipeline that allows you to
@@ -19,7 +21,6 @@ Or include it in your project's `Gemfile` with Bundler:
 ``` ruby
 gem 'sprockets', '~> 3.0'
 ```
-
 
 ## Understanding the Sprockets Environment
 
@@ -433,36 +434,16 @@ def self.call(input)
 end
 ```
 
+## Contributing to Sprockets
 
-## Development
+Sprockets is the work of hundreds of contributors. You're encouraged to submit pull requests, propose
+features and discuss issues.
 
-### Contributing
-
-The Sprockets source code is [hosted on
-GitHub](https://github.com/rails/sprockets). You can check out a
-copy of the latest code using Git:
-
-    $ git clone https://github.com/rails/sprockets
-
-If you've found a bug or have a question, please open an issue on the
-[Sprockets issue
-tracker](https://github.com/rails/sprockets/issues). Or, clone
-the Sprockets repository, write a failing test case, fix the bug and
-submit a pull request.
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ### Version History
 
 Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGELOG.md)
 
-## Build Status
-
-[![Build Status](https://travis-ci.org/rails/sprockets.svg?branch=master)](https://travis-ci.org/rails/sprockets)
-
 ## License
-
-Copyright &copy; 2014 Sam Stephenson <<sstephenson@gmail.com>>
-
-Copyright &copy; 2014 Joshua Peek <<josh@joshpeek.com>>
-
-Sprockets is distributed under an MIT-style license. See LICENSE for
-details.
+Sprockets is released under the [MIT License](MIT-LICENSE).
