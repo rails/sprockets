@@ -10,156 +10,10 @@ require 'sprockets/processor_utils'
 require 'sprockets/resolve'
 require 'sprockets/transformers'
 require 'sprockets/uri_utils'
+require 'sprockets/unloaded_asset'
 
 module Sprockets
 
-  # Internal: Used to parse and store the URI to an unloaded asset
-  # Generates keys used to store and retrieve items from cache
-  class UnloadedAsset
-
-    # Internal: Initialize object for generating cache keys
-    #
-    # uri - A String containing complete URI to a file including schema
-    #       and full path such as
-    #       "file:///Path/app/assets/js/app.js?type=application/javascript"
-    # env - The current "environment" that assets are being loaded into.
-    #       We need it so we know where the +root+ (directory where sprockets
-    #       is being invoked). We also need for the `file_digest` method,
-    #       since, for some strange reason, memoization is provided by
-    #       overriding methods such as `stat` in the `PathUtils` module.
-    #
-    # Returns UnloadedAsset.
-    def initialize(uri, env)
-      @uri             = uri
-      @env             = env
-      @root            = env.root
-      @relative_path   = get_relative_path_from_uri
-      @params          = nil # lazy loaded
-      @filename        = nil # lazy loaded
-    end
-    attr_reader :relative_path, :root, :uri
-
-
-    # Internal: Full file path without schema
-    #
-    # This returns a string containing the full path to the asset without the schema.
-    # Information is loaded lazilly since we want `UnloadedAsset.new(dep, self).relative_path`
-    # to be fast. Calling this method the first time allocates an array and a hash.
-    #
-    # Example
-    #
-    # If the URI is `file:///Full/path/app/assets/javascripts/application.js"` then the
-    # filename would be `"/Full/path/app/assets/javascripts/application.js"`
-    #
-    # Returns a String.
-    def filename
-      unless @filename
-        load_file_params
-      end
-      @filename
-    end
-
-    # Internal: Hash of param values
-    #
-    # This information is generated and used internally by sprockets.
-    # Known keys include `:type` which store the asset's mime-type, `:id` which is a fully resolved
-    # digest for the asset (includes dependency digest as opposed to a digest of only file contents)
-    # and `:pipeline`. Hash may be empty.
-    #
-    # Example
-    #
-    # If the URI is `file:///Full/path/app/assets/javascripts/application.js"type=application/javascript`
-    # Then the params would be `{type: "application/javascript"}`
-    #
-    # Returns a Hash.
-    def params
-      unless @params
-        load_file_params
-      end
-      @params
-    end
-
-    # Internal: Key of asset
-    #
-    # Used to retrieve an asset from the cache based on relative path to asset
-    #
-    # Returns a String.
-    def asset_key
-      "asset-uri:#{relative_path}"
-    end
-
-    # Public: Dependency History key
-    #
-    # Used to retrieve an array of "histories" each of which contain a set of stored dependencies
-    # for a given asset path and filename digest.
-    #
-    # A dependency can refer to either an asset i.e. index.js
-    # may rely on jquery.js (so jquery.js is a dependency), or other factors that may affect
-    # compilation, such as the VERSION of sprockets (i.e. the environment) and what "processors"
-    # are used.
-    #
-    # For example a history array with one Set of dependencies may look like:
-    #
-    # [["environment-version", "environment-paths", "processors:type=text/css&file_type=text/css",
-    #   "file-digest:///Full/path/app/assets/stylesheets/application.css",
-    #   "processors:type=text/css&file_type=text/css&pipeline=self",
-    #   "file-digest:///Full/path/app/assets/stylesheets"]]
-    #
-    # This method of asset lookup is used to ensure that none of the dependencies have been modified
-    # since last lookup. If one of them has, the key will be different and a new entry must be stored.
-    #
-    # URI depndencies are later converted to relative paths
-    #
-    # Returns a String.
-    def dependency_history_key
-      "asset-uri-cache-dependencies:#{relative_path}:#{ @env.file_digest(filename) }"
-    end
-
-    # Internal: Digest key
-    #
-    # Used to retrieve a string containing the relative path to an asset based on
-    # a digest. The digest is generated from dependencies stored via information stored in
-    # the `dependency_history_key` after each of the "dependencies" is "resolved" for example
-    # "environment-version" may be resolved to "environment-1.0-3.2.0" for version "3.2.0" of sprockets
-    #
-    # Returns a String.
-    def digest_key(digest)
-      "asset-uri-digest:#{relative_path}:#{digest}"
-    end
-
-    # Internal: File digest key
-    #
-    # The digest for a given file won't change if the path and the stat time hasn't changed
-    # We can save time by not re-computing this information and storing it in the cache
-    #
-    # Returns a String.
-    def file_digest_key(stat)
-      "file_digest:#{relative_path}:#{stat}"
-    end
-
-    private
-      # Internal: Parses uri into filename and params hash
-      #
-      # Returns Array with filename and params hash
-      def load_file_params
-        @filename, @params = URIUtils.parse_asset_uri(uri)
-      end
-
-      # Internal: Converts uri to a relative path
-      #
-      # Returns a relative path if given URI is in the `@env.root` of where sprockets
-      # is running. Otherwise it returns a string of the absolute path
-      #
-      # Returns a String.
-      def get_relative_path_from_uri
-        path = uri.sub(/\Afile:\/\//, "".freeze)
-        if relative_path = PathUtils.split_subpath(root, path)
-          relative_path
-        else
-          path
-        end
-      end
-  end
   # The loader phase takes a asset URI location and returns a constructed Asset
   # object.
   module Loader
@@ -178,7 +32,7 @@ module Sprockets
     def load(uri)
       unloaded = UnloadedAsset.new(uri, self)
       if unloaded.params.key?(:id)
-        unless asset = cache.get(unloaded.asset_key, true)
+        unless asset = asset_from_cache(unloaded.asset_key)
           id = unloaded.params.delete(:id)
           uri_without_id = build_asset_uri(unloaded.filename, unloaded.params)
           asset = load_from_unloaded(UnloadedAsset.new(uri_without_id, self))
@@ -200,7 +54,7 @@ module Sprockets
           if paths
             digest = DigestUtils.digest(resolve_dependencies(paths))
             if uri_from_cache = cache.get(unloaded.digest_key(digest), true)
-              cache.get(UnloadedAsset.new(uri_from_cache, self).asset_key, true)
+              asset_from_cache(UnloadedAsset.new(uri_from_cache, self).asset_key)
             end
           else
             load_from_unloaded(unloaded)
@@ -211,6 +65,24 @@ module Sprockets
     end
 
     private
+
+      # Internal: Load asset hash from cache
+      #
+      # key - A String containing lookup information for an asset
+      #
+      # This method converts all "compressed" paths to absolute paths.
+      # Returns a hash of values representing an asset
+      def asset_from_cache(key)
+        asset = cache.get(key, true)
+        if asset
+          asset[:uri]       = expand_from_root(asset[:uri])
+          asset[:load_path] = expand_from_root(asset[:load_path])
+          asset[:filename]  = expand_from_root(asset[:filename])
+          asset[:metadata][:included].map!     { |uri| expand_from_root(uri) } if asset[:metadata][:included]
+          asset[:metadata][:dependencies].map! { |uri| uri.start_with?("file-digest://") ? expand_from_root(uri) : uri } if asset[:metadata][:dependencies]
+        end
+        asset
+      end
 
       # Internal: Loads an asset and saves it to cache
       #
@@ -303,16 +175,46 @@ module Sprockets
         }.compact.max
         asset[:mtime] ||= self.stat(unloaded.filename).mtime.to_i
 
+        store_asset(asset, unloaded)
+        asset
+      end
+
+      # Internal: Save a given asset to the cache
+      #
+      # asset - A hash containing values of loaded asset
+      # unloaded - The UnloadedAsset used to lookup the `asset`
+      #
+      # This method converts all absolute paths to "compressed" paths
+      # which are relative if they're in the root.
+      def store_asset(asset, unloaded)
+        # Save the asset in the cache under the new URI
+        cached_asset             = asset.dup
+        cached_asset[:uri]       = compress_from_root(asset[:uri])
+        cached_asset[:filename]  = compress_from_root(asset[:filename])
+        cached_asset[:load_path] = compress_from_root(asset[:load_path])
+
+        if cached_asset[:metadata]
+          # Deep dup to avoid modifying `asset`
+          cached_asset[:metadata] = cached_asset[:metadata].dup
+          if cached_asset[:metadata][:included]
+            cached_asset[:metadata][:included] = cached_asset[:metadata][:included].dup
+            cached_asset[:metadata][:included] = cached_asset[:metadata][:included].map {|uri| compress_from_root(uri) }
+          end
+
+          if cached_asset[:metadata][:dependencies]
+            cached_asset[:metadata][:dependencies] = cached_asset[:metadata][:dependencies].dup
+            cached_asset[:metadata][:dependencies].map! do |uri|
+              uri.start_with?("file-digest://".freeze) ? compress_from_root(uri) : uri
+            end
+          end
+        end
+
         # Unloaded asset and stored_asset now have a different URI
         stored_asset = UnloadedAsset.new(asset[:uri], self)
-
-        # Save the asset in the cache under the new URI
-        cache.set(stored_asset.asset_key, asset, true)
+        cache.set(stored_asset.asset_key, cached_asset, true)
 
         # Save the new relative path for the digest key of the unloaded asset
-        cache.set(unloaded.digest_key(asset[:dependencies_digest]), stored_asset.relative_path, true) # wat
-
-        asset
+        cache.set(unloaded.digest_key(asset[:dependencies_digest]), stored_asset.compressed_path, true)
       end
 
 
@@ -334,21 +236,7 @@ module Sprockets
       #
       # Returns array of resolved dependencies
       def resolve_dependencies(uris)
-        uris.map do |uri|
-          dependency = resolve_dependency(uri)
-          case dependency
-          when Array
-            dependency.map do |dep|
-              if dep && dep.is_a?(String)
-                UnloadedAsset.new(dep, self).relative_path
-              else
-                dep
-              end
-            end
-          else
-            dependency
-          end
-        end
+        uris.map { |uri| resolve_dependency(uri) }
       end
 
       # Internal: Retrieves an asset based on its digest
@@ -388,6 +276,7 @@ module Sprockets
 
         history = cache.get(key) || []
         history.each_with_index do |deps, index|
+          deps = deps.map { |path| path.start_with?("file-digest://") ? expand_from_root(path) : path }
           if asset = yield(deps)
             cache.set(key, history.rotate!(index)) if index > 0
             return asset
@@ -395,7 +284,9 @@ module Sprockets
         end
 
         asset = yield
-        deps = asset[:metadata][:dependencies]
+        deps = asset[:metadata][:dependencies].map do |uri|
+          uri.start_with?("file-digest://") ? compress_from_root(uri) : uri
+        end
         cache.set(key, history.unshift(deps).take(limit))
         asset
       end

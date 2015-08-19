@@ -363,7 +363,8 @@ require 'tmpdir'
 
 class TestFileStoreCaching < Sprockets::TestCase
   def setup
-    @cache = Sprockets::Cache::FileStore.new(File.join(Dir::tmpdir, 'sprockets'))
+    @cache_dir = File.join(Dir::tmpdir, 'sprockets')
+    @cache     = Sprockets::Cache::FileStore.new(@cache_dir)
 
     @env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
@@ -376,6 +377,10 @@ class TestFileStoreCaching < Sprockets::TestCase
     end
   end
 
+  def teardown
+    FileUtils.remove_entry(@cache_dir)
+  end
+
   test "shared cache objects are eql" do
     asset1 = @env1['gallery.js']
     asset2 = @env2['gallery.js']
@@ -386,5 +391,34 @@ class TestFileStoreCaching < Sprockets::TestCase
     assert asset1.eql?(asset2)
     assert asset2.eql?(asset1)
     assert !asset1.equal?(asset2)
+  end
+
+  test "no absolute paths are retuned from cache" do
+    asset1 = @env1['gallery.js']
+
+    Dir.mktmpdir do |dir|
+      env2 = Sprockets::Environment.new(dir) do |env|
+        env.append_path(dir)
+        env.cache = @cache
+      end
+
+      FileUtils.cp_r(@env1.root + "/.", env2.root)
+
+      asset2 = env2['gallery.js']
+
+      assert asset1
+      assert asset2
+
+      assert_equal asset1.digest_path,              asset2.digest_path
+      assert_equal asset1.source,                   asset2.source
+      assert_equal asset1.hexdigest,                asset2.hexdigest
+
+      # Absolute paths should be different
+      refute_equal asset1.uri,                      asset2.uri
+      refute_equal asset1.filename,                 asset2.filename
+      refute_equal asset1.included,                 asset2.included
+      refute_equal asset1.to_hash[:load_path],      asset2.to_hash[:load_path]
+      refute_equal asset1.metadata[:dependencies],  asset2.metadata[:dependencies]
+    end
   end
 end
