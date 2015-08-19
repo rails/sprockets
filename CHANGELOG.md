@@ -1,10 +1,14 @@
+**3.3.2** (August 19, 2015)
+
+* Fix cache contents to use relative paths instead of absolute paths.
+
 **3.3.1** (August 15, 2015)
 
 * Fix legacy Tilt integration when locals is required argument.
 
 **3.3.0** (August 12, 2015)
 
-* Change internal cache lookup to use relative asset paths instead of absolute paths.
+* Change internal cache key to use relative asset paths instead of absolute paths.
 
 **3.2.0** (June 2, 2015)
 
