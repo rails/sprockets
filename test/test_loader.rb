@@ -21,6 +21,10 @@ class TestLoader < Sprockets::TestCase
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
 
+    assert asset = @env.load(Pathname.new("file://#{fixture_path('default/gallery.css.erb')}?type=text/css"))
+    assert_equal fixture_path('default/gallery.css.erb'), asset.filename
+    assert_equal 'text/css', asset.content_type
+
     bad_id = "0000000000000000000000000000000000000000"
     assert asset = @env.load("file://#{fixture_path('default/gallery.js')}?type=application/javascript&id=#{bad_id}")
     assert_equal fixture_path('default/gallery.js'), asset.filename
