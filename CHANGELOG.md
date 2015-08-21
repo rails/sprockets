@@ -1,3 +1,7 @@
+**3.3.3** (August 21, 2015)
+
+* Remove more absolute paths from cache contents.
+
 **3.3.2** (August 19, 2015)
 
 * Fix cache contents to use relative paths instead of absolute paths.
