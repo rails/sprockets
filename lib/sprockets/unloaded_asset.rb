@@ -19,7 +19,7 @@ module Sprockets
     #
     # Returns UnloadedAsset.
     def initialize(uri, env)
-      @uri               = uri
+      @uri               = uri.to_s
       @env               = env
       @compressed_path   = URITar.new(uri, env).compressed_path
       @params            = nil # lazy loaded

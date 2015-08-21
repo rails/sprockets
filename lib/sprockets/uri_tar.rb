@@ -10,6 +10,7 @@ module Sprockets
     def initialize(uri, env)
       @root = env.root
       @env  = env
+      uri   = uri.to_s
       if uri.include?("://".freeze)
         uri_array = uri.split("://".freeze)
         @scheme   = uri_array.shift
