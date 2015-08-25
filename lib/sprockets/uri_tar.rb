@@ -34,6 +34,15 @@ module Sprockets
       scheme + compressed_path
     end
 
+    # Internal: Tells us if we are using an absolute path
+    #
+    # Nix* systems start with a `/` like /Users/schneems.
+    # Windows systems start with a drive letter than colon and slash
+    # like C:/Schneems.
+    def absolute_path?
+      path.start_with?("/".freeze) || path =~ /\A[a-zA-Z]:\// # windows
+    end
+
     # Internal: Convert a "compressed" uri to an absolute path
     #
     # If a uri is inside of the environment's root it will not
@@ -47,7 +56,7 @@ module Sprockets
     #
     # Returns String
     def expand
-      if path.start_with?("/".freeze)
+      if absolute_path?
         # Stored path was absolute, don't add root
         scheme + path
       else
@@ -66,7 +75,14 @@ module Sprockets
     #
     # Returns String
     def compressed_path
-      if compressed_path = @env.split_subpath(root, path)
+      # windows
+      if !@root.start_with?("/".freeze) && path.start_with?("/".freeze)
+        consistent_root = "/".freeze + @root
+      else
+        consistent_root = @root
+      end
+
+      if compressed_path = @env.split_subpath(consistent_root, path)
         compressed_path
       else
         path
