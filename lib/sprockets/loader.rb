@@ -26,7 +26,6 @@ module Sprockets
     #       and full path such as:
     #       "file:///Path/app/assets/js/app.js?type=application/javascript"
     #
-    #
     # Returns Asset.
     def load(uri)
       unloaded = UnloadedAsset.new(uri, self)
@@ -45,7 +44,7 @@ module Sprockets
           # The presence of `paths` indicates dependencies were stored.
           # We can check to see if the dependencies have not changed by "resolving" them and
           # generating a digest key from the resolved entries. If this digest key has not
-          # changed the asset will be pulled from cache.
+          # changed, the asset will be pulled from cache.
           #
           # If this `paths` is present but the cache returns nothing then `fetch_asset_from_dependency_cache`
           # will confusingly be called again with `paths` set to nil where the asset will be
@@ -231,7 +230,7 @@ module Sprockets
       # For example the environment version, if you're using a different version of sprockets
       # then the dependencies should be different, this is used only for generating cache key
       # for example the "environment-version" may be resolved to "environment-1.0-3.2.0" for
-      #  version "3.2.0" of sprockets.
+      # version "3.2.0" of sprockets.
       #
       # Any paths that are returned are converted to relative paths
       #
@@ -248,9 +247,9 @@ module Sprockets
       #
       # This method attempts to retrieve the last `limit` number of histories of an asset
       # from the cache a "history" which is an array of unresolved "dependencies" that the asset needs
-      # to compile. In this case A dependency can refer to either an asset i.e. index.js
+      # to compile. In this case a dependency can refer to either an asset e.g. index.js
       # may rely on jquery.js (so jquery.js is a dependency), or other factors that may affect
-      # compilation, such as the VERSION of sprockets (i.e. the environment) and what "processors"
+      # compilation, such as the VERSION of Sprockets (i.e. the environment) and what "processors"
       # are used.
       #
       # For example a history array may look something like this
@@ -261,7 +260,7 @@ module Sprockets
       #     "file-digest:///Full/path/app/assets/stylesheets"]]
       #
       # Where the first entry is a Set of dependencies for last generated version of that asset.
-      # Multiple versions are stored since sprockets keeps the last `limit` number of assets
+      # Multiple versions are stored since Sprockets keeps the last `limit` number of assets
       # generated present in the system.
       #
       # If a "history" of dependencies is present in the cache, each version of "history" will be
