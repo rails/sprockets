@@ -294,7 +294,7 @@ module Sprockets
         Thread.current.object_id,
         Process.pid,
         rand(1000000)
-      ].join('.')
+      ].join('.'.freeze)
       tmpname = File.join(dirname, basename)
 
       File.open(tmpname, 'wb+') do |f|

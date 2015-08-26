@@ -93,7 +93,7 @@ module Sprockets
     #
     # Returns hex String.
     def pack_hexdigest(bin)
-      bin.unpack('H*').first
+      bin.unpack('H*'.freeze).first
     end
 
     # Internal: Unpack a hex encoded digest string into binary bytes.
