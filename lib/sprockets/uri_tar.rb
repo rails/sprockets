@@ -1,3 +1,5 @@
+require 'sprockets/path_utils'
+
 module Sprockets
  # Internal: used to "expand" and "compress" values for storage
   class URITar
@@ -41,7 +43,7 @@ module Sprockets
     # Windows systems start with a drive letter than colon and slash
     # like C:/Schneems.
     def absolute_path?
-      path.start_with?("/".freeze) || path =~ /\A[a-zA-Z]:\// # windows
+      PathUtils.absolute_path?(path)
     end
 
     # Internal: Convert a "compressed" uri to an absolute path
@@ -83,7 +85,7 @@ module Sprockets
         consistent_root = @root
       end
 
-      if compressed_path = @env.split_subpath(consistent_root, path)
+      if compressed_path = PathUtils.split_subpath(consistent_root, path)
         compressed_path
       else
         path
