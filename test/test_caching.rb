@@ -365,7 +365,13 @@ class TestFileStoreCaching < Sprockets::TestCase
   def setup
     @cache_dir = File.join(Dir::tmpdir, 'sprockets')
     @cache     = Sprockets::Cache::FileStore.new(@cache_dir)
+  end
 
+  def teardown
+    FileUtils.remove_entry(@cache_dir) if File.exist?(@cache_dir)
+  end
+
+  test "shared cache objects are eql" do
     @env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
       env.cache = @cache
@@ -375,13 +381,7 @@ class TestFileStoreCaching < Sprockets::TestCase
       env.append_path(".")
       env.cache = @cache
     end
-  end
 
-  def teardown
-    FileUtils.remove_entry(@cache_dir)
-  end
-
-  test "shared cache objects are eql" do
     asset1 = @env1['gallery.js']
     asset2 = @env2['gallery.js']
 
@@ -394,7 +394,11 @@ class TestFileStoreCaching < Sprockets::TestCase
   end
 
   test "no absolute paths are retuned from cache" do
-    asset1 = @env1['gallery.js']
+    env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path(".")
+      env.cache = @cache
+    end
+    asset1 = env1['schneems.js']
 
     Dir.mktmpdir do |dir|
       env2 = Sprockets::Environment.new(dir) do |env|
@@ -402,9 +406,9 @@ class TestFileStoreCaching < Sprockets::TestCase
         env.cache = @cache
       end
 
-      FileUtils.cp_r(@env1.root + "/.", env2.root)
+      FileUtils.cp_r(env1.root + "/.", env2.root)
 
-      asset2 = env2['gallery.js']
+      asset2 = env2['schneems.js']
 
       assert asset1
       assert asset2
@@ -419,6 +423,33 @@ class TestFileStoreCaching < Sprockets::TestCase
       refute_equal asset1.metadata[:included],      asset2.metadata[:included]
       refute_equal asset1.to_hash[:load_path],      asset2.to_hash[:load_path]
       refute_equal asset1.metadata[:dependencies],  asset2.metadata[:dependencies]
+      refute_equal asset1.metadata[:links],         asset2.metadata[:links]
+
+      # The metadata[:stubbed] and metadata[:required] cannot be
+      # observed directly, they are included in the `dependencies`.
+      # We must use private APIs to test this behavior
+      # https://github.com/rails/sprockets/issues/96#issuecomment-133097865
+      cache_entries = @cache.send(:find_caches).map do |file, _|
+        key    = file.gsub(/\.cache\z/, ''.freeze).split(@cache_dir).last
+        result = @cache.get(key)
+        result.is_a?(Hash) ? result : nil
+      end.compact
+
+      required = cache_entries.map do |asset|
+        asset[:metadata][:required] if asset[:metadata]
+      end.compact
+
+      required.each do |set|
+        refute set.any? {|uri| uri.include?(env1.root) || uri.include?(env2.root)}, "Expected 'required' entry in cache to not include absolute paths but did: #{set.inspect}"
+      end
+
+      stubbed = cache_entries.map do |asset|
+        asset[:metadata][:stubbed] if asset[:metadata]
+      end.compact
+
+      stubbed.each do |set|
+        refute set.any? {|uri| uri.include?(env1.root) || uri.include?(env2.root)}, "Expected 'stubbed' entry in cache to not include absolute paths but did: #{set.inspect}"
+      end
     end
   end
 end
