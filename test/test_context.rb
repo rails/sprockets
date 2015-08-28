@@ -50,8 +50,8 @@ class TestContext < Sprockets::TestCase
 
   test "resolve with content type" do
     assert_equal [
-      "file://#{fixture_path("context/foo.js")}?type=application/javascript",
-      "file://#{fixture_path("context/foo.js")}?type=application/javascript"
+      "file://#{fixture_path_for_uri("context/foo.js")}?type=application/javascript",
+      "file://#{fixture_path_for_uri("context/foo.js")}?type=application/javascript"
     ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end

@@ -4,6 +4,12 @@ require 'sprockets/cache'
 require 'sprockets/erb_processor'
 
 class TestERBProcessor < MiniTest::Test
+
+  def uri_path(path)
+    path = '/' + path if path[1] == ':' # Windows path / drive letter
+    path
+  end
+
   def tset_compile_js_erb_template
     environment = Sprockets::Environment.new
 
@@ -38,7 +44,7 @@ class TestERBProcessor < MiniTest::Test
     output = "var data = 'DATA';"
     result = Sprockets::ERBProcessor.call(input)
     assert_equal output, result[:data]
-    assert_equal "file-digest://#{path}", result[:dependencies].first
+    assert_equal "file-digest://#{uri_path(path)}", result[:dependencies].first
   end
 
   def test_compile_erb_template_with_depend_on_call_outside_load_paths
@@ -61,7 +67,7 @@ class TestERBProcessor < MiniTest::Test
     output = "var data = 'DATA';"
     result = Sprockets::ERBProcessor.call(input)
     assert_equal output, result[:data]
-    assert_equal "file-digest://#{path}", result[:dependencies].first
+    assert_equal "file-digest://#{uri_path(path)}", result[:dependencies].first
   end
 
   def test_pass_custom_erb_helpers_to_template
