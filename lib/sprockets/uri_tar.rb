@@ -63,8 +63,13 @@ module Sprockets
         # Stored path was absolute, don't add root
         scheme + path
       else
-        # Stored path was relative, add root
-        scheme + File.join(root, path)
+        if scheme.empty?
+          File.join(root, path)
+        else
+          # We always want to return an absolute uri,
+          # make sure the path starts with a slash.
+          scheme + File.join("/".freeze, root, path)
+        end
       end
     end
 
