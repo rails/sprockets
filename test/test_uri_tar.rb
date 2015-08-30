@@ -10,6 +10,8 @@ class TestURITar < Sprockets::TestCase
   end
 
   test "works with nix" do
+    skip "Only runs on nix" if File::ALT_SEPARATOR
+
     uri = "/Sites/sprockets/test/fixtures/paths/application.css?type=text/css"
     @fake_env.root = "/Different/path"
     tar = Sprockets::URITar.new(uri, @fake_env)
