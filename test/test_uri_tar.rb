@@ -21,7 +21,7 @@ class TestURITar < Sprockets::TestCase
     @fake_env.root = "/Sites/sprockets"
     tar = Sprockets::URITar.new(uri, @fake_env)
     assert_equal uri, tar.expand
-    assert_equal Sprockets::URITar.new(tar.expand, @fake_env).expand, tar.expand
+    assert_equal Sprockets::URITar.new(tar.compress, @fake_env).expand, uri
     assert_equal "test/fixtures/paths/application.css?type=text/css", tar.compressed_path
     assert_equal "file://test/fixtures/paths/application.css?type=text/css", tar.compress
     assert_equal Sprockets::URITar.new(tar.compress, @fake_env).compress, tar.compress
@@ -49,7 +49,7 @@ class TestURITar < Sprockets::TestCase
     @fake_env.root = "C:/Sites/sprockets"
     tar = Sprockets::URITar.new(uri, @fake_env)
     assert_equal uri, tar.expand
-    assert_equal Sprockets::URITar.new(tar.expand, @fake_env).expand, tar.expand
+    assert_equal Sprockets::URITar.new(tar.compress, @fake_env).expand, uri
     assert_equal "test/fixtures/paths/application.css?type=text/css", tar.compressed_path
     assert_equal "file://test/fixtures/paths/application.css?type=text/css", tar.compress
     assert_equal Sprockets::URITar.new(tar.compress, @fake_env).compress, tar.compress
