@@ -1,3 +1,7 @@
+**3.3.4** (September 1, 2015)
+
+* Relative cache contents now work with windows.
+
 **3.3.3** (August 21, 2015)
 
 * Remove more absolute paths from cache contents.
