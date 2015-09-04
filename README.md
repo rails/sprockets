@@ -374,6 +374,7 @@ The *path* must be a valid asset and may or may not already be part
 of the bundle. `stub` should only be used at the top level bundle, not
 within any subdependencies.
 
+Any asset dependencies of the stubbed asset are blacklisted as well.
 
 ## Processor Interface
 
