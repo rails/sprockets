@@ -1,7 +1,6 @@
 require 'rack/utils'
 require 'sprockets/autoload'
 require 'sprockets/source_map_utils'
-require 'sprockets/sass_importer'
 require 'uri'
 
 module Sprockets
@@ -47,7 +46,7 @@ module Sprockets
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
       @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::Sass::VERSION}:#{@cache_version}".freeze
-      @importer_class = options[:importer] || SassImporter
+      @importer_class = options[:importer] || Sass::Importers::Filesystem
       @functions = Module.new do
         include Functions
         include options[:functions] if options[:functions]
