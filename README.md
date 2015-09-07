@@ -369,12 +369,10 @@ recursively reading the file and following the directives found. This is automat
 
 #### The `stub` Directive
 
-`stub` *path* allows dependency to be excluded from the asset bundle.
+`stub` *path* excludes that asset and its dependencies from the asset bundle.
 The *path* must be a valid asset and may or may not already be part
 of the bundle. `stub` should only be used at the top level bundle, not
 within any subdependencies.
-
-Any asset dependencies of the stubbed asset are blacklisted as well.
 
 ## Processor Interface
 
