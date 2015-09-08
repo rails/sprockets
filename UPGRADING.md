@@ -51,7 +51,7 @@ that for you. But there are programmatic APIs for setting up links if you're
 doing something custom.
 
 ``` css
-/* A comment directive or erb call can we used to declare a link relationship */
+/* A comment directive or an erb call can be used to declare a link relationship */
 /*= link logo.png */
 <%= link_asset "logo.png" %>
 .logo {}
