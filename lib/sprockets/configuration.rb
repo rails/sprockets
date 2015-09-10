@@ -65,8 +65,6 @@ module Sprockets
       self.config = config.merge(digest_class: klass).freeze
     end
 
-    # Deprecated: Get `Context` class.
-    #
     # This class maybe mutated and mixed in with custom helpers.
     #
     #     environment.context_class.instance_eval do
