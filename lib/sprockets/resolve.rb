@@ -115,22 +115,21 @@ module Sprockets
         end
       end
 
-
       def resolve_under_paths(paths, logical_name, accepts)
         deps = Set.new
         return nil, nil, deps if accepts.empty?
 
+        # TODO: Allow new path resolves to be registered
+        @resolvers ||= [
+          method(:resolve_main_under_path),
+          method(:resolve_alts_under_path),
+          method(:resolve_index_under_path)
+        ]
         mime_exts = config[:mime_exts]
-        paths.each do |load_path|
-          # TODO: Allow new path resolves to be registered
-          fns = [
-            method(:resolve_main_under_path),
-            method(:resolve_alts_under_path),
-            method(:resolve_index_under_path)
-          ]
 
+        paths.each do |load_path|
           candidates = []
-          fns.each do |fn|
+          @resolvers.each do |fn|
             result = fn.call(load_path, logical_name, mime_exts)
             candidates.concat(result[0])
             deps.merge(result[1])
@@ -228,7 +227,6 @@ module Sprockets
         accepts << ['*/*'.freeze, 1.0] if accepts.empty?
         return accepts
       end
-
 
       def resolve_alternates(load_path, logical_name)
         return [], Set.new
