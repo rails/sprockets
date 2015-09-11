@@ -135,7 +135,7 @@ module Sprockets
             deps.merge(result[1])
           end
 
-          candidate = find_best_q_match(accepts, candidates) do |c, matcher|
+          candidate = HTTPUtils.find_best_q_match(accepts, candidates) do |c, matcher|
             match_mime_type?(c[:type] || "application/octet-stream", matcher)
           end
           return candidate[:filename], candidate[:type], deps, candidate[:index_alias] if candidate
