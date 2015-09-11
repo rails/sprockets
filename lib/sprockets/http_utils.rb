@@ -36,7 +36,22 @@ module Sprockets
 
     # Internal: Parse Accept header quality values.
     #
-    # Adapted from Rack::Utils#q_values.
+    # values - String e.g. "application/javascript"
+    #
+    # Adapted from Rack::Utils#q_values. Quality values are
+    # described in http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+    #
+    #    parse_q_values("application/javascript")
+    #      # => [["application/javascript", 1.0]]
+    #
+    #    parse_q_values("*/*")
+    #      # => [["*/*", 1.0]]
+    #
+    #    parse_q_values("text/plain; q=0.5, image/*")
+    #      # => [["text/plain", 0.5], ["image/*", 1.0]]
+    #
+    #    parse_q_values("application/javascript, text/css")
+    #      # => [["application/javascript", 1.0], ["text/css", 1.0]]
     #
     # Returns an Array of [String, Float].
     def parse_q_values(values)
