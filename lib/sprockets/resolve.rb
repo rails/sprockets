@@ -63,8 +63,8 @@ module Sprockets
 
     protected
       def resolve_asset_uri(uri)
-        filename, _ = parse_asset_uri(uri)
-        return uri, Set.new([build_file_digest_uri(filename)])
+        filename, _ = URIUtils.parse_asset_uri(uri)
+        return uri, Set.new( [URIUtils.build_file_digest_uri(filename)] )
       end
 
       def resolve_absolute_path(paths, filename, accept)
@@ -72,22 +72,22 @@ module Sprockets
         filename = File.expand_path(filename)
 
         # Ensure path is under load paths
-        return nil, nil, deps unless paths_split(paths, filename)
+        return nil, nil, deps unless PathUtils.paths_split(paths, filename)
 
-        _, mime_type = match_path_extname(filename, config[:mime_exts])
+        _, mime_type = PathUtils.match_path_extname(filename, config[:mime_exts])
         type = resolve_transform_type(mime_type, accept)
         return nil, nil, deps if accept && !type
 
         return nil, nil, deps unless file?(filename)
 
-        deps << build_file_digest_uri(filename)
+        deps << URIUtils.build_file_digest_uri(filename)
         return filename, type, deps
       end
 
       def resolve_relative_path(paths, path, dirname, accept)
         filename = File.expand_path(path, dirname)
-        load_path, _ = paths_split(paths, dirname)
-        if load_path && logical_path = split_subpath(load_path, filename)
+        load_path, _ = PathUtils.paths_split(paths, dirname)
+        if load_path && logical_path = PathUtils.split_subpath(load_path, filename)
           resolve_logical_path([load_path], logical_path, accept)
         else
           return nil, nil, nil, Set.new
@@ -95,10 +95,10 @@ module Sprockets
       end
 
       def resolve_logical_path(paths, logical_path, accept)
-        extname, mime_type = match_path_extname(logical_path, config[:mime_exts])
+        extname, mime_type = PathUtils.match_path_extname(logical_path, config[:mime_exts])
         logical_name = logical_path.chomp(extname)
 
-        extname, pipeline = match_path_extname(logical_name, config[:pipeline_exts])
+        extname, pipeline = PathUtils.match_path_extname(logical_name, config[:pipeline_exts])
         logical_name = logical_name.chomp(extname)
 
         parsed_accept = parse_accept_options(mime_type, accept)
