@@ -115,6 +115,7 @@ module Sprockets
         end
       end
 
+
       def resolve_under_paths(paths, logical_name, accepts)
         deps = Set.new
         return nil, nil, deps if accepts.empty?
@@ -172,24 +173,32 @@ module Sprockets
         }, deps
       end
 
-      def parse_accept_options(mime_type, types)
-        accepts = []
-        accepts += parse_q_values(types) if types
 
+      # Internal: Converts mimetype into accept Array
+      #
+      # - mime_type     - String, optional. e.g. "text/html"
+      # - explicit_type - String, optional. e.g. "application/javascript"
+      #
+      # When called with an explicit_type and a mime_type, only a mime_type
+      # that matches the given explicit_type will be accepted.
+      #
+      # Returns Array of Array
+      #
+      #     [["application/javascript", 1.0]]
+      #     [["*/*", 1.0]]
+      #     []
+      def parse_accept_options(mime_type, explicit_type)
         if mime_type
-          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(mime_type, accept) }
-            accepts = [[mime_type, 1.0]]
-          else
-            return []
-          end
+          return [[mime_type, 1.0]] if explicit_type.nil?
+          return [[mime_type, 1.0]] if HTTPUtils.parse_q_values(explicit_type).any? { |accept, _| HTTPUtils.match_mime_type?(mime_type, accept) }
+          return []
         end
 
-        if accepts.empty?
-          accepts << ['*/*', 1.0]
-        end
-
-        accepts
+        accepts = HTTPUtils.parse_q_values(explicit_type)
+        accepts << ['*/*'.freeze, 1.0] if accepts.empty?
+        return accepts
       end
+
 
       def resolve_alternates(load_path, logical_name)
         return [], Set.new
