@@ -115,6 +115,19 @@ module Sprockets
         end
       end
 
+      # Internal: Finds a file in a set of given paths
+      #
+      # paths        - Array of Strings.
+      # logical_name - String. A filename without extension
+      #                e.g. "application" or "coffee/foo"
+      # accepts      - Array of array containing mime/version pairs
+      #                e.g. [["application/javascript", 1.0]]
+      #
+      # Finds a file with the same name as `logical_name` or "index" inside
+      # of the `logical_name` directory that matches a valid mime-type/version from
+      # `accepts`.
+      #
+      # Returns Array. Filename, type, dependencies, and index_alias
       def resolve_under_paths(paths, logical_name, accepts)
         deps = Set.new
         return nil, nil, deps if accepts.empty?
