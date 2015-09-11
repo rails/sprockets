@@ -119,17 +119,17 @@ module Sprockets
         deps = Set.new
         return nil, nil, deps if accepts.empty?
 
+        # TODO: Allow new path resolves to be registered
+        @resolvers ||= [
+          method(:resolve_main_under_path),
+          method(:resolve_alts_under_path),
+          method(:resolve_index_under_path)
+        ]
         mime_exts = config[:mime_exts]
-        paths.each do |load_path|
-          # TODO: Allow new path resolves to be registered
-          fns = [
-            method(:resolve_main_under_path),
-            method(:resolve_alts_under_path),
-            method(:resolve_index_under_path)
-          ]
 
+        paths.each do |load_path|
           candidates = []
-          fns.each do |fn|
+          @resolvers.each do |fn|
             result = fn.call(load_path, logical_name, mime_exts)
             candidates.concat(result[0])
             deps.merge(result[1])
@@ -144,51 +144,88 @@ module Sprockets
         return nil, nil, deps
       end
 
+      # Internal: Finds candidate files on a given path
+      #
+      # load_path    - String. An absolute path to a directory
+      # logical_name - String. A filename without extension
+      #                e.g. "application" or "coffee/foo"
+      # mime_exts    - Hash of file extensions and their mime types
+      #                e.g. {".xml.builder"=>"application/xml+builder"}
+      #
+      # Finds files that match a given `logical_name` with an acceptable
+      # mime type that is included in `mime_exts` on the `load_path`.
+      #
+      # Returns Array. First element is an Array of hashes or empty, second is a String
       def resolve_main_under_path(load_path, logical_name, mime_exts)
         dirname    = File.dirname(File.join(load_path, logical_name))
-        candidates = find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
-        return candidates.map { |c|
+        candidates = self.find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
+        candidates.map! do |c|
           { filename: c[0], type: c[1] }
-        }, [build_file_digest_uri(dirname)]
+        end
+        return candidates, [ URIUtils.build_file_digest_uri(dirname) ]
+      end
+
+
+      # Internal: Finds candidate index files in a given path
+      #
+      # load_path    - String. An absolute path to a directory
+      # logical_name - String. A filename without extension
+      #                e.g. "application" or "coffee/foo"
+      # mime_exts    - Hash of file extensions and their mime types
+      #                e.g. {".xml.builder"=>"application/xml+builder"}
+      #
+      # Looking in the given `load_path` this method will find all files under the `logical_name` directory
+      # that are named `index` and have a matching mime type in `mime_exts`.
+      #
+      # Returns Array. First element is an Array of hashes or empty, second is a String
+      def resolve_index_under_path(load_path, logical_name, mime_exts)
+        dirname = File.join(load_path, logical_name)
+
+        if self.directory?(dirname)
+          candidates = self.find_matching_path_for_extensions(dirname, "index".freeze, mime_exts)
+        else
+          candidates = []
+        end
+
+        candidates.map! do |c|
+          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.[^\/]+)$/, '\1') }
+        end
+
+        return candidates, [ URIUtils.build_file_digest_uri(dirname) ]
       end
 
       def resolve_alts_under_path(load_path, logical_name, mime_exts)
         filenames, deps = self.resolve_alternates(load_path, logical_name)
-        return filenames.map { |fn|
-          _, mime_type = match_path_extname(fn, mime_exts)
+        filenames.map! do |fn|
+          _, mime_type = PathUtils.match_path_extname(fn, mime_exts)
           { filename: fn, type: mime_type }
-        }, deps
-      end
-
-      def resolve_index_under_path(load_path, logical_name, mime_exts)
-        dirname = File.join(load_path, logical_name)
-        deps = [build_file_digest_uri(dirname)]
-        candidates = []
-        if directory?(dirname)
-          candidates = find_matching_path_for_extensions(dirname, "index", mime_exts)
         end
-        return candidates.map { |c|
-          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.[^\/]+)$/, '\1') }
-        }, deps
+        return filenames, deps
       end
 
-      def parse_accept_options(mime_type, types)
-        accepts = []
-        accepts += parse_q_values(types) if types
-
+      # Internal: Converts mimetype into accept Array
+      #
+      # - mime_type     - String, optional. e.g. "text/html"
+      # - explicit_type - String, optional. e.g. "application/javascript"
+      #
+      # When called with an explicit_type and a mime_type, only a mime_type
+      # that matches the given explicit_type will be accepted.
+      #
+      # Returns Array of Array
+      #
+      #     [["application/javascript", 1.0]]
+      #     [["*/*", 1.0]]
+      #     []
+      def parse_accept_options(mime_type, explicit_type)
         if mime_type
-          if accepts.empty? || accepts.any? { |accept, _| match_mime_type?(mime_type, accept) }
-            accepts = [[mime_type, 1.0]]
-          else
-            return []
-          end
+          return [[mime_type, 1.0]] if explicit_type.nil?
+          return [[mime_type, 1.0]] if HTTPUtils.parse_q_values(explicit_type).any? { |accept, _| HTTPUtils.match_mime_type?(mime_type, accept) }
+          return []
         end
 
-        if accepts.empty?
-          accepts << ['*/*', 1.0]
-        end
-
-        accepts
+        accepts = HTTPUtils.parse_q_values(explicit_type)
+        accepts << ['*/*'.freeze, 1.0] if accepts.empty?
+        return accepts
       end
 
       def resolve_alternates(load_path, logical_name)
