@@ -145,34 +145,64 @@ module Sprockets
         return nil, nil, deps
       end
 
+      # Internal: Finds candidate files on a given path
+      #
+      # load_path    - String. An absolute path to a directory
+      # logical_name - String. A filename without extension
+      #                e.g. "application" or "coffee/foo"
+      # mime_exts    - Hash of file extensions and their mime types
+      #                e.g. {".xml.builder"=>"application/xml+builder"}
+      #
+      # Finds files that match a given `logical_name` with an acceptable
+      # mime type that is included in `mime_exts` on the `load_path`.
+      #
+      # Returns Array. First element is an Array of hashes or empty, second is a String
       def resolve_main_under_path(load_path, logical_name, mime_exts)
         dirname    = File.dirname(File.join(load_path, logical_name))
-        candidates = find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
-        return candidates.map { |c|
+        candidates = self.find_matching_path_for_extensions(dirname, File.basename(logical_name), mime_exts)
+        candidates.map! do |c|
           { filename: c[0], type: c[1] }
-        }, [build_file_digest_uri(dirname)]
+        end
+        return candidates, [ URIUtils.build_file_digest_uri(dirname) ]
+      end
+
+
+      # Internal: Finds candidate index files in a given path
+      #
+      # load_path    - String. An absolute path to a directory
+      # logical_name - String. A filename without extension
+      #                e.g. "application" or "coffee/foo"
+      # mime_exts    - Hash of file extensions and their mime types
+      #                e.g. {".xml.builder"=>"application/xml+builder"}
+      #
+      # Looking in the given `load_path` this method will find all files under the `logical_name` directory
+      # that are named `index` and have a matching mime type in `mime_exts`.
+      #
+      # Returns Array. First element is an Array of hashes or empty, second is a String
+      def resolve_index_under_path(load_path, logical_name, mime_exts)
+        dirname = File.join(load_path, logical_name)
+
+        if self.directory?(dirname)
+          candidates = self.find_matching_path_for_extensions(dirname, "index".freeze, mime_exts)
+        else
+          candidates = []
+        end
+
+        candidates.map! do |c|
+          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.[^\/]+)$/, '\1') }
+        end
+
+        return candidates, [ URIUtils.build_file_digest_uri(dirname) ]
       end
 
       def resolve_alts_under_path(load_path, logical_name, mime_exts)
         filenames, deps = self.resolve_alternates(load_path, logical_name)
-        return filenames.map { |fn|
-          _, mime_type = match_path_extname(fn, mime_exts)
+        filenames.map! do |fn|
+          _, mime_type = PathUtils.match_path_extname(fn, mime_exts)
           { filename: fn, type: mime_type }
-        }, deps
-      end
-
-      def resolve_index_under_path(load_path, logical_name, mime_exts)
-        dirname = File.join(load_path, logical_name)
-        deps = [build_file_digest_uri(dirname)]
-        candidates = []
-        if directory?(dirname)
-          candidates = find_matching_path_for_extensions(dirname, "index", mime_exts)
         end
-        return candidates.map { |c|
-          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.[^\/]+)$/, '\1') }
-        }, deps
+        return filenames, deps
       end
-
 
       # Internal: Converts mimetype into accept Array
       #
