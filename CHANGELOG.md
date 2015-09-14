@@ -55,6 +55,11 @@
 * Added transitional compatibility flag to `Environment#resolve(path, compat: true)`. 2.x mode operates with `compat: true` and 4.x with `compat: false`
 * `manifest-abc123.json` renamed to `.sprockets-abc123.json`
 
+**2.12.4** (June 26, 2015)
+
+* Do not gzip assets that are already gzipped.
+* Improve testing of fingerprint validation.
+
 **2.12.3** (October 28, 2014)
 
 * Security: Fix directory traversal bug in development mode server.
