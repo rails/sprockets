@@ -105,7 +105,9 @@ module Sprockets
         load_path, logical_path = paths_split(config[:paths], path_to_split)
 
         unless load_path
-          raise FileOutsidePaths, "#{unloaded.filename} is no longer under a load path: #{self.paths.join(', ')}"
+          target = path_to_split
+          target += " (index alias of #{unloaded.filename})" if unloaded.param[:index_alias]
+          raise FileOutsidePaths, "#{target} is no longer under a load path: #{self.paths.join(', ')}"
         end
 
         extname, file_type = match_path_extname(logical_path, mime_exts)
