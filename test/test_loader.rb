@@ -45,4 +45,14 @@ class TestLoader < Sprockets::TestCase
       @env.load("file://#{fixture_path('asset/one.css')}?type=text%2Fcss")
     end
   end
+
+  test 'load uri with index alias' do
+    filename = fixture_path('default/coffee/index.js')
+    index_alias = fixture_path('default/coffee.js')
+    assert asset = @env.load("file://#{filename}?type=application/javascript&index_alias=#{Rack::Utils.escape(index_alias)}")
+    assert_equal filename, asset.filename, asset.inspect
+    assert_equal 'coffee.js', asset.logical_path, asset.inspect
+    assert_equal fixture_path('default'), asset.to_hash[:load_path], asset.inspect
+    assert_equal 'application/javascript', asset.content_type
+  end
 end
