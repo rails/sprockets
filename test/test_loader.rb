@@ -1,4 +1,5 @@
 require 'sprockets_test'
+require 'pathname'
 
 class TestLoader < Sprockets::TestCase
   def setup
