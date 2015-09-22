@@ -9,7 +9,7 @@ class TestRequire < MiniTest::Test
     next if File.basename(fn) == "version.rb"
 
     define_method "test_require_individual_library_files: #{fn}" do
-      system "ruby", fn
+      system "ruby", "-I#{ROOT}/lib", fn
       assert $?.success?, "Failed to load #{fn.inspect}"
     end
   end
