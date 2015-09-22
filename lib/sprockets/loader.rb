@@ -106,7 +106,7 @@ module Sprockets
 
         unless load_path
           target = path_to_split
-          target += " (index alias of #{unloaded.filename})" if unloaded.param[:index_alias]
+          target += " (index alias of #{unloaded.filename})" if unloaded.params[:index_alias]
           raise FileOutsidePaths, "#{target} is no longer under a load path: #{self.paths.join(', ')}"
         end
 

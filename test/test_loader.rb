@@ -38,4 +38,10 @@ class TestLoader < Sprockets::TestCase
       @env.load("file://#{fixture_path('default/gallery.js')}?type=text/css")
     end
   end
+
+  test 'load outside asset' do
+    assert_raises Sprockets::FileOutsidePaths do
+      @env.load("file://#{fixture_path('asset/one.css')}?type=text%2Fcss")
+    end
+  end
 end
