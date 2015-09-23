@@ -308,8 +308,10 @@ module Sprockets
 
         history = cache.get(key) || []
         history.each_with_index do |deps, index|
-          deps.map! { |path| path.start_with?("file-digest://") ? expand_from_root(path) : path }
-          if asset = yield(deps)
+          expanded_deps = deps.map do |path|
+            path.start_with?("file-digest://") ? expand_from_root(path) : path
+          end
+          if asset = yield(expanded_deps)
             cache.set(key, history.rotate!(index)) if index > 0
             return asset
           end
