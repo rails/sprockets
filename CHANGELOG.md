@@ -1,3 +1,7 @@
+**3.3.5** (September 25, 2015)
+
+* Fix bug related to absolute path being reintroduced into history cache #141.
+
 **3.3.4** (September 1, 2015)
 
 * Relative cache contents now work with windows.
