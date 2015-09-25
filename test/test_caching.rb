@@ -393,6 +393,41 @@ class TestFileStoreCaching < Sprockets::TestCase
     assert !asset1.equal?(asset2)
   end
 
+  test "history cache is not polluted" do
+    dependency_file = File.join(fixture_path('asset'), "dependencies", "a.js")
+    env1 = Sprockets::Environment.new(fixture_path('asset')) do |env|
+      env.append_path(".")
+      env.cache = @cache
+    end
+    env1['required_assets.js']
+
+    sandbox dependency_file do
+      write(dependency_file, "var aa = 2;")
+      env1['required_assets.js']
+
+      # We must use private APIs to test this behavior
+      # https://github.com/rails/sprockets/pull/141
+      cache_entries = @cache.send(:find_caches).map do |file, _|
+        key    = file.gsub(/\.cache\z/, ''.freeze).split(@cache_dir).last
+        result = @cache.get(key)
+
+        if result.is_a?(Array)
+          result if result.first.is_a?(Set)
+        else
+          nil
+        end
+      end.compact
+
+      assert cache_entries.any?
+
+      cache_entries.each do |sets|
+        sets.each do |set|
+          refute set.any? {|uri| uri.include?(env1.root) }, "Expected entry in cache to not include absolute paths but did: #{set.inspect}"
+        end
+      end
+    end
+  end
+
   test "no absolute paths are retuned from cache" do
     env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
