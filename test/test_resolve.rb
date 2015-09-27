@@ -26,17 +26,17 @@ class TestResolve < Sprockets::TestCase
 
     assert_equal "file://#{fixture_path('index-assets/bar/index.js')}?type=application/javascript",
       resolve("bar/index.js")
-    assert_equal "file://#{fixture_path('index-assets/bar/index.js')}?type=application/javascript&index_alias=#{fixture_path('index-assets/bar.js')}",
+    assert_equal "file://#{fixture_path('index-assets/bar/index.js')}?type=application/javascript&index_alias=#{@env.compress_from_root(fixture_path('index-assets/bar.js'))}",
       resolve("bar.js")
 
     assert_equal "file://#{fixture_path('index-assets/index/foo/index.js')}?type=application/javascript",
       resolve("index/foo/index.js")
-    assert_equal "file://#{fixture_path('index-assets/index/foo/index.js')}?type=application/javascript&index_alias=#{fixture_path('index-assets/index/foo.js')}",
+    assert_equal "file://#{fixture_path('index-assets/index/foo/index.js')}?type=application/javascript&index_alias=#{@env.compress_from_root(fixture_path('index-assets/index/foo.js'))}",
       resolve("index/foo.js")
 
     assert_equal "file://#{fixture_path('index-assets/baz/index.js.erb')}?type=application/javascript",
       resolve("baz/index.js")
-    assert_equal "file://#{fixture_path('index-assets/baz/index.js.erb')}?type=application/javascript&index_alias=#{fixture_path('index-assets/baz.js.erb')}",
+    assert_equal "file://#{fixture_path('index-assets/baz/index.js.erb')}?type=application/javascript&index_alias=#{@env.compress_from_root(fixture_path('index-assets/baz.js.erb'))}",
       resolve("baz.js")
   end
 

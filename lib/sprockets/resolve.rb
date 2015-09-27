@@ -242,7 +242,9 @@ module Sprockets
         end
 
         candidates.map! do |c|
-          { filename: c[0], type: c[1], index_alias: c[0].gsub(/\/index(\.[^\/]+)$/, '\1') }
+          { filename: c[0],
+            type: c[1],
+            index_alias: compress_from_root(c[0].sub(/\/index(\.[^\/]+)$/, '\1')) }
         end
 
         return candidates, [ URIUtils.build_file_digest_uri(dirname) ]
