@@ -101,7 +101,13 @@ module Sprockets
           raise FileNotFound, "could not find file: #{unloaded.filename}"
         end
 
-        path_to_split = unloaded.params[:index_alias] || unloaded.filename
+        path_to_split =
+          if index_alias = unloaded.params[:index_alias]
+            expand_from_root index_alias
+          else
+            unloaded.filename
+          end
+
         load_path, logical_path = paths_split(config[:paths], path_to_split)
 
         unless load_path
