@@ -42,7 +42,7 @@ module Sprockets
       {
         filename: input[:filename],
         syntax: self.class.syntax,
-        load_paths:  input[:environment].paths,
+        load_paths: input[:environment].paths,
         importer: @importer_class,
         source_map_embed: true,
         source_map_file: '.',
