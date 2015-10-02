@@ -10,7 +10,6 @@ require 'sprockets/sassc_compressor'
 
 class TestBaseSassc < Sprockets::TestCase
   CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
-  COMPASS_PATH = File.join(FIXTURE_ROOT, 'compass')
 
   def sass
     ::SassC
