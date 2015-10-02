@@ -4,8 +4,9 @@ require 'base64'
 module Sprockets
   class SasscProcessor < SassProcessor
     def initialize(options = {}, &block)
-      @cache_version = options[:cache_version]
-      @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::SassC::VERSION}:#{@cache_version}".freeze
+      # SassC engine does not currently support caching
+      # @cache_version = options[:cache_version]
+      # @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::SassC::VERSION}:#{@cache_version}".freeze
       @importer_class = options[:importer]
       @functions = Module.new do
         include SassProcessor::Functions
