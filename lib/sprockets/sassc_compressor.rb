@@ -1,5 +1,4 @@
 require 'sprockets/autoload'
-require 'sprockets/sassc_importer'
 require 'sprockets/sass_compressor'
 require 'base64'
 
@@ -9,7 +8,6 @@ module Sprockets
       @options = {
         syntax: :scss,
         style: :compressed,
-        importer: SasscImporter,
         source_map_embed: true,
         source_map_file: '.'
       }.merge(options).freeze
