@@ -81,9 +81,7 @@ class TestSprocketsSassc < TestBaseSassc
 
   test "raise sass error with line number" do
     begin
-      ::Sass::Util.silence_sass_warnings do
-        render('sass/error.sass')
-      end
+      render('sass/error.sass')
       flunk
     rescue SassC::SyntaxError => error
       # this is not exactly consistent with ruby sass
