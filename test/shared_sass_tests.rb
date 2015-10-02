@@ -1,7 +1,3 @@
-silence_warnings do
-  require 'sass'
-end
-
 module SharedSassTestNoFunction
   extend Sprockets::TestDefinition
 
