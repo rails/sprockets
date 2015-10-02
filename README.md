@@ -174,7 +174,7 @@ new SCSS syntax, use the extension `.scss`.
 
 ### Scripting with CoffeeScript
 
-[CoffeeScript](http://jashkenas.github.com/coffee-script/) is a
+[CoffeeScript](http://jashkenas.github.io/coffeescript/) is a
 language that compiles to the "good parts" of JavaScript, featuring a
 cleaner syntax with array comprehensions, classes, and function
 binding.
