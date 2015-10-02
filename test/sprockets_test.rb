@@ -84,13 +84,16 @@ Sprockets.register_postprocessor 'text/css', proc { |input|
   { selector_count: input[:data].scan(/\{/).size }
 }
 
-
-class Sprockets::TestCase < MiniTest::Test
-  FIXTURE_ROOT = File.join(__dir__, "fixtures")
-
-  def self.test(name, &block)
+module Sprockets::TestDefinition
+  def test(name, &block)
     define_method("test_#{name.inspect}", &block)
   end
+end
+
+class Sprockets::TestCase < MiniTest::Test
+  extend Sprockets::TestDefinition
+
+  FIXTURE_ROOT = File.join(__dir__, "fixtures")
 
   def fixture(path)
     IO.read(fixture_path(path))
