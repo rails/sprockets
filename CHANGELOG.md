@@ -1,3 +1,7 @@
+**3.3.6** (October 5, 2015)
+
+* Expose method to override the sass cache in the SassProcessor.
+
 **3.3.5** (September 25, 2015)
 
 * Fix bug related to absolute path being reintroduced into history cache #141.
