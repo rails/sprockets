@@ -2,44 +2,51 @@ require 'sprockets_test'
 require 'shared_sass_tests'
 
 silence_warnings do
-  require 'sass'
+  require 'sassc'
 end
 
-class TestBaseSass < Sprockets::TestCase
+require 'sprockets/sassc_processor'
+require 'sprockets/sassc_compressor'
+
+class TestBaseSassc < Sprockets::TestCase
   CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
 
   def sass
-    ::Sass
+    ::SassC
   end
 
   def sass_functions
-    ::Sass::Script::Functions
+    ::SassC::Script::Functions
   end
 
   def sass_engine
-    ::Sass::Engine
+    ::SassC::Engine
+  end
+
+  def syntax_error
+    SassC::SyntaxError
   end
 
   def compressor
-    Sprockets::SassCompressor
+    Sprockets::SasscCompressor
   end
 
   def teardown
-    refute ::Sass::Script::Functions.instance_methods.include?(:asset_path)
+    refute ::SassC::Script::Functions.instance_methods.include?(:asset_path)
     FileUtils.rm_r(CACHE_PATH) if File.exist?(CACHE_PATH)
     assert !File.exist?(CACHE_PATH)
   end
 end
 
-class TestNoSassFunctionSass < TestBaseSass
-  module ::Sass::Script::Functions
+class TestNoSassFunctionSassC < TestBaseSassc
+  module ::SassC::Script::Functions
     def javascript_path(path)
-      ::Sass::Script::String.new("/js/#{path.value}", :string)
+      ::SassC::Script::String.new("/js/#{path.value}", :string)
     end
 
     module Compass
       def stylesheet_path(path)
-        ::Sass::Script::String.new("/css/#{path.value}", :string)
+        ::SassC::Script::String.new("/css/#{path.value}", :string)
       end
     end
     include Compass
@@ -48,7 +55,7 @@ class TestNoSassFunctionSass < TestBaseSass
   include SharedSassTestNoFunction
 end
 
-class TestSprocketsSass < TestBaseSass
+class TestSprocketsSassc < TestBaseSassc
   def setup
     super
 
@@ -57,6 +64,7 @@ class TestSprocketsSass < TestBaseSass
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
       env.append_path(fixture_path('octicons'))
+      env.register_transformer 'text/sass', 'text/css', Sprockets::SasscProcessor.new
     end
   end
 
@@ -73,19 +81,19 @@ class TestSprocketsSass < TestBaseSass
 
   test "raise sass error with line number" do
     begin
-      ::Sass::Util.silence_sass_warnings do
-        render('sass/error.sass')
-      end
+      render('sass/error.sass')
       flunk
-    rescue Sass::SyntaxError => error
+    rescue SassC::SyntaxError => error
+      # this is not exactly consistent with ruby sass
       assert error.message.include?("invalid")
-      trace = error.backtrace[0]
-      assert trace.include?("error.sass")
-      assert trace.include?(":5")
+      assert error.message.include?("error.sass")
+      assert error.message.include?("line 5")
     end
   end
 
   test "track sass dependencies metadata" do
+    skip "not consistent with ruby sass"
+
     asset = nil
     silence_warnings do
       asset = @env.find_asset('sass/import_partial.css')
@@ -100,11 +108,11 @@ class TestSprocketsSass < TestBaseSass
   include SharedSassTestSprockets
 end
 
-class TestSassCompressor < TestBaseSass
+class TestSasscCompressor < TestBaseSassc
   include SharedSassTestCompressor
 end
 
-class TestSassFunctions < TestSprocketsSass
+class TestSasscFunctions < TestSprocketsSassc
   def setup
     super
     define_asset_path
