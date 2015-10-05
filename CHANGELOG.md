@@ -1,4 +1,4 @@
-**3.3.6** (October 5, 2015)
+**3.4.0** (October 5, 2015)
 
 * Expose method to override the sass cache in the SassProcessor.
 
