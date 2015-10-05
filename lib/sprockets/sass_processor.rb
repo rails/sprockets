@@ -39,8 +39,8 @@ module Sprockets
     # Public: Initialize template with custom options.
     #
     # options - Hash
-    #   cache_version - String custom cache version. Used to force a cache
-    #                   change after code changes are made to Sass Functions.
+    # cache_version - String custom cache version. Used to force a cache
+    #                 change after code changes are made to Sass Functions.
     #
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
@@ -59,7 +59,7 @@ module Sprockets
       options = {
         filename: input[:filename],
         syntax: self.class.syntax,
-        cache_store: CacheStore.new(input[:cache], @cache_version),
+        cache_store: build_cache_store(input, @cache_version),
         load_paths: input[:environment].paths,
         sprockets: {
           context: context,
@@ -83,6 +83,18 @@ module Sprockets
 
       context.metadata.merge(data: css, sass_dependencies: sass_dependencies)
     end
+
+    # Public: Build the cache store to be used by the Sass engine.
+    #
+    # input - the input hash.
+    # version - the cache version.
+    #
+    # Override this method if you need to use a different cache than the
+    # Sprockets cache.
+    def build_cache_store(input, version)
+      CacheStore.new(input[:cache], version)
+    end
+    private :build_cache_store
 
     # Public: Functions injected into Sass context during Sprockets evaluation.
     #
