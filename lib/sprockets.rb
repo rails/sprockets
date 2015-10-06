@@ -122,6 +122,7 @@ module Sprockets
   require 'sprockets/closure_compressor'
   require 'sprockets/sass_compressor'
   require 'sprockets/sassc_compressor'
+  require 'sprockets/jsminc_compressor'
   require 'sprockets/uglifier_compressor'
   require 'sprockets/yui_compressor'
   register_compressor 'text/css', :sass, SassCompressor
@@ -130,6 +131,8 @@ module Sprockets
   register_compressor 'text/css', :scssc, SasscCompressor
   register_compressor 'text/css', :yui, YUICompressor
   register_compressor 'application/javascript', :closure, ClosureCompressor
+  register_compressor 'application/javascript', :jsmin, JSMincCompressor
+  register_compressor 'application/javascript', :jsminc, JSMincCompressor
   register_compressor 'application/javascript', :uglifier, UglifierCompressor
   register_compressor 'application/javascript', :uglify, UglifierCompressor
   register_compressor 'application/javascript', :yui, YUICompressor
