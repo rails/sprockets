@@ -201,10 +201,7 @@ class TestSassSourceMaps < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env = Sprockets::Environment.new(".") do |env|
-      require 'sprockets/sassc_compressor'
       require 'sprockets/sassc_processor'
-      env.register_compressor 'text/css', :sass, Sprockets::SasscCompressor
-      env.register_compressor 'text/css', :scss, Sprockets::SasscCompressor
       env.register_transformer 'text/sass', 'text/css', Sprockets::SasscProcessor
       env.register_transformer 'text/scss', 'text/css', Sprockets::ScsscProcessor
       env.append_path fixture_path('source-maps')
