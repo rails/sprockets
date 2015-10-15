@@ -20,6 +20,44 @@ Or include it in your project's `Gemfile` with Bundler:
 gem 'sprockets', '~> 3.0'
 ```
 
+## Behavior
+
+### Index files are proxies for folders
+
+In sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
+
+```
+<%= asset_path("foo/index.js") %>
+```
+
+Instead you would need to use:
+
+```
+<%= asset_path("foo.js") %>
+```
+
+Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level javascript. You can do this in sprockets using `require_tree .`
+
+```
+//= require_tree .
+```
+
+This has the problem that files are required alphabetically. If your directory has `jquery-ui.js` and `jquery.min.js` then sprockets will require `jquery-ui.js` before `jquery` is required which won't work (because jquery-ui depends on jquery). Previously the only way to get the correct ordering would be to rename your files, something like `0-jquery-ui.js`. Instead of doing that you can use an index file.
+
+For example, if you have an `application.js` and want all the files in the `foo/` folder you could do this:
+
+```
+//= require foo.js
+```
+
+Then create a file `foo/index.js` that requires all the files in that folder in any order you want:
+
+```
+//= require foo.min.js
+//= require foo-ui.js
+```
+
+Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui.js`. If you used `require_tree` it would not work correctly.
 
 ## Understanding the Sprockets Environment
 
