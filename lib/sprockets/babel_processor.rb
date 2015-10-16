@@ -33,7 +33,7 @@ module Sprockets
     def call(input)
       data = input[:data]
 
-      result = input[:cache].fetch(@cache_key + [data]) do
+      result = input[:cache].fetch(@cache_key + [input[:filename]] + [data]) do
         opts = {
           'sourceRoot' => input[:load_path],
           'moduleRoot' => nil,

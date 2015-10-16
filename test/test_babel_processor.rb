@@ -125,4 +125,38 @@ System.register("mod", ["foo"], function (_export) {
 });
     JS
   end
+
+  def test_caching_takes_filename_into_account
+    mod1 = {
+      content_type: 'application/ecmascript-6',
+      data: "import \"foo\";",
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod1.es6", __FILE__),
+      cache: Sprockets::Cache.new
+    }
+
+    mod2 = mod1.dup
+    mod2[:filename] = File.expand_path("../fixtures/mod2.es6", __FILE__)
+
+    assert js1 = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(mod1)[:data]
+    assert_equal <<-JS.chomp, js1.to_s.strip
+System.register("mod1", ["foo"], function (_export) {
+  return {
+    setters: [function (_foo) {}],
+    execute: function () {}
+  };
+});
+    JS
+
+    assert js2 = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(mod2)[:data]
+    assert_equal <<-JS.chomp, js2.to_s.strip
+System.register("mod2", ["foo"], function (_export) {
+  return {
+    setters: [function (_foo) {}],
+    execute: function () {}
+  };
+});
+    JS
+  end
 end
