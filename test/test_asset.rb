@@ -136,7 +136,7 @@ class TextStaticAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/log.txt')}?type=text/plain&id=xxx",
+    assert_equal "file://#{fixture_path_for_uri('asset/log.txt')}?type=text/plain&id=xxx",
       normalize_uri(@asset.uri)
   end
 
@@ -178,7 +178,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/POW.png')}?type=image/png&id=xxx",
+    assert_equal "file://#{fixture_path_for_uri('asset/POW.png')}?type=image/png&id=xxx",
       normalize_uri(@asset.uri)
   end
 
@@ -289,7 +289,7 @@ class SourceAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=source&id=xxx",
+    assert_equal "file://#{fixture_path_for_uri('asset/application.js')}?type=application/javascript&pipeline=source&id=xxx",
       normalize_uri(@asset.uri)
   end
 
@@ -350,7 +350,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=self&id=xxx",
+    assert_equal "file://#{fixture_path_for_uri('asset/application.js')}?type=application/javascript&pipeline=self&id=xxx",
       normalize_uri(@asset.uri)
   end
 
@@ -421,7 +421,7 @@ class BundledAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&id=xxx",
+    assert_equal "file://#{fixture_path_for_uri('asset/application.js')}?type=application/javascript&id=xxx",
       normalize_uri(@asset.uri)
   end
 
@@ -879,9 +879,9 @@ define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
-      "file://#{fixture_path("asset/application.css")}?type=text/css&id=xxx",
-      "file://#{fixture_path("asset/application.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
+      "file://#{fixture_path_for_uri("asset/application.css")}?type=text/css&id=xxx",
+      "file://#{fixture_path_for_uri("asset/application.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset.links)
   end
 
@@ -898,16 +898,16 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     EOS
 
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx",
-      "file://#{fixture_path("asset/application.css")}?type=text/css&id=xxx",
-      "file://#{fixture_path("asset/application.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
+      "file://#{fixture_path_for_uri("asset/application.css")}?type=text/css&id=xxx",
+      "file://#{fixture_path_for_uri("asset/application.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset.links)
   end
 
   test "link_directory current directory includes self last" do
     assert_equal [
-      "file://#{fixture_path("asset/link/directory/bar.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/directory/foo.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/directory/bar.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/directory/foo.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/directory/application.js").links)
   end
 
@@ -918,15 +918,15 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
   test "link_tree without an argument defaults to the current directory" do
     assert_equal [
-      "file://#{fixture_path("asset/link/without_argument/a.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/without_argument/b.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/without_argument/a.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/without_argument/b.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/without_argument/require_tree_without_argument.js").links)
   end
 
   test "link_tree with current directory includes self last" do
     assert_equal [
-      "file://#{fixture_path("asset/link/tree/bar.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/tree/foo.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/tree/bar.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/tree/foo.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/tree/application.js").links)
   end
 
@@ -944,31 +944,31 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
   test "link_directory requires all child files in alphabetical order" do
     assert_equal [
-      "file://#{fixture_path("asset/link/all/README.md")}?id=xxx",
-      "file://#{fixture_path("asset/link/all/b.css")}?type=text/css&id=xxx",
-      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript+ruby&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/all/README.md")}?id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/all/b.css")}?type=text/css&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/all/b.js.erb")}?type=application/javascript+ruby&id=xxx"
     ], normalize_uris(asset("link/all_with_require_directory.js").links)
   end
 
   test "link_directory as app/js requires all child files in alphabetical order" do
     assert_equal [
-      "file://#{fixture_path("asset/link/all/b.js.erb")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/all/b.js.erb")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/all_with_require_directory_as_js.js").links)
   end
 
   test "link_tree respects order of child dependencies" do
     assert_equal [
-      "file://#{fixture_path("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/require_tree_alpha.js").links)
   end
 
   test "link_tree as app/js respects order of child dependencies" do
     assert_equal [
-      "file://#{fixture_path("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
-      "file://#{fixture_path("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
+      "file://#{fixture_path_for_uri("asset/link/alpha/a.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/alpha/b.js")}?type=application/javascript&id=xxx",
+      "file://#{fixture_path_for_uri("asset/link/alpha/c.js")}?type=application/javascript&id=xxx"
     ], normalize_uris(asset("link/require_tree_alpha_as_js.js").links)
   end
 
@@ -980,7 +980,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 }
     EOS
     assert_equal [
-      "file://#{fixture_path("asset/POW.png")}?type=image/png&id=xxx"
+      "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx"
       ], normalize_uris(asset.links)
   end
 
@@ -1089,7 +1089,7 @@ class DebugAssetTest < Sprockets::TestCase
   include AssetTests
 
   test "uri" do
-    assert_equal "file://#{fixture_path('asset/application.js')}?type=application/javascript&pipeline=debug&id=xxx",
+    assert_equal "file://#{fixture_path_for_uri('asset/application.js')}?type=application/javascript&pipeline=debug&id=xxx",
       normalize_uri(@asset.uri)
   end
 

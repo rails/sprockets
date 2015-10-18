@@ -21,6 +21,8 @@ class TestPathDigestUtils < MiniTest::Test
   end
 
   def test_symlink_stat_digest
+    skip "no symlinks available" unless File.symlink?(File.expand_path("../fixtures/default/symlink", __FILE__))
+
     path = File.expand_path("../fixtures/default/mobile", __FILE__)
     assert_equal "e571f54b8982049817ee30d0bf0dcf5dd8c09252b50696f7ccb44019c9229ccd",
       stat_digest(path, File.stat(path)).unpack("h*")[0]
@@ -52,6 +54,8 @@ class TestPathDigestUtils < MiniTest::Test
   end
 
   def test_multiple_file_digests
+    skip "no symlinks available" unless File.symlink?(File.expand_path("../fixtures/default/symlink", __FILE__))
+
     paths = []
     paths << File.expand_path("../fixtures/default/hello.txt", __FILE__)
     paths << File.expand_path("../fixtures/default/app", __FILE__)
