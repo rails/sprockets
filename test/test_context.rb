@@ -49,9 +49,9 @@ class TestContext < Sprockets::TestCase
   end
 
   test "resolve with content type" do
-    assert_equal [fixture_path("context/foo.js"),
-      fixture_path("context/foo.js"),
-      fixture_path("context/foo.js")
+    assert_equal [fixture_path_for_uri("context/foo.js"),
+      fixture_path_for_uri("context/foo.js"),
+      fixture_path_for_uri("context/foo.js")
     ].join(",\n"), @env["resolve_content_type.js"].to_s.strip
   end
 end

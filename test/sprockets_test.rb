@@ -144,6 +144,15 @@ class Sprockets::TestCase < MiniTest::Test
     end
   end
 
+  def fixture_path_for_uri(path)
+    uri_path(fixture_path(path).to_s)
+  end
+
+  def uri_path(path)
+    path = '/' + path if path[1] == ':' # Windows path / drive letter
+    path
+  end
+
   def sandbox(*paths)
     backup_paths = paths.select { |path| File.exist?(path) }
     remove_paths = paths.select { |path| !File.exist?(path) }
