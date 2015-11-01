@@ -43,6 +43,12 @@ class TestPathUtils < MiniTest::Test
       "source-maps",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
+    
+    [ ['a', 'b'], ['a', 'b', '.', '..'] ].each do |dir_contents|
+      Dir.stub :entries, dir_contents do
+        assert_equal ['a', 'b'], entries(Dir.tmpdir)
+      end
+    end
 
     assert_equal [], entries("/tmp/sprockets/missingdir")
   end
