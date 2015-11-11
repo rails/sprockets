@@ -760,6 +760,14 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal read("asset/users.js.erb"), asset("noengine.js").to_s
   end
 
+  test "processing a source file with different content type extensions" do
+    assert_equal read("asset/users.js.erb"), asset("es6_asset.js").to_s
+  end
+
+  test "processing a source file with different content type extensions 1" do
+    assert_equal read("asset/users.js.erb") + "(function() {\n\n\n}).call(this);\n", asset("coffee_asset.js").to_s
+  end
+
   test "processing a source file with unknown extensions" do
     assert_equal read("asset/users.js.erb") + "var jQuery;\n\n\n", asset("unknownexts.min.js").to_s
   end
