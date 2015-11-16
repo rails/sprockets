@@ -6,7 +6,7 @@ class TestEjsProcessor < MiniTest::Test
   def test_compile_ejs_template_to_js
     input = {
       content_type: 'application/javascript',
-      data: "<span>Hello, <%= name %></p>",
+      data: '<span>Hello, <%= name %></p>',
       cache: Sprockets::Cache.new
     }
     assert Sprockets::EjsProcessor.call(input).match(/<span>Hello, /)

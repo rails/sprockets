@@ -17,11 +17,12 @@ module Sprockets
       data = Autoload::SassC::Engine.new(input[:data], @options.merge(filename: 'filename')).render
 
       match_data = data.match(/(.*)\n\/\*# sourceMappingURL=data:application\/json;base64,(.+) \*\//m)
-      css, map = match_data[1], Base64.decode64(match_data[2])
+      css = match_data[1]
+      map = Base64.decode64(match_data[2])
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map)["mappings"]
+        SourceMapUtils.decode_json_source_map(map)['mappings']
       )
 
       { data: css, map: map }

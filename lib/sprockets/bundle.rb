@@ -55,9 +55,7 @@ module Sprockets
         reducers.each do |k, (_, block)|
           value = k == :data ? asset.source : asset.metadata[k]
           if h.key?(k)
-            if !value.nil?
-              h[k] = block.call(h[k], value)
-            end
+            h[k] = block.call(h[k], value) unless value.nil?
           else
             h[k] = value
           end

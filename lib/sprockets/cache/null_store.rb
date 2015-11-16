@@ -19,7 +19,7 @@ module Sprockets
       # key - String cache key.
       #
       # Returns nil.
-      def get(key)
+      def get(_key)
         nil
       end
 
@@ -31,7 +31,7 @@ module Sprockets
       # value - Object value.
       #
       # Returns Object value.
-      def set(key, value)
+      def set(_key, value)
         value
       end
 

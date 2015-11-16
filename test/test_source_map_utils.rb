@@ -7,10 +7,10 @@ class TestSourceMapUtils < MiniTest::Test
   def test_map
     hash = {
       'version' => 3,
-      'file' => "script.min.js",
-      'mappings' => "AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe",
-      'sources' => ["script.js"],
-      'names' => ["hello", "console", "log"]
+      'file' => 'script.min.js',
+      'mappings' => 'AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe',
+      'sources' => ['script.js'],
+      'names' => %w(hello console log)
     }
     map = hash.merge(
       'mappings' => decode_vlq_mappings(hash['mappings'], sources: hash['sources'], names: hash['names'])
@@ -32,16 +32,16 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 'script.js', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "script.min.js")
+    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: 'script.min.js')
   end
 
   def test_map2
     hash = {
       'version' => 3,
-      'file' => "example.js",
-      'mappings' => ";;;;;EACAA;;EACAC;;EAGA;IAAA;;;EAGAC;IAAS;;;EAGTC;;EAGAC;IACE;IACA;IACA;MAAQ;;;;EAGVC;;;IACE;;;EAGF;IAAA;;;EAGAC;;;IAAQ;;MAAA",
-      'sources' => ["example.coffee"],
-      'names' => ["number", "opposite", "square", "list", "math", "race", "cubes"]
+      'file' => 'example.js',
+      'mappings' => ';;;;;EACAA;;EACAC;;EAGA;IAAA;;;EAGAC;IAAS;;;EAGTC;;EAGAC;IACE;IACA;IACA;MAAQ;;;;EAGVC;;;IACE;;;EAGF;IAAA;;;EAGAC;;;IAAQ;;MAAA',
+      'sources' => ['example.coffee'],
+      'names' => %w(number opposite square list math race cubes)
     }
     map = hash.merge(
       'mappings' => decode_vlq_mappings(hash['mappings'], sources: hash['sources'], names: hash['names'])
@@ -63,16 +63,16 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 'example.coffee', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "example.js")
+    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: 'example.js')
   end
 
   def test_map3
     hash = {
       'version' => 3,
-      'file' => "example.min.js",
-      'mappings' => "AACC,SAAQ,EAAG,CAAA,IACCA,CADD,CACOC,CADP,CACaC,CADb,CAC0CC,CAWpDA,EAAA,CAASA,QAAQ,CAACC,CAAD,CAAI,CACnB,MAAOA,EAAP,CAAWA,CADQ,CAIrBJ,EAAA,CAAO,CAAC,CAAD,CAAI,CAAJ,CAAO,CAAP,CAAU,CAAV,CAAa,CAAb,CAEPC,EAAA,CAAO,MACCI,IAAAC,KADD,QAEGH,CAFH,MAGCI,QAAQ,CAACH,CAAD,CAAI,CAChB,MAAOA,EAAP,CAAWD,CAAA,CAAOC,CAAP,CADK,CAHb,CAcc,YAArB,GAAI,MAAOI,MAAX,EAA8C,IAA9C,GAAoCA,KAApC,EACEC,KAAA,CAAM,YAAN,CAGO,UAAQ,EAAG,CAAA,IACdC,CADc,CACVC,CADU,CACJC,CACdA,EAAA,CAAW,EACNF,EAAA,CAAK,CAAV,KAAaC,CAAb,CAAoBX,CAAAa,OAApB,CAAiCH,CAAjC,CAAsCC,CAAtC,CAA4CD,CAAA,EAA5C,CACER,CACA,CADMF,CAAA,CAAKU,CAAL,CACN,CAAAE,CAAAE,KAAA,CAAcb,CAAAM,KAAA,CAAUL,CAAV,CAAd,CAEF,OAAOU,EAPW,CAAX,CAAA,EApCC,CAAX,CAAAG,KAAA,CA8CO,IA9CP",
-      'sources' => ["example.js"],
-      'names' => ["list","math","num","square","x","Math","sqrt","cube","elvis","alert","_i","_len","_results","length","push","call"]
+      'file' => 'example.min.js',
+      'mappings' => 'AACC,SAAQ,EAAG,CAAA,IACCA,CADD,CACOC,CADP,CACaC,CADb,CAC0CC,CAWpDA,EAAA,CAASA,QAAQ,CAACC,CAAD,CAAI,CACnB,MAAOA,EAAP,CAAWA,CADQ,CAIrBJ,EAAA,CAAO,CAAC,CAAD,CAAI,CAAJ,CAAO,CAAP,CAAU,CAAV,CAAa,CAAb,CAEPC,EAAA,CAAO,MACCI,IAAAC,KADD,QAEGH,CAFH,MAGCI,QAAQ,CAACH,CAAD,CAAI,CAChB,MAAOA,EAAP,CAAWD,CAAA,CAAOC,CAAP,CADK,CAHb,CAcc,YAArB,GAAI,MAAOI,MAAX,EAA8C,IAA9C,GAAoCA,KAApC,EACEC,KAAA,CAAM,YAAN,CAGO,UAAQ,EAAG,CAAA,IACdC,CADc,CACVC,CADU,CACJC,CACdA,EAAA,CAAW,EACNF,EAAA,CAAK,CAAV,KAAaC,CAAb,CAAoBX,CAAAa,OAApB,CAAiCH,CAAjC,CAAsCC,CAAtC,CAA4CD,CAAA,EAA5C,CACER,CACA,CADMF,CAAA,CAAKU,CAAL,CACN,CAAAE,CAAAE,KAAA,CAAcb,CAAAM,KAAA,CAAUL,CAAV,CAAd,CAEF,OAAOU,EAPW,CAAX,CAAA,EApCC,CAAX,CAAAG,KAAA,CA8CO,IA9CP',
+      'sources' => ['example.js'],
+      'names' => %w(list math num square x Math sqrt cube elvis alert _i _len _results length push call)
     }
     map = hash.merge(
       'mappings' => decode_vlq_mappings(hash['mappings'], sources: hash['sources'], names: hash['names'])
@@ -94,14 +94,14 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 'example.js', mapping[:source]
     assert_equal nil, mapping[:name]
 
-    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: "example.min.js")
+    assert_equal JSON.generate(hash), encode_json_source_map(map['mappings'], filename: 'example.min.js')
   end
 
   def test_concat_source_maps
     mappings = [
-      {source: 'a.js', generated: [0, 0], original: [0, 0]},
-      {source: 'b.js', generated: [1, 0], original: [20, 0]},
-      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+      { source: 'a.js', generated: [0, 0], original: [0, 0] },
+      { source: 'b.js', generated: [1, 0], original: [20, 0] },
+      { source: 'c.js', generated: [2, 0], original: [30, 0] }
     ].freeze
 
     assert_equal mappings, concat_source_maps(nil, mappings)
@@ -111,34 +111,34 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal mappings, concat_source_maps(mappings, [])
 
     mappings2 = [
-      {source: 'd.js', generated: [0, 0], original: [0, 0]}
+      { source: 'd.js', generated: [0, 0], original: [0, 0] }
     ].freeze
 
     assert_equal [
-      {source: 'a.js', generated: [0, 0], original: [0, 0]},
-      {source: 'b.js', generated: [1, 0], original: [20, 0]},
-      {source: 'c.js', generated: [2, 0], original: [30, 0]},
-      {source: 'd.js', generated: [3, 0], original: [0, 0]}
+      { source: 'a.js', generated: [0, 0], original: [0, 0] },
+      { source: 'b.js', generated: [1, 0], original: [20, 0] },
+      { source: 'c.js', generated: [2, 0], original: [30, 0] },
+      { source: 'd.js', generated: [3, 0], original: [0, 0] }
     ], concat_source_maps(mappings, mappings2)
 
     assert_equal [
-      {source: 'd.js', generated: [0, 0], original: [0, 0]},
-      {source: 'a.js', generated: [1, 0], original: [0, 0]},
-      {source: 'b.js', generated: [2, 0], original: [20, 0]},
-      {source: 'c.js', generated: [3, 0], original: [30, 0]}
+      { source: 'd.js', generated: [0, 0], original: [0, 0] },
+      { source: 'a.js', generated: [1, 0], original: [0, 0] },
+      { source: 'b.js', generated: [2, 0], original: [20, 0] },
+      { source: 'c.js', generated: [3, 0], original: [30, 0] }
     ], concat_source_maps(mappings2, mappings)
   end
 
   def test_combine_source_maps
     mappings = [
-      {source: 'a.js', generated: [0, 0], original: [0, 0]},
-      {source: 'b.js', generated: [1, 0], original: [20, 0]},
-      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+      { source: 'a.js', generated: [0, 0], original: [0, 0] },
+      { source: 'b.js', generated: [1, 0], original: [20, 0] },
+      { source: 'c.js', generated: [2, 0], original: [30, 0] }
     ]
     assert_equal mappings, combine_source_maps([], mappings)
     assert_equal mappings, combine_source_maps(nil, mappings)
 
-    mappings1 = decode_json_source_map(%{
+    mappings1 = decode_json_source_map(%(
       {
         "version": 3,
         "file": "index.js",
@@ -149,9 +149,9 @@ class TestSourceMapUtils < MiniTest::Test
         "names": [],
         "mappings": ";AAAA;AAAA,MAAA,IAAA;;AAAA,EAAA,IAAA,GAAO,SAAA,GAAA;WACL,KAAA,CAAM,aAAN,EADK;EAAA,CAAP,CAAA;;AAGA,EAAA,IAAW,IAAX;AAAA,IAAG,IAAH,CAAA,CAAA,CAAA;GAHA;AAAA"
       }
-    })["mappings"]
+    ))['mappings']
 
-    mappings2 = decode_json_source_map(%{
+    mappings2 = decode_json_source_map(%(
       {
         "version":3,
         "file":"index.min.js",
@@ -159,11 +159,11 @@ class TestSourceMapUtils < MiniTest::Test
         "names":["test","alert","call","this"],
         "mappings":"CACA,WACE,GAAIA,KAEJA,MAAO,WACL,MAAOC,OAAM,eAGf,IAAI,KAAM,CACRD,SAGDE,KAAKC"
       }
-    })["mappings"]
+    ))['mappings']
 
     mappings3 = combine_source_maps(mappings1, mappings2)
     assert_equal 'CAAA,WAAA,GAAA,KAAA,MAAO,WAAA,MACL,OAAM,eAER,IAAW,KAAX,CAAG,SAHH,KAAA',
-      encode_vlq_mappings(mappings3)
+                 encode_vlq_mappings(mappings3)
   end
 
   def test_compare_offsets
@@ -178,9 +178,9 @@ class TestSourceMapUtils < MiniTest::Test
 
   def test_bsearch_mappings
     mappings = [
-      {source: 'a.js', generated: [0, 0], original: [0, 0]},
-      {source: 'b.js', generated: [1, 0], original: [20, 0]},
-      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+      { source: 'a.js', generated: [0, 0], original: [0, 0] },
+      { source: 'b.js', generated: [1, 0], original: [20, 0] },
+      { source: 'c.js', generated: [2, 0], original: [30, 0] }
     ]
 
     assert_equal [0, 0], bsearch_mappings(mappings, [0, 0])[:original]
@@ -192,62 +192,62 @@ class TestSourceMapUtils < MiniTest::Test
 
   def test_decode_json_source_map
     assert_equal({
-      "version" => 3,
-      "file" => "hello.js",
-      "mappings" => [
-        {source: 'b.js', generated: [1, 0], original: [20, 0]},
-        {source: 'c.js', generated: [2, 0], original: [30, 0]}
-      ],
-      "sources" => ["a.js", "b.js", "c.js"],
-      "names" => []
-    }, decode_json_source_map('{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}'))
+                   'version' => 3,
+                   'file' => 'hello.js',
+                   'mappings' => [
+                     { source: 'b.js', generated: [1, 0], original: [20, 0] },
+                     { source: 'c.js', generated: [2, 0], original: [30, 0] }
+                   ],
+                   'sources' => ['a.js', 'b.js', 'c.js'],
+                   'names' => []
+                 }, decode_json_source_map('{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}'))
   end
 
   def test_encode_json_source_map
     mappings_hash = [
-      {source: 'a.js', generated: [0, 0], original: [0, 0]},
-      {source: 'b.js', generated: [1, 0], original: [20, 0]},
-      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+      { source: 'a.js', generated: [0, 0], original: [0, 0] },
+      { source: 'b.js', generated: [1, 0], original: [20, 0] },
+      { source: 'c.js', generated: [2, 0], original: [30, 0] }
     ]
-    mappings_str = "ACmBA;ACUA"
+    mappings_str = 'ACmBA;ACUA'
 
-    sources  = ["a.js", "b.js", "c.js"]
+    sources  = ['a.js', 'b.js', 'c.js']
     names    = []
 
     assert_equal '{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}',
-      encode_json_source_map(mappings_hash, sources: sources, names: names, filename: "hello.js")
+                 encode_json_source_map(mappings_hash, sources: sources, names: names, filename: 'hello.js')
     assert_equal '{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}',
-      encode_json_source_map(mappings_str, sources: sources, names: names, filename: "hello.js")
+                 encode_json_source_map(mappings_str, sources: sources, names: names, filename: 'hello.js')
   end
 
   def test_decode_vlq_mappings
-    mappings = "AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe"
-    sources  = ["script.js"],
-    names    = ["hello", "console", "log"]
+    mappings = 'AAEAA,QAASA,MAAK,EAAG,CACfC,OAAAC,IAAA,CAAY,eAAZ,CADe'
+    sources  = ['script.js'],
+               names = %w(hello console log)
 
     assert_equal([
-      {source: ["script.js"], generated: [1, 0], original: [3, 0], name: "hello"},
-      {source: ["script.js"], generated: [1, 8], original: [3, 9], name: "hello"},
-      {source: ["script.js"], generated: [1, 14], original: [3, 14]},
-      {source: ["script.js"], generated: [1, 16], original: [3, 17]},
-      {source: ["script.js"], generated: [1, 17], original: [4, 2], name: "console"},
-      {source: ["script.js"], generated: [1, 24], original: [4, 2], name: "log"},
-      {source: ["script.js"], generated: [1, 28], original: [4, 2]},
-      {source: ["script.js"], generated: [1, 29], original: [4, 14]},
-      {source: ["script.js"], generated: [1, 44], original: [4, 2]},
-      {source: ["script.js"], generated: [1, 45], original: [3, 17]}
+      { source: ['script.js'], generated: [1, 0], original: [3, 0], name: 'hello' },
+      { source: ['script.js'], generated: [1, 8], original: [3, 9], name: 'hello' },
+      { source: ['script.js'], generated: [1, 14], original: [3, 14] },
+      { source: ['script.js'], generated: [1, 16], original: [3, 17] },
+      { source: ['script.js'], generated: [1, 17], original: [4, 2], name: 'console' },
+      { source: ['script.js'], generated: [1, 24], original: [4, 2], name: 'log' },
+      { source: ['script.js'], generated: [1, 28], original: [4, 2] },
+      { source: ['script.js'], generated: [1, 29], original: [4, 14] },
+      { source: ['script.js'], generated: [1, 44], original: [4, 2] },
+      { source: ['script.js'], generated: [1, 45], original: [3, 17] }
     ], decode_vlq_mappings(mappings, sources: sources, names: names))
   end
 
   def test_encode_vlq_mappings
-    assert_equal "", encode_vlq_mappings([])
+    assert_equal '', encode_vlq_mappings([])
 
     mappings = [
-      {source: 'a.js', generated: [0, 0], original: [0, 0]},
-      {source: 'b.js', generated: [1, 0], original: [20, 0]},
-      {source: 'c.js', generated: [2, 0], original: [30, 0]}
+      { source: 'a.js', generated: [0, 0], original: [0, 0] },
+      { source: 'b.js', generated: [1, 0], original: [20, 0] },
+      { source: 'c.js', generated: [2, 0], original: [30, 0] }
     ]
-    assert_equal "ACmBA;ACUA", encode_vlq_mappings(mappings)
+    assert_equal 'ACmBA;ACUA', encode_vlq_mappings(mappings)
   end
 
   TESTS = {
@@ -260,12 +260,12 @@ class TestSourceMapUtils < MiniTest::Test
     'L'          => [-5],
     'w+B'        => [1000],
     'x+B'        => [-1000],
-    'gqjG'       => [100000],
-    'hqjG'       => [-100000],
+    'gqjG'       => [100_000],
+    'hqjG'       => [-100_000],
     'AAgBC'      => [0, 0, 16, 1],
     'AAgCgBC'    => [0, 0, 32, 16, 1],
-    'DFLx+BhqjG' => [-1, -2, -5, -1000, -100000],
-    'CEKw+BgqjG' => [1, 2, 5, 1000, 100000]
+    'DFLx+BhqjG' => [-1, -2, -5, -1000, -100_000],
+    'CEKw+BgqjG' => [1, 2, 5, 1000, 100_000]
   }
 
   MAP_TESTS = {

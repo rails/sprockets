@@ -2,7 +2,7 @@ require 'set'
 
 module Sprockets
   # Internal: The first processor in the pipeline that reads the file into
-  # memory and passes it along as `input[:data]`.  
+  # memory and passes it along as `input[:data]`.
   class FileReader
     def self.call(input)
       env = input[:environment]

@@ -37,7 +37,7 @@ module Sprockets
 
     # Return an `Cached`. Must be implemented by the subclass.
     def cached
-      raise NotImplementedError
+      fail NotImplementedError
     end
     alias_method :index, :cached
 
@@ -55,17 +55,15 @@ module Sprockets
         # also possible the file was updated more than once in a given second.
         key = UnloadedAsset.new(path, self).file_digest_key(stat.mtime.to_i)
         cache.fetch(key) do
-          self.stat_digest(path, stat)
+          stat_digest(path, stat)
         end
       end
     end
 
     # Find asset by logical path or expanded path.
     def find_asset(*args)
-      uri, _ = resolve(*args)
-      if uri
-        load(uri)
-      end
+      uri, = resolve(*args)
+      load(uri) if uri
     end
 
     def find_all_linked_assets(*args)
@@ -95,8 +93,8 @@ module Sprockets
 
     # Pretty inspect
     def inspect
-      "#<#{self.class}:0x#{object_id.to_s(16)} " +
-        "root=#{root.to_s.inspect}, " +
+      "#<#{self.class}:0x#{object_id.to_s(16)} " \
+        "root=#{root.to_s.inspect}, " \
         "paths=#{paths.inspect}>"
     end
 

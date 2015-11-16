@@ -12,7 +12,7 @@ class TestUglifierCompressor < MiniTest::Test
         mapping: []
       }
     }
-    output = "function foo(){return!0}"
+    output = 'function foo(){return!0}'
     result = Sprockets::UglifierCompressor.call(input)
     assert_equal output, result[:data]
   end

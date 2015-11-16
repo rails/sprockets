@@ -1,7 +1,7 @@
 require 'sprockets_test'
 
 class TestStylesheetBundle < Sprockets::TestCase
-  test "bundle single stylesheet file" do
+  test 'bundle single stylesheet file' do
     environment = Sprockets::Environment.new
     environment.append_path fixture_path('asset')
 
@@ -20,10 +20,10 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal ["file-digest://#{uri_path(filename)}"],
-      result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
+                 result[:dependencies].to_a.sort.select { |dep| dep.start_with?('file-digest:') }
   end
 
-  test "bundle multiple stylesheet files" do
+  test 'bundle multiple stylesheet files' do
     environment = Sprockets::Environment.new
     environment.append_path fixture_path('asset')
 
@@ -42,17 +42,17 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
-      "file-digest://" + fixture_path_for_uri('asset'),
-      "file-digest://" + fixture_path_for_uri('asset/project'),
-      "file-digest://" + fixture_path_for_uri('asset/project.css'),
-      "file-digest://" + fixture_path_for_uri('asset/require_self.css'),
-      "file-digest://" + fixture_path_for_uri('asset/tree/all'),
-      "file-digest://" + fixture_path_for_uri('asset/tree/all/b'),
-      "file-digest://" + fixture_path_for_uri('asset/tree/all/b.css')
-    ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
+      'file-digest://' + fixture_path_for_uri('asset'),
+      'file-digest://' + fixture_path_for_uri('asset/project'),
+      'file-digest://' + fixture_path_for_uri('asset/project.css'),
+      'file-digest://' + fixture_path_for_uri('asset/require_self.css'),
+      'file-digest://' + fixture_path_for_uri('asset/tree/all'),
+      'file-digest://' + fixture_path_for_uri('asset/tree/all/b'),
+      'file-digest://' + fixture_path_for_uri('asset/tree/all/b.css')
+    ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?('file-digest:') }
   end
 
-  test "bundle single javascript file" do
+  test 'bundle single javascript file' do
     environment = Sprockets::Environment.new
     environment.append_path fixture_path('asset')
 
@@ -71,10 +71,10 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal ["file-digest://#{uri_path(filename)}"],
-      result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
+                 result[:dependencies].to_a.sort.select { |dep| dep.start_with?('file-digest:') }
   end
 
-  test "bundle multiple javascript files" do
+  test 'bundle multiple javascript files' do
     environment = Sprockets::Environment.new
     environment.append_path fixture_path('asset')
 
@@ -93,12 +93,12 @@ class TestStylesheetBundle < Sprockets::TestCase
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [
-      "file-digest://" + fixture_path_for_uri('asset'),
-      "file-digest://" + fixture_path_for_uri('asset/application.js'),
-      "file-digest://" + fixture_path_for_uri('asset/project'),
-      "file-digest://" + fixture_path_for_uri('asset/project.js.erb'),
-      "file-digest://" + fixture_path_for_uri('asset/users'),
-      "file-digest://" + fixture_path_for_uri('asset/users.js.erb')
-    ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?("file-digest:") }
+      'file-digest://' + fixture_path_for_uri('asset'),
+      'file-digest://' + fixture_path_for_uri('asset/application.js'),
+      'file-digest://' + fixture_path_for_uri('asset/project'),
+      'file-digest://' + fixture_path_for_uri('asset/project.js.erb'),
+      'file-digest://' + fixture_path_for_uri('asset/users'),
+      'file-digest://' + fixture_path_for_uri('asset/users.js.erb')
+    ], result[:dependencies].to_a.sort.select { |dep| dep.start_with?('file-digest:') }
   end
 end

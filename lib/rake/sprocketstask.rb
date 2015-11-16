@@ -97,8 +97,8 @@ module Rake
 
     def initialize(name = :assets)
       @name         = name
-      @environment  = lambda { Sprockets::Environment.new(Dir.pwd) }
-      @manifest     = lambda { Sprockets::Manifest.new(cached, output) }
+      @environment  = -> { Sprockets::Environment.new(Dir.pwd) }
+      @manifest     = -> { Sprockets::Manifest.new(cached, output) }
       @logger       = Logger.new($stderr)
       @logger.level = Logger::INFO
       @keep         = 2
@@ -110,14 +110,14 @@ module Rake
 
     # Define tasks
     def define
-      desc name == :assets ? "Compile assets" : "Compile #{name} assets"
+      desc name == :assets ? 'Compile assets' : "Compile #{name} assets"
       task name do
         with_logger do
           manifest.compile(assets)
         end
       end
 
-      desc name == :assets ? "Remove all assets" : "Remove all #{name} assets"
+      desc name == :assets ? 'Remove all assets' : "Remove all #{name} assets"
       task "clobber_#{name}" do
         with_logger do
           manifest.clobber
@@ -126,7 +126,7 @@ module Rake
 
       task clobber: ["clobber_#{name}"]
 
-      desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
+      desc name == :assets ? 'Clean old assets' : "Clean old #{name} assets"
       task "clean_#{name}" do
         with_logger do
           manifest.clean(keep)
@@ -137,16 +137,17 @@ module Rake
     end
 
     private
-      # Sub out environment logger with our rake task logger that
-      # writes to stderr.
-      def with_logger
-        if env = manifest.environment
-          old_logger = env.logger
-          env.logger = @logger
-        end
-        yield
-      ensure
-        env.logger = old_logger if env
+
+    # Sub out environment logger with our rake task logger that
+    # writes to stderr.
+    def with_logger
+      if env = manifest.environment
+        old_logger = env.logger
+        env.logger = @logger
       end
+      yield
+    ensure
+      env.logger = old_logger if env
+    end
   end
 end

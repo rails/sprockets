@@ -1,7 +1,7 @@
 require 'sprockets/path_utils'
 
 module Sprockets
- # Internal: used to "expand" and "compress" values for storage
+  # Internal: used to "expand" and "compress" values for storage
   class URITar
     attr_reader :scheme, :root, :path
 
@@ -13,13 +13,13 @@ module Sprockets
       @root = env.root
       @env  = env
       uri   = uri.to_s
-      if uri.include?("://".freeze)
-        uri_array = uri.split("://".freeze)
+      if uri.include?('://'.freeze)
+        uri_array = uri.split('://'.freeze)
         @scheme   = uri_array.shift
-        @scheme   << "://".freeze
-        @path     = uri_array.join("".freeze)
+        @scheme << '://'.freeze
+        @path     = uri_array.join(''.freeze)
       else
-        @scheme = "".freeze
+        @scheme = ''.freeze
         @path   = uri
       end
     end
@@ -68,7 +68,7 @@ module Sprockets
         else
           # We always want to return an absolute uri,
           # make sure the path starts with a slash.
-          scheme + File.join("/".freeze, root, path)
+          scheme + File.join('/'.freeze, root, path)
         end
       end
     end
@@ -84,8 +84,8 @@ module Sprockets
     # Returns String
     def compressed_path
       # windows
-      if !@root.start_with?("/".freeze) && path.start_with?("/".freeze)
-        consistent_root = "/".freeze + @root
+      if !@root.start_with?('/'.freeze) && path.start_with?('/'.freeze)
+        consistent_root = '/'.freeze + @root
       else
         consistent_root = @root
       end

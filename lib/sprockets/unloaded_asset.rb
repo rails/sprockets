@@ -5,7 +5,6 @@ module Sprockets
   # Internal: Used to parse and store the URI to an unloaded asset
   # Generates keys used to store and retrieve items from cache
   class UnloadedAsset
-
     # Internal: Initialize object for generating cache keys
     #
     # uri - A String containing complete URI to a file including scheme
@@ -40,9 +39,7 @@ module Sprockets
     #
     # Returns a String.
     def filename
-      unless @filename
-        load_file_params
-      end
+      load_file_params unless @filename
       @filename
     end
 
@@ -60,9 +57,7 @@ module Sprockets
     #
     # Returns a Hash.
     def params
-      unless @params
-        load_file_params
-      end
+      load_file_params unless @params
       @params
     end
 
@@ -101,7 +96,7 @@ module Sprockets
     #
     # Returns a String.
     def dependency_history_key
-      "asset-uri-cache-dependencies:#{compressed_path}:#{ @env.file_digest(filename) }"
+      "asset-uri-cache-dependencies:#{compressed_path}:#{@env.file_digest(filename)}"
     end
 
     # Internal: Digest key
@@ -128,11 +123,12 @@ module Sprockets
     end
 
     private
-      # Internal: Parses uri into filename and params hash
-      #
-      # Returns Array with filename and params hash
-      def load_file_params
-        @filename, @params = URIUtils.parse_asset_uri(uri)
-      end
+
+    # Internal: Parses uri into filename and params hash
+    #
+    # Returns Array with filename and params hash
+    def load_file_params
+      @filename, @params = URIUtils.parse_asset_uri(uri)
+    end
   end
 end

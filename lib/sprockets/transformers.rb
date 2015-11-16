@@ -38,7 +38,7 @@ module Sprockets
       self.config = hash_reassoc(config, :registered_transformers) do |transformers|
         transformers << Transformer.new(from, to, proc)
       end
-      compute_transformers!(self.config[:registered_transformers])
+      compute_transformers!(config[:registered_transformers])
     end
 
     # Internal: Register transformer for existing type adding a suffix.
@@ -113,60 +113,62 @@ module Sprockets
     # Returns Processor.
     def compose_transformers(transformers, types, preprocessors, postprocessors)
       if types.length < 2
-        raise ArgumentError, "too few transform types: #{types.inspect}"
+        fail ArgumentError, "too few transform types: #{types.inspect}"
       end
 
-      processors = types.each_cons(2).map { |src, dst|
+      processors = types.each_cons(2).map do |src, dst|
         unless processor = transformers[src][dst]
-          raise ArgumentError, "missing transformer for type: #{src} to #{dst}"
+          fail ArgumentError, "missing transformer for type: #{src} to #{dst}"
         end
         processor
-      }
+      end
 
       compose_transformer_list processors, preprocessors, postprocessors
     end
 
     private
-      def compose_transformer_list(transformers, preprocessors, postprocessors)
-        processors = []
 
-        transformers.each do |processor|
-          processors.concat postprocessors[processor.from]
-          processors << processor.proc
-          processors.concat preprocessors[processor.to]
-        end
+    def compose_transformer_list(transformers, preprocessors, postprocessors)
+      processors = []
 
-        if processors.size > 1
-          compose_processors(*processors.reverse)
-        elsif processors.size == 1
-          processors.first
+      transformers.each do |processor|
+        processors.concat postprocessors[processor.from]
+        processors << processor.proc
+        processors.concat preprocessors[processor.to]
+      end
+
+      if processors.size > 1
+        compose_processors(*processors.reverse)
+      elsif processors.size == 1
+        processors.first
+      end
+    end
+
+    def compute_transformers!(registered_transformers)
+      preprocessors         = config[:preprocessors]
+      postprocessors        = config[:postprocessors]
+      transformers          = Hash.new { {} }
+      inverted_transformers = Hash.new { Set.new }
+      incoming_edges        = registered_transformers.group_by(&:from)
+
+      registered_transformers.each do |t|
+        traversals = dfs_paths([t]) { |k| incoming_edges.fetch(k.to, []) }
+
+        traversals.each do |nodes|
+          src = nodes.first.from
+          dst = nodes.last.to
+          processor = compose_transformer_list nodes, preprocessors, postprocessors
+
+          transformers[src] = {} unless transformers.key?(src)
+          transformers[src][dst] = processor
+
+          inverted_transformers[dst] = Set.new unless inverted_transformers.key?(dst)
+          inverted_transformers[dst] << src
         end
       end
 
-      def compute_transformers!(registered_transformers)
-        preprocessors         = self.config[:preprocessors]
-        postprocessors        = self.config[:postprocessors]
-        transformers          = Hash.new { {} }
-        inverted_transformers = Hash.new { Set.new }
-        incoming_edges        = registered_transformers.group_by(&:from)
-
-        registered_transformers.each do |t|
-          traversals = dfs_paths([t]) { |k| incoming_edges.fetch(k.to, []) }
-
-          traversals.each do |nodes|
-            src, dst = nodes.first.from, nodes.last.to
-            processor = compose_transformer_list nodes, preprocessors, postprocessors
-
-            transformers[src] = {} unless transformers.key?(src)
-            transformers[src][dst] = processor
-
-            inverted_transformers[dst] = Set.new unless inverted_transformers.key?(dst)
-            inverted_transformers[dst] << src
-          end
-        end
-
-        self.config = hash_reassoc(config, :transformers) { transformers }
-        self.config = hash_reassoc(config, :inverted_transformers) { inverted_transformers }
-      end
+      self.config = hash_reassoc(config, :transformers) { transformers }
+      self.config = hash_reassoc(config, :inverted_transformers) { inverted_transformers }
+    end
   end
 end

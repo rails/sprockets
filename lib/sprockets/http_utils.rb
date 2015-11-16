@@ -27,8 +27,8 @@ module Sprockets
     def match_mime_type_keys(hash, mime_type)
       type, subtype = mime_type.split('/', 2)
       [
-        hash["*"],
-        hash["*/*"],
+        hash['*'],
+        hash['*/*'],
         hash["#{type}/*"],
         hash["#{type}/#{subtype}"]
       ].compact
@@ -71,7 +71,7 @@ module Sprockets
     #
     # Returns Array of matched Strings from available Array or [].
     def find_q_matches(q_values, available, &matcher)
-      matcher ||= lambda { |a, b| a == b }
+      matcher ||= ->(a, b) { a == b }
 
       matches = []
 
@@ -82,7 +82,7 @@ module Sprockets
       when NilClass
         q_values = []
       else
-        raise TypeError, "unknown q_values type: #{q_values.class}"
+        fail TypeError, "unknown q_values type: #{q_values.class}"
       end
 
       q_values.each do |accepted, quality|
@@ -91,8 +91,8 @@ module Sprockets
         end
       end
 
-      matches.sort_by! { |match, quality| -quality }
-      matches.map! { |match, quality| match }
+      matches.sort_by! { |_match, quality| -quality }
+      matches.map! { |match, _quality| match }
       matches
     end
 

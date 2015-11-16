@@ -6,10 +6,10 @@ class TestBabelProcessor < MiniTest::Test
   def test_compile_es6_features_to_es5
     input = {
       content_type: 'application/ecmascript-6',
-      data: "const square = (n) => n * n",
+      data: 'const square = (n) => n * n',
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -21,10 +21,10 @@ class TestBabelProcessor < MiniTest::Test
   def test_transform_arrow_function
     input = {
       content_type: 'application/ecmascript-6',
-      data: "var square = (n) => n * n",
+      data: 'var square = (n) => n * n',
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -41,8 +41,8 @@ var square = function square(n) {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -57,8 +57,8 @@ require("foo");
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -73,8 +73,8 @@ define(["exports", "foo"], function (exports, _foo) {});
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -89,8 +89,8 @@ define("mod", ["exports", "foo"], function (exports, _foo) {});
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -110,8 +110,8 @@ System.register(["foo"], function (_export) {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
@@ -131,13 +131,13 @@ System.register("mod", ["foo"], function (_export) {
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
-      load_path: File.expand_path("../fixtures", __FILE__),
-      filename: File.expand_path("../fixtures/mod1.es6", __FILE__),
+      load_path: File.expand_path('../fixtures', __FILE__),
+      filename: File.expand_path('../fixtures/mod1.es6', __FILE__),
       cache: Sprockets::Cache.new
     }
 
     mod2 = mod1.dup
-    mod2[:filename] = File.expand_path("../fixtures/mod2.es6", __FILE__)
+    mod2[:filename] = File.expand_path('../fixtures/mod2.es6', __FILE__)
 
     assert js1 = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(mod1)[:data]
     assert_equal <<-JS.chomp, js1.to_s.strip

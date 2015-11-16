@@ -26,11 +26,10 @@ module Sprockets
     #   Manifest.new(environment, "./public/assets/manifest.json")
     #
     def initialize(*args)
-      if args.first.is_a?(Base) || args.first.nil?
-        @environment = args.shift
-      end
+      @environment = args.shift if args.first.is_a?(Base) || args.first.nil?
 
-      @directory, @filename = args[0], args[1]
+      @directory = args[0]
+      @filename = args[1]
 
       # Whether the manifest file is using the old manifest-*.json naming convention
       @legacy_manifest = false
@@ -40,8 +39,9 @@ module Sprockets
       @filename  = File.expand_path(@filename) if @filename
 
       # If filename is given as the second arg
-      if @directory && File.extname(@directory) != ""
-        @directory, @filename = nil, @directory
+      if @directory && File.extname(@directory) != ''
+        @filename = @directory
+        @directory = nil
       end
 
       # Default dir to the directory of the filename
@@ -53,15 +53,13 @@ module Sprockets
       end
 
       unless @directory && @filename
-        raise ArgumentError, "manifest requires output filename"
+        fail ArgumentError, 'manifest requires output filename'
       end
 
       data = {}
 
       begin
-        if File.exist?(@filename)
-          data = json_decode(File.read(@filename))
-        end
+        data = json_decode(File.read(@filename)) if File.exist?(@filename)
       rescue JSON::ParserError => e
         logger.error "#{@filename} is invalid: #{e.class} #{e.message}"
       end
@@ -110,7 +108,7 @@ module Sprockets
     # Returns Enumerator of Assets.
     def find(*args)
       unless environment
-        raise Error, "manifest requires environment for compilation"
+        fail Error, 'manifest requires environment for compilation'
       end
 
       return to_enum(__method__, *args) unless block_given?
@@ -134,7 +132,7 @@ module Sprockets
     #
     def compile(*args)
       unless environment
-        raise Error, "manifest requires environment for compilation"
+        fail Error, 'manifest requires environment for compilation'
       end
 
       filenames = []
@@ -178,9 +176,7 @@ module Sprockets
       path = File.join(dir, filename)
       logical_path = files[filename]['logical_path']
 
-      if assets[logical_path] == filename
-        assets.delete(logical_path)
-      end
+      assets.delete(logical_path) if assets[logical_path] == filename
 
       files.delete(filename)
       FileUtils.rm(path) if File.exist?(path)
@@ -208,19 +204,19 @@ module Sprockets
       asset_versions.each do |logical_path, versions|
         current = assets[logical_path]
 
-        versions.reject { |path, _|
+        versions.reject do |path, _|
           path == current
-        }.sort_by { |_, attrs|
+        end.sort_by do |_, attrs|
           # Sort by timestamp
           Time.parse(attrs['mtime'])
-        }.reverse.each_with_index.drop_while { |(_, attrs), index|
+        end.reverse.each_with_index.drop_while do |(_, attrs), index|
           _age = [0, Time.now - Time.parse(attrs['mtime'])].max
           # Keep if under age or within the count limit
           _age < age || index < count
-        }.each { |(path, _), _|
-           # Remove old assets
+        end.each do |(path, _), _|
+          # Remove old assets
           remove(path)
-        }
+        end
       end
     end
 
@@ -241,22 +237,23 @@ module Sprockets
     end
 
     private
-      def json_decode(obj)
-        JSON.parse(obj, create_additions: false)
-      end
 
-      def json_encode(obj)
-        JSON.generate(obj)
-      end
+    def json_decode(obj)
+      JSON.parse(obj, create_additions: false)
+    end
 
-      def logger
-        if environment
-          environment.logger
-        else
-          logger = Logger.new($stderr)
-          logger.level = Logger::FATAL
-          logger
-        end
+    def json_encode(obj)
+      JSON.generate(obj)
+    end
+
+    def logger
+      if environment
+        environment.logger
+      else
+        logger = Logger.new($stderr)
+        logger.level = Logger::FATAL
+        logger
       end
+    end
   end
 end

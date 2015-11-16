@@ -9,7 +9,7 @@ module Sprockets
     #
     #     env = Environment.new(Rails.root)
     #
-    def initialize(root = ".")
+    def initialize(root = '.')
       initialize_configuration(Sprockets)
       self.root = root
       self.cache = Cache::MemoryStore.new

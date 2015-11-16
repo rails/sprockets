@@ -6,7 +6,7 @@ silence_warnings do
 end
 
 class TestBaseSass < Sprockets::TestCase
-  CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
+  CACHE_PATH = File.expand_path('../../.sass-cache', __FILE__)
 
   def sass
     ::Sass
@@ -52,7 +52,7 @@ class TestSprocketsSass < TestBaseSass
   def setup
     super
 
-    @env = Sprockets::Environment.new(".") do |env|
+    @env = Sprockets::Environment.new('.') do |env|
       env.cache = {}
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
@@ -71,21 +71,21 @@ class TestSprocketsSass < TestBaseSass
     end
   end
 
-  test "raise sass error with line number" do
+  test 'raise sass error with line number' do
     begin
       ::Sass::Util.silence_sass_warnings do
         render('sass/error.sass')
       end
       flunk
     rescue Sass::SyntaxError => error
-      assert error.message.include?("invalid")
+      assert error.message.include?('invalid')
       trace = error.backtrace[0]
-      assert trace.include?("error.sass")
-      assert trace.include?(":5")
+      assert trace.include?('error.sass')
+      assert trace.include?(':5')
     end
   end
 
-  test "track sass dependencies metadata" do
+  test 'track sass dependencies metadata' do
     asset = nil
     silence_warnings do
       asset = @env.find_asset('sass/import_partial.css')
@@ -112,7 +112,7 @@ class TestSassFunctions < TestSprocketsSass
 
   def define_asset_path
     @env.context_class.class_eval do
-      def asset_path(path, options = {})
+      def asset_path(path, _options = {})
         link_asset(path)
         "/#{path}"
       end

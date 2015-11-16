@@ -2,37 +2,37 @@ require 'sprockets_test'
 
 class TestTransformers < Sprockets::TestCase
   def setup
-    @env = Sprockets::Environment.new(".")
+    @env = Sprockets::Environment.new('.')
   end
 
-  test "resolve transform type for svg" do
+  test 'resolve transform type for svg' do
     assert_equal 'image/svg+xml',
-      @env.resolve_transform_type('image/svg+xml', 'image/svg+xml')
+                 @env.resolve_transform_type('image/svg+xml', 'image/svg+xml')
     assert_equal 'image/svg+xml',
-      @env.resolve_transform_type('image/svg+xml', '*/*')
+                 @env.resolve_transform_type('image/svg+xml', '*/*')
     assert_equal 'image/svg+xml',
-      @env.resolve_transform_type('image/svg+xml', nil)
+                 @env.resolve_transform_type('image/svg+xml', nil)
     assert_equal 'image/svg+xml',
-      @env.resolve_transform_type('image/svg+xml', 'image/*')
+                 @env.resolve_transform_type('image/svg+xml', 'image/*')
     assert_equal 'image/png',
-      @env.resolve_transform_type('image/svg+xml', 'image/png')
+                 @env.resolve_transform_type('image/svg+xml', 'image/png')
     assert_equal 'image/svg+xml',
-      @env.resolve_transform_type('image/svg+xml', 'image/svg+xml, image/png')
+                 @env.resolve_transform_type('image/svg+xml', 'image/svg+xml, image/png')
     assert_equal 'image/png',
-      @env.resolve_transform_type('image/svg+xml', 'image/png, image/svg+xml')
+                 @env.resolve_transform_type('image/svg+xml', 'image/png, image/svg+xml')
     assert_equal 'image/png',
-      @env.resolve_transform_type('image/svg+xml', 'image/svg+xml; q=0.8, image/png')
+                 @env.resolve_transform_type('image/svg+xml', 'image/svg+xml; q=0.8, image/png')
     assert_equal 'image/svg+xml',
-      @env.resolve_transform_type('image/svg+xml', 'text/yaml, image/svg+xml, image/png')
+                 @env.resolve_transform_type('image/svg+xml', 'text/yaml, image/svg+xml, image/png')
     assert_equal 'image/png',
-      @env.resolve_transform_type('image/svg+xml', 'text/yaml, image/png, image/svg+xml')
+                 @env.resolve_transform_type('image/svg+xml', 'text/yaml, image/png, image/svg+xml')
     refute @env.resolve_transform_type('image/svg+xml', 'text/yaml')
 
     refute @env.resolve_transform_type(nil, 'image/svg+xml')
     refute @env.resolve_transform_type(nil, nil)
   end
 
-  test "resolve multistep transform type for svg" do
+  test 'resolve multistep transform type for svg' do
     noop = proc {}
 
     assert_equal 'test/svg', @env.resolve_transform_type('test/svg', 'test/svg')
@@ -104,7 +104,7 @@ class TestTransformers < Sprockets::TestCase
     refute @env.resolve_transform_type('test/png', 'test/jif')
   end
 
-  test "expand transform accepts" do
+  test 'expand transform accepts' do
     assert_equal [
       ['text/plain', 1.0],
       ['application/plain+ruby', 0.8]
@@ -124,30 +124,30 @@ class TestTransformers < Sprockets::TestCase
       ['application/dart', 0.8]
     ], @env.expand_transform_accepts(@env.parse_q_values('application/javascript'))
     assert_equal [['image/png', 1.0], ['image/svg+xml', 0.8]],
-      @env.expand_transform_accepts(@env.parse_q_values('image/png'))
+                 @env.expand_transform_accepts(@env.parse_q_values('image/png'))
   end
 
-  test "compose transformers" do
-    @env.register_transformer "image/svg", "image/png", proc { |input|
-      { data: input[:data] + ",svg->png" }
+  test 'compose transformers' do
+    @env.register_transformer 'image/svg', 'image/png', proc { |input|
+      { data: input[:data] + ',svg->png' }
     }
 
-    @env.register_transformer "image/png", "image/gif", proc { |input|
-      { data: input[:data] + ",png->gif" }
+    @env.register_transformer 'image/png', 'image/gif', proc { |input|
+      { data: input[:data] + ',png->gif' }
     }
 
     data = @env.config[:transformers]['image/svg']['image/png'].call(data: '')
-    assert_equal({data: ",svg->png"}, data)
+    assert_equal({ data: ',svg->png' }, data)
 
     data = @env.config[:transformers]['image/svg']['image/gif'].call(data: '')
-    assert_equal({data: ",svg->png,png->gif"}, data)
+    assert_equal({ data: ',svg->png,png->gif' }, data)
 
     assert_raises(Sprockets::ArgumentError) do
-      @env.compose_transformers(nil, ["image/svg"], nil, nil)
+      @env.compose_transformers(nil, ['image/svg'], nil, nil)
     end
 
     assert_raises(Sprockets::ArgumentError) do
-      @env.compose_transformers(Hash.new { {} }, ["image/svg", "image/jif"], nil, nil)
+      @env.compose_transformers(Hash.new { {} }, ['image/svg', 'image/jif'], nil, nil)
     end
   end
 end

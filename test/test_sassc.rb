@@ -9,7 +9,7 @@ require 'sprockets/sassc_processor'
 require 'sprockets/sassc_compressor'
 
 class TestBaseSassc < Sprockets::TestCase
-  CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
+  CACHE_PATH = File.expand_path('../../.sass-cache', __FILE__)
 
   def sass
     ::SassC
@@ -59,7 +59,7 @@ class TestSprocketsSassc < TestBaseSassc
   def setup
     super
 
-    @env = Sprockets::Environment.new(".") do |env|
+    @env = Sprockets::Environment.new('.') do |env|
       env.cache = {}
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
@@ -79,20 +79,20 @@ class TestSprocketsSassc < TestBaseSassc
     end
   end
 
-  test "raise sass error with line number" do
+  test 'raise sass error with line number' do
     begin
       render('sass/error.sass')
       flunk
     rescue SassC::SyntaxError => error
       # this is not exactly consistent with ruby sass
-      assert error.message.include?("invalid")
-      assert error.message.include?("error.sass")
-      assert error.message.include?("line 5")
+      assert error.message.include?('invalid')
+      assert error.message.include?('error.sass')
+      assert error.message.include?('line 5')
     end
   end
 
-  test "track sass dependencies metadata" do
-    skip "not consistent with ruby sass"
+  test 'track sass dependencies metadata' do
+    skip 'not consistent with ruby sass'
 
     asset = nil
     silence_warnings do
@@ -120,7 +120,7 @@ class TestSasscFunctions < TestSprocketsSassc
 
   def define_asset_path
     @env.context_class.class_eval do
-      def asset_path(path, options = {})
+      def asset_path(path, _options = {})
         link_asset(path)
         "/#{path}"
       end

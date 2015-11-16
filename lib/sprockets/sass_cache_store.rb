@@ -7,7 +7,8 @@ module Sprockets
       VERSION = '1'
 
       def initialize(cache, version)
-        @cache, @version = cache, "#{VERSION}/#{version}"
+        @cache = cache
+        @version = "#{VERSION}/#{version}"
       end
 
       def _store(key, version, sha, contents)

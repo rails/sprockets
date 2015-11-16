@@ -36,9 +36,10 @@ module Sprockets
     #
     # Returns unmarshaled Object or raises an Exception.
     def unmarshaled_deflated(str, window_bits = -Zlib::MAX_WBITS)
-      major, minor = str[0], str[1]
+      major = str[0]
+      minor = str[1]
       if major && major.ord == Marshal::MAJOR_VERSION &&
-          minor && minor.ord <= Marshal::MINOR_VERSION
+         minor && minor.ord <= Marshal::MINOR_VERSION
         marshaled = str
       else
         begin
@@ -73,7 +74,6 @@ module Sprockets
       Base64.strict_encode64(str)
     end
 
-
     ## Charset encodings ##
 
     # Internal: Shorthand aliases for detecter functions.
@@ -100,9 +100,7 @@ module Sprockets
       str = detect_unicode_bom(str)
 
       # Attempt Charlock detection
-      if str.encoding == Encoding::BINARY
-        charlock_detect(str)
-      end
+      charlock_detect(str) if str.encoding == Encoding::BINARY
 
       # Fallback to environment's external encoding
       if str.encoding == Encoding::BINARY
@@ -139,9 +137,7 @@ module Sprockets
       str = detect_unicode_bom(str)
 
       # Fallback to UTF-8
-      if str.encoding == Encoding::BINARY
-        str.force_encoding(Encoding::UTF_8)
-      end
+      str.force_encoding(Encoding::UTF_8) if str.encoding == Encoding::BINARY
 
       str
     end
@@ -157,16 +153,15 @@ module Sprockets
       bom_bytes = str.byteslice(0, 4).bytes.to_a
 
       BOM.each do |encoding, bytes|
-        if bom_bytes[0, bytes.size] == bytes
-          str = str.dup
-          str.force_encoding(Encoding::BINARY)
-          str.slice!(0, bytes.size)
-          str.force_encoding(encoding)
-          return str
-        end
+        next unless bom_bytes[0, bytes.size] == bytes
+        str = str.dup
+        str.force_encoding(Encoding::BINARY)
+        str.slice!(0, bytes.size)
+        str.force_encoding(encoding)
+        return str
       end
 
-      return str
+      str
     end
 
     # Public: Detect and strip @charset from CSS style sheet.
@@ -187,9 +182,7 @@ module Sprockets
       end
 
       # Fallback to UTF-8
-      if str.encoding == Encoding::BINARY
-        str.force_encoding(Encoding::UTF_8)
-      end
+      str.force_encoding(Encoding::UTF_8) if str.encoding == Encoding::BINARY
 
       str
     end
@@ -245,9 +238,7 @@ module Sprockets
       str = detect_unicode_bom(str)
 
       # Attempt Charlock detection
-      if str.encoding == Encoding::BINARY
-        charlock_detect(str)
-      end
+      charlock_detect(str) if str.encoding == Encoding::BINARY
 
       # Fallback to environment's external encoding
       if str.encoding == Encoding::BINARY

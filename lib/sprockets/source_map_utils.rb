@@ -22,7 +22,7 @@ module Sprockets
       a ||= []
       b ||= []
       mappings = a.dup
-      offset   = a.any? ? a.last[:generated][0]+1 : 0
+      offset   = a.any? ? a.last[:generated][0] + 1 : 0
       b.each do |m|
         mappings << m.merge(generated: [m[:generated][0] + offset, m[:generated][1]])
       end
@@ -90,9 +90,7 @@ module Sprockets
     def bsearch_mappings(mappings, offset, from = 0, to = mappings.size - 1)
       mid = (from + to) / 2
 
-      if from > to
-        return from < 1 ? nil : mappings[from-1]
-      end
+      return from < 1 ? nil : mappings[from - 1] if from > to
 
       case compare_source_offsets(offset, mappings[mid][:generated])
       when 0
@@ -128,19 +126,17 @@ module Sprockets
       when String
       when Array
         sources ||= mappings.map { |m| m[:source] }.uniq.compact
-        names   ||= mappings.map { |m| m[:name] }.uniq.compact
+        names ||= mappings.map { |m| m[:name] }.uniq.compact
         mappings = encode_vlq_mappings(mappings, sources: sources, names: names)
       else
-        raise TypeError, "could not encode mappings: #{mappings}"
+        fail TypeError, "could not encode mappings: #{mappings}"
       end
 
-      JSON.generate({
-        "version"   => 3,
-        "file"      => filename,
-        "mappings"  => mappings,
-        "sources"   => sources,
-        "names"     => names
-      })
+      JSON.generate('version'   => 3,
+                    'file'      => filename,
+                    'mappings'  => mappings,
+                    'sources'   => sources,
+                    'names'     => names)
     end
 
     # Public: Decode VLQ mappings and match up sources and symbol names.
@@ -167,9 +163,9 @@ module Sprockets
           generated = [generated_line, generated_column]
 
           if segment.size >= 4
-            source_id        += segment[1]
-            original_line    += segment[2]
-            original_column  += segment[3]
+            source_id += segment[1]
+            original_line += segment[2]
+            original_column += segment[3]
 
             source   = sources[source_id]
             original = [original_line, original_column]
@@ -183,7 +179,7 @@ module Sprockets
             name     = names[name_id]
           end
 
-          mapping = {source: source, generated: generated, original: original}
+          mapping = { source: source, generated: generated, original: original }
           mapping[:name] = name if name
           mappings << mapping
         end
@@ -201,7 +197,7 @@ module Sprockets
     # Returns a VLQ encoded String.
     def encode_vlq_mappings(mappings, sources: nil, names: nil)
       sources ||= mappings.map { |m| m[:source] }.uniq.compact
-      names   ||= mappings.map { |m| m[:name] }.uniq.compact
+      names ||= mappings.map { |m| m[:name] }.uniq.compact
 
       sources_index = Hash[sources.each_with_index.to_a]
       names_index   = Hash[names.each_with_index.to_a]
@@ -266,8 +262,8 @@ module Sprockets
       ary.each do |n|
         vlq = n < 0 ? ((-n) << 1) + 1 : n << 1
         loop do
-          digit  = vlq & VLQ_BASE_MASK
-          vlq  >>= VLQ_BASE_SHIFT
+          digit = vlq & VLQ_BASE_MASK
+          vlq >>= VLQ_BASE_SHIFT
           digit |= VLQ_CONTINUATION_BIT if vlq > 0
           result << BASE64_DIGITS[digit]
 
@@ -291,11 +287,11 @@ module Sprockets
         continuation = true
         while continuation
           char = chars.shift
-          raise ArgumentError unless char
+          fail ArgumentError unless char
           digit = BASE64_VALUES[char]
           continuation = false if (digit & VLQ_CONTINUATION_BIT) == 0
           digit &= VLQ_BASE_MASK
-          vlq   += digit << shift
+          vlq += digit << shift
           shift += VLQ_BASE_SHIFT
         end
         result << (vlq & 1 == 1 ? -(vlq >> 1) : vlq >> 1)
@@ -309,11 +305,11 @@ module Sprockets
     #
     # Returns a VLQ encoded String seperated by , and ;.
     def vlq_encode_mappings(ary)
-      ary.map { |group|
-        group.map { |segment|
+      ary.map do |group|
+        group.map do |segment|
           vlq_encode(segment)
-        }.join(',')
-      }.join(';')
+        end.join(',')
+      end.join(';')
     end
 
     # Public: Decode a VLQ string into mapping numbers.

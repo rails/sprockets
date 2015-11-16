@@ -5,7 +5,7 @@ module Sprockets
     autoload :CoffeeScript, 'sprockets/autoload/coffee_script'
     autoload :Eco, 'sprockets/autoload/eco'
     autoload :EJS, 'sprockets/autoload/ejs'
-    autoload :JSMinC, 'sprockets/autoload/jsminc'    
+    autoload :JSMinC, 'sprockets/autoload/jsminc'
     autoload :Sass, 'sprockets/autoload/sass'
     autoload :SassC, 'sprockets/autoload/sassc'
     autoload :Uglifier, 'sprockets/autoload/uglifier'
