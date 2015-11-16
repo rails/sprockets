@@ -38,7 +38,7 @@ module Sprockets
     end
 
     def call(input)
-      data = input[:data].gsub(/$(.)/m, "\\1  ").strip
+      data = input[:data].gsub(/$(.)/m, '\\1  ').strip
       key  = input[:name]
       <<-JST
 (function() { #{@namespace} || (#{@namespace} = {}); #{@namespace}[#{key.inspect}] = #{data};

@@ -9,11 +9,11 @@ class TestManifestUtils < MiniTest::Test
   end
 
   def test_find_directory_manifest
-    root = File.expand_path("../fixtures/manifest_utils", __FILE__)
+    root = File.expand_path('../fixtures/manifest_utils', __FILE__)
 
     assert_match MANIFEST_RE, File.basename(find_directory_manifest(root))
 
     assert_equal "#{root}/default/.sprockets-manifest-f4bf345974645583d284686ddfb7625e.json",
-      find_directory_manifest("#{root}/default")
+                 find_directory_manifest("#{root}/default")
   end
 end

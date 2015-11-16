@@ -16,10 +16,8 @@ module Sprockets
     end
 
     def initialize(options = {})
-      @options = options.merge({
-        'blacklist' => (options['blacklist'] || []) + ['useStrict'],
-        'sourceMap' => true
-      }).freeze
+      @options = options.merge('blacklist' => (options['blacklist'] || []) + ['useStrict'],
+                               'sourceMap' => true).freeze
 
       @cache_key = [
         self.class.name,
@@ -50,7 +48,7 @@ module Sprockets
       end
 
       map = SourceMapUtils.decode_json_source_map(JSON.generate(result['map']))
-      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map["mappings"])
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map['mappings'])
 
       { data: result['code'], map: map }
     end

@@ -1,15 +1,17 @@
-require "minitest/autorun"
-require "sprockets"
-require "sprockets/environment"
-require "fileutils"
+require 'minitest/autorun'
+require 'sprockets'
+require 'sprockets/environment'
+require 'fileutils'
 
-old_verbose, $VERBOSE = $VERBOSE, false
+old_verbose = $VERBOSE
+$VERBOSE = false
 Encoding.default_external = 'UTF-8'
 Encoding.default_internal = 'UTF-8'
 $VERBOSE = old_verbose
 
 def silence_warnings
-  old_verbose, $VERBOSE = $VERBOSE, false
+  old_verbose = $VERBOSE
+  $VERBOSE = false
   yield
 ensure
   $VERBOSE = old_verbose
@@ -17,7 +19,7 @@ end
 
 # Popular extensions for testing but not part of Sprockets core
 
-Sprockets.register_dependency_resolver "rand" do
+Sprockets.register_dependency_resolver 'rand' do
   rand(2**100)
 end
 
@@ -36,46 +38,46 @@ Sprockets.register_transformer 'application/dart', 'application/javascript', Noo
 
 require 'nokogiri'
 
-HtmlBuilderProcessor = proc { |input|
+HtmlBuilderProcessor = proc do |input|
   instance_eval <<-EOS
     builder = Nokogiri::HTML::Builder.new do |doc|
       #{input[:data]}
     end
     builder.to_html
   EOS
-}
+end
 Sprockets.register_mime_type 'application/html+builder', extensions: ['.html.builder']
 Sprockets.register_transformer 'application/html+builder', 'text/html', HtmlBuilderProcessor
 
-XmlBuilderProcessor = proc { |input|
+XmlBuilderProcessor = proc do |input|
   instance_eval <<-EOS
     builder = Nokogiri::XML::Builder.new do |xml|
       #{input[:data]}
     end
     builder.to_xml
   EOS
-}
+end
 Sprockets.register_mime_type 'application/xml+builder', extensions: ['.xml.builder']
 Sprockets.register_transformer 'application/xml+builder', 'application/xml', XmlBuilderProcessor
 
-SVG2PNG = proc { |input|
+SVG2PNG = proc do |input|
   "\x89\x50\x4e\x47\xd\xa\x1a\xa#{input[:data]}"
-}
+end
 Sprockets.register_transformer 'image/svg+xml', 'image/png', SVG2PNG
 
-PNG2GIF = proc { |input|
+PNG2GIF = proc do |input|
   "\x47\x49\x46\x38\x37\61#{input[:data]}"
-}
+end
 Sprockets.register_transformer 'image/png', 'image/gif', PNG2GIF
 
-CSS2HTMLIMPORT = proc { |input|
+CSS2HTMLIMPORT = proc do |input|
   "<style>#{input[:data]}</style>"
-}
+end
 Sprockets.register_transformer 'text/css', 'text/html', CSS2HTMLIMPORT
 
-JS2HTMLIMPORT = proc { |input|
+JS2HTMLIMPORT = proc do |input|
   "<script>#{input[:data]}</script>"
-}
+end
 Sprockets.register_transformer 'application/javascript', 'text/html', JS2HTMLIMPORT
 
 Sprockets.register_bundle_metadata_reducer 'text/css', :selector_count, :+
@@ -93,7 +95,7 @@ end
 class Sprockets::TestCase < MiniTest::Test
   extend Sprockets::TestDefinition
 
-  FIXTURE_ROOT = File.join(__dir__, "fixtures")
+  FIXTURE_ROOT = File.join(__dir__, 'fixtures')
 
   def fixture(path)
     IO.read(fixture_path(path))
@@ -128,17 +130,13 @@ class Sprockets::TestCase < MiniTest::Test
       yield
     ensure
       backup_paths.each do |path|
-        if File.exist?("#{path}.orig")
-          FileUtils.mv("#{path}.orig", path)
-        end
+        FileUtils.mv("#{path}.orig", path) if File.exist?("#{path}.orig")
 
         assert !File.exist?("#{path}.orig")
       end
 
       remove_paths.each do |path|
-        if File.exist?(path)
-          FileUtils.rm_rf(path)
-        end
+        FileUtils.rm_rf(path) if File.exist?(path)
 
         assert !File.exist?(path)
       end

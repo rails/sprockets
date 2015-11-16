@@ -6,7 +6,7 @@ class TestCoffeeScriptProcessor < MiniTest::Test
   def test_compile_coffee_script_template_to_js
     input = {
       content_type: 'application/javascript',
-      data: "square = (n) -> n * n",
+      data: 'square = (n) -> n * n',
       name: 'squared',
       cache: Sprockets::Cache.new,
       metadata: { mapping: [] }

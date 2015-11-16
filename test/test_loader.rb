@@ -3,11 +3,11 @@ require 'pathname'
 
 class TestLoader < Sprockets::TestCase
   def setup
-    @env = Sprockets::Environment.new(".")
+    @env = Sprockets::Environment.new('.')
     @env.append_path(fixture_path('default'))
   end
 
-  test "load asset by uri" do
+  test 'load asset by uri' do
     assert asset = @env.load("file://#{fixture_path_for_uri('default/gallery.js')}?type=application/javascript")
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type
@@ -26,7 +26,7 @@ class TestLoader < Sprockets::TestCase
     assert_equal fixture_path('default/gallery.css.erb'), asset.filename
     assert_equal 'text/css', asset.content_type
 
-    bad_id = "0000000000000000000000000000000000000000"
+    bad_id = '0000000000000000000000000000000000000000'
     assert asset = @env.load("file://#{fixture_path_for_uri('default/gallery.js')}?type=application/javascript&id=#{bad_id}")
     assert_equal fixture_path('default/gallery.js'), asset.filename
     assert_equal 'application/javascript', asset.content_type

@@ -181,7 +181,7 @@ module Sprockets
     #
     # Returns true or false.
     def eql?(other)
-      self.class == other.class && self.id == other.id
+      self.class == other.class && id == other.id
     end
     alias_method :==, :eql?
   end

@@ -50,7 +50,7 @@ module Sprockets
     #
     def register_preprocessor(*args, &block)
       register_config_processor(:preprocessors, *args, &block)
-      compute_transformers!(self.config[:registered_transformers])
+      compute_transformers!(config[:registered_transformers])
     end
     alias_method :register_processor, :register_preprocessor
 
@@ -66,7 +66,7 @@ module Sprockets
     #
     def register_postprocessor(*args, &block)
       register_config_processor(:postprocessors, *args, &block)
-      compute_transformers!(self.config[:registered_transformers])
+      compute_transformers!(config[:registered_transformers])
     end
 
     # Remove Preprocessor `klass` for `mime_type`.
@@ -75,7 +75,7 @@ module Sprockets
     #
     def unregister_preprocessor(*args)
       unregister_config_processor(:preprocessors, *args)
-      compute_transformers!(self.config[:registered_transformers])
+      compute_transformers!(config[:registered_transformers])
     end
     alias_method :unregister_processor, :unregister_preprocessor
 
@@ -85,7 +85,7 @@ module Sprockets
     #
     def unregister_postprocessor(*args)
       unregister_config_processor(:postprocessors, *args)
-      compute_transformers!(self.config[:registered_transformers])
+      compute_transformers!(config[:registered_transformers])
     end
 
     # Bundle Processors are ran on concatenated assets rather than
@@ -148,7 +148,7 @@ module Sprockets
         initial = args[0]
         reducer = args[1].to_proc
       else
-        raise ArgumentError, "wrong number of arguments (#{args.size} for 0..2)"
+        fail ArgumentError, "wrong number of arguments (#{args.size} for 0..2)"
       end
 
       self.config = hash_reassoc(config, :bundle_reducers, mime_type) do |reducers|
@@ -157,70 +157,72 @@ module Sprockets
     end
 
     protected
-      def resolve_processors_cache_key_uri(uri)
-        params = parse_uri_query_params(uri[11..-1])
-        processors = processors_for(params[:type], params[:file_type], params[:pipeline])
-        processors_cache_keys(processors)
+
+    def resolve_processors_cache_key_uri(uri)
+      params = parse_uri_query_params(uri[11..-1])
+      processors = processors_for(params[:type], params[:file_type], params[:pipeline])
+      processors_cache_keys(processors)
+    end
+
+    def build_processors_uri(type, file_type, pipeline)
+      query = encode_uri_query_params(
+        type: type,
+        file_type: file_type,
+        pipeline: pipeline
+      )
+      "processors:#{query}"
+    end
+
+    def processors_for(type, file_type, pipeline)
+      pipeline ||= :default
+      if fn = config[:pipelines][pipeline.to_sym]
+        fn.call(self, type, file_type)
+      else
+        fail Error, "no pipeline: #{pipeline}"
+      end
+    end
+
+    def default_processors_for(type, file_type)
+      bundled_processors = config[:bundle_processors][type]
+      if bundled_processors.any?
+        bundled_processors
+      else
+        self_processors_for(type, file_type)
+      end
+    end
+
+    def self_processors_for(type, file_type)
+      processors = []
+
+      processors.concat config[:postprocessors][type]
+      if type != file_type && processor = config[:transformers][file_type][type]
+        processors << processor
+      end
+      processors.concat config[:preprocessors][file_type]
+
+      if processors.any? || mime_type_charset_detecter(type)
+        processors << FileReader
       end
 
-      def build_processors_uri(type, file_type, pipeline)
-        query = encode_uri_query_params(
-          type: type,
-          file_type: file_type,
-          pipeline: pipeline
-        )
-        "processors:#{query}"
-      end
-
-      def processors_for(type, file_type, pipeline)
-        pipeline ||= :default
-        if fn = config[:pipelines][pipeline.to_sym]
-          fn.call(self, type, file_type)
-        else
-          raise Error, "no pipeline: #{pipeline}"
-        end
-      end
-
-      def default_processors_for(type, file_type)
-        bundled_processors = config[:bundle_processors][type]
-        if bundled_processors.any?
-          bundled_processors
-        else
-          self_processors_for(type, file_type)
-        end
-      end
-
-      def self_processors_for(type, file_type)
-        processors = []
-
-        processors.concat config[:postprocessors][type]
-        if type != file_type && processor = config[:transformers][file_type][type]
-          processors << processor
-        end
-        processors.concat config[:preprocessors][file_type]
-
-        if processors.any? || mime_type_charset_detecter(type)
-          processors << FileReader
-        end
-
-        processors
-      end
+      processors
+    end
 
     private
-      def register_config_processor(type, mime_type, processor = nil, &block)
-        processor ||= block
 
-        self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.unshift(processor)
-          processors
-        end
-      end
+    def register_config_processor(type, mime_type, processor = nil, &block)
+      processor ||= block
 
-      def unregister_config_processor(type, mime_type, proccessor)
-        self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.delete(proccessor)
-          processors
-        end
+      self.config = hash_reassoc(config, type, mime_type) do |processors|
+        processors.unshift(processor)
+        processors
       end
+    end
+
+    def unregister_config_processor(type, mime_type, proccessor)
+      self.config = hash_reassoc(config, type, mime_type) do |processors|
+        processors.delete(proccessor)
+        processors
+      end
+    end
   end
 end

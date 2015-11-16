@@ -33,11 +33,7 @@ module Sprockets
       def get(key)
         exists = true
         value = @cache.delete(key) { exists = false }
-        if exists
-          @cache[key] = value
-        else
-          nil
-        end
+        @cache[key] = value if exists
       end
 
       # Public: Set a key and value in the cache.

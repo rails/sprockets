@@ -5,7 +5,7 @@ class TestUtils < MiniTest::Test
   include Sprockets::Utils
 
   def test_duplicable
-    objs = [nil, true, false, 1, "foo", :foo, [], {}]
+    objs = [nil, true, false, 1, 'foo', :foo, [], {}]
     objs.each do |obj|
       begin
         obj.dup
@@ -22,55 +22,55 @@ class TestUtils < MiniTest::Test
       refute value
       nil
     end
-    assert_equal({foo: nil}, h)
+    assert_equal({ foo: nil }, h)
     assert h.frozen?
 
     h = hash_reassoc({}, :foo) do |value|
       refute value
       true
     end
-    assert_equal({foo: true}, h)
+    assert_equal({ foo: true }, h)
     assert h.frozen?
 
-    h = hash_reassoc({foo: 1}.freeze, :foo) do |value|
+    h = hash_reassoc({ foo: 1 }.freeze, :foo) do |value|
       assert_equal 1, value
       2
     end
-    assert_equal({foo: 2}, h)
+    assert_equal({ foo: 2 }, h)
     assert h.frozen?
 
-    h = hash_reassoc({foo: "bar".freeze}.freeze, :foo) do |value|
-      assert_equal "bar", value
+    h = hash_reassoc({ foo: 'bar'.freeze }.freeze, :foo) do |value|
+      assert_equal 'bar', value
       refute value.frozen?
-      "baz"
+      'baz'
     end
-    assert_equal({foo: "baz"}, h)
-    assert h.frozen?
-    assert h[:foo].frozen?
-
-    h = hash_reassoc({foo: "bar".freeze}.freeze, :foo) do |value|
-      assert_equal "bar", value
-      refute value.frozen?
-      value.sub!("r", "z")
-    end
-    assert_equal({foo: "baz"}, h)
+    assert_equal({ foo: 'baz' }, h)
     assert h.frozen?
     assert h[:foo].frozen?
 
-    h = hash_reassoc({foo: {bar: "baz".freeze}.freeze}.freeze, :foo, :bar) do |value|
-      assert_equal "baz", value
+    h = hash_reassoc({ foo: 'bar'.freeze }.freeze, :foo) do |value|
+      assert_equal 'bar', value
       refute value.frozen?
-      "biz"
+      value.sub!('r', 'z')
     end
-    assert_equal({foo: {bar: "biz"}}, h)
+    assert_equal({ foo: 'baz' }, h)
+    assert h.frozen?
+    assert h[:foo].frozen?
+
+    h = hash_reassoc({ foo: { bar: 'baz'.freeze }.freeze }.freeze, :foo, :bar) do |value|
+      assert_equal 'baz', value
+      refute value.frozen?
+      'biz'
+    end
+    assert_equal({ foo: { bar: 'biz' } }, h)
     assert h.frozen?
     assert h[:foo].frozen?
     assert h[:foo][:bar].frozen?
   end
 
   def test_string_ends_with_semicolon
-    assert string_end_with_semicolon?("var foo;")
-    refute string_end_with_semicolon?("var foo")
+    assert string_end_with_semicolon?('var foo;')
+    refute string_end_with_semicolon?('var foo')
 
     assert string_end_with_semicolon?("var foo;\n")
     refute string_end_with_semicolon?("var foo\n")
@@ -89,14 +89,14 @@ class TestUtils < MiniTest::Test
   end
 
   def test_concat_javascript_sources
-    assert_equal "var foo;\n", concat_javascript_sources("", "var foo;\n".freeze)
+    assert_equal "var foo;\n", concat_javascript_sources('', "var foo;\n".freeze)
     assert_equal "\nvar foo;\n", concat_javascript_sources("\n", "var foo;\n".freeze)
-    assert_equal " \nvar foo;\n", concat_javascript_sources(" ", "var foo;\n".freeze)
+    assert_equal " \nvar foo;\n", concat_javascript_sources(' ', "var foo;\n".freeze)
 
     assert_equal "var foo;\nvar bar;\n", concat_javascript_sources("var foo;\n", "var bar;\n".freeze)
-    assert_equal "var foo;\nvar bar", concat_javascript_sources("var foo", "var bar".freeze)
-    assert_equal "var foo;\nvar bar;", concat_javascript_sources("var foo;", "var bar;".freeze)
-    assert_equal "var foo;\nvar bar;", concat_javascript_sources("var foo", "var bar;".freeze)
+    assert_equal "var foo;\nvar bar", concat_javascript_sources('var foo', 'var bar'.freeze)
+    assert_equal "var foo;\nvar bar;", concat_javascript_sources('var foo;', 'var bar;'.freeze)
+    assert_equal "var foo;\nvar bar;", concat_javascript_sources('var foo', 'var bar;'.freeze)
   end
 
   def test_post_order_depth_first_search

@@ -16,9 +16,9 @@ module Sprockets
   extend Configuration
 
   self.config = {
-    bundle_processors: Hash.new { |h, k| [].freeze }.freeze,
-    bundle_reducers: Hash.new { |h, k| {}.freeze }.freeze,
-    compressors: Hash.new { |h, k| {}.freeze }.freeze,
+    bundle_processors: Hash.new { |_h, _k| [].freeze }.freeze,
+    bundle_reducers: Hash.new { |_h, _k| {}.freeze }.freeze,
+    compressors: Hash.new { |_h, _k| {}.freeze }.freeze,
     dependencies: Set.new.freeze,
     dependency_resolvers: {}.freeze,
     digest_class: Digest::SHA256,
@@ -27,12 +27,12 @@ module Sprockets
     paths: [].freeze,
     pipelines: {}.freeze,
     pipeline_exts: {}.freeze,
-    postprocessors: Hash.new { |h, k| [].freeze }.freeze,
-    preprocessors: Hash.new { |h, k| [].freeze }.freeze,
+    postprocessors: Hash.new { |_h, _k| [].freeze }.freeze,
+    preprocessors: Hash.new { |_h, _k| [].freeze }.freeze,
     registered_transformers: [].freeze,
     root: __dir__.dup.freeze,
-    transformers: Hash.new { |h, k| {}.freeze }.freeze,
-    version: ""
+    transformers: Hash.new { |_h, _k| {}.freeze }.freeze,
+    version: ''
   }.freeze
 
   @context_class = Context
@@ -83,7 +83,7 @@ module Sprockets
   register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapProcessor
   register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapProcessor
 
-  register_pipeline :source do |env|
+  register_pipeline :source do |_env|
     []
   end
 
@@ -93,8 +93,8 @@ module Sprockets
 
   register_pipeline :default do |env, type, file_type|
     # TODO: Hack for to inject source map transformer
-    if (type == "application/js-sourcemap+json" && file_type != "application/js-sourcemap+json") ||
-        (type == "application/css-sourcemap+json" && file_type != "application/css-sourcemap+json")
+    if (type == 'application/js-sourcemap+json' && file_type != 'application/js-sourcemap+json') ||
+       (type == 'application/css-sourcemap+json' && file_type != 'application/css-sourcemap+json')
       [SourceMapProcessor]
     else
       env.default_processors_for(type, file_type)
@@ -107,15 +107,15 @@ module Sprockets
   end
 
   require 'sprockets/directive_processor'
-  register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
-  register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'text/css', DirectiveProcessor.new(comments: ['//', ['/*', '*/']])
+  register_preprocessor 'application/javascript', DirectiveProcessor.new(comments: ['//', ['/*', '*/']])
 
   require 'sprockets/bundle'
   register_bundle_processor 'application/javascript', Bundle
   register_bundle_processor 'text/css', Bundle
 
-  register_bundle_metadata_reducer '*/*', :data, proc { "" }, :concat
-  register_bundle_metadata_reducer 'application/javascript', :data, proc { "" }, Utils.method(:concat_javascript_sources)
+  register_bundle_metadata_reducer '*/*', :data, proc { '' }, :concat
+  register_bundle_metadata_reducer 'application/javascript', :data, proc { '' }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
   register_bundle_metadata_reducer '*/*', :map, SourceMapUtils.method(:concat_source_maps)
 
@@ -141,13 +141,13 @@ module Sprockets
   require 'sprockets/babel_processor'
   register_mime_type 'application/ecmascript-6', extensions: ['.es6'], charset: :unicode
   register_transformer 'application/ecmascript-6', 'application/javascript', BabelProcessor
-  register_preprocessor 'application/ecmascript-6', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'application/ecmascript-6', DirectiveProcessor.new(comments: ['//', ['/*', '*/']])
 
   # Mmm, CoffeeScript
   require 'sprockets/coffee_script_processor'
   register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
   register_transformer 'text/coffeescript', 'application/javascript', CoffeeScriptProcessor
-  register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
+  register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ['#', ['###', '###']])
 
   # JST processors
   require 'sprockets/eco_processor'
@@ -165,8 +165,8 @@ module Sprockets
   register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
   register_transformer 'text/sass', 'text/css', SassProcessor
   register_transformer 'text/scss', 'text/css', ScssProcessor
-  register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
-  register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
+  register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ['//', ['/*', '*/']])
+  register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ['//', ['/*', '*/']])
   register_bundle_metadata_reducer 'text/css', :sass_dependencies, Set.new, :+
 
   # ERB
@@ -188,12 +188,9 @@ module Sprockets
   register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
 
-
-  register_dependency_resolver 'environment-version' do |env|
-    env.version
-  end
+  register_dependency_resolver 'environment-version', &:version
   register_dependency_resolver 'environment-paths' do |env|
-    env.paths.map {|path| env.compress_from_root(path) }
+    env.paths.map { |path| env.compress_from_root(path) }
   end
   register_dependency_resolver 'file-digest' do |env, str|
     env.file_digest(env.parse_file_digest_uri(str))

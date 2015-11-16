@@ -17,7 +17,7 @@ module Sprockets
       candidates, deps = super
 
       # bower.json can only be nested one level deep
-      if !logical_path.index('/'.freeze)
+      unless logical_path.index('/'.freeze)
         dirname = File.join(load_path, logical_path)
 
         if directory?(dirname)
@@ -27,15 +27,13 @@ module Sprockets
           if filename
             deps << build_file_digest_uri(filename)
             read_bower_main(dirname, filename) do |path|
-              if file?(path)
-                candidates << path
-              end
+              candidates << path if file?(path)
             end
           end
         end
       end
 
-      return candidates, deps
+      [candidates, deps]
     end
 
     # Internal: Read bower.json's main directive.

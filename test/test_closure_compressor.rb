@@ -13,7 +13,7 @@ class TestClosureCompressor < MiniTest::Test
     begin
       assert_equal output, Sprockets::ClosureCompressor.call(input)
     rescue Closure::Error
-      skip "No Java runtime present"
+      skip 'No Java runtime present'
     end
   end
 

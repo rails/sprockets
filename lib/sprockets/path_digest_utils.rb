@@ -15,12 +15,12 @@ module Sprockets
     def stat_digest(path, stat)
       if stat.directory?
         # If its a directive, digest the list of filenames
-        digest_class.digest(self.entries(path).join(','.freeze))
+        digest_class.digest(entries(path).join(','.freeze))
       elsif stat.file?
         # If its a file, digest the contents
         digest_class.file(path.to_s).digest
       else
-        raise TypeError, "stat was not a directory or file: #{stat.ftype}"
+        fail TypeError, "stat was not a directory or file: #{stat.ftype}"
       end
     end
 
@@ -31,7 +31,7 @@ module Sprockets
     # Returns String digest bytes or nil.
     def file_digest(path)
       if stat = self.stat(path)
-        self.stat_digest(path, stat)
+        stat_digest(path, stat)
       end
     end
 
@@ -41,7 +41,7 @@ module Sprockets
     #
     # Returns String digest bytes.
     def files_digest(paths)
-      self.digest(paths.map { |path| self.file_digest(path) })
+      digest(paths.map { |path| file_digest(path) })
     end
   end
 end

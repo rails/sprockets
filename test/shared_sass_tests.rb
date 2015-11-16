@@ -8,10 +8,8 @@ module SharedSassTestNoFunction
 
       filename = fixture_path('sass/paths.scss')
       assert data = File.read(filename)
-      engine = sass_engine.new(data, {
-        filename: filename,
-        syntax: :scss
-      })
+      engine = sass_engine.new(data,         filename: filename,
+                                             syntax: :scss)
 
       assert sass_functions.instance_methods.include?(:javascript_path)
       assert sass_functions.instance_methods.include?(:stylesheet_path)
@@ -33,7 +31,7 @@ end
 module SharedSassTestSprockets
   extend Sprockets::TestDefinition
 
-  test "process variables" do
+  test 'process variables' do
     assert_equal <<-EOS, render('sass/variables.sass')
 .content-navigation {
   border-color: #3bbfce;
@@ -46,7 +44,7 @@ module SharedSassTestSprockets
     EOS
   end
 
-  test "process nesting" do
+  test 'process nesting' do
     assert_equal <<-EOS, render('sass/nesting.scss')
 table.hl {
   margin: 2em 0; }
@@ -60,7 +58,7 @@ li {
     EOS
   end
 
-  test "@import scss partial from scss" do
+  test '@import scss partial from scss' do
     assert_equal <<-EOS, render('sass/import_partial.scss')
 #navbar li {
   border-top-radius: 10px;
@@ -79,7 +77,7 @@ li {
     EOS
   end
 
-  test "@import scss partial from sass" do
+  test '@import scss partial from sass' do
     assert_equal <<-EOS, render('sass/import_partial.sass')
 #navbar li {
   border-top-radius: 10px;
@@ -98,7 +96,7 @@ li {
     EOS
   end
 
-  test "@import sass non-partial from scss" do
+  test '@import sass non-partial from scss' do
     assert_equal <<-EOS, render('sass/import_nonpartial.scss')
 .content-navigation {
   border-color: #3bbfce;
@@ -111,11 +109,11 @@ li {
     EOS
   end
 
-  test "@import css file from load path" do
+  test '@import css file from load path' do
     assert_equal "\n", render('sass/import_load_path.scss')
   end
 
-  test "process css file" do
+  test 'process css file' do
     assert_equal <<-EOS, render('sass/reset.css')
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
@@ -123,7 +121,7 @@ footer, header, hgroup, menu, nav, section {
     EOS
   end
 
-  test "@import relative file" do
+  test '@import relative file' do
     assert_equal <<-EOS, render('sass/shared/relative.scss')
 #navbar li {
   border-top-radius: 10px;
@@ -142,21 +140,21 @@ footer, header, hgroup, menu, nav, section {
     EOS
   end
 
-  test "@import relative nested file" do
+  test '@import relative nested file' do
     assert_equal <<-EOS, render('sass/relative.scss')
 body {
   background: #666666; }
     EOS
   end
 
-  test "modify file causes it to recompile" do
+  test 'modify file causes it to recompile' do
     filename = fixture_path('sass/test.scss')
 
     sandbox filename do
-      File.open(filename, 'w') { |f| f.write "body { background: red; };" }
+      File.open(filename, 'w') { |f| f.write 'body { background: red; };' }
       assert_equal "body {\n  background: red; }\n", render(filename)
 
-      File.open(filename, 'w') { |f| f.write "body { background: blue; };" }
+      File.open(filename, 'w') { |f| f.write 'body { background: blue; };' }
       mtime = Time.now + 1
       File.utime(mtime, mtime, filename)
 
@@ -164,15 +162,16 @@ body {
     end
   end
 
-  test "modify partial causes it to recompile" do
-    filename, partial = fixture_path('sass/test.scss'), fixture_path('sass/_partial.scss')
+  test 'modify partial causes it to recompile' do
+    filename = fixture_path('sass/test.scss')
+    partial = fixture_path('sass/_partial.scss')
 
     sandbox filename, partial do
       File.open(filename, 'w') { |f| f.write "@import 'partial';" }
-      File.open(partial, 'w') { |f| f.write "body { background: red; };" }
+      File.open(partial, 'w') { |f| f.write 'body { background: red; };' }
       assert_equal "body {\n  background: red; }\n", render(filename)
 
-      File.open(partial, 'w') { |f| f.write "body { background: blue; };" }
+      File.open(partial, 'w') { |f| f.write 'body { background: blue; };' }
       mtime = Time.now + 1
       File.utime(mtime, mtime, partial)
 
@@ -187,7 +186,7 @@ a:link {
     EOS
   end
 
-  test "@import reference variable" do
+  test '@import reference variable' do
     assert_equal <<-EOS, render('sass/main.scss')
 #header {
   color: "blue"; }
@@ -198,7 +197,7 @@ end
 module SharedSassTestCompressor
   extend Sprockets::TestDefinition
 
-  test "compress css" do
+  test 'compress css' do
     silence_warnings do
       uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
       compressed   = "p{margin:0;padding:0}\n"
@@ -215,7 +214,7 @@ end
 module SharedSassTestFunctions
   extend Sprockets::TestDefinition
 
-  test "path functions" do
+  test 'path functions' do
     assert_equal <<-EOS, render('sass/paths.scss')
 div {
   url: url("/foo.svg");
@@ -228,7 +227,7 @@ div {
     EOS
   end
 
-  test "url functions" do
+  test 'url functions' do
     assert_equal <<-EOS, render('sass/urls.scss')
 div {
   url: url(/foo.svg);
@@ -241,7 +240,7 @@ div {
     EOS
   end
 
-  test "url functions with query and hash parameters" do
+  test 'url functions with query and hash parameters' do
     assert_equal <<-EOS, render('octicons/octicons.scss')
 @font-face {
   font-family: 'octicons';
@@ -251,7 +250,7 @@ div {
     EOS
   end
 
-  test "path function generates links" do
+  test 'path function generates links' do
     asset = silence_warnings do
       @env.find_asset('sass/paths.css')
     end
@@ -268,7 +267,7 @@ div {
     ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
   end
 
-  test "data-url function" do
+  test 'data-url function' do
     assert_equal <<-EOS, render('sass/data_url.scss')
 div {
   url: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAMAAAAoyzS7AAAABlBMVEUFO2sAAADPfNHpAAAACklEQVQIW2NgAAAAAgABYkBPaAAAAABJRU5ErkJggg%3D%3D); }

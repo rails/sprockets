@@ -57,7 +57,7 @@ module Sprockets
             EncodingUtils.unmarshaled_deflated(f.read, Zlib::MAX_WBITS)
           rescue Exception => e
             @logger.error do
-              "#{self.class}[#{path}] could not be unmarshaled: " +
+              "#{self.class}[#{path}] could not be unmarshaled: " \
                 "#{e.class}: #{e.message}"
             end
             nil
@@ -124,60 +124,59 @@ module Sprockets
       end
 
       private
-        # Internal: Get all cache files along with stats.
-        #
-        # Returns an Array of [String filename, File::Stat] pairs sorted by
-        # mtime.
-        def find_caches
-          Dir.glob(File.join(@root, '**/*.cache')).reduce([]) { |stats, filename|
-            stat = safe_stat(filename)
-            # stat maybe nil if file was removed between the time we called
-            # dir.glob and the next stat
-            stats << [filename, stat] if stat
-            stats
-          }.sort_by { |_, stat| stat.mtime.to_i }
+
+      # Internal: Get all cache files along with stats.
+      #
+      # Returns an Array of [String filename, File::Stat] pairs sorted by
+      # mtime.
+      def find_caches
+        Dir.glob(File.join(@root, '**/*.cache')).reduce([]) do |stats, filename|
+          stat = safe_stat(filename)
+          # stat maybe nil if file was removed between the time we called
+          # dir.glob and the next stat
+          stats << [filename, stat] if stat
+          stats
+        end.sort_by { |_, stat| stat.mtime.to_i }
+      end
+
+      def compute_size(caches)
+        caches.inject(0) { |sum, (_, stat)| sum + stat.size }
+      end
+
+      def safe_stat(fn)
+        File.stat(fn)
+      rescue Errno::ENOENT
+        nil
+      end
+
+      def safe_open(path, &block)
+        File.open(path, 'rb', &block) if File.exist?(path)
+      rescue Errno::ENOENT
+      end
+
+      def gc!
+        start_time = Time.now
+
+        caches = find_caches
+        size = compute_size(caches)
+
+        delete_caches, keep_caches = caches.partition do |_filename, stat|
+          deleted = size > @gc_size
+          size -= stat.size
+          deleted
         end
 
-        def compute_size(caches)
-          caches.inject(0) { |sum, (_, stat)| sum + stat.size }
+        return if delete_caches.empty?
+
+        FileUtils.remove(delete_caches.map(&:first), force: true)
+        @size = compute_size(keep_caches)
+
+        @logger.warn do
+          secs = Time.now.to_f - start_time.to_f
+          "#{self.class}[#{@root}] garbage collected " \
+            "#{delete_caches.size} files (#{(secs * 1000).to_i}ms)"
         end
-
-        def safe_stat(fn)
-          File.stat(fn)
-        rescue Errno::ENOENT
-          nil
-        end
-
-        def safe_open(path, &block)
-          if File.exist?(path)
-            File.open(path, 'rb', &block)
-          end
-        rescue Errno::ENOENT
-        end
-
-        def gc!
-          start_time = Time.now
-
-          caches = find_caches
-          size = compute_size(caches)
-
-          delete_caches, keep_caches = caches.partition { |filename, stat|
-            deleted = size > @gc_size
-            size -= stat.size
-            deleted
-          }
-
-          return if delete_caches.empty?
-
-          FileUtils.remove(delete_caches.map(&:first), force: true)
-          @size = compute_size(keep_caches)
-
-          @logger.warn do
-            secs = Time.now.to_f - start_time.to_f
-            "#{self.class}[#{@root}] garbage collected " +
-              "#{delete_caches.size} files (#{(secs * 1000).to_i}ms)"
-          end
-        end
+      end
     end
   end
 end

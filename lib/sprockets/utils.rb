@@ -77,9 +77,9 @@ module Sprockets
       while i >= 0
         c = str[i]
         i -= 1
-        if c == "\n" || c == " " || c == "\t"
+        if c == "\n" || c == ' ' || c == "\t"
           next
-        elsif c != ";"
+        elsif c != ';'
           return false
         else
           return true
@@ -97,7 +97,7 @@ module Sprockets
     # Returns buf String.
     def concat_javascript_sources(buf, source)
       if buf.bytesize > 0
-        buf << ";" unless string_end_with_semicolon?(buf)
+        buf << ';' unless string_end_with_semicolon?(buf)
         buf << "\n" unless buf.end_with?("\n")
       end
       buf << source
@@ -140,7 +140,8 @@ module Sprockets
     #
     # Returns a Set of nodes.
     def dfs(initial)
-      nodes, seen = Set.new, Set.new
+      nodes = Set.new
+      seen = Set.new
       stack = Array(initial).reverse
 
       while node = stack.pop

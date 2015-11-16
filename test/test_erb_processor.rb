@@ -4,7 +4,6 @@ require 'sprockets/cache'
 require 'sprockets/erb_processor'
 
 class TestERBProcessor < MiniTest::Test
-
   def uri_path(path)
     path = '/' + path if path[1] == ':' # Windows path / drive letter
     path
@@ -15,9 +14,9 @@ class TestERBProcessor < MiniTest::Test
 
     input = {
       environment: environment,
-      filename: "foo.js.erb",
+      filename: 'foo.js.erb',
       content_type: 'application/javascript',
-      data: "var data = <%= JSON.generate({foo: true}) %>;",
+      data: 'var data = <%= JSON.generate({foo: true}) %>;',
       metadata: {},
       cache: Sprockets::Cache.new
     }
@@ -27,14 +26,14 @@ class TestERBProcessor < MiniTest::Test
   end
 
   def test_compile_erb_template_with_depend_on_call
-    root = File.expand_path("../fixtures", __FILE__)
+    root = File.expand_path('../fixtures', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path 'default'
 
     path = "#{root}/default/gallery.js"
     input = {
       environment: environment,
-      filename: "foo.js.erb",
+      filename: 'foo.js.erb',
       content_type: 'application/javascript',
       data: "<%= depend_on('#{path}') %>\nvar data = 'DATA';",
       metadata: {},
@@ -48,7 +47,7 @@ class TestERBProcessor < MiniTest::Test
   end
 
   def test_compile_erb_template_with_depend_on_call_outside_load_paths
-    root = File.expand_path("../fixtures", __FILE__)
+    root = File.expand_path('../fixtures', __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path 'default'
 
@@ -57,7 +56,7 @@ class TestERBProcessor < MiniTest::Test
 
     input = {
       environment: environment,
-      filename: "foo.js.erb",
+      filename: 'foo.js.erb',
       content_type: 'application/javascript',
       data: "<%= depend_on('#{path}') %>\nvar data = 'DATA';",
       metadata: {},
@@ -81,14 +80,14 @@ class TestERBProcessor < MiniTest::Test
 
     input = {
       environment: environment,
-      filename: "foo.js.erb",
+      filename: 'foo.js.erb',
       content_type: 'application/javascript',
-      data: "var foo = <%= foo %>;",
+      data: 'var foo = <%= foo %>;',
       metadata: {},
       cache: Sprockets::Cache.new
     }
 
-    output = "var foo = bar;"
+    output = 'var foo = bar;'
     assert_equal output, template.call(input)[:data]
   end
 end

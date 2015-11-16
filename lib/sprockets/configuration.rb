@@ -19,7 +19,7 @@ module Sprockets
     attr_reader :config
 
     def config=(config)
-      raise TypeError, "can't assign mutable config" unless config.frozen?
+      fail TypeError, "can't assign mutable config" unless config.frozen?
       @config = config
     end
 

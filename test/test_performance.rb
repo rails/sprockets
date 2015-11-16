@@ -57,48 +57,49 @@ class TestPerformance < Sprockets::TestCase
     $cache_set_calls = nil
   end
 
-  test "simple file" do
-    @env["gallery.js"].to_s
+  test 'simple file' do
+    @env['gallery.js'].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
   end
 
-  test "cached simple file" do
-    @env.cached["gallery.js"].to_s
+  test 'cached simple file' do
+    @env.cached['gallery.js'].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
   end
 
-  test "file with deps" do
-    @env["mobile.js"].to_s
+  test 'file with deps' do
+    @env['mobile.js'].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
   end
 
-  test "cached file with deps" do
-    @env.cached["mobile.js"].to_s
+  test 'cached file with deps' do
+    @env.cached['mobile.js'].to_s
     assert_no_redundant_stat_calls
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
   end
 
-  test "loading from backend cache" do
-    env1, env2 = new_environment, new_environment
+  test 'loading from backend cache' do
+    env1 = new_environment
+    env2 = new_environment
     cache = Cache.new
     env1.cache = cache
     env2.cache = cache
 
-    env1["mobile.js"]
+    env1['mobile.js']
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
 
-    env2["mobile.js"]
+    env2['mobile.js']
     assert_no_redundant_stat_calls
     assert_no_processor_calls
     assert_no_bundle_processor_calls
@@ -106,24 +107,24 @@ class TestPerformance < Sprockets::TestCase
     assert_no_cache_set_calls
   end
 
-  test "moving root of project after generation is still freaky fast" do
+  test 'moving root of project after generation is still freaky fast' do
     env1 = new_environment
     env1.cache = Cache.new
 
-    env1["mobile.js"]
+    env1['mobile.js']
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        `cp -R #{File.join(fixture_path("default"), "*")} .`
-        env2       = new_environment("./default")
+        `cp -R #{File.join(fixture_path('default'), '*')} .`
+        env2       = new_environment('./default')
         env2.cache = env1.cache
 
         reset_stats!
 
-        env2["mobile.js"]
+        env2['mobile.js']
         assert_no_redundant_stat_calls
         assert_no_processor_calls
         assert_no_bundle_processor_calls
@@ -133,34 +134,35 @@ class TestPerformance < Sprockets::TestCase
     end
   end
 
-  test "loading from instance cache" do
+  test 'loading from instance cache' do
     env = @env.cached
-    env["mobile.js"]
+    env['mobile.js']
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
 
     reset_stats!
 
-    env["mobile.js"]
+    env['mobile.js']
     assert_no_stat_calls
     assert_no_processor_calls
     assert_no_bundle_processor_calls
   end
 
-  test "loading from cached with backend cache" do
-    env1, env2 = new_environment, new_environment
+  test 'loading from cached with backend cache' do
+    env1 = new_environment
+    env2 = new_environment
     cache = Cache.new
     env1.cache = cache
     env2.cache = cache
 
-    env1.cached["mobile.js"]
+    env1.cached['mobile.js']
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
     assert_no_redundant_cache_set_calls
 
     reset_stats!
 
-    env2.cached["mobile.js"]
+    env2.cached['mobile.js']
     assert_no_redundant_stat_calls
     assert_no_processor_calls
     assert_no_bundle_processor_calls
@@ -168,12 +170,12 @@ class TestPerformance < Sprockets::TestCase
     assert_no_cache_set_calls
   end
 
-  test "rollback version" do
+  test 'rollback version' do
     env = new_environment
     env.cache = Cache.new
 
-    env.version = "1"
-    assert asset = env["mobile.js"]
+    env.version = '1'
+    assert asset = env['mobile.js']
     id1 = asset.id
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
@@ -181,8 +183,8 @@ class TestPerformance < Sprockets::TestCase
 
     reset_stats!
 
-    env.version = "2"
-    assert asset = env["mobile.js"]
+    env.version = '2'
+    assert asset = env['mobile.js']
     id2 = asset.id
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
@@ -190,8 +192,8 @@ class TestPerformance < Sprockets::TestCase
 
     reset_stats!
 
-    env.version = "1"
-    assert asset = env["mobile.js"]
+    env.version = '1'
+    assert asset = env['mobile.js']
     assert_equal id1, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
@@ -201,8 +203,8 @@ class TestPerformance < Sprockets::TestCase
 
     reset_stats!
 
-    env.version = "2"
-    assert asset = env["mobile.js"]
+    env.version = '2'
+    assert asset = env['mobile.js']
     assert_equal id2, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
@@ -211,14 +213,14 @@ class TestPerformance < Sprockets::TestCase
     assert_no_cache_set_calls
   end
 
-  test "rollback path change" do
+  test 'rollback path change' do
     env = new_environment
     env.cache = Cache.new
 
     env.clear_paths
     env.append_path(fixture_path('default'))
 
-    assert asset = env["mobile.js"]
+    assert asset = env['mobile.js']
     path1 = asset.id
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
@@ -229,7 +231,7 @@ class TestPerformance < Sprockets::TestCase
     env.append_path(fixture_path('asset'))
     env.append_path(fixture_path('default'))
 
-    assert asset = env["mobile.js"]
+    assert asset = env['mobile.js']
     path2 = asset.id
     assert_no_redundant_processor_calls
     assert_no_redundant_bundle_processor_calls
@@ -239,7 +241,7 @@ class TestPerformance < Sprockets::TestCase
     env.clear_paths
     env.append_path(fixture_path('default'))
 
-    assert asset = env["mobile.js"]
+    assert asset = env['mobile.js']
     assert_equal path1, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
@@ -252,7 +254,7 @@ class TestPerformance < Sprockets::TestCase
     env.append_path(fixture_path('asset'))
     env.append_path(fixture_path('default'))
 
-    assert asset = env["mobile.js"]
+    assert asset = env['mobile.js']
     assert_equal path2, asset.id
     assert_no_redundant_stat_calls
     assert_no_processor_calls
@@ -261,37 +263,37 @@ class TestPerformance < Sprockets::TestCase
     assert_no_cache_set_calls
   end
 
-  test "rollback file change" do
+  test 'rollback file change' do
     env = new_environment
     env.cache = Cache.new
 
-    filename = fixture_path("default/tmp.js")
+    filename = fixture_path('default/tmp.js')
 
     sandbox filename do
-      write(filename, "a;", 1421000000)
+      write(filename, 'a;', 1_421_000_000)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "a;\n", asset.source
       ida = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
-      write(filename, "b;", 1421000001)
+      write(filename, 'b;', 1_421_000_001)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "b;\n", asset.source
       idb = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
-      write(filename, "a;", 1421000000)
+      write(filename, 'a;', 1_421_000_000)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "a;\n", asset.source
       assert_equal ida, asset.id
       assert_no_redundant_stat_calls
@@ -300,10 +302,10 @@ class TestPerformance < Sprockets::TestCase
       assert_no_redundant_cache_get_calls
       assert_no_cache_set_calls
 
-      write(filename, "b;", 1421000001)
+      write(filename, 'b;', 1_421_000_001)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "b;\n", asset.source
       assert_equal idb, asset.id
       assert_no_redundant_stat_calls
@@ -314,39 +316,39 @@ class TestPerformance < Sprockets::TestCase
     end
   end
 
-  test "rollback file dependency change" do
+  test 'rollback file dependency change' do
     env = new_environment
     env.cache = Cache.new
 
-    main = fixture_path("default/tmp-main.js")
-    dep  = fixture_path("default/tmp-dep.js")
+    main = fixture_path('default/tmp-main.js')
+    dep  = fixture_path('default/tmp-dep.js')
 
     sandbox main, dep do
-      write(main, "//= require ./tmp-dep", 1421000000)
-      write(dep, "a;", 1421000000)
+      write(main, '//= require ./tmp-dep', 1_421_000_000)
+      write(dep, 'a;', 1_421_000_000)
       reset_stats!
 
-      assert asset = env["tmp-main.js"]
+      assert asset = env['tmp-main.js']
       assert_equal "a;\n", asset.source
       ida = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
-      write(dep, "b;", 1421000001)
+      write(dep, 'b;', 1_421_000_001)
       reset_stats!
 
-      assert asset = env["tmp-main.js"]
+      assert asset = env['tmp-main.js']
       assert_equal "b;\n", asset.source
       idb = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
-      write(dep, "a;", 1421000000)
+      write(dep, 'a;', 1_421_000_000)
       reset_stats!
 
-      assert asset = env["tmp-main.js"]
+      assert asset = env['tmp-main.js']
       assert_equal "a;\n", asset.source
       assert_equal ida, asset.id
       assert_no_redundant_stat_calls
@@ -355,10 +357,10 @@ class TestPerformance < Sprockets::TestCase
       assert_no_redundant_cache_get_calls
       assert_no_cache_set_calls
 
-      write(dep, "b;", 1421000001)
+      write(dep, 'b;', 1_421_000_001)
       reset_stats!
 
-      assert asset = env["tmp-main.js"]
+      assert asset = env['tmp-main.js']
       assert_equal "b;\n", asset.source
       assert_equal idb, asset.id
       assert_no_redundant_stat_calls
@@ -369,34 +371,34 @@ class TestPerformance < Sprockets::TestCase
     end
   end
 
-  test "rollback file dependency add/remove" do
+  test 'rollback file dependency add/remove' do
     env = new_environment
     env.cache = Cache.new
 
-    main = fixture_path("default/tmp.js")
-    deps = fixture_path("default/tmp")
-    depa = fixture_path("default/tmp/a.js")
-    depb = fixture_path("default/tmp/b.js")
+    main = fixture_path('default/tmp.js')
+    deps = fixture_path('default/tmp')
+    depa = fixture_path('default/tmp/a.js')
+    depb = fixture_path('default/tmp/b.js')
 
     sandbox main, deps, depa, depb do
       FileUtils.mkdir_p(deps)
-      write(main, "//= require_directory ./tmp", 1421000000)
-      write(depa, "a;", 1421000000)
-      File.utime(1421000000, 1421000000, deps)
+      write(main, '//= require_directory ./tmp', 1_421_000_000)
+      write(depa, 'a;', 1_421_000_000)
+      File.utime(1_421_000_000, 1_421_000_000, deps)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "a;\n", asset.source
       ida = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
       assert_no_redundant_cache_set_calls
 
-      write(depb, "b;", 142100001)
-      File.utime(1421000001, 1421000001, deps)
+      write(depb, 'b;', 142_100_001)
+      File.utime(1_421_000_001, 1_421_000_001, deps)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "a;\nb;\n", asset.source
       idab = asset.id
       assert_no_redundant_processor_calls
@@ -404,10 +406,10 @@ class TestPerformance < Sprockets::TestCase
       assert_no_redundant_cache_set_calls
 
       FileUtils.rm(depb)
-      File.utime(1421000000, 1421000000, deps)
+      File.utime(1_421_000_000, 1_421_000_000, deps)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "a;\n", asset.source
       assert_equal ida, asset.id
       assert_no_redundant_stat_calls
@@ -416,11 +418,11 @@ class TestPerformance < Sprockets::TestCase
       assert_no_redundant_cache_get_calls
       assert_no_redundant_cache_set_calls
 
-      write(depb, "b;", 142100001)
-      File.utime(1421000001, 1421000001, deps)
+      write(depb, 'b;', 142_100_001)
+      File.utime(1_421_000_001, 1_421_000_001, deps)
       reset_stats!
 
-      assert asset = env["tmp.js"]
+      assert asset = env['tmp.js']
       assert_equal "a;\nb;\n", asset.source
       assert_equal idab, asset.id
       assert_no_redundant_stat_calls
@@ -432,7 +434,7 @@ class TestPerformance < Sprockets::TestCase
   end
 
   def new_environment(path = fixture_path('default'))
-    Sprockets::Environment.new(".") do |env|
+    Sprockets::Environment.new('.') do |env|
       env.cache = Cache.new
       env.append_path(path)
       env.register_preprocessor 'application/javascript', proc { |input|

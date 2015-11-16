@@ -17,8 +17,8 @@ module Sprockets
     extend self
 
     class CompositeProcessor < Struct.new(:processor_strategy, :param, :processors) # :nodoc:
-      SINGULAR = lambda { |param, input| ProcessorUtils.call_processor param, input }
-      PLURAL   = lambda { |param, input| ProcessorUtils.call_processors param, input }
+      SINGULAR = ->(param, input) { ProcessorUtils.call_processor param, input }
+      PLURAL   = ->(param, input) { ProcessorUtils.call_processors param, input }
 
       def self.create(processors)
         if processors.length == 1
@@ -58,7 +58,7 @@ module Sprockets
     #
     # Returns a Hash with :data and other processor metadata key/values.
     def call_processors(processors, input)
-      data = input[:data] || ""
+      data = input[:data] || ''
       metadata = (input[:metadata] || {}).dup
 
       processors.reverse_each do |processor|
@@ -80,7 +80,7 @@ module Sprockets
       metadata = (input[:metadata] || {}).dup
       metadata[:data] = input[:data]
 
-      case result = processor.call({data: "", metadata: {}}.merge(input))
+      case result = processor.call({ data: '', metadata: {} }.merge(input))
       when NilClass
         metadata
       when Hash
@@ -88,7 +88,7 @@ module Sprockets
       when String
         metadata.merge(data: result)
       else
-        raise TypeError, "invalid processor return type: #{result.class}"
+        fail TypeError, "invalid processor return type: #{result.class}"
       end
     end
 
@@ -139,22 +139,22 @@ module Sprockets
     #
     # Returns result or raises a TypeError.
     def validate_processor_result!(result)
-      if !result.instance_of?(Hash)
-        raise TypeError, "processor metadata result was expected to be a Hash, but was #{result.class}"
+      unless result.instance_of?(Hash)
+        fail TypeError, "processor metadata result was expected to be a Hash, but was #{result.class}"
       end
 
-      if !result[:data].instance_of?(String)
-        raise TypeError, "processor :data was expected to be a String, but as #{result[:data].class}"
+      unless result[:data].instance_of?(String)
+        fail TypeError, "processor :data was expected to be a String, but as #{result[:data].class}"
       end
 
       result.each do |key, value|
-        if !key.instance_of?(Symbol)
-          raise TypeError, "processor metadata[#{key.inspect}] expected to be a Symbol"
+        unless key.instance_of?(Symbol)
+          fail TypeError, "processor metadata[#{key.inspect}] expected to be a Symbol"
         end
 
-        if !valid_processor_metadata_value?(value)
-          raise TypeError, "processor metadata[:#{key}] returned a complex type: #{value.inspect}\n" +
-            "Only #{VALID_METADATA_TYPES.to_a.join(", ")} maybe used."
+        unless valid_processor_metadata_value?(value)
+          fail TypeError, "processor metadata[:#{key}] returned a complex type: #{value.inspect}\n" \
+            "Only #{VALID_METADATA_TYPES.to_a.join(', ')} maybe used."
         end
       end
 

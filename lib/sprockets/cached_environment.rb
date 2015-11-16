@@ -60,10 +60,11 @@ module Sprockets
     end
 
     private
-      # Cache is immutable, any methods that try to change the runtime config
-      # should bomb.
-      def config=(config)
-        raise RuntimeError, "can't modify immutable cached environment"
-      end
+
+    # Cache is immutable, any methods that try to change the runtime config
+    # should bomb.
+    def config=(_config)
+      fail "can't modify immutable cached environment"
+    end
   end
 end

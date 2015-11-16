@@ -80,7 +80,7 @@ module Sprockets
           digest << 'Encoding'
           digest << obj.name
         else
-          raise TypeError, "couldn't digest #{klass}"
+          fail TypeError, "couldn't digest #{klass}"
         end
       end
 
@@ -147,7 +147,7 @@ module Sprockets
       when String
         digest_class = DIGEST_SIZES[digest.bytesize]
       else
-        raise TypeError, "unknown digest: #{digest.inspect}"
+        fail TypeError, "unknown digest: #{digest.inspect}"
       end
 
       if hash_name = HASH_ALGORITHMS[digest_class]

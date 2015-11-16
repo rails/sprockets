@@ -176,7 +176,7 @@ module Sprockets
     # customized by the application. Though, in the future, some
     # basics implemention may be provided with different methods that
     # are required to be overridden.
-    def asset_path(path, options = {})
+    def asset_path(_path, _options = {})
       message = <<-EOS
 Custom asset_path helper is not implemented
 
@@ -187,7 +187,7 @@ Extend your environment context with a custom method.
       end
     end
       EOS
-      raise NotImplementedError, message
+      fail NotImplementedError, message
     end
 
     # Expand logical image asset path.

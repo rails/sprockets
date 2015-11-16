@@ -25,11 +25,12 @@ module Sprockets
       end
 
       match_data = data.match(/(.*)\n\/\*# sourceMappingURL=data:application\/json;base64,(.+) \*\//m)
-      css, map = match_data[1], Base64.decode64(match_data[2])
+      css = match_data[1]
+      map = Base64.decode64(match_data[2])
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map)["mappings"]
+        SourceMapUtils.decode_json_source_map(map)['mappings']
       )
 
       context.metadata.merge(data: css, map: map)
@@ -53,7 +54,6 @@ module Sprockets
       }
     end
   end
-
 
   class ScsscProcessor < SasscProcessor
     def self.syntax
