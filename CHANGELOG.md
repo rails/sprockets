@@ -1,3 +1,7 @@
+**3.4.1** (November 25, 2015)
+
+* PathUtils::Entries will no longer error on an empty directory.
+
 **3.4.0** (October 5, 2015)
 
 * Expose method to override the sass cache in the SassProcessor.
