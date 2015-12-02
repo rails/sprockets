@@ -51,6 +51,21 @@ module Sprockets
       end
     end
 
+    def gzip?
+      return @gzip if defined?(@gzip)
+      true
+    end
+
+    def skip_gzip?
+      !gzip?
+    end
+
+    # Enable or disable the creation of gzip files,
+    # on by default.
+    def gzip=(gzip)
+      @gzip = gzip
+    end
+
     # Assign a compressor to run on `application/javascript` assets.
     #
     # The compressor object must respond to `compress`.

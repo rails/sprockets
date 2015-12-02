@@ -1,3 +1,7 @@
+**Master**
+
+* Reintroduce Gzip file generation for non-binary assets.
+
 **3.4.1** (November 25, 2015)
 
 * PathUtils::Entries will no longer error on an empty directory.
