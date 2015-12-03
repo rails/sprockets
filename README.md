@@ -22,6 +22,21 @@ gem 'sprockets', '~> 3.0'
 
 ## Behavior
 
+Sprockets is a Ruby library for compiling and serving web assets.
+It features declarative dependency management for JavaScript and CSS
+assets, as well as a preprocessor pipeline that allows you to
+write assets in languages like CoffeeScript, Sass and SCSS.
+
+## Using sprockets
+
+For most people interested in using sprockets you will want to see [End User Asset Generation](guides/end_user_asset_generation.md) guide. This contains information about sprocket's directive syntax, and default processing behavior.
+
+If you are a framework developer that is using sprockets, see [Building an Asset Processing Framework](guides/building_an_asset_processing_framework.md).
+
+If you are a library developer who is extending the functionality of sprockets, see [Extending Sprockets](guides/extending_sprockets.md).
+
+Below is a disjointed mix of documentation for all three of these roles. Eventually they will be moved to an appropriate guide, for now the recommended way to consume documentation is to view the appropriate guide first and then supplement with docs from the README.
+
 ### Index files are proxies for folders
 
 In sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
