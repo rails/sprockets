@@ -20,6 +20,16 @@ Or include it in your project's `Gemfile` with Bundler:
 gem 'sprockets', '~> 3.0'
 ```
 
+## Using sprockets
+
+For most people interested in using sprockets you will want to see [End User Asset Generation](guides/end_user_asset_generation.md) guide. This contains information about sprocket's directive syntax, and default processing behavior.
+
+If you are a framework developer that is using sprockets, see [Building an Asset Processing Framework](guides/building_an_asset_processing_framework.md).
+
+If you are a library developer who is extending the functionality of sprockets, see [Extending Sprockets](guides/extending_sprockets.md).
+
+Below is a disjointed mix of documentation for all three of these roles. Eventually they will be moved to an appropriate guide, for now the recommended way to consume documentation is to view the appropriate guide first and then supplement with docs from the README.
+
 ## Behavior
 
 ### Index files are proxies for folders
