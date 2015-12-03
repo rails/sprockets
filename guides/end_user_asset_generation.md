@@ -1,6 +1,6 @@
 # End User Asset Generation
 
-This guide is for those using sprockets through an interface similar to the Rails asset pipeline. It will talk about end user interfaces. If you are not the end user, but intstead a tools developer who is building an asset processing framework, see [building an asset processing framework](building_an_asset_processing_framework.md).
+This guide is for those using Sprockets through an interface similar to the Rails asset pipeline. It will talk about end user interfaces. If you are not the end user, but instead a tools developer who is building an asset processing framework, see [building an asset processing framework](building_an_asset_processing_framework.md).
 
 ## What is Sprockets?
 
@@ -11,7 +11,7 @@ write assets in languages like CoffeeScript, Sass and SCSS.
 
 ## Behavior Overview
 
-You can interact through sprockets primarially through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with sprockets.
+You can interact through sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with sprockets.
 
 Since you are likely using sprockets through another framework (like the Rails asset pipeline), there will configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
 
@@ -19,7 +19,7 @@ Since you are likely using sprockets through another framework (like the Rails a
 
 Directives are special comments in your asset file and the main way of interacting with processors. What kind of interactions? You can use these directives to tell sprockets to load other files, or specify dependencies on other assets.
 
-For example, let's say you have custom javascript that you've written. You put this javascript in a file called `beta.js`. The javascript makes heavy use of jQuery, so you need to load that before your code executes. You could add this directive to the top of `beta.js`:
+For example, let's say you have custom JavaScript that you've written. You put this javascript in a file called `beta.js`. The javascript makes heavy use of jQuery, so you need to load that before your code executes. You could add this directive to the top of `beta.js`:
 
 ```js
 //= require jquery
@@ -126,7 +126,7 @@ Instead you would need to use:
 <%= asset_path("foo.js") %>
 ```
 
-Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level javascript. You can do this in sprockets using `require_tree .`
+Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level JavaScript. You can do this in sprockets using `require_tree .`
 
 ```
 //= require_tree .
@@ -167,7 +167,7 @@ TODO:
 
 This section details the default output of sprockets. This may have been modified by the frameworks you're using, so you will want to verify behavior with their docs.
 
-Processors and compressors will affect individual file output contents. Refer to the default processors and compressor ection how processors for your asset may have modifed your file.
+Processors and compressors will affect individual file output contents. Refer to the default processors and compressor section how processors for your asset may have modified your file.
 
 ### Manifest File
 
