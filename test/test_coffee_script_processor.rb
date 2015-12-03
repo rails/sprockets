@@ -13,7 +13,7 @@ class TestCoffeeScriptProcessor < MiniTest::Test
     }
     result = Sprockets::CoffeeScriptProcessor.call(input)
     assert result[:data].match(/var square/)
-    assert_equal 19, result[:map].size
+    assert_equal 13, result[:map].size
     assert_equal [], result[:map].map { |m| m[:source] }.uniq.compact
   end
 
