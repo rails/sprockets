@@ -629,4 +629,32 @@ class TestManifest < Sprockets::TestCase
     assert paths.include?("mobile/b.js")
     assert !paths.include?("application.js")
   end
+
+  test "compress non-binary assets" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    %W{ gallery.css application.js logo.svg }.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+    end
+  end
+
+  test "disable file gzip" do
+    @env.gzip = false
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    %W{ gallery.css application.js logo.svg }.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      refute File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to not generate gzipped file: '#{original_path}.gz' but it did"
+    end
+  end
+
+  test "do not compress binary assets" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    %W{ blank.gif }.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      refute File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to not generate gzipped file: '#{original_path}.gz' but it did"
+    end
+  end
 end
