@@ -139,9 +139,9 @@ module Sprockets
       # Returns a JavaScript response that re-throws a Ruby exception
       # in the browser
       def javascript_exception_response(exception)
-        err  = "#{exception.class.name}: #{exception.message}\n  (in #{exception.backtrace[0]})"
+        err  = "#{exception.class.name}"
         body = "throw Error(#{err.inspect})"
-        [ 200, { "Content-Type" => "application/javascript", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+        [ 500, { "Content-Type" => "application/javascript", "Content-Length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Returns a CSS response that hides all elements on the page and
@@ -194,7 +194,7 @@ module Sprockets
           }
         CSS
 
-        [ 200, { "Content-Type" => "text/css; charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+        [ 500, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string

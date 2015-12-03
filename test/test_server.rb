@@ -234,13 +234,13 @@ class TestServer < Sprockets::TestCase
 
   test "re-throw JS exceptions in the browser" do
     get "/assets/missing_require.js"
-    assert_equal 200, last_response.status
-    assert_equal "throw Error(\"Sprockets::FileNotFound: couldn't find file 'notfound' with type 'application/javascript'\\n  (in #{fixture_path("server/vendor/javascripts/missing_require.js")}:1)\")", last_response.body
+    assert_equal 500, last_response.status
+    assert_equal "throw Error(\"Sprockets::FileNotFound\")", last_response.body
   end
 
   test "display CSS exceptions in the browser" do
     get "/assets/missing_require.css"
-    assert_equal 200, last_response.status
+    assert_equal 500, last_response.status
     assert_match %r{content: ".*?Sprockets::FileNotFound}, last_response.body
   end
 
