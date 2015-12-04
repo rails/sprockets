@@ -528,4 +528,11 @@ class TestManifest < Sprockets::TestCase
       refute File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to not generate gzipped file: '#{original_path}.gz' but it did"
     end
   end
+
+  test 'raises exception when gzip fails' do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    Zlib::GzipWriter.stub(:new, -> { fail 'kaboom' }) do
+      assert_raises('kaboom') { manifest.compile('application.js') }
+    end
+  end
 end
