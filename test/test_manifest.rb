@@ -636,6 +636,7 @@ class TestManifest < Sprockets::TestCase
       original_path = @env[file_name].digest_path
       manifest.compile(file_name)
       assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+      assert_equal File.stat("#{@dir}/#{original_path}").mtime, Zlib::GzipReader.open("#{@dir}/#{original_path}.gz") {|gz| gz.mtime }
     end
   end
 

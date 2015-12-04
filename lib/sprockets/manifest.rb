@@ -202,7 +202,10 @@ module Sprockets
           logger.debug "Skipping #{target}.gz, already exists"
         else
           logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute { write_file.wait!; gzip.compress(target) }
+          concurrent_compressors << Concurrent::Future.execute do
+            write_file.wait!
+            gzip.compress(target)
+          end
         end
 
       end
