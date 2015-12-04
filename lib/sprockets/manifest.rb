@@ -1,6 +1,10 @@
 require 'json'
 require 'time'
+
+require 'concurrent/future'
+
 require 'sprockets/manifest_utils'
+require 'sprockets/utils/gzip'
 
 module Sprockets
   # The Manifest logs the contents of assets compiled to a single directory. It
@@ -137,7 +141,9 @@ module Sprockets
         raise Error, "manifest requires environment for compilation"
       end
 
-      filenames = []
+      filenames              = []
+      concurrent_compressors = []
+      concurrent_writers     = []
 
       find(*args) do |asset|
         files[asset.digest_path] = {
@@ -159,11 +165,25 @@ module Sprockets
           logger.debug "Skipping #{target}, already exists"
         else
           logger.info "Writing #{target}"
-          asset.write_to target
+          write_file = Concurrent::Future.execute { asset.write_to target }
+          concurrent_writers << write_file
+        end
+        filenames << asset.filename
+
+        next if environment.skip_gzip?
+        gzip = Utils::Gzip.new(asset)
+        next if gzip.cannot_compress?(environment.mime_types)
+
+        if File.exist?("#{target}.gz")
+          logger.debug "Skipping #{target}.gz, already exists"
+        else
+          logger.info "Writing #{target}.gz"
+          concurrent_compressors << Concurrent::Future.execute { write_file.wait!; gzip.compress(target) }
         end
 
-        filenames << asset.filename
       end
+      concurrent_writers.each(&:wait!)
+      concurrent_compressors.each(&:wait!)
       save
 
       filenames
@@ -176,6 +196,7 @@ module Sprockets
     #
     def remove(filename)
       path = File.join(dir, filename)
+      gzip = "#{path}.gz"
       logical_path = files[filename]['logical_path']
 
       if assets[logical_path] == filename
@@ -184,6 +205,7 @@ module Sprockets
 
       files.delete(filename)
       FileUtils.rm(path) if File.exist?(path)
+      FileUtils.rm(gzip) if File.exist?(gzip)
 
       save
 
