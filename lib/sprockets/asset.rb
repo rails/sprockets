@@ -21,7 +21,6 @@ module Sprockets
       @load_path    = attributes[:load_path]
       @logical_path = attributes[:logical_path]
       @metadata     = attributes[:metadata]
-      @mtime        = attributes[:mtime]
       @name         = attributes[:name]
       @source       = attributes[:source]
       @uri          = attributes[:uri]
