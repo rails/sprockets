@@ -208,7 +208,7 @@ module Sprockets
       end
       concurrent_writers.each(&:wait)
       concurrent_compressors.each(&:wait)
-      Concurrent::Future.execute { self.save }.wait
+      save
 
       filenames
     end
