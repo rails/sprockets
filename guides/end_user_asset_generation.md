@@ -11,13 +11,13 @@ write assets in languages like CoffeeScript, Sass and SCSS.
 
 ## Behavior Overview
 
-You can interact through Sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with Sprockets.
+You can interact through sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with sprockets.
 
-Since you are likely using Sprockets through another framework (like the Rails asset pipeline), there will configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
+Since you are likely using sprockets through another framework (like the Rails asset pipeline), there will configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
 
 ### Directives
 
-Directives are special comments in your asset file and the main way of interacting with processors. What kind of interactions? You can use these directives to tell Sprockets to load other files, or specify dependencies on other assets.
+Directives are special comments in your asset file and the main way of interacting with processors. What kind of interactions? You can use these directives to tell sprockets to load other files, or specify dependencies on other assets.
 
 For example, let's say you have custom JavaScript that you've written. You put this javascript in a file called `beta.js`. The javascript makes heavy use of jQuery, so you need to load that before your code executes. You could add this directive to the top of `beta.js`:
 
@@ -70,7 +70,7 @@ Sprockets uses the filename extensions to determine what processors to run on yo
 application.scss
 ```
 
-Then Sprockets will by default run the sass processor (which implements scss). The output file will be converted to css.
+Then sprockets will by default run the sass processor (which implements scss). The output file will be converted to css.
 
 You can specify multiple processors by specifying multiple file extensions. For example you can use Ruby's [ERB template language](http://ruby-doc.org/stdlib-2.2.3/libdoc/erb/rdoc/ERB.html) to embed content in your doc before running the sass processor. To accomplish this you would need to name your file
 
@@ -80,7 +80,7 @@ application.scss.erb
 
 Processors are run from right to left, so in the above example the processor associated with `erb` will be run before the processor associated with `scss` extension.
 
-For a description of the processors that Sprockets has by default see the "default processors" section below. Other libraries may register additional processors.
+For a description of the processors that sprockets has by default see the "default processors" section below. Other libraries may register additional processors.
 
 ## File Order Processing
 
@@ -114,7 +114,7 @@ Or you can use index files to proxy your folders
 
 ### Index files are proxies for folders
 
-In Sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
+In sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
 
 ```
 <%= asset_path("foo/index.js") %>
@@ -126,13 +126,13 @@ Instead you would need to use:
 <%= asset_path("foo.js") %>
 ```
 
-Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level JavaScript. You can do this in Sprockets using `require_tree .`
+Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level JavaScript. You can do this in sprockets using `require_tree .`
 
 ```
 //= require_tree .
 ```
 
-This has the problem that files are required alphabetically. If your directory has `jquery-ui.js` and `jquery.min.js` then Sprockets will require `jquery-ui.js` before `jquery` is required which won't work (because jquery-ui depends on jquery). Previously the only way to get the correct ordering would be to rename your files, something like `0-jquery-ui.js`. Instead of doing that you can use an index file.
+This has the problem that files are required alphabetically. If your directory has `jquery-ui.js` and `jquery.min.js` then sprockets will require `jquery-ui.js` before `jquery` is required which won't work (because jquery-ui depends on jquery). Previously the only way to get the correct ordering would be to rename your files, something like `0-jquery-ui.js`. Instead of doing that you can use an index file.
 
 For example, if you have an `application.js` and want all the files in the `foo/` folder you could do this:
 
@@ -165,7 +165,7 @@ TODO:
 
 ## Output
 
-This section details the default output of Sprockets. This may have been modified by the frameworks you're using, so you will want to verify behavior with their docs.
+This section details the default output of sprockets. This may have been modified by the frameworks you're using, so you will want to verify behavior with their docs.
 
 Processors and compressors will affect individual file output contents. Refer to the default processors and compressor section how processors for your asset may have modified your file.
 
@@ -177,26 +177,8 @@ TODO: Explain contents, location, and name of a manifest file.
 
 TODO: Explain default fingerprinting/digest behavior
 
-### Gzip
-
-By default when Sprockets generates a compiled asset file it will also produce a gzipped copy of that file. Sprockets only gzips non-binary files such as CSS, javascript, and SVG files.
-
-For example if Sprockets is generating
-
-```
-application-12345.css
-```
-
-Then it will also generate a compressed copy in
-
-```
-application-12345.css.gz
-```
-
-This behavior can be disabled, refer to your framework specific documentation.
-
 ## WIP
 
-This guide is a work in progress. There are many different groups of people who interact with Sprockets. Some only need to know directive syntax to put in their asset files, some are building features like the Rails asset pipeline, and some are plugging into Sprockets and writing things like preprocessors. The goal of these guides are to provide task specific guidance to make the expected behavior explicit. If you are using Sprockets and you find missing information in these guides, please consider submitting a pull request with updated information.
+This guide is a work in progress. There are many different groups of people who interact with sprockets. Some only need to know directive syntax to put in their asset files, some are building features like the Rails asset pipeline, and some are plugging into sprockets and writing things like preprocessors. The goal of these guides are to provide task specific guidance to make the expected behavior explicit. If you are using sprockets and you find missing information in these guides, please consider submitting a pull request with updated information.
 
 These guides live in [guides](/guides).
