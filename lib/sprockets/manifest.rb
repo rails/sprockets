@@ -203,7 +203,7 @@ module Sprockets
         else
           logger.info "Writing #{target}.gz"
           concurrent_compressors << Concurrent::Future.execute do
-            write_file.wait!
+            write_file.wait! if write_file
             gzip.compress(target)
           end
         end
