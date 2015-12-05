@@ -1,5 +1,9 @@
 **Master**
 
+**3.5.1** (December 5, 2015)
+
+* Fix gzip asset generation for assets already on disk.
+
 **3.5.0** (December 3, 2015)
 
 * Reintroduce Gzip file generation for non-binary assets.
