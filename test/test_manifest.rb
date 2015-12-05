@@ -510,6 +510,26 @@ class TestManifest < Sprockets::TestCase
     end
   end
 
+
+  test "writes gzip files even if files were already on disk" do
+    @env.gzip = false
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    files = %W{ gallery.css application.js logo.svg }
+    files.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}"), "Expecting \"#{@dir}/#{original_path}\" to exist but did not"
+    end
+
+    @env.gzip = true
+    files.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+      assert_equal File.stat("#{@dir}/#{original_path}").mtime, Zlib::GzipReader.open("#{@dir}/#{original_path}.gz") {|gz| gz.mtime }
+    end
+  end
+
   test "disable file gzip" do
     @env.gzip = false
     manifest = Sprockets::Manifest.new(@env, @dir)
