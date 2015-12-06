@@ -500,4 +500,58 @@ class TestManifest < Sprockets::TestCase
       manifest.compile('application.js')
     end
   end
+
+  test "compress non-binary assets" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    %W{ gallery.css application.js logo.svg }.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+    end
+  end
+
+
+  test "writes gzip files even if files were already on disk" do
+    @env.gzip = false
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    files = %W{ gallery.css application.js logo.svg }
+    files.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}"), "Expecting \"#{@dir}/#{original_path}\" to exist but did not"
+    end
+
+    @env.gzip = true
+    files.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+    end
+  end
+
+  test "disable file gzip" do
+    @env.gzip = false
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    %W{ gallery.css application.js logo.svg }.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      refute File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to not generate gzipped file: '#{original_path}.gz' but it did"
+    end
+  end
+
+  test "do not compress binary assets" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    %W{ blank.gif }.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      refute File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to not generate gzipped file: '#{original_path}.gz' but it did"
+    end
+  end
+
+  test 'raises exception when gzip fails' do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    Zlib::GzipWriter.stub(:new, -> { fail 'kaboom' }) do
+      assert_raises('kaboom') { manifest.compile('application.js') }
+    end
+  end
 end
