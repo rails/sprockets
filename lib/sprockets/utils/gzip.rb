@@ -41,11 +41,14 @@ module Sprockets
       #
       # Returns nothing.
       def compress(target)
+        mtime = PathUtils.stat(target).mtime
         PathUtils.atomic_write("#{target}.gz") do |f|
           gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.mtime = PathUtils.stat(target).mtime
+          gz.mtime = mtime
           gz.write(@source)
           gz.close
+
+          File.utime(mtime, mtime, f.path)
         end
 
         nil
