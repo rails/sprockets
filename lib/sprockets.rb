@@ -33,7 +33,8 @@ module Sprockets
     registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
     root: File.expand_path('..', __FILE__).freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
-    version: ""
+    version: "",
+    gzip_enabled: true
   }.freeze
   self.computed_config = {}
 
