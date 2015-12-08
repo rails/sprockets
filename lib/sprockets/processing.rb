@@ -44,8 +44,8 @@ module Sprockets
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_preprocessor 'text/css', :my_processor do |context, data|
-    #       data.gsub(...)
+    #     register_preprocessor 'text/css' do |input|
+    #       input[:data].gsub(...)
     #     end
     #
     def register_preprocessor(*args, &block)
@@ -60,8 +60,8 @@ module Sprockets
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_postprocessor 'application/javascript', :my_processor do |context, data|
-    #       data.gsub(...)
+    #     register_postprocessor 'application/javascript' do |input|
+    #       input[:data].gsub(...)
     #     end
     #
     def register_postprocessor(*args, &block)
@@ -100,7 +100,7 @@ module Sprockets
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_bundle_processor 'application/javascript', :my_processor do |context, data|
+    #     register_bundle_processor 'application/javascript' do |context, data|
     #       data.gsub(...)
     #     end
     #
