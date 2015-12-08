@@ -51,21 +51,6 @@ module Sprockets
       end
     end
 
-    def gzip?
-      return @gzip if defined?(@gzip)
-      true
-    end
-
-    def skip_gzip?
-      !gzip?
-    end
-
-    # Enable or disable the creation of gzip files,
-    # on by default.
-    def gzip=(gzip)
-      @gzip = gzip
-    end
-
     # Assign a compressor to run on `application/javascript` assets.
     #
     # The compressor object must respond to `compress`.
@@ -84,6 +69,26 @@ module Sprockets
       end
 
       register_bundle_processor 'application/javascript', klass
+    end
+
+    # Public: Checks if Gzip is enabled.
+    def gzip?
+      config[:gzip_enabled]
+    end
+
+    # Public: Checks if Gzip is disabled.
+    def skip_gzip?
+      !gzip?
+    end
+
+    # Public: Enable or disable the creation of Gzip files.
+    #
+    # Defaults to true.
+    #
+    #     environment.gzip = false
+    #
+    def gzip=(gzip)
+      self.config = config.merge(gzip_enabled: gzip).freeze
     end
   end
 end

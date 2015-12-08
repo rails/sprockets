@@ -32,7 +32,8 @@ module Sprockets
     registered_transformers: [].freeze,
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
-    version: ""
+    version: "",
+    gzip_enabled: true
   }.freeze
 
   @context_class = Context
