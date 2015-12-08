@@ -1,7 +1,7 @@
 require 'json'
 require 'time'
 
-require 'concurrent/future'
+require 'concurrent'
 
 require 'sprockets/manifest_utils'
 require 'sprockets/utils/gzip'
