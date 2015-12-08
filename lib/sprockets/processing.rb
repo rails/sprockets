@@ -100,8 +100,8 @@ module Sprockets
     #
     # A block can be passed for to create a shorthand processor.
     #
-    #     register_bundle_processor 'application/javascript' do |context, data|
-    #       data.gsub(...)
+    #     register_bundle_processor 'application/javascript' do |input|
+    #       input[:data].gsub(...)
     #     end
     #
     def register_bundle_processor(*args, &block)
