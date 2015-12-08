@@ -502,6 +502,10 @@ class TestEnvironment < Sprockets::TestCase
     @env.append_path(fixture_path('asset'))
   end
 
+  test "default gzip" do
+    assert_equal true, @env.gzip?
+  end
+
   test "change jst template namespace" do
     @env.register_transformer 'application/javascript+function', 'application/javascript', Sprockets::JstProcessor.new(namespace: 'this.JST2')
     assert asset = @env["hello.js"]
@@ -750,12 +754,23 @@ class TestCached < Sprockets::TestCase
     Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
       env.cache = {}
+      env.gzip = false
       yield env if block_given?
     end.cached
   end
 
   def setup
     @env = new_environment
+  end
+
+  test "inherit the gzip option" do
+    assert_equal false, @env.gzip?
+  end
+
+  test "does not allow to change the gzip option" do
+    assert_raises RuntimeError do
+      @env.gzip = true
+    end
   end
 
   test "does not allow new mime types to be added" do
