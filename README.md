@@ -20,13 +20,13 @@ Or include it in your project's `Gemfile` with Bundler:
 gem 'sprockets', '~> 3.0'
 ```
 
-## Using sprockets
+## Using Sprockets
 
-For most people interested in using sprockets you will want to see [End User Asset Generation](guides/end_user_asset_generation.md) guide. This contains information about sprocket's directive syntax, and default processing behavior.
+For most people interested in using Sprockets you will want to see [End User Asset Generation](guides/end_user_asset_generation.md) guide. This contains information about sprocket's directive syntax, and default processing behavior.
 
-If you are a framework developer that is using sprockets, see [Building an Asset Processing Framework](guides/building_an_asset_processing_framework.md).
+If you are a framework developer that is using Sprockets, see [Building an Asset Processing Framework](guides/building_an_asset_processing_framework.md).
 
-If you are a library developer who is extending the functionality of sprockets, see [Extending Sprockets](guides/extending_sprockets.md).
+If you are a library developer who is extending the functionality of Sprockets, see [Extending Sprockets](guides/extending_sprockets.md).
 
 Below is a disjointed mix of documentation for all three of these roles. Eventually they will be moved to an appropriate guide, for now the recommended way to consume documentation is to view the appropriate guide first and then supplement with docs from the README.
 
@@ -34,7 +34,7 @@ Below is a disjointed mix of documentation for all three of these roles. Eventua
 
 ### Index files are proxies for folders
 
-In sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
+In Sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
 
 ```
 <%= asset_path("foo/index.js") %>
@@ -46,13 +46,13 @@ Instead you would need to use:
 <%= asset_path("foo.js") %>
 ```
 
-Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level javascript. You can do this in sprockets using `require_tree .`
+Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level javascript. You can do this in Sprockets using `require_tree .`
 
 ```
 //= require_tree .
 ```
 
-This has the problem that files are required alphabetically. If your directory has `jquery-ui.js` and `jquery.min.js` then sprockets will require `jquery-ui.js` before `jquery` is required which won't work (because jquery-ui depends on jquery). Previously the only way to get the correct ordering would be to rename your files, something like `0-jquery-ui.js`. Instead of doing that you can use an index file.
+This has the problem that files are required alphabetically. If your directory has `jquery-ui.js` and `jquery.min.js` then Sprockets will require `jquery-ui.js` before `jquery` is required which won't work (because jquery-ui depends on jquery). Previously the only way to get the correct ordering would be to rename your files, something like `0-jquery-ui.js`. Instead of doing that you can use an index file.
 
 For example, if you have an `application.js` and want all the files in the `foo/` folder you could do this:
 
