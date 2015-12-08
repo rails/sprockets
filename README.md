@@ -20,6 +20,7 @@ Or include it in your project's `Gemfile` with Bundler:
 gem 'sprockets', '~> 3.0'
 ```
 
+<<<<<<< HEAD
 ## Using sprockets
 
 For most people interested in using sprockets you will want to see [End User Asset Generation](guides/end_user_asset_generation.md) guide. This contains information about sprocket's directive syntax, and default processing behavior.
@@ -69,6 +70,8 @@ Then create a file `foo/index.js` that requires all the files in that folder in 
 
 Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui.js`. If you used `require_tree` it would not work correctly.
 
+=======
+>>>>>>> maclover7/master
 ## Understanding the Sprockets Environment
 
 You'll need an instance of the `Sprockets::Environment` class to
@@ -480,36 +483,16 @@ def self.call(input)
 end
 ```
 
+## Contributing to Sprockets
 
-## Development
+Sprockets is the work of hundreds of contributors. You're encouraged to submit pull requests, propose
+features and discuss issues.
 
-### Contributing
-
-The Sprockets source code is [hosted on
-GitHub](https://github.com/rails/sprockets). You can check out a
-copy of the latest code using Git:
-
-    $ git clone https://github.com/rails/sprockets
-
-If you've found a bug or have a question, please open an issue on the
-[Sprockets issue
-tracker](https://github.com/rails/sprockets/issues). Or, clone
-the Sprockets repository, write a failing test case, fix the bug and
-submit a pull request.
+See [CONTRIBUTING](CONTRIBUTING.md).
 
 ### Version History
 
 Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGELOG.md)
 
-## Build Status
-
-[![Build Status](https://travis-ci.org/rails/sprockets.svg?branch=master)](https://travis-ci.org/rails/sprockets)
-
 ## License
-
-Copyright &copy; 2014 Sam Stephenson <<sstephenson@gmail.com>>
-
-Copyright &copy; 2014 Joshua Peek <<josh@joshpeek.com>>
-
-Sprockets is distributed under an MIT-style license. See LICENSE for
-details.
+Sprockets is released under the [MIT License](MIT-LICENSE).
