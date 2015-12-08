@@ -1,5 +1,10 @@
 **Master**
 
+**3.5.2** (December 8, 2015)
+
+* Fix JRuby bug with concurrent-ruby.
+* Fix disabling gzip generation in cached environments.
+
 **3.5.1** (December 5, 2015)
 
 * Fix gzip asset generation for assets already on disk.
