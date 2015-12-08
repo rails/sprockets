@@ -20,7 +20,6 @@ Or include it in your project's `Gemfile` with Bundler:
 gem 'sprockets', '~> 3.0'
 ```
 
-<<<<<<< HEAD
 ## Using sprockets
 
 For most people interested in using sprockets you will want to see [End User Asset Generation](guides/end_user_asset_generation.md) guide. This contains information about sprocket's directive syntax, and default processing behavior.
@@ -70,8 +69,6 @@ Then create a file `foo/index.js` that requires all the files in that folder in 
 
 Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui.js`. If you used `require_tree` it would not work correctly.
 
-=======
->>>>>>> maclover7/master
 ## Understanding the Sprockets Environment
 
 You'll need an instance of the `Sprockets::Environment` class to
