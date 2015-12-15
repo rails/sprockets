@@ -224,6 +224,11 @@ class TestServer < Sprockets::TestCase
   test "bad fingerprint digest returns a 404" do
     get "/assets/application-0000000000000000000000000000000000000000.js"
     assert_equal 404, last_response.status
+
+    head "/assets/application-0000000000000000000000000000000000000000.js"
+    assert_equal 404, last_response.status
+    assert_equal "0", last_response.headers['Content-Length']
+    assert_equal "", last_response.body
   end
 
   test "missing source" do
@@ -270,6 +275,11 @@ class TestServer < Sprockets::TestCase
 
     get "/assets/.-0000000./etc/passwd"
     assert_equal 403, last_response.status
+
+    head "/assets/.-0000000./etc/passwd"
+    assert_equal 403, last_response.status
+    assert_equal "0", last_response.headers['Content-Length']
+    assert_equal "", last_response.body
   end
 
   test "add new source to tree" do
@@ -303,6 +313,12 @@ class TestServer < Sprockets::TestCase
   test "disallow non-get methods" do
     get "/assets/foo.js"
     assert_equal 200, last_response.status
+
+    head "/assets/foo.js"
+    assert_equal 200, last_response.status
+    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "0", last_response.headers['Content-Length']
+    assert_equal "", last_response.body
 
     post "/assets/foo.js"
     assert_equal 405, last_response.status
