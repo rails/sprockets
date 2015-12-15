@@ -1,3 +1,4 @@
+require 'set'
 require 'time'
 require 'rack/utils'
 
@@ -6,6 +7,9 @@ module Sprockets
   # `CachedEnvironment` that provides a Rack compatible `call`
   # interface and url generation helpers.
   module Server
+    # Supported HTTP request methods.
+    ALLOWED_REQUEST_METHODS = ['GET', 'HEAD'].to_set.freeze
+
     # `call` implements the Rack 1.x specification which accepts an
     # `env` Hash and returns a three item tuple with the status code,
     # headers, and body.
@@ -23,7 +27,7 @@ module Sprockets
       start_time = Time.now.to_f
       time_elapsed = lambda { ((Time.now.to_f - start_time) * 1000).to_i }
 
-      if !['GET', 'HEAD'].include?(env['REQUEST_METHOD'])
+      unless ALLOWED_REQUEST_METHODS.include? env['REQUEST_METHOD']
         return method_not_allowed_response
       end
 
