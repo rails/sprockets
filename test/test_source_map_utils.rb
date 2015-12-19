@@ -98,36 +98,44 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal expected, actual
   end
 
+  def test_concat_empty_source_map_returns_original
+    abc_mappings = [
+      { source: 'a.js', generated: [rand(1..100), rand(0..100)], original: [rand(1..100), rand(0..100)] },
+      { source: 'b.js', generated: [rand(1..100), rand(0..100)], original: [rand(1..100), rand(0..100)] },
+      { source: 'c.js', generated: [rand(1..100), rand(0..100)], original: [rand(1..100), rand(0..100)] }
+    ].freeze
+
+    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps(nil, abc_mappings)
+    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps(abc_mappings, nil)
+
+    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps([], abc_mappings)
+    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps(abc_mappings, [])
+  end
+
   def test_concat_source_maps
-    mappings = [
-      { source: 'a.js', generated: [0, 0], original: [0,  0] },
-      { source: 'b.js', generated: [1, 0], original: [20, 0] },
-      { source: 'c.js', generated: [2, 0], original: [30, 0] }
-    ].freeze
-
-    assert_equal mappings, Sprockets::SourceMapUtils.concat_source_maps(nil, mappings)
-    assert_equal mappings, Sprockets::SourceMapUtils.concat_source_maps(mappings, nil)
-
-    assert_equal mappings, Sprockets::SourceMapUtils.concat_source_maps([], mappings)
-    assert_equal mappings, Sprockets::SourceMapUtils.concat_source_maps(mappings, [])
-
-    mappings2 = [
-      { source: 'd.js', generated: [0, 0], original: [0, 0] }
-    ].freeze
-
-    assert_equal [
-      { source: 'a.js', generated: [0, 0], original: [0,  0] },
-      { source: 'b.js', generated: [1, 0], original: [20, 0] },
-      { source: 'c.js', generated: [2, 0], original: [30, 0] },
-      { source: 'd.js', generated: [3, 0], original: [0,  0] }
-    ], Sprockets::SourceMapUtils.concat_source_maps(mappings, mappings2)
-
-    assert_equal [
-      { source: 'd.js', generated: [0, 0], original: [0,  0] },
-      { source: 'a.js', generated: [1, 0], original: [0,  0] },
+    abc_mappings = [
+      { source: 'a.js', generated: [1, 0], original: [1,  0] },
       { source: 'b.js', generated: [2, 0], original: [20, 0] },
       { source: 'c.js', generated: [3, 0], original: [30, 0] }
-    ], Sprockets::SourceMapUtils.concat_source_maps(mappings2, mappings)
+    ].freeze
+
+    d_mapping = [
+      { source: 'd.js', generated: [1, 0], original: [1, 0] }
+    ].freeze
+
+    assert_equal [
+      { source: 'a.js', generated: [1, 0], original: [1,  0] },
+      { source: 'b.js', generated: [2, 0], original: [20, 0] },
+      { source: 'c.js', generated: [3, 0], original: [30, 0] },
+      { source: 'd.js', generated: [4, 0], original: [1,  0] }
+    ], Sprockets::SourceMapUtils.concat_source_maps(abc_mappings, d_mapping)
+
+    assert_equal [
+      { source: 'd.js', generated: [1, 0], original: [1,  0] },
+      { source: 'a.js', generated: [2, 0], original: [1,  0] },
+      { source: 'b.js', generated: [3, 0], original: [20, 0] },
+      { source: 'c.js', generated: [4, 0], original: [30, 0] }
+    ], Sprockets::SourceMapUtils.concat_source_maps(d_mapping, abc_mappings)
   end
 
   def test_combine_source_maps

@@ -22,7 +22,13 @@ module Sprockets
       a ||= []
       b ||= []
       mappings = a.dup
-      offset   = a.any? ? a.last[:generated][0]+1 : 0
+
+      if a.any?
+        offset = a.last[:generated][0]
+      else
+        offset = 0
+      end
+
       b.each do |m|
         mappings << m.merge(generated: [m[:generated][0] + offset, m[:generated][1]])
       end
