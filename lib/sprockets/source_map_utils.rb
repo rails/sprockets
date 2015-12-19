@@ -41,23 +41,25 @@ module Sprockets
     # map can be combined with the Uglifier map so the source lines of the
     # minified output can be traced back to the original CoffeeScript file.
     #
-    # a - Array of source mapping Hashes
-    # b - Array of source mapping Hashes
+    #   original_map = [{ :source => "index.coffee", :generated => [2, 0], :original => [1, 0] }]
+    #   second_map   = [{ :source => "index.js",     :generated => [1, 1], :original => [2, 0] }]
+    #   combine_source_maps(original_map, second_map)
+    #     # => [{:source=>"index.coffee", :generated => [1, 1], :original => [1, 0]}]
     #
     # Returns a new Array of source mapping Hashes.
-    def combine_source_maps(a, b)
-      a ||= []
-      return b.dup if a.empty?
+    def combine_source_maps(original_map, second_map)
+      original_map ||= []
+      return second_map.dup if original_map.empty?
 
-      mappings = []
+      new_map = []
 
-      b.each do |m|
-        om = bsearch_mappings(a, m[:original])
-        next unless om
-        mappings << om.merge(generated: m[:generated])
+      second_map.each do |m|
+        original_line = bsearch_mappings(original_map, m[:original])
+        next unless original_line
+        new_map << original_line.merge(generated: m[:generated])
       end
 
-      mappings
+      new_map
     end
 
     # Public: Compare two source map offsets.
