@@ -14,6 +14,7 @@ module Sprockets
       config[:pipelines]
     end
 
+    # Registers a pipeline that will be called by `call_processor` method.
     def register_pipeline(name, proc = nil, &block)
       proc ||= block
 
