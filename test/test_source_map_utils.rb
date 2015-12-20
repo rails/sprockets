@@ -223,6 +223,21 @@ class TestSourceMapUtils < MiniTest::Test
       Sprockets::SourceMapUtils.encode_vlq_mappings(combined_mappings)
   end
 
+  def test_combine_source_maps_skips_default
+    first_mapping = [
+      { :source => "index.coffee", :generated => [1,  0], :original => [1,  0]},
+    ]
+    second_mapping = [
+      { :source => "index.coffee", :generated => [1,  1], :original => [1,  0]},
+      { :source => "index.coffee", :generated => [1, 12], :original => [1,  0]},
+      { :source => "index.coffee", :generated => [1, 15], :original => [1,  0]},
+      { :source => "index.coffee", :generated => [1, 20], :original => [1,  0]},
+    ]
+
+    combined_mappings = Sprockets::SourceMapUtils.combine_source_maps(first_mapping, second_mapping)
+    assert_equal second_mapping, combined_mappings
+  end
+
   def test_compare_offsets
     assert_equal( 0,  Sprockets::SourceMapUtils.compare_source_offsets([1, 5], [1, 5]))
     assert_equal(-1,  Sprockets::SourceMapUtils.compare_source_offsets([1, 5], [2, 0]))

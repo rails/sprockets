@@ -15,6 +15,108 @@ class TestSourceMaps < Sprockets::TestCase
     asset = @env['child.js']
     map = asset.metadata[:map]
     assert_equal ['child.source-1fa5b1a0f53ee03f5b38d4c5b2346d338916e58b0656d6c37f84bd4c742e49c1.js'], map.map { |m| m[:source] }.uniq.compact
+
+    assert_equal [1, 0], map.first[:generated]
+    assert_equal [1, 0], map.first[:original]
+  end
+
+  test "simple source map" do
+    asset = @env['foo-bar.js']
+    map   = asset.metadata[:map]
+
+    expected = "var foo = \"foo\";\nvar bar = \"bar\";\n\n\n"
+    assert_equal expected, asset.source
+
+    foo_source_path     = "foo.source-98f4654ce1a9f7268ad1980896e0e20d1e6b95cca53c85e002feeb20eb3a8008.js"
+    bar_source_path     = "bar.source-fcb2768a2b823ae765d81566d477d6a5c20772b68c391a8a7f7456abcf9e6fc5.js"
+    foo_bar_source_path = "foo-bar.source-adf044b5009a8b37cda4ea2ebb72578512e0319aae337adca62f86c8861342b1.js"
+
+    expected = [foo_source_path, bar_source_path, foo_bar_source_path]
+    actual   = map.map { |m| m[:source] }.uniq.compact
+    assert_equal expected, actual
+
+    expected = [
+      {
+        :source    => foo_source_path,
+        :generated => [1, 0],
+        :original  => [1, 0]
+      },
+      {
+        :source => bar_source_path,
+        :generated => [2, 0],
+        :original  => [1, 0]
+      },
+      {
+        :source    => foo_bar_source_path,
+        :generated => [3, 0],
+        :original  => [1, 0]
+      }
+    ]
+    assert_equal expected, map
+  end
+
+  test "coffee" do
+    expected = [
+      {:source=>
+         "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [1, 0],
+       :original  => [1, 0]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [2, 0],
+       :original  => [1, 0]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [2, 6],
+       :original  => [1, 0]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [4, 2],
+       :original  => [1, 0]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [4, 9],
+       :original  => [1, 0]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [4, 12],
+       :original  => [2,  2]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 4],
+       :original  => [2, 2]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 8],
+       :original  => [2, 2]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 10],
+       :original  => [2,  8]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 19],
+       :original  => [2,  9]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 21],
+       :original  => [2,  8]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 24],
+       :original  => [2,  8]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [5, 25],
+       :original  => [2,  2]},
+      {:source =>
+        "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
+       :generated => [7, 0],
+       :original  => [1, 0]}
+    ]
+    asset = @env['project.js']
+    map   = asset.metadata[:map]
+    assert_equal expected, map
   end
 
   test "builds a concatenated source map" do
