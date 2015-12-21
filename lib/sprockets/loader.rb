@@ -155,9 +155,7 @@ module Sprockets
             content_type: type,
             metadata: {
               dependencies: dependencies,
-              map: [
-                {source: source_path, generated: [0, 0], original: [0, 0]}
-              ]
+              map: []
             }
           })
           validate_processor_result!(result)
