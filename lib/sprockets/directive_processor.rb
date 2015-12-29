@@ -34,8 +34,6 @@ module Sprockets
   #     env.register_processor('text/css', MyProcessor)
   #
   class DirectiveProcessor
-    VERSION = '1'
-
     # Directives are denoted by a `=` followed by the name, then
     # argument list.
     #
