@@ -47,6 +47,7 @@ module Sprockets
       @cache_version = options[:cache_version]
       @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::Sass::VERSION}:#{@cache_version}".freeze
       @importer_class = options[:importer] || Sass::Importers::Filesystem
+      @sass_config = options[:sass_config] || {}
       @functions = Module.new do
         include Functions
         include options[:functions] if options[:functions]
@@ -57,7 +58,7 @@ module Sprockets
     def call(input)
       context = input[:environment].context_class.new(input)
 
-      options = {
+      engine_options = {
         filename: input[:filename],
         syntax: self.class.syntax,
         cache_store: build_cache_store(input, @cache_version),
@@ -68,9 +69,9 @@ module Sprockets
           environment: input[:environment],
           dependencies: context.metadata[:dependencies]
         }
-      }
+      }.merge!(@sass_config)
 
-      engine = Autoload::Sass::Engine.new(input[:data], options)
+      engine = Autoload::Sass::Engine.new(input[:data], engine_options)
 
       css, map = Utils.module_include(Autoload::Sass::Script::Functions, @functions) do
         engine.render_with_sourcemap('')

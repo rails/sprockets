@@ -7,6 +7,7 @@ module Sprockets
       @cache_version = options[:cache_version]
       @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::SassC::VERSION}:#{@cache_version}".freeze
       @importer_class = options[:importer]
+      @sass_config = options[:sass_config] || {}
       @functions = Module.new do
         include SassProcessor::Functions
         include options[:functions] if options[:functions]
@@ -50,7 +51,7 @@ module Sprockets
           environment: input[:environment],
           dependencies: context.metadata[:dependencies]
         }
-      }
+      }.merge!(@sass_config)
     end
   end
 
