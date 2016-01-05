@@ -36,7 +36,6 @@ module Sprockets
       #            (default: 1000).
       def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
         @root     = root
-        @size     = find_caches.inject(0) { |n, (_, stat)| n + stat.size }
         @max_size = max_size
         @gc_size  = max_size * 0.75
         @logger   = logger
@@ -107,11 +106,11 @@ module Sprockets
         # Write data
         PathUtils.atomic_write(path) do |f|
           f.write(raw)
-          @size += f.size unless exists
+          @size = size + f.size unless exists
         end
 
         # GC if necessary
-        gc! if @size > @max_size
+        gc! if size > @max_size
 
         value
       end
@@ -120,7 +119,7 @@ module Sprockets
       #
       # Returns String.
       def inspect
-        "#<#{self.class} size=#{@size}/#{@max_size}>"
+        "#<#{self.class} size=#{size}/#{@max_size}>"
       end
 
       private
@@ -136,6 +135,10 @@ module Sprockets
             stats << [filename, stat] if stat
             stats
           }.sort_by { |_, stat| stat.mtime.to_i }
+        end
+
+        def size
+          @size ||= compute_size(find_caches)
         end
 
         def compute_size(caches)
