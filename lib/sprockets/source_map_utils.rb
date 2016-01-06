@@ -56,9 +56,13 @@ module Sprockets
     def combine_source_maps(original_map, second_map)
       original_map ||= []
       return second_map.dup if original_map.empty?
+      if original_map.size == 1
+        map    = original_map.first
+        source = map[:source]
+        return second_map if map[:generated] == DEFAULT_MAP_VALUE &&  map[:original] == DEFAULT_MAP_VALUE && second_map.all? {|m| m[:source] == source }
+      end
 
       new_map = []
-
       second_map.each do |m|
         original_line = bsearch_mappings(original_map, m[:original])
         next unless original_line
@@ -67,6 +71,7 @@ module Sprockets
 
       new_map
     end
+    DEFAULT_MAP_VALUE = [1, 0]
 
     # Public: Compare two source map offsets.
     #
