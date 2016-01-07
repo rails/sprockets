@@ -81,7 +81,7 @@ module Sprockets
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map.to_json(css_uri: ''))["mappings"]
+        SourceMapUtils.decode_json_source_map(map.to_json(css_uri: '', type: :inline))["mappings"]
       )
 
       # Track all imported files

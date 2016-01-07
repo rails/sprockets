@@ -17,13 +17,18 @@ module Sprockets
       env = input[:environment]
 
       uri, _ = env.resolve!(input[:filename], accept: accept)
-      asset = env.load(uri)
-      map = asset.metadata[:map] || []
+      asset  = env.load(uri)
+      map    = asset.metadata[:map] || []
 
       map.map { |m| m[:source] }.uniq.compact.each do |source|
         # TODO: Resolve should expect fingerprints
         fingerprint = source[/-([0-9a-f]{7,128})\.[^.]+\z/, 1]
-        uri, _ = env.resolve!(source.sub("-#{fingerprint}", ""))
+        if fingerprint
+          path = source.sub("-#{fingerprint}", "")
+        else
+          path = source
+        end
+        uri, _ = env.resolve!(path)
         links << env.load(uri).uri
       end
 

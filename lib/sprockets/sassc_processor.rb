@@ -30,13 +30,17 @@ module Sprockets
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map)["mappings"]
+        change_source(SourceMapUtils.decode_json_source_map(map)["mappings"], input[:source_path])
       )
 
       context.metadata.merge(data: css, map: map)
     end
 
     private
+
+    def change_source(mappings, source)
+      mappings.each { |m| m[:source] = source }
+    end
 
     def engine_options(input, context)
       {

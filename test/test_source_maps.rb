@@ -70,7 +70,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal({
       "version" => 3,
       "file" => "coffee/main.js",
-      "mappings" => "AADA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAA;;EAAA,QAAA,GAAA;;EAAA,IAAA,QAAA;IAAA,MAAA,GAAA,CAAA,GAAA;;;EAAA,MAAA,GAAA,SAAA,CAAA;WAAA,CAAA,GAAA;EAAA;;EAAA,IAAA,GAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA,CAAA;;EAAA,IAAA,GAAA;IAAA,IAAA,EAAA,IAAA,CAAA,IAAA;IAAA,MAAA,EAAA,MAAA;IAAA,IAAA,EAAA,SAAA,CAAA;aAAA,CAAA,GAAA,MAAA,CAAA,CAAA;IAAA,CAAA;;;EAAA,IAAA,GAAA,SAAA;AAAA,QAAA;IAAA,uBAAA;WAAA,KAAA,CAAA,MAAA,EAAA,OAAA;EAAA;;EAAA,IAAA,8CAAA;IAAA,KAAA,CAAA,YAAA,EAAA;;;EAAA,KAAA;;AAAA;SAAA,sCAAA;;mBAAA,IAAA,CAAA,IAAA,CAAA,GAAA;AAAA;;;AAAA",
+      "mappings" => "AACA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAW;;EACX,QAAA,GAAW;;EAGX,IAAgB,QAAhB;IAAA,MAAA,GAAS,CAAC,GAAV;;;EAGA,MAAA,GAAS,SAAC,CAAD;WAAO,CAAA,GAAI;EAAX;;EAGT,IAAA,GAAO,CAAC,CAAD,EAAI,CAAJ,EAAO,CAAP,EAAU,CAAV,EAAa,CAAb;;EAGP,IAAA,GACE;IAAA,IAAA,EAAQ,IAAI,CAAC,IAAb;IACA,MAAA,EAAQ,MADR;IAEA,IAAA,EAAQ,SAAC,CAAD;aAAO,CAAA,GAAI,MAAA,CAAO,CAAP;IAAX,CAFR;;;EAKF,IAAA,GAAO,SAAA;AACL,QAAA;IADM,uBAAQ;WACd,KAAA,CAAM,MAAN,EAAc,OAAd;EADK;;EAIP,IAAsB,8CAAtB;IAAA,KAAA,CAAM,YAAN,EAAA;;;EAGA,KAAA;;AAAS;SAAA,sCAAA;;mBAAA,IAAI,CAAC,IAAL,CAAU,GAAV;AAAA;;;AA1BT",
       "sources" => ["coffee/main.source-2ee93f5e7f3b843c3002478375432cf923860432879315335f4b987c205057db.coffee"],
       "names" => []
     }, map)
@@ -108,15 +108,15 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "babel/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&pipeline=source&id=xxx"
+      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&id=xxx"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
       "version" => 3,
       "file" => "babel/main.js",
-      "mappings" => ";;;;;;;;;;AADA,IAAA,IAAA,GAAA,KAAA,CAAA,GAAA,CAAA,UAAA,CAAA;SAAA,CAAA,GAAA,CAAA;CAAA,CAAA,CAAA;AAAA,IAAA,IAAA,GAAA,KAAA,CAAA,GAAA,CAAA,UAAA,CAAA,EAAA,CAAA;SAAA,CAAA,GAAA,CAAA;CAAA,CAAA,CAAA;;IAAA,WAAA;YAAA,WAAA;;AAAA,WAAA,WAAA,CAAA,QAAA,EAAA,SAAA,EAAA;0BAAA,WAAA;;AAAA,+BAAA,WAAA,6CAAA,QAAA,EAAA,SAAA,EAAA;GAAA;;eAAA,WAAA;;WAAA,gBAAA,MAAA,EAAA;AAAA,iCAAA,WAAA,wCAAA;KAAA;;;WAAA,yBAAA;AAAA,aAAA,IAAA,KAAA,CAAA,OAAA,EAAA,CAAA;KAAA;;;SAAA,WAAA;GAAA,KAAA,CAAA,IAAA;;AAAA,IAAA,SAAA,uBAAA,MAAA,CAAA,QAAA,0BAAA;MAAA,GAAA,EAAA,GAAA,EAAA,IAAA;;;;AAAA,WAAA,GAAA,CAAA,EAAA,GAAA,GAAA,CAAA;;;AAAA,YAAA,GAAA,GAAA;;AAAA,WAAA,GAAA,GAAA,CAAA;AAAA,WAAA,IAAA,IAAA,CAAA;;eAAA,GAAA;;;;;;;;;;;CAAA,EAAA,CAAA",
-      "sources" => ["babel/main.source-1acb9cf16a3e1ce0fe0a38491472a14a6a97281ceace4b67ec16a904be5fa1b9.es6"],
+      "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
+      "sources"  => ["babel/main.es6"],
       "names"=>[]
     }, map)
   end
@@ -158,15 +158,15 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss&pipeline=source&id=xxx"
+      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss&id=xxx"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
       "version" => 3,
       "file" => "sass/main.css",
-      "mappings" => "AADA,MAAA;EAAA,MAAA,EAAA,CAAA;EAAA,OAAA,EAAA,CAAA;EAAA,UAAA,EAAA,IAAA;AAAA,MAAA;EAAA,OAAA,EAAA,YAAA;AAAA,KAAA;EAAA,OAAA,EAAA,KAAA;EAAA,OAAA,EAAA,QAAA;EAAA,eAAA,EAAA,IAAA",
-      "sources" => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
+      "mappings" => "AACE,MAAG;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI;AAGlB,MAAG;EAAE,OAAO,EAAE,YAAY;AAE1B,KAAE;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI",
+      "sources" => [fixture_path_for_uri('source-maps/sass/main.scss')],
       "names" => []
     }, map)
   end
@@ -197,7 +197,7 @@ class TestSourceMaps < Sprockets::TestCase
 end
 
 
-class TestSassSourceMaps < Sprockets::TestCase
+class TestSasscSourceMaps < Sprockets::TestCase
   def setup
     @env = Sprockets::Environment.new
     @env = Sprockets::Environment.new(".") do |env|
@@ -231,11 +231,11 @@ class TestSassSourceMaps < Sprockets::TestCase
 
     assert map = JSON.parse(asset.source)
     assert_equal({
-      "version" => 3,
-      "file" => "sass/main.css",
-      "mappings" => "AADA,GAAA,CAAA,EAAA,CAAA;EAAA,MAAA,EAAA,CAAA;EAAA,OAAA,EAAA,CAAA;EAAA,UAAA,EAAA,IAAA,GAAA;;AAAA,GAAA,CAAA,EAAA,CAAA;EAAA,OAAA,EAAA,YAAA,GAAA;;AAAA,GAAA,CAAA,CAAA,CAAA;EAAA,OAAA,EAAA,KAAA;EAAA,OAAA,EAAA,QAAA;EAAA,eAAA,EAAA,IAAA,GAAA",
-      "sources" => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
-      "names" => []
+      "version"  => 3,
+      "file"     => "sass/main.css",
+      "mappings" => "AAAA,GAAG,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAE;EACV,OAAO,EAAE,CAAE;EACX,UAAU,EAAE,IAAK,GAClB;;AALH,GAAG,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAa,GAAI;;AAPjC,GAAG,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAM;EACf,OAAO,EAAE,QAAS;EAClB,eAAe,EAAE,IAAK,GACvB",
+      "sources"  => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
+      "names"    => []
     }, map)
   end
 end
