@@ -11,7 +11,6 @@ require 'sprockets/path_utils'
 require 'sprockets/resolve'
 require 'sprockets/server'
 require 'sprockets/source_map_utils'
-require 'sprockets/loader'
 require 'sprockets/uri_tar'
 
 module Sprockets
