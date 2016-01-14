@@ -60,6 +60,12 @@ Sprockets.register_transformer 'text/coffeescript', 'application/javascript', Co
 
 The first argument is the mime type of the file that the processor accepts. The second argument is the mime type that it generates, and the last argument is the object that responds to `call`.
 
+For example, say you wanted to have Sprockets process a `.html` file, and output the mime type as application/javascript. To accomplish this, you would do the following:
+
+```ruby
+  register_transformer 'text/html', 'application/javascript', MyTemplateProcessor
+```
+
 ## Compressors
 
 A compressor takes in an asset, and returns a smaller version of that asset. For example the uglifier compressor takes in a javascript file, it then removes the whitespace and applies other space saving techniques and returns a smaller javascript source. It must respond to `call` and return a `:data` key in a hash similar to a preprocessor. You can register a compressor like this:
