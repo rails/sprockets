@@ -195,6 +195,7 @@ module Sprockets
         filenames << asset.filename
 
         next if environment.skip_gzip?
+        next if asset.metadata[:skip_gzip]
         gzip = Utils::Gzip.new(asset)
         next if gzip.cannot_compress?(environment.mime_types)
 
