@@ -43,7 +43,7 @@ module Sprockets
     end
 
     def engine_options(input, context)
-      {
+      merge_options({
         filename: input[:filename],
         syntax: self.class.syntax,
         load_paths: input[:environment].paths,
@@ -55,7 +55,7 @@ module Sprockets
           environment: input[:environment],
           dependencies: context.metadata[:dependencies]
         }
-      }.merge!(@sass_config)
+      })
     end
   end
 

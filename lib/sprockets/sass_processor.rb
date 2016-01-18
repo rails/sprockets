@@ -58,7 +58,7 @@ module Sprockets
     def call(input)
       context = input[:environment].context_class.new(input)
 
-      engine_options = {
+      engine_options = merge_options({
         filename: input[:filename],
         syntax: self.class.syntax,
         cache_store: build_cache_store(input, @cache_version),
@@ -69,7 +69,7 @@ module Sprockets
           environment: input[:environment],
           dependencies: context.metadata[:dependencies]
         }
-      }.merge!(@sass_config)
+      })
 
       engine = Autoload::Sass::Engine.new(input[:data], engine_options)
 
@@ -105,6 +105,18 @@ module Sprockets
       CacheStore.new(input[:cache], version)
     end
     private :build_cache_store
+
+    def merge_options(options)
+      defaults = @sass_config.dup
+
+      if load_paths = defaults.delete(:load_paths)
+        options[:load_paths] += load_paths
+      end
+
+      options.merge!(defaults)
+      options
+    end
+    private :merge_options
 
     # Public: Functions injected into Sass context during Sprockets evaluation.
     #
