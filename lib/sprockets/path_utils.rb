@@ -110,7 +110,7 @@ module Sprockets
     # subpath is outside of path.
     def split_subpath(path, subpath)
       return "" if path == subpath
-      path = File.join(path, '')
+      path = File.join(path, ''.freeze)
       if subpath.start_with?(path)
         subpath[path.length..-1]
       else
