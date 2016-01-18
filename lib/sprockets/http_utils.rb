@@ -15,7 +15,7 @@ module Sprockets
     def match_mime_type?(value, matcher)
       v1, v2 = value.split('/'.freeze, 2)
       m1, m2 = matcher.split('/'.freeze, 2)
-      (m1 == '*' || v1 == m1) && (m2.nil? || m2 == '*' || m2 == v2)
+      (m1 == '*'.freeze || v1 == m1) && (m2.nil? || m2 == '*'.freeze || m2 == v2)
     end
 
     # Public: Return values from Hash where the key matches the mime type.
