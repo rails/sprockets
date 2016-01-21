@@ -5,6 +5,37 @@ require 'sprockets/cache'
 require 'sprockets/coffee_script_processor'
 require 'sprockets/uglifier_compressor'
 
+require 'sprockets_test'
+
+class TestCallingProcessors < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path fixture_path('default')
+  end
+
+  def test_charset_supersedes_default_when_nil
+    processor = Proc.new do |input|
+      {data: input[:data], charset: nil}
+    end
+    @env.register_processor('image/png' , processor)
+    asset = @env['troll.png']
+    assert_equal nil, asset.charset
+  ensure
+    @env.unregister_preprocessor('image/png' , processor)
+  end
+
+  def test_charset_supersedes_default
+    processor = Proc.new do |input|
+      {data: input[:data], charset: 'foo'}
+    end
+    @env.register_processor('image/png' , processor)
+    asset = @env['troll.png']
+    assert_equal 'foo', asset.charset
+  ensure
+    @env.unregister_preprocessor('image/png' , processor)
+  end
+end
+
 class TestProcessorUtils < MiniTest::Test
   include Sprockets::ProcessorUtils
 

@@ -118,6 +118,15 @@ Sprockets expects an array of hashes for this map. Each hash must have a `:sourc
 return {data: data, map: [{ source: "original.coffee", # ... }]}
 ```
 
+- charset: This key contains the mime charset for an asset
+
+A charset is the encoding for text based assets. If you do not specify a charset then one will be automatically assigned by sprockets based on the encoding type of the contents returned in the `:data` key. Normally you want that, the only time you don't want that is if you're working with binary data, or data you don't want to be compressed. If sprockets sees a `charset` then it will think that the contents of the file are text and can be compressed via GZIP. You can avoid this by setting the field manually
+
+```ruby
+return { data: data, charset: nil }
+```
+
+
 WIP the format of the source map may be subject to change before 4.0 is released. Currently it takes a `:original` and `:generated` key which each hold an array of line and column numbers. Line numbers are 1 indexed column numbers are 0 indexed. The first character of a file will always be `[1,0]`.
 
 - WIP - other metadata keys

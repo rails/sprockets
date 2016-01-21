@@ -160,11 +160,10 @@ module Sprockets
           })
           validate_processor_result!(result)
           source = result.delete(:data)
-          metadata = result.merge!(
-            charset: source.encoding.name.downcase,
-            digest: digest(source),
-            length: source.bytesize
-          )
+          metadata = result
+          metadata[:charset] = source.encoding.name.downcase unless metadata.key?(:charset)
+          metadata[:digest]  = digest(source)
+          metadata[:length]  = source.bytesize
         else
           dependencies << build_file_digest_uri(unloaded.filename)
           metadata = {
