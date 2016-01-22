@@ -681,7 +681,7 @@ class TestManifest < Sprockets::TestCase
 
   test 'raises exception when gzip fails' do
     manifest = Sprockets::Manifest.new(@env, @dir)
-    Zlib::GzipWriter.stub(:new, -> (io, level) { fail 'kaboom' }) do
+    Zlib::GzipWriter.stub(:new, ->(io, level) { fail 'kaboom' }) do
       ex = assert_raises(RuntimeError) { manifest.compile('application.js') }
       assert_equal 'kaboom', ex.message
     end
