@@ -22,6 +22,7 @@ div {
   url: url(image-path("foo.png"));
   url: url(video-path("foo.mov"));
   url: url(audio-path("foo.mp3"));
+  url: url(font-path("foo.woff2"));
   url: url(font-path("foo.woff"));
   url: url("/js/foo.js");
   url: url("/css/foo.css"); }
@@ -222,6 +223,7 @@ div {
   url: url("/foo.png");
   url: url("/foo.mov");
   url: url("/foo.mp3");
+  url: url("/foo.woff2");
   url: url("/foo.woff");
   url: url("/foo.js");
   url: url("/foo.css"); }
@@ -235,6 +237,7 @@ div {
   url: url(/foo.png);
   url: url(/foo.mov);
   url: url(/foo.mp3);
+  url: url(/foo.woff2);
   url: url(/foo.woff);
   url: url(/foo.js);
   url: url(/foo.css); }
@@ -245,7 +248,7 @@ div {
     assert_equal <<-EOS, render('octicons/octicons.scss')
 @font-face {
   font-family: 'octicons';
-  src: url(/octicons.eot?#iefix) format("embedded-opentype"), url(/octicons.woff) format("woff"), url(/octicons.ttf) format("truetype"), url(/octicons.svg#octicons) format("svg");
+  src: url(/octicons.eot?#iefix) format("embedded-opentype"), url(/octicons.woff2) format("woff2"), url(/octicons.woff) format("woff"), url(/octicons.ttf) format("truetype"), url(/octicons.svg#octicons) format("svg");
   font-weight: normal;
   font-style: normal; }
     EOS
@@ -264,6 +267,7 @@ div {
       "file://#{fixture_path_for_uri('compass/foo.mp3')}?type=audio/mpeg&id=xxx",
       "file://#{fixture_path_for_uri('compass/foo.svg')}?type=image/png&id=xxx",
       "file://#{fixture_path_for_uri('compass/foo.svg')}?type=image/svg+xml&id=xxx",
+      "file://#{fixture_path_for_uri('compass/foo.woff2')}?type=application/font-woff2&id=xxx",
       "file://#{fixture_path_for_uri('compass/foo.woff')}?type=application/font-woff&id=xxx"
     ], asset.links.to_a.map { |uri| uri.sub(/id=\w+/, 'id=xxx') }.sort
   end
