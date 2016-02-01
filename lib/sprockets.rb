@@ -77,6 +77,7 @@ module Sprockets
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
   register_mime_type 'application/x-font-ttf', extensions: ['.ttf']
   register_mime_type 'application/font-woff', extensions: ['.woff']
+  register_mime_type 'application/font-woff2', extensions: ['.woff2']
 
   require 'sprockets/source_map_processor'
   register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map']
