@@ -528,6 +528,28 @@ class TestManifest < Sprockets::TestCase
     end
   end
 
+  test "compress non-binary different compressor assets" do
+    begin
+      @env.gzip_compressor = proc do |file, source, mtime|
+        file.write "00000"
+        file.close
+      end
+
+      manifest = Sprockets::Manifest.new(@env, @dir)
+      %W{ gallery.css application.js logo.svg }.each do |file_name|
+        original_path = @env[file_name].digest_path
+        manifest.compile(file_name)
+        assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+        #now zopfli doesn't compress mtime in the compressed string, it always return: 1970-01-01 00:00:00 +0000
+        #
+        assert_equal File.stat("#{@dir}/#{original_path}").mtime, File.stat("#{@dir}/#{original_path}.gz").mtime
+        assert_equal "00000", File.read("#{@dir}/#{original_path}.gz")
+      end
+    ensure
+      @env.gzip_compressor = Sprockets::Utils::ZlibArchiver
+    end
+  end
+
   test "writes gzip files even if files were already on disk" do
     @env.gzip = false
     manifest = Sprockets::Manifest.new(@env, @dir)
@@ -572,4 +594,5 @@ class TestManifest < Sprockets::TestCase
       assert_equal 'kaboom', ex.message
     end
   end
+
 end
