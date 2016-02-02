@@ -28,7 +28,7 @@ If you are a framework developer that is using Sprockets, see [Building an Asset
 
 If you are a library developer who is extending the functionality of Sprockets, see [Extending Sprockets](guides/extending_sprockets.md).
 
-Below is a disjointed mix of documentation for all three of these roles. Eventually they will be moved to an appropriate guide, for now the recommended way to consume documentation is to view the appropriate guide first and then supplement with docs from the README.
+Below is a disjointed mix of documentation for all three of these roles. Eventually they will be moved to an appropriate guide, for now the recommended way to consume this documentation is to view the appropriate guide first and then supplement with docs from the README.
 
 ## Behavior
 
