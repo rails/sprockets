@@ -3,10 +3,11 @@ module Sprockets
   module Utils
     class Gzip
       # Private: Generates a gzipped file based off of reference file.
-      def initialize(asset)
+      def initialize(asset, archiver = ZlibArchiver)
         @content_type  = asset.content_type
         @source        = asset.source
         @charset       = asset.charset
+        @archiver      = archiver
       end
 
       # What non-text mime types should we compress? This list comes from:
@@ -45,19 +46,16 @@ module Sprockets
 
       # Private: Generates a gzipped file based off of reference asset.
       #
-      # Compresses the target asset's contents and puts it into a file with
-      # the same name plus a `.gz` extension in the same folder as the original.
+      # Call archiver to actually compresses the target asset's contents and 
+      # puts it into a file with the same name plus a `.gz` extension 
+      # in the same folder as the original.
       # Does not modify the target asset.
       #
       # Returns nothing.
       def compress(target)
         mtime = PathUtils.stat(target).mtime
         PathUtils.atomic_write("#{target}.gz") do |f|
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime
-          gz.write(@source)
-          gz.close
-
+          @archiver.call(f, @source, mtime)
           File.utime(mtime, mtime, f.path)
         end
 
