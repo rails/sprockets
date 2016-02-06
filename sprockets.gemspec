@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.name = "sprockets"
   s.version = Sprockets::VERSION
   s.summary = "Rack-based asset packaging system"
-  s.description = "Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, LESS, Sass, and SCSS."
+  s.description = "Sprockets is a Rack-based asset packaging system that concatenates and serves JavaScript, CoffeeScript, CSS, Sass, and SCSS."
   s.license = "MIT"
 
   s.files = Dir["README.md", "CHANGELOG.md", "LICENSE", "lib/**/*.rb"]
