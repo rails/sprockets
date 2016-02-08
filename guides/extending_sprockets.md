@@ -46,7 +46,7 @@ Sprockets.register_preprocessor('application/javascript', HelloWorldProcessor.ne
 
 ## Transformers
 
-A transformer takes one asset and converst it into another asset. For example the `CoffeeScriptProcessor` is what takes a file with a `.coffee` file extension and returns a `.js` file.
+A transformer takes one asset and converts it into another asset. For example the `CoffeeScriptProcessor` is what takes a file with a `.coffee` file extension and returns a `.js` file.
 
 ### Transformer Interface
 
