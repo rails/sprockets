@@ -149,6 +149,23 @@ module Sprockets
       nil
     end
 
+    # Public: Find the source of assets by paths.
+    #
+    # Returns Enumerator of assets file content.
+    def find_sources(*args)
+      return to_enum(__method__, *args) unless block_given?
+
+      if environment
+        find(*args).each do |asset|
+          yield asset.source
+        end
+      else
+        args.each do |path|
+          yield File.binread(File.join(dir, assets[path]))
+        end
+      end
+    end
+
     # Compile and write asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is

@@ -630,6 +630,23 @@ class TestManifest < Sprockets::TestCase
     assert !paths.include?("application.js")
   end
 
+  test "find_sources with environment" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+
+    result = manifest.find_sources("mobile/a.js", "mobile/b.js")
+    assert_equal ["var A;\n", "var B;\n"], result.to_a
+  end
+
+  test "find_sources without environment" do
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    manifest.compile('mobile/a.js', 'mobile/b.js')
+
+    manifest = Sprockets::Manifest.new(nil, @dir)
+
+    result = manifest.find_sources("mobile/a.js", "mobile/b.js")
+    assert_equal ["var A;\n", "var B;\n"], result.to_a
+  end
+
   test "compress non-binary assets" do
     manifest = Sprockets::Manifest.new(@env, @dir)
     %W{ gallery.css application.js logo.svg }.each do |file_name|
@@ -639,7 +656,6 @@ class TestManifest < Sprockets::TestCase
       assert_equal File.stat("#{@dir}/#{original_path}").mtime, Zlib::GzipReader.open("#{@dir}/#{original_path}.gz") {|gz| gz.mtime }
     end
   end
-
 
   test "writes gzip files even if files were already on disk" do
     @env.gzip = false
