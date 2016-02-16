@@ -6,6 +6,7 @@ require 'sprockets/cache'
 require 'sprockets/environment'
 require 'sprockets/errors'
 require 'sprockets/manifest'
+require 'sprockets/utils/zlib'
 
 module Sprockets
   require 'sprockets/processor_utils'
@@ -34,6 +35,7 @@ module Sprockets
     registered_transformers: [].freeze,
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    archivers: Hash.new { |h, k| {}.freeze }.freeze,
     version: "",
     gzip_enabled: true
   }.freeze
@@ -217,4 +219,7 @@ module Sprockets
 
   depend_on 'environment-version'
   depend_on 'environment-paths'
+
+  #GZIP
+  register_archiver :gzip, Utils::Zlib
 end
