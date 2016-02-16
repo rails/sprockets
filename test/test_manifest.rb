@@ -520,7 +520,7 @@ class TestManifest < Sprockets::TestCase
 
   test "compress non-binary assets" do
     manifest = Sprockets::Manifest.new(@env, @dir)
-    %W{ gallery.css application.js logo.svg }.each do |file_name|
+    %W{ gallery.css application.js logo.svg favicon.ico }.each do |file_name|
       original_path = @env[file_name].digest_path
       manifest.compile(file_name)
       assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
@@ -530,7 +530,7 @@ class TestManifest < Sprockets::TestCase
   test "writes gzip files even if files were already on disk" do
     @env.gzip = false
     manifest = Sprockets::Manifest.new(@env, @dir)
-    files = %W{ gallery.css application.js logo.svg }
+    files = %W{ gallery.css application.js logo.svg favicon.ico}
     files.each do |file_name|
       original_path = @env[file_name].digest_path
       manifest.compile(file_name)
@@ -548,7 +548,7 @@ class TestManifest < Sprockets::TestCase
   test "disable file gzip" do
     @env.gzip = false
     manifest = Sprockets::Manifest.new(@env, @dir)
-    %W{ gallery.css application.js logo.svg }.each do |file_name|
+    %W{ gallery.css application.js logo.svg favicon.ico }.each do |file_name|
       original_path = @env[file_name].digest_path
       manifest.compile(file_name)
       refute File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to not generate gzipped file: '#{original_path}.gz' but it did"
