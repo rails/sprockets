@@ -10,13 +10,13 @@ module Sprockets
 
       # What non-text mime types should we compress? This list comes from:
       # https://www.fastly.com/blog/new-gzip-settings-and-deciding-what-compress
-      COMPRESSABLE_MIME_TYPES = [
-        "application/vnd.ms-fontobject".freeze,
-        "application/x-font-opentype".freeze,
-        "application/x-font-ttf".freeze,
-        "image/x-icon".freeze,
-        "image/svg+xml".freeze
-      ]
+      COMPRESSABLE_MIME_TYPES = {
+        "application/vnd.ms-fontobject" => true,
+        "application/x-font-opentype" => true,
+        "application/x-font-ttf" => true,
+        "image/x-icon" => true,
+        "image/svg+xml" => true
+      }
 
       # Private: Returns whether or not an asset can be compressed.
       #
