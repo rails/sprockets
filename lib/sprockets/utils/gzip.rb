@@ -8,6 +8,16 @@ module Sprockets
         @charset       = asset.charset
       end
 
+      # What non-text mime types should we compress? This list comes from:
+      # https://www.fastly.com/blog/new-gzip-settings-and-deciding-what-compress
+      COMPRESSABLE_MIME_TYPES = {
+        "application/vnd.ms-fontobject" => true,
+        "application/x-font-opentype" => true,
+        "application/x-font-ttf" => true,
+        "image/x-icon" => true,
+        "image/svg+xml" => true
+      }
+
       # Private: Returns whether or not an asset can be compressed.
       #
       # We want to compress any file that is text based.
@@ -21,9 +31,8 @@ module Sprockets
         # encoded text. We can check this value to see if the asset
         # can be compressed.
         #
-        # SVG images are text but do not have
-        # a charset defined, this is special cased.
-        @charset || @content_type == "image/svg+xml".freeze
+        # We also check against our list of non-text compressible mime types
+        @charset || COMPRESSABLE_MIME_TYPES.include?(@content_type)
       end
 
       # Private: Opposite of `can_compress?`.
