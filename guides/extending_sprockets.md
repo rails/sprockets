@@ -131,9 +131,105 @@ WIP the format of the source map may be subject to change before 4.0 is released
 
 - WIP - other metadata keys
 
+## Supporting All Versions of Sprockets in Processors
+
+If you are extending sprockets you may want to support all current major versions of sprockets (2, 3, and 4). The processor interface was deprecated from Sprockets 2 and a legacy shim was put into Sprockets 3. Now that Sprockets 4 is out that shim no longer is active, so you'll need to update your gem to either only use the new interface or use both interfaces.
+
+As a recap Sprockets 2 let you register a processor with a class that would be instantiated and the method `render` called on it you can [view the calling code in Sprockets 2.x](https://github.com/rails/sprockets/blob/2199a6012cc2b9cdbcbc0049361e5ee02770dff0/lib/sprockets/context.rb#L194-L202). It may have looked like this:
+
+
+```ruby
+# Sprockets 2.x interface
+
+class MySprocketsExtension
+  def initialize(filename, &block)
+    # code
+  end
+
+  def render(variable, empty_hash_wtf)
+    # code
+  end
+end
+
+require 'sprockets/processing'
+extend Sprockets::Processing
+
+register_preprocessor 'text/css', MySprocketsExtension
+```
+
+You can also pass a block to both 2.x and 3.x+, however the number of args the method takes has changed so it's very hard to do that method and support multiple processor interfaces.
+
+This `render` interface is deprecated, instead you should use the `call` interface. Whatever you pass to the processor can have a `call` method, it does not need to be a class.
+
+
+```ruby
+# Sprockets 3.x+ interface
+
+module MySprocketsExtension
+  def self.call(input)
+    # code
+  end
+end
+
+require 'sprockets/processing'
+extend Sprockets::Processing
+
+register_preprocessor 'text/css', MySprocketsExtension
+```
+
+This is really frustrating, that some of the hash keys have changed between sprockets 3 and 4. Why? Because who needs stability? For example in one of them the filename is passed in the key `:filename` while in the other it is `:source_path`. You'll want to support both of them you can do something like this in your code
+
+```ruby
+# Sprockets 3.x+ interface
+
+module MySprocketsExtension
+  def self.call(input)
+    filename = input[:source_path] || input[:filename]
+    # code
+  end
+end
+```
+
+Ugh.
+
+Okay so if you want 2, 3, and 4 to work you can pass in a class that also has a `call` method on it. To see how this can be done you can reference this [autoprefixer-rails pull request](https://github.com/ai/autoprefixer-rails/pull/85). The shorthand code looks something like this:
+
+```ruby
+# Sprockets 2.x & 3.x+ interface
+
+class MySprocketsExtension
+  def initialize(filename, &block)
+    @filename = filename
+    @source   = block.call
+  end
+
+  def render(variable, empty_hash_wtf)
+    self.class.run(@filename, @source)
+  end
+
+  def self.run(filename, source)
+    # do somethign with filename and source
+  end
+
+  def self.call(input)
+    filename = input[:source_path] || input[:filename]
+    source   = input[:data]
+    run(filename, source)
+  end
+end
+
+require 'sprockets/processing'
+extend Sprockets::Processing
+
+register_preprocessor 'text/css', MySprocketsExtension
+```
+
+This way you're passing in an object that responds to 3.x's `call` interface and 2.x's `new.render` interface. In generally we're recommending people not use Sprockets 2.x and that they upgrade to Sprockets 3+. If it's easier on you, you can rev a major version and only support the new interface.
+
 
 ## WIP
 
 This guide is a work in progress. There are many different groups of people who interact with Sprockets. Some only need to know directive syntax to put in their asset files, some are building features like the Rails asset pipeline, and some are plugging into Sprockets and writing things like preprocessors. The goal of these guides are to provide task specific guidance to make the expected behavior explicit. If you are using Sprockets and you find missing information in these guides, please consider submitting a pull request with updated information.
 
 These guides live in [guides](/guides).
+
