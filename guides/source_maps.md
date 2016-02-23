@@ -19,7 +19,7 @@ When an asset is served to the browser it lets the browser know if a source map 
 //# sourceMappingURL=
 ```
 
-For example a javascript file like applicaiton.js was being served from `public/assets/application.js` then it might have a map file in `public/assets/application.js.map`. In that case the comment could either be a full path
+For example a javascript file like appli caiton.js was being served from `public/assets/application.js` then it might have a map file in `public/assets/application.js.map`. In that case the comment could either be a full path
 
 
 ```js
