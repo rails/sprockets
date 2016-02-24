@@ -38,7 +38,8 @@ module Sprockets
           'sourceRoot' => input[:load_path],
           'moduleRoot' => nil,
           'filename' => input[:filename],
-          'filenameRelative' => PathUtils.split_subpath(input[:load_path], input[:filename])
+          'filenameRelative' => PathUtils.split_subpath(input[:load_path], input[:filename]),
+          'sourceFileName' => input[:source_path]
         }.merge(@options)
 
         if opts['moduleIds'] && opts['moduleRoot']

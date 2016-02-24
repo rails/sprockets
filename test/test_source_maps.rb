@@ -108,7 +108,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "babel/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&id=xxx"
+      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&pipeline=source&id=xxx"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
@@ -116,7 +116,7 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "babel/main.js",
       "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
-      "sources"  => ["babel/main.es6"],
+      "sources" => ["babel/main.source-1acb9cf16a3e1ce0fe0a38491472a14a6a97281ceace4b67ec16a904be5fa1b9.es6"],
       "names"=>[]
     }, map)
   end

@@ -10,7 +10,8 @@ class TestBabelProcessor < MiniTest::Test
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.call(input)[:data]
@@ -25,7 +26,8 @@ class TestBabelProcessor < MiniTest::Test
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.call(input)[:data]
@@ -43,7 +45,8 @@ var square = function square(n) {
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'common').call(input)[:data]
@@ -59,7 +62,8 @@ require("foo");
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'amd').call(input)[:data]
@@ -75,7 +79,8 @@ define(["exports", "foo"], function (exports, _foo) {});
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'amd', 'moduleIds' => true).call(input)[:data]
@@ -91,7 +96,8 @@ define("mod", ["exports", "foo"], function (exports, _foo) {});
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'system').call(input)[:data]
@@ -112,7 +118,8 @@ System.register(["foo"], function (_export) {
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
     }
 
     assert js = Sprockets::BabelProcessor.new('modules' => 'system', 'moduleIds' => true).call(input)[:data]
@@ -133,7 +140,8 @@ System.register("mod", ["foo"], function (_export) {
       metadata: {},
       load_path: File.expand_path("../fixtures", __FILE__),
       filename: File.expand_path("../fixtures/mod1.es6", __FILE__),
-      cache: Sprockets::Cache.new
+      cache: Sprockets::Cache.new,
+      source_path: "mod1.source-XYZ.es6"
     }
 
     mod2 = mod1.dup
