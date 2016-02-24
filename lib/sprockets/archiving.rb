@@ -38,13 +38,34 @@ module Sprockets
       end
     end
 
+    # Public: Checks if archiver is enabled.
+    def archiver_enabled? type
+      archiver = archivers[type]
+      if archiver.nil?
+        false
+      else
+        if type == :gzip
+          config[:gzip_enabled] ? true : false
+        else
+          true
+        end
+      end
+    end
+
+    # Public: Checks if archiver is disabled.
+    def skip_archiver? type
+      !archiver_enabled?
+    end
+
     # Public: Checks if Gzip is enabled.
     def gzip?
+      warn "gzip? method is deprecated. Use archiver_enabled?(:gzip) to check if gzip is enabled"
       config[:gzip_enabled]
     end
 
     # Public: Checks if Gzip is disabled.
     def skip_gzip?
+      warn "skip_gzip? method is deprecated. Use skip_archiver?(:gzip) to check if gzip is disabled"
       !gzip?
     end
 
@@ -60,13 +81,11 @@ module Sprockets
 
     # Public: Get list of archivers which is active
     def active_archivers
-      archivers = []
-      config[:archivers].each do |sym, archiver|
-        is_active = !archiver.nil?
-        is_active = gzip? ? true : false if sym == :gzip
-        archivers << archiver if is_active
+      result = []
+      archivers.each do |sym, archiver|
+        result << archiver if archiver_enabled?( sym )
       end
-      archivers
+      result
     end
   end
 end
