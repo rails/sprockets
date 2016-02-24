@@ -63,7 +63,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "coffee/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/coffee/main.coffee')}?type=text/coffeescript&pipeline=source&id=xxx"
+      "file://#{fixture_path_for_uri('source-maps/coffee/main.coffee')}?type=text/coffeescript&pipeline=source"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
@@ -108,7 +108,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "babel/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&pipeline=source&id=xxx"
+      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&pipeline=source"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
@@ -158,7 +158,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss&id=xxx"
+      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
@@ -226,7 +226,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path('source-maps/sass/main.scss')}?type=text/scss&pipeline=source&id=xxx"
+      "file://#{fixture_path('source-maps/sass/main.scss')}?type=text/scss&pipeline=source"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
