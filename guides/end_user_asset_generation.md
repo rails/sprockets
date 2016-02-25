@@ -5,15 +5,13 @@ This guide is for those using Sprockets through an interface similar to the Rail
 ## What is Sprockets?
 
 Sprockets is a Ruby library for compiling and serving web assets.
-It features declarative dependency management for JavaScript and CSS
-assets, as well as a preprocessor pipeline that allows you to
-write assets in languages like CoffeeScript, Sass and SCSS.
+It features declarative dependency management for JavaScript and CSS assets, as well as a preprocessor pipeline that allows you to write assets in languages like CoffeeScript, Sass and SCSS.
 
 ## Behavior Overview
 
 You can interact through Sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with Sprockets.
 
-Since you are likely using Sprockets through another framework (like the Rails asset pipeline), there will configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
+Since you are likely using Sprockets through another framework (such as the [the Rails asset pipeline](http://guides.rubyonrails.org/asset_pipeline.html)), there will be configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
 
 ### Directives
 
@@ -47,20 +45,20 @@ The directive processor understands comment blocks in three formats:
 #= require foo
 ```
 
-Here is a list of the available directives
+Here is a list of the available directives:
 
-- require
-- require_self
-- require_tree
-- require_directory
-- depend
-- depend_on_asset
-- stub
-- link
-- link_directory
-- link_tree
+- [`require`](#require)
+- [`require_self`](#require_self)
+- [`require_tree`](#require_tree)
+- [`require_directory`](#require_directory)
+- [`depend`](#depend)
+- [`depend_on_asset`](#depend_on_asset)
+- [`stub`](#stub)
+- [`link`](#link)
+- [`link_directory`](#link_directory)
+- [`link_tree`](#link_directory)
 
-You can see what each of these does below
+You can see what each of these does below.
 
 ### Specifying Processors through File Extensions
 
@@ -72,7 +70,7 @@ application.scss
 
 Then Sprockets will by default run the sass processor (which implements scss). The output file will be converted to css.
 
-You can specify multiple processors by specifying multiple file extensions. For example you can use Ruby's [ERB template language](http://ruby-doc.org/stdlib-2.2.3/libdoc/erb/rdoc/ERB.html) to embed content in your doc before running the sass processor. To accomplish this you would need to name your file
+You can specify multiple processors by specifying multiple file extensions. For example you can use Ruby's [ERB template language](http://ruby-doc.org/stdlib-2.3.0/libdoc/erb/rdoc/ERB.html) to embed content in your doc before running the sass processor. To accomplish this you would need to name your file
 
 ```
 application.scss.erb
@@ -104,7 +102,7 @@ jquery.js
 
 Then `alpha.js` will be loaded before either of the other two. This can be a problem if `alpha.js` uses jquery. For this reason it is not recommend to use `require_directory` with files that are ordering dependent. You can either require individual files manually:
 
-```
+```js
 //= require jquery
 //= require alpha
 //= require beta
@@ -116,19 +114,19 @@ Or you can use index files to proxy your folders
 
 In Sprockets index files such as `index.js` or `index.css` files inside of a folder will generate a file with the folder's name. So if you have a `foo/index.js` file it will compile down to `foo.js`. This is similar to NPM's behavior of using [folders as modules](https://nodejs.org/api/modules.html#modules_folders_as_modules). It is also somewhat similar to the way that a file in `public/my_folder/index.html` can be reached by a request to `/my_folder`. This means that you cannot directly use an index file. For example this would not work:
 
-```
+```erb
 <%= asset_path("foo/index.js") %>
 ```
 
 Instead you would need to use:
 
-```
+```erb
 <%= asset_path("foo.js") %>
 ```
 
 Why would you want to use this behavior?  It is common behavior where you might want to include an entire directory of files in a top level JavaScript. You can do this in Sprockets using `require_tree .`
 
-```
+```js
 //= require_tree .
 ```
 
@@ -136,13 +134,13 @@ This has the problem that files are required alphabetically. If your directory h
 
 For example, if you have an `application.js` and want all the files in the `foo/` folder you could do this:
 
-```
+```js
 //= require foo.js
 ```
 
 Then create a file `foo/index.js` that requires all the files in that folder in any order you want:
 
-```
+```js
 //= require foo.min.js
 //= require foo-ui.js
 ```
@@ -152,10 +150,37 @@ Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui
 
 ## Default Directives
 
-TODO: add description of each of the directives
+### require
+TODO: add description for `require`
+
+### require_self
+TODO: add description for `require_self`
+
+### require_tree
+TODO: add description for `require_tree`
+
+### require_directory
+TODO: add description for `require_dependency`
+
+### depend
+TODO: add description for `depend`
+
+### depend_on_asset
+TODO: add description for `depend_on_asset`
+
+### stub
+TODO: add description for `stub`
+
+### link
+TODO: add description for `link`
+
+### link_directory
+TODO: add description for `link_directory`
+
+### link_tree
+TODO: add description for `link_directory`
 
 ## Default Processors
-
 
 TODO: add description of each of the processors
 
