@@ -158,7 +158,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
     assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss"
+      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss&pipeline=source"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
@@ -166,7 +166,42 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "sass/main.css",
       "mappings" => "AACE,MAAG;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI;AAGlB,MAAG;EAAE,OAAO,EAAE,YAAY;AAE1B,KAAE;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI",
-      "sources" => [fixture_path_for_uri('source-maps/sass/main.scss')],
+      "sources" => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
+      "names" => []
+    }, map)
+  end
+
+  test "compile scss source map with imported dependencies" do
+    asset = silence_warnings do
+      @env.find_asset("sass/with-import.css")
+    end
+    assert asset
+    assert_equal fixture_path('source-maps/sass/with-import.scss'), asset.filename
+    assert_equal "text/css", asset.content_type
+
+    assert_match "body {\n  color: red; }", asset.source
+
+    asset = silence_warnings do
+      @env.find_asset("sass/with-import.css.map")
+    end
+    assert asset
+    assert_equal fixture_path('source-maps/sass/with-import.scss'), asset.filename
+    assert_equal "sass/with-import.css.map", asset.logical_path
+    assert_equal "application/css-sourcemap+json", asset.content_type
+    assert_equal [
+      "file://#{fixture_path_for_uri('source-maps/sass/_imported.scss')}?type=text/scss&pipeline=source",
+      "file://#{fixture_path_for_uri('source-maps/sass/with-import.scss')}?type=text/scss&pipeline=source"
+    ], normalize_uris(asset.links)
+
+    assert map = JSON.parse(asset.source)
+    assert_equal({
+      "version" => 3,
+      "file" => "sass/with-import.css",
+      "mappings" => "AAAA,IAAK;EAAE,KAAK,EAAE,GAAG;;ACEjB,GAAI;EAAE,KAAK,EAAE,IAAI",
+      "sources" => [
+        "sass/_imported.source-9767e91e9d4b0334e59a1d389e9801bc6a2c5c4a5500a3c2c7915687965b2c16.scss",
+        "sass/with-import.source-5d53742ba113ac26396986bf14ab5c7e19ef193e494d5d868a9362e3e057cb26.scss"
+      ],
       "names" => []
     }, map)
   end
