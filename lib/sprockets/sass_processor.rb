@@ -81,7 +81,10 @@ module Sprockets
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map.to_json(css_uri: '', type: :inline))["mappings"]
+        expand_map_sources(
+          SourceMapUtils.decode_json_source_map(map.to_json(css_uri: '', type: :inline))["mappings"],
+          input[:environment]
+        )
       )
 
       # Track all imported files
@@ -94,6 +97,16 @@ module Sprockets
       context.metadata.merge(data: css, sass_dependencies: sass_dependencies, map: map)
     end
 
+    private
+
+    def expand_map_sources(mapping, env)
+      mapping.each do |map|
+        uri, _ = env.resolve!(map[:source], pipeline: :source)
+        source_path = env.load(uri).digest_path
+        map[:source] = source_path
+      end
+    end
+
     # Public: Build the cache store to be used by the Sass engine.
     #
     # input - the input hash.
@@ -104,7 +117,6 @@ module Sprockets
     def build_cache_store(input, version)
       CacheStore.new(input[:cache], version)
     end
-    private :build_cache_store
 
     def merge_options(options)
       defaults = @sass_config.dup
@@ -116,7 +128,6 @@ module Sprockets
       options.merge!(defaults)
       options
     end
-    private :merge_options
 
     # Public: Functions injected into Sass context during Sprockets evaluation.
     #

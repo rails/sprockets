@@ -29,7 +29,7 @@ module Sprockets
           path = source
         end
         uri, _ = env.resolve!(path)
-        links << env.load(uri).uri
+        links << uri
       end
 
       json = env.encode_json_source_map(map, filename: asset.logical_path)
