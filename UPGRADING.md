@@ -98,5 +98,5 @@ console.log(square);
 
 If you are [extending sprockets](guides/extending_sprockets.md) you may want to support all current major versions of sprockets (2, 3, and 4). The processor interface was deprecated from Sprockets 2 and a legacy shim was put into Sprockets 3. Now that Sprockets 4 is out that shim no longer is active, so you'll need to update your gem to either only use the new interface or use both interfaces.
 
-Please see the "Supporting all versions of Sprockets in Processors" section in the [[extending sprockets guide](guides/extending_sprockets.md) for details.
+Please see the "Supporting all versions of Sprockets in Processors" section in the [extending sprockets guide](guides/extending_sprockets.md) for details.
 
