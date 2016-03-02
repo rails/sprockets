@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets_test'
 
 $file_stat_calls = nil
