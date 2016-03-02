@@ -149,7 +149,7 @@ module Sprockets
     #
     # Returns [String extname, Object value] or nil nothing matched.
     def match_path_extname(path, extensions)
-      match, key = nil, ""
+      match, key = nil, String.new("")
       path_extnames(path).reverse_each do |extname|
         key.prepend(extname)
         if value = extensions[key]

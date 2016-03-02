@@ -46,7 +46,7 @@ module Sprockets
       uri, deps = resolve(path, **kargs)
 
       unless uri
-        message = "couldn't find file '#{path}'"
+        message = String.new("couldn't find file '#{path}'")
 
         if relative_path?(path) && kargs[:base_path]
           load_path, _ = paths_split(config[:paths], kargs[:base_path])

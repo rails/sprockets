@@ -234,7 +234,7 @@ module Sprockets
         headers = {}
 
         # Set caching headers
-        headers["Cache-Control"] = "public"
+        headers["Cache-Control"] = String.new("public")
         headers["ETag"]          = %("#{etag}")
 
         # If the request url contains a fingerprint, set a long
