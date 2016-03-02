@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'set'
 require 'sprockets/http_utils'
 require 'sprockets/path_dependency_utils'

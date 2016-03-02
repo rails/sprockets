@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Define some basic Sprockets error classes
 module Sprockets
   class Error           < StandardError; end
