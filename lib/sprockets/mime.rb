@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets/encoding_utils'
 require 'sprockets/http_utils'
 require 'sprockets/utils'

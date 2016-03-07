@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets_test'
 require 'shared_sass_tests'
 

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/coffee_script_processor'

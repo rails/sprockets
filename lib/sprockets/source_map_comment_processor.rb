@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Sprockets
   class SourceMapCommentProcessor
     def self.call(input)

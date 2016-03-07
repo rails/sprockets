@@ -1,4 +1,6 @@
 # encoding: utf-8
+# frozen_string_literal: true
+
 require 'sprockets/version'
 require 'sprockets/cache'
 require 'sprockets/environment'
@@ -121,8 +123,8 @@ module Sprockets
   register_bundle_processor 'application/javascript', Bundle
   register_bundle_processor 'text/css', Bundle
 
-  register_bundle_metadata_reducer '*/*', :data, proc { "" }, :concat
-  register_bundle_metadata_reducer 'application/javascript', :data, proc { "" }, Utils.method(:concat_javascript_sources)
+  register_bundle_metadata_reducer '*/*', :data, proc { String.new("") }, :concat
+  register_bundle_metadata_reducer 'application/javascript', :data, proc { String.new("") }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
   register_bundle_metadata_reducer '*/*', :map, SourceMapUtils.method(:concat_source_maps)
 

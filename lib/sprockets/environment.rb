@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets/base'
 require 'sprockets/cache/memory_store'
 require 'sprockets/cached_environment'

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Sprockets
   module Autoload
     autoload :Babel, 'sprockets/autoload/babel'

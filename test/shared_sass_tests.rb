@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module SharedSassTestNoFunction
   extend Sprockets::TestDefinition
 

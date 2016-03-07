@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets/digest_utils'
 require 'sprockets/path_digest_utils'
 require 'sprockets/uri_utils'

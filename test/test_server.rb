@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 require 'sprockets_test'
 require 'rack/builder'
 require 'rack/test'

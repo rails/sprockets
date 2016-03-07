@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "sprockets_test"
 
 class AssetEncodingTest < Sprockets::TestCase
@@ -39,7 +40,7 @@ class AssetEncodingTest < Sprockets::TestCase
 
   test "read static BINARY asset" do
     data = @env['binary.png'].to_s
-    assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00".force_encoding("BINARY"),
+    assert_equal String.new("\x89PNG\r\n\x1A\n\x00\x00\x00").force_encoding("BINARY"),
       data[0..10]
     assert_equal Encoding::BINARY, data.encoding
   end
@@ -47,7 +48,7 @@ class AssetEncodingTest < Sprockets::TestCase
   test "read processed BINARY asset" do
     @env.register_postprocessor('image/png') { |input| input[:data] }
     data = @env['binary.png'].to_s
-    assert_equal "\x89PNG\r\n\x1A\n\x00\x00\x00".force_encoding("BINARY"),
+    assert_equal String.new("\x89PNG\r\n\x1A\n\x00\x00\x00").force_encoding("BINARY"),
       data[0..10]
     assert_equal Encoding::BINARY, data.encoding
   end

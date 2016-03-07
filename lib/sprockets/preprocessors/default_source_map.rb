@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Sprockets
   module Preprocessors
     # Private: Adds a default map to assets when one is not present

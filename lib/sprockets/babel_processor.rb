@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets/autoload'
 require 'sprockets/path_utils'
 require 'sprockets/source_map_utils'

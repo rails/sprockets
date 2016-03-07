@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "sprockets_test"
 
 module AssetTests
@@ -396,7 +397,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   test "each" do
-    body = ""
+    body = String.new("")
     @asset.each { |part| body << part }
     assert_equal "\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
@@ -467,7 +468,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "each" do
-    body = ""
+    body = String.new("")
     @asset.each { |part| body << part }
     assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
