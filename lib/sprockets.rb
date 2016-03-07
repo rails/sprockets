@@ -36,8 +36,7 @@ module Sprockets
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     archivers: Hash.new { |h, k| {}.freeze }.freeze,
-    version: "",
-    gzip_enabled: true
+    version: ""
   }.freeze
 
   @context_class = Context

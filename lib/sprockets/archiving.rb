@@ -18,7 +18,7 @@ module Sprockets
     # will register Zlib compression for text file, 
     # we dont use myme_types here, because different mime_type 
     # can be compressed by one archiver (text/stylesheets, text/javascript, etc)
-    def register_archiver type, archiver
+    def register_archiver(type, archiver)
       if archiver.is_a?( Class )
         klass = archiver
       else
@@ -31,7 +31,7 @@ module Sprockets
       end
     end
 
-    def unregister_archiver type
+    def unregister_archiver(type)
       self.config = hash_reassoc(config, :archivers) do |archivers|
         archivers.delete(type)
         archivers
@@ -39,34 +39,25 @@ module Sprockets
     end
 
     # Public: Checks if archiver is enabled.
-    def archiver_enabled? type
-      archiver = archivers[type]
-      if archiver.nil?
-        false
-      else
-        if type == :gzip
-          config[:gzip_enabled] ? true : false
-        else
-          true
-        end
-      end
+    def archiver_enabled?(type)
+      archivers.has_key?(type)
     end
 
     # Public: Checks if archiver is disabled.
-    def skip_archiver? type
-      !archiver_enabled?
+    def skip_archiver?(type)
+      !archiver_enabled?(type)
     end
 
     # Public: Checks if Gzip is enabled.
     def gzip?
       warn "gzip? method is deprecated. Use archiver_enabled?(:gzip) to check if gzip is enabled"
-      config[:gzip_enabled]
+      archiver_enabled?(:gzip)
     end
 
     # Public: Checks if Gzip is disabled.
     def skip_gzip?
       warn "skip_gzip? method is deprecated. Use skip_archiver?(:gzip) to check if gzip is disabled"
-      !gzip?
+      skip_archiver?(:gzip)
     end
 
     # Public: Enable or disable the creation of Gzip files.
@@ -76,16 +67,16 @@ module Sprockets
     #     environment.gzip = false
     #
     def gzip=(gzip)
-      self.config = config.merge(gzip_enabled: gzip).freeze
+      if gzip
+        register_archiver(:gzip, ::Sprockets::Utils::Zlib) if skip_archiver?(:gzip)
+      else
+        unregister_archiver(:gzip)
+      end
     end
 
     # Public: Get list of archivers which is active
     def active_archivers
-      result = []
-      archivers.each do |sym, archiver|
-        result << archiver if archiver_enabled?( sym )
-      end
-      result
+      archivers.values
     end
   end
 end
