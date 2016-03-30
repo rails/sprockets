@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require 'fileutils'
-
 module Sprockets
   # Internal: File and path related utilities. Mixed into Environment.
   #
@@ -305,9 +303,9 @@ module Sprockets
         yield f
       end
 
-      FileUtils.mv(tmpname, filename)
+      File.rename(tmpname, filename)
     ensure
-      FileUtils.rm(tmpname) if File.exist?(tmpname)
+      File.delete(tmpname) if File.exist?(tmpname)
     end
   end
 end
