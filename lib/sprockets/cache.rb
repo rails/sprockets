@@ -154,7 +154,9 @@ module Sprockets
       #
       # Returns a String with a length less than 250 characters.
       def expand_key(key)
-        "sprockets/v#{VERSION}/#{DigestUtils.pack_urlsafe_base64digest(DigestUtils.digest(key))}"
+        digest_key = DigestUtils.pack_urlsafe_base64digest(DigestUtils.digest(key))
+        namespace = digest_key[0, 2]
+        "sprockets/v#{VERSION}/#{namespace}/#{digest_key}"
       end
 
       PEEK_SIZE = 100
