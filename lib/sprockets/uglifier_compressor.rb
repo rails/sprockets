@@ -17,7 +17,7 @@ module Sprockets
   #       Sprockets::UglifierCompressor.new(comments: :copyright)
   #
   class UglifierCompressor
-    VERSION = '2'
+    VERSION = '3'
 
     # Public: Return singleton instance with default options.
     #
@@ -45,8 +45,7 @@ module Sprockets
 
     def call(input)
       if Autoload::Uglifier::VERSION.to_i < 2
-        input[:environment].logger.warn "uglifier 1.x is no longer supported, please upgrade to 2.x"
-        return nil
+        raise "uglifier 1.x is no longer supported, please upgrade to 2.x"
       end
 
       js, map = @uglifier.compile_with_map(input[:data])
