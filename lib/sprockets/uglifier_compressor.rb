@@ -37,27 +37,23 @@ module Sprockets
     attr_reader :cache_key
 
     def initialize(options = {})
-      # Feature detect Uglifier 2.0 option support
-      if Autoload::Uglifier::DEFAULTS[:copyright]
-        # Uglifier < 2.x
-        options[:copyright] ||= false
-      else
-        # Uglifier >= 2.x
-        options[:copyright] ||= :none
-      end
+      options[:comments] ||= :none
 
       @uglifier = Autoload::Uglifier.new(options)
       @cache_key = "#{self.class.name}:#{Autoload::Uglifier::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
-      js, map = @uglifier.compile_with_map(input[:data])
+      if Autoload::Uglifier::VERSION.to_i < 2
+        input[:environment].logger.warn "uglifier 1.x is no longer supported, please upgrade to 2.x"
+        return nil
+      end
 
+      js, map = @uglifier.compile_with_map(input[:data])
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
         SourceMapUtils.decode_json_source_map(map)["mappings"]
       )
-
       { data: js, map: map }
     end
   end
