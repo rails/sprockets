@@ -15,7 +15,7 @@ matrix:
 
 matrix:
   include:
-    - rmv: 1.9.3
+    - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-1.9
     - rvm: 2.2
       script: bundle exec rake test_isolated
