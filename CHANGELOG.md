@@ -1,4 +1,8 @@
-**Master**
+**3.6.0** (April 6, 2016)
+
+* Add `Manifest#find_sources` to return the source of the compiled assets.
+* Fix the list of compressable mime types.
+* Improve performance of the `FileStore` cache.
 
 **3.5.2** (December 8, 2015)
 
