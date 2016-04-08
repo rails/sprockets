@@ -4,7 +4,7 @@ require 'set'
 module Sprockets
   # Functional utilities for dealing with Processor functions.
   #
-  # A Processor is a general function that my modify or transform an asset as
+  # A Processor is a general function that may modify or transform an asset as
   # part of the pipeline. CoffeeScript to JavaScript conversion, Minification
   # or Concatenation are all implemented as seperate Processor steps.
   #
