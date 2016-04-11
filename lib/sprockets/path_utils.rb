@@ -55,7 +55,9 @@ module Sprockets
       if File.directory?(path)
         entries = Dir.entries(path, :encoding => Encoding.default_internal)
         entries.reject! { |entry|
-          entry =~ /^\.|~$|^\#.*\#$/
+          entry.start_with?(".".freeze) ||
+            (entry.start_with?("#".freeze) && entry.end_with?("#".freeze)) ||
+            entry.end_with?("~".freeze)
         }
         entries.sort!
       else
