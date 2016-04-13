@@ -15,10 +15,8 @@ module Sprockets
       @env  = env
       uri   = uri.to_s
       if uri.include?("://".freeze)
-        uri_array = uri.split("://".freeze)
-        @scheme   = uri_array.shift
-        @scheme   << "://".freeze
-        @path     = uri_array.join("".freeze)
+        @scheme, _, @path = uri.partition("://".freeze)
+        @scheme << "://".freeze
       else
         @scheme = "".freeze
         @path   = uri
