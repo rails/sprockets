@@ -50,8 +50,7 @@ module Sprockets
       #
       # Returns Object value.
       def set(key, value)
-        @cache.delete(key)
-        @cache[key] = value
+        @cache.store(key, value)
         @cache.shift if @cache.size > @max_size
         value
       end
