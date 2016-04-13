@@ -96,6 +96,26 @@ class TestMemoryStore < MiniTest::Test
   end
 
   include CacheStoreTests
+
+  def test_get_with_lru
+    @_store.set(:a, 1)
+    @_store.set(:b, 2)
+    @_store.set(:c, 3)
+    assert_equal [1, 2, 3], @_store.instance_variable_get(:@cache).values
+    @_store.get(:a)
+    @_store.set(:d, 4)
+    assert_equal [2, 3, 1, 4], @_store.instance_variable_get(:@cache).values
+  end
+
+  def test_set_with_lru
+    @_store.set(:a, 1)
+    @_store.set(:b, 2)
+    @_store.set(:c, 3)
+    assert_equal [1, 2, 3], @_store.instance_variable_get(:@cache).values
+    @_store.set(:a, 1)
+    @_store.set(:d, 4)
+    assert_equal [2, 3, 1, 4], @_store.instance_variable_get(:@cache).values
+  end
 end
 
 class TestZeroMemoryStore < MiniTest::Test
