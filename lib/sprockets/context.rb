@@ -100,7 +100,7 @@ module Sprockets
     # including it.
     #
     # This is used for caching purposes. Any changes made to
-    # the dependency file with invalidate the cache of the
+    # the dependency file will invalidate the cache of the
     # source file.
     def depend_on(path)
       if environment.absolute_path?(path) && environment.stat(path)
