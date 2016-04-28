@@ -9,7 +9,7 @@ In production Sprockets combines files together and minifies them when possible.
 - [Source Map 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit)
 - [Mozilla source-map library](https://github.com/mozilla/source-map/)
 
-So if a source map is used, the exact same method of concatenation and minifciation in production can be used in development. This encourage developers to use standardized tools that are adopted across browsers to debug their assets.
+So if a source map is used, the exact same method of concatenation and minification in production can be used in development. This encourages developers to use standardized tools that are adopted across browsers to debug their assets.
 
 ## Source Map Detection
 
@@ -19,7 +19,7 @@ When an asset is served to the browser it lets the browser know if a source map 
 //# sourceMappingURL=
 ```
 
-For example a javascript file like appli caiton.js was being served from `public/assets/application.js` then it might have a map file in `public/assets/application.js.map`. In that case the comment could either be a full path
+For example a javascript file like application.js was being served from `public/assets/application.js` then it might have a map file in `public/assets/application.js.map`. In that case the comment could either be a full path
 
 
 ```js
@@ -206,7 +206,7 @@ We can represent integers in base64. First we generate an array of valid base64 
 BASE64_DIGITS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('')
 ```
 
-Then we can generate a hash of those characters to their coresponding numeric value
+Then we can generate a hash of those characters to their corresponding numeric value
 
 
 ```ruby
@@ -215,7 +215,7 @@ BASE64_VALUES = (0...64).each_with_object({}) { |i, hash| hash[BASE64_DIGITS[i]]
 
 So the value of "A" would be `0` and "9" would be `61`. So now we can represent numbers 0 up to 64 with only one character. Since we need to go higher than 64 digits, the VLQ lets us use a bit inside of the base64 bit value to determine if we continue or stop. In the spec it says that the base64 digit can contain 6 bits of data. The 6th bit is the "continuation" bit which tells us to either stop or keep going.
 
-We can determine if a continuation bit is set with bit shifting and maskign. So if we have 6 bits repersenting 1: "000001" it would take us 5 shifts to represent "100000" which would be only the continuation bit.
+We can determine if a continuation bit is set with bit shifting and masking. So if we have 6 bits representing 1: "000001" it would take us 5 shifts to represent "100000" which would be only the continuation bit.
 
 ```ruby
 VLQ_BASE_SHIFT = 5
@@ -236,7 +236,7 @@ VLQ_CONTINUATION_BIT.to_s(2)
 
 This works because we `to_s` accepts a base, by passing in a base of 2 we are returning binary representation.
 
-Now we can determine if an iteger has the continuation bit set by bit masking. Using a [bitwise &](http://ruby-doc.org/core-2.2.3/Fixnum.html#method-i-26) we mask out all the bits to zero except for the first one. If the result returned is 0 it means that the bit is not set and processing should not be continued:
+Now we can determine if an integer has the continuation bit set by bit masking. Using a [bitwise &](http://ruby-doc.org/core-2.2.3/Fixnum.html#method-i-26) we mask out all the bits to zero except for the first one. If the result returned is 0 it means that the bit is not set and processing should not be continued:
 
 
 ```ruby
@@ -363,7 +363,7 @@ shift += VLQ_BASE_SHIFT
 # => 5
 ```
 
-The second time the only thing htat is different with `"C"` is the digit and vlq:
+The second time the only thing that is different with `"C"` is the digit and vlq:
 
 
 ```
