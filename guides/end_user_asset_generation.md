@@ -151,34 +151,61 @@ Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui
 ## Default Directives
 
 ### require
-TODO: add description for `require`
+
+`require` *path* inserts the contents of the asset source file
+specified by *path*. If the file is required multiple times, it will
+appear in the bundle only once.
 
 ### require_self
-TODO: add description for `require_self`
+
+`require_self` tells Sprockets to insert the body of the current
+source file before any subsequent `require` directives.
 
 ### require_tree
-TODO: add description for `require_tree`
+
+`require_tree` *path* works like `require_directory`, but operates
+recursively to require all files in all subdirectories of the
+directory specified by *path*.
 
 ### require_directory
-TODO: add description for `require_dependency`
 
-### depend
-TODO: add description for `depend`
+`require_directory` *path* requires all source files of the same
+format in the directory specified by *path*. Files are required in
+alphabetical order.
+
+### depend_on
+
+`depend_on` *path* declares a dependency on the given *path* without
+including it in the bundle. This is useful when you need to expire an
+asset's cache in response to a change in another file.
 
 ### depend_on_asset
-TODO: add description for `depend_on_asset`
+
+`depend_on_asset` *path* works like `depend_on`, but operates
+recursively reading the file and following the directives found. This is automatically implied if you use `link`, so consider if it just makes sense using `link` instead of `depend_on_asset`.
 
 ### stub
-TODO: add description for `stub`
+
+`stub` *path* excludes that asset and its dependencies from the asset bundle.
+The *path* must be a valid asset and may or may not already be part
+of the bundle. `stub` should only be used at the top level bundle, not
+within any subdependencies.
 
 ### link
-TODO: add description for `link`
+
+`link` *path* declares a dependency on the target *path* and adds it to a list
+of subdependencies to automatically be compiled when the asset is written out to
+disk.
 
 ### link_directory
-TODO: add description for `link_directory`
+
+`link_directory` *path* links all the files inside the directory specified by the *path*
 
 ### link_tree
-TODO: add description for `link_directory`
+
+`link_tree` *path* works like `link_directory`, but operates
+recursively to link all files in all subdirectories of the
+directory specified by *path*.
 
 ## Default Processors
 
