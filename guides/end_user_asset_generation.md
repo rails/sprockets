@@ -161,17 +161,17 @@ appear in the bundle only once.
 `require_self` tells Sprockets to insert the body of the current
 source file before any subsequent `require` directives.
 
-### require_tree
-
-`require_tree` *path* works like `require_directory`, but operates
-recursively to require all files in all subdirectories of the
-directory specified by *path*.
-
 ### require_directory
 
 `require_directory` *path* requires all source files of the same
 format in the directory specified by *path*. Files are required in
 alphabetical order.
+
+### require_tree
+
+`require_tree` *path* works like `require_directory`, but operates
+recursively to require all files in all subdirectories of the
+directory specified by *path*.
 
 ### depend_on
 
