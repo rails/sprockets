@@ -362,7 +362,7 @@ reference files relative to the location of the current file.
 specified by *path*. If the file is required multiple times, it will
 appear in the bundle only once.
 
-### The `require_directory` Directive ###
+#### The `require_directory` Directive
 
 `require_directory` *path* requires all source files of the same
 format in the directory specified by *path*. Files are required in
@@ -403,6 +403,16 @@ automatically be defined for you.
   background-image: asset-url("logo.png")
 }
 ```
+
+#### The `link_directory` Directive
+
+`link_directory` *path* links all the files inside the directory specified by the *path*
+
+#### The `link_tree` Directive
+
+`link_tree` *path* works like `link_directory`, but operates
+recursively to link all files in all subdirectories of the
+directory specified by *path*.
 
 #### The `depend_on` Directive
 
