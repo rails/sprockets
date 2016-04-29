@@ -448,7 +448,7 @@ The `input` Hash defines the following public fields.
 * `:environment` - Current `Sprockets::Environment` instance.
 * `:cache` - A `Sprockets::Cache` instance. See [`Sprockets::Cache#fetch`](https://github.com/rails/sprockets/blob/master/lib/sprockets/cache.rb).
 * `:uri` - String Asset URI.
-* `:filename` - String full path to original file.
+* `:source_path` - String full path to original file.
 * `:load_path` - String current load path for filename.
 * `:name` - String logical path for filename.
 * `:content_type` - String content type of the output asset.

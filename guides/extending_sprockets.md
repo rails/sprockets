@@ -177,7 +177,9 @@ extend Sprockets::Processing
 register_preprocessor 'text/css', MySprocketsExtension
 ```
 
-This is really frustrating, that some of the hash keys have changed between sprockets 3 and 4. Why? Because who needs stability? For example in one of them the filename is passed in the key `:filename` while in the other it is `:source_path`. You'll want to support both of them you can do something like this in your code
+Some of the hash keys have changed between sprockets 3 and 4. For example in Sprockets 3 the filename is passed in the
+key `:filename` while in Sprockets 4 it is `:source_path`. You'll want to support both of them you can do something like
+this in your code
 
 ```ruby
 # Sprockets 3.x+ interface
@@ -189,8 +191,6 @@ module MySprocketsExtension
   end
 end
 ```
-
-Ugh.
 
 Okay so if you want 2, 3, and 4 to work you can pass in a class that also has a `call` method on it. To see how this can be done you can reference this [autoprefixer-rails pull request](https://github.com/ai/autoprefixer-rails/pull/85). The shorthand code looks something like this:
 
