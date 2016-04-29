@@ -131,16 +131,22 @@ module Sprockets
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
-          result = call_processors(processors, {
-            environment: self,
-            cache: self.cache,
-            uri: unloaded.uri,
-            filename: unloaded.filename,
-            load_path: load_path,
-            name: name,
-            content_type: type,
-            metadata: { dependencies: dependencies }
-          })
+          processor_interface = Hash.new do |hash, key|
+            if :source_path == key
+              Sprockets::Deprecation.new.warn("The processor key `:source_path` is deprecated please use `:filename` instead")
+              hash[:filename]
+            end
+          end
+          processor_interface[:environment]  = self
+          processor_interface[:cache]        = self.cache
+          processor_interface[:uri]          = unloaded.uri
+          processor_interface[:filename]     = unloaded.filename
+          processor_interface[:load_path]    = load_path
+          processor_interface[:name]         = name
+          processor_interface[:content_type] = type
+          processor_interface[:metadata]     = { dependencies: dependencies }
+
+          result = call_processors(processors, processor_interface)
           validate_processor_result!(result)
           source = result.delete(:data)
           metadata = result
