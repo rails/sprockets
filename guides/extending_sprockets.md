@@ -104,32 +104,49 @@ Sprockets.register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.c
 
 ### Metadata Keys
 
-While you can store arbitrary keys in the metadata returned by your extension, there are some with special meaning and uses inside of Sprockets. More may be added in the future.
+While you can store arbitrary keys in the metadata returned by your extension, there are some with special meaning and
+uses inside of Sprockets. More may be added in the future.
 
 Anything you add to the metadata will be stored in the Sprockets cache for the asset.
 
-- map: This key contains a source map for the asset
+- map: This key contains a source map for the asset.
 
-A source map is a way to tell a browser how to map a generated file to an original for example if you write a coffeescript file, Sprockets will generate a javascript file which is what the browser will see. If you need to debug this javascript file it helps if you know where the in your original coffeescript file the generated javascript code came from. The source map tells the browser how to map from a generated file to an original
+A source map is a way to tell a browser how to map a generated file to an original for example if you write a
+CoffeeScript file, Sprockets will generate a JavaScript file which is what the browser will see. If you need to debug
+this javascript file it helps if you know where the in your original CoffeeScript file the generated JavaScript code
+came from. The source map tells the browser how to map from a generated file to an original.
 
-Sprockets expects an array of hashes for this map. Each hash must have a `:source` key, the name of the original file from which generated content came.
+Sprockets expects an array of hashes for this map. Each hash must have a `:source` key, the name of the original file
+from which generated content came.
 
 ```ruby
 return {data: data, map: [{ source: "original.coffee", # ... }]}
 ```
 
-- charset: This key contains the mime charset for an asset
+- charset: This key contains the mime charset for an asset.
 
-A charset is the encoding for text based assets. If you do not specify a charset then one will be automatically assigned by sprockets based on the encoding type of the contents returned in the `:data` key. Normally you want that, the only time you don't want that is if you're working with binary data, or data you don't want to be compressed. If sprockets sees a `charset` then it will think that the contents of the file are text and can be compressed via GZIP. You can avoid this by setting the field manually
+A charset is the encoding for text based assets. If you do not specify a charset then one will be automatically assigned
+by sprockets based on the encoding type of the contents returned in the `:data` key. Normally you want that, the only
+time you don't want that is if you're working with binary data, or data you don't want to be compressed. If Sprockets
+sees a `charset` then it will think that the contents of the file are text and can be compressed via GZIP. You can avoid
+this by setting the field manually.
 
 ```ruby
 return { data: data, charset: nil }
 ```
 
 
-WIP the format of the source map may be subject to change before 4.0 is released. Currently it takes a `:original` and `:generated` key which each hold an array of line and column numbers. Line numbers are 1 indexed column numbers are 0 indexed. The first character of a file will always be `[1,0]`.
+WIP the format of the source map may be subject to change before 4.0 is released. Currently it takes a `:original`
+and `:generated` key which each hold an array of line and column numbers. Line numbers are 1 indexed column numbers
+are 0 indexed. The first character of a file will always be `[1,0]`.
 
-- WIP - other metadata keys
+- required: A `Set` of String Asset URIs that the Bundle processor should concatenate together.
+
+- stubbed: A `Set` of String Asset URIs that will be omitted from the `:required` set.
+
+- links: A `Set` of String Asset URIs that should be compiled along with this asset.
+
+- dependencies: A `Set` of String Cache URIs that should be monitored for caching.
 
 ## Supporting All Versions of Sprockets in Processors
 

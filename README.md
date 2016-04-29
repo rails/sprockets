@@ -477,6 +477,8 @@ The metadata Hash provides an open format for processors to extend the pipeline 
 * `:stubbed` - A `Set` of String Asset URIs that will be omitted from the `:required` set.
 * `:links` - A `Set` of String Asset URIs that should be compiled along with this asset.
 * `:dependencies` - A `Set` of String Cache URIs that should be monitored for caching.
+* `:map` - An `Array` of source maps for the asset.
+* `:charset` - The mime charset for an asset.
 
 ``` ruby
 def self.call(input)
