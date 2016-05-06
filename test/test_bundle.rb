@@ -39,7 +39,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       metadata: {}
     }
 
-    data = "/* b.css */\n\nb { display: none }\n/*\n\n\n\n */\n\n\nbody {}\n.project {}\n"
+    data = "/* b.css */\nb { display: none }\n/*\n\n\n\n */\n\nbody {}\n.project {}\n"
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [

@@ -115,7 +115,7 @@ module Sprockets
 
         data = String.new("")
         data.force_encoding(body.encoding)
-        data << header << "\n" unless header.empty?
+        data << header unless header.empty?
         data << body
         # Ensure body ends in a new line
         data << "\n" if data.length > 0 && data[-1] != "\n"
@@ -146,7 +146,11 @@ module Sprockets
           processed_header << line
         end
 
-        return processed_header.chomp, directives
+        processed_header.chomp!
+        # Ensure header ends in a new line like before it was processed
+        processed_header << "\n" if processed_header.length > 0 && header[-1] == "\n"
+
+        return processed_header, directives
       end
 
       # Gathers comment directives in the source and processes them.

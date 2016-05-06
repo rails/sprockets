@@ -862,7 +862,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "require_self inserts the current file's body at the specified point" do
-    assert_equal "/* b.css */\n\nb { display: none }\n/*\n\n\n\n */\n\n\nbody {}\n.project {}\n", asset("require_self.css").to_s
+    assert_equal "/* b.css */\nb { display: none }\n/*\n\n\n\n */\n\nbody {}\n.project {}\n", asset("require_self.css").to_s
   end
 
   test "multiple require_self directives raises and error" do
@@ -1052,6 +1052,11 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   test "appends missing semicolons" do
     assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n",
       asset("semicolons.js").to_s
+  end
+
+  test 'keeps code in same line after multi-line comments' do
+    assert_equal "/******/ function foo() {\n}\n",
+      asset('multi_line_comment.js').to_s
   end
 
   test "should not fail if home is not set in environment" do
