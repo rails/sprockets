@@ -45,6 +45,8 @@ The directive processor understands comment blocks in three formats:
 #= require foo
 ```
 
+> Note: Directives are only processed if they come before any application code. Once you have a line that does not include a comment or whitespace then Sprockets will stop looking for directives. If you use a directive outside of the "header" of the document it will not do anything, and won't raise any errors.
+
 Here is a list of the available directives:
 
 - [`require`](#require)
