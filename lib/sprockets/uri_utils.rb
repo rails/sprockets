@@ -21,15 +21,6 @@ module Sprockets
   module URIUtils
     extend self
 
-    # Internal: Determine if a URI is a file digest
-    #
-    # uri - String uri
-    #
-    # Returns {true, false}
-    def file_digest_uri?(uri)
-      uri.start_with?('file-digest://'.freeze)
-    end
-
     # Internal: Parse URI into component parts.
     #
     # uri - String uri
@@ -120,6 +111,15 @@ module Sprockets
     # Returns String URI.
     def build_asset_uri(path, params = {})
       join_file_uri("file", nil, path, encode_uri_query_params(params))
+    end
+
+    # Internal: Determine if a URI is a file digest
+    #
+    # uri - String uri
+    #
+    # Returns true uri is a digest uri
+    def file_digest_uri?(uri)
+      uri.start_with?('file-digest://'.freeze)
     end
 
     # Internal: Parse file-digest dependency URI.
