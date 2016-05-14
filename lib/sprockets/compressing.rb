@@ -11,6 +11,24 @@ module Sprockets
       config[:compressors]
     end
 
+    # Public: Register a new compressor `klass` at `sym` for `mime_type`.
+    #
+    # Registering a processor allows it to be looked up by `sym` later when
+    # assigning a JavaScript or CSS compressor.
+    #
+    # Compressors only operate on JavaScript and CSS. If you want to compress a
+    # different type of asset, use a preprocessor instead.
+    #
+    # Examples
+    #
+    #     register_compressor 'text/css', :my_sass, MySassCompressor
+    #     css_compressor = :my_sass
+    #
+    # mime_type - String MIME Type (one of: 'test/css' or 'application/javascript').
+    # sym       - Symbol registration address.
+    # klass     - The compressor class.
+    #
+    # Returns nothing.
     def register_compressor(mime_type, sym, klass)
       self.config = hash_reassoc(config, :compressors, mime_type) do |compressors|
         compressors[sym] = klass
