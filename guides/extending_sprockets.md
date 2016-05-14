@@ -68,11 +68,24 @@ For example, say you wanted to have Sprockets process a `.html` file, and output
 
 ## Compressors
 
-A compressor takes in an asset, and returns a smaller version of that asset. For example the uglifier compressor takes in a javascript file, it then removes the whitespace and applies other space saving techniques and returns a smaller javascript source. It must respond to `call` and return a `:data` key in a hash similar to a preprocessor. You can register a compressor like this:
+A compressor takes in an asset, and returns a smaller version of that asset. For example the uglifier compressor takes in a JavaScript file, it then removes the whitespace and applies other space saving techniques and returns a smaller JavaScript source.
+
+Compressors must respond to `call` and return a `:data` key in a hash similar to a processor.
+
+You can register a compressor like this:
 
 ```ruby
 Sprockets.register_compressor 'application/javascript', :uglify, UglifierCompressor
 ```
+
+Registering a compressor allows it to be used later. After registering a compressor you can activate it using the `js_compressor=` or `css_compressor=` method on the environment or Sprockets global.
+
+```ruby
+Sprockets.register_compressor 'text/css', :my_css, MyCssCompressor
+Sprockets.css_compressor = :my_css
+```
+
+Compressors only operate on JavaScript and CSS. If you want to compress a different type of asset, use a processor (see "Preprocessors" above) to process the asset.
 
 ## Adding directives to your extension
 
