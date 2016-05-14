@@ -17,7 +17,7 @@ module Sprockets
     # assigning a JavaScript or CSS compressor.
     #
     # Compressors only operate on JavaScript and CSS. If you want to compress a
-    # different type of asset, use a preprocessor instead.
+    # different type of asset, use a processor instead.
     #
     # Examples
     #
