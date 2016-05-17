@@ -49,7 +49,7 @@ module Sprockets
     /x
 
     def self.instance
-      # Default to C omment styles
+      # Default to C comment styles
       @instance ||= new(comments: ["//", ["/*", "*/"]])
     end
 
