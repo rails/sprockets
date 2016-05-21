@@ -6,15 +6,17 @@ Sprockets can use custom processors, compressors, and directives. This document 
 
 Sprockets supports a few different ways to extend functionality.
 
-- preprocessors
+- processors
 - transformers
 - compressors
 
-For a detailed explantation of each see the respective sections below.
+For a detailed explanation of each see the respective sections below.
 
 Sprockets ships with a number of built in processors, transformers and compressors. You can see all the defaults registered in `lib/sprockets.rb`.
 
-## Preprocesors
+## Processors
+
+There are two types of processors: preprocessors and postprocessors.
 
 A preprocessor is called as an asset is loaded. Generally preprocessors take in a raw file and convert its contents. For example the `DirectiveProcessor` is the processor that is responsible for reading in the Sprockets directives such as:
 
@@ -24,9 +26,24 @@ A preprocessor is called as an asset is loaded. Generally preprocessors take in 
 
 It will then load in the `foo` file and add its contents to the original file.
 
-### Preprocessor Interface
+A postprocessor is called after all of the transformers run. Generally postprocessors do a final transformation to an asset before it is ready for bundling in the asset pipeline.
 
-A preprocessor is expected to respond to `call()` and it accepts a hash of file contents. It is expected to return a hash that includes a `:data` key. The value returned in the `:data` key will be used as the contents for the file. Any other keys returned will be stored in the `:metadata` hash of an asset. For example, this result:
+For example, imagine that you like to write JavaScript without semicolons. However, your project uses a CoffeeScript library. Since CoffeeScript adds semicolons during compilation, you might make a processor that removes all `;` from JavaScript files since CoffeeScript compiles to JavaScript. A simple implementation of this could be a proc:
+
+```ruby
+remove_semicolons_processor = -> (input) {
+  data = input[:data].gsub(";", "")
+  { data: data }
+}
+```
+
+When you register this processor as a postprocessor your CoffeeScript library will first be compiled to JavaScript, then post-processed by this processor, thus removing all semicolons from the output.
+
+Without postprocessors, you would have to ensure that the CoffeeScript transformer is run _before_ your processor so you would have to insert it after the CoffeeScript transformer much like two Rack middlewares that have an order-dependence on one another. With postprocessors, you can register your processor as a postprocessor and not need to worry about ordering it after the CoffeeScript transformer.
+
+### Processor Interface
+
+A processor is expected to respond to `call()` and it accepts a hash of file contents. It is expected to return a hash that includes a `:data` key. The value returned in the `:data` key will be used as the contents for the file. Any other keys returned will be stored in the `:metadata` hash of an asset. For example, this result:
 
 ```ruby
 class HelloWorldProcessor
@@ -36,12 +53,18 @@ class HelloWorldProcessor
 end
 ```
 
-Would apppend the string `'hello world'` on a new line to any asset.
+Would append the string `'hello world'` on a new line to any asset.
 
-For Sprockets to call the processor it must be registered. If we wanted this processor to be called with any javascript files we would use the javascript mime type `application/javascript` and pass in the object that responds to call, in this case an instance of the HelloWorldProcessor class:
+For Sprockets to call the processor it must be registered. If we wanted this processor to be called with any JavaScript files we would use the JavaScript mime type `application/javascript` and pass in the object that responds to call, in this case an instance of the `HelloWorldProcessor` class:
 
 ```ruby
 Sprockets.register_preprocessor('application/javascript', HelloWorldProcessor.new)
+```
+
+To register a processor as a postprocessor instead of a preprocessor, invoke the `register_postprocessor` command instead:
+
+```ruby
+Sprockets.register_postprocessor('application/javascript', HelloWorldProcessor.new)
 ```
 
 ## Transformers
@@ -85,7 +108,7 @@ Sprockets.register_compressor 'text/css', :my_css, MyCssCompressor
 Sprockets.css_compressor = :my_css
 ```
 
-Compressors only operate on JavaScript and CSS. If you want to compress a different type of asset, use a processor (see "Preprocessors" above) to process the asset.
+Compressors only operate on JavaScript and CSS. If you want to compress a different type of asset, use a processor (see "Processors" above) to process the asset.
 
 ## Adding directives to your extension
 
