@@ -67,6 +67,86 @@ To register a processor as a postprocessor instead of a preprocessor, invoke the
 Sprockets.register_postprocessor('application/javascript', HelloWorldProcessor.new)
 ```
 
+### Keys
+
+The `call` interface returns a hash. In different versions of Sprockets there may be different keys. This doc is for Sprockets 4 (master). You can see these values being passed into processors [in the Sprockets loader](https://github.com/rails/sprockets/blob/a9b53daaa5404443c0684103b7f83cd5be208575/lib/sprockets/loader.rb#L148-L161).
+
+- `:data` - [String] Contains the contents of the file being passed to the your processor.
+
+Example:
+
+```
+'var foo = "bar"'
+```
+
+- `:uri` - [String] A full URI to the asset, may include custom Sprockets params.
+
+Example:
+
+```
+"file:///Users/richardschneeman/Documents/projects/sprockets/test/fixtures/default/application.coffee?type=application/javascript",
+```
+
+- `:filename` - [String] Full path to asset on disk.
+
+Example:
+
+```
+"/Users/richardschneeman/Documents/projects/sprockets/test/fixtures/default/gallery.js\"
+```
+
+- `:load_path` - [String] The load path that was used to find the asset.
+
+Example:
+
+```
+"/Users/richardschneeman/Documents/projects/sprockets/test/fixtures/default"
+```
+
+- `:source_path` - (Sprockets 4 only) [String] The source file for the generated asset, potentially useful for working with source maps.
+
+Example:
+
+```
+"gallery.source-828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab.js"
+```
+
+
+- `:name` - [String] The name of the file being loaded without extension.
+
+Example
+
+```
+"gallery"
+```
+
+- `:content_type` - [String] The coresponding mime content type of the asset.
+
+Example:
+
+```
+"application/javascript"
+```
+
+- `:metadata` - [Hash] Extra data, see the "metadata" section.
+
+Example:
+
+```
+# See metadata section for more info
+{
+  dependencies: [].to_set
+  map: [
+    # ...
+  ]
+}
+```
+
+- `:cache` - [Sprockets::Cache] A cache object you can use to store and retrieve intermediate objects. You can use `Cache#get`, `Cache#set` and `Cache#fetch` api. Refer to method docs for more info. If using paths for the key or contents, use `Sprockets::Environment#compress_from_root` and `Sprockets::Environment#expand_from_root` as the location of of your files absolute path will change.
+
+
+- `:environment`  [Sprockets::Environment] Now you have direct access to all 105 methods that Sprockets uses! Use carefully, we may consider limiting this in the future. If you have feedback on what methods you need or use please say hi, Open an issue and let the Sprockets team know.
+
 ## Transformers
 
 A transformer takes one asset and converts it into another asset. For example the `CoffeeScriptProcessor` is what takes a file with a `.coffee` file extension and returns a `.js` file.
@@ -230,21 +310,6 @@ extend Sprockets::Processing
 register_preprocessor 'text/css', MySprocketsExtension
 ```
 
-Some of the hash keys have changed between sprockets 3 and 4. For example in Sprockets 3 the filename is passed in the
-key `:filename` while in Sprockets 4 it is `:source_path`. You'll want to support both of them you can do something like
-this in your code
-
-```ruby
-# Sprockets 3.x+ interface
-
-module MySprocketsExtension
-  def self.call(input)
-    filename = input[:source_path] || input[:filename]
-    # code
-  end
-end
-```
-
 Okay so if you want 2, 3, and 4 to work you can pass in a class that also has a `call` method on it. To see how this can be done you can reference this [autoprefixer-rails pull request](https://github.com/ai/autoprefixer-rails/pull/85). The shorthand code looks something like this:
 
 ```ruby
@@ -265,7 +330,7 @@ class MySprocketsExtension
   end
 
   def self.call(input)
-    filename = input[:source_path] || input[:filename]
+    filename = input[:filename]
     source   = input[:data]
     run(filename, source)
   end
@@ -278,6 +343,20 @@ register_preprocessor 'text/css', MySprocketsExtension
 ```
 
 This way you're passing in an object that responds to 3.x's `call` interface and 2.x's `new.render` interface. In generally we're recommending people not use Sprockets 2.x and that they upgrade to Sprockets 3+. If it's easier on you, you can rev a major version and only support the new interface.
+
+
+There are new hash keys introduced in Sprockets 4. The `:source_path` key contains the file that will hold the sourcemap of the current asset.
+
+```ruby
+# Sprockets 3.x+ interface
+
+module MySprocketsExtension
+  def self.call(input)
+    file_where_source_map_will_end_up = input[:source_path]
+    # code
+  end
+end
+```
 
 
 ## WIP
