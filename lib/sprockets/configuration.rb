@@ -63,7 +63,7 @@ module Sprockets
     #     environment.digest_class = Digest::MD5
     #
     def digest_class=(klass)
-      self.config = config.merge(digest_class: klass).freeze
+      self.config = hash_reassoc(config, :digest_class) { klass }
     end
 
     # This class maybe mutated and mixed in with custom helpers.
