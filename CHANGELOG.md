@@ -2,6 +2,8 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+- Remove expensive checking for existing semicolons and newlines in concat_javascript_sources [#310]
+
 ## 4.0.0.beta2
 
 - Fix load_paths on Sass processors [#223]

@@ -11,7 +11,7 @@ class TestContext < Sprockets::TestCase
   test "context environment is cached" do
     instances = @env["environment.js"].to_s.split("\n")
     assert_match "Sprockets::CachedEnvironment", instances[0]
-    assert_equal instances[0], instances[1]
+    assert_equal instances[0], instances[2]
   end
 
   test "source file properties are exposed in context" do
@@ -78,7 +78,7 @@ class TestCustomProcessor < Sprockets::TestCase
     @env.register_mime_type 'text/yaml+bundle', extensions: ['.bundle.yml']
     @env.register_transformer 'text/yaml+bundle', 'application/javascript', YamlBundleProcessor
 
-    assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
+    assert_equal "var Foo = {};\n\n;\nvar Bar = {};\n;\n", @env['application.js'].to_s
   end
 
   require 'base64'

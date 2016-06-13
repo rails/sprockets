@@ -68,29 +68,9 @@ module Sprockets
       end
     end
 
-    # Internal: Check if string has a trailing semicolon.
-    #
-    # str - String
-    #
-    # Returns true or false.
-    def string_end_with_semicolon?(str)
-      i = str.size - 1
-      while i >= 0
-        c = str[i]
-        i -= 1
-        if c == "\n" || c == " " || c == "\t"
-          next
-        elsif c != ";"
-          return false
-        else
-          return true
-        end
-      end
-      true
-    end
-
     # Internal: Accumulate asset source to buffer and append a trailing
-    # semicolon if necessary.
+    # semicolon and newline. This may result in duplicated semicolons and
+    # newlines, but we don't mind because they'll be removed by the minifier.
     #
     # buf    - String buffer to append to
     # source - String source to append
@@ -98,8 +78,7 @@ module Sprockets
     # Returns buf String.
     def concat_javascript_sources(buf, source)
       if buf.bytesize > 0
-        buf << ";" unless string_end_with_semicolon?(buf)
-        buf << "\n" unless buf.end_with?("\n")
+        buf << ";\n"
       end
       buf << source
     end

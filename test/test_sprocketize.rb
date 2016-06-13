@@ -52,7 +52,7 @@ class TestSprockets < Sprockets::TestCase
 
   test "compile file with dependencies" do
     output = sprockets "-I", fixture_path("asset"), fixture_path("asset/application.js")
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", output
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n;\nvar Users = {\n  find: function(id) {\n  }\n};\n;\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", output
   end
 
   test "compile asset to output directory" do

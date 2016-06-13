@@ -55,7 +55,7 @@ class TestServer < Sprockets::TestCase
 
   test "serve source with dependencies" do
     get "/assets/application.js"
-    assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\n",
+    assert_equal "var foo;\n;\n\n(function() {\n  application.boot();\n})();\n",
       last_response.body
   end
 
@@ -112,8 +112,8 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_NONE_MATCH' => "nope"
 
     assert_equal 200, last_response.status
-    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
-    assert_equal '52', last_response.headers['Content-Length']
+    assert_equal '"0daf0f86922e94e54db5d664a29121ca1f2ac5dfda71db9691e5c6477d42b28b"', last_response.headers['ETag']
+    assert_equal '54', last_response.headers['Content-Length']
   end
 
   test "not modified partial response with fingerprint and if-none-match etags match" do
@@ -172,8 +172,8 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_MATCH' => etag
 
     assert_equal 200, last_response.status
-    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
-    assert_equal '52', last_response.headers['Content-Length']
+    assert_equal '"0daf0f86922e94e54db5d664a29121ca1f2ac5dfda71db9691e5c6477d42b28b"', last_response.headers['ETag']
+    assert_equal '54', last_response.headers['Content-Length']
   end
 
   test "precondition failed with if-match is a mismatch" do
@@ -288,7 +288,7 @@ class TestServer < Sprockets::TestCase
 
     sandbox filename do
       get "/assets/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar japanese = \"日本語\";\n", last_response.body
+      assert_equal "var foo;\n;\n\n(function() {\n  application.boot();\n})();\n;\nvar bar;\n;\nvar japanese = \"日本語\";\n;\n", last_response.body
 
       File.open(filename, "w") do |f|
         f.write "var baz;\n"
@@ -299,7 +299,7 @@ class TestServer < Sprockets::TestCase
       File.utime(mtime, mtime, path)
 
       get "/assets/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\nvar japanese = \"日本語\";\n", last_response.body
+      assert_equal "var foo;\n;\n\n(function() {\n  application.boot();\n})();\n;\nvar bar;\n;\nvar baz;\n;\nvar japanese = \"日本語\";\n;\n", last_response.body
     end
   end
 

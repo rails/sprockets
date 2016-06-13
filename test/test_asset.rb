@@ -431,7 +431,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js",
+    assert_equal "application-91236d87a8fed56003b8bf2e96e7feb7ffaae0d25b07bf6d33ee8fc509f7f1e3.js",
       @asset.digest_path
   end
 
@@ -440,23 +440,23 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "length" do
-    assert_equal 159, @asset.length
+    assert_equal 163, @asset.length
   end
 
   test "source digest" do
-    assert_equal [149, 91, 45, 221, 208, 209, 68, 155, 28, 97, 113, 36, 184, 59, 70, 48, 14, 218, 222, 192, 109, 86, 17, 4, 247, 246, 22, 82, 65, 179, 26, 148], @asset.digest.bytes.to_a
+    assert_equal [145, 35, 109, 135, 168, 254, 213, 96, 3, 184, 191, 46, 150, 231, 254, 183, 255, 170, 224, 210, 91, 7, 191, 109, 51, 238, 143, 197, 9, 247, 241, 227], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
-    assert_equal "955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94", @asset.hexdigest
+    assert_equal "91236d87a8fed56003b8bf2e96e7feb7ffaae0d25b07bf6d33ee8fc509f7f1e3", @asset.hexdigest
   end
 
   test "source base64digest" do
-    assert_equal "lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.base64digest
+    assert_equal "kSNth6j+1WADuL8uluf+t/+q4NJbB79tM+6PxQn38eM=", @asset.base64digest
   end
 
   test "integrity" do
-    assert_equal "sha256-lVst3dDRRJscYXEkuDtGMA7a3sBtVhEE9/YWUkGzGpQ=", @asset.integrity
+    assert_equal "sha256-kSNth6j+1WADuL8uluf+t/+q4NJbB79tM+6PxQn38eM=", @asset.integrity
   end
 
   test "charset is UTF-8" do
@@ -464,13 +464,13 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "to_s" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n;\nvar Users = {\n  find: function(id) {\n  }\n};\n;\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", @asset.to_s
   end
 
   test "each" do
     body = String.new("")
     @asset.each { |part| body << part }
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n;\nvar Users = {\n  find: function(id) {\n  }\n};\n;\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n", body
   end
 
   test "asset is stale when one of its source files is modified" do
@@ -739,7 +739,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring the same file multiple times has no effect" do
-    assert_equal read("asset/project.js.erb")+"\n\n\n", asset("multiple.js").to_s
+    assert_equal read("asset/project.js.erb")+"\n;\n\n\n", asset("multiple.js").to_s
   end
 
   test "requiring a file of a different format raises an exception" do
@@ -749,7 +749,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "bundling joins files with blank line" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n;\nvar Users = {\n  find: function(id) {\n  }\n};\n;\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n",
       asset("application.js").to_s
   end
 
@@ -758,23 +758,23 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "processing a source file with no engine extensions" do
-    assert_equal read("asset/users.js.erb"), asset("noengine.js").to_s
+    assert_equal read("asset/users.js.erb") + ";\n", asset("noengine.js").to_s
   end
 
   test "processing a source file with different content type extensions" do
-    assert_equal read("asset/users.js.erb"), asset("es6_asset.js").to_s
+    assert_equal read("asset/users.js.erb") + ";\n", asset("es6_asset.js").to_s
   end
 
   test "processing a source file with different content type extensions 1" do
-    assert_equal read("asset/users.js.erb") + "(function() {\n\n\n}).call(this);\n", asset("coffee_asset.js").to_s
+    assert_equal read("asset/users.js.erb") + ";\n(function() {\n\n\n}).call(this);\n", asset("coffee_asset.js").to_s
   end
 
   test "processing a source file with unknown extensions" do
-    assert_equal read("asset/users.js.erb") + "var jQuery;\n\n\n", asset("unknownexts.min.js").to_s
+    assert_equal read("asset/users.js.erb") + ";\nvar jQuery;\n;\n\n\n", asset("unknownexts.min.js").to_s
   end
 
   test "requiring a file with a relative path" do
-    assert_equal read("asset/project.js.erb") + "\n",
+    assert_equal read("asset/project.js.erb") + "\n;\n",
       asset("relative/require.js").to_s
   end
 
@@ -803,14 +803,14 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_directory requires all child files in alphabetical order" do
     assert_equal(
-      "ok(\"b.js.erb\");\n",
+      "ok(\"b.js.erb\");\n;\n",
       asset("tree/all_with_require_directory.js").to_s
     )
   end
 
   test "require_directory current directory includes self last" do
     assert_equal(
-      "var Bar;\nvar Foo;\nvar App;\n",
+      "var Bar;\n;\nvar Foo;\n;\nvar App;\n",
       asset("tree/directory/application.js").to_s
     )
   end
@@ -824,14 +824,14 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_tree without an argument defaults to the current directory" do
     assert_equal(
-      "a();\nb();\n",
+      "a();\n;\nb();\n;\n",
       asset("tree/without_argument/require_tree_without_argument.js").to_s
     )
   end
 
   test "require_tree with current directory includes self last" do
     assert_equal(
-      "var Bar;\nvar Foo;\nvar App;\n",
+      "var Bar;\n;\nvar Foo;\n;\nvar App;\n",
       asset("tree/tree/application.js").to_s
     )
   end
@@ -856,7 +856,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_tree respects order of child dependencies" do
     assert_equal(
-      "var c;\nvar b;\nvar a;\n\n",
+      "var c;\n;\nvar b;\n;\nvar a;\n\n;\n",
       asset("tree/require_tree_alpha.js").to_s
     )
   end
@@ -875,7 +875,7 @@ class BundledAssetTest < Sprockets::TestCase
     assert asset = asset("require_manifest.js")
     assert_equal <<-EOS, asset.to_s
 
-define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
+define("application.js", "application-91236d87a8fed56003b8bf2e96e7feb7ffaae0d25b07bf6d33ee8fc509f7f1e3.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
@@ -893,7 +893,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
 
 
-define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
+define("application.js", "application-91236d87a8fed56003b8bf2e96e7feb7ffaae0d25b07bf6d33ee8fc509f7f1e3.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
     EOS
@@ -986,24 +986,24 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "stub single dependency" do
-    assert_equal "var jQuery.UI = {};\n\n\n", asset("stub/skip_jquery").to_s
+    assert_equal "var jQuery.UI = {};\n;\n\n\n", asset("stub/skip_jquery").to_s
   end
 
   test "stub dependency tree" do
-    assert_equal "var Foo = {};\n\n\n\n", asset("stub/application").to_s
+    assert_equal "var Foo = {};\n;\n\n\n\n", asset("stub/application").to_s
   end
 
   test "resolves circular requires" do
-    assert_equal "var A;\nvar C;\nvar B;\n",
+    assert_equal "var A;\n;\nvar C;\n;\nvar B;\n",
       asset("circle/a.js").to_s
-    assert_equal "var B;\nvar A;\nvar C;\n",
+    assert_equal "var B;\n;\nvar A;\n;\nvar C;\n",
       asset("circle/b.js").to_s
-    assert_equal "var C;\nvar B;\nvar A;\n",
+    assert_equal "var C;\n;\nvar B;\n;\nvar A;\n",
       asset("circle/c.js").to_s
   end
 
   test "unknown directives are ignored" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n\n//\n// = Foo\n//\n// == Examples\n//\n// Foo.bar()\n// => \"baz\"\nvar Foo;\n",
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n;\n\n//\n// = Foo\n//\n// == Examples\n//\n// Foo.bar()\n// => \"baz\"\nvar Foo;\n",
       asset("unknown_directives.js").to_s
   end
 
@@ -1104,7 +1104,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application.debug-2f5fde4066077205c961164247ca6ae471977d347b4ef96d9d6e2e17d9d9906c.js",
+    assert_equal "application.debug-4e488239a4775658381340f2419a3acf74409271f0fb0b09cfb189e9355eca7f.js",
       @asset.digest_path
   end
 
@@ -1113,7 +1113,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "length" do
-    assert_equal 264, @asset.length
+    assert_equal 268, @asset.length
   end
 
   test "charset is UTF-8" do
@@ -1121,7 +1121,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "to_s" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-a1ddc843806213ded8eaf93eb6502617575c906ebb3c8826825abe53344c8806.map", @asset.to_s
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\n;\nvar Users = {\n  find: function(id) {\n  }\n};\n;\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-a1ddc843806213ded8eaf93eb6502617575c906ebb3c8826825abe53344c8806.map", @asset.to_s
   end
 
   def asset(logical_path, options = {})

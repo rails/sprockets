@@ -226,7 +226,7 @@ module EnvironmentTests
   end
 
   test "find index.js in directory" do
-    assert_equal "var A;\nvar B;\n", @env["mobile.js"].to_s
+    assert_equal "var A;\n;\nvar B;\n;\n", @env["mobile.js"].to_s
   end
 
   test "find index.css in directory" do
