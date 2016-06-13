@@ -90,7 +90,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       metadata: {}
     }
 
-    data = "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n"
+    data = "var Project = {\n  find: function(id) {\n  }\n};\n;\nvar Users = {\n  find: function(id) {\n  }\n};\n;\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n"
     result = Sprockets::Bundle.call(input)
     assert_equal data, result[:data]
     assert_equal [

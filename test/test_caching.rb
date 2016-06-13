@@ -200,7 +200,7 @@ class TestCaching < Sprockets::TestCase
     sandbox foo, bar do
       File.open(foo, 'w') { |f| f.write "//= require bar-tmp\nfoo;\n" }
       File.open(bar, 'w') { |f| f.write "bar;\n" }
-      assert_equal "bar;\nfoo;\n", @env1["foo-tmp.js"].to_s
+      assert_equal "bar;\n;\nfoo;\n", @env1["foo-tmp.js"].to_s
       assert_equal "bar;\n", @env1["bar-tmp.js"].to_s
 
       # File.open(foo, 'w') { |f| f.write "foo;\n" }
@@ -224,7 +224,7 @@ class TestCaching < Sprockets::TestCase
       env.cache = @cache
     end
 
-    assert_equal "jQuery;\n", env1["main.js"].to_s
+    assert_equal "jQuery;\n;\n", env1["main.js"].to_s
     assert_equal "jQuery;\n", env1["jquery.js"].to_s
 
     assert_raises Sprockets::FileNotFound do
@@ -250,13 +250,13 @@ class TestCaching < Sprockets::TestCase
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
-      assert_equal "jQuery;\n", asset.to_s
+      assert_equal "jQuery;\n;\n", asset.to_s
 
       write(patched_jquery, "jQueryFixed;\n", 1422000010)
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
-      assert_equal "jQueryFixed;\n", asset.to_s
+      assert_equal "jQueryFixed;\n;\n", asset.to_s
 
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/app/jquery.js'), asset.filename
@@ -271,7 +271,7 @@ class TestCaching < Sprockets::TestCase
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
-      assert_equal "jQuery;\n", asset.to_s
+      assert_equal "jQuery;\n;\n", asset.to_s
     end
   end
 
@@ -293,14 +293,14 @@ class TestCaching < Sprockets::TestCase
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
-      assert_equal "jQuery;\n", asset.to_s
+      assert_equal "jQuery;\n;\n", asset.to_s
 
       FileUtils.mkdir(File.dirname(patched_jquery))
       write(patched_jquery, "jQueryFixed;\n", 1423000010)
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
-      assert_equal "jQueryFixed;\n", asset.to_s
+      assert_equal "jQueryFixed;\n;\n", asset.to_s
 
       asset = @env["jquery.js"]
       assert_equal fixture_path('default/app/jquery/index.js'), asset.filename
@@ -315,7 +315,7 @@ class TestCaching < Sprockets::TestCase
 
       asset = @env["main.js"]
       assert_equal fixture_path('default/app/main.js'), asset.filename
-      assert_equal "jQuery;\n", asset.to_s
+      assert_equal "jQuery;\n;\n", asset.to_s
     end
   end
 
@@ -333,13 +333,13 @@ class TestCaching < Sprockets::TestCase
     end
 
     assert main = env1.find_asset("main.js")
-    assert_equal "var jQuery;\n", main.to_s
+    assert_equal "var jQuery;\n;\n", main.to_s
     assert_equal fixture_path('default/app/main.js'), main.filename
     assert_equal main, env1.load(main.uri)
     assert_equal main, env1.find_asset("main.js")
 
     assert main = env2.find_asset("main.js")
-    assert_equal "var jQuery;\n", main.to_s
+    assert_equal "var jQuery;\n;\n", main.to_s
     assert_equal fixture_path('default/app/main.js'), main.filename
     assert_equal main, env2.load(main.uri)
     assert_equal main, env2.find_asset("main.js")
