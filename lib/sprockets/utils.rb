@@ -74,16 +74,19 @@ module Sprockets
     def string_end_with_semicolon?(str)
       i = str.size - 1
       while i >= 0
-        c = str[i]
+        c = str[i].ord
         i -= 1
-        if c == "\n" || c == " " || c == "\t"
-          next
-        elsif c != ";"
-          return false
-        else
-          return true
+
+        # Need to compare against the ordinals because the string can be UTF_8 or UTF_32LE encoded
+        # 0x0A == "\n"
+        # 0x20 == " "
+        # 0x09 == "\t"
+        # 0x3B == ";"
+        unless c == 0x0A || c == 0x20 || c == 0x09
+          return c === 0x3B
         end
       end
+
       true
     end
 
@@ -95,11 +98,21 @@ module Sprockets
     #
     # Returns buf String.
     def concat_javascript_sources(buf, source)
-      if buf.bytesize > 0
-        buf << ";" unless string_end_with_semicolon?(buf)
-        buf << "\n" unless buf.end_with?("\n")
+      if source.bytesize > 0
+        buf << source
+
+        # If the source contains non-ASCII characters, indexing on it becomes O(N).
+        # This will lead to O(N^2) performance in string_end_with_semicolon?, so we should use 32 bit encoding to make sure indexing stays O(1)
+        source = source.encode(Encoding::UTF_32LE) unless source.ascii_only?
+
+        if !string_end_with_semicolon?(source)
+          buf << ";\n"
+        elsif source[source.size - 1].ord != 0x0A
+          buf << "\n"
+        end
       end
-      buf << source
+
+      buf
     end
 
     # Internal: Prepends a leading "." to an extension if its missing.
