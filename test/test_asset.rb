@@ -125,26 +125,6 @@ module FreshnessTests
     end
   end
 
-  test "modify asset's dependency file" do
-    main = fixture_path('asset/test-main.js.erb')
-    dep  = fixture_path('asset/test-dep.js')
-
-    sandbox main, dep do
-      write(main, "//= depend_on test-dep\n<%= File.read('#{dep}') %>")
-      write(dep, "a;")
-      asset      = asset('test-main.js')
-      old_digest = asset.hexdigest
-      old_uri    = asset.uri
-      assert_equal "a;", asset.to_s
-
-      write(dep, "b;")
-      asset = asset('test-main.js')
-      refute_equal old_digest, asset.hexdigest
-      refute_equal old_uri, asset.uri
-      assert_equal "b;", asset.to_s
-    end
-  end
-
   test "remove asset's dependency file" do
     main = fixture_path('asset/test-main.js')
     dep  = fixture_path('asset/test-dep.js')
@@ -420,6 +400,26 @@ class ProcessedAssetTest < Sprockets::TestCase
 
   include AssetTests
 
+  test "modify asset's dependency file" do
+    main = fixture_path('asset/test-main.js.erb')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      write(main, "//= depend_on test-dep\n<%= File.read('#{dep}') %>")
+      write(dep, "a;")
+      asset      = asset('test-main.js')
+      old_digest = asset.hexdigest
+      old_uri    = asset.uri
+      assert_equal "a;", asset.to_s
+
+      write(dep, "b;")
+      asset = asset('test-main.js')
+      refute_equal old_digest, asset.hexdigest
+      refute_equal old_uri, asset.uri
+      assert_equal "b;", asset.to_s
+    end
+  end
+
   test "uri" do
     assert_equal "file://#{fixture_path_for_uri('asset/application.js')}?type=application/javascript&pipeline=self&id=xxx",
       normalize_uri(@asset.uri)
@@ -507,6 +507,27 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   include AssetTests
+
+  test "modify asset's dependency file" do
+    main = fixture_path('asset/test-main.js.erb')
+    dep  = fixture_path('asset/test-dep.js')
+
+    sandbox main, dep do
+      write(main, "//= depend_on test-dep\n<%= File.read('#{dep}') %>")
+      write(dep, "a;")
+      asset      = asset('test-main.js')
+      old_digest = asset.hexdigest
+      old_uri    = asset.uri
+      assert_equal "a;\n", asset.to_s
+
+      write(dep, "b;")
+      asset = asset('test-main.js')
+      refute_equal old_digest, asset.hexdigest
+      refute_equal old_uri, asset.uri
+      assert_equal "b;\n", asset.to_s
+    end
+  end
+
 
   test "uri" do
     assert_equal "file://#{fixture_path_for_uri('asset/application.js')}?type=application/javascript&id=xxx",
@@ -1017,6 +1038,7 @@ class BundledAssetTest < Sprockets::TestCase
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
+;
     EOS
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
@@ -1035,6 +1057,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
+;
     EOS
 
     assert_equal [
@@ -1189,7 +1212,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "appends missing semicolons" do
-    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n",
+    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n;\n",
       asset("semicolons.js").to_s
   end
 
