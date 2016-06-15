@@ -130,6 +130,17 @@ module Sprockets
       Set
     ]).freeze
 
+    # Internal: Hash of all "simple" value types allowed to be returned in
+    # processor metadata.
+    VALID_METADATA_VALUE_TYPES_HASH = VALID_METADATA_VALUE_TYPES.each_with_object({}) do |type, hash|
+      hash[type] = true
+    end.freeze
+
+    # Internal: Hash of all nested compound metadata types that can nest values.
+    VALID_METADATA_COMPOUND_TYPES_HASH = VALID_METADATA_COMPOUND_TYPES.each_with_object({}) do |type, hash|
+      hash[type] = true
+    end.freeze
+
     # Internal: Set of all allowed metadata types.
     VALID_METADATA_TYPES = (VALID_METADATA_VALUE_TYPES + VALID_METADATA_COMPOUND_TYPES).freeze
 
@@ -168,9 +179,9 @@ module Sprockets
     #
     # Returns true if class is in whitelist otherwise false.
     def valid_processor_metadata_value?(value)
-      if VALID_METADATA_VALUE_TYPES.include?(value.class)
+      if VALID_METADATA_VALUE_TYPES_HASH[value.class]
         true
-      elsif VALID_METADATA_COMPOUND_TYPES.include?(value.class)
+      elsif VALID_METADATA_COMPOUND_TYPES_HASH[value.class]
         value.all? { |v| valid_processor_metadata_value?(v) }
       else
         false
