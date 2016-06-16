@@ -188,7 +188,7 @@ module Sprockets
 
       # The `require` directive functions similar to Ruby's own `require`.
       # It provides a way to declare a dependency on a file in your path
-      # and ensures its only loaded once before the source file.
+      # and ensures it's only loaded once before the source file.
       #
       # `require` works with files in the environment path:
       #
@@ -266,8 +266,8 @@ module Sprockets
       # it.
       #
       # This is used for caching purposes. Any changes that would
-      # invalid the asset dependency will invalidate the cache our the
-      # source file.
+      # invalidate the asset dependency will invalidate the cache of
+      # the source file.
       #
       # Unlike `depend_on`, the path must be a requirable asset.
       #
@@ -308,7 +308,7 @@ module Sprockets
       #     //= link_directory "./fonts"
       #
       # Use caution when linking against JS or CSS assets. Include an explicit
-      # extension or content type in these cases
+      # extension or content type in these cases.
       #
       #     //= link_directory "./scripts" .js
       #
@@ -324,7 +324,7 @@ module Sprockets
       #     //= link_tree "./images"
       #
       # Use caution when linking against JS or CSS assets. Include an explicit
-      # extension or content type in these cases
+      # extension or content type in these cases.
       #
       #     //= link_tree "./styles" .css
       #
