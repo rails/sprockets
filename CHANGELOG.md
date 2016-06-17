@@ -1,3 +1,7 @@
+**3.6.1** (June 17, 2016)
+
+* Some performance improvements.
+
 **3.6.0** (April 6, 2016)
 
 * Add `Manifest#find_sources` to return the source of the compiled assets.
