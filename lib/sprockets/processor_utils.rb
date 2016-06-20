@@ -116,6 +116,7 @@ module Sprockets
     VALID_METADATA_VALUE_TYPES = Set.new([
       String,
       Symbol,
+      Integer,
       Fixnum,
       Bignum,
       TrueClass,

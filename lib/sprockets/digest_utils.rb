@@ -56,6 +56,9 @@ module Sprockets
         elsif klass == Symbol
           digest << 'Symbol'
           digest << obj.to_s
+        elsif klass == Integer
+          digest << 'Integer'
+          digest << obj.to_s
         elsif klass == Fixnum
           digest << 'Fixnum'
           digest << obj.to_s
