@@ -10,7 +10,7 @@ module Sprockets
     end
 
     def self.call(*args)
-      Sprockets::Deprecation.new.warn "CoffeeScriptTemplate is deprecated please use CoffeeScriptProcessor instead"
+      Deprecation.new.warn "CoffeeScriptTemplate is deprecated please use CoffeeScriptProcessor instead"
       CoffeeScriptProcessor.call(*args)
     end
   end
