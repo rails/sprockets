@@ -28,7 +28,11 @@ end
 class TestEngines < Sprockets::TestCase
   test "registering engine" do
     env = new_environment
-    env.register_engine ".alert", AlertProcessor
+
+    Sprockets::SilenceDeprecation.silence do
+      env.register_engine ".alert", AlertProcessor
+    end
+
     asset = env["hello.alert"]
     assert_equal "alert(\"Hello world!\\n\");\n", asset.to_s
     assert_equal 'application/javascript', asset.content_type
