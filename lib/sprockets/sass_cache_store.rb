@@ -25,5 +25,10 @@ module Sprockets
   end
 
   # Deprecated: Use Sprockets::SassProcessor::CacheStore instead.
-  SassCacheStore = SassProcessor::CacheStore
+  class SassCacheStore < SassProcessor::CacheStore
+    def initialize(*args)
+      Sprockets::Deprecation.new.warn "SassCacheStore is deprecated please use SassProcessor::CacheStore instead"
+      super
+    end
+  end
 end
