@@ -15,7 +15,7 @@ module Sprockets
     attr_reader :callstack
 
     def initialize(callstack = nil)
-      @callstack = callstack || caller_locations(2)
+      @callstack = callstack || caller(2)
     end
 
     def warn(message)
@@ -66,7 +66,6 @@ module Sprockets
       end
 
       def _extract_callstack
-        warn "Please pass `caller_locations` to the deprecation API" if $VERBOSE
         offending_line = callstack.find { |line| !ignored_callstack(line) } || callstack.first
 
         if offending_line
