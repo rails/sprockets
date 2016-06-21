@@ -236,7 +236,7 @@ module Sprockets
         "Please update your processor interface:\n" +
         "https://github.com/rails/sprockets/blob/master/guides/extending_sprockets.md#supporting-all-versions-of-sprockets-in-processors\n"
 
-        Deprecation.new([caller_locations[3]]).warn msg
+        Deprecation.new([caller[3]]).warn msg
       end
 
       def wrap_processor(klass, proc)
