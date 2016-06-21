@@ -539,43 +539,53 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "register global block preprocessor" do
-    old_size = new_environment.preprocessors['text/css'].size
-    Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.preprocessors['text/css'].size
-    Sprockets.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.preprocessors['text/css'].size
+    Sprockets::SilenceDeprecation.silence do
+      old_size = new_environment.preprocessors['text/css'].size
+      Sprockets.register_preprocessor('text/css', :foo) { |context, data| data }
+      assert_equal old_size+1, new_environment.preprocessors['text/css'].size
+      Sprockets.unregister_preprocessor('text/css', :foo)
+      assert_equal old_size, new_environment.preprocessors['text/css'].size
+    end
   end
 
   test "unregister custom block preprocessor" do
-    old_size = @env.preprocessors['text/css'].size
-    @env.register_preprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.preprocessors['text/css'].size
-    @env.unregister_preprocessor('text/css', :foo)
-    assert_equal old_size, @env.preprocessors['text/css'].size
+    Sprockets::SilenceDeprecation.silence do
+      old_size = @env.preprocessors['text/css'].size
+      @env.register_preprocessor('text/css', :foo) { |context, data| data }
+      assert_equal old_size+1, @env.preprocessors['text/css'].size
+      @env.unregister_preprocessor('text/css', :foo)
+      assert_equal old_size, @env.preprocessors['text/css'].size
+    end
   end
 
   test "unregister custom block postprocessor" do
-    old_size = @env.postprocessors['text/css'].size
-    @env.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.postprocessors['text/css'].size
-    @env.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, @env.postprocessors['text/css'].size
+    Sprockets::SilenceDeprecation.silence do
+      old_size = @env.postprocessors['text/css'].size
+      @env.register_postprocessor('text/css', :foo) { |context, data| data }
+      assert_equal old_size+1, @env.postprocessors['text/css'].size
+      @env.unregister_postprocessor('text/css', :foo)
+      assert_equal old_size, @env.postprocessors['text/css'].size
+    end
   end
 
   test "register global block postprocessor" do
-    old_size = new_environment.postprocessors['text/css'].size
-    Sprockets.register_postprocessor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, new_environment.postprocessors['text/css'].size
-    Sprockets.unregister_postprocessor('text/css', :foo)
-    assert_equal old_size, new_environment.postprocessors['text/css'].size
+    Sprockets::SilenceDeprecation.silence do
+      old_size = new_environment.postprocessors['text/css'].size
+      Sprockets.register_postprocessor('text/css', :foo) { |context, data| data }
+      assert_equal old_size+1, new_environment.postprocessors['text/css'].size
+      Sprockets.unregister_postprocessor('text/css', :foo)
+      assert_equal old_size, new_environment.postprocessors['text/css'].size
+    end
   end
 
   test "unregister custom block bundle processor" do
-    old_size = @env.bundle_processors['text/css'].size
-    @env.register_bundle_processor('text/css', :foo) { |context, data| data }
-    assert_equal old_size+1, @env.bundle_processors['text/css'].size
-    @env.unregister_bundle_processor('text/css', :foo)
-    assert_equal old_size, @env.bundle_processors['text/css'].size
+    Sprockets::SilenceDeprecation.silence do
+      old_size = @env.bundle_processors['text/css'].size
+      @env.register_bundle_processor('text/css', :foo) { |context, data| data }
+      assert_equal old_size+1, @env.bundle_processors['text/css'].size
+      @env.unregister_bundle_processor('text/css', :foo)
+      assert_equal old_size, @env.bundle_processors['text/css'].size
+    end
   end
 
   test "register global bundle processor" do
