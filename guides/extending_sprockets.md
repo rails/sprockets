@@ -301,6 +301,7 @@ This `render` interface is deprecated, instead you should use the `call` interfa
 module MySprocketsExtension
   def self.call(input)
     # code
+    { data: result }
   end
 end
 
@@ -334,7 +335,8 @@ class MySprocketsExtension
     source   = input[:data]
     context  = input[:environment].context_class.new(input)
 
-    run(filename, source, context)
+    result = run(filename, source, context)
+    { data: result }
   end
 end
 
@@ -356,6 +358,7 @@ module MySprocketsExtension
   def self.call(input)
     file_where_source_map_will_end_up = input[:source_path]
     # code
+    { data: result }
   end
 end
 ```
