@@ -1,5 +1,6 @@
 module Sprockets
   class Deprecation
+    THREAD_LOCAL__SILENCE_KEY = "_sprockets_deprecation_silence".freeze
     DEFAULT_BEHAVIORS = {
       raise: ->(message, callstack) {
         e = DeprecationException.new(message)
@@ -14,11 +15,19 @@ module Sprockets
 
     attr_reader :callstack
 
+    def self.silence(&block)
+      Thread.current[THREAD_LOCAL__SILENCE_KEY] = true
+      block.call
+    ensure
+      Thread.current[THREAD_LOCAL__SILENCE_KEY] = false
+    end
+
     def initialize(callstack = nil)
       @callstack = callstack || caller(2)
     end
 
     def warn(message)
+      return if Thread.current[THREAD_LOCAL__SILENCE_KEY]
       deprecation_message(message).tap do |m|
         behavior.each { |b| b.call(m, callstack) }
       end
