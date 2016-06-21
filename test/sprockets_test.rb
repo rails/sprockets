@@ -197,3 +197,12 @@ class Sprockets::TestCase < MiniTest::Test
     end
   end
 end
+
+module Sprockets
+  module SilenceDeprecation
+    def self.silence(&block)
+      Deprecation.silence(&block)
+    end
+  end
+end
+
