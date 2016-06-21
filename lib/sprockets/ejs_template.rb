@@ -2,5 +2,16 @@ require 'sprockets/ejs_processor'
 
 module Sprockets
   # Deprecated
-  EjsTemplate = EjsProcessor
+  module EjsTemplate
+    VERSION = EjsProcessor::VERSION
+
+    def self.cache_key
+      EjsProcessor.cache_key
+    end
+
+    def self.call(*args)
+      Sprockets::Deprecation.new.warn "EjsTemplate is deprecated please use EjsProcessor instead"
+      EjsProcessor.call(*args)
+    end
+  end
 end
