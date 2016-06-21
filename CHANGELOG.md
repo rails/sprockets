@@ -1,3 +1,7 @@
+**3.6.2** (June 21, 2016)
+
+* More performance improvements.
+
 **3.6.1** (June 17, 2016)
 
 * Some performance improvements.
