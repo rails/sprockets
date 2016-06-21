@@ -1,5 +1,16 @@
 module Sprockets
   class Deprecation
+    DEFAULT_BEHAVIORS = {
+      raise: ->(message, callstack) {
+        e = DeprecationException.new(message)
+        e.set_backtrace(callstack.map(&:to_s))
+        raise e
+      },
+
+      stderr: ->(message, callstack) {
+        $stderr.puts(message)
+      },
+    }
 
     attr_reader :callstack
 
@@ -14,13 +25,21 @@ module Sprockets
     end
 
     private
+      def behavior
+        @behavior ||= [DEFAULT_BEHAVIORS[:stderr]]
+      end
+
+      def behavior=(behavior)
+        @behavior = Array(behavior).map { |b| DEFAULT_BEHAVIORS[b] || b }
+      end
+
       def deprecation_message(message = nil)
         message ||= "You are using deprecated behavior which will be removed from the next major or minor release."
         "DEPRECATION WARNING: #{message} #{ deprecation_caller_message }"
       end
 
       def deprecation_caller_message
-        file, line, method = extract_callstack(callstack)
+        file, line, method = extract_callstack
         if file
           if line && method
             "(called from #{method} at #{file}:#{line})"
@@ -28,6 +47,12 @@ module Sprockets
             "(called from #{file}:#{line})"
           end
         end
+      end
+
+      SPROCKETS_GEM_ROOT = File.expand_path("../../../../..", __FILE__) + "/"
+
+      def ignored_callstack(path)
+        path.start_with?(SPROCKETS_GEM_ROOT) || path.start_with?(RbConfig::CONFIG['rubylibdir'])
       end
 
       def extract_callstack
