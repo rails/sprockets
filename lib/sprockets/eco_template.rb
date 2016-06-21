@@ -10,7 +10,7 @@ module Sprockets
     end
 
     def self.call(*args)
-      Sprockets::Deprecation.new.warn "EcoTemplate is deprecated please use EcoProcessor instead"
+      Deprecation.new.warn "EcoTemplate is deprecated please use EcoProcessor instead"
       EcoProcessor.call(*args)
     end
   end

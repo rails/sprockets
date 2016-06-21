@@ -10,7 +10,7 @@ module Sprockets
     end
 
     def self.call(*args)
-      Sprockets::Deprecation.new.warn "EjsTemplate is deprecated please use EjsProcessor instead"
+      Deprecation.new.warn "EjsTemplate is deprecated please use EjsProcessor instead"
       EjsProcessor.call(*args)
     end
   end
