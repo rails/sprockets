@@ -4,7 +4,7 @@ module Sprockets
   # Deprecated
   class SassTemplate < SassProcessor
     def self.call(*args)
-      Sprockets::Deprecation.new.warn "SassTemplate is deprecated please use SassProcessor instead"
+      Deprecation.new.warn "SassTemplate is deprecated please use SassProcessor instead"
       super
     end
   end
@@ -12,7 +12,7 @@ module Sprockets
   # Deprecated
   class ScssTemplate < ScssProcessor
     def self.call(*args)
-      Sprockets::Deprecation.new.warn "ScssTemplate is deprecated please use ScssProcessor instead"
+      Deprecation.new.warn "ScssTemplate is deprecated please use ScssProcessor instead"
       super
     end
   end
