@@ -321,18 +321,20 @@ class MySprocketsExtension
     @source   = block.call
   end
 
-  def render(variable, empty_hash_wtf)
-    self.class.run(@filename, @source)
+  def render(context, empty_hash_wtf)
+    self.class.run(@filename, @source, context)
   end
 
-  def self.run(filename, source)
-    # do somethign with filename and source
+  def self.run(filename, source, context)
+    # do somethign with filename and source and context
   end
 
   def self.call(input)
     filename = input[:filename]
     source   = input[:data]
-    run(filename, source)
+    context  = input[:environment].context_class.new(input)
+
+    run(filename, source, context)
   end
 end
 
@@ -357,7 +359,6 @@ module MySprocketsExtension
   end
 end
 ```
-
 
 ## WIP
 
