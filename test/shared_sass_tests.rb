@@ -114,7 +114,7 @@ li {
   end
 
   test "@import css file from load path" do
-    assert_equal "\n", render('sass/import_load_path.scss')
+    assert_match /\A\s*\z/, render('sass/import_load_path.scss')
   end
 
   test "process css file" do
