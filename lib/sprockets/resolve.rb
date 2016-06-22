@@ -60,7 +60,7 @@ module Sprockets
         end
 
         message << " with type '#{options[:accept]}'" if options[:accept]
-        message << "\nLooked up these paths: #{config[:paths]}"
+        message << "\nChecked in these paths: \n  #{ config[:paths].join("\n  ") }"
 
         raise FileNotFound, message
       end
