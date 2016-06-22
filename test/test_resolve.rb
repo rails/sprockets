@@ -251,6 +251,18 @@ class TestResolve < Sprockets::TestCase
       @env.each_logical_path("application.js", /gallery\.css/).to_a
   end
 
+  test "adds paths to exceptions" do
+    random_path = SecureRandom.hex
+    @env.append_path(random_path)
+
+    error = assert_raises(Sprockets::FileNotFound) do
+      uri, _ = @env.resolve!("thisfiledoesnotexistandshouldraiseerrors", {})
+      uri
+    end
+
+    assert_match /#{ random_path }/, error.message
+  end
+
   def resolve(path, options = {})
     uri, _ = @env.resolve(path, options.merge(compat: false))
     uri
