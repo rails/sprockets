@@ -90,6 +90,12 @@ class TestCustomProcessor < Sprockets::TestCase
       @data = block.call
     end
 
+    def self.call(input)
+      context = input[:environment].context_class.new(input)
+      result  = self.new(nil, &Proc.new { input[:data]} ).render(context)
+      { data: result }
+    end
+
     def render(context, locals = {})
       data = @data
       data.gsub(/url\(\"(.+?)\"\)/) do
@@ -102,7 +108,8 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   test "custom processor using Context#resolve and Context#depend_on" do
-    @env.register_engine '.embed', DataUriProcessor
+    @env.register_mime_type 'text/css+embed', extensions: ['.css.embed']
+    @env.register_transformer 'text/css+embed', 'text/css', DataUriProcessor
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
       @env["sprite.css"].to_s.lines.to_a[0..1].join
@@ -112,14 +119,21 @@ class TestCustomProcessor < Sprockets::TestCase
   test "block custom processor" do
     require 'base64'
 
-    @env.register_preprocessor 'text/css', :data_uris do |context, data|
-      data.gsub(/url\(\"(.+?)\"\)/) do
-        path = context.resolve($1, compat: true)
-        context.depend_on(path)
-        data = Base64.encode64(File.open(path, "rb") { |f| f.read })
-        "url(data:image/png;base64,#{data})"
+    klass = Class.new do
+      def self.call(input)
+        data   = input[:data]
+        result = data.gsub(/url\(\"(.+?)\"\)/) do
+          context = input[:environment].context_class.new(input)
+          path = context.resolve($1, compat: true)
+          context.depend_on(path)
+          data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+          "url(data:image/png;base64,#{data})"
+        end
+        { data: result }
       end
     end
+
+    @env.register_preprocessor 'text/css', klass
 
     assert_equal ".pow {\n  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAEsCAMAAADNS4U5AAAAGXRFWHRTb2Z0\n",
       @env["sprite2.css"].to_s.lines.to_a[0..1].join

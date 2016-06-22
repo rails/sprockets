@@ -51,6 +51,8 @@ module Sprockets
     #     environment.register_engine '.coffee', CoffeeScriptProcessor
     #
     def register_engine(ext, klass, options = {})
+      Deprecation.new([caller.first]).warn("`register_engine` is deprecated please register a mime type and use `register_compressor` or `register_transformer`")
+
       ext = Sprockets::Utils.normalize_extension(ext)
 
       self.computed_config = {}
