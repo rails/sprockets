@@ -6,7 +6,7 @@ class TestUglifierCompressor < MiniTest::Test
   def test_compress_javascript
     input = {
       content_type: 'application/javascript',
-      data: "function foo() {\n  return true;\n}",
+      data: "/* Copyright Rails */\nfunction foo() {\n  return true;\n}",
       cache: Sprockets::Cache.new
     }
     output = "function foo(){return!0}"
