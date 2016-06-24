@@ -41,7 +41,7 @@ module Sprockets
         options[:copyright] ||= false
       else
         # Uglifier >= 2.x
-        options[:copyright] ||= :none
+        options[:comments] ||= :none
       end
 
       @uglifier = Autoload::Uglifier.new(options)
