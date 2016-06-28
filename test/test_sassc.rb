@@ -66,7 +66,6 @@ class TestSprocketsSassc < TestBaseSassc
       env.append_path(fixture_path('compass'))
       env.append_path(fixture_path('octicons'))
       env.register_transformer 'text/sass', 'text/css', Sprockets::SasscProcessor.new
-      env.register_transformer 'text/scss', 'text/css', Sprockets::ScsscProcessor.new
     end
   end
 
