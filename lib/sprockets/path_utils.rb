@@ -178,6 +178,7 @@ module Sprockets
     def find_matching_path_for_extensions(path, basename, extensions)
       matches = []
       entries(path).each do |entry|
+        next unless File.basename(entry).start_with?(basename)
         extname, value = match_path_extname(entry, extensions)
         if basename == entry.chomp(extname)
           filename = File.join(path, entry)
