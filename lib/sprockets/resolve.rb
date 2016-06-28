@@ -180,7 +180,20 @@ module Sprockets
           method(:resolve_alts_under_path),
           method(:resolve_index_under_path)
         ]
-        mime_exts = config[:mime_exts]
+
+        mime_exts = {}
+        accepts.each do |mime, version|
+          if '*/*'.freeze == mime
+            mime_exts = config[:mime_exts]
+            break
+          end
+
+          mime_hash = config[:mime_types][mime]
+          raise "No valid mime type found for #{ mime.inspect }. Valid types #{ config[:mime_types].keys.inspect }" unless mime_hash
+          mime_hash[:extensions].each do |extension|
+            mime_exts[extension] = mime
+          end
+        end
 
         paths.each do |load_path|
           candidates = []
