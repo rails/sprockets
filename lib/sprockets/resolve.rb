@@ -22,6 +22,12 @@ module Sprockets
     #
     # The String Asset URI is returned or nil if no results are found.
     def resolve(path, load_paths: config[:paths], accept: nil, pipeline: nil, base_path: nil)
+      unless path.is_a?(String)
+        # This can use the deprecation framework once it's merged
+        @logger.warn("Passing #{path.class.name} to `Sprockets#resolve` is deprecated: #{path}") if @logger
+        return
+      end
+
       paths = load_paths
 
       if valid_asset_uri?(path)
