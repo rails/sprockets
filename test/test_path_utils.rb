@@ -170,6 +170,9 @@ class TestPathUtils < MiniTest::Test
     refute match_path_extname("jquery.map", extensions)
     refute match_path_extname("jquery.map.js", extensions)
     refute match_path_extname("jquery.map.css", extensions)
+
+    extensions = { ".coffee" => "application/coffeescript", ".js" => "application/javascript", ".js.jsx.coffee" => "application/jsx+coffee" }
+    assert_equal [".js.jsx.coffee", "application/jsx+coffee"], match_path_extname("component.js.jsx.coffee", extensions)
   end
 
   def test_path_parents
