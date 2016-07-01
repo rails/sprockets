@@ -1,3 +1,10 @@
+**3.6.3** (July 1, 2016)
+
+* Faster asset lookup in large directories #336
+* Faster PathUtils.match_path_extname https://github.com/rails/sprockets/commit/697269cf81e5261fdd7072e32bd489403027fd7e
+* Fixed uglifier comment stripping #326
+* Error messages now show load path info #313
+
 **3.6.2** (June 21, 2016)
 
 * More performance improvements.
