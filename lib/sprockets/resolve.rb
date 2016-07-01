@@ -178,6 +178,7 @@ module Sprockets
         candidates = []
         entries = self.entries(dirname)
         entries.each do |entry|
+          next unless File.basename(entry).start_with?(basename)
           name, type, _, _ = parse_path_extnames(entry)
           if basename == name
             candidates << [File.join(dirname, entry), type]
