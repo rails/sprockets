@@ -67,7 +67,7 @@ module Sprockets
       },
       Set => ->(val, digest) {
         digest << 'Set'.freeze
-        ADD_VALUE_TO_DIGEST[Array].call(val.to_a, digest)
+        ADD_VALUE_TO_DIGEST[Array].call(val, digest)
       },
       Encoding => ->(val, digest) {
         digest << 'Encoding'.freeze
