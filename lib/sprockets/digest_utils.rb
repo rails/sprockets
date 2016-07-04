@@ -67,7 +67,7 @@ module Sprockets
       },
       Set => ->(val, digest) {
         digest << 'Set'.freeze
-        ADD_VALUE_TO_DIGEST[Array].call(val.to_a, digest)
+        ADD_VALUE_TO_DIGEST[Array].call(val, digest)
       },
       Encoding => ->(val, digest) {
         digest << 'Encoding'.freeze
@@ -88,10 +88,18 @@ module Sprockets
     #
     # Returns a String digest of the object.
     def digest(obj)
-      digest = digest_class.new
+      build_digest(obj).digest
+    end
 
-      ADD_VALUE_TO_DIGEST[obj.class].call(obj, digest)
-      digest.digest
+    # Internal: Generate a hexdigest for a nested JSON serializable object.
+    #
+    # The same as `pack_hexdigest(digest(obj))`.
+    #
+    # obj - A JSON serializable object.
+    #
+    # Returns a String digest of the object.
+    def hexdigest(obj)
+      build_digest(obj).hexdigest!
     end
 
     # Internal: Pack a binary digest to a hex encoded string.
@@ -171,5 +179,13 @@ module Sprockets
     def hexdigest_integrity_uri(hexdigest)
       integrity_uri(unpack_hexdigest(hexdigest))
     end
+
+    private
+      def build_digest(obj)
+        digest = digest_class.new
+
+        ADD_VALUE_TO_DIGEST[obj.class].call(obj, digest)
+        digest
+      end
   end
 end

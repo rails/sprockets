@@ -186,7 +186,7 @@ module Sprockets
           dependencies_digest: DigestUtils.digest(resolve_dependencies(metadata[:dependencies]))
         }
 
-        asset[:id]  = pack_hexdigest(digest(asset))
+        asset[:id]  = hexdigest(asset)
         asset[:uri] = build_asset_uri(unloaded.filename, unloaded.params.merge(id: asset[:id]))
 
         store_asset(asset, unloaded)
