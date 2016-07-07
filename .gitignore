@@ -6,4 +6,4 @@ doc
 docs
 pkg
 tmp
-vendor
+.DS_Store
