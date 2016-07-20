@@ -30,7 +30,7 @@ class TestEngines < Sprockets::TestCase
     env = new_environment
 
     Sprockets::SilenceDeprecation.silence do
-      env.register_engine ".alert", AlertProcessor
+      env.register_engine ".alert", AlertProcessor, silence_deprecation: true
     end
 
     asset = env["hello.alert"]
