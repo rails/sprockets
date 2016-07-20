@@ -6,3 +6,4 @@ doc
 docs
 pkg
 tmp
+.DS_Store

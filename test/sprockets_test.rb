@@ -23,7 +23,7 @@ end
 
 NoopProcessor = proc { |input| input[:data] }
 # Sprockets.register_mime_type 'text/haml', extensions: ['.haml']
-Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html'
+Sprockets.register_engine '.haml', NoopProcessor, mime_type: 'text/html', silence_deprecation: true
 
 # Sprockets.register_mime_type 'text/ng-template', extensions: ['.ngt']
 AngularProcessor = proc { |input|
@@ -33,19 +33,19 @@ $app.run(function($templateCache) {
 });
   EOS
 }
-Sprockets.register_engine '.ngt', AngularProcessor, mime_type: 'application/javascript'
+Sprockets.register_engine '.ngt', AngularProcessor, mime_type: 'application/javascript', silence_deprecation: true
 
 # Sprockets.register_mime_type 'text/mustache', extensions: ['.mustache']
-Sprockets.register_engine '.mustache', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_engine '.mustache', NoopProcessor, mime_type: 'application/javascript', silence_deprecation: true
 
 # Sprockets.register_mime_type 'text/x-handlebars-template', extensions: ['.handlebars']
-Sprockets.register_engine '.handlebars', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_engine '.handlebars', NoopProcessor, mime_type: 'application/javascript', silence_deprecation: true
 
 # Sprockets.register_mime_type 'application/javascript-module', extensions: ['.es6']
-Sprockets.register_engine '.es6', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_engine '.es6', NoopProcessor, mime_type: 'application/javascript', silence_deprecation: true
 
 # Sprockets.register_mime_type 'application/dart', extensions: ['.dart']
-Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript'
+Sprockets.register_engine '.dart', NoopProcessor, mime_type: 'application/javascript', silence_deprecation: true
 
 require 'nokogiri'
 
@@ -72,7 +72,7 @@ Sprockets.register_mime_type 'application/xml+builder', extensions: ['.xml.build
 Sprockets.register_transformer 'application/xml+builder', 'application/xml', XmlBuilderProcessor
 
 require 'sprockets/jst_processor'
-Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript'
+Sprockets.register_engine '.jst2', Sprockets::JstProcessor.new(namespace: 'this.JST2'), mime_type: 'application/javascript', silence_deprecation: true
 
 SVG2PNG = proc { |input|
   "\x89\x50\x4e\x47\xd\xa\x1a\xa#{input[:data]}"

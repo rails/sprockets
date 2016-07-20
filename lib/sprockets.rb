@@ -124,7 +124,7 @@ module Sprockets
   # Mmm, CoffeeScript
   require 'sprockets/coffee_script_processor'
   Deprecation.silence do
-    register_engine '.coffee', CoffeeScriptProcessor, mime_type: 'application/javascript'
+    register_engine '.coffee', CoffeeScriptProcessor, mime_type: 'application/javascript', silence_deprecation: true
   end
 
   # JST engines
@@ -132,24 +132,22 @@ module Sprockets
   require 'sprockets/ejs_processor'
   require 'sprockets/jst_processor'
   Deprecation.silence do
-    register_engine '.jst', JstProcessor, mime_type: 'application/javascript'
-    register_engine '.eco', EcoProcessor, mime_type: 'application/javascript'
-    register_engine '.ejs', EjsProcessor, mime_type: 'application/javascript'
+    register_engine '.jst', JstProcessor, mime_type: 'application/javascript', silence_deprecation: true
+    register_engine '.eco', EcoProcessor, mime_type: 'application/javascript', silence_deprecation: true
+    register_engine '.ejs', EjsProcessor, mime_type: 'application/javascript', silence_deprecation: true
   end
 
   # CSS engines
   require 'sprockets/sass_processor'
   Deprecation.silence do
-    register_engine '.sass', SassProcessor, mime_type: 'text/css'
-    register_engine '.scss', ScssProcessor, mime_type: 'text/css'
+    register_engine '.sass', SassProcessor, mime_type: 'text/css', silence_deprecation: true
+    register_engine '.scss', ScssProcessor, mime_type: 'text/css', silence_deprecation: true
   end
   register_bundle_metadata_reducer 'text/css', :sass_dependencies, Set.new, :+
 
   # Other
   require 'sprockets/erb_processor'
-  Deprecation.silence do
-    register_engine '.erb', ERBProcessor, mime_type: 'text/plain'
-  end
+  register_engine '.erb', ERBProcessor, mime_type: 'text/plain', silence_deprecation: true
 
   register_dependency_resolver 'environment-version' do |env|
     env.version
