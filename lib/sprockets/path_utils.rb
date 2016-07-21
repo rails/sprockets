@@ -148,16 +148,19 @@ module Sprockets
     #
     # Returns [String extname, Object value] or nil nothing matched.
     def match_path_extname(path, extensions)
-      match, key = nil, ""
-      path_extnames(path).reverse_each do |extname|
-        key.prepend(extname)
-        if value = extensions[key]
-          match = [key.dup, value]
-        elsif match
-          break
+      basename = File.basename(path)
+
+      i = basename.index('.'.freeze)
+      while i && i < basename.length - 1
+        extname = basename[i..-1]
+        if value = extensions[extname]
+          return extname, value
         end
+
+        i = basename.index('.'.freeze, i+1)
       end
-      match
+
+      nil
     end
 
     # Internal: Returns all parents for path
