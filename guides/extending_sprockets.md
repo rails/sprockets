@@ -363,6 +363,44 @@ module MySprocketsExtension
 end
 ```
 
+### Registering All Versions of Sprockets in Processors
+
+In Sprockets 2 and 3 the way you registered a processor was via `register_engine`. Something like
+
+```ruby
+# Sprockets 2 and 3
+env.register_engine '.css', MySprocketsExtension, mime_type: 'text/css'
+```
+
+In Sprockets 4 you must first explicitly register a mime type and use the appropriate processor directive i.e. `register_transformer`, `register_preprocessor`, etc.
+
+```ruby
+# Sprockets 4
+env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
+env.register_preprocessor 'text/css', MySprocketsExtension
+```
+
+The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. You wouldn't need to add a mime type for JS and CSS assets but you will for other filetypes for example `.coffee` or `.scss`. The above `register_mime_type` example is used for example purposes and wouldn't be required.
+
+Sprockets 4 will not chain asset extensions so `.coffee.erb` is explicitly registered in addition to `.coffee`.
+
+Depending on what your library needs to do it may run into a scenario where it must use the `register_engine` directive in Sprockets 3 even though it is deprecated. This is because some libraries are designed to over-write the default processors that ship with Sprockets and Sprockets 3 still registers all processors using `register_engine`. To get your library to work with all versions without a deprecation you can use the `silence_deprecation` option.
+
+```ruby
+# Sprockets 2, 3, and 4
+
+if env.respond_to?(:register_transformer)
+  env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
+  env.register_preprocessor 'text/css', MySprocketsExtension
+end
+
+if env.respond_to(:register_engine)
+  register_engine '.css', MySprocketsExtension, mime_type: 'text/css', silence_deprecation: true
+end
+```
+
+> Note: You shouldn't use the `silence_deprecation` option unless you're sure that your library works with Sprockets 4, you should be testing using a CI service such as Travis.
+
 ## WIP
 
 This guide is a work in progress. There are many different groups of people who interact with Sprockets. Some only need to know directive syntax to put in their asset files, some are building features like the Rails asset pipeline, and some are plugging into Sprockets and writing things like preprocessors. The goal of these guides are to provide task specific guidance to make the expected behavior explicit. If you are using Sprockets and you find missing information in these guides, please consider submitting a pull request with updated information.
