@@ -1,3 +1,7 @@
+** 3.7.0** (July 21, 2016)
+
+* Deprecated interfaces now emit deprecation warnings #345
+
 **3.6.3** (July 1, 2016)
 
 * Faster asset lookup in large directories #336
