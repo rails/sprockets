@@ -51,6 +51,17 @@ module Sprockets
     #     environment.register_engine '.coffee', CoffeeScriptProcessor
     #
     def register_engine(ext, klass, options = {})
+      unless options[:silence_deprecation]
+        msg = <<-MSG
+Sprockets method `register_engine` is deprecated.
+Please register a mime type using `register_mime_type` then
+use `register_compressor` or `register_transformer`.
+https://github.com/rails/sprockets/blob/master/guides/extending_sprockets.md#supporting-all-versions-of-sprockets-in-processors
+        MSG
+
+        Deprecation.new([caller.first]).warn(msg)
+      end
+
       ext = Sprockets::Utils.normalize_extension(ext)
 
       self.computed_config = {}

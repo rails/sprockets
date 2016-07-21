@@ -4,6 +4,7 @@ require 'sprockets/cache'
 require 'sprockets/environment'
 require 'sprockets/errors'
 require 'sprockets/manifest'
+require 'sprockets/deprecation'
 
 module Sprockets
   require 'sprockets/processor_utils'
@@ -122,25 +123,31 @@ module Sprockets
 
   # Mmm, CoffeeScript
   require 'sprockets/coffee_script_processor'
-  register_engine '.coffee', CoffeeScriptProcessor, mime_type: 'application/javascript'
+  Deprecation.silence do
+    register_engine '.coffee', CoffeeScriptProcessor, mime_type: 'application/javascript', silence_deprecation: true
+  end
 
   # JST engines
   require 'sprockets/eco_processor'
   require 'sprockets/ejs_processor'
   require 'sprockets/jst_processor'
-  register_engine '.jst', JstProcessor, mime_type: 'application/javascript'
-  register_engine '.eco', EcoProcessor, mime_type: 'application/javascript'
-  register_engine '.ejs', EjsProcessor, mime_type: 'application/javascript'
+  Deprecation.silence do
+    register_engine '.jst', JstProcessor, mime_type: 'application/javascript', silence_deprecation: true
+    register_engine '.eco', EcoProcessor, mime_type: 'application/javascript', silence_deprecation: true
+    register_engine '.ejs', EjsProcessor, mime_type: 'application/javascript', silence_deprecation: true
+  end
 
   # CSS engines
   require 'sprockets/sass_processor'
-  register_engine '.sass', SassProcessor, mime_type: 'text/css'
-  register_engine '.scss', ScssProcessor, mime_type: 'text/css'
+  Deprecation.silence do
+    register_engine '.sass', SassProcessor, mime_type: 'text/css', silence_deprecation: true
+    register_engine '.scss', ScssProcessor, mime_type: 'text/css', silence_deprecation: true
+  end
   register_bundle_metadata_reducer 'text/css', :sass_dependencies, Set.new, :+
 
   # Other
   require 'sprockets/erb_processor'
-  register_engine '.erb', ERBProcessor, mime_type: 'text/plain'
+  register_engine '.erb', ERBProcessor, mime_type: 'text/plain', silence_deprecation: true
 
   register_dependency_resolver 'environment-version' do |env|
     env.version

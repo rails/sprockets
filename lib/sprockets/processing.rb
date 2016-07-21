@@ -231,14 +231,24 @@ module Sprockets
         compute_transformers!
       end
 
+      def deprecate_legacy_processor_interface(interface)
+        msg = "You are using the a deprecated processor interface #{ interface.inspect }.\n" +
+        "Please update your processor interface:\n" +
+        "https://github.com/rails/sprockets/blob/master/guides/extending_sprockets.md#supporting-all-versions-of-sprockets-in-processors\n"
+
+        Deprecation.new([caller[3]]).warn msg
+      end
+
       def wrap_processor(klass, proc)
         if !proc
           if klass.respond_to?(:call)
             klass
           else
+            deprecate_legacy_processor_interface(klass)
             LegacyTiltProcessor.new(klass)
           end
         elsif proc.respond_to?(:arity) && proc.arity == 2
+          deprecate_legacy_processor_interface(proc)
           LegacyProcProcessor.new(klass.to_s, proc)
         else
           proc
