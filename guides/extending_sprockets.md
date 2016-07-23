@@ -2,6 +2,21 @@
 
 Sprockets can use custom processors, compressors, and directives. This document is intended for library authors who want to extend Sprockets functionality.
 
+## Contents
+
+- [Types of Extensions](#types-of-extensions)
+  - [Processors](#processors)
+  - [Transformers](#transformers)
+  - [Compressors](#compressors)
+- [Extension Interface](#extension-interface)
+  - [Extension Keys](#extension-keys)
+  - [Extension Metadata Keys](#extension-metadata-keys)
+  - [Register Mime Type](#register-mime-types)
+- [Adding Directives to your Extension](#adding-directives-to-your-extension)
+- [Supporting All Versions of Sprockets in Processors](#supporting-all-versions-of-sprockets-in-processors)
+  - [Registering All Versions of Sprockets in Processors](#registering-all-versions-of-sprockets-in-processors)
+
+
 ## Types of Extensions
 
 Sprockets supports a few different ways to extend functionality.
@@ -14,7 +29,7 @@ For a detailed explanation of each see the respective sections below.
 
 Sprockets ships with a number of built in processors, transformers and compressors. You can see all the defaults registered in `lib/sprockets.rb`.
 
-## Processors
+### Processors
 
 There are two types of processors: preprocessors and postprocessors.
 
@@ -41,7 +56,50 @@ When you register this processor as a postprocessor your CoffeeScript library wi
 
 Without postprocessors, you would have to ensure that the CoffeeScript transformer is run _before_ your processor so you would have to insert it after the CoffeeScript transformer much like two Rack middlewares that have an order-dependence on one another. With postprocessors, you can register your processor as a postprocessor and not need to worry about ordering it after the CoffeeScript transformer.
 
-### Processor Interface
+## Transformers
+
+A transformer takes one asset and converts it into another asset. For example the `CoffeeScriptProcessor` is what takes a file with a `.coffee` file extension and returns a `.js` file.
+
+### Transformers
+
+Like a preprocessor, a transformer will return the contents of the file in a `:data` key, and any other metadata.
+
+You can register a transformer like this:
+
+```ruby
+Sprockets.register_transformer 'text/coffeescript', 'application/javascript', CoffeeScriptProcessor
+```
+
+The first argument is the mime type of the file that the processor accepts. The second argument is the mime type that it generates, and the last argument is the object that responds to `call`.
+
+For example, say you wanted to have Sprockets process a `.html` file, and output the mime type as application/javascript. To accomplish this, you would do the following:
+
+```ruby
+Sprockets.register_transformer 'text/html', 'application/javascript', MyTemplateProcessor
+```
+
+### Compressors
+
+A compressor takes in an asset, and returns a smaller version of that asset. For example the uglifier compressor takes in a JavaScript file, it then removes the whitespace and applies other space saving techniques and returns a smaller JavaScript source.
+
+Compressors must respond to `call` and return a `:data` key in a hash similar to a processor.
+
+You can register a compressor like this:
+
+```ruby
+Sprockets.register_compressor 'application/javascript', :uglify, UglifierCompressor
+```
+
+Registering a compressor allows it to be used later. After registering a compressor you can activate it using the `js_compressor=` or `css_compressor=` method on the environment or Sprockets global.
+
+```ruby
+Sprockets.register_compressor 'text/css', :my_css, MyCssCompressor
+Sprockets.css_compressor = :my_css
+```
+
+Compressors only operate on JavaScript and CSS. If you want to compress a different type of asset, use a processor (see "Processors" above) to process the asset.
+
+## Extension Interface
 
 A processor is expected to respond to `call()` and it accepts a hash of file contents. It is expected to return a hash that includes a `:data` key. The value returned in the `:data` key will be used as the contents for the file. Any other keys returned will be stored in the `:metadata` hash of an asset. For example, this result:
 
@@ -67,7 +125,7 @@ To register a processor as a postprocessor instead of a preprocessor, invoke the
 Sprockets.register_postprocessor('application/javascript', HelloWorldProcessor.new)
 ```
 
-### Keys
+### Extension Keys
 
 The `call` interface returns a hash. In different versions of Sprockets there may be different keys. This doc is for Sprockets 4 (master). You can see these values being passed into processors [in the Sprockets loader](https://github.com/rails/sprockets/blob/a9b53daaa5404443c0684103b7f83cd5be208575/lib/sprockets/loader.rb#L148-L161).
 
@@ -147,78 +205,7 @@ Example:
 
 - `:environment`  [Sprockets::Environment] Now you have direct access to all 105 methods that Sprockets uses! Use carefully, we may consider limiting this in the future. If you have feedback on what methods you need or use please say hi, Open an issue and let the Sprockets team know.
 
-## Transformers
-
-A transformer takes one asset and converts it into another asset. For example the `CoffeeScriptProcessor` is what takes a file with a `.coffee` file extension and returns a `.js` file.
-
-### Transformer Interface
-
-Like a preprocessor, a transformer will return the contents of the file in a `:data` key, and any other metadata.
-
-You can register a transformer like this:
-
-```ruby
-Sprockets.register_transformer 'text/coffeescript', 'application/javascript', CoffeeScriptProcessor
-```
-
-The first argument is the mime type of the file that the processor accepts. The second argument is the mime type that it generates, and the last argument is the object that responds to `call`.
-
-For example, say you wanted to have Sprockets process a `.html` file, and output the mime type as application/javascript. To accomplish this, you would do the following:
-
-```ruby
-  register_transformer 'text/html', 'application/javascript', MyTemplateProcessor
-```
-
-## Compressors
-
-A compressor takes in an asset, and returns a smaller version of that asset. For example the uglifier compressor takes in a JavaScript file, it then removes the whitespace and applies other space saving techniques and returns a smaller JavaScript source.
-
-Compressors must respond to `call` and return a `:data` key in a hash similar to a processor.
-
-You can register a compressor like this:
-
-```ruby
-Sprockets.register_compressor 'application/javascript', :uglify, UglifierCompressor
-```
-
-Registering a compressor allows it to be used later. After registering a compressor you can activate it using the `js_compressor=` or `css_compressor=` method on the environment or Sprockets global.
-
-```ruby
-Sprockets.register_compressor 'text/css', :my_css, MyCssCompressor
-Sprockets.css_compressor = :my_css
-```
-
-Compressors only operate on JavaScript and CSS. If you want to compress a different type of asset, use a processor (see "Processors" above) to process the asset.
-
-## Adding directives to your extension
-
-If you are writing a transformer you likely also want it to understand Sprockets directives (such as the ability to `require` other files). You don't have to add this functionality in manually, instead you can register a custom instance of `DirectiveProcessor` to run with your asset.
-
-The `DirectiveProcessor` can be initialized with a `:comments` key that holds an array of characters that denote a comment. For example the coffeescript language uses `#` as a comment. We could apply directive support to coffeescript files by registering:
-
-```ruby
-Sprockets.register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
-```
-
-## Register Mime Types
-
-You can add new mime-types to Sprockets by using the `register_mime_type` method. For example:
-
-```ruby
-Sprockets.register_mime_type 'application/json', extensions: ['.json'], charset: :unicode
-Sprockets.register_mime_type 'application/ruby', extensions: ['.rb']
-```
-
-The first method is the mime-type of the object. The `:extensions` key passed to the second argument contains an array of all the extensions for the given mime type. An optional charset can be registered. This should only be used for text based mimetypes.
-
-Your extension may have multiple parts for example some people use `.coffee.js` when this file type is used, we do not wish it to process as javascript first and then as coffee script so we register this entire extension:
-
-
-```ruby
-Sprockets.register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
-```
-
-### Metadata Keys
+### Extension Metadata Keys
 
 While you can store arbitrary keys in the metadata returned by your extension, there are some with special meaning and
 uses inside of Sprockets. More may be added in the future.
@@ -251,7 +238,6 @@ this by setting the field manually.
 return { data: data, charset: nil }
 ```
 
-
 WIP the format of the source map may be subject to change before 4.0 is released. Currently it takes a `:original`
 and `:generated` key which each hold an array of line and column numbers. Line numbers are 1 indexed column numbers
 are 0 indexed. The first character of a file will always be `[1,0]`.
@@ -263,6 +249,34 @@ are 0 indexed. The first character of a file will always be `[1,0]`.
 - links: A `Set` of String Asset URIs that should be compiled along with this asset.
 
 - dependencies: A `Set` of String Cache URIs that should be monitored for caching.
+
+### Register Mime Types
+
+You can add new mime-types to Sprockets by using the `register_mime_type` method. For example:
+
+```ruby
+Sprockets.register_mime_type 'application/json', extensions: ['.json'], charset: :unicode
+Sprockets.register_mime_type 'application/ruby', extensions: ['.rb']
+```
+
+The first method is the mime-type of the object. The `:extensions` key passed to the second argument contains an array of all the extensions for the given mime type. An optional charset can be registered. This should only be used for text based mimetypes.
+
+Your extension may have multiple parts for example some people use `.coffee.js` when this file type is used, we do not wish it to process as javascript first and then as coffee script so we register this entire extension:
+
+
+```ruby
+Sprockets.register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
+```
+
+## Adding Directives to your Extension
+
+If you are writing a transformer you likely also want it to understand Sprockets directives (such as the ability to `require` other files). You don't have to add this functionality in manually, instead you can register a custom instance of `DirectiveProcessor` to run with your asset.
+
+The `DirectiveProcessor` can be initialized with a `:comments` key that holds an array of characters that denote a comment. For example the coffeescript language uses `#` as a comment. We could apply directive support to coffeescript files by registering:
+
+```ruby
+Sprockets.register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
+```
 
 ## Supporting All Versions of Sprockets in Processors
 
