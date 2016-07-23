@@ -266,9 +266,46 @@ are 0 indexed. The first character of a file will always be `[1,0]`.
 
 ## Supporting All Versions of Sprockets in Processors
 
-If you are extending sprockets you may want to support all current major versions of sprockets (2, 3, and 4). The processor interface was deprecated from Sprockets 2 and a legacy shim was put into Sprockets 3. Now that Sprockets 4 is out that shim no longer is active, so you'll need to update your gem to either only use the new interface or use both interfaces.
+If you are extending sprockets you may want to support all current major versions of sprockets (2, 3, and 4). The processor interface was deprecated from Sprockets 2 and a legacy shim was put into Sprockets 3. Now that Sprockets 4 is out that shim no longer is active, so you'll need to update your gem to either only use the new interface or use both interfaces. For example:
 
-As a recap Sprockets 2 let you register a processor with a class that would be instantiated and the method `render` called on it you can [view the calling code in Sprockets 2.x](https://github.com/rails/sprockets/blob/2199a6012cc2b9cdbcbc0049361e5ee02770dff0/lib/sprockets/context.rb#L194-L202). It may have looked like this:
+```ruby
+# Sprockets 2, 3 & 4 interface
+
+class MySprocketsExtension
+  def initialize(filename, &block)
+    @filename = filename
+    @source   = block.call
+  end
+
+  def render(context, empty_hash_wtf)
+    self.class.run(@filename, @source, context)
+  end
+
+  def self.run(filename, source, context)
+    source + "/* Hello From my sprockets extension */"
+  end
+
+  def self.call(input)
+    filename = input[:filename]
+    source   = input[:data]
+    context  = input[:environment].context_class.new(input)
+
+    result = run(filename, source, context)
+    { data: result }
+  end
+end
+
+require 'sprockets/processing'
+extend Sprockets::Processing
+
+register_preprocessor 'text/css', MySprocketsExtension
+```
+
+This extension is registered to add a comment `/* Hello From my sprockets extension */` to the end of a `text/css` (.css) file.
+
+To understand why all of this is needed, we need to look at the different interfaces for Sprockets 2, 3, and 4.
+
+Sprockets 2 let you register a processor with a class that would be instantiated and the method `render` called on it you can [view the calling code in Sprockets 2.x](https://github.com/rails/sprockets/blob/2199a6012cc2b9cdbcbc0049361e5ee02770dff0/lib/sprockets/context.rb#L194-L202). It may have looked like this:
 
 
 ```ruby
@@ -290,9 +327,9 @@ extend Sprockets::Processing
 register_preprocessor 'text/css', MySprocketsExtension
 ```
 
-You can also pass a block to both 2.x and 3.x+, however the number of args the method takes has changed so it's very hard to do that method and support multiple processor interfaces.
+You can also pass a block to both 2.x and 3.x+ processor interfaces, however the number of args the method takes has changed so it's very hard to do that method and support multiple processor interfaces.
 
-This `render` interface is deprecated, instead you should use the `call` interface. Whatever you pass to the processor can have a `call` method, it does not need to be a class.
+This Sprockets 2.x `render` interface is deprecated, instead you should use the `call` interface which was introduced in Sprockets 3.x. Whatever you pass to the processor can have a `call` method, it does not need to be a class.
 
 
 ```ruby
@@ -301,6 +338,7 @@ This `render` interface is deprecated, instead you should use the `call` interfa
 module MySprocketsExtension
   def self.call(input)
     # code
+    result = input[:data] # :data key holds source
     { data: result }
   end
 end
@@ -311,40 +349,7 @@ extend Sprockets::Processing
 register_preprocessor 'text/css', MySprocketsExtension
 ```
 
-Okay so if you want 2, 3, and 4 to work you can pass in a class that also has a `call` method on it. To see how this can be done you can reference this [autoprefixer-rails pull request](https://github.com/ai/autoprefixer-rails/pull/85). The shorthand code looks something like this:
-
-```ruby
-# Sprockets 2, 3 & 4 interface
-
-class MySprocketsExtension
-  def initialize(filename, &block)
-    @filename = filename
-    @source   = block.call
-  end
-
-  def render(context, empty_hash_wtf)
-    self.class.run(@filename, @source, context)
-  end
-
-  def self.run(filename, source, context)
-    # do somethign with filename and source and context
-  end
-
-  def self.call(input)
-    filename = input[:filename]
-    source   = input[:data]
-    context  = input[:environment].context_class.new(input)
-
-    result = run(filename, source, context)
-    { data: result }
-  end
-end
-
-require 'sprockets/processing'
-extend Sprockets::Processing
-
-register_preprocessor 'text/css', MySprocketsExtension
-```
+So if you want 2, 3, and 4 to work you can pass in a class that also has a `call` method on it as well as a `render` instance method. To see how this can be done you can reference this [autoprefixer-rails pull request](https://github.com/ai/autoprefixer-rails/pull/85).
 
 This way you're passing in an object that responds to 3.x's `call` interface and 2.x's `new.render` interface. In generally we're recommending people not use Sprockets 2.x and that they upgrade to Sprockets 3+. If it's easier on you, you can rev a major version and only support the new interface.
 
@@ -362,6 +367,10 @@ module MySprocketsExtension
   end
 end
 ```
+
+If your application is making serious modifications to the source file (an example could be a coffee script file generating JS will be signifigantly different) then you'll want to calculate and return an appropriate `map` key in the `metadata` hash. See the "metadata" section for more info on doing this.
+
+Once you've written your processor to run on all 3 versions of Sprockets you will need to register it. This is covered next.
 
 ### Registering All Versions of Sprockets in Processors
 
