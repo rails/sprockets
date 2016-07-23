@@ -368,7 +368,7 @@ end
 In Sprockets 2 and 3 the way you registered a processor was via `register_engine`. Something like
 
 ```ruby
-# Sprockets 2 and 3
+# Sprockets 3
 env.register_engine '.css', MySprocketsExtension, mime_type: 'text/css'
 ```
 
@@ -387,7 +387,7 @@ Sprockets 4 will not chain asset extensions so `.coffee.erb` is explicitly regis
 Depending on what your library needs to do it may run into a scenario where it must use the `register_engine` directive in Sprockets 3 even though it is deprecated. This is because some libraries are designed to over-write the default processors that ship with Sprockets and Sprockets 3 still registers all processors using `register_engine`. To get your library to work with all versions without a deprecation you can use the `silence_deprecation` option.
 
 ```ruby
-# Sprockets 2, 3, and 4
+# Sprockets 3 and 4
 
 if env.respond_to?(:register_transformer)
   env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
@@ -400,6 +400,23 @@ end
 ```
 
 > Note: You shouldn't use the `silence_deprecation` option unless you're sure that your library works with Sprockets 4, you should be testing using a CI service such as Travis.
+
+Unfortunately if you want your code to work with 2, 3, and 4 you'll need to detect versions because `register_engine` in Sprockets 2 does not accept a hash:
+
+```ruby
+# Sprockets 2, 3, and 4
+
+if env.respond_to?(:register_transformer)
+  env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
+  env.register_preprocessor 'text/css', MySprocketsExtension
+end
+
+if env.respond_to(:register_engine)
+  args = ['.css', MySprocketsExtension]
+  args << { mime_type: 'text/css', silence_deprecation: true } if Sprockets::VERSION.start_with?("3")
+  register_engine(*args)
+end
+```
 
 ## WIP
 
