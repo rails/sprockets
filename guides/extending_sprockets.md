@@ -13,6 +13,7 @@ Sprockets can use custom processors, compressors, and directives. This document 
   - [Extension Metadata Keys](#extension-metadata-keys)
   - [Register Mime Type](#register-mime-types)
 - [Adding Directives to your Extension](#adding-directives-to-your-extension)
+- [Adding ERB Support to your Extension](#adding-erb-support-to-your-extension)
 - [Supporting All Versions of Sprockets in Processors](#supporting-all-versions-of-sprockets-in-processors)
   - [Registering All Versions of Sprockets in Processors](#registering-all-versions-of-sprockets-in-processors)
 
@@ -277,6 +278,25 @@ The `DirectiveProcessor` can be initialized with a `:comments` key that holds an
 ```ruby
 Sprockets.register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
 ```
+
+## Adding ERB Support to your Extension
+
+In Sprockets 4 file types are no longer "chainable" this means that if you wanted to use a `.coffee.erb` that it must be registered to sprockets explicitly. This is different from previous versions of sprockets where you would have to register only a `.erb` processor and then a `.coffee` processor and sprockets would chain them (first running erb then coffee).
+
+The reason for the change is to have more explicit behavior. It helps sprockets know to do the right thing, decreases magic, and increases speed. It also means that as a library maintainer you must tell sprockets all the extensions you want your project to work with. Going with the coffee script example. You would need to register a mime type
+
+<!---
+Right now sprockets uses an "internal interface" to register erb files. I'm not actually sure how to register support for an ERB file correctly without using that interface, need to do more research
+
+```
+env.register_mime_type 'text/coffeescript+ruby', extensions: ['.coffee.erb', '.js.coffee.erb']
+
+env.register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
+env.register_transformer 'text/coffeescript', 'application/javascript', CoffeeScriptProcessor
+env.register_preprocessor 'text/coffeescript', DirectiveProcessor.new(comments: ["#", ["###", "###"]])
+```
+
+-->
 
 ## Supporting All Versions of Sprockets in Processors
 
