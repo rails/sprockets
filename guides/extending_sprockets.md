@@ -314,7 +314,7 @@ register_preprocessor 'text/css', MySprocketsExtension
 Okay so if you want 2, 3, and 4 to work you can pass in a class that also has a `call` method on it. To see how this can be done you can reference this [autoprefixer-rails pull request](https://github.com/ai/autoprefixer-rails/pull/85). The shorthand code looks something like this:
 
 ```ruby
-# Sprockets 2.x & 3.x+ interface
+# Sprockets 2, 3 & 4 interface
 
 class MySprocketsExtension
   def initialize(filename, &block)
@@ -365,43 +365,7 @@ end
 
 ### Registering All Versions of Sprockets in Processors
 
-In Sprockets 2 and 3 the way you registered a processor was via `register_engine`. Something like
-
-```ruby
-# Sprockets 3
-env.register_engine '.css', MySprocketsExtension, mime_type: 'text/css'
-```
-
-In Sprockets 4 you must first explicitly register a mime type and use the appropriate processor directive i.e. `register_transformer`, `register_preprocessor`, etc.
-
-```ruby
-# Sprockets 4
-env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
-env.register_preprocessor 'text/css', MySprocketsExtension
-```
-
-The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. You wouldn't need to add a mime type for JS and CSS assets but you will for other filetypes for example `.coffee` or `.scss`. The above `register_mime_type` example is used for example purposes and wouldn't be required.
-
-Sprockets 4 will not chain asset extensions so `.coffee.erb` is explicitly registered in addition to `.coffee`.
-
-Depending on what your library needs to do it may run into a scenario where it must use the `register_engine` directive in Sprockets 3 even though it is deprecated. This is because some libraries are designed to over-write the default processors that ship with Sprockets and Sprockets 3 still registers all processors using `register_engine`. To get your library to work with all versions without a deprecation you can use the `silence_deprecation` option.
-
-```ruby
-# Sprockets 3 and 4
-
-if env.respond_to?(:register_transformer)
-  env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
-  env.register_preprocessor 'text/css', MySprocketsExtension
-end
-
-if env.respond_to(:register_engine)
-  register_engine '.css', MySprocketsExtension, mime_type: 'text/css', silence_deprecation: true
-end
-```
-
-> Note: You shouldn't use the `silence_deprecation` option unless you're sure that your library works with Sprockets 4, you should be testing using a CI service such as Travis.
-
-Unfortunately if you want your code to work with 2, 3, and 4 you'll need to detect versions because `register_engine` in Sprockets 2 does not accept a hash:
+In Sprockets 2 and 3 the way you registered a processor was via `register_engine`. Unfortunately they have different method signatures. In Sprockets 4 you must first explicitly register a mime type and use the appropriate processor directive i.e. `register_transformer`, `register_preprocessor`, etc. To register a processor for all 3 versions of sprockets you could do it like this:
 
 ```ruby
 # Sprockets 2, 3, and 4
@@ -414,9 +378,41 @@ end
 if env.respond_to(:register_engine)
   args = ['.css', MySprocketsExtension]
   args << { mime_type: 'text/css', silence_deprecation: true } if Sprockets::VERSION.start_with?("3")
-  register_engine(*args)
+  env.register_engine(*args)
 end
 ```
+
+To understand why this is all needed, we can break down the parts. First is how you register an "engine" with Sprockets 3:
+
+
+```ruby
+# Sprockets 3
+env.register_engine '.css', MySprocketsExtension, mime_type: 'text/css', silence_deprecation: true
+```
+
+The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. We can pass in `silence_deprecation: true` to let Sprockets know that the inteface is going away, only do this on code you know works with Sprockets 4.
+
+To get the `register_engine code working with Sprockets 2 we have to do some version detection since Sprockets 2 will error if you try to pass a hash into it:
+
+```
+# Sprockets 2 & 3
+args = ['.css', MySprocketsExtension]
+args << { mime_type: 'text/css', silence_deprecation: true } if Sprockets::VERSION.start_with?("3")
+env.register_engine(*args)
+```
+
+Next we see how to do it with Sprockets 4 when `register_engine` is removed:
+
+```ruby
+# Sprockets 4
+env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
+env.register_preprocessor 'text/css', MySprocketsExtension
+```
+
+In reality you wouldn't need to add a mime type for JS and CSS assets since they're already there by default but you will for other filetypes for example `.coffee` or `.scss`. The above `register_mime_type` example is used for example purposes and wouldn't be required.
+
+Sprockets 4 will not chain asset extensions so `.coffee.erb` is explicitly registered in addition to `.coffee`. If your application introduces a new mime/extension combo it will be responsible for registering all combinations.
+
 
 ## WIP
 
