@@ -63,6 +63,8 @@ class TestSprocketsSassc < TestBaseSassc
     @env = Sprockets::Environment.new(".") do |env|
       env.cache = {}
       env.append_path(fixture_path('.'))
+      puts "Root Path: #{ FIXTURE_ROOT }"
+      puts "Compass path: #{ fixture_path('compass').inspect }"
       env.append_path(fixture_path('compass'))
       env.append_path(fixture_path('octicons'))
       env.register_transformer 'text/sass', 'text/css', Sprockets::SasscProcessor.new
