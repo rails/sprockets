@@ -44,7 +44,7 @@ class TestPathUtils < MiniTest::Test
       "source-maps",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
-
+    
     [ ['a', 'b'], ['a', 'b', '.', '..'] ].each do |dir_contents|
       Dir.stub :entries, dir_contents do
         assert_equal ['a', 'b'], entries(Dir.tmpdir)
@@ -188,7 +188,7 @@ class TestPathUtils < MiniTest::Test
     assert_equal [
       ["#{dirname}/hello.jst.ejs", "application/ejs"],
       ["#{dirname}/hello.txt", "text/plain"]
-    ].sort, find_matching_path_for_extensions(dirname, "hello", extensions).sort
+    ], find_matching_path_for_extensions(dirname, "hello", extensions)
 
   end
 
