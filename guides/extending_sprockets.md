@@ -325,7 +325,7 @@ class MySprocketsExtension
     context  = input[:environment].context_class.new(input)
 
     result = run(filename, source, context)
-    { data: result }
+    context.metadata.merge(data: result)
   end
 end
 
