@@ -418,7 +418,7 @@ if env.respond_to?(:register_transformer)
   env.register_preprocessor 'text/css', MySprocketsExtension
 end
 
-if env.respond_to(:register_engine)
+if env.respond_to?(:register_engine)
   args = ['.css', MySprocketsExtension]
   args << { mime_type: 'text/css', silence_deprecation: true } if Sprockets::VERSION.start_with?("3")
   env.register_engine(*args)
