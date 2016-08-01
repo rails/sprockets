@@ -1,4 +1,4 @@
-** 3.7.0** (July 21, 2016)
+**3.7.0** (July 21, 2016)
 
 * Deprecated interfaces now emit deprecation warnings #345
 
