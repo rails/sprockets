@@ -31,7 +31,7 @@ Previously, if you wanted Rails to serve a non-standard named asset (any CSS not
 config.assets.precompile += ["marketing.css"]
 ```
 
-Sprockets 3 introduced the concept of a "manifest" file that could list all assets you want to make available using the `link` directive. In this case, to compile the `marketing.css` you would set precompile to:
+Sprockets 4 introduced the concept of a "manifest" file that could list all assets you want to make available using the `link` directive. In this case, to compile the `marketing.css` you would set precompile to:
 
 ```ruby
 config.assets.precompile = ["manifest.js"]
