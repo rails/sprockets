@@ -103,7 +103,7 @@
 
 **3.0.0** (April 12, 2015)
 
-[Guide to upgrading from Sprockets 2.x to 3.x](https://github.com/rails/sprockets/blob/master/UPGRADING.md)
+[Guide to upgrading from Sprockets 2.x to 3.x](https://github.com/rails/sprockets/blob/3.x/UPGRADING.md)
 
 * New processor API. Tilt interface is deprecated.
 * Improved file store caching backend.
