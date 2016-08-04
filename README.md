@@ -204,8 +204,8 @@ environment.js_compressor  = :uglify
 environment.css_compressor = :scss
 ```
 
-If you are using Sprockets directly with Rack app, don't forget to add
-`uglifier` and `sass` gems to your Gemfile when using above options.
+If you are using Sprockets directly with a Rack app, don't forget to add
+the `uglifier` and `sass` gems to your Gemfile when using above options.
 
 ### Styling with Sass and SCSS
 
@@ -434,9 +434,9 @@ within any subdependencies.
 
 ## Processor Interface
 
-Sprockets 2.x was originally design around [Tilt](https://github.com/rtomayko/tilt)'s engine interface. However, starting with 3.x, a new interface has been introduced deprecating Tilt.
+Sprockets 2.x was originally designed around [Tilt](https://github.com/rtomayko/tilt)'s engine interface. However, starting with 3.x, a new interface has been introduced deprecating Tilt.
 
-Similar to Rack, a processor is a any "callable" (an object that responds to `call`). This maybe a simple Proc or a full class that defines a `def self.call(input)` method. The `call` method accepts an `input` Hash and returns a Hash of metadata.
+Similar to Rack, a processor is any "callable" (an object that responds to `call`). This may be a simple Proc or a full class that defines a `def self.call(input)` method. The `call` method accepts an `input` Hash and returns a Hash of metadata.
 
 Also see [`Sprockets::ProcessorUtils`](https://github.com/rails/sprockets/blob/master/lib/sprockets/processor_utils.rb) for public helper methods.
 
@@ -444,7 +444,7 @@ Also see [`Sprockets::ProcessorUtils`](https://github.com/rails/sprockets/blob/m
 
 The `input` Hash defines the following public fields.
 
-* `:data` - String asset contents
+* `:data` - String asset contents.
 * `:environment` - Current `Sprockets::Environment` instance.
 * `:cache` - A `Sprockets::Cache` instance. See [`Sprockets::Cache#fetch`](https://github.com/rails/sprockets/blob/master/lib/sprockets/cache.rb).
 * `:uri` - String Asset URI.
@@ -465,7 +465,7 @@ end
 
 ### return Hash
 
-The processor should return metadata `Hash`. With the exception of the `:data` key, the processor can store arbitrary JSON valid values in this Hash. The data will be stored and exposed on `Asset#metadata`.
+The processor should return metadata `Hash`. With the exception of the `:data` key, the processor can store arbitrary valid JSON values in this Hash. The data will be stored and exposed on `Asset#metadata`.
 
 The returned `:data` replaces the assets `input[:data]` to the next processor in the chain. Returning a `String` is shorthand for returning `{ data: str }`. And returning `nil` is shorthand for a no-op where the input data is not transformed, `{ data: input[:data] }`.
 
