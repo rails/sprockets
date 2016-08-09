@@ -36,11 +36,12 @@ module Sprockets
     attr_reader :cache_key
 
     def initialize(options = {})
-      @compiler = Autoload::Closure::Compiler.new(options)
+      @options = options
       @cache_key = "#{self.class.name}:#{Autoload::Closure::VERSION}:#{Autoload::Closure::COMPILER_VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
+      @compiler ||= Autoload::Closure::Compiler.new(@options)
       @compiler.compile(input[:data])
     end
   end
