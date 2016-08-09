@@ -39,7 +39,7 @@ module Sprockets
     def initialize(options = {})
       options[:comments] ||= :none
 
-      @uglifier = Autoload::Uglifier.new(options)
+      @options = options
       @cache_key = "#{self.class.name}:#{Autoload::Uglifier::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
@@ -47,6 +47,7 @@ module Sprockets
       if Autoload::Uglifier::VERSION.to_i < 2
         raise "uglifier 1.x is no longer supported, please upgrade to 2.x"
       end
+      @uglifier ||= Autoload::Uglifier.new(@options)
 
       js, map = @uglifier.compile_with_map(input[:data])
       map = SourceMapUtils.combine_source_maps(
