@@ -44,11 +44,12 @@ module Sprockets
         options[:comments] ||= :none
       end
 
-      @uglifier = Autoload::Uglifier.new(options)
+      @options = options
       @cache_key = "#{self.class.name}:#{Autoload::Uglifier::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
+      @uglifier ||= Autoload::Uglifier.new(@options)
       @uglifier.compile(input[:data])
     end
   end
