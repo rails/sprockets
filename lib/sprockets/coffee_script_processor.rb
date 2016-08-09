@@ -8,7 +8,7 @@ module Sprockets
   #
   # For more infomation see:
   #
-  #   https://github.com/josh/ruby-coffee-script
+  #   https://github.com/rails/ruby-coffee-script
   #
   module CoffeeScriptProcessor
     VERSION = '2'
