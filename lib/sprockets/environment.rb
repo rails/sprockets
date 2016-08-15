@@ -5,7 +5,7 @@ require 'sprockets/cached_environment'
 
 module Sprockets
   class Environment < Base
-    # `Environment` should initialized with your application's root
+    # `Environment` should be initialized with your application's root
     # directory. This should be the same as your Rails or Rack root.
     #
     #     env = Environment.new(Rails.root)
@@ -19,7 +19,7 @@ module Sprockets
 
     # Returns a cached version of the environment.
     #
-    # All its file system calls are cached which makes `cached` much
+    # All of its file system calls are cached which makes `cached` much
     # faster. This behavior is ideal in production since the file
     # system only changes between deploys.
     def cached
