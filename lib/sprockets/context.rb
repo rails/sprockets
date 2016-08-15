@@ -116,7 +116,7 @@ module Sprockets
     #
     # This is used for caching purposes. Any changes that would
     # invalidate the dependency asset will invalidate the source
-    # file. Unlike `depend_on`, this will include recursively include
+    # file. Unlike `depend_on`, this will recursively include
     # the target asset's dependencies.
     def depend_on_asset(path)
       load(resolve(path))
