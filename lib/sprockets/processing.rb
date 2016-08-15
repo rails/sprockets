@@ -218,9 +218,9 @@ module Sprockets
         end
       end
 
-      def unregister_config_processor(type, mime_type, proccessor)
+      def unregister_config_processor(type, mime_type, processor)
         self.config = hash_reassoc(config, type, mime_type) do |processors|
-          processors.delete(proccessor)
+          processors.delete_if { |p| p == processor || p.class == processor }
           processors
         end
       end
