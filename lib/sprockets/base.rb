@@ -15,7 +15,7 @@ require 'sprockets/source_map_utils'
 require 'sprockets/uri_tar'
 
 module Sprockets
-  # `Base` class for `Environment` and `Cached`.
+  # `Base` class for `Environment` and `CachedEnvironment`.
   class Base
     include PathUtils, PathDependencyUtils, PathDigestUtils, DigestUtils, SourceMapUtils
     include Configuration
@@ -35,7 +35,7 @@ module Sprockets
       @cache = Cache.new(cache, logger)
     end
 
-    # Return an `Cached`. Must be implemented by the subclass.
+    # Return an `CachedEnvironment`. Must be implemented by the subclass.
     def cached
       raise NotImplementedError
     end

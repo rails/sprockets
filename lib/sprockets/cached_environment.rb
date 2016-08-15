@@ -2,14 +2,14 @@
 require 'sprockets/base'
 
 module Sprockets
-  # `Cached` is a special cached version of `Environment`.
+  # `CachedEnvironment` is a special cached version of `Environment`.
   #
   # The expection is that all of its file system methods are cached
-  # for the instances lifetime. This makes `Cached` much faster. This
+  # for the instances lifetime. This makes `CachedEnvironment` much faster. This
   # behavior is ideal in production environments where the file system
   # is immutable.
   #
-  # `Cached` should not be initialized directly. Instead use
+  # `CachedEnvironment` should not be initialized directly. Instead use
   # `Environment#cached`.
   class CachedEnvironment < Base
     def initialize(environment)
