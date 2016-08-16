@@ -748,7 +748,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 end
 
-class TestCached < Sprockets::TestCase
+class TestCachedEnvironment < Sprockets::TestCase
   include EnvironmentTests
 
   def new_environment
