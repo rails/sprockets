@@ -210,6 +210,10 @@ module Sprockets
   register_dependency_resolver 'processors' do |env, str|
     env.resolve_processors_cache_key_uri(str)
   end
+  register_dependency_resolver 'env' do |env, str|
+    _, var = str.split(':', 2)
+    ENV[var]
+  end
 
   depend_on 'environment-version'
   depend_on 'environment-paths'
