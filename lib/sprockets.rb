@@ -162,7 +162,6 @@ module Sprockets
   require 'sprockets/eco_processor'
   require 'sprockets/ejs_processor'
   require 'sprockets/jst_processor'
-  register_mime_type 'application/javascript+function', extensions: []
   register_mime_type 'text/eco', extensions: ['.eco', '.jst.eco']
   register_mime_type 'text/ejs', extensions: ['.ejs', '.jst.ejs']
   register_transformer 'text/eco', 'application/javascript+function', EcoProcessor
