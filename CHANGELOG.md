@@ -4,6 +4,11 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## 4.0.0.beta2
 
+- Source Map fixes [#255]
+- Performance improvements
+
+## 4.0.0.beta2
+
 - Fix load_paths on Sass processors [#223]
 
 
