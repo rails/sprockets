@@ -746,6 +746,19 @@ class TestEnvironment < Sprockets::TestCase
     @env.unregister_preprocessor('application/javascript', processor)
     assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
   end
+
+  test "disabling processors by class name also disables processors which are instances of that class" do
+    space_and_whitespace_compressor = Class.new(WhitespaceCompressor)
+
+    @env.register_preprocessor('text/html', WhitespaceCompressor)
+    @env.register_preprocessor('text/html', WhitespaceCompressor.new)
+    @env.register_preprocessor('text/html', space_and_whitespace_compressor)
+    assert_equal 3, @env.preprocessors['text/html'].size
+
+    @env.unregister_preprocessor('text/html', WhitespaceCompressor)
+    assert_equal 1, @env.preprocessors['text/html'].size
+    assert_equal space_and_whitespace_compressor, @env.preprocessors['text/html'][0]
+  end
 end
 
 class TestCachedEnvironment < Sprockets::TestCase
