@@ -3,8 +3,13 @@ require "sprockets_test"
 
 class DependencyTest < Sprockets::TestCase
   def setup
+    @old_env_value = ENV['DEPENDENCY_TEST_VALUE']
     ENV['DEPENDENCY_TEST_VALUE'] = 'Hello'
     @env = Sprockets::Environment.new
+  end
+
+  def teardown
+    ENV['DEPENDENCY_TEST_VALUE'] = @old_env_value
   end
 
   def test_env_dependency
