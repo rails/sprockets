@@ -34,6 +34,10 @@ module Sprockets
         change_source(SourceMapUtils.decode_json_source_map(map)["mappings"], input[:source_path])
       )
 
+      engine.dependencies.each do |dependency|
+        context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.filename)
+      end
+
       context.metadata.merge(data: css, map: map)
     end
 
