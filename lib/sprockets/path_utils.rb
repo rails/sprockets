@@ -180,16 +180,30 @@ module Sprockets
     # Returns an Array of [String path, Object value] matches.
     def find_matching_path_for_extensions(path, basename, extensions)
       matches = []
-      entries(path).each do |entry|
-        next unless File.basename(entry).start_with?(basename)
-        extname, value = match_path_extname(entry, extensions)
-        if basename == entry.chomp(extname)
-          filename = File.join(path, entry)
-          if file?(filename)
-            matches << [filename, value]
+      # Requires a file touch for each extension
+      # In the case where lots of extensions are given, it may be faster to search the directory
+      if extensions.length < 3
+        extensions.each do |(extension, mime_type)|
+          file = File.join(path, basename + extension)
+          matches << [file, mime_type] if File.exist?(file)
+        end
+      end
+
+      # Used when files don't have registered mime types or
+      # when a large number of extensions would require too many file touches.
+      if matches.empty?
+        entries(path).each do |entry|
+          next unless File.basename(entry).start_with?(basename)
+          extname, value = match_path_extname(entry, extensions)
+          if basename == entry.chomp(extname)
+            filename = File.join(path, entry)
+            if file?(filename)
+              matches << [filename, value]
+            end
           end
         end
       end
+
       matches
     end
 
