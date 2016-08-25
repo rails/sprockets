@@ -114,6 +114,8 @@ li {
   end
 
   test "@import css file from load path" do
+    skip "Does not work on windows with sassc" if File::ALT_SEPARATOR && self.sass == ::SassC
+
     assert_equal "\n", render('sass/import_load_path.scss')
   end
 
