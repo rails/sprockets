@@ -51,6 +51,27 @@ class TestSourceMaps < Sprockets::TestCase
     ], map.map { |m| m[:source] }.uniq.compact
   end
 
+  test "rebuilds a source map when related dependency has changed" do
+    filename = fixture_path('source-maps/dynamic/unstable.js')
+    sandbox filename do
+      write(filename, "magic_number = 42", 1421000000)
+      map_1 = JSON.parse(@env['dynamic/application.js.map'].source)
+
+      write(filename, "number_of_the_beast = 666", 1422000000)
+      map_2 = JSON.parse(@env['dynamic/application.js.map'].source)
+
+      assert_equal([
+        "dynamic/unstable.source-43b85c2116b8c894a292c17a6845aa1c9b1491f7dc6bddf764c384668457d55a.js",
+        "dynamic/application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
+      ], map_1["sources"])
+
+      assert_equal([
+        "dynamic/unstable.source-2ae6f42425799bc9f718842df81be58c5f011dc93a00ca4da17be8877bdb02b3.js",
+        "dynamic/application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
+      ], map_2["sources"])
+    end
+  end
+
   test "compile coffeescript source map" do
     assert asset = @env.find_asset("coffee/main.js")
     assert_equal fixture_path('source-maps/coffee/main.coffee'), asset.filename
