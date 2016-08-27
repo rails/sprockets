@@ -139,6 +139,7 @@ module Sprockets
     #     <%= require_asset "#{framework}.js" %>
     #
     def require_asset(path)
+      @content_type = "application/jsx" if path.match(/\.js\.jsx/)
       @required << resolve(path, accept: @content_type, pipeline: :self, compat: false)
       nil
     end
