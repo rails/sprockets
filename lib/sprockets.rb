@@ -34,6 +34,7 @@ module Sprockets
     registered_transformers: Hash.new { |h, k| {}.freeze }.freeze,
     root: File.expand_path('..', __FILE__).freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    exporters: Hash.new { |h, k| [].freeze }.freeze,
     version: "",
     gzip_enabled: true
   }.freeze
@@ -161,6 +162,9 @@ module Sprockets
   register_dependency_resolver 'processors' do |env, str|
     env.resolve_processors_cache_key_uri(str)
   end
+
+  require 'sprockets/gzip_exporter'
+  register_exporter '*/*', Sprockets::GzipExporter
 
   depend_on 'environment-version'
   depend_on 'environment-paths'

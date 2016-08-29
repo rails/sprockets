@@ -166,20 +166,20 @@ module Sprockets
       end
     end
 
-    # Compile and write asset to directory. The asset is written to a
+    # Export asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
     # also inserted into the manifest file.
     #
-    #   compile("application.js")
+    #   export("application.js")
     #
-    def compile(*args)
+    def export(*args)
       unless environment
         raise Error, "manifest requires environment for compilation"
       end
 
       filenames              = []
-      concurrent_compressors = []
+      concurrent_exporters = []
       concurrent_writers     = []
 
       find(*args) do |asset|
@@ -211,27 +211,24 @@ module Sprockets
         end
         filenames << asset.filename
 
-        next if environment.skip_gzip?
-        gzip = Utils::Gzip.new(asset)
-        next if gzip.cannot_compress?(environment.mime_types)
+        exporters = environment.exporters
 
-        if File.exist?("#{target}.gz")
-          logger.debug "Skipping #{target}.gz, already exists"
-        else
-          logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute do
-            write_file.wait! if write_file
-            gzip.compress(target)
-          end
+        wildcard_exporters = exporters['*/*']
+        content_type_exporters = exporters[asset.content_type]
+
+        (wildcard_exporters + content_type_exporters).each do |exporter|
+          process = exporter.call(environment, asset, target, dir, logger, -> { write_file.wait! if write_file })
+          concurrent_exporters << process if process
+          # binding.pry
         end
-
       end
       concurrent_writers.each(&:wait!)
-      concurrent_compressors.each(&:wait!)
+      concurrent_exporters.each(&:wait!)
       save
 
       filenames
     end
+    alias_method :compile, :export
 
     # Removes file from directory and from manifest. `filename` must
     # be the name with any directory path.
