@@ -5,7 +5,6 @@ require 'time'
 require 'concurrent'
 
 require 'sprockets/manifest_utils'
-require 'sprockets/utils/gzip'
 
 module Sprockets
   # The Manifest logs the contents of assets compiled to a single directory. It
@@ -147,27 +146,29 @@ module Sprockets
       end
     end
 
-    # Compile and write asset to directory. The asset is written to a
+    # Export asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
     # also inserted into the manifest file.
     #
-    #   compile("application.js")
+    #   export("application.js")
     #
-    def compile(*args)
+    def export(*args)
       unless environment
         raise Error, "manifest requires environment for compilation"
       end
 
-      filenames              = []
-      concurrent_compressors = []
-      executor               = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
-      concurrent_writers     = []
+      filenames            = []
+      concurrent_exporters = []
+      executor             = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
+      number_of_errors     = 0
+      last_error           = nil
 
       find(*args) do |asset|
+        mtime = Time.now.iso8601
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
-          'mtime'        => Time.now.iso8601,
+          'mtime'        => mtime,
           'size'         => asset.bytesize,
           'digest'       => asset.hexdigest,
 
@@ -180,36 +181,51 @@ module Sprockets
 
         target = File.join(dir, asset.digest_path)
 
-        if File.exist?(target)
-          logger.debug "Skipping #{target}, already exists"
-        else
-          logger.info "Writing #{target}"
-          write_file = Concurrent::Future.execute(executor: executor) { asset.write_to target }
-          concurrent_writers << write_file
-        end
         filenames << asset.filename
 
-        next if environment.skip_gzip?
-        gzip = Utils::Gzip.new(asset)
-        next if gzip.cannot_compress?(environment.mime_types)
+        asset_exporters_hash = {}
 
-        if File.exist?("#{target}.gz")
-          logger.debug "Skipping #{target}.gz, already exists"
-        else
-          logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute(executor: executor) do
-            write_file.wait! if write_file
-            gzip.compress(target)
-          end
+        environment.exporters.each do |mime_type, exporters|
+          next unless environment.match_mime_type? asset.content_type, mime_type
+          (asset_exporters_hash[asset] ||= Set.new).merge exporters
         end
 
+        asset_exporters_hash.each do |asset, exporters|
+          exporters.each do |exporter|
+
+            exporter_instance = exporter.new(environment, asset, target, dir, logger, mtime)
+
+            if exporter == FileExporter || !environment.config[:export_concurrent]
+              # FileExporter must be finished before the other exporters
+              exporter_instance.call
+            else
+              # don't execute these yet, we don't know if FileExporter has already run
+              concurrent_exporters << Concurrent::Future.new(executor: executor) do
+                begin
+                  exporter_instance.call
+                rescue => e
+                  number_of_errors = number_of_errors + 1
+                  last_error = e
+                end
+              end
+            end
+          end
+          concurrent_exporters.each(&:execute)
+        end
       end
-      concurrent_writers.each(&:wait!)
-      concurrent_compressors.each(&:wait!)
+
+      # make sure all exporters have finished before returning the main thread
+      concurrent_exporters.each(&:wait!)
+      if last_error
+        logger.info "There have been #{number_of_errors} errors. " +
+        "To inspect them, turn off concurrent exporting by invoking env.export_concurrent = false"
+        raise last_error
+      end
       save
 
       filenames
     end
+    alias_method :compile, :export
 
     # Removes file from directory and from manifest. `filename` must
     # be the name with any directory path.
