@@ -290,7 +290,7 @@ module Sprockets
       # If no history is present, or if none of the histories could be resolved to a valid asset then,
       # the asset's dependencies are resolved, added to the History, the asset is loaded again, and older
       # entries are removed if the "history" is above `limit`
-      def fetch_asset_from_dependency_cache(unloaded, limit = 1)
+      def fetch_asset_from_dependency_cache(unloaded, limit = 3)
         history = cache_get_dependency_history(unloaded)
         history.each_with_index do |deps, index|
           expanded_deps = history_entry_unpack_dependencies(deps)
