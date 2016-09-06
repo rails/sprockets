@@ -161,6 +161,7 @@ module Sprockets
 
       filenames              = []
       concurrent_compressors = []
+      executor               = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
       concurrent_writers     = []
 
       find(*args) do |asset|
@@ -183,7 +184,7 @@ module Sprockets
           logger.debug "Skipping #{target}, already exists"
         else
           logger.info "Writing #{target}"
-          write_file = Concurrent::Future.execute { asset.write_to target }
+          write_file = Concurrent::Future.execute(executor: executor) { asset.write_to target }
           concurrent_writers << write_file
         end
         filenames << asset.filename
@@ -196,7 +197,7 @@ module Sprockets
           logger.debug "Skipping #{target}.gz, already exists"
         else
           logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute do
+          concurrent_compressors << Concurrent::Future.execute(executor: executor) do
             write_file.wait! if write_file
             gzip.compress(target)
           end
