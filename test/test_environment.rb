@@ -69,6 +69,13 @@ module EnvironmentTests
     assert_equal 1, @env.bundle_processors['text/css'].size
   end
 
+  test "Has the asset name when an error is raised" do
+    error = assert_raises do
+      @env.find_asset("error_in_erb.js", accept: '*/*')
+    end
+    assert_match %r{error_in_erb.js}, error.message
+  end
+
   test "find asset with accept type" do
     assert asset = @env.find_asset("gallery.js", accept: '*/*')
     assert_equal fixture_path('default/gallery.js'), asset.filename
