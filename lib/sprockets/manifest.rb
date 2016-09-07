@@ -182,28 +182,21 @@ module Sprockets
 
         if File.exist?(target)
           logger.debug "Skipping #{target}, already exists"
+          compressor = create_compressor(asset, target, executor)
+          compressor.execute if compressor
         else
           logger.info "Writing #{target}"
-          write_file = Concurrent::Future.execute(executor: executor) { asset.write_to target }
+          compressor = create_compressor(asset, target, executor)
+          write_file = Concurrent::Promise.new { asset.write_to target }
+          write_file.then { compressor.execute } if compressor
+
+          write_file.execute
           concurrent_writers << write_file
         end
+        concurrent_compressors << compressor if compressor
         filenames << asset.filename
-
-        next if environment.skip_gzip?
-        gzip = Utils::Gzip.new(asset)
-        next if gzip.cannot_compress?(environment.mime_types)
-
-        if File.exist?("#{target}.gz")
-          logger.debug "Skipping #{target}.gz, already exists"
-        else
-          logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute(executor: executor) do
-            write_file.wait! if write_file
-            gzip.compress(target)
-          end
-        end
-
       end
+
       concurrent_writers.each(&:wait!)
       concurrent_compressors.each(&:wait!)
       save
@@ -285,6 +278,26 @@ module Sprockets
     end
 
     private
+
+      def should_compress?(gzip, target)
+        return if environment.skip_gzip?
+        return if gzip.cannot_compress?(environment.mime_types)
+
+        if File.exist?("#{target}.gz")
+          logger.debug "Skipping #{target}.gz, already exists"
+          false
+        else
+          logger.info "Writing #{target}.gz"
+          true
+        end
+      end
+
+      def create_compressor(asset, target, executor)
+        gzip = Utils::Gzip.new(asset)
+        return unless should_compress?(gzip, target)
+        Concurrent::Promise.new(executor: executor) { gzip.compress(target) }
+      end
+
       def json_decode(obj)
         JSON.parse(obj, create_additions: false)
       end
