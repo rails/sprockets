@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'sprockets/asset'
 require 'sprockets/digest_utils'
 require 'sprockets/errors'
@@ -323,7 +324,7 @@ module Sprockets
         cache_set_dependency_history(unloaded, history)
       end
       def history_entry_pack_dependencies(history_entry)
-        history_entry.map do |uri|
+        history_entry.dup.map! do |uri|
           uri.start_with?("file-digest://") ? compress_from_root(uri) : uri
         end
       end
