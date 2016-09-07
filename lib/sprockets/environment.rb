@@ -31,6 +31,10 @@ module Sprockets
       cached.find_asset(*args)
     end
 
+    def find_asset!(*args)
+      cached.find_asset!(*args)
+    end
+
     def find_all_linked_assets(*args, &block)
       cached.find_all_linked_assets(*args, &block)
     end
