@@ -93,6 +93,9 @@ module Sprockets
       find_asset(*args)
     end
 
+    # Find asset by logical path or expanded path.
+    #
+    # If the asset is not found an error will be raised.
     def find_asset!(*args)
       asset = find_asset(*args)
       if asset
