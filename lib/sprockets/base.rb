@@ -93,6 +93,18 @@ module Sprockets
       find_asset(*args)
     end
 
+    # Find asset by logical path or expanded path.
+    #
+    # If the asset is not found an error will be raised.
+    def find_asset!(*args)
+      asset = find_asset(*args)
+      if asset
+        return asset
+      else
+        raise_on_unknown_asset(*args)
+      end
+    end
+
     # Pretty inspect
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
@@ -107,5 +119,13 @@ module Sprockets
     def expand_from_root(uri)
       URITar.new(uri, self).expand
     end
+
+    private
+      def raise_on_unknown_asset(*args)
+        asset_name = args.shift
+        msg = String.new("Could not load asset #{ asset_name.inspect }")
+        msg << "with options #{ args.inspect }" unless args.empty?
+        raise Sprockets::NotFound, msg
+      end
   end
 end

@@ -47,6 +47,18 @@ module EnvironmentTests
     assert_equal "hello: world\n", context.call("JST['hello']", name: "world")
   end
 
+  test "find_asset! does not raise an exception when asset is found" do
+    @env.find_asset!("hello.js") # assert no raise
+  end
+
+  test "find_asset! raises an error when asset is not found" do
+    does_not_exist_file_name = "doesnotexist.blerg"
+    error = assert_raises(Sprockets::NotFound) do
+      @env.find_asset!(does_not_exist_file_name)
+    end
+    assert_match %r{#{does_not_exist_file_name}}, error.message
+  end
+
   test "asset_data_uri helper" do
     assert asset = @env["with_data_uri.css"]
     assert_equal "body {\n  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAP%2F%2F%2FwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw%3D%3D) no-repeat;\n}\n", asset.to_s
