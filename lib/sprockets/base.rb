@@ -69,7 +69,7 @@ module Sprockets
         load(uri)
       end
     rescue => e
-      raise e, "Error trying to resolve and load '#{ args.first }':\n#{e.message}", e.backtrace
+      raise LoadError.new(args.first)
     end
 
     def find_all_linked_assets(*args)

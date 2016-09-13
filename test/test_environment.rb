@@ -53,7 +53,7 @@ module EnvironmentTests
 
   test "find_asset! raises an error when asset is not found" do
     does_not_exist_file_name = "doesnotexist.blerg"
-    error = assert_raises(Sprockets::NotFound) do
+    error = assert_raises(Sprockets::LoadError) do
       @env.find_asset!(does_not_exist_file_name)
     end
     assert_match %r{#{does_not_exist_file_name}}, error.message
@@ -74,6 +74,7 @@ module EnvironmentTests
       @env.find_asset("error_in_erb.js", accept: '*/*')
     end
     assert_match %r{error_in_erb.js}, error.message
+    puts error.message
   end
 
   test "find asset with accept type" do

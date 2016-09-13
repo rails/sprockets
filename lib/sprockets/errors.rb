@@ -9,4 +9,18 @@ module Sprockets
   class ConversionError         < NotFound; end
   class FileNotFound            < NotFound; end
   class FileOutsidePaths        < NotFound; end
+
+  # Used to wrap non-sprockets errors
+  class LoadError < Error
+    attr_reader :cause
+
+    def initialize(asset_name)
+      message = String.new("Error finding and loading #{asset_name}:\n")
+      message << "#{$!.class}: #{$!.message}"
+
+      super($!.message)
+      set_backtrace($!.backtrace)
+      @cause = $!
+    end
+  end
 end
