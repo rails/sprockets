@@ -231,9 +231,9 @@ TODO: Explain contents, location, and name of a manifest file.
 
 TODO: Explain default fingerprinting/digest behavior
 
-### Gzip
+## Gzip Files
 
-By default when Sprockets generates a compiled asset file it will also produce a gzipped copy of that file. Sprockets only gzips non-binary files such as CSS, javascript, and SVG files.
+In many cases it is faster to serve a compressed (archived) file over a web request and have the client expand the file than it is to just serve the whole file. Many web browsers and clients support `gzip` by default. As a result By default when Sprockets generates a compiled asset file it will also produce a gzipped copy of that file on disk. Sprockets only gzips non-binary files such as CSS, javascript, and SVG files.
 
 For example if Sprockets is generating
 
@@ -247,7 +247,52 @@ Then it will also generate a compressed copy in
 application-12345.css.gz
 ```
 
-This behavior can be disabled, refer to your framework specific documentation.
+By default current verisons of Rails will serve your gzip file if you have `config.public_file_server.enabled = true`. If you are using another server such as NGINX or apache, you'll have to configure it to serve the gzip file from disk when appropriate.
+
+### Gzip Behavior
+
+To disable gzip behavior, refer to your framework specific documentation. For Rails it is:
+
+```
+config.assets.gzip = false
+```
+
+By default Sprockets generates gzip files using zlib which ships with the Ruby standard library. There are other algorithms you can use instead such as [zopfli](https://github.com/miyucy/zopfli). Usually you would use a different algorithm for either faster compression speed or a higher compression ratio, but the trade offs are application specific, so please benchmark and do not assume one application's default is good for your application.
+
+To replace the compression algorithm set `gzip_compressor` to a new archiver, for example if you have the `zopfli` gem in your Gemfile you could use it:
+
+```
+config.assets.gzip_compressor = Sprockets::Utils::ZopfliArchiver
+```
+
+> Note if you have the `zopfli` gem loaded in your gemfile before Sprockets then Sprockets will use zopfli by default. Otherwise zlib, will be the default.
+
+The gzip compressor must respond to a `call` method that takes three arguments, a file object, the file contents, and mtime of the original asset.
+
+### Alternative Archive Formats
+
+There are different algorithms that produce entirely new file formats such as [brotli](https://en.wikipedia.org/wiki/Brotli) (via the [brotli gem](https://github.com/miyucy/brotli)) generating `.br` files. In addition to generating the new file format, you'll also need to verify that the method you are using to serve assets from your webserver supports detecting and serving this new file type. At the time of writing Rails only supports serving the `gzip` format via `config.public_file_server.enabled `.
+
+There is currently no standard interface for generating a non-gzip archive file from Sprockets. However you can use the gzip interface for generating custom archive formats:
+
+```
+original_compressor = config.assets.gzip_compressor
+
+gzip_and_brotli_compressor = Proc.new do |file, contents, mtime|
+  original_compressor.call(file, contents, mtime)
+  gzip_file_name   = file.to_path
+  brotli_file_name = gzip_file_name.gsub(/\.gz\z/, ".br")
+  unless File.exist?(brotli_file_name)
+    PathUtils.atomic_write(brotli_file_name) do |f|
+      # write brotli file here
+    end
+  end
+end
+
+config.assets.gzip_compressor = gzip_and_brotli_compressor
+```
+
+Be very careful when doing this, make sure to call the original gzip compressor or you won't get `.gz` files generated. Your code may be called inside of a forked process or a thread, use `PathUtils.atomic_write` if writing to a file that was not passed in, and do not mutate global state.
 
 ## WIP
 
