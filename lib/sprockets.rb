@@ -38,7 +38,7 @@ module Sprockets
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: "",
     gzip_enabled: true,
-    gzip_compressor: Sprockets::Utils::ZlibArchiver
+    gzip_compressor: defined?(::Zopfli) ? Sprockets::Utils::ZopfliArchiver : Sprockets::Utils::ZlibArchiver
   }.freeze
 
   @context_class = Context
