@@ -53,7 +53,7 @@ Here is a list of the available directives:
 - [`require_self`](#require_self)
 - [`require_tree`](#require_tree)
 - [`require_directory`](#require_directory)
-- [`depend`](#depend)
+- [`depend_on`](#depend_on)
 - [`depend_on_asset`](#depend_on_asset)
 - [`stub`](#stub)
 - [`link`](#link)
