@@ -2,11 +2,50 @@
 module Sprockets
   module Utils
     class Gzip
+
+      # Private: Generates a gzipped file based off of reference asset.
+      #
+      #     ZlibArchiver.call(file, source, mtime)
+      #
+      # Compresses a given `source` using stdlib Zlib algorithm
+      # writes contents to the `file` passed in. Sets `mtime` of
+      # written file to passed in `mtime`
+      module ZlibArchiver
+        def self.call(file, source, mtime)
+          gz = Zlib::GzipWriter.new(file, Zlib::BEST_COMPRESSION)
+          gz.mtime = mtime
+          gz.write(source)
+          gz.close
+
+          File.utime(mtime, mtime, file.path)
+        end
+      end
+
+      # Private: Generates a gzipped file based off of reference asset.
+      #
+      #     ZopfliArchiver.call(file, source, mtime)
+      #
+      # Compresses a given `source` using the zopfli gem
+      # writes contents to the `file` passed in. Sets `mtime` of
+      # written file to passed in `mtime`
+      module ZopfliArchiver
+        def self.call(file, source, mtime)
+          compressed_source = Autoload::Zopfli.deflate(source, format: :gzip, mtime: mtime)
+          file.write(compressed_source)
+          file.close
+
+          nil
+        end
+      end
+
+      attr_reader :content_type, :source, :charset, :archiver
+
       # Private: Generates a gzipped file based off of reference file.
-      def initialize(asset)
+      def initialize(asset, archiver: ZlibArchiver)
         @content_type  = asset.content_type
         @source        = asset.source
         @charset       = asset.charset
+        @archiver      = archiver
       end
 
       # What non-text mime types should we compress? This list comes from:
@@ -27,7 +66,7 @@ module Sprockets
       # through a compression algorithm would make them larger.
       #
       # Return Boolean.
-      def can_compress?(mime_types)
+      def can_compress?
         # The "charset" of a mime type is present if the value is
         # encoded text. We can check this value to see if the asset
         # can be compressed.
@@ -39,8 +78,8 @@ module Sprockets
       # Private: Opposite of `can_compress?`.
       #
       # Returns Boolean.
-      def cannot_compress?(mime_types)
-        !can_compress?(mime_types)
+      def cannot_compress?
+        !can_compress?
       end
 
       # Private: Generates a gzipped file based off of reference asset.
@@ -50,16 +89,9 @@ module Sprockets
       # Does not modify the target asset.
       #
       # Returns nothing.
-      def compress(target)
-        mtime = PathUtils.stat(target).mtime
-        PathUtils.atomic_write("#{target}.gz") do |f|
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime
-          gz.write(@source)
-          gz.close
-
-          File.utime(mtime, mtime, f.path)
-        end
+      def compress(file, target)
+        mtime = Sprockets::PathUtils.stat(target).mtime
+        archiver.call(file, source, mtime)
 
         nil
       end

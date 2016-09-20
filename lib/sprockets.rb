@@ -6,8 +6,6 @@ require 'sprockets/cache'
 require 'sprockets/environment'
 require 'sprockets/errors'
 require 'sprockets/manifest'
-require 'sprockets/exporter'
-
 
 module Sprockets
   require 'sprockets/processor_utils'
@@ -201,11 +199,17 @@ module Sprockets
   register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
 
+  require 'sprockets/exporters/file_exporter'
+  register_exporter '*/*', Exporters::FileExporter
+
   # Gzip
-  require 'sprockets/gzip_exporter'
-  require 'sprockets/file_exporter'
-  register_exporter '*/*', Sprockets::FileExporter
-  register_exporter '*/*', Sprockets::GzipExporter
+  require 'sprockets/exporters/zlib_exporter'
+  require 'sprockets/exporters/zopfli_exporter'
+  if defined?(::Zopfli)
+    register_exporter '*/*', Exporters::ZopfliExporter
+  else
+    register_exporter '*/*', Exporters::ZlibExporter
+  end
 
   register_dependency_resolver 'environment-version' do |env|
     env.version

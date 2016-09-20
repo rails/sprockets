@@ -153,7 +153,7 @@ module Sprockets
     #
     #   export("application.js")
     #
-    def export(*args)
+    def compile(*args)
       unless environment
         raise Error, "manifest requires environment for compilation"
       end
@@ -161,8 +161,6 @@ module Sprockets
       filenames            = []
       concurrent_exporters = []
       executor             = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
-      number_of_errors     = 0
-      last_error           = nil
 
       find(*args) do |asset|
         mtime = Time.now.iso8601
@@ -179,53 +177,37 @@ module Sprockets
         }
         assets[asset.logical_path] = asset.digest_path
 
-        target = File.join(dir, asset.digest_path)
-
         filenames << asset.filename
 
-        asset_exporters_hash = {}
+        promise      = nil
+        last_promise = nil
+        exporters_for_asset(asset) do |exporter|
+          next if exporter.skip?(logger)
 
-        environment.exporters.each do |mime_type, exporters|
-          next unless environment.match_mime_type? asset.content_type, mime_type
-          (asset_exporters_hash[asset] ||= Set.new).merge exporters
+          if !environment.export_concurrent
+            exporter.call
+            next
+          end
+
+          if promise.nil?
+            last_promise = promise = Concurrent::Promise.new(executor: executor) { exporter.call }
+          else
+            last_promise = promise.then { exporter.call }
+          end
         end
 
-        asset_exporters_hash.each do |asset, exporters|
-          exporters.each do |exporter|
-
-            exporter_instance = exporter.new(environment, asset, target, dir, logger, mtime)
-
-            if exporter == FileExporter || !environment.config[:export_concurrent]
-              # FileExporter must be finished before the other exporters
-              exporter_instance.call
-            else
-              # don't execute these yet, we don't know if FileExporter has already run
-              concurrent_exporters << Concurrent::Future.new(executor: executor) do
-                begin
-                  exporter_instance.call
-                rescue => e
-                  number_of_errors = number_of_errors + 1
-                  last_error = e
-                end
-              end
-            end
-          end
-          concurrent_exporters.each(&:execute)
+        if promise
+          promise.execute
+          concurrent_exporters << last_promise
         end
       end
 
       # make sure all exporters have finished before returning the main thread
       concurrent_exporters.each(&:wait!)
-      if last_error
-        logger.info "There have been #{number_of_errors} errors. " +
-        "To inspect them, turn off concurrent exporting by invoking env.export_concurrent = false"
-        raise last_error
-      end
       save
 
       filenames
     end
-    alias_method :compile, :export
 
     # Removes file from directory and from manifest. `filename` must
     # be the name with any directory path.
@@ -301,6 +283,33 @@ module Sprockets
     end
 
     private
+
+      # Given an asset, finds all exporters that
+      # match it's mime-type.
+      #
+      # Will yield each expoter to the passed in block.
+      #
+      #     array = []
+      #     puts asset.content_type # => "application/javascript"
+      #     exporters_for_asset(asset) do |exporter|
+      #       array << exporter
+      #     end
+      #     # puts array => [Exporters::FileExporter, Exporters::ZlibExporter]
+      def exporters_for_asset(asset)
+        exporters = Set.new([Exporters::FileExporter])
+
+        environment.exporters.each do |mime_type, exporter_list|
+          next unless environment.match_mime_type? asset.content_type, mime_type
+          exporter_list.each do |exporter|
+            exporters << exporter
+          end
+        end
+
+        exporters.each do |exporter|
+          yield exporter.new(asset: asset, environment: environment, directory: dir)
+        end
+      end
+
       def json_decode(obj)
         JSON.parse(obj, create_additions: false)
       end

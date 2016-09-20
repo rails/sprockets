@@ -13,7 +13,8 @@ class TestRakeTask < Sprockets::TestCase
       env.append_path(fixture_path('default'))
     end
 
-    @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
+    @dir = Dir.mktmpdir
+    FileUtils.mkdir_p(@dir)
 
     @manifest_custom_dir = Sprockets::Manifest.new(@env, @dir)
 
@@ -30,9 +31,7 @@ class TestRakeTask < Sprockets::TestCase
   def teardown
     Rake.application = nil
 
-    # FileUtils.rm_rf(@dir)
-    # wtf, dunno
-    system "rm -rf #{@dir}"
+    FileUtils.remove_entry_secure(@dir) if File.exist?(@dir)
     assert Dir["#{@dir}/*"].empty?
   end
 
