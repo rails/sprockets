@@ -40,7 +40,7 @@ module Sprockets
       #
       # The `skip?` will be called before anything will be written.
       # If `skip?` returns truthy it will not continue. This method
-      # takes a `logger` that responds to +debub+ and +info+.  The `skip?`
+      # takes a `logger` that responds to +debug+ and +info+.  The `skip?`
       # method is the only place expected to write to a logger, any other
       # messages may produce jumbled logs.
       def skip?(logger)
