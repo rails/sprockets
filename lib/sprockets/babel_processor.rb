@@ -16,6 +16,12 @@ module Sprockets
       instance.call(input)
     end
 
+    def self.cache_key
+      instance.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(options = {})
       @options = options.merge({
         'blacklist' => (options['blacklist'] || []) + ['useStrict'],

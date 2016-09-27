@@ -168,4 +168,15 @@ System.register("mod2", ["foo"], function (_export) {
 });
     JS
   end
+
+  def test_cache_key
+    assert Sprockets::BabelProcessor.cache_key
+
+    amd_processor_1 = Sprockets::BabelProcessor.new('modules' => 'amd')
+    amd_processor_2 = Sprockets::BabelProcessor.new('modules' => 'amd')
+    assert_equal amd_processor_1.cache_key, amd_processor_2.cache_key
+
+    system_processor = Sprockets::BabelProcessor.new('modules' => 'system')
+    refute_equal amd_processor_1.cache_key, system_processor.cache_key
+  end
 end
