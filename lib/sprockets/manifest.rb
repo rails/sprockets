@@ -180,7 +180,6 @@ module Sprockets
         filenames << asset.filename
 
         promise      = nil
-        last_promise = nil
         exporters_for_asset(asset) do |exporter|
           next if exporter.skip?(logger)
 
@@ -190,15 +189,11 @@ module Sprockets
           end
 
           if promise.nil?
-            last_promise = promise = Concurrent::Promise.new(executor: executor) { exporter.call }
+            promise = Concurrent::Promise.new(executor: executor) { exporter.call }
+            concurrent_exporters << promise.execute
           else
-            last_promise = promise.then { exporter.call }
+            concurrent_exporters << promise.then { exporter.call }
           end
-        end
-
-        if promise
-          promise.execute
-          concurrent_exporters << last_promise
         end
       end
 
