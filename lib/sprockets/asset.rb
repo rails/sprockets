@@ -67,6 +67,13 @@ module Sprockets
       logical_path.sub(/\.(\w+)$/) { |ext| "-#{etag}#{ext}" }
     end
 
+    # Public: Return load path + logical path with digest spliced in.
+    #
+    # Returns String.
+    def full_digest_path
+      File.join(@load_path, digest_path)
+    end
+
     # Public: Returns String MIME type of asset. Returns nil if type is unknown.
     attr_reader :content_type
 

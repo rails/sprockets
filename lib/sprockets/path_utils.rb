@@ -6,6 +6,7 @@ module Sprockets
   # when code actually wants to reference ::FileUtils.
   module PathUtils
     extend self
+    require 'pathname'
 
     # Public: Like `File.stat`.
     #
@@ -73,8 +74,6 @@ module Sprockets
     #
     # Returns true if path is absolute, otherwise false.
     if File::ALT_SEPARATOR
-      require 'pathname'
-
       # On Windows, ALT_SEPARATOR is \
       # Delegate to Pathname since the logic gets complex.
       def absolute_path?(path)
@@ -100,6 +99,18 @@ module Sprockets
     # Returns true if path is relative, otherwise false.
     def relative_path?(path)
       path =~ /^\.\.?($|#{SEPARATOR_PATTERN})/ ? true : false
+    end
+
+    # Public: Get relative path from `start` to `dest`.
+    #
+    # start - String start path (file or dir)
+    # dest  - String destination path
+    #
+    # Returns relative String path from `start` to `dest`
+    def relative_path_from(start, dest)
+      start, dest = Pathname.new(start), Pathname.new(dest)
+      start = start.dirname unless start.directory?
+      dest.relative_path_from(start).to_s
     end
 
     # Internal: Get relative path for root path and subpath.

@@ -136,6 +136,9 @@ module Sprockets
       case mappings
       when String
       when Array
+        mappings.each do |m|
+          m[:source] = relative_path_from(filename, m[:source])
+        end if filename
         sources ||= mappings.map { |m| m[:source] }.uniq.compact
         names   ||= mappings.map { |m| m[:name] }.uniq.compact
         mappings = encode_vlq_mappings(mappings, sources: sources, names: names)
