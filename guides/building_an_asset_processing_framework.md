@@ -18,7 +18,7 @@ Then it will also generate a compressed copy in
 application-12345.css.gz
 ```
 
-You can disable this behavior `Sprockets::Environemnt#gzip=` to something falsey for example:
+You can disable this behavior `Sprockets::Environment#gzip=` to something falsey for example:
 
 ```ruby
 env = Sprockets::Environment.new(".")
