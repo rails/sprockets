@@ -519,6 +519,10 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal true, @env.gzip?
   end
 
+  test "default gzip compressor" do
+    assert_equal Sprockets::Utils::ZlibArchiver, @env.gzip_compressor
+  end
+
   test "change jst template namespace" do
     @env.register_transformer 'application/javascript+function', 'application/javascript', Sprockets::JstProcessor.new(namespace: 'this.JST2')
     assert asset = @env["hello.js"]
@@ -781,6 +785,10 @@ class TestCachedEnvironment < Sprockets::TestCase
       env.append_path(fixture_path('default'))
       env.cache = {}
       env.gzip = false
+      env.gzip_compressor = proc do |file, source, mtime|
+        file.write source
+        file.close
+      end
       yield env if block_given?
     end.cached
   end
@@ -793,9 +801,25 @@ class TestCachedEnvironment < Sprockets::TestCase
     assert_equal false, @env.gzip?
   end
 
+  test "inherit the gzip compressor option" do
+    assert @env.gzip_compressor.is_a?(Proc)
+  end
+
   test "does not allow to change the gzip option" do
     assert_raises RuntimeError do
       @env.gzip = true
+    end
+  end
+
+  test "does not allow to change the gzip compressor option" do
+    assert_raises RuntimeError do
+      @env.gzip_compressor = Sprockets::Utils::ZlibArchiver
+    end
+  end
+
+  test "does not allow to change the gzip compressor to nil or unknown values" do
+    assert_raises Sprockets::Error do
+      @env.gzip_compressor = nil
     end
   end
 

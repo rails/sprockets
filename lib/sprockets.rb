@@ -6,6 +6,8 @@ require 'sprockets/cache'
 require 'sprockets/environment'
 require 'sprockets/errors'
 require 'sprockets/manifest'
+require 'sprockets/utils/zlib_archiver'
+require 'sprockets/utils/zopfli_archiver'
 
 module Sprockets
   require 'sprockets/processor_utils'
@@ -35,7 +37,8 @@ module Sprockets
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
     version: "",
-    gzip_enabled: true
+    gzip_enabled: true,
+    gzip_compressor: Sprockets::Utils::ZlibArchiver
   }.freeze
 
   @context_class = Context

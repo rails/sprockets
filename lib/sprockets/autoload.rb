@@ -11,5 +11,6 @@ module Sprockets
     autoload :SassC, 'sprockets/autoload/sassc'
     autoload :Uglifier, 'sprockets/autoload/uglifier'
     autoload :YUI, 'sprockets/autoload/yui'
+    autoload :Zopfli, 'sprockets/autoload/zopfli'
   end
 end

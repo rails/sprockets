@@ -109,5 +109,17 @@ module Sprockets
     def gzip=(gzip)
       self.config = config.merge(gzip_enabled: gzip).freeze
     end
+
+    def gzip_compressor
+      config[:gzip_compressor]
+    end
+
+    def gzip_compressor=(value)
+      if value.respond_to?(:call)
+        self.config = config.merge(gzip_compressor: value).freeze
+      else
+        raise(Error, "gzip compressor #{value} must respond to call method")
+      end
+    end
   end
 end
