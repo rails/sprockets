@@ -6,6 +6,8 @@ require 'sprockets/cache'
 require 'sprockets/environment'
 require 'sprockets/errors'
 require 'sprockets/manifest'
+require 'sprockets/exporter'
+
 
 module Sprockets
   require 'sprockets/processor_utils'
@@ -34,8 +36,10 @@ module Sprockets
     registered_transformers: [].freeze,
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    exporters: Hash.new { |h, k| Set.new.freeze }.freeze,
     version: "",
-    gzip_enabled: true
+    gzip_enabled: true,
+    export_concurrent: true
   }.freeze
 
   @context_class = Context
@@ -197,6 +201,11 @@ module Sprockets
   register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
 
+  # Gzip
+  require 'sprockets/gzip_exporter'
+  require 'sprockets/file_exporter'
+  register_exporter '*/*', Sprockets::FileExporter
+  register_exporter '*/*', Sprockets::GzipExporter
 
   register_dependency_resolver 'environment-version' do |env|
     env.version
