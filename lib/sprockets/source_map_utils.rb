@@ -137,7 +137,7 @@ module Sprockets
       when String
       when Array
         mappings.each do |m|
-          m[:source] = relative_path_from(filename, m[:source])
+          m[:source] = PathUtils.relative_path_from(filename, m[:source])
         end if filename
         sources ||= mappings.map { |m| m[:source] }.uniq.compact
         names   ||= mappings.map { |m| m[:name] }.uniq.compact
