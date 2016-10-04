@@ -21,8 +21,10 @@ module Sprockets
       uri, _ = env.resolve!(input[:filename], accept: map_type)
       map = env.load(uri)
 
+      path = PathUtils.relative_path_from(input[:filename], map.full_digest_path)
+
       asset.metadata.merge(
-        data: asset.source + (comment % map.digest_path),
+        data: asset.source + (comment % path),
         links: asset.links + [asset.uri, map.uri]
       )
     end
