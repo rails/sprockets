@@ -61,13 +61,13 @@ class TestSourceMaps < Sprockets::TestCase
       map_2 = JSON.parse(@env['dynamic/application.js.map'].source)
 
       assert_equal([
-        "dynamic/unstable.source-43b85c2116b8c894a292c17a6845aa1c9b1491f7dc6bddf764c384668457d55a.js",
-        "dynamic/application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
+        "unstable.source-43b85c2116b8c894a292c17a6845aa1c9b1491f7dc6bddf764c384668457d55a.js",
+        "application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
       ], map_1["sources"])
 
       assert_equal([
-        "dynamic/unstable.source-2ae6f42425799bc9f718842df81be58c5f011dc93a00ca4da17be8877bdb02b3.js",
-        "dynamic/application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
+        "unstable.source-2ae6f42425799bc9f718842df81be58c5f011dc93a00ca4da17be8877bdb02b3.js",
+        "application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
       ], map_2["sources"])
     end
   end
@@ -93,7 +93,7 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "coffee/main.js",
       "mappings" => "AACA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAW;;EACX,QAAA,GAAW;;EAGX,IAAgB,QAAhB;IAAA,MAAA,GAAS,CAAC,GAAV;;;EAGA,MAAA,GAAS,SAAC,CAAD;WAAO,CAAA,GAAI;EAAX;;EAGT,IAAA,GAAO,CAAC,CAAD,EAAI,CAAJ,EAAO,CAAP,EAAU,CAAV,EAAa,CAAb;;EAGP,IAAA,GACE;IAAA,IAAA,EAAQ,IAAI,CAAC,IAAb;IACA,MAAA,EAAQ,MADR;IAEA,IAAA,EAAQ,SAAC,CAAD;aAAO,CAAA,GAAI,MAAA,CAAO,CAAP;IAAX,CAFR;;;EAKF,IAAA,GAAO,SAAA;AACL,QAAA;IADM,uBAAQ;WACd,KAAA,CAAM,MAAN,EAAc,OAAd;EADK;;EAIP,IAAsB,8CAAtB;IAAA,KAAA,CAAM,YAAN,EAAA;;;EAGA,KAAA;;AAAS;SAAA,sCAAA;;mBAAA,IAAI,CAAC,IAAL,CAAU,GAAV;AAAA;;;AA1BT",
-      "sources" => ["coffee/main.source-2ee93f5e7f3b843c3002478375432cf923860432879315335f4b987c205057db.coffee"],
+      "sources" => ["main.source-2ee93f5e7f3b843c3002478375432cf923860432879315335f4b987c205057db.coffee"],
       "names" => []
     }, map)
   end
@@ -138,7 +138,7 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "babel/main.js",
       "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
-      "sources" => ["babel/main.source-1acb9cf16a3e1ce0fe0a38491472a14a6a97281ceace4b67ec16a904be5fa1b9.es6"],
+      "sources" => ["main.source-1acb9cf16a3e1ce0fe0a38491472a14a6a97281ceace4b67ec16a904be5fa1b9.es6"],
       "names"=>[]
     }, map)
   end
@@ -188,7 +188,7 @@ class TestSourceMaps < Sprockets::TestCase
       "version" => 3,
       "file" => "sass/main.css",
       "mappings" => "AACE,MAAG;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI;AAGlB,MAAG;EAAE,OAAO,EAAE,YAAY;AAE1B,KAAE;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI",
-      "sources" => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
+      "sources" => ["main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
       "names" => []
     }, map)
   end
@@ -221,8 +221,8 @@ class TestSourceMaps < Sprockets::TestCase
       "file" => "sass/with-import.css",
       "mappings" => "AAAA,IAAK;EAAE,KAAK,EAAE,GAAG;;ACEjB,GAAI;EAAE,KAAK,EAAE,IAAI",
       "sources" => [
-        "sass/_imported.source-9767e91e9d4b0334e59a1d389e9801bc6a2c5c4a5500a3c2c7915687965b2c16.scss",
-        "sass/with-import.source-5d53742ba113ac26396986bf14ab5c7e19ef193e494d5d868a9362e3e057cb26.scss"
+        "_imported.source-9767e91e9d4b0334e59a1d389e9801bc6a2c5c4a5500a3c2c7915687965b2c16.scss",
+        "with-import.source-5d53742ba113ac26396986bf14ab5c7e19ef193e494d5d868a9362e3e057cb26.scss"
       ],
       "names" => []
     }, map)
@@ -291,7 +291,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
       "version"  => 3,
       "file"     => "sass/main.css",
       "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAE;EACV,OAAO,EAAE,CAAE;EACX,UAAU,EAAE,IAAK,GAClB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAa,GAAI;;AAPjC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAM;EACf,OAAO,EAAE,QAAS;EAClB,eAAe,EAAE,IAAK,GACvB",
-      "sources"  => ["sass/main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
+      "sources"  => ["main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
       "names"    => []
     }, map)
   end
