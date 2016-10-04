@@ -146,12 +146,12 @@ module Sprockets
       end
     end
 
-    # Export asset to directory. The asset is written to a
+    # Compile asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
     # also inserted into the manifest file.
     #
-    #   export("application.js")
+    #   compile("application.js")
     #
     def compile(*args)
       unless environment
@@ -280,7 +280,7 @@ module Sprockets
     private
 
       # Given an asset, finds all exporters that
-      # match it's mime-type.
+      # match its mime-type.
       #
       # Will yield each expoter to the passed in block.
       #
@@ -291,7 +291,7 @@ module Sprockets
       #     end
       #     # puts array => [Exporters::FileExporter, Exporters::ZlibExporter]
       def exporters_for_asset(asset)
-        exporters = Set.new([Exporters::FileExporter])
+        exporters = [Exporters::FileExporter]
 
         environment.exporters.each do |mime_type, exporter_list|
           next unless environment.match_mime_type? asset.content_type, mime_type
@@ -299,6 +299,8 @@ module Sprockets
             exporters << exporter
           end
         end
+
+        exporters.uniq!
 
         exporters.each do |exporter|
           yield exporter.new(asset: asset, environment: environment, directory: dir)
