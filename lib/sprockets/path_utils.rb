@@ -113,6 +113,21 @@ module Sprockets
       dest.relative_path_from(start).to_s
     end
 
+    # Public: Joins path to base path.
+    #
+    # base - Root path
+    # path - Extending path
+    #
+    # Example
+    #
+    #     join('base/path/', '../file.js')
+    #     # => 'base/file.js'
+    #
+    # Returns string path starting from base and ending at path
+    def join(base, path)
+      (Pathname.new(base) + path).to_s
+    end
+
     # Internal: Get relative path for root path and subpath.
     #
     # path    - String path

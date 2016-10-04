@@ -128,6 +128,7 @@ module Sprockets
   register_bundle_metadata_reducer '*/*', :data, proc { String.new("") }, :concat
   register_bundle_metadata_reducer 'application/javascript', :data, proc { String.new("") }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
+  register_bundle_metadata_reducer '*/*', :sources, proc { [] }, :+
   register_bundle_metadata_reducer '*/*', :map, SourceMapUtils.method(:concat_source_maps)
 
   require 'sprockets/closure_compressor'

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'sprockets/sass_processor'
+require 'sprockets/path_utils'
 require 'base64'
 
 module Sprockets
@@ -22,30 +23,32 @@ module Sprockets
       options = engine_options(input, context)
       engine = Autoload::SassC::Engine.new(input[:data], options)
 
-      data = Utils.module_include(Autoload::SassC::Script::Functions, @functions) do
-        engine.render
+      css = Utils.module_include(Autoload::SassC::Script::Functions, @functions) do
+        engine.render.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
       end
 
-      match_data = data.match(/(.*)\n\/\*# sourceMappingURL=data:application\/json;base64,(.+) \*\//m)
-      css, map = match_data[1], Base64.decode64(match_data[2])
+      map = SourceMapUtils.decode_json_source_map(engine.source_map)
+      sources = map['sources'].map do |s|
+        expand_source(PathUtils.join(File.dirname(input[:filename]), s), input[:environment])
+      end
+
+      map = map["mappings"].each do |m|
+        m[:source] = PathUtils.join(File.dirname(input[:filename]), m[:source])
+      end
 
       map = SourceMapUtils.combine_source_maps(
         input[:metadata][:map],
-        change_source(SourceMapUtils.decode_json_source_map(map)["mappings"], input[:source_path])
+        expand_map_sources(map, input[:environment])
       )
 
       engine.dependencies.each do |dependency|
         context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.filename)
       end
 
-      context.metadata.merge(data: css, map: map)
+      context.metadata.merge(data: css, map: map, sources: sources)
     end
 
     private
-
-    def change_source(mappings, source)
-      mappings.each { |m| m[:source] = source }
-    end
 
     def engine_options(input, context)
       merge_options({
@@ -53,8 +56,9 @@ module Sprockets
         syntax: self.class.syntax,
         load_paths: input[:environment].paths,
         importer: @importer_class,
-        source_map_embed: true,
-        source_map_file: '.',
+        source_map_contents: true,
+        source_map_file: "#{input[:filename]}.map",
+        omit_source_map_url: true,
         sprockets: {
           context: context,
           environment: input[:environment],

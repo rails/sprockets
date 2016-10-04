@@ -140,7 +140,8 @@ module Sprockets
         mappings.each do |m|
           m[:source] = PathUtils.relative_path_from(filename, m[:source])
         end if filename
-        sources ||= mappings.map { |m| m[:source] }.uniq.compact
+        sources = sources.map { |s| PathUtils.relative_path_from(filename, s) } if filename && sources
+        sources = (Array(sources) + mappings.map { |m| m[:source] }).uniq.compact
         names   ||= mappings.map { |m| m[:name] }.uniq.compact
         mappings = encode_vlq_mappings(mappings, sources: sources, names: names)
       else
