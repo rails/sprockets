@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'json'
+require 'sprockets/path_utils'
 
 module Sprockets
   module SourceMapUtils
