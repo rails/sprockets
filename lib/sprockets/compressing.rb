@@ -90,24 +90,5 @@ module Sprockets
       register_bundle_processor 'application/javascript', klass
     end
 
-    # Public: Checks if Gzip is enabled.
-    def gzip?
-      config[:gzip_enabled]
-    end
-
-    # Public: Checks if Gzip is disabled.
-    def skip_gzip?
-      !gzip?
-    end
-
-    # Public: Enable or disable the creation of Gzip files.
-    #
-    # Defaults to true.
-    #
-    #     environment.gzip = false
-    #
-    def gzip=(gzip)
-      self.config = config.merge(gzip_enabled: gzip).freeze
-    end
   end
 end

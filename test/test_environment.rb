@@ -516,7 +516,7 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "default gzip" do
-    assert_equal true, @env.gzip?
+    assert_equal true, @env.archiver_enabled?(:gzip)
   end
 
   test "change jst template namespace" do
@@ -790,7 +790,7 @@ class TestCachedEnvironment < Sprockets::TestCase
   end
 
   test "inherit the gzip option" do
-    assert_equal false, @env.gzip?
+    assert_equal false, @env.archiver_enabled?(:gzip)
   end
 
   test "does not allow to change the gzip option" do

@@ -5,7 +5,6 @@ require 'time'
 require 'concurrent'
 
 require 'sprockets/manifest_utils'
-require 'sprockets/utils/gzip'
 
 module Sprockets
   # The Manifest logs the contents of assets compiled to a single directory. It
@@ -164,6 +163,8 @@ module Sprockets
       executor               = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
       concurrent_writers     = []
 
+      active_archivers = environment.active_archivers
+
       find(*args) do |asset|
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
@@ -189,20 +190,20 @@ module Sprockets
         end
         filenames << asset.filename
 
-        next if environment.skip_gzip?
-        gzip = Utils::Gzip.new(asset)
-        next if gzip.cannot_compress?(environment.mime_types)
+        active_archivers.each do |archiver|
+          instance = archiver.new( asset, target )
+          next if instance.cannot_compress?(environment.mime_types)
 
-        if File.exist?("#{target}.gz")
-          logger.debug "Skipping #{target}.gz, already exists"
-        else
-          logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute(executor: executor) do
-            write_file.wait! if write_file
-            gzip.compress(target)
+          if File.exist?( instance.result_filename )
+            logger.debug "Skipping #{instance.result_filename}, already exists"
+          else
+            logger.info "Writing #{instance.result_filename}"
+            concurrent_compressors << Concurrent::Future.execute(executor: executor) do
+              write_file.wait! if write_file
+              instance.compress
+            end
           end
         end
-
       end
       concurrent_writers.each(&:wait!)
       concurrent_compressors.each(&:wait!)

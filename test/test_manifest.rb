@@ -572,4 +572,87 @@ class TestManifest < Sprockets::TestCase
       assert_equal 'kaboom', ex.message
     end
   end
+
+  test 'replace gzip archiver' do
+    begin
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    class ArchiverReplace
+      def initialize(asset, target)
+        @target = target
+        @result_filename = "#{target}.gz"
+      end
+
+      def cannot_compress?(mime_types)
+        false
+      end
+
+      def compress
+        mtime = Sprockets::PathUtils.stat(@target).mtime
+        Sprockets::PathUtils.atomic_write( result_filename ) do |f|
+          f.write "var A;\n"
+          f.close
+          File.utime(mtime, mtime, f.path)
+        end
+
+        nil
+      end
+
+      def result_filename
+        @result_filename
+      end
+    end
+    @env.register_archiver :gzip, ArchiverReplace
+    files = %W{ application.js }
+    files.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+      assert_equal File.read("#{@dir}/#{original_path}.gz"), "var A;\n"
+    end
+    ensure
+      @env.register_archiver :gzip, Sprockets::Utils::Zlib
+    end
+  end
+
+  test 'add archiver' do
+    begin
+    manifest = Sprockets::Manifest.new(@env, @dir)
+    class ArchiverAdd
+      def initialize(asset, target)
+        @target = target
+        @result_filename = "#{target}.tax"
+      end
+
+      def cannot_compress?(mime_types)
+        false
+      end
+
+      def compress
+        mtime = Sprockets::PathUtils.stat(@target).mtime
+        Sprockets::PathUtils.atomic_write( result_filename ) do |f|
+          f.write "var A;\n"
+          f.close
+          File.utime(mtime, mtime, f.path)
+        end
+
+        nil
+      end
+
+      def result_filename
+        @result_filename
+      end
+    end
+    @env.register_archiver :tax, ArchiverAdd
+    files = %W{ application.js }
+    files.each do |file_name|
+      original_path = @env[file_name].digest_path
+      manifest.compile(file_name)
+      assert File.exist?("#{@dir}/#{original_path}.gz"), "Expecting '#{original_path}' to generate gzipped file: '#{original_path}.gz' but it did not"
+      assert File.exist?("#{@dir}/#{original_path}.tax"), "Expecting '#{original_path}' to generate archived file: '#{original_path}.tax' but it did not"
+    end
+    ensure
+      @env.unregister_archiver :tax
+    end
+  end
+
 end

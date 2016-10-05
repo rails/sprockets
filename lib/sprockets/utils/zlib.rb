@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 module Sprockets
   module Utils
-    class Gzip
+    class Zlib
       # Private: Generates a gzipped file based off of reference file.
-      def initialize(asset)
+      def initialize(asset, target)
         @content_type  = asset.content_type
         @source        = asset.source
         @charset       = asset.charset
+        @target        = target
+        @result_filename = "#{target}.gz"
       end
 
       # What non-text mime types should we compress? This list comes from:
@@ -50,10 +52,10 @@ module Sprockets
       # Does not modify the target asset.
       #
       # Returns nothing.
-      def compress(target)
-        mtime = PathUtils.stat(target).mtime
-        PathUtils.atomic_write("#{target}.gz") do |f|
-          gz = Zlib::GzipWriter.new(f, Zlib::BEST_COMPRESSION)
+      def compress
+        mtime = PathUtils.stat(@target).mtime
+        PathUtils.atomic_write( result_filename ) do |f|
+          gz = ::Zlib::GzipWriter.new(f, ::Zlib::BEST_COMPRESSION)
           gz.mtime = mtime
           gz.write(@source)
           gz.close
@@ -62,6 +64,10 @@ module Sprockets
         end
 
         nil
+      end
+
+      def result_filename
+        @result_filename
       end
     end
   end
