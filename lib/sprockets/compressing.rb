@@ -102,12 +102,33 @@ module Sprockets
 
     # Public: Enable or disable the creation of Gzip files.
     #
-    # Defaults to true.
+    # To disable gzip generation set to a falsey value:
     #
     #     environment.gzip = false
     #
+    # To enable set to a truthy value. By default zlib wil
+    # be used to gzip assets. If you have the Zopfli gem
+    # installed you can specify the zopfli algorithm to be used
+    # instead:
+    #
+    #     environment.gzip = :zopfli
+    #
     def gzip=(gzip)
       self.config = config.merge(gzip_enabled: gzip).freeze
+
+      case gzip
+      when false, nil
+        self.unregister_exporter Exporters::ZlibExporter
+        self.unregister_exporter Exporters::ZopfliExporter
+      when :zopfli
+        self.unregister_exporter Exporters::ZlibExporter
+        self.register_exporter '*/*', Exporters::ZopfliExporter
+      else
+        self.unregister_exporter Exporters::ZopfliExporter
+        self.register_exporter '*/*', Exporters::ZlibExporter
+      end
+
+      gzip
     end
   end
 end

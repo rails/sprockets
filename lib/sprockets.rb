@@ -200,16 +200,10 @@ module Sprockets
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
 
   require 'sprockets/exporters/file_exporter'
-  register_exporter '*/*', Exporters::FileExporter
-
-  # Gzip
   require 'sprockets/exporters/zlib_exporter'
   require 'sprockets/exporters/zopfli_exporter'
-  if defined?(::Zopfli)
-    register_exporter '*/*', Exporters::ZopfliExporter
-  else
-    register_exporter '*/*', Exporters::ZlibExporter
-  end
+  register_exporter '*/*', Exporters::FileExporter
+  register_exporter '*/*', Exporters::ZlibExporter
 
   register_dependency_resolver 'environment-version' do |env|
     env.version
