@@ -2,7 +2,6 @@
 module Sprockets
   module Utils
     class Gzip
-
       # Private: Generates a gzipped file based off of reference asset.
       #
       #     ZlibArchiver.call(file, source, mtime)

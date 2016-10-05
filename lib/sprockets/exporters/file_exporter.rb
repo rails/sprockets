@@ -4,7 +4,6 @@ module Sprockets
   module Exporters
     # Writes a an asset file to disk
     class FileExporter < Exporters::Base
-
       def skip?(logger)
         if ::File.exist?(target)
           logger.debug "Skipping #{ target }, already exists"
@@ -15,7 +14,6 @@ module Sprockets
         end
       end
 
-      # :asset, :environment, :directory, :target
       def call
         write(target) do |file|
           file.write(asset.source)
