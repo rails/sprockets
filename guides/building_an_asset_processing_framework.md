@@ -25,6 +25,15 @@ env = Sprockets::Environment.new(".")
 env.gzip = false
 ```
 
+By default Sprockets uses zlib to generate the compiled asset, you can use zopfli by installing the zopfli gem and then telling Sprockets to compile assets with it:
+
+```ruby
+env = Sprockets::Environment.new(".")
+env.gzip = :zopfli
+```
+
+Setting to any other truthy value will enable zlib compression.
+
 ## WIP
 
 This guide is a work in progress. There are many different groups of people who interact with Sprockets. Some only need to know directive syntax to put in their asset files, some are building features like the Rails asset pipeline, and some are plugging into Sprockets and writing things like preprocessors. The goal of these guides are to provide task specific guidance to make the expected behavior explicit. If you are using Sprockets and you find missing information in these guides, please consider submitting a pull request with updated information.

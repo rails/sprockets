@@ -25,6 +25,7 @@ Sprockets supports a few different ways to extend functionality.
 - processors
 - transformers
 - compressors
+- exporters
 
 For a detailed explanation of each see the respective sections below.
 
@@ -99,6 +100,18 @@ Sprockets.css_compressor = :my_css
 ```
 
 Compressors only operate on JavaScript and CSS. If you want to compress a different type of asset, use a processor (see "Processors" above) to process the asset.
+
+## Exporters
+
+An exporter takes a compiled asset and writes it to disk. The default exporters are `FileExporter` which writes an asset's compiled source to disk and `ZlibExporter` that will produce a `.gz` file extension.
+
+You can write your own exporter:
+
+```
+register_exporter '*/*', Sprockets::Exporters::ZlibExporter
+```
+
+First argument is the mime type of files that the exporter will operate on. For your convienence a `Sprockets::Exporters::Base` class is provided for you to inherit from. Details about the required interface for an exporter are in that class.
 
 ## Extension Interface
 

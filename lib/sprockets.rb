@@ -34,8 +34,10 @@ module Sprockets
     registered_transformers: [].freeze,
     root: __dir__.dup.freeze,
     transformers: Hash.new { |h, k| {}.freeze }.freeze,
+    exporters: Hash.new { |h, k| Set.new.freeze }.freeze,
     version: "",
-    gzip_enabled: true
+    gzip_enabled: true,
+    export_concurrent: true
   }.freeze
 
   @context_class = Context
@@ -197,6 +199,11 @@ module Sprockets
   register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html
   register_mime_type 'application/xml+ruby', extensions: ['.xml.erb', '.rxml']
 
+  require 'sprockets/exporters/file_exporter'
+  require 'sprockets/exporters/zlib_exporter'
+  require 'sprockets/exporters/zopfli_exporter'
+  register_exporter '*/*', Exporters::FileExporter
+  register_exporter '*/*', Exporters::ZlibExporter
 
   register_dependency_resolver 'environment-version' do |env|
     env.version

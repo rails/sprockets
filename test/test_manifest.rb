@@ -9,14 +9,13 @@ class TestManifest < Sprockets::TestCase
     @env = Sprockets::Environment.new(".") do |env|
       env.append_path(fixture_path('default'))
     end
-    @dir = File.join(Dir::tmpdir, 'sprockets/manifest')
+
+    @dir = Dir.mktmpdir
     FileUtils.mkdir_p(@dir)
   end
 
   def teardown
-    # FileUtils.rm_rf(@dir)
-    # wtf, dunno
-    system "rm -rf #{@dir}"
+    FileUtils.remove_entry_secure(@dir) if File.exist?(@dir)
     assert Dir["#{@dir}/*"].empty?
   end
 

@@ -5,7 +5,6 @@ require 'time'
 require 'concurrent'
 
 require 'sprockets/manifest_utils'
-require 'sprockets/utils/gzip'
 
 module Sprockets
   # The Manifest logs the contents of assets compiled to a single directory. It
@@ -147,7 +146,7 @@ module Sprockets
       end
     end
 
-    # Compile and write asset to directory. The asset is written to a
+    # Compile asset to directory. The asset is written to a
     # fingerprinted filename like
     # `application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js`. An entry is
     # also inserted into the manifest file.
@@ -159,15 +158,15 @@ module Sprockets
         raise Error, "manifest requires environment for compilation"
       end
 
-      filenames              = []
-      concurrent_compressors = []
-      executor               = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
-      concurrent_writers     = []
+      filenames            = []
+      concurrent_exporters = []
+      executor             = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
 
       find(*args) do |asset|
+        mtime = Time.now.iso8601
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
-          'mtime'        => Time.now.iso8601,
+          'mtime'        => mtime,
           'size'         => asset.bytesize,
           'digest'       => asset.hexdigest,
 
@@ -178,34 +177,28 @@ module Sprockets
         }
         assets[asset.logical_path] = asset.digest_path
 
-        target = File.join(dir, asset.digest_path)
-
-        if File.exist?(target)
-          logger.debug "Skipping #{target}, already exists"
-        else
-          logger.info "Writing #{target}"
-          write_file = Concurrent::Future.execute(executor: executor) { asset.write_to target }
-          concurrent_writers << write_file
-        end
         filenames << asset.filename
 
-        next if environment.skip_gzip?
-        gzip = Utils::Gzip.new(asset)
-        next if gzip.cannot_compress?(environment.mime_types)
+        promise      = nil
+        exporters_for_asset(asset) do |exporter|
+          next if exporter.skip?(logger)
 
-        if File.exist?("#{target}.gz")
-          logger.debug "Skipping #{target}.gz, already exists"
-        else
-          logger.info "Writing #{target}.gz"
-          concurrent_compressors << Concurrent::Future.execute(executor: executor) do
-            write_file.wait! if write_file
-            gzip.compress(target)
+          if !environment.export_concurrent
+            exporter.call
+            next
+          end
+
+          if promise.nil?
+            promise = Concurrent::Promise.new(executor: executor) { exporter.call }
+            concurrent_exporters << promise.execute
+          else
+            concurrent_exporters << promise.then { exporter.call }
           end
         end
-
       end
-      concurrent_writers.each(&:wait!)
-      concurrent_compressors.each(&:wait!)
+
+      # make sure all exporters have finished before returning the main thread
+      concurrent_exporters.each(&:wait!)
       save
 
       filenames
@@ -285,6 +278,35 @@ module Sprockets
     end
 
     private
+
+      # Given an asset, finds all exporters that
+      # match its mime-type.
+      #
+      # Will yield each expoter to the passed in block.
+      #
+      #     array = []
+      #     puts asset.content_type # => "application/javascript"
+      #     exporters_for_asset(asset) do |exporter|
+      #       array << exporter
+      #     end
+      #     # puts array => [Exporters::FileExporter, Exporters::ZlibExporter]
+      def exporters_for_asset(asset)
+        exporters = [Exporters::FileExporter]
+
+        environment.exporters.each do |mime_type, exporter_list|
+          next unless environment.match_mime_type? asset.content_type, mime_type
+          exporter_list.each do |exporter|
+            exporters << exporter
+          end
+        end
+
+        exporters.uniq!
+
+        exporters.each do |exporter|
+          yield exporter.new(asset: asset, environment: environment, directory: dir)
+        end
+      end
+
       def json_decode(obj)
         JSON.parse(obj, create_additions: false)
       end

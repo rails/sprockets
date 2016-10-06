@@ -4,12 +4,13 @@ require 'sprockets/dependencies'
 require 'sprockets/mime'
 require 'sprockets/paths'
 require 'sprockets/processing'
+require 'sprockets/exporting'
 require 'sprockets/transformers'
 require 'sprockets/utils'
 
 module Sprockets
   module Configuration
-    include Paths, Mime, Transformers, Processing, Compressing, Dependencies, Utils
+    include Paths, Mime, Transformers, Processing, Exporting, Compressing, Dependencies, Utils
 
     def initialize_configuration(parent)
       @config = parent.config
