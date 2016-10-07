@@ -107,12 +107,10 @@ module Sprockets
     VALID_METADATA_VALUE_TYPES = Set.new([
       String,
       Symbol,
-      Fixnum,
-      Bignum,
       TrueClass,
       FalseClass,
       NilClass
-    ]).freeze
+    ] + (0.class == Integer ? [Integer] : [Bignum, Fixnum])).freeze
 
     # Internal: Set of all nested compound metadata types that can nest values.
     VALID_METADATA_COMPOUND_TYPES = Set.new([
