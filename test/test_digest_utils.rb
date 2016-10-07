@@ -19,20 +19,13 @@ class TestDigestUtils < MiniTest::Test
   end
 
   def test_digest
-    if Fixnum == Bignum # Ruby 2.4+
-      assert_equal "f899a3d2245b5b18b9366e01085c5de1ef2fc075503a5a61f0e18d186dabd33d", hexdigest(42)
-      assert_equal "5bdbf1eb09f2cb8722c41135a3de8ba29cc1d722c1e7a17a96050bc41145966f", hexdigest([[:foo, 1]])
-      assert_equal "fe35e16f5d2a681d24c12c4354ec527165bfdb09c14a08ff71e913da6d84ae6c", hexdigest([{foo: 1}])
-    else
-      assert_equal "0d4af38194cb7dc915a75b04926886f6753ffc5b4f54513adfc582fdf3642e8c", hexdigest(42)
-      assert_equal "905e6cc86eccb1849ae6c1e0bb01b96fedb3e341ad3d60f828e93e9b5e469a4f", hexdigest([[:foo, 1]])
-      assert_equal "9500d3562922431a8ccce61bd510d341ca8d61cf6b6e5ae620e7b1598436ed73", hexdigest([{foo: 1}])
-    end
-
+    assert_equal "291e87109f89e59ad717aebe4ffc9657c700e74da45db789ecd19d6b797baee2", hexdigest(42)
+    assert_equal "b6054efd9929004bdd0a1c09eb2d12961325396da749143def3e9a4050aa703e", hexdigest([[:foo, 1]])
+    assert_equal "79a19ffe41ecebd5dc35e95363e0b4aa79b139a22bc650384df57eb09842f099", hexdigest([{foo: 1}])
     assert_equal "9bda381dac87b1c16b04f996abb623f43f1cdb89ce8be7dda3f67319dc440bc5", hexdigest(nil)
     assert_equal "92de503a8b413365fc38050c7dd4bacf28b0f705e744dacebcaa89f2032dcd67", hexdigest(true)
     assert_equal "bdfd64a7c8febcc3b0b8fb05d60c8e2a4cb6b8c081fcba20db1c9778e9beaf89", hexdigest(false)
-    assert_equal "abed5dfa575e89eb850242440d64c316071f76de0db48dd8d416f4aa5ece6afd", hexdigest(2 ** 128)
+    assert_equal "d1312b90a6258e9bda7d10e5e1ab1468d92786eca72a65b5ab077169e36bcb1e", hexdigest(2 ** 128)
     assert_equal "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", hexdigest("foo")
     assert_equal "dea6712e86478d2ee22a35a8c5ac9627e7cbc5ce2407a7da7c645fea2434fe9b", hexdigest(:foo)
     assert_equal "f0cf39d0be3efbb6f86ac2404100ff7e055c17ded946a06808d66f89ca03a811", hexdigest([])
