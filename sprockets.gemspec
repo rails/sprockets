@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rack-test", "~> 0.6"
   s.add_development_dependency "rake", "~> 10.0"
   s.add_development_dependency "sass", "~> 3.4"
-  s.add_development_dependency "sassc", "~> 1.7"
+  s.add_development_dependency "sassc", ">= 1.10.1", "< 2.0"
   s.add_development_dependency "uglifier", "~> 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"
   s.add_development_dependency "zopfli", "~> 0.0.4"

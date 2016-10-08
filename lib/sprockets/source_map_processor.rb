@@ -17,9 +17,10 @@ module Sprockets
 
       env = input[:environment]
 
-      uri, _ = env.resolve!(input[:filename], accept: accept)
-      asset  = env.load(uri)
-      map    = asset.metadata[:map] || []
+      uri, _  = env.resolve!(input[:filename], accept: accept)
+      asset   = env.load(uri)
+      map     = asset.metadata[:map] || []
+      sources = asset.metadata[:sources]
 
       # TODO: Because of the default piplene hack we have to apply dependencies
       #       from compiled asset to the source map, otherwise the source map cache
@@ -39,7 +40,7 @@ module Sprockets
         links << uri
       end
 
-      json = env.encode_json_source_map(map, filename: asset.logical_path)
+      json = env.encode_json_source_map(map, sources: sources, filename: asset.logical_path)
 
       { data: json, links: links, dependencies: dependencies }
     end

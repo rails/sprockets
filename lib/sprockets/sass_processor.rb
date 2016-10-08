@@ -100,11 +100,14 @@ module Sprockets
 
     private
 
+    def expand_source(source, env)
+      uri, _ = env.resolve!(source, pipeline: :source)
+      env.load(uri).digest_path
+    end
+
     def expand_map_sources(mapping, env)
       mapping.each do |map|
-        uri, _ = env.resolve!(map[:source], pipeline: :source)
-        source_path = env.load(uri).digest_path
-        map[:source] = source_path
+        map[:source] = expand_source(map[:source], env)
       end
     end
 
