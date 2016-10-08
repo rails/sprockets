@@ -94,11 +94,11 @@ module Sprockets
       when ".js"
         # Re-throw JavaScript asset exceptions to the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
-        return javascript_exception_response(e)
+        return javascript_exception_response
       when ".css"
         # Display CSS asset exceptions in the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"
-        return css_exception_response(e)
+        return css_exception_response
       else
         raise
       end
@@ -161,65 +161,12 @@ module Sprockets
         end
       end
 
-      # Returns a JavaScript response that re-throws a Ruby exception
-      # in the browser
-      def javascript_exception_response(exception)
-        err  = "#{exception.class.name}: #{exception.message}\n  (in #{exception.backtrace[0]})"
-        body = "throw Error(#{err.inspect})"
-        [ 200, { "Content-Type" => "application/javascript", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+      def javascript_exception_response
+        [ 500, { "Content-Type" => "application/javascript", "Content-Length" => "21" }, [ "Internal Server Error" ] ]
       end
 
-      # Returns a CSS response that hides all elements on the page and
-      # displays the exception
-      def css_exception_response(exception)
-        message   = "\n#{exception.class.name}: #{exception.message}"
-        backtrace = "\n  #{exception.backtrace.first}"
-
-        body = <<-CSS
-          html {
-            padding: 18px 36px;
-          }
-
-          head {
-            display: block;
-          }
-
-          body {
-            margin: 0;
-            padding: 0;
-          }
-
-          body > * {
-            display: none !important;
-          }
-
-          head:after, body:before, body:after {
-            display: block !important;
-          }
-
-          head:after {
-            font-family: sans-serif;
-            font-size: large;
-            font-weight: bold;
-            content: "Error compiling CSS asset";
-          }
-
-          body:before, body:after {
-            font-family: monospace;
-            white-space: pre-wrap;
-          }
-
-          body:before {
-            font-weight: bold;
-            content: "#{escape_css_content(message)}";
-          }
-
-          body:after {
-            content: "#{escape_css_content(backtrace)}";
-          }
-        CSS
-
-        [ 200, { "Content-Type" => "text/css; charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+      def css_exception_response
+        [ 500, { "Content-Type" => "text/css;charset=utf-8", "Content-Length" => "21" }, [ "Internal Server Error" ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string
