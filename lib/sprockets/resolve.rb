@@ -55,8 +55,9 @@ module Sprockets
         end
 
         message << " with type '#{kargs[:accept]}'" if kargs[:accept]
-        message << " with type '#{kargs[:accept]}'" if kargs[:accept]
-        message << "\nChecked in these paths: \n  #{ kargs[:paths].join("\n  ") }"
+
+        load_paths = kargs[:load_paths] || config[:paths]
+        message << "\nChecked in these paths: \n  #{ load_paths.join("\n  ") }"
 
         raise FileNotFound, message
       end
