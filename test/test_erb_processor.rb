@@ -3,6 +3,7 @@ require 'minitest/autorun'
 require 'sprockets'
 require 'sprockets/cache'
 require 'sprockets/erb_processor'
+require 'sass'
 
 class TestERBProcessor < MiniTest::Test
 
@@ -91,5 +92,24 @@ class TestERBProcessor < MiniTest::Test
 
     output = "var foo = bar;"
     assert_equal output, template.call(input)[:data]
+  end
+
+  def test_compile_js_erb_template_with_top_level_constant_access
+    environment = Sprockets::Environment.new
+
+    Sprockets.const_set(:Sass, Class.new)
+
+    input = {
+      environment: environment,
+      filename: "foo.js.erb",
+      content_type: 'application/javascript',
+      data: "var sass_version = '<%= Sass::VERSION %>';",
+      metadata: {},
+      cache: Sprockets::Cache.new
+    }
+
+    assert_match /sass_version/, Sprockets::ERBProcessor.call(input)[:data]
+  ensure
+    Sprockets.send(:remove_const, :Sass)
   end
 end
