@@ -20,14 +20,11 @@ module Sprockets
 
     def call(input)
       engine = ::ERB.new(input[:data], nil, '<>')
-      engine.filename = input[:filename]
-
       context = input[:environment].context_class.new(input)
       klass = (class << context; self; end)
-      klass.const_set(:ENV, context.env_proxy)
       klass.class_eval(&@block) if @block
-
-      data = engine.result(context.instance_eval('binding'))
+      engine.def_method(klass, :_evaluate_template, input[:filename])
+      data = context._evaluate_template
       context.metadata.merge(data: data)
     end
   end
