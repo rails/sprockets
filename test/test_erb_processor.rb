@@ -11,7 +11,7 @@ class TestERBProcessor < MiniTest::Test
     path
   end
 
-  def tset_compile_js_erb_template
+  def test_compile_js_erb_template
     environment = Sprockets::Environment.new
 
     input = {
