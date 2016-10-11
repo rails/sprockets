@@ -18,24 +18,6 @@ module Sprockets
   # The `Context` also collects dependencies declared by
   # assets. See `DirectiveProcessor` for an example of this.
   class Context
-    # Internal: Proxy for ENV that keeps track of the environment variables used
-    class ENVProxy < SimpleDelegator
-      def initialize(context)
-        @context = context
-        super(ENV)
-      end
-
-      def [](key)
-        @context.depend_on_env(key)
-        super
-      end
-
-      def fetch(key, *)
-        @context.depend_on_env(key)
-        super
-      end
-    end
-
     attr_reader :environment, :filename
 
     def initialize(input)
@@ -58,10 +40,6 @@ module Sprockets
         stubbed: @stubbed,
         links: @links,
         dependencies: @dependencies }
-    end
-
-    def env_proxy
-      ENVProxy.new(self)
     end
 
     # Returns the environment path that contains the file.
@@ -142,15 +120,6 @@ module Sprockets
     # the target asset's dependencies.
     def depend_on_asset(path)
       load(resolve(path))
-    end
-
-    # `depend_on_env` allows you to state a dependency on an environment
-    # variable.
-    #
-    # This is used for caching purposes. Any changes in the value of the
-    # environment variable will invalidate the cache of the source file.
-    def depend_on_env(key)
-      @dependencies << "env:#{key}"
     end
 
     # `require_asset` declares `path` as a dependency of the file. The
