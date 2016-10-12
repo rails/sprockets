@@ -28,6 +28,55 @@ class TestERBProcessor < MiniTest::Test
     assert_equal output, Sprockets::ERBProcessor.call(input)[:data]
   end
 
+  def test_compile_erb_template_that_depends_on_env
+    old_env_value = ::ENV['ERB_ENV_TEST_VALUE']
+    ::ENV['ERB_ENV_TEST_VALUE'] = 'success'
+
+    root = File.expand_path("../fixtures", __FILE__)
+    environment = Sprockets::Environment.new(root)
+    environment.append_path 'default'
+
+    input = {
+      environment: environment,
+      filename: "foo.js.erb",
+      content_type: 'application/javascript',
+      data: "<%= ENV['ERB_ENV_TEST_VALUE'] %>;",
+      metadata: {},
+      cache: Sprockets::Cache.new
+    }
+
+    output = "success;"
+    result = Sprockets::ERBProcessor.call(input)
+    assert_equal output, result[:data]
+    assert_equal "env:ERB_ENV_TEST_VALUE", result[:dependencies].first
+  ensure
+    ::ENV['ERB_ENV_TEST_VALUE'] = old_env_value
+  end
+
+  def test_compile_erb_template_that_depends_on_empty_env
+    old_env_value = ::ENV.delete('ERB_ENV_TEST_VALUE')
+
+    root = File.expand_path("../fixtures", __FILE__)
+    environment = Sprockets::Environment.new(root)
+    environment.append_path 'default'
+
+    input = {
+      environment: environment,
+      filename: "foo.js.erb",
+      content_type: 'application/javascript',
+      data: "<%= ENV['ERB_ENV_TEST_VALUE'] %>;",
+      metadata: {},
+      cache: Sprockets::Cache.new
+    }
+
+    output = ";"
+    result = Sprockets::ERBProcessor.call(input)
+    assert_equal output, result[:data]
+    assert_equal "env:ERB_ENV_TEST_VALUE", result[:dependencies].first
+  ensure
+    ::ENV['ERB_ENV_TEST_VALUE'] = old_env_value
+  end
+
   def test_compile_erb_template_with_depend_on_call
     root = File.expand_path("../fixtures", __FILE__)
     environment = Sprockets::Environment.new(root)
