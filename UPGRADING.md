@@ -1,7 +1,7 @@
 # Guide to upgrading from Sprockets 2.x to 3.x
 
 Even though its a major release, Sprockets 3.x should be fairly API compatible
-with 2.x unless explicitly note in the CHANGELOG. For the most part, the
+with 2.x unless explicitly noted in the CHANGELOG. For the most part, the
 application facing APIs have remained the same with the majority of the changes
 at the extension layer. So you shouldn't have to change much application code,
 but you should verify that all the sprockets extension gems you are using are
