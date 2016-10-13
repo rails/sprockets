@@ -26,7 +26,7 @@ module Sprockets
 
       uri, params = URIUtils.parse_asset_uri(input[:uri])
       uri = env.expand_from_root(params[:index_alias]) if params[:index_alias]
-      path = PathUtils.relative_path_from(uri, map.full_digest_path)
+      path = PathUtils.relative_path_from(PathUtils.split_subpath(input[:load_path], uri), map.digest_path)
 
       asset.metadata.merge(
         data: asset.source + (comment % path),

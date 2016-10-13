@@ -80,13 +80,8 @@ module Sprockets
 
       css = css.sub("\n/*# sourceMappingURL= */\n", '')
 
-      map = SourceMapUtils.combine_source_maps(
-        input[:metadata][:map],
-        expand_map_sources(
-          SourceMapUtils.decode_json_source_map(map.to_json(css_uri: '', type: :inline))["mappings"],
-          input[:environment]
-        )
-      )
+      map = SourceMapUtils.format_source_map(JSON.parse(map.to_json(css_uri: '')), input)
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
 
       # Track all imported files
       sass_dependencies = Set.new([input[:filename]])
@@ -99,17 +94,6 @@ module Sprockets
     end
 
     private
-
-    def expand_source(source, env)
-      uri, _ = env.resolve!(source, pipeline: :source)
-      env.load(uri).digest_path
-    end
-
-    def expand_map_sources(mapping, env)
-      mapping.each do |map|
-        map[:source] = expand_source(map[:source], env)
-      end
-    end
 
     # Public: Build the cache store to be used by the Sass engine.
     #

@@ -219,9 +219,9 @@ Example:
 # See metadata section for more info
 {
   dependencies: [].to_set
-  map: [
+  map: {
     # ...
-  ]
+  }
 }
 ```
 
@@ -244,12 +244,7 @@ CoffeeScript file, Sprockets will generate a JavaScript file which is what the b
 this javascript file it helps if you know where the in your original CoffeeScript file the generated JavaScript code
 came from. The source map tells the browser how to map from a generated file to an original.
 
-Sprockets expects an array of hashes for this map. Each hash must have a `:source` key, the name of the original file
-from which generated content came.
-
-```ruby
-return {data: data, map: [{ source: "original.coffee", # ... }]}
-```
+Sprockets expects this map to follow the [source map spec](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
 
 - charset: This key contains the mime charset for an asset.
 

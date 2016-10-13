@@ -128,6 +128,30 @@ module Sprockets
       (Pathname.new(base) + path).to_s
     end
 
+    # Public: Sets pipeline for path
+    #
+    # path       - String path
+    # extensions - List of file extensions
+    # pipeline   - Pipeline
+    #
+    # Examples
+    #
+    #     set_pipeline('path/file.js.erb', config[:mime_exts], config[:pipeline_exts], :source)
+    #     # => 'path/file.source.js.erb'
+    #
+    #     set_pipeline('path/some.file.source.js.erb', config[:mime_exts], config[:pipeline_exts], :debug)
+    #     # => 'path/some.file.debug.js.erb'
+    #
+    # Returns string path with pipeline parsed in
+    def set_pipeline(path, mime_exts, pipeline_exts, pipeline)
+      extension, _ = match_path_extname(path, mime_exts)
+      path.chomp!(extension)
+      pipeline_old, _ = match_path_extname(path, pipeline_exts)
+      path.chomp!(pipeline_old)
+
+      "#{path}.#{pipeline}#{extension}"
+    end
+
     # Internal: Get relative path for root path and subpath.
     #
     # path    - String path

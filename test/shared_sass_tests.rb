@@ -202,11 +202,19 @@ end
 module SharedSassTestCompressor
   extend Sprockets::TestDefinition
 
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path File.expand_path("../fixtures", __FILE__)
+  end
+
   test "compress css" do
     silence_warnings do
       uncompressed = "p {\n  margin: 0;\n  padding: 0;\n}\n"
       compressed   = "p{margin:0;padding:0}\n"
       input = {
+        environment: @env,
+        filename: File.expand_path("../fixtures/uncompressed.css", __FILE__),
+        load_path: File.expand_path("../fixtures", __FILE__),
         data: uncompressed,
         metadata: {},
         cache: Sprockets::Cache.new

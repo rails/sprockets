@@ -1,11 +1,18 @@
 # frozen_string_literal: true
+require 'sprockets_test'
 require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/babel_processor'
 
 class TestBabelProcessor < MiniTest::Test
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path File.expand_path("../fixtures", __FILE__)
+  end
+
   def test_compile_es6_features_to_es5
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "const square = (n) => n * n",
       metadata: {},
@@ -22,6 +29,7 @@ class TestBabelProcessor < MiniTest::Test
 
   def test_transform_arrow_function
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "var square = (n) => n * n",
       metadata: {},
@@ -41,6 +49,7 @@ var square = function square(n) {
 
   def test_common_modules
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
@@ -58,6 +67,7 @@ require("foo");
 
   def test_amd_modules
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
@@ -75,6 +85,7 @@ define(["exports", "foo"], function (exports, _foo) {});
 
   def test_amd_modules_with_ids
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
@@ -92,6 +103,7 @@ define("mod", ["exports", "foo"], function (exports, _foo) {});
 
   def test_system_modules
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
@@ -114,6 +126,7 @@ System.register(["foo"], function (_export) {
 
   def test_system_modules_with_ids
     input = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},
@@ -136,6 +149,7 @@ System.register("mod", ["foo"], function (_export) {
 
   def test_caching_takes_filename_into_account
     mod1 = {
+      environment: @env,
       content_type: 'application/ecmascript-6',
       data: "import \"foo\";",
       metadata: {},

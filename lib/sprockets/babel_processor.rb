@@ -42,11 +42,11 @@ module Sprockets
 
       result = input[:cache].fetch(@cache_key + [input[:filename]] + [data]) do
         opts = {
-          'sourceRoot' => input[:load_path],
           'moduleRoot' => nil,
           'filename' => input[:filename],
           'filenameRelative' => PathUtils.split_subpath(input[:load_path], input[:filename]),
-          'sourceFileName' => input[:source_path]
+          'sourceFileName' => File.basename(input[:filename]),
+          'sourceMapTarget' => input[:filename]
         }.merge(@options)
 
         if opts['moduleIds'] && opts['moduleRoot']
@@ -57,8 +57,8 @@ module Sprockets
         Autoload::Babel::Transpiler.transform(data, opts)
       end
 
-      map = SourceMapUtils.decode_json_source_map(JSON.generate(result['map']))
-      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map["mappings"])
+      map = SourceMapUtils.format_source_map(result["map"], input)
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
 
       { data: result['code'], map: map }
     end

@@ -29,10 +29,6 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 17,          mapping[:original].last
     assert_equal 'script.js', mapping[:source]
     assert_equal nil,         mapping[:name]
-
-    expected = JSON.generate(source_map)
-    actual   = Sprockets::SourceMapUtils.encode_json_source_map(mappings, filename: "script.min.js")
-    assert_equal expected, actual
   end
 
   def test_map2
@@ -61,10 +57,6 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 8,                mapping[:original].last
     assert_equal 'example.coffee', mapping[:source]
     assert_equal nil,              mapping[:name]
-
-    expected = JSON.generate(source_map)
-    actual   = Sprockets::SourceMapUtils.encode_json_source_map(mappings, filename: "example.js")
-    assert_equal expected, actual
   end
 
   def test_map3
@@ -93,10 +85,6 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 1,            mapping[:original].last
     assert_equal 'example.js', mapping[:source]
     assert_equal nil,          mapping[:name]
-
-    expected = JSON.generate(source_map)
-    actual   = Sprockets::SourceMapUtils.encode_json_source_map(mappings, filename: "example.min.js")
-    assert_equal expected, actual
   end
 
   def test_concat_empty_source_map_returns_original
@@ -105,12 +93,31 @@ class TestSourceMapUtils < MiniTest::Test
       { source: 'b.js', generated: [rand(1..100), rand(0..100)], original: [rand(1..100), rand(0..100)] },
       { source: 'c.js', generated: [rand(1..100), rand(0..100)], original: [rand(1..100), rand(0..100)] }
     ].freeze
+    
+    map = {
+      "version" => 3,
+      "file" => "a.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(abc_mappings),
+      "sources" => ["a.js", "b.js", "c.js"],
+      "names" => []
+    }
+    empty_map = { "version" => 3, "file" => 'a.js', "sections" => [] }
+    index_map = {
+      "version" => 3,
+      "file" => "a.js",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map" => map
+        }
+      ]
+    }
 
-    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps(nil, abc_mappings)
-    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps(abc_mappings, nil)
+    assert_equal map, Sprockets::SourceMapUtils.concat_source_maps(nil, map.dup)
+    assert_equal map, Sprockets::SourceMapUtils.concat_source_maps(map.dup, nil)
 
-    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps([], abc_mappings)
-    assert_equal abc_mappings, Sprockets::SourceMapUtils.concat_source_maps(abc_mappings, [])
+    assert_equal index_map, Sprockets::SourceMapUtils.concat_source_maps(empty_map.dup, map.dup)
+    assert_equal index_map, Sprockets::SourceMapUtils.concat_source_maps(map.dup, empty_map.dup)
   end
 
   def test_concat_source_maps
@@ -124,19 +131,38 @@ class TestSourceMapUtils < MiniTest::Test
       { source: 'd.js', generated: [1, 0], original: [1, 0] }
     ].freeze
 
+    abc_map = {
+      "version" => 3,
+      "file" => "a.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(abc_mappings),
+      "sources" => ["a.js", "b.js", "c.js"],
+      "names" => []
+    }
+
+    d_map = {
+      "version" => 3,
+      "file" => "d.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(d_mapping),
+      "sources" => ["d.js"],
+      "names" => []
+    }
+
+
+    combined = Sprockets::SourceMapUtils.concat_source_maps(abc_map.dup, d_map.dup)
     assert_equal [
       { source: 'a.js', generated: [1, 0], original: [1,  0] },
       { source: 'b.js', generated: [2, 0], original: [20, 0] },
       { source: 'c.js', generated: [3, 0], original: [30, 0] },
       { source: 'd.js', generated: [4, 0], original: [1,  0] }
-    ], Sprockets::SourceMapUtils.concat_source_maps(abc_mappings, d_mapping)
+    ], Sprockets::SourceMapUtils.decode_source_map(combined)[:mappings]
 
+    combined = Sprockets::SourceMapUtils.concat_source_maps(d_map.dup, abc_map.dup)
     assert_equal [
       { source: 'd.js', generated: [1, 0], original: [1,  0] },
       { source: 'a.js', generated: [2, 0], original: [1,  0] },
       { source: 'b.js', generated: [3, 0], original: [20, 0] },
       { source: 'c.js', generated: [4, 0], original: [30, 0] }
-    ], Sprockets::SourceMapUtils.concat_source_maps(d_mapping, abc_mappings)
+    ], Sprockets::SourceMapUtils.decode_source_map(combined)[:mappings]
   end
 
   def test_combine_source_maps_returns_original
@@ -145,8 +171,14 @@ class TestSourceMapUtils < MiniTest::Test
       { source: 'b.js', generated: [2, 0], original: [20, 0] },
       { source: 'c.js', generated: [3, 0], original: [30, 0] }
     ]
-    assert_equal abc_mappings, Sprockets::SourceMapUtils.combine_source_maps([], abc_mappings)
-    assert_equal abc_mappings, Sprockets::SourceMapUtils.combine_source_maps(nil, abc_mappings)
+    map = {
+      "version" => 3,
+      "file" => "a.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(abc_mappings),
+      "sources" => ["a.js", "b.js", "c.js"],
+      "names" => []
+    }
+    assert_equal map, Sprockets::SourceMapUtils.combine_source_maps(nil, map.dup)
   end
 
   def test_combine_source_maps
@@ -200,7 +232,7 @@ class TestSourceMapUtils < MiniTest::Test
       { :source => "index.js", :generated => [1, 89], :original => [13, 8], :name => "this" }
     ]
 
-    expected = [
+    expected_mapping = [
       { :source => "index.coffee", :generated => [1,  1], :original => [1,  0]},
       { :source => "index.coffee", :generated => [1, 12], :original => [1,  0]},
       { :source => "index.coffee", :generated => [1, 15], :original => [1,  0]},
@@ -216,12 +248,33 @@ class TestSourceMapUtils < MiniTest::Test
       { :source => "index.coffee", :generated => [1, 84], :original => [1,  0]},
       { :source => "index.coffee", :generated => [1, 89], :original => [1,  0]}
     ]
+    first_map = {
+      "version" => 3,
+      "file" => "index.coffee",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(first_mapping),
+      "sources" => ["index.coffee"],
+      "names" => []
+    }
+    second_map = {
+      "version" => 3,
+      "file" => "index.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(second_mapping),
+      "sources" => ["index.js"],
+      "names" => ["test", "alert", "call", "this"]
+    }
+    expected_map = {
+      "version" => 3,
+      "file" => "index.coffee",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(expected_mapping),
+      "sources" => ["index.coffee"],
+      "names" => []
+    }
 
-    combined_mappings = Sprockets::SourceMapUtils.combine_source_maps(first_mapping, second_mapping)
-    assert_equal expected, combined_mappings
+    combined_map = Sprockets::SourceMapUtils.combine_source_maps(first_map, second_map)
+    assert_equal expected_map, combined_map
 
     assert_equal 'CAAA,WAAA,GAAA,KAAA,MAAO,WAAA,MACL,OAAM,eAER,IAAW,KAAX,CAAG,SAHH,KAAA',
-      Sprockets::SourceMapUtils.encode_vlq_mappings(combined_mappings)
+      Sprockets::SourceMapUtils.encode_source_map(Sprockets::SourceMapUtils.decode_source_map(expected_map))["mappings"]
   end
 
   def test_compare_offsets
@@ -251,42 +304,80 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal [40, 0], Sprockets::SourceMapUtils.bsearch_mappings(mappings, [6, 0])[:original]
   end
 
-  def test_decode_json_source_map
+  def test_decode_source_map
     expected = {
-      "version"  => 3,
-      "file"     => "hello.js",
-      "mappings" => [
+      version:  3,
+      file:     "hello.js",
+      mappings: [
         { source: 'b.js', generated: [1, 0], original: [20, 0] },
         { source: 'c.js', generated: [2, 0], original: [30, 0] }
       ],
-      "sources" => ["a.js", "b.js", "c.js"],
-      "names"   => []
+      sources:  ["a.js", "b.js", "c.js"],
+      names:    []
     }
-    actual = Sprockets::SourceMapUtils.decode_json_source_map('{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}')
+    actual = Sprockets::SourceMapUtils.decode_source_map(JSON.parse('{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}'))
     assert_equal expected, actual
   end
 
-  def test_encode_json_source_map_from_hash
-    mappings_hash = [
-      { source: 'a.js', generated: [0, 0], original: [0,  0] },
-      { source: 'b.js', generated: [1, 0], original: [20, 0] },
-      { source: 'c.js', generated: [2, 0], original: [30, 0] }
-    ]
+  def test_decode_index_source_map
+    expected = {
+      version:  3,
+      file:     "index.js",
+      mappings: [
+        { source: 'file.js', generated: [1, 0], original: [1, 0] },
+        { source: 'file.js', generated: [2, 0], original: [1, 0] },
+        { source: 'file.js', generated: [3, 0], original: [1, 0] },
+        { source: 'index.js', generated: [4, 0], original: [1, 0] },
+        { source: 'index.js', generated: [5, 0], original: [2, 0] }
+      ],
+      sources:  ["file.js", "index.js"],
+      names:    []
+    }
+    index_map = {
+      "version"  => 3,
+      "file"     => "index.js",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "file.js",
+            "mappings" => "AAAA;AAAA;AAAA",
+            "sources"  => ["file.js"],
+            "names"    => []
+          }
+        },
+        {
+          "offset" => { "line" => 3, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "index.js",
+            "mappings" => "AAAA;AACA",
+            "sources"  => ["index.js"],
+            "names"    => []
+          }
+        }
+      ]
+    }
+    actual = Sprockets::SourceMapUtils.decode_source_map(index_map)
+    assert_equal expected, actual
+  end
 
-    sources  = ["a.js", "b.js", "c.js"]
-    names    = []
+  def test_encode_source_map
+    map = {
+      version: 3,
+      file: "hello.js",
+      mappings: [
+        { source: 'a.js', generated: [0, 0], original: [0,  0] },
+        { source: 'b.js', generated: [1, 0], original: [20, 0] },
+        { source: 'c.js', generated: [2, 0], original: [30, 0] }
+      ],
+      sources: ["a.js", "b.js", "c.js"],
+      names: []
+    }
 
     assert_equal '{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}',
-      Sprockets::SourceMapUtils.encode_json_source_map(mappings_hash, sources: sources, names: names, filename: "hello.js")
-  end
-
-  def test_encode_json_source_map_from_string
-    mappings_str = "ACmBA;ACUA"
-    sources      = ["a.js", "b.js", "c.js"]
-    names        = []
-    expected     = '{"version":3,"file":"hello.js","mappings":"ACmBA;ACUA","sources":["a.js","b.js","c.js"],"names":[]}'
-    actual       = Sprockets::SourceMapUtils.encode_json_source_map(mappings_str, sources: sources, names: names, filename: "hello.js")
-    assert_equal expected, actual
+      JSON.dump(Sprockets::SourceMapUtils.encode_source_map(map))
   end
 
   def test_decode_vlq_mappings
