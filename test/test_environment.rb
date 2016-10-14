@@ -216,6 +216,30 @@ module EnvironmentTests
     refute @env.find_asset("zeroclipboard.unknown")
   end
 
+
+  test "explicit package.json access returns json file" do
+    assert_equal fixture_path('default/npm/package.json'),
+      @env["npm/package.json"].filename
+  end
+
+  test "find default npm main" do
+    assert_equal fixture_path('default/npm/main.js'),
+      @env["npm"].filename
+  end
+
+  test "find npm main by format extension" do
+    assert_equal fixture_path('default/npm/main.js'),
+      @env["npm.js"].filename
+    refute @env.find_asset("npm.css")
+  end
+
+  test "find npm main by content type" do
+    assert_equal fixture_path('default/npm/main.js'),
+      @env.find_asset("npm", accept: 'application/javascript').filename
+    assert_equal fixture_path('default/npm/main.js'),
+      @env.find_asset("npm.js", accept: 'application/javascript').filename
+  end
+
   test "find bundled asset in environment" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end
