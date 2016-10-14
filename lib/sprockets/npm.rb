@@ -17,7 +17,7 @@ module Sprockets
         dirname = File.join(load_path, logical_path)
 
         if directory?(dirname)
-          filename = File.join(dirname, 'package.json')
+          filename = File.join(dirname, 'package.json'.freeze)
 
           if self.file?(filename)
             deps << build_file_digest_uri(filename)
