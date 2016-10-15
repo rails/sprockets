@@ -240,6 +240,11 @@ module EnvironmentTests
       @env.find_asset("npm.js", accept: 'application/javascript').filename
   end
 
+  test "find default npm main when main key is not set" do
+    assert_equal fixture_path('default/express/index.js'),
+      @env["express"].filename
+  end
+
   test "find bundled asset in environment" do
     assert_equal "var Gallery = {};\n", @env["gallery.js"].to_s
   end

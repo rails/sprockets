@@ -49,6 +49,8 @@ module Sprockets
         package['main'].each do |name|
           yield File.expand_path(name, dirname)
         end
+      when nil
+        yield './index.js'
       end
     end
   end
