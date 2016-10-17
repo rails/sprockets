@@ -2,9 +2,18 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
-## Next Release
+## Master
+
+
+## 4.0.0.beta4
 
 - Changing the version now busts the digest of all assets [#404]
+- Exporter interface added [#386]
+- Using ENV vars in templates will recompile templates when the env vars change. [#365]
+- Source maps for imported sass files with sassc is now fixed [#391]
+- Load paths now in error messages [#322]
+- Cache key added to babel processor [#387]
+- `Environment#find_asset!` can now be used to raise an exception when asset could not be found [#379]
 
 ## 4.0.0.beta3
 
