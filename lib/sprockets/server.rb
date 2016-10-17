@@ -23,7 +23,7 @@ module Sprockets
       start_time = Time.now.to_f
       time_elapsed = lambda { ((Time.now.to_f - start_time) * 1000).to_i }
 
-      if env['REQUEST_METHOD'] != 'GET'
+      if !['GET', 'HEAD'].include?(env['REQUEST_METHOD'])
         return method_not_allowed_response
       end
 
@@ -39,7 +39,7 @@ module Sprockets
 
       # URLs containing a `".."` are rejected for security reasons.
       if forbidden_request?(path)
-        return forbidden_response
+        return forbidden_response(env)
       end
 
       # Look up the asset.
@@ -86,10 +86,10 @@ module Sprockets
         not_modified_response(env, if_none_match)
       when :not_found
         logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
-        not_found_response
+        not_found_response(env)
       when :precondition_failed
         logger.info "#{msg} 412 Precondition Failed (#{time_elapsed.call}ms)"
-        precondition_failed_response
+        precondition_failed_response(env)
       end
     rescue Exception => e
       logger.error "Error compiling asset #{path}:"
@@ -118,9 +118,17 @@ module Sprockets
         path.include?("..") || absolute_path?(path)
       end
 
+      def head_request?(env)
+        env['REQUEST_METHOD'] == 'HEAD'
+      end
+
       # Returns a 200 OK response tuple
       def ok_response(asset, env)
-        [ 200, headers(env, asset, asset.length), asset ]
+        if head_request?(env)
+          [ 200, headers(env, asset, 0), [] ]
+        else
+          [ 200, headers(env, asset, asset.length), asset ]
+        end
       end
 
       # Returns a 304 Not Modified response tuple
@@ -129,21 +137,33 @@ module Sprockets
       end
 
       # Returns a 403 Forbidden response tuple
-      def forbidden_response
-        [ 403, { "Content-Type" => "text/plain", "Content-Length" => "9" }, [ "Forbidden" ] ]
+      def forbidden_response(env)
+        if head_request?(env)
+          [ 403, { "Content-Type" => "text/plain", "Content-Length" => "0" }, [] ]
+        else
+          [ 403, { "Content-Type" => "text/plain", "Content-Length" => "9" }, [ "Forbidden" ] ]
+        end
       end
 
       # Returns a 404 Not Found response tuple
-      def not_found_response
-        [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9", "X-Cascade" => "pass" }, [ "Not found" ] ]
+      def not_found_response(env)
+        if head_request?(env)
+          [ 404, { "Content-Type" => "text/plain", "Content-Length" => "0", "X-Cascade" => "pass" }, [] ]
+        else
+          [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9", "X-Cascade" => "pass" }, [ "Not found" ] ]
+        end
       end
 
       def method_not_allowed_response
         [ 405, { "Content-Type" => "text/plain", "Content-Length" => "18" }, [ "Method Not Allowed" ] ]
       end
 
-      def precondition_failed_response
-        [ 412, { "Content-Type" => "text/plain", "Content-Length" => "19", "X-Cascade" => "pass" }, [ "Precondition Failed" ] ]
+      def precondition_failed_response(env)
+        if head_request?(env)
+          [ 412, { "Content-Type" => "text/plain", "Content-Length" => "0", "X-Cascade" => "pass" }, [] ]
+        else
+          [ 412, { "Content-Type" => "text/plain", "Content-Length" => "19", "X-Cascade" => "pass" }, [ "Precondition Failed" ] ]
+        end
       end
 
       # Returns a JavaScript response that re-throws a Ruby exception
