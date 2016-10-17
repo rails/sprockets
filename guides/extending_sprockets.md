@@ -8,6 +8,7 @@ Sprockets can use custom processors, compressors, and directives. This document 
   - [Processors](#processors)
   - [Transformers](#transformers)
   - [Compressors](#compressors)
+  - [Exporters](#exporters)
 - [Extension Interface](#extension-interface)
   - [Extension Keys](#extension-keys)
   - [Extension Metadata Keys](#extension-metadata-keys)
@@ -112,6 +113,16 @@ register_exporter '*/*', Sprockets::Exporters::ZlibExporter
 ```
 
 First argument is the mime type of files that the exporter will operate on. For your convienence a `Sprockets::Exporters::Base` class is provided for you to inherit from. Details about the required interface for an exporter are in that class.
+
+Your exporter gets initialized once for each asset to be exported by sprockets with the following keyword arguments
+
+ - asset (Instance of Sprockets::Asset)
+ - environment (Instance of Sprockets::Environment)
+ - directory (Instance of String)
+
+A `setup` method is called right after the exporter is initalized. Your exporter is expected implement a `skip?` method. If this method returns true then sprockets will skip your exporter and move to the next one. An instance of `Sprockets::Logger` is passed into this method that can be used to indicate to the user what is happening. This method is caled syncronously.
+
+The work of writing the new asset to disk is performed in the `call` method. This method is potentially called in a new thread and should not mutate any global state. A `write` method is provided that takes a `filename` to be written to (full path) and yields an IO object.
 
 ## Extension Interface
 
