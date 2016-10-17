@@ -163,7 +163,7 @@ module Sprockets
           source = result.delete(:data)
           metadata = result
           metadata[:charset] = source.encoding.name.downcase unless metadata.key?(:charset)
-          metadata[:digest]  = digest(source)
+          metadata[:digest]  = digest(self.version + source)
           metadata[:length]  = source.bytesize
         else
           dependencies << build_file_digest_uri(unloaded.filename)

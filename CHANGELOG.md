@@ -2,6 +2,10 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## Next Release
+
+- Changing the version now busts the digest of all assets [#404]
+
 ## 4.0.0.beta3
 
 - Source Map fixes [#255] [#367]
