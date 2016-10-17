@@ -62,6 +62,14 @@ module Sprockets
       def inspect
         "#<#{self.class} size=#{@cache.size}/#{@max_size}>"
       end
+
+      # Public: Clear the cache
+      #
+      # Returns true
+      def clear(options=nil)
+        @cache.clear
+        true
+      end
     end
   end
 end

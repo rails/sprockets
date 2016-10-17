@@ -36,6 +36,12 @@ module Sprockets
   #
   #   Returns argument value.
   #
+  # clear(options)
+  #
+  #   Clear the entire cache. Be careful with this method since it could
+  #   affect other processes if shared cache is being used.
+  #
+  #   The options hash is passed to the underlying cache implementation.
   class Cache
     # Builtin cache stores.
     autoload :FileStore,   'sprockets/cache/file_store'
@@ -144,6 +150,14 @@ module Sprockets
       "#<#{self.class} local=#{@fetch_cache.inspect} store=#{@cache_wrapper.cache.inspect}>"
     end
 
+    # Public: Clear cache
+    #
+    # Returns truthy on success, potentially raises exception on failure
+    def clear(options=nil)
+      @cache_wrapper.clear
+      @fetch_cache.clear
+    end
+
     private
       # Internal: Expand object cache key into a short String key.
       #
@@ -212,6 +226,16 @@ module Sprockets
         def set(key, value)
           cache.set(key, value)
         end
+
+        def clear(options=nil)
+          # dalli has a #flush method so try it
+          if cache.respond_to?(:flush)
+            cache.flush(options)
+          else
+            cache.clear(options)
+          end
+          true
+        end
       end
 
       class HashWrapper < Wrapper
@@ -222,6 +246,11 @@ module Sprockets
         def set(key, value)
           cache[key] = value
         end
+
+        def clear(options=nil)
+          cache.clear
+          true
+        end
       end
 
       class ReadWriteWrapper < Wrapper
@@ -231,6 +260,11 @@ module Sprockets
 
         def set(key, value)
           cache.write(key, value)
+        end
+
+        def clear(options=nil)
+          cache.clear(options)
+          true
         end
       end
   end

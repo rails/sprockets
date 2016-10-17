@@ -42,6 +42,13 @@ module Sprockets
       def inspect
         "#<#{self.class}>"
       end
+
+      # Public: Simulate clearing the cache
+      #
+      # Returns true
+      def clear(options=nil)
+        true
+      end
     end
   end
 end

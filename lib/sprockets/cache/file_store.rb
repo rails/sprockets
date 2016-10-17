@@ -20,7 +20,8 @@ module Sprockets
     class FileStore
       # Internal: Default key limit for store.
       DEFAULT_MAX_SIZE = 25 * 1024 * 1024
-
+      EXCLUDED_DIRS = ['.', '..'].freeze
+      GITKEEP_FILES = ['.gitkeep', '.keep'].freeze
       # Internal: Default standard error fatal logger.
       #
       # Returns a Logger.
@@ -121,6 +122,21 @@ module Sprockets
       # Returns String.
       def inspect
         "#<#{self.class} size=#{size}/#{@max_size}>"
+      end
+
+      # Public: Clear the cache
+      #
+      # adapted from ActiveSupport::Cache::FileStore#clear
+      #
+      # Deletes all items from the cache. In this case it deletes all the entries in the specified
+      # file store directory except for .keep or .gitkeep. Be careful which directory is specified
+      # as @root because everything in that directory will be deleted.
+      #
+      # Returns true
+      def clear(options=nil)
+        root_dirs = Dir.entries(@root).reject { |f| (EXCLUDED_DIRS + GITKEEP_FILES).include?(f) }
+        FileUtils.rm_r(root_dirs.collect{ |f| File.join(@root, f) })
+        true
       end
 
       private
