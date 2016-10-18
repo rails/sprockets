@@ -13,11 +13,11 @@ module Sprockets
       candidates, deps = super
 
       # package.json can only be nested one level deep
-      if !logical_path.index('/'.freeze)
+      if !logical_path.index('/')
         dirname = File.join(load_path, logical_path)
 
         if directory?(dirname)
-          filename = File.join(dirname, 'package.json'.freeze)
+          filename = File.join(dirname, 'package.json')
 
           if self.file?(filename)
             deps << build_file_digest_uri(filename)
@@ -45,12 +45,8 @@ module Sprockets
       case package['main']
       when String
         yield File.expand_path(package['main'], dirname)
-      when Array
-        package['main'].each do |name|
-          yield File.expand_path(name, dirname)
-        end
       when nil
-        yield './index.js'
+        yield File.expand_path('index.js', dirname)
       end
     end
   end
