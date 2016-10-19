@@ -12,19 +12,16 @@ module Sprockets
     def resolve_alternates(load_path, logical_path)
       candidates, deps = super
 
-      # package.json can only be nested one level deep
-      if !logical_path.index('/')
-        dirname = File.join(load_path, logical_path)
+      dirname = File.join(load_path, logical_path)
 
-        if directory?(dirname)
-          filename = File.join(dirname, 'package.json')
+      if directory?(dirname)
+        filename = File.join(dirname, 'package.json')
 
-          if self.file?(filename)
-            deps << build_file_digest_uri(filename)
-            read_package_main(dirname, filename) do |path|
-              if file?(path)
-                candidates << path
-              end
+        if self.file?(filename)
+          deps << build_file_digest_uri(filename)
+          read_package_main(dirname, filename) do |path|
+            if file?(path)
+              candidates << path
             end
           end
         end

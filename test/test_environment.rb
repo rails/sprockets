@@ -227,6 +227,11 @@ module EnvironmentTests
       @env["npm"].filename
   end
 
+  test "find nested npm main" do
+    assert_equal fixture_path('default/npm-nested/a/b/main.js'),
+      @env["npm-nested/a/b"].filename
+  end
+
   test "find npm main by format extension" do
     assert_equal fixture_path('default/npm/main.js'),
       @env["npm.js"].filename
