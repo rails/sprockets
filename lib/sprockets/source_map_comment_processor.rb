@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+require 'sprockets/uri_utils'
+require 'sprockets/path_utils'
+
 module Sprockets
   class SourceMapCommentProcessor
     def self.call(input)
@@ -21,7 +24,9 @@ module Sprockets
       uri, _ = env.resolve!(input[:filename], accept: map_type)
       map = env.load(uri)
 
-      path = PathUtils.relative_path_from(input[:filename], map.full_digest_path)
+      uri, _ = URIUtils.parse_asset_uri(input[:uri])
+      uri = env.expand_from_root(_[:index_alias]) if _[:index_alias]
+      path = PathUtils.relative_path_from(uri, map.full_digest_path)
 
       asset.metadata.merge(
         data: asset.source + (comment % path),
