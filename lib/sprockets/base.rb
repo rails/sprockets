@@ -6,6 +6,7 @@ require 'sprockets/configuration'
 require 'sprockets/digest_utils'
 require 'sprockets/errors'
 require 'sprockets/loader'
+require 'sprockets/npm'
 require 'sprockets/path_dependency_utils'
 require 'sprockets/path_digest_utils'
 require 'sprockets/path_utils'
@@ -22,6 +23,7 @@ module Sprockets
     include Server
     include Resolve, Loader
     include Bower
+    include Npm
 
     # Get persistent cache store
     attr_reader :cache
