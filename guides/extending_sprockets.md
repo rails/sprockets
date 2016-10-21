@@ -286,7 +286,7 @@ Sprockets.register_mime_type 'application/ruby', extensions: ['.rb']
 
 The first method is the mime-type of the object. The `:extensions` key passed to the second argument contains an array of all the extensions for the given mime type. An optional charset can be registered. This should only be used for text based mimetypes.
 
-Your extension may have multiple parts for example some people use `.coffee.js` when this file type is used, we do not wish it to process as javascript first and then as coffee script so we register this entire extension:
+Your extension may have multiple parts for example some people use `.js.coffee` when this file type is used, we do not wish it to process as javascript first and then as coffee script so we register this entire extension:
 
 
 ```ruby
