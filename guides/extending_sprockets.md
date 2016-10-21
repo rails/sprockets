@@ -290,7 +290,7 @@ Your extension may have multiple parts for example some people use `.coffee.js` 
 
 
 ```ruby
-Sprockets.register_mime_type 'text/coffeescript', extensions: ['.coffee', '.js.coffee']
+Sprockets.register_mime_type 'text/coffeescript', extensions: ['.coffee', '.coffee.js']
 ```
 
 ## Adding Directives to your Extension
