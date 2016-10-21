@@ -26,6 +26,11 @@ module CacheStoreNullTests
     result = @store.fetch("foo") { "bar" }
     assert_equal "bar", result
   end
+
+  def test_clear
+    result = @store.clear
+    assert result, "@store.clear returned #{result} instead of true"
+  end
 end
 
 module CacheStoreTests
@@ -69,6 +74,14 @@ module CacheStoreTests
   def test_fetch
     result = @store.fetch("user") { "josh" }
     assert_equal "josh", result
+  end
+
+  def test_clear
+    @store.set("foo", "bar")
+    assert_equal "bar", @store.get("foo")
+    result = @store.clear
+    assert result, "@store.clear returned #{result} instead of true"
+    assert_equal nil, @store.get("foo")
   end
 end
 

@@ -50,9 +50,15 @@ class TestRakeTask < Sprockets::TestCase
 
     @rake[:assets].invoke
     assert File.exist?("#{@dir}/#{digest_path}")
+    # set a cache key
+    result = @env.cache.set('foo', 'bar')
+    assert_equal result, @env.cache.get('foo')
 
     @rake[:clobber_assets].invoke
     assert !File.exist?("#{@dir}/#{digest_path}")
+    # verify the cache key was cleared
+    assert_equal @env.cache.get('foo'), nil
+
   end
 
   test "custom manifest directory" do

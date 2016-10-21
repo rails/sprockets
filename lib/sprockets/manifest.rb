@@ -265,6 +265,8 @@ module Sprockets
     def clobber
       FileUtils.rm_r(directory) if File.exist?(directory)
       logger.info "Removed #{directory}"
+      # if we have an environment clear the cache too
+      environment.cache.clear if environment
       nil
     end
 
