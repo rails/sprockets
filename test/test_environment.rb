@@ -235,7 +235,6 @@ module EnvironmentTests
   test "find npm main by format extension" do
     assert_equal fixture_path('default/npm/main.js'),
       @env["npm.js"].filename
-    refute @env.find_asset("npm.css")
   end
 
   test "find npm main by content type" do
@@ -248,6 +247,18 @@ module EnvironmentTests
   test "find default npm main when main key is not set" do
     assert_equal fixture_path('default/express/index.js'),
       @env["express"].filename
+  end
+
+  test "find npm style by format extension" do
+    assert_equal fixture_path('default/npm/style.css'),
+      @env["npm.css"].filename
+  end
+
+  test "find npm style by content type" do
+    assert_equal fixture_path('default/npm/style.css'),
+      @env.find_asset("npm", accept: 'text/css').filename
+    assert_equal fixture_path('default/npm/style.css'),
+      @env.find_asset("npm.css", accept: 'text/css').filename
   end
 
   test "find bundled asset in environment" do

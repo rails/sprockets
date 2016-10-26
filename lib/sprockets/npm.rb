@@ -19,7 +19,7 @@ module Sprockets
 
         if self.file?(filename)
           deps << build_file_digest_uri(filename)
-          read_package_main(dirname, filename) do |path|
+          read_package_directives(dirname, filename) do |path|
             if file?(path)
               candidates << path
             end
@@ -30,13 +30,13 @@ module Sprockets
       return candidates, deps
     end
 
-    # Internal: Read package.json's main directive.
+    # Internal: Read package.json's main and style directives.
     #
     # dirname  - String path to component directory.
     # filename - String path to package.json.
     #
     # Returns nothing.
-    def read_package_main(dirname, filename)
+    def read_package_directives(dirname, filename)
       package = JSON.parse(File.read(filename), create_additions: false)
 
       case package['main']
@@ -45,6 +45,8 @@ module Sprockets
       when nil
         yield File.expand_path('index.js', dirname)
       end
+
+      yield File.expand_path(package['style'], dirname) if package['style']
     end
   end
 end
