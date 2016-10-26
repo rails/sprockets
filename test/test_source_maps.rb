@@ -251,6 +251,19 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal "main.css", map['file']
     assert_equal 172, map['mappings'].size
   end
+
+  test "source maps work with index alias" do
+    asset = @env.find_asset("foo.js",  pipeline: :debug)
+    mapUrl = asset.source.match(/^\/\/# sourceMappingURL=(.*)$/)[1]
+    assert_equal "foo/index.js-f0762afcb2fb7da09c19868c366b58f81324dc7128b5a64a2757e9eab1e02837.map", mapUrl
+
+    map = @env.find_asset('foo/index.js.map')
+    sources = JSON.parse(map.source.match(/"sources":(\[.*?\])/)[1])
+    assert_equal [
+      "file.source-db1eb561f880aead3f69d072274e15ee404921dfebe30a35b12e2d8c47e33803.coffee",
+      "index.source-8b27c2df3fc22ff7f0800e09e0b26088dac8c711f6e3b1765aae1d632fd83798.js"
+    ], sources
+  end
 end
 
 
