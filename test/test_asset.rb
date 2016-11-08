@@ -742,6 +742,14 @@ class BundledAssetTest < Sprockets::TestCase
     assert_equal read("asset/project.js.erb")+"\n\n\n", asset("multiple.js").to_s
   end
 
+  test "requiring index file directly and by alias includes it only once" do
+    assert_equal "alert(1);\n\n\n", asset("index_alias/require.js").to_s
+  end
+
+  test "requiring index file by tree and by alias includes it only once" do
+    assert_equal "alert(1);\n", asset("index_alias/require_tree.js").to_s
+  end
+
   test "requiring a file of a different format raises an exception" do
     assert_raises Sprockets::FileNotFound do
       asset("mismatch.js")
