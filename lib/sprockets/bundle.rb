@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'set'
 require 'sprockets/utils'
+require 'sprockets/uri_utils'
 
 module Sprockets
   # Internal: Bundle processor takes a single file asset and prepends all the
@@ -25,6 +26,7 @@ module Sprockets
       required = Utils.dfs(processed_uri, &find_required)
       stubbed  = Utils.dfs(env.load(processed_uri).metadata[:stubbed], &find_required)
       required.subtract(stubbed)
+      dedup(required)
       assets = required.map { |uri| env.load(uri) }
 
       (required + stubbed).each do |uri|
@@ -33,6 +35,22 @@ module Sprockets
 
       reducers = Hash[env.match_mime_type_keys(env.config[:bundle_reducers], type).flat_map(&:to_a)]
       process_bundle_reducers(assets, reducers).merge(dependencies: dependencies, included: assets.map(&:uri))
+    end
+
+    # Internal: Removes uri from required if it's already included as an alias.
+    #
+    # required - Set of required uris
+    #
+    # Returns deduped set of uris
+    def self.dedup(required)
+      dupes = required.reduce([]) do |r, uri|
+        path, params = URIUtils.parse_asset_uri(uri)
+        if (params.delete(:index_alias))
+          r << URIUtils.build_asset_uri(path, params)
+        end
+        r
+      end
+      required.subtract(dupes)
     end
 
     # Internal: Run bundle reducers on set of Assets producing a reduced
