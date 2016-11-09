@@ -107,10 +107,8 @@ module Sprockets
         # This will lead to O(N^2) performance in string_end_with_semicolon?, so we should use 32 bit encoding to make sure indexing stays O(1)
         source = source.encode(Encoding::UTF_32LE) unless source.ascii_only?
 
-        if !string_end_with_semicolon?(source)
-          buf << ";\n"
-        elsif source[source.size - 1].ord != 0x0A
-          buf << "\n"
+        unless string_end_with_semicolon?(source)
+          buf << ";"
         end
       end
 
