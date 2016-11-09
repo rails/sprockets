@@ -68,28 +68,33 @@ module Sprockets
       end
     end
 
-    # Internal: Check if string has a trailing semicolon.
+    # Internal: Get the location where a semicolon should be inserted
     #
     # str - String
     #
-    # Returns true or false.
-    def string_end_with_semicolon?(str)
-      i = str.size - 1
+    # Returns nil if insertion isn't needed, or the location.
+    def semicolon_insertion_location(str)
+      i = str.bytesize - 1
       while i >= 0
-        c = str[i].ord
-        i -= 1
-
+        c = str.getbyte(i)
         # Need to compare against the ordinals because the string can be UTF_8 or UTF_32LE encoded
         # 0x0A == "\n"
         # 0x20 == " "
         # 0x09 == "\t"
         # 0x3B == ";"
         unless c == 0x0A || c == 0x20 || c == 0x09
-          return c === 0x3B
+          if c === 0x3B
+            return nil
+          else
+            # Because we're iterating byte-by-byte we need to calculate the offset using the bytesize
+            return str.size - str.bytesize + i + 1
+          end
         end
+
+        i -= 1
       end
 
-      true
+      nil
     end
 
     # Internal: Accumulate asset source to buffer and append a trailing
@@ -101,15 +106,14 @@ module Sprockets
     # Returns buf String.
     def concat_javascript_sources(buf, source)
       if source.bytesize > 0
-        buf << source
+        idx = semicolon_insertion_location(source)
 
-        # If the source contains non-ASCII characters, indexing on it becomes O(N).
-        # This will lead to O(N^2) performance in string_end_with_semicolon?, so we should use 32 bit encoding to make sure indexing stays O(1)
-        source = source.encode(Encoding::UTF_32LE) unless source.ascii_only?
-
-        unless string_end_with_semicolon?(source)
-          buf << ";"
+        unless idx.nil?
+          source = source.dup
+          source.insert(idx, ';')
         end
+
+        buf << source
       end
 
       buf
