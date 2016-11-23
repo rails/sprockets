@@ -296,6 +296,7 @@ module Sprockets
         exporters = [Exporters::FileExporter]
 
         environment.exporters.each do |mime_type, exporter_list|
+          next unless asset.content_type
           next unless environment.match_mime_type? asset.content_type, mime_type
           exporter_list.each do |exporter|
             exporters << exporter
