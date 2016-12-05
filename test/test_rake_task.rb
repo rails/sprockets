@@ -57,7 +57,7 @@ class TestRakeTask < Sprockets::TestCase
     @rake[:clobber_assets].invoke
     assert !File.exist?("#{@dir}/#{digest_path}")
     # verify the cache key was cleared
-    assert_equal @env.cache.get('foo'), nil
+    assert_nil @env.cache.get('foo')
 
   end
 

@@ -157,7 +157,7 @@ class TestERBProcessor < MiniTest::Test
       cache: Sprockets::Cache.new
     }
 
-    assert_match /sass_version/, Sprockets::ERBProcessor.call(input)[:data]
+    assert_match(/sass_version/, Sprockets::ERBProcessor.call(input)[:data])
   ensure
     Sprockets.send(:remove_const, :Sass)
   end

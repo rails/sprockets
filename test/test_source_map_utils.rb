@@ -28,7 +28,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 3,           mapping[:original].first
     assert_equal 17,          mapping[:original].last
     assert_equal 'script.js', mapping[:source]
-    assert_equal nil,         mapping[:name]
+    assert_nil                mapping[:name]
 
     expected = JSON.generate(source_map)
     actual   = Sprockets::SourceMapUtils.encode_json_source_map(mappings, filename: "script.min.js")
@@ -60,7 +60,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 28,               mapping[:original].first
     assert_equal 8,                mapping[:original].last
     assert_equal 'example.coffee', mapping[:source]
-    assert_equal nil,              mapping[:name]
+    assert_nil                     mapping[:name]
 
     expected = JSON.generate(source_map)
     actual   = Sprockets::SourceMapUtils.encode_json_source_map(mappings, filename: "example.js")
@@ -84,7 +84,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 2,            mapping[:original].first
     assert_equal 1,            mapping[:original].last
     assert_equal 'example.js', mapping[:source]
-    assert_equal nil,          mapping[:name]
+    assert_nil                 mapping[:name]
 
     assert mapping = mappings.last
     assert_equal 1,            mapping[:generated].first
@@ -92,7 +92,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 2,            mapping[:original].first
     assert_equal 1,            mapping[:original].last
     assert_equal 'example.js', mapping[:source]
-    assert_equal nil,          mapping[:name]
+    assert_nil                 mapping[:name]
 
     expected = JSON.generate(source_map)
     actual   = Sprockets::SourceMapUtils.encode_json_source_map(mappings, filename: "example.min.js")

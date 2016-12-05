@@ -410,7 +410,7 @@ module EnvironmentTests
   end
 
   test "missing asset returns nil" do
-    assert_equal nil, @env["missing.js"]
+    assert_nil @env["missing.js"]
   end
 
   test "missing asset path returns nil" do

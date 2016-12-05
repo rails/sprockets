@@ -197,7 +197,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "charset is nil" do
-    assert_equal nil, @asset.charset
+    assert_nil @asset.charset
   end
 
   test "length" do
@@ -1204,7 +1204,7 @@ class AssetContentTypeTest < Sprockets::TestCase
   end
 
   test "content type" do
-    assert_equal nil, content_type("empty")
+    assert_nil content_type("empty")
 
     assert_equal "application/javascript", content_type("application.js")
     assert_equal "text/css", content_type("application.css")
@@ -1216,7 +1216,7 @@ class AssetContentTypeTest < Sprockets::TestCase
 
     assert_equal "text/css", content_type("store.css.erb", accept: "text/css")
     assert_equal "text/html", content_type("files.erb", accept: "text/html")
-    assert_equal nil, content_type("store.foo")
+    assert_nil content_type("store.foo")
 
     assert_equal "application/javascript", content_type("application.coffee", accept: "application/javascript")
     assert_equal "text/css", content_type("application.scss", accept: "text/css")
@@ -1239,13 +1239,13 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("jquery.ext/form.js")
     assert_equal "application/javascript", content_type("jquery-coffee.min.coffee", accept: "application/javascript")
     assert_equal "application/javascript", content_type("jquery-custom.min.js.erb", accept: "application/javascript")
-    assert_equal nil, content_type("jquery.js.min")
+    assert_nil content_type("jquery.js.min")
 
     assert_equal "application/javascript", content_type("all.coffee/plain.js")
     assert_equal "application/javascript", content_type("all.coffee/hot.coffee", accept: "application/javascript")
     assert_equal "application/javascript", content_type("all.coffee/index.coffee", accept: "application/javascript")
 
-    assert_equal nil, content_type("sprite.css.embed")
+    assert_nil content_type("sprite.css.embed")
 
     assert_equal "application/javascript", content_type("traceur.es6", accept: "application/javascript")
   end
