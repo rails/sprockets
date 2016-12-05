@@ -16,12 +16,11 @@ module Sprockets
       initialize_configuration(environment)
 
       @cache   = environment.cache
-      @stats   = Hash.new { |h, k| h[k] = _stat(k) }
-      @entries = Hash.new { |h, k| h[k] = _entries(k) }
-      @uris    = Hash.new { |h, k| h[k] = _load(k) }
-
-      @processor_cache_keys  = Hash.new { |h, k| h[k] = _processor_cache_key(k) }
-      @resolved_dependencies = Hash.new { |h, k| h[k] = _resolve_dependency(k) }
+      @stats   = {}
+      @entries = {}
+      @uris    = {}
+      @processor_cache_keys = {}
+      @resolved_dependencies = {}
     end
 
     # No-op return self as cached environment.
@@ -31,33 +30,28 @@ module Sprockets
     alias_method :index, :cached
 
     # Internal: Cache Environment#entries
-    alias_method :_entries, :entries
     def entries(path)
-      @entries[path]
+      @entries[path] ||= super(path)
     end
 
     # Internal: Cache Environment#stat
-    alias_method :_stat, :stat
     def stat(path)
-      @stats[path]
+      @stats[path] ||= super(path)
     end
 
     # Internal: Cache Environment#load
-    alias_method :_load, :load
     def load(uri)
-      @uris[uri]
+      @uris[uri] ||= super(uri)
     end
 
     # Internal: Cache Environment#processor_cache_key
-    alias_method :_processor_cache_key, :processor_cache_key
     def processor_cache_key(str)
-      @processor_cache_keys[str]
+      @processor_cache_keys[str] ||= super(str)
     end
 
     # Internal: Cache Environment#resolve_dependency
-    alias_method :_resolve_dependency, :resolve_dependency
     def resolve_dependency(str)
-      @resolved_dependencies[str]
+      @resolved_dependencies[str] ||= super(str)
     end
 
     private
