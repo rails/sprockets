@@ -1,6 +1,6 @@
 # Guide to upgrading from Sprockets 3.x to 4.x
 
-Make sure that you're running the latest Sprockets 3 release. This document is a work in progress and not at all authoritative. It is meant to underline the biggest features and changes from Sprockets 3 to 4. If you're not already on Sprockets 3 check out https://github.com/rails/sprockets/blob/3.x/UPGRADING.md. Sprockets 3 was a compatability release to bridge to Sprockets 4, and many deprecated things have been removed in version 4.
+Make sure that you're running the latest Sprockets 3 release. This document is a work in progress and not at all authoritative. It is meant to underline the biggest features and changes from Sprockets 3 to 4. If you're not already on Sprockets 3 check out https://github.com/rails/sprockets/blob/3.x/UPGRADING.md. Sprockets 3 was a compatibility release to bridge Sprockets 4, and many deprecated things have been removed in version 4.
 
 This upgrading guide touches on:
 
