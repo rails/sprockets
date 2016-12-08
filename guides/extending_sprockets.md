@@ -120,7 +120,7 @@ Your exporter gets initialized once for each asset to be exported by sprockets w
  - environment (Instance of Sprockets::Environment)
  - directory (Instance of String)
 
-A `setup` method is called right after the exporter is initalized. Your exporter is expected implement a `skip?` method. If this method returns true then sprockets will skip your exporter and move to the next one. An instance of `Sprockets::Logger` is passed into this method that can be used to indicate to the user what is happening. This method is caled syncronously.
+A `setup` method is called right after the exporter is initalized. Your exporter is expected implement a `skip?` method. If this method returns true then sprockets will skip your exporter and move to the next one. An instance of `Sprockets::Logger` is passed into this method that can be used to indicate to the user what is happening. This method is called synchronously.
 
 The work of writing the new asset to disk is performed in the `call` method. This method is potentially called in a new thread and should not mutate any global state. A `write` method is provided that takes a `filename` to be written to (full path) and yields an IO object.
 
