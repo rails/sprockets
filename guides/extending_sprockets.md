@@ -112,7 +112,7 @@ You can write your own exporter:
 register_exporter '*/*', Sprockets::Exporters::ZlibExporter
 ```
 
-First argument is the mime type of files that the exporter will operate on. For your convienence a `Sprockets::Exporters::Base` class is provided for you to inherit from. Details about the required interface for an exporter are in that class.
+First argument is the mime type of files that the exporter will operate on. For your convenience, a `Sprockets::Exporters::Base` class is provided for you to inherit from. Details about the required interface for an exporter are in that class.
 
 Your exporter gets initialized once for each asset to be exported by sprockets with the following keyword arguments
 
