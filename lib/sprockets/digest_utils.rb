@@ -35,55 +35,107 @@ module Sprockets
       DIGEST_SIZES[bytes.bytesize]
     end
 
-    ADD_VALUE_TO_DIGEST = {
-      String     => ->(val, digest) { digest << val },
-      FalseClass => ->(val, digest) { digest << 'FalseClass'.freeze },
-      TrueClass  => ->(val, digest) { digest << 'TrueClass'.freeze  },
-      NilClass   => ->(val, digest) { digest << 'NilClass'.freeze   },
+    module RefinementDigestUtils
+      extend self
 
-      Symbol => ->(val, digest) {
-        digest << 'Symbol'.freeze
-        digest << val.to_s
-      },
-      Integer => ->(val, digest) {
-        digest << 'Integer'.freeze
-        digest << val.to_s
-      },
-      Array => ->(val, digest) {
-        digest << 'Array'.freeze
-        val.each do |element|
-          ADD_VALUE_TO_DIGEST[element.class].call(element, digest)
+      module AddValueToDigest
+        refine Object do
+          def add_value_to_digest(_)
+            raise TypeError, "couldn't digest #{self}"
+          end
         end
-      },
-      Hash => ->(val, digest) {
-        digest << 'Hash'.freeze
-        val.sort.each do |array|
-          ADD_VALUE_TO_DIGEST[Array].call(array, digest)
+
+        refine String do
+          def add_value_to_digest(digest)
+            digest << self
+          end
         end
-      },
-      Set => ->(val, digest) {
-        digest << 'Set'.freeze
-        ADD_VALUE_TO_DIGEST[Array].call(val, digest)
-      },
-      Encoding => ->(val, digest) {
-        digest << 'Encoding'.freeze
-        digest << val.name
-      },
-    }
-    if 0.class != Integer # Ruby < 2.4
-      ADD_VALUE_TO_DIGEST[Fixnum] = ->(val, digest) {
-        digest << 'Integer'.freeze
-        digest << val.to_s
-      }
-      ADD_VALUE_TO_DIGEST[Bignum] = ->(val, digest) {
-        digest << 'Integer'.freeze
-        digest << val.to_s
-      }
+
+        refine FalseClass do
+          def add_value_to_digest(digest)
+            digest << 'FalseClass'.freeze
+          end
+        end
+
+        refine TrueClass do
+          def add_value_to_digest(digest)
+            digest << 'TrueClass'.freeze
+          end
+        end
+
+        refine NilClass do
+          def add_value_to_digest(digest)
+            digest << 'NilClass'.freeze
+          end
+        end
+
+        refine Symbol do
+          def add_value_to_digest(digest)
+            digest << 'Symbol'.freeze
+            digest << to_s
+          end
+        end
+
+        refine Fixnum do
+          def add_value_to_digest(digest)
+            digest << 'Integer'.freeze
+            digest << to_s
+          end
+        end
+
+        refine Bignum do
+          def add_value_to_digest(digest)
+            digest << 'Integer'.freeze
+            digest << to_s
+          end
+        end
+
+        refine Array do
+          def add_value_to_digest(digest)
+            digest << 'Array'.freeze
+            each do |element|
+              element.add_value_to_digest(digest)
+            end
+          end
+        end
+
+        refine Hash do
+          def add_value_to_digest(digest)
+            digest << 'Hash'.freeze
+            sort.each do |array|
+              digest << 'Array'.freeze
+              array.each do |element|
+                element.add_value_to_digest(digest)
+              end
+            end
+          end
+        end
+
+        refine Set do
+          def add_value_to_digest(digest)
+            digest << 'Set'.freeze
+            digest << 'Array'.freeze
+            each do |element|
+              element.add_value_to_digest(digest)
+            end
+          end
+        end
+
+        refine Encoding do
+          def add_value_to_digest(digest)
+            digest << 'Encoding'.freeze
+            digest << self.name
+          end
+        end
+      end
+      using AddValueToDigest
+
+      def digest(digest, obj)
+        obj.add_value_to_digest(digest)
+        digest
+      end
     end
-    ADD_VALUE_TO_DIGEST.default_proc = ->(_, val) {
-      raise TypeError, "couldn't digest #{ val }"
-    }
-    private_constant :ADD_VALUE_TO_DIGEST
+    private_constant :RefinementDigestUtils
 
     # Internal: Generate a hexdigest for a nested JSON serializable object.
     #
@@ -189,9 +241,7 @@ module Sprockets
     private
       def build_digest(obj)
         digest = digest_class.new
-
-        ADD_VALUE_TO_DIGEST[obj.class].call(obj, digest)
-        digest
+        RefinementDigestUtils.digest(digest, obj)
       end
   end
 end

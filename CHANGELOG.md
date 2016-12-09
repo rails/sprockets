@@ -1,9 +1,8 @@
-**Master**
-
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
 ## Master
 
+- Minimum Ruby version now 2.2 to support refinements, required keyword args, and symbol GC.
 
 ## 4.0.0.beta4
 
