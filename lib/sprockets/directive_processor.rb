@@ -77,7 +77,8 @@ module Sprockets
       @dependencies = Set.new(input[:metadata][:dependencies])
 
       data, directives = process_source(input[:data])
-      process_directives(directives)
+      runners = process_directives(directives)
+      runners.each(&:finalize)
 
       { data: data,
         required: @required,
@@ -176,7 +177,7 @@ module Sprockets
       #     env.register_processor('text/css', DirectiveProcessor)
       #
       def process_directives(directives)
-        directives.each do |line_number, name, *args|
+        directives.map do |line_number, name, *args|
           begin
             send("process_#{name}_directive", *args)
           rescue Exception => e
@@ -205,7 +206,10 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << resolve(path, accept: @content_type, pipeline: :self)
+        runner = Parallel::Runner.new -> { resolve(path, accept: @content_type, pipeline: :self) }
+        runner.exec
+        runner.finalize ->(result) { @required << result }
+        runner
       end
 
       # `require_self` causes the body of the current file to be inserted
@@ -219,10 +223,15 @@ module Sprockets
       #      */
       #
       def process_require_self_directive
-        if @required.include?(@uri)
-          raise ArgumentError, "require_self can only be called once per source file"
+        runner = Parallel::Runner.new -> { }
+        runner.exec
+        runner.finalize ->(result) do
+          if @required.include?(@uri)
+            raise ArgumentError, "require_self can only be called once per source file"
+          end
+          @required << @uri
         end
-        @required << @uri
+        runner
       end
 
       # `require_directory` requires all the files inside a single
@@ -232,8 +241,13 @@ module Sprockets
       #     //= require_directory "./javascripts"
       #
       def process_require_directory_directive(path = ".")
-        path = expand_relative_dirname(:require_directory, path)
-        require_paths(*@environment.stat_directory_with_dependencies(path))
+        runner = Parallel::Runner.new -> {
+          path = expand_relative_dirname(:require_directory, path)
+          require_paths(*@environment.stat_directory_with_dependencies(path))
+        }
+        runner.exec
+        runner.finalize ->(result) { result.map(&:finalize) }
+        runner
       end
 
       # `require_tree` requires all the nested files in a directory.
@@ -242,8 +256,13 @@ module Sprockets
       #     //= require_tree "./public"
       #
       def process_require_tree_directive(path = ".")
-        path = expand_relative_dirname(:require_tree, path)
-        require_paths(*@environment.stat_sorted_tree_with_dependencies(path))
+        runner = Parallel::Runner.new -> {
+          path = expand_relative_dirname(:require_tree, path)
+          require_paths(*@environment.stat_sorted_tree_with_dependencies(path))
+        }
+        runner.exec
+        runner.finalize ->(result) { result.map(&:finalize) }
+        runner
       end
 
       # Allows you to state a dependency on a file without
@@ -259,7 +278,12 @@ module Sprockets
       #     //= depend_on "foo.png"
       #
       def process_depend_on_directive(path)
-        resolve(path)
+        runner = Parallel::Runner.new -> {
+          resolve(path)
+        }
+        runner.exec
+        runner.finalize ->(result) { }
+        runner
       end
 
       # Allows you to state a dependency on an asset without including
@@ -274,7 +298,12 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        load(resolve(path))
+        runner = Parallel::Runner.new -> {
+          load(resolve(path))
+        }
+        runner.exec
+        runner.finalize ->(result) { }
+        runner
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -286,7 +315,12 @@ module Sprockets
       #     //= stub "jquery"
       #
       def process_stub_directive(path)
-        @stubbed << resolve(path, accept: @content_type, pipeline: :self)
+        runner = Parallel::Runner.new -> {
+          resolve(path, accept: @content_type, pipeline: :self)
+        }
+        runner.exec
+        runner.finalize ->(result) { @stubbed << result }
+        runner
       end
 
       # Declares a linked dependency on the target asset.
@@ -298,7 +332,12 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        @links << load(resolve(path)).uri
+        runner = Parallel::Runner.new -> {
+          load(resolve(path)).uri
+        }
+        runner.exec
+        runner.finalize ->(result) { @links << result }
+        runner
       end
 
       # `link_directory` links all the files inside a single
@@ -313,9 +352,14 @@ module Sprockets
       #     //= link_directory "./scripts" .js
       #
       def process_link_directory_directive(path = ".", accept = nil)
-        path = expand_relative_dirname(:link_directory, path)
-        accept = expand_accept_shorthand(accept)
-        link_paths(*@environment.stat_directory_with_dependencies(path), accept)
+        runner = Parallel::Runner.new -> {
+          path = expand_relative_dirname(:link_directory, path)
+          accept = expand_accept_shorthand(accept)
+          link_paths(*@environment.stat_directory_with_dependencies(path), accept)
+        }
+        runner.exec
+        runner.finalize ->(result) { result.each(&:finalize) }
+        runner
       end
 
       # `link_tree` links all the nested files in a directory.
@@ -329,9 +373,14 @@ module Sprockets
       #     //= link_tree "./styles" .css
       #
       def process_link_tree_directive(path = ".", accept = nil)
-        path = expand_relative_dirname(:link_tree, path)
-        accept = expand_accept_shorthand(accept)
-        link_paths(*@environment.stat_sorted_tree_with_dependencies(path), accept)
+        runner = Parallel::Runner.new -> {
+          path = expand_relative_dirname(:link_directory, path)
+          accept = expand_accept_shorthand(accept)
+          link_paths(*@environment.stat_directory_with_dependencies(path), accept)
+        }
+        runner.exec
+        runner.finalize ->(result) { result.each(&:finalize) }
+        runner
       end
 
     private
@@ -360,13 +409,24 @@ module Sprockets
       end
 
       def resolve_paths(paths, deps, **kargs)
-        @dependencies.merge(deps)
+        runner = Parallel::Runner.new -> {}
+        runner.exec
+        runner.finalize -> { @dependencies.merge(deps) }
+        runner_array << runner
+
         paths.each do |subpath, stat|
-          next if subpath == @filename || stat.directory?
-          uri, deps = @environment.resolve(subpath, **kargs)
-          @dependencies.merge(deps)
-          yield uri if uri
+          runner = Parallel::Runner.new -> {
+            next if subpath == @filename || stat.directory?
+            uri, deps = @environment.resolve(subpath, **kargs)
+          }
+          runner.exec
+          runner.finalize -> (uri, deps) {
+            @dependencies.merge(deps)
+            yield uri if uri
+          }
+          runner_array << runner
         end
+        runner_array
       end
 
       def expand_relative_dirname(directive, path)

@@ -7,6 +7,8 @@ require 'sprockets/environment'
 require 'sprockets/errors'
 require 'sprockets/manifest'
 
+require 'sprockets/parallel/runner'
+
 module Sprockets
   require 'sprockets/processor_utils'
   extend ProcessorUtils
