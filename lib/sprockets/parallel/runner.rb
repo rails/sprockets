@@ -50,15 +50,14 @@ module Sprockets
         self.class.queue(self)
       end
 
-      def finalize(block = nil, &implicit_block)
-        block = block || implicit_block
-        if block
-          @finalize = block
-        else
-          wait_until_done!
-          raise "No finalize block specified" if @finalize.nil?
-          @finalize.call(@result)
-        end
+      def finalize=(block)
+        @finalize = block
+      end
+
+      def finalize
+        wait_until_done!
+        raise "No finalize block specified" if @finalize.nil?
+        @finalize.call(@result)
       end
     end
   end

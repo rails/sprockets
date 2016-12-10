@@ -208,7 +208,7 @@ module Sprockets
       def process_require_directive(path)
         runner = Parallel::Runner.new -> { resolve(path, accept: @content_type, pipeline: :self) }
         runner.exec
-        runner.finalize ->(result) { @required << result }
+        runner.finalize = ->(result) { @required << result }
         runner
       end
 
@@ -225,7 +225,7 @@ module Sprockets
       def process_require_self_directive
         runner = Parallel::Runner.new -> { }
         runner.exec
-        runner.finalize ->(result) do
+        runner.finalize = ->(result) do
           if @required.include?(@uri)
             raise ArgumentError, "require_self can only be called once per source file"
           end
@@ -246,7 +246,7 @@ module Sprockets
           require_paths(*@environment.stat_directory_with_dependencies(path))
         }
         runner.exec
-        runner.finalize ->(result) { result.map(&:finalize) }
+        runner.finalize = ->(result) { result.map(&:finalize) }
         runner
       end
 
@@ -261,7 +261,7 @@ module Sprockets
           require_paths(*@environment.stat_sorted_tree_with_dependencies(path))
         }
         runner.exec
-        runner.finalize ->(result) { result.map(&:finalize) }
+        runner.finalize = ->(result) { result.map(&:finalize) }
         runner
       end
 
@@ -282,7 +282,7 @@ module Sprockets
           resolve(path)
         }
         runner.exec
-        runner.finalize ->(result) { }
+        runner.finalize = ->(result) { }
         runner
       end
 
@@ -302,7 +302,7 @@ module Sprockets
           load(resolve(path))
         }
         runner.exec
-        runner.finalize ->(result) { }
+        runner.finalize = ->(result) { }
         runner
       end
 
@@ -319,7 +319,7 @@ module Sprockets
           resolve(path, accept: @content_type, pipeline: :self)
         }
         runner.exec
-        runner.finalize ->(result) { @stubbed << result }
+        runner.finalize = ->(result) { @stubbed << result }
         runner
       end
 
@@ -336,7 +336,7 @@ module Sprockets
           load(resolve(path)).uri
         }
         runner.exec
-        runner.finalize ->(result) { @links << result }
+        runner.finalize = ->(result) { @links << result }
         runner
       end
 
@@ -358,7 +358,7 @@ module Sprockets
           link_paths(*@environment.stat_directory_with_dependencies(path), accept)
         }
         runner.exec
-        runner.finalize ->(result) { result.each(&:finalize) }
+        runner.finalize = ->(result) { result.each(&:finalize) }
         runner
       end
 
@@ -379,7 +379,7 @@ module Sprockets
           link_paths(*@environment.stat_directory_with_dependencies(path), accept)
         }
         runner.exec
-        runner.finalize ->(result) { result.each(&:finalize) }
+        runner.finalize = ->(result) { result.each(&:finalize) }
         runner
       end
 
@@ -409,19 +409,22 @@ module Sprockets
       end
 
       def resolve_paths(paths, deps, **kargs)
+        runner_array = []
         runner = Parallel::Runner.new -> {}
         runner.exec
-        runner.finalize -> { @dependencies.merge(deps) }
+        runner.finalize = ->(_) { @dependencies.merge(deps) }
         runner_array << runner
 
         paths.each do |subpath, stat|
           runner = Parallel::Runner.new -> {
             next if subpath == @filename || stat.directory?
-            uri, deps = @environment.resolve(subpath, **kargs)
+            uri, new_deps = @environment.resolve(subpath, **kargs)
+            return [uri, new_deps]
           }
           runner.exec
-          runner.finalize -> (uri, deps) {
-            @dependencies.merge(deps)
+          runner.finalize = -> (args) {
+            uri, new_deps = *args
+            @dependencies.merge(new_deps) if new_deps
             yield uri if uri
           }
           runner_array << runner
