@@ -22,7 +22,7 @@ module Sprockets
         @queue << job
       end
 
-      def initialize(block, &implicit_block)
+      def initialize(block = nil, &implicit_block)
         @job    = block || implicit_block
         @status = :created
         @result = nil

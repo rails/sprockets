@@ -178,12 +178,7 @@ module Sprockets
       #
       def process_directives(directives)
         directives.map do |line_number, name, *args|
-          begin
-            send("process_#{name}_directive", *args)
-          rescue Exception => e
-            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
-            raise e
-          end
+          send("process_#{name}_directive", *args, line_number: line_number)
         end
       end
 
@@ -205,8 +200,15 @@ module Sprockets
       #
       #     //= require "./bar"
       #
-      def process_require_directive(path)
-        runner = Parallel::Runner.new -> { resolve(path, accept: @content_type, pipeline: :self) }
+      def process_require_directive(path, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            resolve(path, accept: @content_type, pipeline: :self)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { @required << result }
         runner
@@ -240,11 +242,16 @@ module Sprockets
       #
       #     //= require_directory "./javascripts"
       #
-      def process_require_directory_directive(path = ".")
-        runner = Parallel::Runner.new -> {
-          path = expand_relative_dirname(:require_directory, path)
-          require_paths(*@environment.stat_directory_with_dependencies(path))
-        }
+      def process_require_directory_directive(path = ".", line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            path = expand_relative_dirname(:require_directory, path)
+            require_paths(*@environment.stat_directory_with_dependencies(path), line_number: line_number)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { result.map(&:finalize) }
         runner
@@ -255,11 +262,16 @@ module Sprockets
       #
       #     //= require_tree "./public"
       #
-      def process_require_tree_directive(path = ".")
-        runner = Parallel::Runner.new -> {
-          path = expand_relative_dirname(:require_tree, path)
-          require_paths(*@environment.stat_sorted_tree_with_dependencies(path))
-        }
+      def process_require_tree_directive(path = ".", line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            path = expand_relative_dirname(:require_tree, path)
+            require_paths(*@environment.stat_sorted_tree_with_dependencies(path), line_number: line_number)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { result.map(&:finalize) }
         runner
@@ -277,10 +289,15 @@ module Sprockets
       #
       #     //= depend_on "foo.png"
       #
-      def process_depend_on_directive(path)
-        runner = Parallel::Runner.new -> {
-          resolve(path)
-        }
+      def process_depend_on_directive(path, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            resolve(path)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { }
         runner
@@ -297,10 +314,15 @@ module Sprockets
       #
       #     //= depend_on_asset "bar.js"
       #
-      def process_depend_on_asset_directive(path)
-        runner = Parallel::Runner.new -> {
-          load(resolve(path))
-        }
+      def process_depend_on_asset_directive(path, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            load(resolve(path))
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { }
         runner
@@ -314,10 +336,15 @@ module Sprockets
       #
       #     //= stub "jquery"
       #
-      def process_stub_directive(path)
-        runner = Parallel::Runner.new -> {
-          resolve(path, accept: @content_type, pipeline: :self)
-        }
+      def process_stub_directive(path, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            resolve(path, accept: @content_type, pipeline: :self)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { @stubbed << result }
         runner
@@ -331,10 +358,15 @@ module Sprockets
       #
       #   /*= link "logo.png" */
       #
-      def process_link_directive(path)
-        runner = Parallel::Runner.new -> {
-          load(resolve(path)).uri
-        }
+      def process_link_directive(path, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            load(resolve(path)).uri
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { @links << result }
         runner
@@ -351,12 +383,17 @@ module Sprockets
       #
       #     //= link_directory "./scripts" .js
       #
-      def process_link_directory_directive(path = ".", accept = nil)
-        runner = Parallel::Runner.new -> {
-          path = expand_relative_dirname(:link_directory, path)
-          accept = expand_accept_shorthand(accept)
-          link_paths(*@environment.stat_directory_with_dependencies(path), accept)
-        }
+      def process_link_directory_directive(path = ".", accept = nil, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            path = expand_relative_dirname(:link_directory, path)
+            accept = expand_accept_shorthand(accept)
+            link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
         runner.exec
         runner.finalize = ->(result) { result.each(&:finalize) }
         runner
@@ -372,12 +409,18 @@ module Sprockets
       #
       #     //= link_tree "./styles" .css
       #
-      def process_link_tree_directive(path = ".", accept = nil)
-        runner = Parallel::Runner.new -> {
-          path = expand_relative_dirname(:link_directory, path)
-          accept = expand_accept_shorthand(accept)
-          link_paths(*@environment.stat_directory_with_dependencies(path), accept)
-        }
+      def process_link_tree_directive(path = ".", accept = nil, line_number: )
+        runner = Parallel::Runner.new do
+          begin
+            path = expand_relative_dirname(:link_directory, path)
+            accept = expand_accept_shorthand(accept)
+            link_paths(*@environment.stat_directory_with_dependencies(path), accept)
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
+
         runner.exec
         runner.finalize = ->(result) { result.each(&:finalize) }
         runner
@@ -396,19 +439,19 @@ module Sprockets
         end
       end
 
-      def require_paths(paths, deps)
-        resolve_paths(paths, deps, accept: @content_type, pipeline: :self) do |uri|
+      def require_paths(paths, deps, line_number:)
+        resolve_paths(paths, deps, accept: @content_type, pipeline: :self, line_number: line_number) do |uri|
           @required << uri
         end
       end
 
-      def link_paths(paths, deps, accept)
+      def link_paths(paths, deps, accept, line_number:)
         resolve_paths(paths, deps, accept: accept) do |uri|
           @links << load(uri).uri
         end
       end
 
-      def resolve_paths(paths, deps, **kargs)
+      def resolve_paths(paths, deps, line_number: , **kargs)
         runner_array = []
         runner = Parallel::Runner.new -> {}
         runner.exec
