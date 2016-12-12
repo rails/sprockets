@@ -52,6 +52,11 @@ class TestProcessorUtils < MiniTest::Test
     end
   end
 
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path File.expand_path("../fixtures", __FILE__)
+  end
+
   def test_call_nothing
     a = proc {}
 
@@ -247,6 +252,9 @@ class TestProcessorUtils < MiniTest::Test
     processor = compose_processors(Sprockets::UglifierCompressor, Sprockets::CoffeeScriptProcessor)
 
     input = {
+      environment: @env,
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/compose.coffee", __FILE__),
       content_type: 'application/javascript',
       data: "self.square = (n) -> n * n",
       cache: Sprockets::Cache.new

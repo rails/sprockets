@@ -49,15 +49,13 @@ module Sprockets
     def call(input)
       css, map = Autoload::Sass::Engine.new(
         input[:data],
-        @options.merge(filename: 'filename')
+        @options.merge(filename: input[:filename])
       ).render_with_sourcemap('')
 
       css = css.sub("/*# sourceMappingURL= */\n", '')
 
-      map = SourceMapUtils.combine_source_maps(
-        input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map.to_json(css_uri: 'uri'))["mappings"]
-      )
+      map = SourceMapUtils.format_source_map(JSON.parse(map.to_json(css_uri: '')), input)
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
 
       { data: css, map: map }
     end

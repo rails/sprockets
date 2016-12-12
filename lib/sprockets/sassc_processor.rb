@@ -27,25 +27,18 @@ module Sprockets
         engine.render.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
       end
 
-      map = SourceMapUtils.decode_json_source_map(engine.source_map)
-      sources = map['sources'].map do |s|
-        expand_source(PathUtils.join(File.dirname(input[:filename]), s), input[:environment])
+      begin
+        map = SourceMapUtils.format_source_map(JSON.parse(engine.source_map), input)
+        map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
+
+        engine.dependencies.each do |dependency|
+          context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.filename)
+        end
+      rescue SassC::NotRenderedError
+        map = input[:metadata][:map]
       end
 
-      map = map["mappings"].each do |m|
-        m[:source] = PathUtils.join(File.dirname(input[:filename]), m[:source])
-      end
-
-      map = SourceMapUtils.combine_source_maps(
-        input[:metadata][:map],
-        expand_map_sources(map, input[:environment])
-      )
-
-      engine.dependencies.each do |dependency|
-        context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.filename)
-      end
-
-      context.metadata.merge(data: css, map: map, sources: sources)
+      context.metadata.merge(data: css, map: map)
     end
 
     private
@@ -56,7 +49,7 @@ module Sprockets
         syntax: self.class.syntax,
         load_paths: input[:environment].paths,
         importer: @importer_class,
-        source_map_contents: true,
+        source_map_contents: false,
         source_map_file: "#{input[:filename]}.map",
         omit_source_map_url: true,
         sprockets: {

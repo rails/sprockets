@@ -1106,7 +1106,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application.debug-2f5fde4066077205c961164247ca6ae471977d347b4ef96d9d6e2e17d9d9906c.js",
+    assert_equal "application.debug-60cfa762e3139c2580dbfbefd46a5359803225363eaef31efb725e6731ab6849.js",
       @asset.digest_path
   end
 
@@ -1123,7 +1123,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "to_s" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-a1ddc843806213ded8eaf93eb6502617575c906ebb3c8826825abe53344c8806.map", @asset.to_s
+    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-161f7edec524c6e94ab3b89924c4fb96d4552bb83b32d975c074b7fb9a84c454.map", @asset.to_s
   end
 
   def asset(logical_path, options = {})

@@ -155,8 +155,7 @@ module Sprockets
             name: name,
             content_type: type,
             metadata: {
-              dependencies: dependencies,
-              map: []
+              dependencies: dependencies
             }
           })
           validate_processor_result!(result)
