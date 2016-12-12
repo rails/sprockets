@@ -203,14 +203,18 @@ module Sprockets
       def process_require_directive(path, line_number: )
         runner = Parallel::Runner.new do
           begin
-            resolve(path, accept: @content_type, pipeline: :self)
+            uri, deps = _resolve(path, accept: @content_type, pipeline: :self)
           rescue Exception => e
             e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
           end
         end
         runner.exec
-        runner.finalize = ->(result) { @required << result }
+        runner.finalize = ->(args) {
+          uri, deps = *args
+          @dependencies.merge(deps)
+          @required << uri
+        }
         runner
       end
 
@@ -297,14 +301,17 @@ module Sprockets
       def process_depend_on_directive(path, line_number: )
         runner = Parallel::Runner.new do
           begin
-            resolve(path)
+            uri, deps = _resolve(path)
           rescue Exception => e
             e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
           end
         end
         runner.exec
-        runner.finalize = ->(result) { }
+        runner.finalize = -> (args) {
+            uri, deps = *args
+            @dependencies.merge(deps)
+        }
         runner
       end
 
@@ -322,14 +329,20 @@ module Sprockets
       def process_depend_on_asset_directive(path, line_number: )
         runner = Parallel::Runner.new do
           begin
-            load(resolve(path))
+            uri, deps = _resolve(path)
+            asset     = _load(uri)
+            [asset, deps]
           rescue Exception => e
             e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
           end
         end
         runner.exec
-        runner.finalize = ->(result) { }
+        runner.finalize = ->(args) {
+          asset, deps = *args
+          @dependencies.merge(deps)
+          @dependencies.merge(asset.metadata[:dependencies])
+        }
         runner
       end
 
@@ -344,14 +357,18 @@ module Sprockets
       def process_stub_directive(path, line_number: )
         runner = Parallel::Runner.new do
           begin
-            resolve(path, accept: @content_type, pipeline: :self)
+            uri, deps = _resolve(path, accept: @content_type, pipeline: :self)
           rescue Exception => e
             e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
           end
         end
         runner.exec
-        runner.finalize = ->(result) { @stubbed << result }
+        runner.finalize = -> (args) {
+          uri, deps = *args
+          @dependencies.merge(deps)
+          @stubbed << uri
+        }
         runner
       end
 
@@ -366,14 +383,22 @@ module Sprockets
       def process_link_directive(path, line_number: )
         runner = Parallel::Runner.new do
           begin
-            load(resolve(path)).uri
+            uri, deps = _resolve(path)
+            asset     = _load(uri)
+            [asset, deps]
           rescue Exception => e
             e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
           end
         end
         runner.exec
-        runner.finalize = ->(result) { @links << result }
+        runner.finalize = ->(args) {
+          asset, deps = *args
+          @dependencies.merge(deps)
+          @dependencies.merge(asset.metadata[:dependencies])
+
+          @links << asset.uri
+        }
         runner
       end
 
@@ -389,18 +414,12 @@ module Sprockets
       #     //= link_directory "./scripts" .js
       #
       def process_link_directory_directive(path = ".", accept = nil, line_number: )
-        runner = Parallel::Runner.new do
-          begin
-            path = expand_relative_dirname(:link_directory, path)
-            accept = expand_accept_shorthand(accept)
-            link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
-          rescue Exception => e
-            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
-            raise e
-          end
-        end
-        runner.exec
-        runner.finalize = ->(result) { result.each(&:finalize) }
+        path = expand_relative_dirname(:link_directory, path)
+        accept = expand_accept_shorthand(accept)
+        runners = link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
+
+        runner = Parallel::Runner.new -> {}
+        runner.finalize = -> (result) { runners.each(&:finalize) }
         runner
       end
 
@@ -415,19 +434,12 @@ module Sprockets
       #     //= link_tree "./styles" .css
       #
       def process_link_tree_directive(path = ".", accept = nil, line_number: )
-        runner = Parallel::Runner.new do
-          begin
-            path = expand_relative_dirname(:link_directory, path)
-            accept = expand_accept_shorthand(accept)
-            link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
-          rescue Exception => e
-            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
-            raise e
-          end
-        end
+        path = expand_relative_dirname(:link_tree, path)
+        accept = expand_accept_shorthand(accept)
+        runners = link_paths(*@environment.stat_sorted_tree_with_dependencies(path), accept, line_number: line_number)
 
-        runner.exec
-        runner.finalize = ->(result) { result.each(&:finalize) }
+        runner = Parallel::Runner.new -> {}
+        runner.finalize = -> (result) {runners.each(&:finalize)}
         runner
       end
 
@@ -452,7 +464,10 @@ module Sprockets
 
       def link_paths(paths, deps, accept, line_number:)
         resolve_paths(paths, deps, accept: accept, line_number: line_number) do |uri|
-          @links << load(uri).uri
+          asset = _load(uri)
+
+          @links << asset.uri
+          @dependencies.merge(asset.metadata[:dependencies])
         end
       end
 
@@ -467,7 +482,7 @@ module Sprockets
           runner = Parallel::Runner.new -> {
             next if subpath == @filename || stat.directory?
             uri, new_deps = @environment.resolve(subpath, **kargs)
-            return [uri, new_deps]
+            [uri, new_deps]
           }
           runner.exec
           runner.finalize = -> (args) {
@@ -496,13 +511,12 @@ module Sprockets
         end
       end
 
-      def load(uri)
+      def _load(uri)
         asset = @environment.load(uri)
-        @dependencies.merge(asset.metadata[:dependencies])
         asset
       end
 
-      def resolve(path, **kargs)
+      def _resolve(path, **kargs)
         # Prevent absolute paths in directives
         if @environment.absolute_path?(path)
           raise FileOutsidePaths, "can't require absolute file: #{path}"
@@ -510,8 +524,7 @@ module Sprockets
 
         kargs[:base_path] = @dirname
         uri, deps = @environment.resolve!(path, **kargs)
-        @dependencies.merge(deps)
-        uri
+        return uri, deps
       end
   end
 end
