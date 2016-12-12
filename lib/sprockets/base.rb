@@ -68,7 +68,7 @@ module Sprockets
       if uri
         load(uri)
       end
-    rescue => e
+    rescue
       raise LoadError.new(args.first)
     end
 

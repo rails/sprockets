@@ -53,7 +53,7 @@ module EnvironmentTests
 
   test "find_asset! raises an error when asset is not found" do
     does_not_exist_file_name = "doesnotexist.blerg"
-    error = assert_raises(Sprockets::LoadError) do
+    error = assert_raises(Sprockets::FileNotFound) do
       @env.find_asset!(does_not_exist_file_name)
     end
     assert_match %r{#{does_not_exist_file_name}}, error.message
@@ -447,19 +447,19 @@ module EnvironmentTests
   end
 
   test "asset with missing requires raises an exception" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::NotFound do
       @env["missing_require.js"]
     end
   end
 
   test "asset with missing depend_on raises an exception" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::NotFound do
       @env["missing_depend_on.js"]
     end
   end
 
   test "asset with missing absolute depend_on raises an exception" do
-    assert_raises Sprockets::FileOutsidePaths do
+    assert_raises Sprockets::LoadError do
       @env["missing_absolute_depend_on.js"]
     end
   end
@@ -693,7 +693,7 @@ class TestEnvironment < Sprockets::TestCase
       { data: 42 }
     }
 
-    assert_raises TypeError do
+    assert_raises Sprockets::LoadError do
       @env.find_asset("application.js")
     end
   end
@@ -704,7 +704,7 @@ class TestEnvironment < Sprockets::TestCase
       { data: my_string.new("foo") }
     }
 
-    assert_raises TypeError do
+    assert_raises Sprockets::LoadError do
       @env.find_asset("application.js")
     end
   end
@@ -714,7 +714,7 @@ class TestEnvironment < Sprockets::TestCase
       { data: "hello", foo: Object.new }
     }
 
-    assert_raises TypeError do
+    assert_raises Sprockets::LoadError do
       @env.find_asset("application.js")
     end
   end
@@ -777,7 +777,7 @@ class TestEnvironment < Sprockets::TestCase
       File.open(filename, 'w') { |f| f.write "-->" }
       begin
         @env["tmp.js"].to_s
-      rescue ExecJS::Error => e
+      rescue Sprockets::LoadError, ExecJS::Error => e
         assert e
       else
         flunk "nothing raised"

@@ -85,7 +85,7 @@ class TestSprocketsSassc < TestBaseSassc
     begin
       render('sass/error.sass')
       flunk
-    rescue SassC::SyntaxError => error
+    rescue Sprockets::LoadError, SassC::SyntaxError => error
       # this is not exactly consistent with ruby sass
       assert error.message.include?("invalid")
       assert error.message.include?("error.sass")

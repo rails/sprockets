@@ -11,7 +11,7 @@ module Sprockets
   class FileOutsidePaths        < NotFound; end
 
   # Used to wrap non-sprockets errors
-  class LoadError < Error
+  class LoadError < NotFound
     attr_reader :cause
 
     def initialize(asset_name)

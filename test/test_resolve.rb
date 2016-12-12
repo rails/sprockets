@@ -254,7 +254,7 @@ class TestResolve < Sprockets::TestCase
     random_path = SecureRandom.hex
     @env.append_path(random_path)
 
-    error = assert_raises(Sprockets::FileNotFound) do
+    error = assert_raises(Sprockets::NotFound) do
       uri, _ = @env.resolve!("thisfiledoesnotexistandshouldraiseerrors", {})
       uri
     end

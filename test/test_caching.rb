@@ -206,7 +206,7 @@ class TestCaching < Sprockets::TestCase
       # File.open(foo, 'w') { |f| f.write "foo;\n" }
       File.unlink(bar)
       assert_nil @env2["bar-tmp.js"]
-      assert_raises Sprockets::FileNotFound do
+      assert_raises Sprockets::NotFound do
         @env1["foo-tmp.js"].to_s
       end
     end
@@ -227,7 +227,7 @@ class TestCaching < Sprockets::TestCase
     assert_equal "jQuery;\n", env1["main.js"].to_s
     assert_equal "jQuery;\n", env1["jquery.js"].to_s
 
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::NotFound do
       env2["main.js"].to_s
     end
   end

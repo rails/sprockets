@@ -118,7 +118,7 @@ module FreshnessTests
 
       File.unlink(dep)
 
-      assert_raises(Sprockets::FileNotFound) do
+      assert_raises(Sprockets::NotFound) do
         asset('test-main.js')
       end
     end
@@ -707,7 +707,7 @@ class BundledAssetTest < Sprockets::TestCase
 
       File.unlink(dep)
 
-      assert_raises(Sprockets::FileNotFound) do
+      assert_raises(Sprockets::NotFound) do
         asset('test-main.js')
       end
     end
@@ -743,7 +743,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring a file of a different format raises an exception" do
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::NotFound do
       asset("mismatch.js")
     end
   end
@@ -781,7 +781,7 @@ class BundledAssetTest < Sprockets::TestCase
   test "can't require files outside the load path" do
     assert !@env.paths.include?(fixture_path("default")), @env.paths.inspect
 
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::NotFound do
       asset("relative/require_outside_path.js")
     end
   end
@@ -790,13 +790,13 @@ class BundledAssetTest < Sprockets::TestCase
     @env.append_path(fixture_path("default"))
     assert @env.paths.include?(fixture_path("default")), @env.paths.inspect
 
-    assert_raises Sprockets::FileNotFound do
+    assert_raises Sprockets::NotFound do
       asset("relative/require_other_load_path.js")
     end
   end
 
   test "can't require absolute files outside the load path" do
-    assert_raises Sprockets::FileOutsidePaths do
+    assert_raises Sprockets::LoadError do
       asset("absolute/require_outside_path.js").to_s
     end
   end
@@ -837,19 +837,19 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "require_tree with a logical path argument raises an exception" do
-    assert_raises(Sprockets::ArgumentError) do
+    assert_raises(Sprockets::LoadError) do
       asset("tree/with_logical_path/require_tree_with_logical_path.js").to_s
     end
   end
 
   test "require_tree with a nonexistent path raises an exception" do
-    assert_raises(Sprockets::ArgumentError) do
+    assert_raises(Sprockets::LoadError) do
       asset("tree/with_logical_path/require_tree_with_nonexistent_path.js").to_s
     end
   end
 
   test "require_tree with a nonexistent absolute path raises an exception" do
-    assert_raises(Sprockets::ArgumentError) do
+    assert_raises(Sprockets::LoadError) do
       asset("absolute/require_nonexistent_path.js").to_s
     end
   end
@@ -866,7 +866,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "multiple require_self directives raises and error" do
-    assert_raises(Sprockets::ArgumentError) do
+    assert_raises(Sprockets::LoadError) do
       asset("require_self_twice.css")
     end
   end
@@ -934,13 +934,13 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "link_tree with a logical path argument raises an exception" do
-    assert_raises(Sprockets::ArgumentError) do
+    assert_raises(Sprockets::LoadError) do
       asset("link/with_logical_path/require_tree_with_logical_path.js")
     end
   end
 
   test "link_tree with a nonexistent path raises an exception" do
-    assert_raises(Sprockets::ArgumentError) do
+    assert_raises(Sprockets::LoadError) do
       asset("link/with_logical_path/require_tree_with_nonexistent_path.js")
     end
   end

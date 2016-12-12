@@ -78,7 +78,7 @@ class TestSprocketsSass < TestBaseSass
         render('sass/error.sass')
       end
       flunk
-    rescue Sass::SyntaxError => error
+    rescue Sprockets::LoadError, Sass::SyntaxError => error
       assert error.message.include?("invalid")
       trace = error.backtrace[0]
       assert trace.include?("error.sass")
