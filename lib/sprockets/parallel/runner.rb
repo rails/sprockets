@@ -11,7 +11,11 @@ module Sprockets
           loop do
             result = @queue.pop
             break if result == @poision
-            result.call
+            begin
+              result.call
+            rescue Exception => e
+              result.exception = e
+            end
           end
         end
         t.abort_on_exception = true
@@ -27,6 +31,11 @@ module Sprockets
         @status = :created
         @result = nil
         @mutex  = Mutex.new
+        @exception = nil
+      end
+
+      def exception=(e)
+        @exception = e
       end
 
       def call
@@ -51,6 +60,10 @@ module Sprockets
 
       def finalize
         raise "No finalize block specified" if @finalize.nil?
+        if @exception
+          first_line = @exception.backtrace.first
+          @exception.set_backtrace([first_line] + caller)
+        end
         @mutex.synchronize do
           run unless done?
         end
@@ -59,6 +72,7 @@ module Sprockets
 
       private def run
         @result = @job.call if @job
+        @backtrace = nil
         @job    = nil
         @status = :done
       end

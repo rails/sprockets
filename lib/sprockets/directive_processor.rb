@@ -414,12 +414,20 @@ module Sprockets
       #     //= link_directory "./scripts" .js
       #
       def process_link_directory_directive(path = ".", accept = nil, line_number: )
-        path = expand_relative_dirname(:link_directory, path)
-        accept = expand_accept_shorthand(accept)
-        runners = link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
+        runner = Parallel::Runner.new do
+          begin
+            path = expand_relative_dirname(:link_directory, path)
+            accept = expand_accept_shorthand(accept)
+            runners = link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
+            runners
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
+        runner.exec
 
-        runner = Parallel::Runner.new -> {}
-        runner.finalize = -> (result) { runners.each(&:finalize) }
+        runner.finalize = -> (result) { result.each(&:finalize) }
         runner
       end
 
@@ -434,12 +442,20 @@ module Sprockets
       #     //= link_tree "./styles" .css
       #
       def process_link_tree_directive(path = ".", accept = nil, line_number: )
-        path = expand_relative_dirname(:link_tree, path)
-        accept = expand_accept_shorthand(accept)
-        runners = link_paths(*@environment.stat_sorted_tree_with_dependencies(path), accept, line_number: line_number)
+        runner = Parallel::Runner.new do
+          begin
+            path = expand_relative_dirname(:link_tree, path)
+            accept = expand_accept_shorthand(accept)
+            runners = link_paths(*@environment.stat_sorted_tree_with_dependencies(path), accept, line_number: line_number)
+            runners
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
+          end
+        end
+        runner.exec
 
-        runner = Parallel::Runner.new -> {}
-        runner.finalize = -> (result) {runners.each(&:finalize)}
+        runner.finalize = -> (result) { result.each(&:finalize) }
         runner
       end
 
