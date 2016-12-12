@@ -15,10 +15,10 @@ module Sprockets
     attr_reader :cause
 
     def initialize(asset_name)
-      message = String.new("Error finding and loading #{asset_name}:\n")
+      message = String.new("Error finding and loading '#{asset_name}':\n")
       message << "#{$!.class}: #{$!.message}"
 
-      super($!.message)
+      super(message)
       set_backtrace($!.backtrace)
       @cause = $!
     end

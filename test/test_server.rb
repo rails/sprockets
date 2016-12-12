@@ -243,7 +243,8 @@ class TestServer < Sprockets::TestCase
     get "/assets/missing_require.js"
     assert_equal 200, last_response.status
 
-    assert_match "throw Error(\"Sprockets::FileNotFound:", last_response.body
+    assert_match "Error finding and loading 'missing_require.js'", last_response.body
+    assert_match "Sprockets::FileNotFound", last_response.body
     assert_match "couldn't find file 'notfound' with type 'application/javascript'", last_response.body
     assert_match(/(in #{fixture_path("server/vendor/javascripts/missing_require.js")}:1)/, last_response.body)
   end
