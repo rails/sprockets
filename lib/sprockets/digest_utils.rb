@@ -80,6 +80,9 @@ module Sprockets
         digest << val.to_s
       }
     end
+
+    ADD_VALUE_TO_DIGEST.compare_by_identity.rehash
+
     ADD_VALUE_TO_DIGEST.default_proc = ->(_, val) {
       raise TypeError, "couldn't digest #{ val }"
     }
