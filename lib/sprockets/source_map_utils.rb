@@ -6,6 +6,56 @@ module Sprockets
   module SourceMapUtils
     extend self
 
+    # Puglic: Transpose source maps into a standard format
+    #
+    # NOTE: Does not support index maps
+    #
+    # version => 3
+    # file    => logical path
+    # sources => relative from filename
+    #
+    #   Unnecessary attributes are removed
+    #
+    # Example
+    #
+    #     map
+    #     #=> {
+    #     #  "version"        => 3,
+    #     #  "file"           => "stdin",
+    #     #  "sourceRoot"     => "",
+    #     #  "sourceContents" => "blah blah blah",
+    #     #  "sources"        => [/root/logical/path.js],
+    #     #  "names"          => [..],
+    #     #}
+    #     format_source_map(map, input)
+    #     #=> {
+    #     #  "version"        => 3,
+    #     #  "file"           => "logical/path.js",
+    #     #  "sources"        => ["path.js"],
+    #     #  "names"          => [..],
+    #     #}
+    def format_source_map(map, input)
+      filename      = input[:filename]
+      load_path     = input[:load_path]
+      load_paths    = input[:environment].config[:paths]
+      mime_exts     = input[:environment].config[:mime_exts]
+      pipeline_exts = input[:environment].config[:pipeline_exts]
+      file          = PathUtils.split_subpath(load_path, filename)
+      {
+        "version"  => 3,
+        "file"     => file,
+        "mappings" => map["mappings"],
+        "sources"  => map["sources"].map do |source|
+          source = URIUtils.split_file_uri(source)[2] if source.start_with? "file://"
+          source = PathUtils.join(File.dirname(filename), source) unless PathUtils.absolute_path?(source)
+          _, source = PathUtils.paths_split(load_paths, source) 
+          source = PathUtils.relative_path_from(file, source)
+          PathUtils.set_pipeline(source, mime_exts, pipeline_exts, :source)
+        end,
+        "names"    => map["names"]
+      }
+    end
+
     # Public: Concatenate two source maps.
     #
     # For an example, if two js scripts are concatenated, the individual source
@@ -16,25 +66,75 @@ module Sprockets
     #     script3 = "#{script1}#{script2}"
     #     map3    = concat_source_maps(map1, map2)
     #
-    # a - Array of source mapping Hashes
-    # b - Array of source mapping Hashes
+    # a - Source map hash
+    # b - Source map hash
     #
-    # Returns a new Array of source mapping Hashes.
+    # Returns a new source map hash.
     def concat_source_maps(a, b)
-      a ||= []
-      b ||= []
-      mappings = a.dup
+      return a || b unless a && b
+      a, b = make_index_map(a), make_index_map(b)
 
-      if a.any?
-        offset = a.last[:generated][0]
-      else
+      if a["sections"].count == 0 || a["sections"].last["map"]["mappings"].empty?
         offset = 0
+      else
+        offset = a["sections"].last["map"]["mappings"].count(';') + 
+                 a["sections"].last["offset"]["line"] + 1
       end
 
-      b.each do |m|
-        mappings << m.merge(generated: [m[:generated][0] + offset, m[:generated][1]])
+      a["sections"] += b["sections"].map do |section|
+        {
+          "offset" => section["offset"].merge({ "line" => section["offset"]["line"] + offset }),
+          "map"    => section["map"].merge({
+            "sources" => section["map"]["sources"].map do |source|
+              PathUtils.relative_path_from(a["file"], PathUtils.join(File.dirname(b["file"]), source))
+            end
+          })
+        }
       end
-      mappings
+      a
+    end
+
+    # Public: Converts source map to index map
+    #
+    # Example:
+    #
+    #     map
+    #     # => {
+    #       "version"  => 3,
+    #       "file"     => "..",
+    #       "mappings" => "AAAA;AACA;..;AACA",
+    #       "sources"  => [..],
+    #       "names"    => [..]
+    #     }
+    #     make_index_map(map)
+    #     # => {
+    #       "version"  => 3,
+    #       "file"     => "..",
+    #       "sections" => [
+    #         {
+    #           "offset" => { "line" => 0, "column" => 0 },
+    #           "map"    => {
+    #             "version"  => 3,
+    #             "file"     => "..",
+    #             "mappings" => "AAAA;AACA;..;AACA",
+    #             "sources"  => [..],
+    #             "names"    => [..]
+    #           }
+    #         }
+    #       ]
+    #     }
+    def make_index_map(map)
+      return map if map.key? "sections"
+      {
+        "version"  => map["version"],
+        "file"     => map["file"],
+        "sections" => [
+          {
+            "offset" => { "line" => 0, "column" => 0 },
+            "map"    => map
+          }
+        ]
+      }
     end
 
     # Public: Combine two seperate source map transformations into a single
@@ -49,25 +149,95 @@ module Sprockets
     # map can be combined with the Uglifier map so the source lines of the
     # minified output can be traced back to the original CoffeeScript file.
     #
-    #   original_map = [{ :source => "index.coffee", :generated => [2, 0], :original => [1, 0] }]
-    #   second_map   = [{ :source => "index.js",     :generated => [1, 1], :original => [2, 0] }]
-    #   combine_source_maps(original_map, second_map)
-    #     # => [{:source=>"index.coffee", :generated => [1, 1], :original => [1, 0]}]
-    #
-    # Returns a new Array of source mapping Hashes.
-    def combine_source_maps(original_map, second_map)
-      original_map ||= []
-      return second_map.dup if original_map.empty?
+    # Returns a source map hash.
+    def combine_source_maps(first, second)
+      return second unless first
 
-      new_map = []
+      _first  = decode_source_map(first)
+      _second = decode_source_map(second)
 
-      second_map.each do |m|
-        original_line = bsearch_mappings(original_map, m[:original])
-        next unless original_line
-        new_map << original_line.merge(generated: m[:generated])
+      new_mappings = []
+
+      _second[:mappings].each do |m|
+        first_line = bsearch_mappings(_first[:mappings], m[:original])
+        new_mappings << first_line.merge(generated: m[:generated]) if first_line
       end
 
-      new_map
+      _first[:mappings] = new_mappings
+
+      encode_source_map(_first)
+    end
+
+    # Public: Decompress source map
+    #
+    # Example:
+    #
+    #     decode_source_map(map)
+    #     # => {
+    #       version:  3,
+    #       file:     "..",
+    #       mappings: [
+    #         { source: "..", generated: [0, 0], original: [0, 0], name: ".."}, ..
+    #       ],
+    #       sources:  [..],
+    #       names:    [..]
+    #     }
+    #
+    # map - Source map hash (v3 spec)
+    #
+    # Returns an uncompressed source map hash
+    def decode_source_map(map)
+      return nil unless map
+
+      mappings, sources, names = [], [], []
+      if map["sections"]
+        map["sections"].each do |s|
+          mappings += decode_source_map(s["map"])[:mappings].each do |m|
+            m[:generated][0] += s["offset"]["line"]
+            m[:generated][1] += s["offset"]["column"]
+          end
+          sources |= s["map"]["sources"]
+          names   |= s["map"]["names"]
+        end
+      else
+        mappings = decode_vlq_mappings(map["mappings"], sources: map["sources"], names: map["names"])
+        sources  = map["sources"]
+        names    = map["names"]
+      end
+      {
+        version:  3,
+        file:     map["file"],
+        mappings: mappings,
+        sources:  sources,
+        names:    names
+      }
+    end
+
+    # Public: Compress source map
+    #
+    # Example:
+    #
+    #     encode_source_map(map)
+    #     # => {
+    #       "version"  => 3,
+    #       "file"     => "..",
+    #       "mappings" => "AAAA;AACA;..;AACA",
+    #       "sources"  => [..],
+    #       "names"    => [..]
+    #     }
+    #
+    # map - Source map hash (uncompressed)
+    #
+    # Returns a compressed source map hash according to source map spec v3
+    def encode_source_map(map)
+      return nil unless map
+      {
+        "version"  => map[:version],
+        "file"     => map[:file],
+        "mappings" => encode_vlq_mappings(map[:mappings], sources: map[:sources], names: map[:names]),
+        "sources"  => map[:sources],
+        "names"    => map[:names]
+      }
     end
 
     # Public: Compare two source map offsets.
@@ -112,49 +282,6 @@ module Sprockets
       when 1
         bsearch_mappings(mappings, offset, mid + 1, to)
       end
-    end
-
-    # Public: Decode Source Map JSON into Ruby objects.
-    #
-    # json - String source map JSON
-    #
-    # Returns Hash.
-    def decode_json_source_map(json)
-      map = JSON.parse(json)
-      map['mappings'] = decode_vlq_mappings(map['mappings'], sources: map['sources'], names: map['names'])
-      map
-    end
-
-    # Public: Encode mappings to Source Map JSON.
-    #
-    # mappings - Array of Hash or String VLQ encoded mappings
-    # sources  - Array of String sources
-    # names    - Array of String names
-    # filename - String filename
-    #
-    # Returns JSON String.
-    def encode_json_source_map(mappings, sources: nil, names: nil, filename: nil)
-      case mappings
-      when String
-      when Array
-        mappings.each do |m|
-          m[:source] = PathUtils.relative_path_from(filename, m[:source])
-        end if filename
-        sources = sources.map { |s| PathUtils.relative_path_from(filename, s) } if filename && sources
-        sources = (Array(sources) + mappings.map { |m| m[:source] }).uniq.compact
-        names   ||= mappings.map { |m| m[:name] }.uniq.compact
-        mappings = encode_vlq_mappings(mappings, sources: sources, names: names)
-      else
-        raise TypeError, "could not encode mappings: #{mappings}"
-      end
-
-      JSON.generate({
-        "version"   => 3,
-        "file"      => filename,
-        "mappings"  => mappings,
-        "sources"   => sources,
-        "names"     => names
-      })
     end
 
     # Public: Decode VLQ mappings and match up sources and symbol names.

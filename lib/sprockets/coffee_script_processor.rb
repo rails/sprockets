@@ -21,11 +21,18 @@ module Sprockets
       data = input[:data]
 
       js, map = input[:cache].fetch([self.cache_key, data]) do
-        result = Autoload::CoffeeScript.compile(data, sourceMap: true, sourceFiles: [input[:source_path]])
-        [result['js'], SourceMapUtils.decode_json_source_map(result['v3SourceMap'])['mappings']]
+        result = Autoload::CoffeeScript.compile(
+          data,
+          sourceMap: true,
+          sourceFiles: [File.basename(input[:filename])],
+          generatedFile: input[:filename]
+        )
+        [result['js'], JSON.parse(result['v3SourceMap'])]
       end
 
+      map = SourceMapUtils.format_source_map(map, input)
       map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
+
       { data: js, map: map }
     end
   end

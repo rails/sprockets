@@ -47,13 +47,13 @@ module Sprockets
       if Autoload::Uglifier::VERSION.to_i < 2
         raise "uglifier 1.x is no longer supported, please upgrade to 2.x"
       end
-      @uglifier ||= Autoload::Uglifier.new(@options)
+      @uglifier ||= Autoload::Uglifier.new(@options.merge({ source_filename: input[:filename] }))
 
       js, map = @uglifier.compile_with_map(input[:data])
-      map = SourceMapUtils.combine_source_maps(
-        input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map)["mappings"]
-      )
+
+      map = SourceMapUtils.format_source_map(JSON.parse(map), input)
+      map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
+
       { data: js, map: map }
     end
   end

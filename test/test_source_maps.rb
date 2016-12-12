@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'sprockets_test'
 require 'sprockets/bundle'
+require 'sprockets/source_map_utils'
 
 silence_warnings do
   require 'sass'
@@ -8,67 +9,69 @@ end
 
 class TestSourceMaps < Sprockets::TestCase
   def setup
-    @env = Sprockets::Environment.new
-    @env.append_path fixture_path('source-maps')
+    @env = Sprockets::Environment.new(fixture_path('source-maps')) do |env|
+      env.append_path('.')
+      env.cache = {}
+    end
+  end
+
+  def get_sources(map)
+    map["sections"].reduce([]) { |r, s| r | s["map"]["sources"] }
   end
 
   test "builds a source map for js files" do
     asset = @env['child.js']
     map = asset.metadata[:map]
-    assert_equal ['child.source-1fa5b1a0f53ee03f5b38d4c5b2346d338916e58b0656d6c37f84bd4c742e49c1.js'], map.map { |m| m[:source] }.uniq.compact
+    assert_equal ["child.source.js"], get_sources(map)
   end
 
   test "builds a concatenated source map" do
     asset = @env['application.js']
     map = asset.metadata[:map]
     assert_equal [
-      "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
-      "users.source-97778acdc614f43b92cf4711aecbc71ce3af98081418a80068a107d87c142a60.coffee",
-      "application.source-eb88d0e61cf8b783aa9402689bb0fd8579514480b446c68fe7e17e8d9d09b67a.coffee"
-    ], map.map { |m| m[:source] }.uniq.compact
+      "project.source.coffee",
+      "users.source.coffee",
+      "application.source.coffee"
+    ], get_sources(map)
   end
 
   test "builds a minified source map" do
-    @env.js_compressor = :uglifier
+    @env.js_compressor = Sprockets::UglifierCompressor.new
+    
 
     asset = @env['application.js']
-    map = asset.metadata[:map]
-    assert map.all? { |mapping| mapping[:generated][0] == 1 }
+    map = Sprockets::SourceMapUtils.decode_source_map(asset.metadata[:map])
+    assert map[:mappings].all? { |mapping| mapping[:generated][0] == 1 }
     assert_equal [
-      "project.source-8c5bc45531c819bca8f1ff1667663276a6a95b02668d2483933f877bf8385e1c.coffee",
-      "users.source-97778acdc614f43b92cf4711aecbc71ce3af98081418a80068a107d87c142a60.coffee",
-      "application.source-eb88d0e61cf8b783aa9402689bb0fd8579514480b446c68fe7e17e8d9d09b67a.coffee"
-    ], map.map { |m| m[:source] }.uniq.compact
+      "project.source.coffee",
+      "users.source.coffee",
+      "application.source.coffee"
+    ], map[:sources]
   end
 
   test "builds a source map with js dependency" do
     asset = @env['parent.js']
     map = asset.metadata[:map]
     assert_equal [
-      "child.source-1fa5b1a0f53ee03f5b38d4c5b2346d338916e58b0656d6c37f84bd4c742e49c1.js",
-      "users.source-97778acdc614f43b92cf4711aecbc71ce3af98081418a80068a107d87c142a60.coffee",
-      "parent.source-4cd7e6dee61e33d04dae677fcd1f593cf7b2abbc12b247dedee6ae87b8e9f713.js"
-    ], map.map { |m| m[:source] }.uniq.compact
+      "child.source.js",
+      "users.source.coffee",
+      "parent.source.js"
+    ], get_sources(map)
   end
 
   test "rebuilds a source map when related dependency has changed" do
     filename = fixture_path('source-maps/dynamic/unstable.js')
     sandbox filename do
-      write(filename, "magic_number = 42", 1421000000)
-      map_1 = JSON.parse(@env['dynamic/application.js.map'].source)
+      write(filename, "var magic_number = 42;", 1421000000)
+      asset1  = @env.find_asset('dynamic/application.js', pipeline: :debug)
+      mapUrl1 = asset1.source.match(/^\/\/# sourceMappingURL=(.*?)$/)[1]
 
-      write(filename, "number_of_the_beast = 666", 1422000000)
-      map_2 = JSON.parse(@env['dynamic/application.js.map'].source)
+      write(filename, "var number_of_the_beast = 666;\nmagic_number = 7;", 1422000000)
+      asset2  = @env.find_asset('dynamic/application.js', pipeline: :debug)
+      mapUrl2 = asset2.source.match(/^\/\/# sourceMappingURL=(.*?)$/)[1]
 
-      assert_equal([
-        "unstable.source-43b85c2116b8c894a292c17a6845aa1c9b1491f7dc6bddf764c384668457d55a.js",
-        "application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
-      ], map_1["sources"])
-
-      assert_equal([
-        "unstable.source-2ae6f42425799bc9f718842df81be58c5f011dc93a00ca4da17be8877bdb02b3.js",
-        "application.source-5cc94f82fada13ee8ef969d4cef2018e52ce42f9e1c8ccb6f8333cdc0dd5d3b5.coffee"
-      ], map_2["sources"])
+      refute_equal(asset1.digest_path, asset2.digest_path, "Asset digest didn't update.")
+      refute_equal(mapUrl1, mapUrl2, "`sourceMappingUrl` didn't update.")
     end
   end
 
@@ -90,11 +93,20 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert map = JSON.parse(asset.source)
     assert_equal({
-      "version" => 3,
-      "file" => "coffee/main.js",
-      "mappings" => "AACA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAW;;EACX,QAAA,GAAW;;EAGX,IAAgB,QAAhB;IAAA,MAAA,GAAS,CAAC,GAAV;;;EAGA,MAAA,GAAS,SAAC,CAAD;WAAO,CAAA,GAAI;EAAX;;EAGT,IAAA,GAAO,CAAC,CAAD,EAAI,CAAJ,EAAO,CAAP,EAAU,CAAV,EAAa,CAAb;;EAGP,IAAA,GACE;IAAA,IAAA,EAAQ,IAAI,CAAC,IAAb;IACA,MAAA,EAAQ,MADR;IAEA,IAAA,EAAQ,SAAC,CAAD;aAAO,CAAA,GAAI,MAAA,CAAO,CAAP;IAAX,CAFR;;;EAKF,IAAA,GAAO,SAAA;AACL,QAAA;IADM,uBAAQ;WACd,KAAA,CAAM,MAAN,EAAc,OAAd;EADK;;EAIP,IAAsB,8CAAtB;IAAA,KAAA,CAAM,YAAN,EAAA;;;EAGA,KAAA;;AAAS;SAAA,sCAAA;;mBAAA,IAAI,CAAC,IAAL,CAAU,GAAV;AAAA;;;AA1BT",
-      "sources" => ["main.source-2ee93f5e7f3b843c3002478375432cf923860432879315335f4b987c205057db.coffee"],
-      "names" => []
+      "version"  => 3,
+      "file"     => "coffee/main.coffee",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "coffee/main.coffee",
+            "mappings" => "AACA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAW;;EACX,QAAA,GAAW;;EAGX,IAAgB,QAAhB;IAAA,MAAA,GAAS,CAAC,GAAV;;;EAGA,MAAA,GAAS,SAAC,CAAD;WAAO,CAAA,GAAI;EAAX;;EAGT,IAAA,GAAO,CAAC,CAAD,EAAI,CAAJ,EAAO,CAAP,EAAU,CAAV,EAAa,CAAb;;EAGP,IAAA,GACE;IAAA,IAAA,EAAQ,IAAI,CAAC,IAAb;IACA,MAAA,EAAQ,MADR;IAEA,IAAA,EAAQ,SAAC,CAAD;aAAO,CAAA,GAAI,MAAA,CAAO,CAAP;IAAX,CAFR;;;EAKF,IAAA,GAAO,SAAA;AACL,QAAA;IADM,uBAAQ;WACd,KAAA,CAAM,MAAN,EAAc,OAAd;EADK;;EAIP,IAAsB,8CAAtB;IAAA,KAAA,CAAM,YAAN,EAAA;;;EAGA,KAAA;;AAAS;SAAA,sCAAA;;mBAAA,IAAI,CAAC,IAAL,CAAU,GAAV;AAAA;;;AA1BT",
+            "sources"  => ["main.source.coffee"],
+            "names"    => []
+          }
+        }
+      ]
     }, map)
   end
 
@@ -135,11 +147,20 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert map = JSON.parse(asset.source)
     assert_equal({
-      "version" => 3,
-      "file" => "babel/main.js",
-      "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
-      "sources" => ["main.source-1acb9cf16a3e1ce0fe0a38491472a14a6a97281ceace4b67ec16a904be5fa1b9.es6"],
-      "names"=>[]
+      "version"  => 3,
+      "file"     => "babel/main.es6",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "babel/main.es6",
+            "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
+            "sources"  => ["main.source.es6"],
+            "names"    => []
+          }
+        }
+      ]
     }, map)
   end
 
@@ -185,11 +206,20 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert map = JSON.parse(asset.source)
     assert_equal({
-      "version" => 3,
-      "file" => "sass/main.css",
-      "mappings" => "AACE,MAAG;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI;AAGlB,MAAG;EAAE,OAAO,EAAE,YAAY;AAE1B,KAAE;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI",
-      "sources" => ["main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
-      "names" => []
+      "version"  => 3,
+      "file"     => "sass/main.scss",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "sass/main.scss",
+            "mappings" => "AACE,MAAG;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI;AAGlB,MAAG;EAAE,OAAO,EAAE,YAAY;AAE1B,KAAE;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI",
+            "sources"  => ['main.source.scss'],
+            "names"    => []
+          }
+        }
+      ]
     }, map)
   end
 
@@ -217,14 +247,23 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert map = JSON.parse(asset.source)
     assert_equal({
-      "version" => 3,
-      "file" => "sass/with-import.css",
-      "mappings" => "AAAA,IAAK;EAAE,KAAK,EAAE,GAAG;;ACEjB,GAAI;EAAE,KAAK,EAAE,IAAI",
-      "sources" => [
-        "_imported.source-9767e91e9d4b0334e59a1d389e9801bc6a2c5c4a5500a3c2c7915687965b2c16.scss",
-        "with-import.source-5d53742ba113ac26396986bf14ab5c7e19ef193e494d5d868a9362e3e057cb26.scss"
-      ],
-      "names" => []
+      "version"  => 3,
+      "file"     => "sass/with-import.scss",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "sass/with-import.scss",
+            "mappings" => "AAAA,IAAK;EAAE,KAAK,EAAE,GAAG;;ACEjB,GAAI;EAAE,KAAK,EAAE,IAAI",
+            "sources"  => [
+              "_imported.source.scss",
+              "with-import.source.scss"
+            ],
+            "names"    => []
+          }
+        }
+      ]
     }, map)
   end
 
@@ -255,14 +294,42 @@ class TestSourceMaps < Sprockets::TestCase
   test "source maps work with index alias" do
     asset = @env.find_asset("foo.js",  pipeline: :debug)
     mapUrl = asset.source.match(/^\/\/# sourceMappingURL=(.*)$/)[1]
-    assert_equal "foo/index.js-f0762afcb2fb7da09c19868c366b58f81324dc7128b5a64a2757e9eab1e02837.map", mapUrl
+    assert_equal "foo/index.js-501c1acd99a6f760dd3ec4195ab25a3518f689fcf1ffc9be33f28e2f28712826.map", mapUrl
 
-    map = @env.find_asset('foo/index.js.map')
-    sources = JSON.parse(map.source.match(/"sources":(\[.*?\])/)[1])
+    map = JSON.parse(@env.find_asset('foo/index.js.map').source)
     assert_equal [
-      "file.source-db1eb561f880aead3f69d072274e15ee404921dfebe30a35b12e2d8c47e33803.coffee",
-      "index.source-8b27c2df3fc22ff7f0800e09e0b26088dac8c711f6e3b1765aae1d632fd83798.js"
-    ], sources
+      "file.source.coffee",
+      "index.source.js"
+    ], get_sources(map)
+  end
+
+  test "relative sources at different depths" do
+    assert @env.find_asset("sub/directory.js", pipeline: :debug)
+    assert map = JSON.parse(@env.find_asset("sub/directory.js.map").source)
+    assert_equal [
+      "a.source.js",
+      "modules/something.source.js",
+      "directory.source.js"
+    ], get_sources(map)
+  end
+
+  test "source maps are updated correctly after file change" do
+    filename = fixture_path('source-maps/sub/a.js')
+    sandbox filename do
+      expected = JSON.parse(@env.find_asset('sub/directory.js.map').source).tap do |map|
+        index = map["sections"].find_index { |s| /sub\/a\.js$/ =~ s["map"]["file"] }
+        map["sections"][index]["map"]["mappings"] << ";AACA"
+        map["sections"][(index+1)..-1].each do |s|
+          s["offset"]["line"] += 1
+        end
+      end
+        
+      File.open(filename, 'a') do |file|
+        file.puts "console.log('newline');"
+      end
+
+      assert_equal JSON.dump(expected), @env.find_asset('sub/directory.js.map').source
+    end
   end
 end
 
@@ -302,10 +369,19 @@ class TestSasscSourceMaps < Sprockets::TestCase
     assert map = JSON.parse(asset.source)
     assert_equal({
       "version"  => 3,
-      "file"     => "sass/main.css",
-      "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAE;EACV,OAAO,EAAE,CAAE;EACX,UAAU,EAAE,IAAK,GAClB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAa,GAAI;;AAPjC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAM;EACf,OAAO,EAAE,QAAS;EAClB,eAAe,EAAE,IAAK,GACvB",
-      "sources"  => ["main.source-86fe07ad89fecbab307d376bcadfa23d65ad108e3735b564510246b705f6ced1.scss"],
-      "names"    => []
+      "file"     => "sass/main.scss",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "sass/main.scss",
+            "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAE;EACV,OAAO,EAAE,CAAE;EACX,UAAU,EAAE,IAAK,GAClB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAa,GAAI;;AAPjC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAM;EACf,OAAO,EAAE,QAAS;EAClB,eAAe,EAAE,IAAK,GACvB",
+            "sources"  => ["main.source.scss"],
+            "names"    => []
+          }
+        }
+      ]
     }, map)
   end
 
@@ -333,14 +409,23 @@ class TestSasscSourceMaps < Sprockets::TestCase
 
     assert map = JSON.parse(asset.source)
     assert_equal({
-      "version" => 3,
-      "file" => "sass/with-import.css",
-      "mappings" => "ACAA,AAAA,IAAI,CAAC;EAAE,KAAK,EAAE,GAAI,GAAI;;ADEtB,AAAA,GAAG,CAAC;EAAE,KAAK,EAAE,IAAK,GAAI",
-      "sources" => [
-        "with-import.source-5d53742ba113ac26396986bf14ab5c7e19ef193e494d5d868a9362e3e057cb26.scss",
-        "_imported.source-9767e91e9d4b0334e59a1d389e9801bc6a2c5c4a5500a3c2c7915687965b2c16.scss"
-      ],
-      "names" => []
+      "version"  => 3,
+      "file"     => "sass/with-import.scss",
+      "sections" => [
+        {
+          "offset" => { "line" => 0, "column" => 0 },
+          "map"    => {
+            "version"  => 3,
+            "file"     => "sass/with-import.scss",
+            "mappings" => "ACAA,AAAA,IAAI,CAAC;EAAE,KAAK,EAAE,GAAI,GAAI;;ADEtB,AAAA,GAAG,CAAC;EAAE,KAAK,EAAE,IAAK,GAAI",
+            "sources"  => [
+              "with-import.source.scss",
+              "_imported.source.scss"
+            ],
+            "names"    => []
+          }
+        }
+      ]
     }, map)
   end
 end

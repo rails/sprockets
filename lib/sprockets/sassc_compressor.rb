@@ -9,23 +9,24 @@ module Sprockets
       @options = {
         syntax: :scss,
         style: :compressed,
-        source_map_embed: true,
-        source_map_file: '.'
+        source_map_contents: false,
+        omit_source_map_url: true,
       }.merge(options).freeze
     end
 
     def call(input)
       # SassC requires the template to be modifiable
       input_data = input[:data].frozen? ? input[:data].dup : input[:data]
-      data = Autoload::SassC::Engine.new(input_data, @options.merge(filename: 'filename')).render
+      engine = Autoload::SassC::Engine.new(input_data, @options.merge(filename: input[:filename], source_map_file: "#{input[:filename]}.map")) 
+        
+      css = engine.render.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
 
-      match_data = data.match(/(.*)\n\/\*# sourceMappingURL=data:application\/json;base64,(.+) \*\//m)
-      css, map = match_data[1], Base64.decode64(match_data[2])
-
-      map = SourceMapUtils.combine_source_maps(
-        input[:metadata][:map],
-        SourceMapUtils.decode_json_source_map(map)["mappings"]
-      )
+      begin
+        map = SourceMapUtils.format_source_map(JSON.parse(engine.source_map), input)
+        map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
+      rescue SassC::NotRenderedError
+        map = input[:metadata][:map]
+      end
 
       { data: css, map: map }
     end

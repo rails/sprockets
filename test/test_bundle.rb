@@ -13,6 +13,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       environment: environment,
       uri: "file://#{filename}?type=text/css",
       filename: filename,
+      load_path: fixture_path('asset'),
       content_type: 'text/css',
       metadata: {}
     }
@@ -35,6 +36,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       environment: environment,
       uri: "file://#{filename}?type=text/css",
       filename: filename,
+      load_path: fixture_path('asset'),
       content_type: 'text/css',
       metadata: {}
     }
@@ -64,6 +66,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       environment: environment,
       uri: "file://#{filename}?type=application/javascript",
       filename: filename,
+      load_path: fixture_path('asset'),
       content_type: 'application/javascript',
       metadata: {}
     }
@@ -86,6 +89,7 @@ class TestStylesheetBundle < Sprockets::TestCase
       environment: environment,
       uri: "file://#{filename}?type=application/javascript",
       filename: filename,
+      load_path: fixture_path('asset'),
       content_type: 'application/javascript',
       metadata: {}
     }
