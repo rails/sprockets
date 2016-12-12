@@ -224,14 +224,19 @@ module Sprockets
       #      *= require_tree .
       #      */
       #
-      def process_require_self_directive
+      def process_require_self_directive(line_number: )
         runner = Parallel::Runner.new -> { }
         runner.exec
-        runner.finalize = ->(result) do
-          if @required.include?(@uri)
-            raise ArgumentError, "require_self can only be called once per source file"
+        runner.finalize = Proc.new do |result|
+          begin
+            if @required.include?(@uri)
+              raise ArgumentError, "require_self can only be called once per source file"
+            end
+            @required << @uri
+          rescue Exception => e
+            e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
+            raise e
           end
-          @required << @uri
         end
         runner
       end
@@ -414,7 +419,7 @@ module Sprockets
           begin
             path = expand_relative_dirname(:link_directory, path)
             accept = expand_accept_shorthand(accept)
-            link_paths(*@environment.stat_directory_with_dependencies(path), accept)
+            link_paths(*@environment.stat_directory_with_dependencies(path), accept, line_number: line_number)
           rescue Exception => e
             e.set_backtrace(["#{@filename}:#{line_number}"] + e.backtrace)
             raise e
@@ -446,7 +451,7 @@ module Sprockets
       end
 
       def link_paths(paths, deps, accept, line_number:)
-        resolve_paths(paths, deps, accept: accept) do |uri|
+        resolve_paths(paths, deps, accept: accept, line_number: line_number) do |uri|
           @links << load(uri).uri
         end
       end

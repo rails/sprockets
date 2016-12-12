@@ -26,23 +26,18 @@ module Sprockets
         @job    = block || implicit_block
         @status = :created
         @result = nil
+        @mutex  = Mutex.new
       end
 
       def call
-        @result = @job.call if @job
-        @job    = nil
-        @status = :done
+        @mutex.synchronize do
+          run unless done?
+        end
         @result
       end
 
       def done?
         @status == :done
-      end
-
-      def wait_until_done!
-        until done?
-          sleep 0.01
-        end
       end
 
       def exec
@@ -55,9 +50,17 @@ module Sprockets
       end
 
       def finalize
-        wait_until_done!
         raise "No finalize block specified" if @finalize.nil?
+        @mutex.synchronize do
+          run unless done?
+        end
         @finalize.call(@result)
+      end
+
+      private def run
+        @result = @job.call if @job
+        @job    = nil
+        @status = :done
       end
     end
   end
