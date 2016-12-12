@@ -6,7 +6,7 @@ module Sprockets
       @queue   = Queue.new
       @poision = Object.new
 
-      @thread_pool = 5.times.map {
+      @thread_pool = 4.times.map {
         t = Thread.new do
           loop do
             result = @queue.pop
@@ -27,10 +27,10 @@ module Sprockets
       end
 
       def initialize(block = nil, &implicit_block)
-        @job    = block || implicit_block
-        @status = :created
-        @result = nil
-        @mutex  = Mutex.new
+        @job       = block || implicit_block
+        @status    = :created
+        @result    = nil
+        @mutex     = Mutex.new
         @exception = nil
       end
 
@@ -60,11 +60,12 @@ module Sprockets
 
       def finalize
         raise "No finalize block specified" if @finalize.nil?
-        if @exception
-          first_line = @exception.backtrace.first
-          @exception.set_backtrace([first_line] + caller)
-        end
         @mutex.synchronize do
+          if @exception
+            first_line = @exception.backtrace.first
+            @exception.set_backtrace([first_line] + caller)
+          end
+
           run unless done?
         end
         @finalize.call(@result)
