@@ -75,15 +75,21 @@ module Sprockets
       @stubbed      = Set.new(input[:metadata][:stubbed])
       @links        = Set.new(input[:metadata][:links])
       @dependencies = Set.new(input[:metadata][:dependencies])
+      @to_link      = Set.new
+      @to_load      = Set.new
 
       data, directives = process_source(input[:data])
       process_directives(directives)
 
-      { data: data,
-        required: @required,
-        stubbed: @stubbed,
-        links: @links,
-        dependencies: @dependencies }
+      {
+        data:         data,
+        required:     @required,
+        stubbed:      @stubbed,
+        links:        @links,
+        to_load:      @to_load,
+        to_link:      @to_link,
+        dependencies: @dependencies
+      }
     end
 
     protected
@@ -274,7 +280,7 @@ module Sprockets
       #     //= depend_on_asset "bar.js"
       #
       def process_depend_on_asset_directive(path)
-        load(resolve(path))
+        to_load(resolve(path))
       end
 
       # Allows dependency to be excluded from the asset bundle.
@@ -298,7 +304,8 @@ module Sprockets
       #   /*= link "logo.png" */
       #
       def process_link_directive(path)
-        @links << load(resolve(path)).uri
+        uri = to_load(resolve(path))
+        @to_link << uri
       end
 
       # `link_directory` links all the files inside a single
@@ -355,7 +362,7 @@ module Sprockets
 
       def link_paths(paths, deps, accept)
         resolve_paths(paths, deps, accept: accept) do |uri|
-          @links << load(uri).uri
+          @to_link << to_load(uri)
         end
       end
 
@@ -385,10 +392,9 @@ module Sprockets
         end
       end
 
-      def load(uri)
-        asset = @environment.load(uri)
-        @dependencies.merge(asset.metadata[:dependencies])
-        asset
+      def to_load(uri)
+        @to_load << uri
+        uri
       end
 
       def resolve(path, **kargs)
