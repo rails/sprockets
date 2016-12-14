@@ -995,6 +995,26 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert_equal "var Foo = {};\n\n\n\n", asset("stub/application").to_s
   end
 
+  test "resolves circular link_tree" do
+    assert_equal 'var A;',
+      asset("circle_link_tree/a.js").to_s.chomp
+  end
+
+  test "resolves circular link_directory" do
+    assert_equal 'var A;',
+      asset("circle_link_directory/a.js").to_s.chomp
+  end
+
+  test "resolves circular link" do
+    assert_equal 'var A;',
+      asset("circle_link/a.js").to_s.chomp
+  end
+
+  test "resolves circular depend_on_asset" do
+    assert_equal 'var A;',
+      asset("circle_depend_on_asset/a.js").to_s.chomp
+  end
+
   test "resolves circular requires" do
     assert_equal "var A;\nvar C;\nvar B;\n",
       asset("circle/a.js").to_s
