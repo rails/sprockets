@@ -17,10 +17,26 @@ module Sprockets
     def self.call(input)
       env  = input[:environment]
       type = input[:content_type]
+      input[:links] ||= Set.new
       dependencies = Set.new(input[:metadata][:dependencies])
 
       processed_uri, deps = env.resolve(input[:filename], accept: type, pipeline: :self)
       dependencies.merge(deps)
+
+      # DirectiveProcessor (and any other transformers called here with pipeline=self)
+      primary_asset = env.load(processed_uri)
+      to_load = primary_asset.metadata.delete(:to_load) || Set.new
+      to_link = primary_asset.metadata.delete(:to_link) || Set.new
+
+      to_load.each do |uri|
+        loaded_asset = env.load(uri)
+        dependencies.merge(loaded_asset.metadata[:dependencies])
+        if to_link.include?(uri)
+          primary_metadata = primary_asset.metadata
+          input[:links]            << loaded_asset.uri
+          primary_metadata[:links] << loaded_asset.uri
+        end
+      end
 
       find_required = proc { |uri| env.load(uri).metadata[:required] }
       required = Utils.dfs(processed_uri, &find_required)
