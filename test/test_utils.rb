@@ -4,7 +4,24 @@ require 'sprockets/utils'
 class TestUtils < MiniTest::Test
   include Sprockets::Utils
 
-  def test_duplicable
+  def test_duplicable_pre_ruby_2_4
+    skip if RUBY_VERSION >= "2.4"
+
+    objs = [nil, true, false, 1, "foo", :foo, [], {}]
+    objs.each do |obj|
+      begin
+        obj.dup
+      rescue TypeError
+        refute duplicable?(obj), "can't dup: #{obj.inspect}"
+      else
+        assert duplicable?(obj), "can dup: #{obj.inspect}"
+      end
+    end
+  end
+
+  def test_duplicable_post_ruby_2_4
+    skip if RUBY_VERSION < "2.4"
+
     objs = [nil, true, false, 1, "foo", :foo, [], {}]
     objs.each do |obj|
       begin

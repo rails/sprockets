@@ -14,11 +14,15 @@ module Sprockets
     #
     # Returns false if .dup would raise a TypeError, otherwise true.
     def duplicable?(obj)
-      case obj
-      when NilClass, FalseClass, TrueClass, Symbol, Numeric
-        false
-      else
+      if RUBY_VERSION >= "2.4.0"
         true
+      else
+        case obj
+        when NilClass, FalseClass, TrueClass, Symbol, Numeric
+          false
+        else
+          true
+        end
       end
     end
 
