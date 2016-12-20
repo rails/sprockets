@@ -1,3 +1,7 @@
+**3.7.1** (December 19, 2016)
+
+* Ruby 2.4 support for Sprockets 3.
+
 **3.7.0** (July 21, 2016)
 
 * Deprecated interfaces now emit deprecation warnings #345
