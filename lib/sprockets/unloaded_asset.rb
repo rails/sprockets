@@ -23,8 +23,13 @@ module Sprockets
       @uri               = uri.to_s
       @env               = env
       @compressed_path   = URITar.new(uri, env).compressed_path
-      @params            = nil # lazy loaded
-      @filename          = nil # lazy loaded
+      # lazy loaded
+      @params            = nil
+      @filename          = nil
+      @load_path         = nil
+      @logical_path      = nil
+      @file_type         = nil
+      @initial_logical_path = nil
     end
     attr_reader :compressed_path, :uri
 
@@ -128,12 +133,78 @@ module Sprockets
       "file_digest:#{compressed_path}:#{stat}"
     end
 
+    def load_path
+      split_logical_and_load_path
+      @load_path
+    end
+
+    def type
+      params[:type]
+    end
+
+    def file_type
+      unless @file_type
+        name
+      end
+      @file_type
+    end
+
+    def name
+      @name ||= begin
+        split_logical_and_load_path
+        extname, @file_type = @env.match_path_extname(@initial_logical_path, @env.mime_exts)
+        name = @initial_logical_path.chomp(extname)
+        name
+      end
+    end
+
+    def logical_path
+      @logical_path ||= begin
+        logical_path = self.name.dup
+
+        if pipeline = self.params[:pipeline]
+          logical_path << ".#{pipeline}"
+        end
+
+        if type = self.params[:type]
+          logical_path << @env.config[:mime_types][type][:extensions].first
+        end
+        logical_path
+      end
+    end
+
+    def initial_logical_path
+      unless @initial_logical_path
+        split_logical_and_load_path
+      end
+      @initial_logical_path
+    end
+
     private
       # Internal: Parses uri into filename and params hash
       #
       # Returns Array with filename and params hash
       def load_file_params
         @filename, @params = URIUtils.parse_asset_uri(uri)
+      end
+
+      def split_logical_and_load_path
+        return if @load_path
+
+        path_to_split =
+          if index_alias = self.params[:index_alias]
+            @env.expand_from_root index_alias
+          else
+            self.filename
+          end
+
+        @load_path, @initial_logical_path = @env.paths_split(@env.config[:paths], path_to_split)
+
+        if @load_path.nil?
+          target = path_to_split
+          target += " (index alias of #{self.filename})" if self.params[:index_alias]
+          raise FileOutsidePaths, "#{target} is no longer under a load path: #{@env.paths.join(', ')}"
+        end
       end
   end
 end

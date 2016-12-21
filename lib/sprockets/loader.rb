@@ -102,60 +102,35 @@ module Sprockets
           raise FileNotFound, "could not find file: #{unloaded.filename}"
         end
 
-        path_to_split =
-          if index_alias = unloaded.params[:index_alias]
-            expand_from_root index_alias
-          else
-            unloaded.filename
-          end
-
-        load_path, logical_path = paths_split(config[:paths], path_to_split)
-
-        unless load_path
-          target = path_to_split
-          target += " (index alias of #{unloaded.filename})" if unloaded.params[:index_alias]
-          raise FileOutsidePaths, "#{target} is no longer under a load path: #{self.paths.join(', ')}"
+        if unloaded.type != unloaded.file_type && !config[:transformers][unloaded.file_type][unloaded.type]
+          raise ConversionError, "could not convert #{unloaded.file_type.inspect} to #{unloaded.type.inspect}"
         end
 
-        extname, file_type = match_path_extname(logical_path, mime_exts)
-        logical_path = logical_path.chomp(extname)
-        name = logical_path
+        processors = processors_for(unloaded.type, unloaded.file_type, unloaded.params[:pipeline])
 
-        if pipeline = unloaded.params[:pipeline]
-          logical_path += ".#{pipeline}"
-        end
-
-        if type = unloaded.params[:type]
-          logical_path += config[:mime_types][type][:extensions].first
-        end
-
-        if type != file_type && !config[:transformers][file_type][type]
-          raise ConversionError, "could not convert #{file_type.inspect} to #{type.inspect}"
-        end
-
-        processors = processors_for(type, file_type, pipeline)
-
-        processors_dep_uri = build_processors_uri(type, file_type, pipeline)
+        processors_dep_uri = build_processors_uri(unloaded.type, unloaded.file_type, unloaded.params[:pipeline])
         dependencies = config[:dependencies] + [processors_dep_uri]
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
           source_uri, _ = resolve!(unloaded.filename, pipeline: :source)
-          source_asset = load(source_uri)
+          source_asset  = load(source_uri)
 
           source_path = source_asset.digest_path
+          #  DigestUtils.pack_hexdigest(digest)
 
           result = call_processors(processors, {
-            environment: self,
-            cache: self.cache,
-            uri: unloaded.uri,
-            filename: unloaded.filename,
-            load_path: load_path,
-            source_path: source_path,
-            name: name,
-            content_type: type,
+            environment:  self,
+            cache:        self.cache,
+            uri:          unloaded.uri,
+            filename:     unloaded.filename,
+            load_path:    unloaded.load_path,
+            source_path:  source_path,
+            name:         unloaded.name,
+            content_type: unloaded.type,
             metadata: {
-              dependencies: dependencies
+              dependencies:
+                          dependencies
             }
           })
           validate_processor_result!(result)
@@ -167,21 +142,21 @@ module Sprockets
         else
           dependencies << build_file_digest_uri(unloaded.filename)
           metadata = {
-            digest: file_digest(unloaded.filename),
-            length: self.stat(unloaded.filename).size,
+            digest:       file_digest(unloaded.filename),
+            length:       self.stat(unloaded.filename).size,
             dependencies: dependencies
           }
         end
 
         asset = {
-          uri: unloaded.uri,
-          load_path: load_path,
-          filename: unloaded.filename,
-          name: name,
-          logical_path: logical_path,
-          content_type: type,
-          source: source,
-          metadata: metadata,
+          uri:                 unloaded.uri,
+          load_path:           unloaded.load_path,
+          filename:            unloaded.filename,
+          name:                unloaded.name,
+          logical_path:        unloaded.logical_path,
+          content_type:        unloaded.type,
+          source:              source,
+          metadata:            metadata,
           dependencies_digest: DigestUtils.digest(resolve_dependencies(metadata[:dependencies]))
         }
 
