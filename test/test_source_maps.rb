@@ -376,7 +376,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
           "map"    => {
             "version"  => 3,
             "file"     => "sass/main.scss",
-            "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAE;EACV,OAAO,EAAE,CAAE;EACX,UAAU,EAAE,IAAK,GAClB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAa,GAAI;;AAPjC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAM;EACf,OAAO,EAAE,QAAS;EAClB,eAAe,EAAE,IAAK,GACvB",
+            "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI,GACjB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAY,GAAK;;AAPjC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI,GACtB",
             "sources"  => ["main.source.scss"],
             "names"    => []
           }
@@ -417,7 +417,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
           "map"    => {
             "version"  => 3,
             "file"     => "sass/with-import.scss",
-            "mappings" => "ACAA,AAAA,IAAI,CAAC;EAAE,KAAK,EAAE,GAAI,GAAI;;ADEtB,AAAA,GAAG,CAAC;EAAE,KAAK,EAAE,IAAK,GAAI",
+            "mappings" => "ACAA,AAAA,IAAI,CAAC;EAAE,KAAK,EAAE,GAAG,GAAK;;ADEtB,AAAA,GAAG,CAAC;EAAE,KAAK,EAAE,IAAI,GAAK",
             "sources"  => [
               "with-import.source.scss",
               "_imported.source.scss"
