@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yui-compressor", "~> 0.12"
   s.add_development_dependency "zopfli", "~> 0.0.4"
 
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.2.0'
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
