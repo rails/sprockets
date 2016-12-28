@@ -113,19 +113,13 @@ module Sprockets
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
-          source_uri, _ = resolve!(unloaded.filename, pipeline: :source)
-          source_asset  = load(source_uri)
-
-          source_path = source_asset.digest_path
-          #  DigestUtils.pack_hexdigest(digest)
-
           result = call_processors(processors, {
             environment:  self,
             cache:        self.cache,
             uri:          unloaded.uri,
             filename:     unloaded.filename,
             load_path:    unloaded.load_path,
-            source_path:  source_path,
+            source_path:  unloaded.source_path,
             name:         unloaded.name,
             content_type: unloaded.type,
             metadata: {

@@ -133,6 +133,15 @@ module Sprockets
       "file_digest:#{compressed_path}:#{stat}"
     end
 
+    def source_path
+      @source_path ||= begin
+        digest      = @env.file_digest(self.filename)
+        hex         = DigestUtils.pack_hexdigest(digest)
+        source_path = self.logical_path.sub(/\.(\w+)$/) { |ext| "-#{hex}#{ext}" }
+        source_path
+      end
+    end
+
     def load_path
       split_logical_and_load_path
       @load_path
