@@ -94,12 +94,6 @@ module Sprockets
       def metadata_from_processors(unloaded, dependencies: )
         processors = processors_for(unloaded.type, unloaded.file_type, unloaded.params[:pipeline])
 
-        # if processors.empty?
-          # puts unloaded.filename
-          # puts unloaded.params.inspect
-          # puts processors.inspect
-        # end
-
         if processors.empty?
           default_metadata(unloaded, dependencies: dependencies)
         else
@@ -154,6 +148,8 @@ module Sprockets
 
         dependencies = config[:dependencies].dup
 
+        # Source pipeline is used only when showing the raw source file
+        # for example `path/file.source.js.erb`
         if "source".freeze == unloaded.params[:pipeline]
           metadata = default_metadata(unloaded, dependencies: dependencies)
         else
