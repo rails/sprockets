@@ -91,28 +91,19 @@ module Sprockets
         asset
       end
 
-      # Internal: Loads an asset and saves it to cache
-      #
-      # unloaded - An UnloadedAsset
-      #
-      # This method is only called when the given unloaded asset could not be
-      # successfully pulled from cache.
-      def load_from_unloaded(unloaded)
-        unless file?(unloaded.filename)
-          raise FileNotFound, "could not find file: #{unloaded.filename}"
-        end
-
-        if unloaded.type != unloaded.file_type && !config[:transformers][unloaded.file_type][unloaded.type]
-          raise ConversionError, "could not convert #{unloaded.file_type.inspect} to #{unloaded.type.inspect}"
-        end
-
+      def metadata_from_processors(unloaded, dependencies: )
         processors = processors_for(unloaded.type, unloaded.file_type, unloaded.params[:pipeline])
 
-        processors_dep_uri = build_processors_uri(unloaded.type, unloaded.file_type, unloaded.params[:pipeline])
-        dependencies = config[:dependencies] + [processors_dep_uri]
+        # if processors.empty?
+          # puts unloaded.filename
+          # puts unloaded.params.inspect
+          # puts processors.inspect
+        # end
 
-        # Read into memory and process if theres a processor pipeline
-        if processors.any?
+        if processors.empty?
+          default_metadata(unloaded, dependencies: dependencies)
+        else
+          # Read into memory and process if theres a processor pipeline
           result = call_processors(processors, {
             environment:  self,
             cache:        self.cache,
@@ -128,18 +119,46 @@ module Sprockets
             }
           })
           validate_processor_result!(result)
-          source = result.delete(:data)
+          source   = result[:data]
           metadata = result
           metadata[:charset] = source.encoding.name.downcase unless metadata.key?(:charset)
           metadata[:digest]  = digest(self.version + source)
           metadata[:length]  = source.bytesize
+          metadata
+        end
+      end
+
+      def default_metadata(unloaded, dependencies: )
+        dependencies << build_file_digest_uri(unloaded.filename)
+        {
+          digest:       self.file_digest(unloaded.filename),
+          length:       self.stat(unloaded.filename).size,
+          dependencies: dependencies
+        }
+      end
+
+      # Internal: Loads an asset and saves it to cache
+      #
+      # unloaded - An UnloadedAsset
+      #
+      # This method is only called when the given unloaded asset could not be
+      # successfully pulled from cache.
+      def load_from_unloaded(unloaded)
+        unless file?(unloaded.filename)
+          raise FileNotFound, "could not find file: #{unloaded.filename}"
+        end
+
+        if unloaded.type != unloaded.file_type && !config[:transformers][unloaded.file_type][unloaded.type]
+          raise ConversionError, "could not convert #{unloaded.file_type.inspect} to #{unloaded.type.inspect}"
+        end
+
+        dependencies = config[:dependencies].dup
+
+        if "source".freeze == unloaded.params[:pipeline]
+          metadata = default_metadata(unloaded, dependencies: dependencies)
         else
-          dependencies << build_file_digest_uri(unloaded.filename)
-          metadata = {
-            digest:       file_digest(unloaded.filename),
-            length:       self.stat(unloaded.filename).size,
-            dependencies: dependencies
-          }
+          dependencies << build_processors_uri(unloaded.type, unloaded.file_type, unloaded.params[:pipeline])
+          metadata = metadata_from_processors(unloaded, dependencies: dependencies)
         end
 
         asset = {
@@ -149,7 +168,7 @@ module Sprockets
           name:                unloaded.name,
           logical_path:        unloaded.logical_path,
           content_type:        unloaded.type,
-          source:              source,
+          source:              metadata.delete(:data),
           metadata:            metadata,
           dependencies_digest: DigestUtils.digest(resolve_dependencies(metadata[:dependencies]))
         }
