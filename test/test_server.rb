@@ -55,16 +55,16 @@ class TestServer < Sprockets::TestCase
 
   test "serve source with dependencies" do
     get "/assets/application.js"
-    assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\n",
+    assert_equal "var foo;\n\n\n(function() {\n  application.boot();\n})();\n",
       last_response.body
   end
 
   test "serve source file self that has dependencies" do
     get "/assets/application.self.js"
     assert_equal 200, last_response.status
-    assert_equal "\n(function() {\n  application.boot();\n})();\n",
+    assert_equal "\n\n(function() {\n  application.boot();\n})();\n",
       last_response.body
-    assert_equal "43", last_response.headers['Content-Length']
+    assert_equal "44", last_response.headers['Content-Length']
   end
 
   test "serve source with content type headers" do
@@ -113,8 +113,8 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_NONE_MATCH' => "nope"
 
     assert_equal 200, last_response.status
-    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
-    assert_equal '52', last_response.headers['Content-Length']
+    assert_equal '"842fa57129275420777a24b7687cecc276a02fcb16297193225a93997a7e7726"', last_response.headers['ETag']
+    assert_equal '53', last_response.headers['Content-Length']
   end
 
   test "not modified partial response with fingerprint and if-none-match etags match" do
@@ -173,8 +173,8 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_MATCH' => etag
 
     assert_equal 200, last_response.status
-    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
-    assert_equal '52', last_response.headers['Content-Length']
+    assert_equal '"842fa57129275420777a24b7687cecc276a02fcb16297193225a93997a7e7726"', last_response.headers['ETag']
+    assert_equal '53', last_response.headers['Content-Length']
   end
 
   test "precondition failed with if-match is a mismatch" do
@@ -218,8 +218,8 @@ class TestServer < Sprockets::TestCase
 
     get "/assets/application.self-#{digest}.js"
     assert_equal 200, last_response.status
-    assert_equal "\n(function() {\n  application.boot();\n})();\n", last_response.body
-    assert_equal "43", last_response.headers['Content-Length']
+    assert_equal "\n\n(function() {\n  application.boot();\n})();\n", last_response.body
+    assert_equal "44", last_response.headers['Content-Length']
     assert_match %r{max-age}, last_response.headers['Cache-Control']
   end
 
@@ -290,7 +290,7 @@ class TestServer < Sprockets::TestCase
 
     sandbox filename do
       get "/assets/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar japanese = \"日本語\";\n", last_response.body
+      assert_equal "var foo;\n\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar japanese = \"日本語\";\n\n", last_response.body
 
       File.open(filename, "w") do |f|
         f.write "var baz;\n"
@@ -301,7 +301,7 @@ class TestServer < Sprockets::TestCase
       File.utime(mtime, mtime, path)
 
       get "/assets/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\nvar japanese = \"日本語\";\n", last_response.body
+      assert_equal "var foo;\n\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\nvar japanese = \"日本語\";\n\n", last_response.body
     end
   end
 

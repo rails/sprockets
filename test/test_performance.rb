@@ -328,7 +328,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp-main.js"]
-      assert_equal "a;\n", asset.source
+      assert_equal "a;\n\n", asset.source
       ida = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
@@ -338,7 +338,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp-main.js"]
-      assert_equal "b;\n", asset.source
+      assert_equal "b;\n\n", asset.source
       idb = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
@@ -348,7 +348,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp-main.js"]
-      assert_equal "a;\n", asset.source
+      assert_equal "a;\n\n", asset.source
       assert_equal ida, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
@@ -360,7 +360,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp-main.js"]
-      assert_equal "b;\n", asset.source
+      assert_equal "b;\n\n", asset.source
       assert_equal idb, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
@@ -387,7 +387,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp.js"]
-      assert_equal "a;\n", asset.source
+      assert_equal "a;\n\n", asset.source
       ida = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
@@ -398,7 +398,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp.js"]
-      assert_equal "a;\nb;\n", asset.source
+      assert_equal "a;\nb;\n\n", asset.source
       idab = asset.id
       assert_no_redundant_processor_calls
       assert_no_redundant_bundle_processor_calls
@@ -409,7 +409,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp.js"]
-      assert_equal "a;\n", asset.source
+      assert_equal "a;\n\n", asset.source
       assert_equal ida, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
@@ -422,7 +422,7 @@ class TestPerformance < Sprockets::TestCase
       reset_stats!
 
       assert asset = env["tmp.js"]
-      assert_equal "a;\nb;\n", asset.source
+      assert_equal "a;\nb;\n\n", asset.source
       assert_equal idab, asset.id
       assert_no_redundant_stat_calls
       assert_no_processor_calls
