@@ -6,6 +6,7 @@ class TestUtils < MiniTest::Test
   include Sprockets::Utils
 
   def test_duplicable
+    skip unless 0.class != Integer # Ruby < 2.4
     objs = [nil, true, false, 1, "foo", :foo, [], {}]
     objs.each do |obj|
       begin
