@@ -69,35 +69,15 @@ class TestUtils < MiniTest::Test
     assert h[:foo][:bar].frozen?
   end
 
-  def test_string_ends_with_semicolon
-    assert string_end_with_semicolon?("var foo;")
-    refute string_end_with_semicolon?("var foo")
-
-    assert string_end_with_semicolon?("var foo;\n")
-    refute string_end_with_semicolon?("var foo\n")
-
-    assert string_end_with_semicolon?("var foo;\n\n")
-    refute string_end_with_semicolon?("var foo\n\n")
-
-    assert string_end_with_semicolon?("  var foo;\n  \n")
-    refute string_end_with_semicolon?("  var foo\n  \n")
-
-    assert string_end_with_semicolon?("\tvar foo;\n\t\n")
-    refute string_end_with_semicolon?("\tvar foo\n\t\n")
-
-    assert string_end_with_semicolon?("var foo\n;\n")
-    refute string_end_with_semicolon?("var foo\n\n")
-  end
-
   def test_concat_javascript_sources
     assert_equal "var foo;\n", apply_concat_javascript_sources("".freeze, "var foo;\n".freeze)
     assert_equal "\nvar foo;\n", apply_concat_javascript_sources("\n".freeze, "var foo;\n".freeze)
     assert_equal " \nvar foo;\n", apply_concat_javascript_sources(" ".freeze, "var foo;\n".freeze)
 
     assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo;\n".freeze, "var bar;\n".freeze)
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo".freeze, "var bar".freeze)
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo;".freeze, "var bar;".freeze)
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo".freeze, "var bar;".freeze)
+    assert_equal "var foo\nvar bar", apply_concat_javascript_sources("var foo".freeze, "var bar".freeze)
+    assert_equal "var foo;\nvar bar;", apply_concat_javascript_sources("var foo;".freeze, "var bar;".freeze)
+    assert_equal "var foo\nvar bar;", apply_concat_javascript_sources("var foo".freeze, "var bar;".freeze)
   end
 
   def apply_concat_javascript_sources(*args)

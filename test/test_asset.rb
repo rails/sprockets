@@ -886,7 +886,6 @@ class BundledAssetTest < Sprockets::TestCase
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
     EOS
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
@@ -905,7 +904,6 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
 define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
     EOS
 
     assert_equal [
@@ -1079,13 +1077,8 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert_equal "\n.foo {}\n\n.bar {}\n\n\n", asset("charset.css").to_s
   end
 
-  test "appends missing semicolons" do
-    assert_equal "var Bar\n;\n\n\n(function() {\n  var Foo\n})\n;\n",
-      asset("semicolons.js").to_s
-  end
-
   test 'keeps code in same line after multi-line comments' do
-    assert_equal "/******/ function foo() {\n}\n;\n",
+    assert_equal "/******/ function foo() {\n}\n",
       asset('multi_line_comment.js').to_s
   end
 
