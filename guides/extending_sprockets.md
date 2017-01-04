@@ -186,15 +186,6 @@ Example:
 "/Users/richardschneeman/Documents/projects/sprockets/test/fixtures/default"
 ```
 
-- `:source_path` - (Sprockets 4 only) [String] The source file for the generated asset, potentially useful for working with source maps.
-
-Example:
-
-```
-"gallery.source-828e4be75f8bf69529b5d618dd12a6144d58d47cf4c3a9e3f64b0b8812008dab.js"
-```
-
-
 - `:name` - [String] The name of the file being loaded without extension.
 
 Example

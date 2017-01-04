@@ -440,7 +440,7 @@ Similar to Rack, a processor is any "callable" (an object that responds to `call
 
 Also see [`Sprockets::ProcessorUtils`](https://github.com/rails/sprockets/blob/master/lib/sprockets/processor_utils.rb) for public helper methods.
 
-### input Hash
+### Input Hash
 
 The `input` Hash defines the following public fields.
 
@@ -448,7 +448,6 @@ The `input` Hash defines the following public fields.
 * `:environment` - Current `Sprockets::Environment` instance.
 * `:cache` - A `Sprockets::Cache` instance. See [`Sprockets::Cache#fetch`](https://github.com/rails/sprockets/blob/master/lib/sprockets/cache.rb).
 * `:uri` - String Asset URI.
-* `:source_path` - String full path to original file.
 * `:load_path` - String current load path for filename.
 * `:name` - String logical path for filename.
 * `:content_type` - String content type of the output asset.
