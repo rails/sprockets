@@ -76,10 +76,18 @@ module Sprockets
     #
     # Returns buf String.
     def concat_javascript_sources(buf, source)
-      # Need to compare against the ordinals because the string can be UTF_8 or UTF_32LE encoded
-      # 0x0A == "\n"
-      buf << 0x0A if buf.bytesize > 0 && buf.getbyte(-1) != 0x0A
-      buf << source
+      unless source.empty?
+        # add newline if buf not end with newline
+        buf << "\n" unless buf.empty? || buf.end_with?("\n")
+
+        # add semicolon after last none whitespace character if that is not semicolon
+        idx = source.rindex(/[^\n\t ]/)
+        source = source.dup.insert(idx + 1, ';') if idx && source[idx] != ';'
+
+        buf << source
+      end
+
+      buf
     end
 
     # Internal: Inject into target module for the duration of the block.
