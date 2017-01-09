@@ -23,7 +23,7 @@ module Sprockets
       js, map = input[:cache].fetch([self.cache_key, data]) do
         result = Autoload::CoffeeScript.compile(
           data,
-          sourceMap: true,
+          sourceMap: "v3",
           sourceFiles: [File.basename(input[:filename])],
           generatedFile: input[:filename]
         )
