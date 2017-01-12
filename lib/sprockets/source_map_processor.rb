@@ -3,21 +3,23 @@ require 'set'
 
 module Sprockets
   class SourceMapProcessor
-    def self.call(input)
-      case input[:content_type]
+    def self.original_content_type(source_map_content_type, error_when_not_found: true)
+      case source_map_content_type
       when "application/js-sourcemap+json"
         accept = "application/javascript"
       when "application/css-sourcemap+json"
         accept = "text/css"
       else
-        fail input[:content_type]
+        fail(source_map_content_type) if error_when_not_found
+        source_map_content_type
       end
+    end
 
+    def self.call(input)
       links = Set.new(input[:metadata][:links])
-
       env = input[:environment]
 
-      uri, _ = env.resolve!(input[:filename], accept: accept)
+      uri, _ = env.resolve!(input[:filename], accept: original_content_type(input[:content_type]))
       asset  = env.load(uri)
       map    = asset.metadata[:map]
 

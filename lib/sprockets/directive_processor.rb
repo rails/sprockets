@@ -70,7 +70,9 @@ module Sprockets
       @uri          = input[:uri]
       @filename     = input[:filename]
       @dirname      = File.dirname(@filename)
-      @content_type = input[:content_type]
+      # If loading a source map file like `application.js.map` resolve
+      # dependencies using `.js` instead of `.js.map`
+      @content_type = SourceMapProcessor.original_content_type(input[:content_type], error_when_not_found: false)
       @required     = Set.new(input[:metadata][:required])
       @stubbed      = Set.new(input[:metadata][:stubbed])
       @links        = Set.new(input[:metadata][:links])
