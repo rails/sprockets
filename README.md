@@ -359,8 +359,8 @@ reference files relative to the location of the current file.
 #### The `require` Directive
 
 `require` *path* inserts the contents of the asset source file
-specified by *path*. If the file is required multiple times, it will
-appear in the bundle only once.
+specified by *path*. If the same file is required multiple times
+with different path expressions, it will appear in the bundle only once.
 
 #### The `require_directory` Directive
 
