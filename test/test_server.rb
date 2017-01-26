@@ -210,6 +210,7 @@ class TestServer < Sprockets::TestCase
     get "/assets/application-#{digest}.js"
     assert_equal 200, last_response.status
     assert_match %r{max-age}, last_response.headers['Cache-Control']
+    assert_match %r{immutable}, last_response.headers['Cache-Control']
   end
 
   test "fingerprint digest of file self" do
