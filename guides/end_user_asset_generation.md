@@ -140,11 +140,11 @@ For example, if you have an `application.js` and want all the files in the `foo/
 //= require foo.js
 ```
 
-Then create a file `foo/index.js` that requires all the files in that folder in any order you want:
+Then create a file `foo/index.js` that requires all the files in that folder in any order you want using relative references:
 
 ```js
-//= require foo.min.js
-//= require foo-ui.js
+//= require ./foo.min.js
+//= require ./foo-ui.js
 ```
 
 Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui.js`. If you used `require_tree` it would not work correctly.
