@@ -7,7 +7,6 @@ module Sprockets
     extend self
 
     MANIFEST_RE = /^\.sprockets-manifest-[0-9a-f]{32}.json$/
-    LEGACY_MANIFEST_RE = /^manifest(-[0-9a-f]{32})?.json$/
 
     # Public: Generate a new random manifest path.
     #
