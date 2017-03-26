@@ -6,7 +6,7 @@ module Sprockets
   module SourceMapUtils
     extend self
 
-    # Puglic: Transpose source maps into a standard format
+    # Public: Transpose source maps into a standard format
     #
     # NOTE: Does not support index maps
     #
