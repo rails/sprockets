@@ -120,11 +120,14 @@ module Sprockets
       return to_enum(__method__, *args) unless block_given?
 
       environment = self.environment.cached
-      args.flatten.each do |path|
-        environment.find_all_linked_assets(path) do |asset|
-          yield asset
+      promises = args.flatten.map do |path|
+        Concurrent::Promise.execute(executor: executor) do
+          environment.find_all_linked_assets(path) do |asset|
+            yield asset
+          end
         end
       end
+      promises.each(&:wait!)
 
       nil
     end
@@ -160,7 +163,6 @@ module Sprockets
 
       filenames            = []
       concurrent_exporters = []
-      executor             = Concurrent::FixedThreadPool.new(Concurrent.processor_count)
 
       find(*args) do |asset|
         mtime = Time.now.iso8601
@@ -182,11 +184,6 @@ module Sprockets
         promise      = nil
         exporters_for_asset(asset) do |exporter|
           next if exporter.skip?(logger)
-
-          if !environment.export_concurrent
-            exporter.call
-            next
-          end
 
           if promise.nil?
             promise = Concurrent::Promise.new(executor: executor) { exporter.call }
@@ -326,6 +323,10 @@ module Sprockets
           logger.level = Logger::FATAL
           logger
         end
+      end
+
+      def executor
+        @executor ||= environment.export_concurrent ? :fast : :immediate
       end
   end
 end

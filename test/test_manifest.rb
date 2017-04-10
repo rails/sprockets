@@ -505,7 +505,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, @dir)
 
     result = manifest.find_sources("mobile/a.js", "mobile/b.js")
-    assert_equal ["var A;\n", "var B;\n"], result.to_a
+    assert_equal ["var A;\n", "var B;\n"], result.to_a.sort
   end
 
   test "find_sources without environment" do
@@ -608,5 +608,36 @@ class TestManifest < Sprockets::TestCase
     @env.register_exporter 'image/png',SlowExporter2
     Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
     assert_equal %w(0 1 0 1 0 1 0 1), SlowExporter.seq
+  end
+
+  # Record Processor sequence with a delay to test concurrency.
+  class SlowProcessor
+    attr_reader :seq
+
+    def initialize
+      @seq = []
+    end
+
+    def call(_)
+      seq << '0'
+      sleep CONTEXT_SWITCH_DURATION
+      seq << '1'
+      nil
+    end
+  end
+
+  test 'concurrent processing' do
+    processor = SlowProcessor.new
+    @env.register_postprocessor 'image/png', processor
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 0 1 1), processor.seq
+  end
+
+  test 'sequential processing' do
+    @env.export_concurrent = false
+    processor = SlowProcessor.new
+    @env.register_postprocessor 'image/png', processor
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 1 0 1), processor.seq
   end
 end
