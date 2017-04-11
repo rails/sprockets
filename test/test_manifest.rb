@@ -701,4 +701,30 @@ class TestManifest < Sprockets::TestCase
       assert_raises('kaboom') { manifest.compile('application.js') }
     end
   end
+
+  # Sleep duration to context switch between concurrent threads.
+  CONTEXT_SWITCH_DURATION = 0.001
+
+  # Record Processor sequence with a delay to test concurrency.
+  class SlowProcessor
+    attr_reader :seq
+
+    def initialize
+      @seq = []
+    end
+
+    def call(_)
+      seq << '0'
+      sleep CONTEXT_SWITCH_DURATION
+      seq << '1'
+      nil
+    end
+  end
+
+  test 'concurrent processing' do
+    processor = SlowProcessor.new
+    @env.register_postprocessor 'image/png', processor
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 0 1 1), processor.seq
+  end
 end
