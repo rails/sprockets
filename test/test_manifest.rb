@@ -573,7 +573,7 @@ class TestManifest < Sprockets::TestCase
   end
 
   # Sleep duration to context switch between concurrent threads.
-  CONTEXT_SWITCH_DURATION = 0.001
+  CONTEXT_SWITCH_DURATION = 0.1
 
   # Record Exporter sequence with a delay to test concurrency.
   class SlowExporter < Sprockets::Exporters::Base
