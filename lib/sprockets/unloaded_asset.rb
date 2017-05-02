@@ -21,11 +21,12 @@ module Sprockets
     def initialize(uri, env)
       @uri               = uri.to_s
       @env               = env
+      @version           = env.version
       @compressed_path   = URITar.new(uri, env).compressed_path
       @params            = nil # lazy loaded
       @filename          = nil # lazy loaded
     end
-    attr_reader :compressed_path, :uri
+    attr_reader :compressed_path, :uri, :version
 
     # Internal: Full file path without schema
     #
@@ -123,7 +124,7 @@ module Sprockets
     #
     # Returns a String.
     def file_digest_key(stat)
-      "file_digest:#{compressed_path}:#{stat}"
+      "file_digest:#{compressed_path}:#{stat}:#{version}"
     end
 
     private
