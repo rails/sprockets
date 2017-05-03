@@ -28,7 +28,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 3,           mapping[:original].first
     assert_equal 17,          mapping[:original].last
     assert_equal 'script.js', mapping[:source]
-    assert_equal nil,         mapping[:name]
+    assert_nil mapping[:name]
   end
 
   def test_map2
@@ -56,7 +56,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 28,               mapping[:original].first
     assert_equal 8,                mapping[:original].last
     assert_equal 'example.coffee', mapping[:source]
-    assert_equal nil,              mapping[:name]
+    assert_nil mapping[:name]
   end
 
   def test_map3
@@ -84,7 +84,7 @@ class TestSourceMapUtils < MiniTest::Test
     assert_equal 2,            mapping[:original].first
     assert_equal 1,            mapping[:original].last
     assert_equal 'example.js', mapping[:source]
-    assert_equal nil,          mapping[:name]
+    assert_nil mapping[:name]
   end
 
   def test_concat_empty_source_map_returns_original
