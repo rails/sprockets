@@ -92,6 +92,17 @@ module Sprockets
       @data['assets'] ||= {}
     end
 
+    # Allows to add custom assets which are compiled from 
+    # sources outside the asset pipeline.
+    #
+    #   Logical path (String): Fingerprinted path (String)
+    #
+    #   { "app.js" => "app.2e8e97c6.js",
+    #     "vendor.js"      => "vendor.ae090855.js" }
+    def add_assets(custom_assets)
+      @data['assets'] = assets.merge(custom_assets)
+    end
+
     # Returns internal file directory listing. Keys are filenames
     # which map to an attributes array.
     #

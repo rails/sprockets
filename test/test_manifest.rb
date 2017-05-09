@@ -483,6 +483,32 @@ class TestManifest < Sprockets::TestCase
     assert data['assets']['application.js']
   end
 
+  test 'allow custom assets' do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    custom_assets = {'app.js' => 'app.2e8e97c6.js', 'vendor.js' => 'vendor.ae090855.js'}
+
+    digest_path = @env['application.js'].digest_path
+
+    assert !File.exist?("#{@dir}/#{digest_path}")
+    manifest.compile('application.js')
+    manifest.add_assets(custom_assets)
+    manifest.save
+
+    assert File.directory?(manifest.directory)
+    assert File.file?(manifest.filename)
+
+    assert File.exist?("#{@dir}/manifest.json")
+    assert File.exist?("#{@dir}/#{digest_path}")
+
+    data = JSON.parse(File.read(manifest.filename))
+    assert data['files'][digest_path]
+    assert_equal 'application.js', data['files'][digest_path]['logical_path']
+    assert data['files'][digest_path]['size'] > 230
+    assert_equal digest_path, data['assets']['application.js']
+    assert_equal custom_assets['app.js'], data['assets']['app.js']
+    assert_equal custom_assets['vendor.js'], data['assets']['vendor.js']
+  end
+
   test "nil environment raises compilation error" do
     assert !File.exist?("#{@dir}/manifest.json")
 
