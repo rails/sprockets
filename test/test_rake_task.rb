@@ -45,7 +45,7 @@ class TestRakeTask < Sprockets::TestCase
     assert File.exist?("#{@dir}/#{digest_path}")
   end
 
-  test "clobber" do
+  test "delete" do
     digest_path = @env['application.js'].digest_path
 
     @rake[:assets].invoke
@@ -54,7 +54,7 @@ class TestRakeTask < Sprockets::TestCase
     result = @env.cache.set('foo', 'bar')
     assert_equal result, @env.cache.get('foo')
 
-    @rake[:clobber_assets].invoke
+    @rake[:delete_assets].invoke
     assert !File.exist?("#{@dir}/#{digest_path}")
     # verify the cache key was cleared
     assert_nil @env.cache.get('foo')
