@@ -31,39 +31,26 @@ module Sprockets
     def load(uri)
       unloaded = UnloadedAsset.new(uri, self)
       if unloaded.params.key?(:id)
-        unless asset = asset_from_cache(unloaded.asset_key)
-          id = unloaded.params.delete(:id)
-          uri_without_id = build_asset_uri(unloaded.filename, unloaded.params)
-          asset = load_from_unloaded(UnloadedAsset.new(uri_without_id, self))
-          if asset[:id] != id
-            @logger.warn "Sprockets load error: Tried to find #{uri}, but latest was id #{asset[:id]}"
-          end
-        end
+        asset = load_asset_with_id(unloaded)
       else
-        asset = fetch_asset_from_dependency_cache(unloaded) do |paths|
-          # When asset is previously generated, its "dependencies" are stored in the cache.
-          # The presence of `paths` indicates dependencies were stored.
-          # We can check to see if the dependencies have not changed by "resolving" them and
-          # generating a digest key from the resolved entries. If this digest key has not
-          # changed, the asset will be pulled from cache.
-          #
-          # If this `paths` is present but the cache returns nothing then `fetch_asset_from_dependency_cache`
-          # will confusingly be called again with `paths` set to nil where the asset will be
-          # loaded from disk.
-          if paths
-            digest = DigestUtils.digest(resolve_dependencies(paths))
-            if uri_from_cache = cache.get(unloaded.digest_key(digest), true)
-              asset_from_cache(UnloadedAsset.new(uri_from_cache, self).asset_key)
-            end
-          else
-            load_from_unloaded(unloaded)
-          end
-        end
+        asset = fetch_asset_from_dependency_cache(unloaded)
       end
       Asset.new(asset)
     end
 
     private
+      def load_asset_with_id(unloaded)
+        unless asset = asset_from_cache(unloaded.asset_key)
+          id = unloaded.params.delete(:id)
+          uri_without_id = build_asset_uri(unloaded.filename, unloaded.params)
+          asset = load_from_unloaded(UnloadedAsset.new(uri_without_id, self))
+          if asset[:id] != id
+            @logger.warn "Sprockets load error: Tried to find #{unloaded.uri}, but latest was id #{asset[:id]}"
+          end
+        end
+
+        asset
+      end
 
       # Internal: Load asset hash from cache
       #
@@ -71,8 +58,8 @@ module Sprockets
       #
       # This method converts all "compressed" paths to absolute paths.
       # Returns a hash of values representing an asset
-      def asset_from_cache(key)
-        asset = cache.get(key, true)
+      def asset_from_cache(uri_from_cache)
+        asset = cache_get_asset(uri_from_cache)
         if asset
           asset[:uri]       = expand_from_root(asset[:uri])
           asset[:load_path] = expand_from_root(asset[:load_path])
@@ -182,6 +169,7 @@ module Sprockets
 
         asset[:id]  = hexdigest(asset)
         asset[:uri] = build_asset_uri(unloaded.filename, unloaded.params.merge(id: asset[:id]))
+        resolve_dependencies(metadata[:dependencies])
 
         store_asset(asset, unloaded)
         asset
@@ -238,13 +226,10 @@ module Sprockets
             cached_asset[:metadata][key].map! {|uri| compress_from_root(uri) }
           end
         end
-
         # Unloaded asset and stored_asset now have a different URI
-        stored_asset = UnloadedAsset.new(asset[:uri], self)
-        cache.set(stored_asset.asset_key, cached_asset, true)
-
+        cache_set_asset(asset, cached_asset)
         # Save the new relative path for the digest key of the unloaded asset
-        cache.set(unloaded.digest_key(asset[:dependencies_digest]), stored_asset.compressed_path, true)
+        cache_set_uri(asset, unloaded)
       end
 
 
@@ -298,29 +283,79 @@ module Sprockets
       # history will be saved with the dependency that found a valid asset moved to the front.
       #
       # If no history is present, or if none of the histories could be resolved to a valid asset then,
-      # the block is yielded to and expected to return a valid asset.
-      # When this happens the dependencies for the returned asset are added to the "history", and older
-      # entries are removed if the "history" is above `limit`.
+      # the asset's dependencies are resolved, added to the History, the asset is loaded again, and older
+      # entries are removed if the "history" is above `limit`
       def fetch_asset_from_dependency_cache(unloaded, limit = 3)
-        key = unloaded.dependency_history_key
-
-        history = cache.get(key) || []
+        history = cache_get_dependency_history(unloaded)
         history.each_with_index do |deps, index|
-          expanded_deps = deps.map do |path|
-            path.start_with?("file-digest://") ? expand_from_root(path) : path
-          end
-          if asset = yield(expanded_deps)
-            cache.set(key, history.rotate!(index)) if index > 0
+          expanded_deps = history_entry_unpack_dependencies(deps)
+          if asset = asset_from_expanded_deps(unloaded, expanded_deps)
+            if index > 0
+              history.rotate!(index)
+              cache_set_dependency_history(unloaded, history)
+            end
             return asset
           end
         end
 
-        asset = yield
-        deps  = asset[:metadata][:dependencies].dup.map! do |uri|
+        asset = load_from_unloaded(unloaded)
+        history_add_entry(unloaded, history, asset, limit)
+        asset
+      end
+
+      def asset_from_expanded_deps(unloaded, expanded_deps)
+        cached_asset = nil
+        if uri_from_cache = cache_get_uri(unloaded, expanded_deps)
+          cached_asset = asset_from_cache(uri_from_cache)
+        end
+        cached_asset
+      end
+
+      def history_add_entry(unloaded, history, asset, limit)
+        deps = history_entry_pack_dependencies(asset[:metadata][:dependencies])
+        key = unloaded.dependency_history_key
+        history.unshift(deps).take(limit)
+        cache_set_dependency_history(unloaded, history)
+      end
+      def history_entry_pack_dependencies(history_entry)
+        history_entry.dup.map! do |uri|
           uri.start_with?("file-digest://") ? compress_from_root(uri) : uri
         end
-        cache.set(key, history.unshift(deps).take(limit))
-        asset
+      end
+      def history_entry_unpack_dependencies(history_entry)
+        history_entry.map do |path|
+          path.start_with?("file-digest://") ? expand_from_root(path) : path
+        end
+      end
+
+      def cache_get_dependency_history(unloaded)
+        key = unloaded.dependency_history_key
+        history = cache.get(key) || []
+      end
+
+      def cache_set_dependency_history(unloaded, history)
+        key = unloaded.dependency_history_key
+        cache.set(key, history)
+      end
+
+      def cache_get_uri(unloaded, expanded_deps)
+        dependencies = resolve_dependencies(expanded_deps)
+        digest = DigestUtils.digest(dependencies)
+        cache.get(unloaded.digest_key(digest), true)
+      end
+
+      def cache_set_uri(loaded_asset, unloaded)
+        stored_asset = UnloadedAsset.new(loaded_asset[:uri], self)
+        cache.set(unloaded.digest_key(loaded_asset[:dependencies_digest]), stored_asset.asset_key, true)
+      end
+
+      def cache_get_asset(uri_from_cache)
+        cache.get(uri_from_cache, true)
+      end
+
+      def cache_set_asset(loaded_asset, cached_asset)
+        stored_asset = UnloadedAsset.new(loaded_asset[:uri], self)
+        cache.set(stored_asset.asset_key, cached_asset, true)
       end
   end
 end
