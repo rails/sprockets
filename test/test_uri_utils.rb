@@ -148,6 +148,14 @@ class TestURIUtils < MiniTest::Test
     end
   end
 
+  def test_file_digest_uri
+    assert file_digest_uri?('file-digest:///usr/local/var/github/app/assets/javascripts/application.js')
+    assert file_digest_uri?('file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js')
+    refute file_digest_uri?('file:///usr/local/var/file-digest/app/assets/javascripts/application.js')
+    refute file_digest_uri?('file:///usr/local/var/github/app/assets/stylesheets/users.css?type=text/css')
+    refute file_digest_uri?('http://file-digest.com:8080')
+  end
+
   def test_parse_file_digest_uri
     assert_equal "/usr/local/var/github/app/assets/javascripts/application.js",
       parse_file_digest_uri("file-digest:///usr/local/var/github/app/assets/javascripts/application.js")

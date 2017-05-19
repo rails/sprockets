@@ -113,6 +113,15 @@ module Sprockets
       join_file_uri("file", nil, path, encode_uri_query_params(params))
     end
 
+    # Internal: Determine if a URI is a file digest
+    #
+    # uri - String uri
+    #
+    # Returns true uri is a digest uri
+    def file_digest_uri?(uri)
+      uri.start_with?('file-digest://'.freeze)
+    end
+
     # Internal: Parse file-digest dependency URI.
     #
     # Examples

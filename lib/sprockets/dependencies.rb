@@ -58,7 +58,7 @@ module Sprockets
     def resolve_dependency(str)
       # Optimize for the most common scheme to
       # save 22k allocations on an average Spree app.
-      scheme = if str.start_with?('file-digest:'.freeze)
+      scheme = if file_digest_uri?(str)
         'file-digest'.freeze
       else
         str[/([^:]+)/, 1]
