@@ -81,7 +81,7 @@ module Sprockets
       end
     else
       def absolute_path?(path)
-        path[0] == File::SEPARATOR
+        path.start_with?(File::SEPARATOR)
       end
     end
 
