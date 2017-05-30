@@ -505,7 +505,7 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, @dir)
 
     result = manifest.find_sources("mobile/a.js", "mobile/b.js")
-    assert_equal ["var A;\n", "var B;\n"], result.to_a
+    assert_equal ["var A;\n", "var B;\n"], result.to_a.sort
   end
 
   test "find_sources without environment" do
@@ -570,5 +570,74 @@ class TestManifest < Sprockets::TestCase
       ex = assert_raises(RuntimeError) { manifest.compile('application.js') }
       assert_equal 'kaboom', ex.message
     end
+  end
+
+  # Sleep duration to context switch between concurrent threads.
+  CONTEXT_SWITCH_DURATION = 0.1
+
+  # Record Exporter sequence with a delay to test concurrency.
+  class SlowExporter < Sprockets::Exporters::Base
+    class << self
+      attr_accessor :seq
+    end
+
+    def call
+      SlowExporter.seq << '0'
+      sleep CONTEXT_SWITCH_DURATION
+      SlowExporter.seq << '1'
+    end
+  end
+
+  class SlowExporter2 < SlowExporter
+  end
+
+  test 'concurrent exporting' do
+    # Register 2 exporters and compile 2 files to ensure that
+    # all 4 exporting tasks run concurrently.
+    SlowExporter.seq = []
+    @env.register_exporter 'image/png',SlowExporter
+    @env.register_exporter 'image/png',SlowExporter2
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 0 0 0 1 1 1 1), SlowExporter.seq
+  end
+
+  test 'sequential exporting' do
+    @env.export_concurrent = false
+    SlowExporter.seq = []
+    @env.register_exporter 'image/png',SlowExporter
+    @env.register_exporter 'image/png',SlowExporter2
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 1 0 1 0 1 0 1), SlowExporter.seq
+  end
+
+  # Record Processor sequence with a delay to test concurrency.
+  class SlowProcessor
+    attr_reader :seq
+
+    def initialize
+      @seq = []
+    end
+
+    def call(_)
+      seq << '0'
+      sleep CONTEXT_SWITCH_DURATION
+      seq << '1'
+      nil
+    end
+  end
+
+  test 'concurrent processing' do
+    processor = SlowProcessor.new
+    @env.register_postprocessor 'image/png', processor
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 0 1 1), processor.seq
+  end
+
+  test 'sequential processing' do
+    @env.export_concurrent = false
+    processor = SlowProcessor.new
+    @env.register_postprocessor 'image/png', processor
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
+    assert_equal %w(0 1 0 1), processor.seq
   end
 end
