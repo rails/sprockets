@@ -6,6 +6,10 @@ assets, as well as a powerful preprocessor pipeline that allows you to
 write assets in languages like CoffeeScript, Sass and SCSS.
 
 
+## Code Status
+
+[![Build Status](https://secure.travis-ci.org/rails/sprockets.svg?branch=master)](http://travis-ci.org/rails/sprockets)
+
 ## Installation
 
 Install Sprockets from RubyGems:
