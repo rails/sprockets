@@ -232,7 +232,7 @@ module Sprockets
       end
 
       def deprecate_legacy_processor_interface(interface)
-        msg = "You are using the a deprecated processor interface #{ interface.inspect }.\n" +
+        msg = "You are using a deprecated processor interface #{ interface.inspect }.\n" +
         "Please update your processor interface:\n" +
         "https://github.com/rails/sprockets/blob/master/guides/extending_sprockets.md#supporting-all-versions-of-sprockets-in-processors\n"
 
