@@ -120,6 +120,7 @@ class TestTransformers < Sprockets::TestCase
       ['application/ecmascript-6+ruby', 0.8],
       ['application/javascript+ruby', 0.8],
       ['application/coffeescript+ruby', 0.8],
+      ["application/eco+ruby", 0.8],
       ['text/mustache', 0.8], # TODO: Extra step transform should be weighted down
       ['text/x-handlebars-template', 0.8], # TODO: Extra step transform should be weighted down
       ['application/dart', 0.8]
