@@ -4,6 +4,8 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+## 4.0.0.beta5
+
 - Reduce string allocations
 - Source map metadata uses compressed form specified by the [source map v3 spec](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k). [#402] **[BREAKING]**
 - Generate [index maps](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit#heading=h.535es3xeprgt) when decoding source maps isn't necessary. [#402]
