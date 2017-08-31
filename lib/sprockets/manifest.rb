@@ -144,7 +144,8 @@ module Sprockets
         end
       else
         args.each do |path|
-          yield File.binread(File.join(dir, assets[path]))
+          asset = assets[path]
+          yield File.binread(File.join(dir, asset)) if asset
         end
       end
     end
