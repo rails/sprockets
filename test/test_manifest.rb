@@ -634,7 +634,13 @@ class TestManifest < Sprockets::TestCase
     manifest = Sprockets::Manifest.new(@env, @dir)
 
     result = manifest.find_sources("mobile/a.js", "mobile/b.js")
-    assert_equal ["var A;\n", "var B;\n"], result.to_a
+    assert_equal ["var A;\n", "var B;\n"], result.to_a.sort
+
+    result = manifest.find_sources("not_existent.js", "also_not_existent.js")
+    assert_equal [], result.to_a
+
+    result = manifest.find_sources("mobile/a.js", "also_not_existent.js")
+    assert_equal ["var A;\n"], result.to_a
   end
 
   test "find_sources without environment" do
@@ -645,6 +651,12 @@ class TestManifest < Sprockets::TestCase
 
     result = manifest.find_sources("mobile/a.js", "mobile/b.js")
     assert_equal ["var A;\n", "var B;\n"], result.to_a
+
+    result = manifest.find_sources("not_existent.js", "also_not_existent.js")
+    assert_equal [], result.to_a
+
+    result = manifest.find_sources("mobile/a.js", "also_not_existent.js")
+    assert_equal ["var A;\n"], result.to_a
   end
 
   test "compress non-binary assets" do
