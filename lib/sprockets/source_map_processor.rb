@@ -6,9 +6,9 @@ module Sprockets
     def self.original_content_type(source_map_content_type, error_when_not_found: true)
       case source_map_content_type
       when "application/js-sourcemap+json"
-        accept = "application/javascript"
+        "application/javascript"
       when "application/css-sourcemap+json"
-        accept = "text/css"
+        "text/css"
       else
         fail(source_map_content_type) if error_when_not_found
         source_map_content_type
