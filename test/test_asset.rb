@@ -79,7 +79,7 @@ module FreshnessTests
 
     sandbox filename do
       write(filename, "a;")
-      asset = asset('test.js')
+      asset('test.js')
 
       File.unlink(filename)
 
@@ -114,7 +114,7 @@ module FreshnessTests
     sandbox main, dep do
       write(main, "//= depend_on test-dep\n")
       write(dep, "a;")
-      asset = asset('test-main.js')
+      asset('test-main.js')
 
       File.unlink(dep)
 
