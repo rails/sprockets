@@ -71,40 +71,40 @@ class TestUtils < MiniTest::Test
   end
 
   def test_string_ends_with_semicolon
-    assert string_end_with_semicolon?("var foo;")
-    refute string_end_with_semicolon?("var foo")
+    assert_nil semicolon_insertion_location("var foo;")
+    assert_equal 7, semicolon_insertion_location("var foo")
 
-    assert string_end_with_semicolon?("var foo;\n")
-    refute string_end_with_semicolon?("var foo\n")
+    assert_nil semicolon_insertion_location("var foo;\n")
+    assert_equal 7, semicolon_insertion_location("var foo\n")
 
-    assert string_end_with_semicolon?("var foo;\n\n")
-    refute string_end_with_semicolon?("var foo\n\n")
+    assert_nil semicolon_insertion_location("var foo;\n\n")
+    assert_equal 7, semicolon_insertion_location("var foo\n\n")
 
-    assert string_end_with_semicolon?("  var foo;\n  \n")
-    refute string_end_with_semicolon?("  var foo\n  \n")
+    assert_nil semicolon_insertion_location("  var foo;\n  \n")
+    assert_equal 9, semicolon_insertion_location("  var foo\n  \n")
 
-    assert string_end_with_semicolon?("\tvar foo;\n\t\n")
-    refute string_end_with_semicolon?("\tvar foo\n\t\n")
+    assert_nil semicolon_insertion_location("\tvar foo;\n\t\n")
+    assert_equal 8, semicolon_insertion_location("\tvar foo\n\t\n")
 
-    assert string_end_with_semicolon?("var foo\n;\n")
-    refute string_end_with_semicolon?("var foo\n\n")
+    assert_nil semicolon_insertion_location("var foo\n;\n")
+    assert_equal 7, semicolon_insertion_location("var foo\n\n")
   end
 
   def test_concat_javascript_sources
-    assert_equal "var foo;\n", apply_concat_javascript_sources("".freeze, "var foo;\n".freeze)
-    assert_equal "\nvar foo;\n", apply_concat_javascript_sources("\n".freeze, "var foo;\n".freeze)
-    assert_equal " \nvar foo;\n", apply_concat_javascript_sources(" ".freeze, "var foo;\n".freeze)
+    assert_equal "var foo;\n", apply_concat_javascript_sources("", "var foo;\n")
+    assert_equal "\nvar foo;\n", apply_concat_javascript_sources("\n", "var foo;\n")
+    assert_equal " var foo;\n", apply_concat_javascript_sources(" ", "var foo;\n")
 
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo;\n".freeze, "var bar;\n".freeze)
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo".freeze, "var bar".freeze)
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo;".freeze, "var bar;".freeze)
-    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo".freeze, "var bar;".freeze)
+    assert_equal "var foo;\nvar bar;\n", apply_concat_javascript_sources("var foo;\n", "var bar;\n")
+    assert_equal "var foo;var bar;", apply_concat_javascript_sources("var foo", "var bar")
+    assert_equal "var foo;var bar;", apply_concat_javascript_sources("var foo;", "var bar;")
+    assert_equal "var foo;var bar;", apply_concat_javascript_sources("var foo", "var bar;")
+    assert_equal "'😁';var bar;", apply_concat_javascript_sources("'😁'", "var bar;")
   end
 
   def apply_concat_javascript_sources(*args)
     args.reduce(String.new(""), &method(:concat_javascript_sources))
   end
-
 
   def test_post_order_depth_first_search
     m = []

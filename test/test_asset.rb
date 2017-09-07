@@ -881,13 +881,13 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "linked asset depends on target asset" do
     assert asset = asset("require_manifest.js")
-    assert_equal <<-EOS, asset.to_s
-
+    expected = '
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
-    EOS
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
+'
+
+    assert_equal expected, asset.to_s
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
       "file://#{fixture_path_for_uri("asset/application.css")}?type=text/css&id=xxx",
@@ -897,16 +897,15 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
   test "directive linked asset depends on target asset" do
     assert asset = asset("require_manifest2.js")
-    assert_equal <<-EOS, asset.to_s
-
+    expected = '
 
 
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
-    EOS
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
+'
+    assert_equal expected, asset.to_s
 
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
@@ -1080,12 +1079,12 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "appends missing semicolons" do
-    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n;\n",
+    assert_equal "var Bar;\n\n(function() {\n  var Foo\n});\n",
       asset("semicolons.js").to_s
   end
 
   test 'keeps code in same line after multi-line comments' do
-    assert_equal "/******/ function foo() {\n}\n;\n",
+    assert_equal "/******/ function foo() {\n};\n",
       asset('multi_line_comment.js').to_s
   end
 
