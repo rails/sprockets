@@ -154,10 +154,6 @@ module Sprockets
           processed_header << line
         end
 
-        processed_header.chomp!
-        # Ensure header ends in a new line like before it was processed
-        processed_header << "\n" if processed_header.length > 0 && header[-1] == "\n"
-
         return processed_header, directives
       end
 

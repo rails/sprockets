@@ -97,13 +97,13 @@ module FreshnessTests
       asset      = asset('test-main.js')
       old_digest = asset.hexdigest
       old_uri    = asset.uri
-      assert_equal "a;\n", asset.to_s
+      assert_equal "\na;\n", asset.to_s
 
       write(dep, "b;")
       asset = asset('test-main.js')
       refute_equal old_digest, asset.hexdigest
       refute_equal old_uri, asset.uri
-      assert_equal "b;\n", asset.to_s
+      assert_equal "\nb;\n", asset.to_s
     end
   end
 
@@ -743,11 +743,11 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring index file directly and by alias includes it only once" do
-    assert_equal "alert(1);\n\n\n", asset("index_alias/require.js").to_s
+    assert_equal "alert(1);\n\n\n\n", asset("index_alias/require.js").to_s
   end
 
   test "requiring index file by tree and by alias includes it only once" do
-    assert_equal "alert(1);\n", asset("index_alias/require_tree.js").to_s
+    assert_equal "alert(1);\n\n\n", asset("index_alias/require_tree.js").to_s
   end
 
   test "requiring a file of a different format raises an exception" do
@@ -766,7 +766,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "processing a source file with no engine extensions" do
-    assert_equal read("asset/users.js.erb"), asset("noengine.js").to_s
+    assert_equal read("asset/users.js.erb") + "\n", asset("noengine.js").to_s
   end
 
   test "processing a source file with different content type extensions" do
@@ -782,7 +782,7 @@ class BundledAssetTest < Sprockets::TestCase
   end
 
   test "requiring a file with a relative path" do
-    assert_equal read("asset/project.js.erb") + "\n",
+    assert_equal read("asset/project.js.erb") + "\n\n",
       asset("relative/require.js").to_s
   end
 
@@ -811,14 +811,14 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_directory requires all child files in alphabetical order" do
     assert_equal(
-      "ok(\"b.js.erb\");\n",
+      "ok(\"b.js.erb\");\n\n",
       asset("tree/all_with_require_directory.js").to_s
     )
   end
 
   test "require_directory current directory includes self last" do
     assert_equal(
-      "var Bar;\nvar Foo;\nvar App;\n",
+      "var Bar;\nvar Foo;\n\nvar App;\n",
       asset("tree/directory/application.js").to_s
     )
   end
@@ -826,20 +826,20 @@ class BundledAssetTest < Sprockets::TestCase
   test "require_tree requires all descendant files in alphabetical order" do
     assert_equal(
       asset("tree/all_with_require.js").to_s,
-      asset("tree/all_with_require_tree.js").to_s + "\n\n\n\n\n\n"
+      asset("tree/all_with_require_tree.js").to_s + "\n\n\n\n\n"
     )
   end
 
   test "require_tree without an argument defaults to the current directory" do
     assert_equal(
-      "a();\nb();\n",
+      "a();\nb();\n\n",
       asset("tree/without_argument/require_tree_without_argument.js").to_s
     )
   end
 
   test "require_tree with current directory includes self last" do
     assert_equal(
-      "var Bar;\nvar Foo;\nvar App;\n",
+      "var Bar;\nvar Foo;\n\nvar App;\n",
       asset("tree/tree/application.js").to_s
     )
   end
@@ -864,7 +864,7 @@ class BundledAssetTest < Sprockets::TestCase
 
   test "require_tree respects order of child dependencies" do
     assert_equal(
-      "var c;\nvar b;\nvar a;\n\n",
+      "var c;\n\nvar b;\n\nvar a;\n\n\n",
       asset("tree/require_tree_alpha.js").to_s
     )
   end
@@ -885,8 +885,7 @@ class BundledAssetTest < Sprockets::TestCase
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
     EOS
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
@@ -904,8 +903,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
     EOS
 
     assert_equal [
@@ -996,7 +994,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "stub single dependency" do
-    assert_equal "var jQuery.UI = {};\n\n\n", asset("stub/skip_jquery").to_s
+    assert_equal "\nvar jQuery.UI = {};\n\n\n", asset("stub/skip_jquery").to_s
   end
 
   test "stub dependency tree" do
@@ -1004,31 +1002,31 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "resolves circular link_tree" do
-    assert_equal 'var A;',
+    assert_equal "\nvar A;",
       asset("circle_link_tree/a.js").to_s.chomp
   end
 
   test "resolves circular link_directory" do
-    assert_equal 'var A;',
+    assert_equal "\nvar A;",
       asset("circle_link_directory/a.js").to_s.chomp
   end
 
   test "resolves circular link" do
-    assert_equal 'var A;',
+    assert_equal "\nvar A;",
       asset("circle_link/a.js").to_s.chomp
   end
 
   test "resolves circular depend_on_asset" do
-    assert_equal 'var A;',
+    assert_equal "\nvar A;",
       asset("circle_depend_on_asset/a.js").to_s.chomp
   end
 
   test "resolves circular requires" do
-    assert_equal "var A;\nvar C;\nvar B;\n",
+    assert_equal "\nvar A;\n\nvar C;\n\nvar B;\n",
       asset("circle/a.js").to_s
-    assert_equal "var B;\nvar A;\nvar C;\n",
+    assert_equal "\nvar B;\n\nvar A;\n\nvar C;\n",
       asset("circle/b.js").to_s
-    assert_equal "var C;\nvar B;\nvar A;\n",
+    assert_equal "\nvar C;\n\nvar B;\n\nvar A;\n",
       asset("circle/c.js").to_s
   end
 
@@ -1079,13 +1077,8 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert_equal "\n.foo {}\n\n.bar {}\n\n\n", asset("charset.css").to_s
   end
 
-  test "appends missing semicolons" do
-    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n;\n",
-      asset("semicolons.js").to_s
-  end
-
   test 'keeps code in same line after multi-line comments' do
-    assert_equal "/******/ function foo() {\n}\n;\n",
+    assert_equal "/******/ function foo() {\n};\n",
       asset('multi_line_comment.js').to_s
   end
 

@@ -68,30 +68,6 @@ module Sprockets
       end
     end
 
-    # Internal: Check if string has a trailing semicolon.
-    #
-    # str - String
-    #
-    # Returns true or false.
-    def string_end_with_semicolon?(str)
-      i = str.size - 1
-      while i >= 0
-        c = str[i].ord
-        i -= 1
-
-        # Need to compare against the ordinals because the string can be UTF_8 or UTF_32LE encoded
-        # 0x0A == "\n"
-        # 0x20 == " "
-        # 0x09 == "\t"
-        # 0x3B == ";"
-        unless c == 0x0A || c == 0x20 || c == 0x09
-          return c === 0x3B
-        end
-      end
-
-      true
-    end
-
     # Internal: Accumulate asset source to buffer and append a trailing
     # semicolon if necessary.
     #
@@ -100,18 +76,15 @@ module Sprockets
     #
     # Returns buf String.
     def concat_javascript_sources(buf, source)
-      if source.bytesize > 0
+      unless source.empty?
+        # add newline if buf not end with newline
+        buf << "\n" unless buf.empty? || buf.end_with?("\n")
+
+        # add semicolon after last none whitespace character if that is not semicolon
+        idx = source.rindex(/[^\n\t ]/)
+        source = source.dup.insert(idx + 1, ';') if idx && source[idx] != ';'
+
         buf << source
-
-        # If the source contains non-ASCII characters, indexing on it becomes O(N).
-        # This will lead to O(N^2) performance in string_end_with_semicolon?, so we should use 32 bit encoding to make sure indexing stays O(1)
-        source = source.encode(Encoding::UTF_32LE) unless source.ascii_only?
-
-        if !string_end_with_semicolon?(source)
-          buf << ";\n"
-        elsif source[source.size - 1].ord != 0x0A
-          buf << "\n"
-        end
       end
 
       buf

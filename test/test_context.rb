@@ -11,7 +11,7 @@ class TestContext < Sprockets::TestCase
   test "context environment is cached" do
     instances = @env["environment.js"].to_s.split("\n")
     assert_match "Sprockets::CachedEnvironment", instances[0]
-    assert_equal instances[0], instances[1]
+    assert_equal instances[0], instances[2]
   end
 
   test "source file properties are exposed in context" do
