@@ -49,7 +49,7 @@ module Sprockets
       path.force_encoding(Encoding::UTF_8)
 
       # Hack for parsing Windows "/C:/Users/IEUser" paths
-      if File::ALT_SEPARATOR
+      if File::ALT_SEPARATOR && path[2] == ':'
         path = path[1..-1]
       end
 
