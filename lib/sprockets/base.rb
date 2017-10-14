@@ -100,7 +100,7 @@ module Sprockets
     end
 
     def compress_from_root(uri)
-      URITar.new(uri, self).compress
+      URITar.fast_compress(uri, self.root)
     end
 
     def expand_from_root(uri)
