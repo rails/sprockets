@@ -55,7 +55,7 @@ module Sprockets
           # will confusingly be called again with `paths` set to nil where the asset will be
           # loaded from disk.
           if paths
-            if uri[7..(app_root.length+6)] != app_root
+            if uri.to_s[7..(app_root.length+6)] != app_root
               unless @@gorilla_ass_cache.has_key?(uri)
                 digest = DigestUtils.digest(resolve_dependencies(paths))
                 if uri_from_cache = cache.get(unloaded.digest_key(digest), true)
