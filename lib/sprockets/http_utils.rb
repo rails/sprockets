@@ -56,6 +56,7 @@ module Sprockets
     #
     # Returns Array of matched Strings from available Array or [].
     def find_q_matches(q_values, available, &matcher)
+      return [] if available == []
       matcher ||= lambda { |a, b| a == b }
 
       matches = []
