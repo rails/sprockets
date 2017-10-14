@@ -31,8 +31,7 @@ module Sprockets
     # Returns Asset.
     def load(uri)
       @@gorilla_ass_cache ||= {}
-      # TODO
-      app_root = '/'
+      app_root = Sprockets.check_modified_root
       unloaded = UnloadedAsset.new(uri, self)
       if unloaded.params.key?(:id)
         unless asset = asset_from_cache(unloaded.asset_key)
