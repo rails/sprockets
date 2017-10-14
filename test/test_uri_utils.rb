@@ -45,15 +45,16 @@ class TestURIUtils < MiniTest::Test
 
     parts = split_file_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal ['file', nil, '/usr/local/var/github/app/assets/javascripts/application.js', nil], parts
+    if DOSISH
+      parts = split_file_uri("file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc")
+      assert_equal ['file', nil, 'C:/Documents and Settings/davris/FileSchemeURIs.doc', nil], parts
 
-    parts = split_file_uri("file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc")
-    assert_equal ['file', nil, 'C:/Documents and Settings/davris/FileSchemeURIs.doc', nil], parts
+      parts = split_file_uri("file:///D:/Program%20Files/Viewer/startup.htm")
+      assert_equal ['file', nil, 'D:/Program Files/Viewer/startup.htm', nil], parts
 
-    parts = split_file_uri("file:///D:/Program%20Files/Viewer/startup.htm")
-    assert_equal ['file', nil, 'D:/Program Files/Viewer/startup.htm', nil], parts
-
-    parts = split_file_uri("file:///C:/Program%20Files/Music/Web%20Sys/main.html?REQUEST=RADIO")
-    assert_equal ['file', nil, 'C:/Program Files/Music/Web Sys/main.html', 'REQUEST=RADIO'], parts
+      parts = split_file_uri("file:///C:/Program%20Files/Music/Web%20Sys/main.html?REQUEST=RADIO")
+      assert_equal ['file', nil, 'C:/Program Files/Music/Web Sys/main.html', 'REQUEST=RADIO'], parts
+    end
   end
 
   def test_join_uri_path
@@ -98,8 +99,10 @@ class TestURIUtils < MiniTest::Test
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal ["/usr/local/var/github/app/assets/javascripts/foo bar.js", {}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js")
-    assert_equal ["C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js", {}],
-      parse_asset_uri("file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert_equal ["C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js", {}],
+        parse_asset_uri("file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
   end
 
   def test_parse_query_params
@@ -152,8 +155,10 @@ class TestURIUtils < MiniTest::Test
       parse_file_digest_uri("file-digest:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal "/usr/local/var/github/app/assets/javascripts/foo bar.js",
       parse_file_digest_uri("file-digest:///usr/local/var/github/app/assets/javascripts/foo%20bar.js")
-    assert_equal "C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
-      parse_file_digest_uri("file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert_equal "C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+        parse_file_digest_uri("file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
   end
 
   def test_build_file_digest_uri
