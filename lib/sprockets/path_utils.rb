@@ -12,10 +12,22 @@ module Sprockets
     #
     # Returns nil if the file does not exist.
     def stat(path)
-      if File.exist?(path)
-        File.stat(path.to_s)
+      # TODO
+      root = '/'
+      if (path[0...root.length] != root)
+        @@gorilla_patch_cached_stats ||= {}
+        return @@gorilla_patch_cached_stats[path] if @@gorilla_patch_cached_stats.has_key?(path)
+        @@gorilla_patch_cached_stats[path] = if File.exist?(path)
+                                               File.stat(path)
+                                             else
+                                               nil
+                                             end
       else
-        nil
+        if File.exist?(path)
+          File.stat(path)
+        else
+          nil
+        end
       end
     end
 

@@ -30,6 +30,9 @@ module Sprockets
     #
     # Returns Asset.
     def load(uri)
+      @@gorilla_ass_cache ||= {}
+      # TODO
+      app_root = '/'
       unloaded = UnloadedAsset.new(uri, self)
       if unloaded.params.key?(:id)
         unless asset = asset_from_cache(unloaded.asset_key)
@@ -52,9 +55,19 @@ module Sprockets
           # will confusingly be called again with `paths` set to nil where the asset will be
           # loaded from disk.
           if paths
-            digest = DigestUtils.digest(resolve_dependencies(paths))
-            if uri_from_cache = cache.get(unloaded.digest_key(digest), true)
-              asset_from_cache(UnloadedAsset.new(uri_from_cache, self).asset_key)
+            if uri[7..(app_root.length+6)] != app_root
+              unless @@gorilla_ass_cache.has_key?(uri)
+                digest = DigestUtils.digest(resolve_dependencies(paths))
+                if uri_from_cache = cache.get(unloaded.digest_key(digest), true)
+                  @@gorilla_ass_cache[uri] = asset_from_cache(UnloadedAsset.new(uri_from_cache, self).asset_key)
+                end
+              end
+              @@gorilla_ass_cache[uri]
+            else
+              digest = DigestUtils.digest(resolve_dependencies(paths))
+              if uri_from_cache = cache.get(unloaded.digest_key(digest), true)
+                asset_from_cache(UnloadedAsset.new(uri_from_cache, self).asset_key)
+              end
             end
           else
             load_from_unloaded(unloaded)

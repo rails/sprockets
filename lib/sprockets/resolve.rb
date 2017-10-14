@@ -153,6 +153,13 @@ module Sprockets
       end
 
       def path_matches(load_path, logical_name, logical_basename)
+        @@gorilla_djungle_banana_cache ||= {}
+        # TODO
+        app_dir = '/'
+        is_in_app = load_path[0...app_dir.size] == app_dir
+        if !is_in_app && @@gorilla_djungle_banana_cache.has_key?([load_path, logical_name, logical_basename])
+          return @@gorilla_djungle_banana_cache[[load_path, logical_name, logical_basename]]
+        end
         dirname    = File.dirname(File.join(load_path, logical_name))
         candidates = dirname_matches(dirname, logical_basename)
         deps       = file_digest_dependency_set(dirname)
@@ -170,11 +177,19 @@ module Sprockets
         end
 
         deps.merge(file_digest_dependency_set(dirname))
-
-        return candidates.select { |fn, _| file?(fn) }, deps
+        result = candidates.select { |fn, _| file?(fn) }, deps
+        @@gorilla_djungle_banana_cache[[load_path, logical_name, logical_basename]] = result if !is_in_app
+        result
       end
 
       def dirname_matches(dirname, basename)
+        @@gorilla_djungle_banana_tree_cache ||= {}
+        # TODO
+        app_dir = '/'
+        is_in_app = dirname[0...app_dir.size] == app_dir
+        if !is_in_app && @@gorilla_djungle_banana_tree_cache.has_key?([dirname, basename])
+          return @@gorilla_djungle_banana_cache[[dirname, basename]]
+        end
         candidates = []
         entries = self.entries(dirname)
         entries.each do |entry|
@@ -184,6 +199,7 @@ module Sprockets
             candidates << [File.join(dirname, entry), type]
           end
         end
+        @@gorilla_djungle_banana_tree_cache[[dirname, basename]] = candidates if !is_in_app
         candidates
       end
 
