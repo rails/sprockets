@@ -48,7 +48,7 @@ module Sprockets
       path.force_encoding(Encoding::UTF_8)
 
       # Hack for parsing Windows "file:///C:/Users/IEUser" paths
-      path.gsub!(/^\/([a-zA-Z]:)/, '\1'.freeze) if File::ALT_SEPARATOR
+      path = path[1..-1] if File::ALT_SEPARATOR
 
       [scheme, host, path, query]
     end
