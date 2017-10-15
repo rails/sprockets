@@ -48,7 +48,7 @@ module Sprockets
       path.force_encoding(Encoding::UTF_8)
 
       # Hack for parsing Windows "file:///C:/Users/IEUser" paths
-      path.gsub!(/^\/([a-zA-Z]:)/, '\1'.freeze)
+      path = path[1..-1] if File::ALT_SEPARATOR
 
       [scheme, host, path, query]
     end
@@ -59,7 +59,7 @@ module Sprockets
     def join_file_uri(scheme, host, path, query)
       str = "#{scheme}://"
       str << host if host
-      path = "/#{path}" unless path.start_with?("/")
+      path = "/#{path}" unless path.start_with?('/'.freeze)
       str << URI::Generic::DEFAULT_PARSER.escape(path)
       str << "?#{query}" if query
       str
@@ -72,7 +72,7 @@ module Sprockets
     # Returns true or false.
     def valid_asset_uri?(str)
       # Quick prefix check before attempting a full parse
-      str.start_with?("file://") && parse_asset_uri(str) ? true : false
+      str.start_with?('file://'.freeze) && parse_asset_uri(str) ? true : false
     rescue URI::InvalidURIError
       false
     end
@@ -109,7 +109,7 @@ module Sprockets
     #
     # Returns String URI.
     def build_asset_uri(path, params = {})
-      join_file_uri("file", nil, path, encode_uri_query_params(params))
+      join_file_uri('file', nil, path, encode_uri_query_params(params))
     end
 
     # Internal: Parse file-digest dependency URI.

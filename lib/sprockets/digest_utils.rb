@@ -84,6 +84,39 @@ module Sprockets
     }
     private_constant :ADD_VALUE_TO_DIGEST
 
+    def a_v_t_d(c, v, d)
+      case c
+      when 'String'.freeze then d << v
+      when 'FalseClass'.freeze then d << 'FalseClass'.freeze
+      when 'TrueClass'.freeze then d << 'TrueClass'.freeze
+      when 'NilClass'.freeze then d << 'NilClass'.freeze
+      when 'Symbol'.freeze
+        d << 'Symbol'.freeze
+        d << v.to_s
+      when 'Integer'.freeze
+        d << 'Integer'.freeze
+        d << v.to_s
+      when 'Array'.freeze
+        d << 'Array'.freeze
+        v.each { |element| a_v_t_d(element.class.name, element, d) }
+      when 'Hash'.freeze
+        d << 'Hash'.freeze
+        v.sort.each { |array| a_v_t_d('Array', array, d) }
+      when 'Set'.freeze
+        d << 'Set'.freeze
+        a_v_t_d('Array',v.to_a, d)
+      when 'Encoding'.freeze
+        d << 'Encoding'.freeze
+        d << v.name
+      when 'Fixnum'.freeze
+        d << 'Integer'.freeze
+        d << v.to_s
+      when 'Bignum'.freeze
+        d << 'Integer'.freeze
+        d << v.to_s
+      else raise TypeError, "couldn't digest #{c} - #{c.class} -- #{v}"
+      end
+    end
     # Internal: Generate a hexdigest for a nested JSON serializable object.
     #
     # This is used for generating cache keys, so its pretty important its
@@ -94,8 +127,8 @@ module Sprockets
     # Returns a String digest of the object.
     def digest(obj)
       digest = digest_class.new
-
-      ADD_VALUE_TO_DIGEST[obj.class].call(obj, digest)
+      a_v_t_d(obj.class.name, obj, digest)
+      # ADD_VALUE_TO_DIGEST[obj.class].call(obj, digest)
       digest.digest
     end
 
