@@ -19,6 +19,7 @@ module Sprockets
     class FileStore
       # Internal: Default key limit for store.
       DEFAULT_MAX_SIZE = 25 * 1024 * 1024
+      attr_reader :max_size
 
       # Internal: Default standard error fatal logger.
       #
