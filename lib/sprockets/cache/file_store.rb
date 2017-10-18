@@ -22,6 +22,9 @@ module Sprockets
       DEFAULT_MAX_SIZE = 25 * 1024 * 1024
       EXCLUDED_DIRS = ['.', '..'].freeze
       GITKEEP_FILES = ['.gitkeep', '.keep'].freeze
+
+      attr_reader :max_size
+
       # Internal: Default standard error fatal logger.
       #
       # Returns a Logger.
