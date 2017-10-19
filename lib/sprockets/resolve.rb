@@ -155,7 +155,7 @@ module Sprockets
       def path_matches(load_path, logical_name, logical_basename)
         @@gorilla_djungle_banana_cache ||= {}
         app_root = Sprockets.check_modified_root
-        is_in_app = load_path[0...app_root.size] == app_root
+        is_in_app = load_path.start_with?(app_root.to_s)
         if !is_in_app && @@gorilla_djungle_banana_cache.has_key?([load_path, logical_name, logical_basename])
           return @@gorilla_djungle_banana_cache[[load_path, logical_name, logical_basename]]
         end
