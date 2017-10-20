@@ -13,11 +13,11 @@ module Sprockets
       @root = env.root
       @env  = env
       uri   = uri.to_s
-      if uri.include?("://".freeze)
-        @scheme, _, @path = uri.partition("://".freeze)
-        @scheme << "://".freeze
+      if uri.include?('://'.freeze)
+        @scheme, _, @path = uri.partition('://'.freeze)
+        @scheme << '://'.freeze
       else
-        @scheme = "".freeze
+        @scheme = ''.freeze
         @path   = uri
       end
     end
@@ -33,6 +33,21 @@ module Sprockets
     # Returns String
     def compress
       scheme + compressed_path
+    end
+
+    def self.fast_compress(uri, root)
+      if uri.include?('://'.freeze)
+        scheme, _, path = uri.partition('://'.freeze)
+        scheme << '://'.freeze
+      else
+        scheme = ''.freeze
+        path   = uri
+      end
+      if compressed_path = PathUtils.split_subpath(root, path)
+        scheme + compressed_path
+      else
+        scheme + path
+      end
     end
 
     # Internal: Tells us if we are using an absolute path
@@ -66,7 +81,7 @@ module Sprockets
         else
           # We always want to return an absolute uri,
           # make sure the path starts with a slash.
-          scheme + File.join("/".freeze, root, path)
+          scheme + File.join('/'.freeze, root, path)
         end
       end
     end
@@ -82,8 +97,8 @@ module Sprockets
     # Returns String
     def compressed_path
       # windows
-      if !@root.start_with?("/".freeze) && path.start_with?("/".freeze)
-        consistent_root = "/".freeze + @root
+      if !@root.start_with?('/'.freeze) && path.start_with?('/'.freeze)
+        consistent_root = '/'.freeze + @root
       else
         consistent_root = @root
       end

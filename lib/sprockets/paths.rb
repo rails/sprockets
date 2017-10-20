@@ -23,6 +23,16 @@ module Sprockets
     end
     private :root=
 
+    # requests outside of check_modified_root will be cached
+    def check_modified_root
+      config[:check_modified_root]
+    end
+    def check_modified_root=(path)
+      self.config = hash_reassoc(config, :check_modified_root) do
+        File.expand_path(path)
+      end
+    end
+
     # Returns an `Array` of path `String`s.
     #
     # These paths will be used for asset logical path lookups.

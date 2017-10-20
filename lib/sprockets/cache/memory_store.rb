@@ -12,7 +12,7 @@ module Sprockets
     #
     class MemoryStore
       # Internal: Default key limit for store.
-      DEFAULT_MAX_SIZE = 1000
+      DEFAULT_MAX_SIZE = 10000
 
       # Public: Initialize the cache store.
       #
