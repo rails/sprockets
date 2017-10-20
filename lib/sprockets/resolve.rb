@@ -186,7 +186,7 @@ module Sprockets
         app_root = Sprockets.check_modified_root
         is_in_app = dirname[0...app_root.size] == app_root
         if !is_in_app && @@gorilla_djungle_banana_tree_cache.has_key?([dirname, basename])
-          return @@gorilla_djungle_banana_cache[[dirname, basename]]
+          return @@gorilla_djungle_banana_tree_cache[[dirname, basename]]
         end
         candidates = []
         entries = self.entries(dirname)
