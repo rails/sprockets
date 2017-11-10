@@ -48,7 +48,7 @@ module Sprockets
         "sources"  => map["sources"].map do |source|
           source = URIUtils.split_file_uri(source)[2] if source.start_with? "file://"
           source = PathUtils.join(File.dirname(filename), source) unless PathUtils.absolute_path?(source)
-          _, source = PathUtils.paths_split(load_paths, source) 
+          _, source = PathUtils.paths_split(load_paths, source)
           source = PathUtils.relative_path_from(file, source)
           PathUtils.set_pipeline(source, mime_exts, pipeline_exts, :source)
         end,
