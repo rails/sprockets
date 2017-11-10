@@ -72,13 +72,25 @@ module Sprockets
     # Returns a new source map hash.
     def concat_source_maps(a, b)
       return a || b unless a && b
-      a, b = make_index_map(a), make_index_map(b)
+      a = make_index_map(a)
+      b = make_index_map(b)
 
-      if a["sections"].count == 0 || a["sections"].last["map"]["mappings"].empty?
-        offset = 0
-      else
-        offset = a["sections"].last["map"]["mappings"].count(';') + 
-                 a["sections"].last["offset"]["line"] + 1
+      offset = 0
+      if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
+        # Account for length of last asset
+        # Count the different VLQ sections such as "AACA;" by counting commas
+        # mappings do not always end with a semicolon so we check for that
+        # and increment
+        last_mappings = a["sections"].last["map"]["mappings"]
+        offset += last_mappings.count(';')
+        offset += 1 if last_mappings[-1] != ";"
+
+        last_offset = a["sections"].last["offset"]["line"]
+        if last_offset > 0
+          offset += last_offset
+        else
+          offset += 1
+        end
       end
 
       a["sections"] += b["sections"].map do |section|
