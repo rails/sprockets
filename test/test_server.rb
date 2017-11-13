@@ -333,4 +333,9 @@ class TestServer < Sprockets::TestCase
     delete "/assets/foo.js"
     assert_equal 405, last_response.status
   end
+
+  test "invalid URLs" do
+    get "/assets/%E2%EF%BF%BD%A6.js"
+    assert_equal 400, last_response.status
+  end
 end
