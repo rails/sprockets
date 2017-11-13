@@ -3,62 +3,10 @@ require 'minitest/autorun'
 require 'sprockets/source_map_utils'
 
 class TestSourceMapUtils < MiniTest::Test
-  module SprocketsDeepDup
-    refine Object do
-      # Returns a deep copy of object if it's duplicable. If it's
-      # not duplicable, returns +self+.
-      #
-      #   object = Object.new
-      #   dup    = object.deep_dup
-      #   dup.instance_variable_set(:@a, 1)
-      #
-      #   object.instance_variable_defined?(:@a) # => false
-      #   dup.instance_variable_defined?(:@a)    # => true
-      def deep_dup
-        dup
-      rescue TypeError # TypeError: can't dup Fixnum
-        self
-      end
-    end
 
-    refine Array do
-      # Returns a deep copy of array.
-      #
-      #   array = [1, [2, 3]]
-      #   dup   = array.deep_dup
-      #   dup[1][2] = 4
-      #
-      #   array[1][2] # => nil
-      #   dup[1][2]   # => 4
-      def deep_dup
-        map(&:deep_dup)
-      end
-    end
-
-    refine Hash do
-      # Returns a deep copy of hash.
-      #
-      #   hash = { a: { b: 'b' } }
-      #   dup  = hash.deep_dup
-      #   dup[:a][:c] = 'c'
-      #
-      #   hash[:a][:c] # => nil
-      #   dup[:a][:c]  # => "c"
-      def deep_dup
-        hash = dup
-        each_pair do |key, value|
-          if key.frozen? && ::String === key
-            hash[key] = value.deep_dup
-          else
-            hash.delete(key)
-            hash[key.deep_dup] = value.deep_dup
-          end
-        end
-        hash
-      end
-    end
+  def deep_dup(object)
+    Marshal.load( Marshal.dump(object) )
   end
-  using SprocketsDeepDup
 
   def test_map
     source_map = {
@@ -172,14 +120,14 @@ class TestSourceMapUtils < MiniTest::Test
       ]
     }
 
-    assert_equal map, Sprockets::SourceMapUtils.concat_source_maps(nil, map.deep_dup)
-    assert_equal map, Sprockets::SourceMapUtils.concat_source_maps(map.deep_dup, nil)
+    assert_equal map, Sprockets::SourceMapUtils.concat_source_maps(nil, deep_dup(map))
+    assert_equal map, Sprockets::SourceMapUtils.concat_source_maps(deep_dup(map), nil)
 
-    assert_equal index_map, Sprockets::SourceMapUtils.concat_source_maps(empty_map.deep_dup, map.dup)
+    assert_equal index_map, Sprockets::SourceMapUtils.concat_source_maps(deep_dup(empty_map), map.dup)
 
-    expected_index_map = index_map.deep_dup
+    expected_index_map = deep_dup(index_map)
     expected_index_map["sections"].first["map"].delete("x_sprockets_linecount")
-    assert_equal expected_index_map, Sprockets::SourceMapUtils.concat_source_maps(map.deep_dup, empty_map.deep_dup)
+    assert_equal expected_index_map, Sprockets::SourceMapUtils.concat_source_maps(deep_dup(map), deep_dup(empty_map))
   end
 
   def test_concat_source_maps
@@ -212,7 +160,7 @@ class TestSourceMapUtils < MiniTest::Test
       "x_sprockets_linecount" => 1
     }
 
-    combined = Sprockets::SourceMapUtils.concat_source_maps(abc_map.deep_dup, d_map.deep_dup)
+    combined = Sprockets::SourceMapUtils.concat_source_maps(deep_dup(abc_map), deep_dup(d_map))
     assert_equal [
       { source: 'a.js', generated: [1, 0], original: [1,  0] },
       { source: 'b.js', generated: [2, 0], original: [20, 0] },
@@ -220,7 +168,7 @@ class TestSourceMapUtils < MiniTest::Test
       { source: 'd.js', generated: [4, 0], original: [1,  0] }
     ], Sprockets::SourceMapUtils.decode_source_map(combined)[:mappings]
 
-    combined = Sprockets::SourceMapUtils.concat_source_maps(d_map.deep_dup, abc_map.deep_dup)
+    combined = Sprockets::SourceMapUtils.concat_source_maps(deep_dup(d_map), deep_dup(abc_map))
     assert_equal [
       { source: 'd.js', generated: [1, 0], original: [1,  0] },
       { source: 'a.js', generated: [2, 0], original: [1,  0] },
