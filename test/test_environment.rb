@@ -798,10 +798,12 @@ class TestEnvironment < Sprockets::TestCase
   end
 
   test "disabling default directive preprocessor" do
-    assert processor = @env.preprocessors['application/javascript'][0]
-    assert_kind_of Sprockets::DirectiveProcessor, processor
+    assert processors = @env.preprocessors['application/javascript']
+    processor = processors.detect {|p| p.is_a?(Sprockets::DirectiveProcessor) }
+
+    assert processor
     @env.unregister_preprocessor('application/javascript', processor)
-    assert_equal "// =require \"notfound\"\n;\n", @env["missing_require.js"].to_s
+    assert_equal "// =require \"notfound\";\n", @env["missing_require.js"].to_s
   end
 
   test "disabling processors by class name also disables processors which are instances of that class" do
