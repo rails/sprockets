@@ -1080,8 +1080,14 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
   end
 
   test "appends missing semicolons" do
-    assert_equal "var Bar\n;\n\n(function() {\n  var Foo\n})\n;\n",
-      asset("semicolons.js").to_s
+expected = <<-EOS
+var Bar;
+
+(function() {
+  var Foo
+});
+EOS
+    assert_equal expected, asset("semicolons.js").to_s
   end
 
   test 'keeps code in same line after multi-line comments' do
