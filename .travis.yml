@@ -3,7 +3,7 @@ language: ruby
 cache: bundler
 
 sudo: false
-
+before_script: "unset _JAVA_OPTIONS"
 rvm:
   - 2.2
   - 2.3.4
