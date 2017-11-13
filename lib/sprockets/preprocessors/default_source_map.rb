@@ -25,6 +25,8 @@ module Sprockets
             "sources"   => [PathUtils.set_pipeline(basename, mime_exts, pipeline_exts, :source)],
             "names"     => []
           }
+        else
+          result[:map] = map
         end
         return result
       end
