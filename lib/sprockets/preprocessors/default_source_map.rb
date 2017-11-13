@@ -28,9 +28,11 @@ module Sprockets
         else
           result[:map] = map
         end
+
+        result[:map]["x_sprockets_linecount"] = lines
         return result
       end
-      
+
       private
 
       def default_mappings(lines)

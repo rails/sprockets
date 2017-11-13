@@ -81,16 +81,11 @@ module Sprockets
         # Count the different VLQ sections such as "AACA;" by counting commas
         # mappings do not always end with a semicolon so we check for that
         # and increment
-        last_mappings = a["sections"].last["map"]["mappings"]
-        offset += last_mappings.count(';')
-        offset += 1 if last_mappings[-1] != ";"
+        last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
+        offset += last_line_count
 
         last_offset = a["sections"].last["offset"]["line"]
-        if last_offset > 0
-          offset += last_offset
-        else
-          offset += 1
-        end
+        offset += last_offset
       end
 
       a["sections"] += b["sections"].map do |section|
