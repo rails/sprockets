@@ -885,8 +885,7 @@ class BundledAssetTest < Sprockets::TestCase
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
     EOS
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
@@ -904,8 +903,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png")
-;
+define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
     EOS
 
     assert_equal [
@@ -1091,8 +1089,11 @@ EOS
   end
 
   test 'keeps code in same line after multi-line comments' do
-    assert_equal "/******/ function foo() {\n}\n;\n",
-      asset('multi_line_comment.js').to_s
+expected = <<-EOS
+/******/ function foo() {
+};
+EOS
+    assert_equal expected, asset('multi_line_comment.js').to_s
   end
 
   test "should not fail if home is not set in environment" do
@@ -1140,7 +1141,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application.debug-60cfa762e3139c2580dbfbefd46a5359803225363eaef31efb725e6731ab6849.js",
+    assert_equal "application.debug-dee339ce0ee2dc7cdfa0d36dff3ef946cebe1bd3e414515d40c3cafc49c0a51a.js",
       @asset.digest_path
   end
 
@@ -1149,7 +1150,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "length" do
-    assert_equal 264, @asset.length
+    assert_equal 265, @asset.length
   end
 
   test "charset is UTF-8" do
@@ -1157,7 +1158,26 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "to_s" do
-    assert_equal "var Project = {\n  find: function(id) {\n  }\n};\nvar Users = {\n  find: function(id) {\n  }\n};\n\n\n\ndocument.on('dom:loaded', function() {\n  $('search').focus();\n});\n\n//# sourceMappingURL=application.js-161f7edec524c6e94ab3b89924c4fb96d4552bb83b32d975c074b7fb9a84c454.map", @asset.to_s
+expected = <<-EOS
+var Project = {
+  find: function(id) {
+  }
+};
+var Users = {
+  find: function(id) {
+  }
+};
+
+
+
+document.on('dom:loaded', function() {
+  $('search').focus();
+});
+
+//# sourceMappingURL=application.js-95e519d4e0f0a5c4c7d24787ded990b0d027f7ad30b39f402c4c5e3196a41e8b.map
+EOS
+
+    assert_equal expected, @asset.to_s
   end
 
   def asset(logical_path, options = {})
