@@ -77,10 +77,6 @@ module Sprockets
 
       offset = 0
       if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
-        # Account for length of last asset
-        # Count the different VLQ sections such as "AACA;" by counting commas
-        # mappings do not always end with a semicolon so we check for that
-        # and increment
         last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
         offset += last_line_count
 
