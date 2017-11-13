@@ -16,6 +16,8 @@ class TestSourceMapUtils < MiniTest::Test
       #   dup.instance_variable_defined?(:@a)    # => true
       def deep_dup
         dup
+      rescue TypeError # TypeError: can't dup Fixnum
+        self
       end
     end
 
