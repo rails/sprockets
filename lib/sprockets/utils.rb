@@ -106,7 +106,7 @@ module Sprockets
       source = source.encode(Encoding::UTF_32LE) unless source.ascii_only?
       return buf if string_end_with_semicolon?(source)
 
-      if whitespace = WHITESPACE_ORDINALS[buf[-1].ord]
+      if whitespace = WHITESPACE_ORDINALS[source[-1].ord]
         buf[-1] = ";#{whitespace}"
       else
         buf << ";"
