@@ -98,7 +98,7 @@ module Sprockets
     #
     # Returns buf String.
     def concat_javascript_sources(buf, source)
-      return buf if source.bytesize < 0
+      return buf if source.bytesize <= 0
 
       buf << source
       # If the source contains non-ASCII characters, indexing on it becomes O(N).
