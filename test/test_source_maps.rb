@@ -19,6 +19,32 @@ class TestSourceMaps < Sprockets::TestCase
     map["sections"].reduce([]) { |r, s| r | s["map"]["sources"] }
   end
 
+  # Offset should be the line that the asset starts on minus one
+  test "correct offsets" do
+    asset = @env["multi-require.js"]
+    map   = asset.metadata[:map]
+
+    child         = @env["child.js"]
+    child_lines   = child.to_s.lines.length
+    child_section = map["sections"][0]
+    assert_equal 0, child_section["offset"]["line"]
+
+    coffee_main         = @env["coffee/main.js"]
+    coffee_main_lines   = coffee_main.to_s.lines.length
+    coffee_main_section = map["sections"][1]
+    assert_equal child_lines, coffee_main_section["offset"]["line"]
+
+    sub_a_js          = @env["sub/a.js"]
+    sub_a_js_lines    = sub_a_js.to_s.lines.length
+    sub_a_js_section  = map["sections"][2]
+
+    assert_equal coffee_main_lines + child_lines, sub_a_js_section["offset"]["line"]
+
+    plain_js         = @env["plain.js"]
+    plain_js_section = map["sections"][3]
+    assert_equal sub_a_js_lines + coffee_main_lines + child_lines, plain_js_section["offset"]["line"]
+  end
+
   test "builds a source map for js files" do
     asset = @env['child.js']
     map = asset.metadata[:map]
