@@ -106,6 +106,9 @@ module Sprockets
       source = source.encode(Encoding::UTF_32LE) unless source.ascii_only?
       return buf if string_end_with_semicolon?(source)
 
+      # If the last character in the string was whitespace,
+      # such as a newline, then we want to put the semicolon
+      # before the whitespace. Otherwise append a semicolon.
       if whitespace = WHITESPACE_ORDINALS[source[-1].ord]
         buf[-1] = ";#{whitespace}"
       else
