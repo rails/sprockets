@@ -29,7 +29,7 @@ module Sprockets
       path = PathUtils.relative_path_from(PathUtils.split_subpath(input[:load_path], uri), map.digest_path)
 
       asset.metadata.merge(
-        data: asset.source + (comment % path),
+        data: asset.source + (comment % path) + "\n",
         links: asset.links + [asset.uri, map.uri]
       )
     end

@@ -19,6 +19,32 @@ class TestSourceMaps < Sprockets::TestCase
     map["sections"].reduce([]) { |r, s| r | s["map"]["sources"] }
   end
 
+  # Offset should be the line that the asset starts on minus one
+  test "correct offsets" do
+    asset = @env["multi-require.js"]
+    map   = asset.metadata[:map]
+
+    child         = @env["child.js"]
+    child_lines   = child.to_s.lines.length
+    child_section = map["sections"][0]
+    assert_equal 0, child_section["offset"]["line"]
+
+    coffee_main         = @env["coffee/main.js"]
+    coffee_main_lines   = coffee_main.to_s.lines.length
+    coffee_main_section = map["sections"][1]
+    assert_equal child_lines, coffee_main_section["offset"]["line"]
+
+    sub_a_js          = @env["sub/a.js"]
+    sub_a_js_lines    = sub_a_js.to_s.lines.length
+    sub_a_js_section  = map["sections"][2]
+
+    assert_equal coffee_main_lines + child_lines, sub_a_js_section["offset"]["line"]
+
+    plain_js         = @env["plain.js"]
+    plain_js_section = map["sections"][3]
+    assert_equal sub_a_js_lines + coffee_main_lines + child_lines, plain_js_section["offset"]["line"]
+  end
+
   test "builds a source map for js files" do
     asset = @env['child.js']
     map = asset.metadata[:map]
@@ -37,7 +63,6 @@ class TestSourceMaps < Sprockets::TestCase
 
   test "builds a minified source map" do
     @env.js_compressor = Sprockets::UglifierCompressor.new
-    
 
     asset = @env['application.js']
     map = Sprockets::SourceMapUtils.decode_source_map(asset.metadata[:map])
@@ -103,7 +128,8 @@ class TestSourceMaps < Sprockets::TestCase
             "file"     => "coffee/main.coffee",
             "mappings" => "AACA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAW;;EACX,QAAA,GAAW;;EAGX,IAAgB,QAAhB;IAAA,MAAA,GAAS,CAAC,GAAV;;;EAGA,MAAA,GAAS,SAAC,CAAD;WAAO,CAAA,GAAI;EAAX;;EAGT,IAAA,GAAO,CAAC,CAAD,EAAI,CAAJ,EAAO,CAAP,EAAU,CAAV,EAAa,CAAb;;EAGP,IAAA,GACE;IAAA,IAAA,EAAQ,IAAI,CAAC,IAAb;IACA,MAAA,EAAQ,MADR;IAEA,IAAA,EAAQ,SAAC,CAAD;aAAO,CAAA,GAAI,MAAA,CAAO,CAAP;IAAX,CAFR;;;EAKF,IAAA,GAAO,SAAA;AACL,QAAA;IADM,uBAAQ;WACd,KAAA,CAAM,MAAN,EAAc,OAAd;EADK;;EAIP,IAAsB,8CAAtB;IAAA,KAAA,CAAM,YAAN,EAAA;;;EAGA,KAAA;;AAAS;SAAA,sCAAA;;mBAAA,IAAI,CAAC,IAAL,CAAU,GAAV;AAAA;;;AA1BT",
             "sources"  => ["main.source.coffee"],
-            "names"    => []
+            "names"    => [],
+            "x_sprockets_linecount"=>47
           }
         }
       ]
@@ -157,7 +183,8 @@ class TestSourceMaps < Sprockets::TestCase
             "file"     => "babel/main.es6",
             "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
             "sources"  => ["main.source.es6"],
-            "names"    => []
+            "names"    => [],
+            "x_sprockets_linecount"=>66
           }
         }
       ]
@@ -216,7 +243,8 @@ class TestSourceMaps < Sprockets::TestCase
             "file"     => "sass/main.scss",
             "mappings" => "AACE,MAAG;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI;AAGlB,MAAG;EAAE,OAAO,EAAE,YAAY;AAE1B,KAAE;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI",
             "sources"  => ['main.source.scss'],
-            "names"    => []
+            "names"    => [],
+            "x_sprockets_linecount"=>10
           }
         }
       ]
@@ -260,7 +288,8 @@ class TestSourceMaps < Sprockets::TestCase
               "_imported.source.scss",
               "with-import.source.scss"
             ],
-            "names"    => []
+            "names"    => [],
+            "x_sprockets_linecount"=>5
           }
         }
       ]
@@ -294,7 +323,7 @@ class TestSourceMaps < Sprockets::TestCase
   test "source maps work with index alias" do
     asset = @env.find_asset("foo.js",  pipeline: :debug)
     mapUrl = asset.source.match(/^\/\/# sourceMappingURL=(.*)$/)[1]
-    assert_equal "foo/index.js-501c1acd99a6f760dd3ec4195ab25a3518f689fcf1ffc9be33f28e2f28712826.map", mapUrl
+    assert_equal "foo/index.js-008b5ccb5459dc75d7fd51bf5b1ac79fe54d05157d50586c16e558f33d28e9c4.map", mapUrl
 
     map = JSON.parse(@env.find_asset('foo/index.js.map').source)
     assert_equal [
@@ -323,7 +352,7 @@ class TestSourceMaps < Sprockets::TestCase
           s["offset"]["line"] += 1
         end
       end
-        
+
       File.open(filename, 'a') do |file|
         file.puts "console.log('newline');"
       end
@@ -378,7 +407,8 @@ class TestSasscSourceMaps < Sprockets::TestCase
             "file"     => "sass/main.scss",
             "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI,GACjB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAY,GAAK;;AAPjC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI,GACtB",
             "sources"  => ["main.source.scss"],
-            "names"    => []
+            "names"    => [],
+            "x_sprockets_linecount"=>12
           }
         }
       ]
@@ -422,7 +452,8 @@ class TestSasscSourceMaps < Sprockets::TestCase
               "with-import.source.scss",
               "_imported.source.scss"
             ],
-            "names"    => []
+            "names"    => [],
+            "x_sprockets_linecount"=>5
           }
         }
       ]
