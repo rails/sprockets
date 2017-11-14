@@ -22,6 +22,7 @@ module Sprockets
       DEFAULT_MAX_SIZE = 25 * 1024 * 1024
       EXCLUDED_DIRS = ['.', '..'].freeze
       GITKEEP_FILES = ['.gitkeep', '.keep'].freeze
+      
       # Internal: Default standard error fatal logger.
       #
       # Returns a Logger.
@@ -34,8 +35,10 @@ module Sprockets
       # Public: Initialize the cache store.
       #
       # root     - A String path to a directory to persist cached values to.
-      # max_size - A Integer of the maximum number of keys the store will hold.
-      #            (default: 1000).
+      # max_size - A Integer of the maximum size the store will hold (in bytes).
+      #            (default: 25MB).
+      # logger   - The logger to which some info will be printed.
+      #            (default logger level is FATAL and won't output anything).
       def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
         @root     = root
         @max_size = max_size
