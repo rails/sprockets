@@ -4,6 +4,8 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+- Return a `400 Bad Request` when the path encoding is invalid. [#514]
+
 ## 4.0.0.beta5
 
 - Reduce string allocations

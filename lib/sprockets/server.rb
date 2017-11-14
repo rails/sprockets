@@ -37,6 +37,10 @@ module Sprockets
       # Extract the path from everything after the leading slash
       path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
 
+      unless path.valid_encoding?
+        return bad_request_response(env)
+      end
+
       # Strip fingerprint
       if fingerprint = path_fingerprint(path)
         path = path.sub("-#{fingerprint}", '')
@@ -129,6 +133,15 @@ module Sprockets
       # Returns a 304 Not Modified response tuple
       def not_modified_response(env, etag)
         [ 304, cache_headers(env, etag), [] ]
+      end
+
+      # Returns a 400 Forbidden response tuple
+      def bad_request_response(env)
+        if head_request?(env)
+          [ 400, { "Content-Type" => "text/plain", "Content-Length" => "0" }, [] ]
+        else
+          [ 400, { "Content-Type" => "text/plain", "Content-Length" => "11" }, [ "Bad Request" ] ]
+        end
       end
 
       # Returns a 403 Forbidden response tuple
