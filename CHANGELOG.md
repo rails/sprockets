@@ -4,6 +4,9 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+## 4.0.0.beta6
+
+- Fix source map line offsets [#515]
 - Return a `400 Bad Request` when the path encoding is invalid. [#514]
 
 ## 4.0.0.beta5
