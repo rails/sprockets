@@ -18,7 +18,6 @@ Sprockets can use custom processors, compressors, and directives. This document 
 - [Supporting All Versions of Sprockets in Processors](#supporting-all-versions-of-sprockets-in-processors)
   - [Registering All Versions of Sprockets in Processors](#registering-all-versions-of-sprockets-in-processors)
 
-
 ## Types of Extensions
 
 Sprockets supports a few different ways to extend functionality.
