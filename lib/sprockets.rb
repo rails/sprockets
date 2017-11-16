@@ -102,9 +102,9 @@ module Sprockets
     env.default_processors_for(type, file_type)
   end
 
-  require 'sprockets/source_map_comment_processor'
+  require 'sprockets/add_source_map_comment_to_asset_processor'
   register_pipeline :debug do
-    [SourceMapCommentProcessor]
+    [AddSourceMapCommentToAssetProcessor]
   end
 
   require 'sprockets/directive_processor'
