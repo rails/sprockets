@@ -1,6 +1,6 @@
 # Source Maps
 
-This is mostly a guide for developers of Sprockets, contents may change without notice.
+This is mostly a guide for developers of Sprockets, contents may change without notice. For a base level description see [What is a source map](https://schneems.com/2017/11/14/wtf-is-a-source-map/).
 
 ## What is a source map?
 
