@@ -38,6 +38,8 @@ If you are a framework developer that is using Sprockets, see [Building an Asset
 
 If you are a library developer who is extending the functionality of Sprockets, see [Extending Sprockets](guides/extending_sprockets.md).
 
+If you want to work on Sprockets or better understand how it works read [How Sprockets Works](guides/how_sprockets_works.md)
+
 ## Behavior Overview
 
 You can interact with Sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with Sprockets.
