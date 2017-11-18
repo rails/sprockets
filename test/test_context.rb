@@ -36,6 +36,14 @@ class TestContext < Sprockets::TestCase
     }, YAML.load(json))
   end
 
+  test "asset_data_uri encodes svg using optimized URI-escaping" do
+    assert_equal(<<-CSS, @env["svg-embed.css"].to_s)
+.svg-embed {
+  background: url("data:image/svg+xml;charset=utf-8,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='512' height='512' viewBox='0 0 512 512'%3E%3Cpath d='M224 387.814v124.186l-192-192 192-192v126.912c223.375 5.24 213.794-151.896 156.931-254.912 140.355 151.707 110.55 394.785-156.931 387.814z'%3E%3C/path%3E%3C/svg%3E");
+}
+    CSS
+  end
+
   test "extend context" do
     @env.context_class.class_eval do
       def datauri(path)
