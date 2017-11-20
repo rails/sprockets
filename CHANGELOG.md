@@ -4,6 +4,8 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+- Process `*.jst.eco.erb` files with ERBProcessor
+
 ## 4.0.0.beta6
 
 - Fix source map line offsets [#515]
