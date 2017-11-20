@@ -54,11 +54,11 @@ module Sprockets
       if fingerprint
         if_match = fingerprint
       elsif env['HTTP_IF_MATCH']
-        if_match = env['HTTP_IF_MATCH'][/^"(\w+)"$/, 1]
+        if_match = env['HTTP_IF_MATCH'][/"(\w+)"$/, 1]
       end
 
       if env['HTTP_IF_NONE_MATCH']
-        if_none_match = env['HTTP_IF_NONE_MATCH'][/^"(\w+)"$/, 1]
+        if_none_match = env['HTTP_IF_NONE_MATCH'][/"(\w+)"$/, 1]
       end
 
       # Look up the asset.
