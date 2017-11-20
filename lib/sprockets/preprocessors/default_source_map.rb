@@ -13,7 +13,7 @@ module Sprockets
         map           = input[:metadata][:map]
         filename      = input[:filename]
         load_path     = input[:load_path]
-        lines         = input[:data].lines.count
+        lines         = input[:data].lines.length
         basename      = File.basename(filename)
         mime_exts     = input[:environment].config[:mime_exts]
         pipeline_exts = input[:environment].config[:pipeline_exts]
@@ -25,10 +25,14 @@ module Sprockets
             "sources"   => [PathUtils.set_pipeline(basename, mime_exts, pipeline_exts, :source)],
             "names"     => []
           }
+        else
+          result[:map] = map
         end
+
+        result[:map]["x_sprockets_linecount"] = lines
         return result
       end
-      
+
       private
 
       def default_mappings(lines)

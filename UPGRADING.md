@@ -11,9 +11,11 @@ This upgrading guide touches on:
 
 ## Source Maps
 
+Read more about [What is a source map](https://schneems.com/2017/11/14/wtf-is-a-source-map/).
+
 Source maps are a major new feature. As a word of warning, source maps were half finished when this project was transitioned between maintainers. Please try things and if they don't work correctly open an issue with what you expected to happen, what happened and a small sample app showing the problem.
 
-First, what is a source map? Source maps are a standard way to make debugging concatenated or compiled assets easier. When using Rails and Sprockets in development mode, no assets are concatenated. If your app used 10 JS files, all of them would be served independently. This helped with debugging: you got helpful errors like `Error in file <file.js> on line <number>` that pointed at the problem instead of at an unrelated, minified JS file. 
+First, what is a source map? Source maps are a standard way to make debugging concatenated or compiled assets easier. When using Rails and Sprockets in development mode, no assets are concatenated. If your app used 10 JS files, all of them would be served independently. This helped with debugging: you got helpful errors like `Error in file <file.js> on line <number>` that pointed at the problem instead of at an unrelated, minified JS file.
 
 Source maps eliminate the need to serve these separate files. Instead, a special source map file can be read by the browser to help it understand how to unpack your assets. It "maps" the current, modified asset to its "source" so you can view the source when debugging. This way you can serve assets in development in the exact same way as in production. Fewer surprises is always better.
 

@@ -186,9 +186,10 @@ module Sprockets
       asset
     end
 
-    # Returns a Base64-encoded `data:` URI with the contents of the
-    # asset at the specified path, and marks that path as a dependency
-    # of the current file.
+    # Returns a `data:` URI with the contents of the asset at the specified
+    # path, and marks that path as a dependency of the current file.
+    #
+    # Uses URI encoding for SVG files, base64 encoding for all the other files.
     #
     # Use `asset_data_uri` from ERB with CSS or JavaScript assets:
     #
@@ -198,8 +199,11 @@ module Sprockets
     #
     def asset_data_uri(path)
       asset = depend_on_asset(path)
-      data = EncodingUtils.base64(asset.source)
-      "data:#{asset.content_type};base64,#{Rack::Utils.escape(data)}"
+      if asset.content_type == 'image/svg+xml'
+        svg_asset_data_uri(asset)
+      else
+        base64_asset_data_uri(asset)
+      end
     end
 
     # Expands logical path to full url to asset.
@@ -250,6 +254,51 @@ Extend your environment context with a custom method.
     # Expand logical stylesheet asset path.
     def stylesheet_path(path)
       asset_path(path, type: :stylesheet)
+    end
+
+    protected
+
+    # Returns a URI-encoded data URI (always "-quoted).
+    def svg_asset_data_uri(asset)
+      svg = asset.source.dup
+      optimize_svg_for_uri_escaping!(svg)
+      data = Rack::Utils.escape(svg)
+      optimize_quoted_uri_escapes!(data)
+      "\"data:#{asset.content_type};charset=utf-8,#{data}\""
+    end
+
+    # Returns a Base64-encoded data URI.
+    def base64_asset_data_uri(asset)
+      data = Rack::Utils.escape(EncodingUtils.base64(asset.source))
+      "data:#{asset.content_type};base64,#{data}"
+    end
+
+    # Optimizes an SVG for being URI-escaped.
+    #
+    # This method only performs these basic but crucial optimizations:
+    # * Replaces " with ', because ' does not need escaping.
+    # * Removes comments, meta, doctype, and newlines.
+    # * Collapses whitespace.
+    def optimize_svg_for_uri_escaping!(svg)
+      # Remove comments, xml meta, and doctype
+      svg.gsub!(/<!--.*?-->|<\?.*?\?>|<!.*?>/m, '')
+      # Replace consecutive whitespace and newlines with a space
+      svg.gsub!(/\s+/, ' ')
+      # Collapse inter-tag whitespace
+      svg.gsub!('> <', '><')
+      # Replace " with '
+      svg.gsub!(/([\w:])="(.*?)"/, "\\1='\\2'")
+      svg.strip!
+    end
+
+    # Un-escapes characters in the given URI-escaped string that do not need
+    # escaping in "-quoted data URIs.
+    def optimize_quoted_uri_escapes!(escaped)
+      escaped.gsub!('%3D', '=')
+      escaped.gsub!('%3A', ':')
+      escaped.gsub!('%2F', '/')
+      escaped.gsub!('%27', "'")
+      escaped.tr!('+', ' ')
     end
   end
 end

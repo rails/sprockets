@@ -102,14 +102,10 @@ module Sprockets
     env.default_processors_for(type, file_type)
   end
 
-  require 'sprockets/source_map_comment_processor'
+  require 'sprockets/add_source_map_comment_to_asset_processor'
   register_pipeline :debug do
-    [SourceMapCommentProcessor]
+    [AddSourceMapCommentToAssetProcessor]
   end
-
-  require 'sprockets/preprocessors/default_source_map'
-  register_preprocessor 'text/css', Preprocessors::DefaultSourceMap.new
-  register_preprocessor 'application/javascript', Preprocessors::DefaultSourceMap.new
 
   require 'sprockets/directive_processor'
   register_preprocessor 'text/css', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
@@ -123,7 +119,6 @@ module Sprockets
   register_bundle_metadata_reducer 'application/javascript', :data, proc { String.new("") }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
   register_bundle_metadata_reducer '*/*', :sources, proc { [] }, :+
-  register_bundle_metadata_reducer '*/*', :map, proc { |input| { "version" => 3, "file" => PathUtils.split_subpath(input[:load_path], input[:filename]), "sections" => [] } }, SourceMapUtils.method(:concat_source_maps)
 
   require 'sprockets/closure_compressor'
   require 'sprockets/sass_compressor'
@@ -220,4 +215,11 @@ module Sprockets
 
   depend_on 'environment-version'
   depend_on 'environment-paths'
+
+  require 'sprockets/preprocessors/default_source_map'
+  register_preprocessor 'text/css',               Preprocessors::DefaultSourceMap.new
+  register_preprocessor 'application/javascript', Preprocessors::DefaultSourceMap.new
+
+  register_bundle_metadata_reducer 'text/css',               :map, proc { |input| { "version" => 3, "file" => PathUtils.split_subpath(input[:load_path], input[:filename]), "sections" => [] } }, SourceMapUtils.method(:concat_source_maps)
+  register_bundle_metadata_reducer 'application/javascript', :map, proc { |input| { "version" => 3, "file" => PathUtils.split_subpath(input[:load_path], input[:filename]), "sections" => [] } }, SourceMapUtils.method(:concat_source_maps)
 end

@@ -48,7 +48,7 @@ module Sprockets
         "sources"  => map["sources"].map do |source|
           source = URIUtils.split_file_uri(source)[2] if source.start_with? "file://"
           source = PathUtils.join(File.dirname(filename), source) unless PathUtils.absolute_path?(source)
-          _, source = PathUtils.paths_split(load_paths, source) 
+          _, source = PathUtils.paths_split(load_paths, source)
           source = PathUtils.relative_path_from(file, source)
           PathUtils.set_pipeline(source, mime_exts, pipeline_exts, :source)
         end,
@@ -72,13 +72,16 @@ module Sprockets
     # Returns a new source map hash.
     def concat_source_maps(a, b)
       return a || b unless a && b
-      a, b = make_index_map(a), make_index_map(b)
+      a = make_index_map(a)
+      b = make_index_map(b)
 
-      if a["sections"].count == 0 || a["sections"].last["map"]["mappings"].empty?
-        offset = 0
-      else
-        offset = a["sections"].last["map"]["mappings"].count(';') + 
-                 a["sections"].last["offset"]["line"] + 1
+      offset = 0
+      if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
+        last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
+        offset += last_line_count
+
+        last_offset = a["sections"].last["offset"]["line"]
+        offset += last_offset
       end
 
       a["sections"] += b["sections"].map do |section|
