@@ -72,10 +72,14 @@ module Sprockets
   register_mime_type 'audio/aiff', extensions: ['.aiff']
   register_mime_type 'audio/mpeg', extensions: ['.mp3', '.mp2', '.m2a', '.m3a']
   register_mime_type 'application/ogg', extensions: ['.ogx']
+  register_mime_type 'audio/ogg', extensions: ['.ogg', '.oga']
   register_mime_type 'audio/midi', extensions: ['.midi', '.mid']
   register_mime_type 'video/avi', extensions: ['.avi']
   register_mime_type 'audio/wave', extensions: ['.wav', '.wave']
   register_mime_type 'video/mp4', extensions: ['.mp4', '.m4v']
+  register_mime_type 'audio/aac', extensions: ['.aac']
+  register_mime_type 'audio/mp4', extensions: ['.m4a']
+  register_mime_type 'audio/flac', extensions: ['.flac']
 
   # Common font types
   register_mime_type 'application/vnd.ms-fontobject', extensions: ['.eot']
