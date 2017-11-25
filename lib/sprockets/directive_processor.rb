@@ -371,9 +371,9 @@ module Sprockets
       def expand_relative_dirname(directive, path)
         if @environment.relative_path?(path)
           path = File.expand_path(path, @dirname)
-          stat = @environment.stat(path)
+          mdata = @environment.meta_data(path)
 
-          if stat && stat.directory?
+          if mdata && mdata[:directory]
             path
           else
             raise ArgumentError, "#{directive} argument must be a directory"
