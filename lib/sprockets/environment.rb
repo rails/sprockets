@@ -13,7 +13,15 @@ module Sprockets
       initialize_configuration(Sprockets)
       self.root = root
       self.cache = Cache::MemoryStore.new
+      self.check_modified_paths = [root.to_s]
       yield self if block_given?
+      @@start_time_i ||= Time.now.to_i
+    end
+
+    # Sprockents environment, application start up time
+    # needed to check if meta_data cache about static files should be updated
+    def self.start_time_i
+      @@start_time_i
     end
 
     # Returns a cached version of the environment.
