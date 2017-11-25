@@ -17,9 +17,9 @@ module Sprockets
     #
     #   ActiveSupport::Cache::FileStore
     #
-    class FileStore
+    class KFileStore
       # Internal: Default key limit for store.
-      DEFAULT_MAX_SIZE = 25 * 1024 * 1024
+      DEFAULT_MAX_SIZE = 25000
 
       # Internal: Default standard error fatal logger.
       #
@@ -36,11 +36,15 @@ module Sprockets
       # max_size - A Integer of the maximum number of keys the store will hold.
       #            (default: 1000).
       def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
+        start_time = Time.now
         @root = root
         @max_size = max_size
         @gc_size = max_size * 0.75
-        @mem_store = Sprockets::Cache::MemoryStore.new(max_size / 1000)
+        @mem_store = Sprockets::Cache::MemoryStore.new(max_size)
         @logger = logger
+        @size = find_caches.size
+        load_time = Time.now.to_f - start_time.to_f
+        puts "Sprockets KFile Cache - max entries: #{@max_size}, current entries: #{@size}, init time: #{(load_time * 1000).to_i}ms"
       end
 
       # Public: Retrieve value from cache.
@@ -111,13 +115,13 @@ module Sprockets
         # Write data
         PathUtils.atomic_write(path) do |f|
           f.write(raw)
-          @size = size + f.size unless exists
+         @size += 1 unless exists
         end
 
         @mem_store.set(key, value)
 
         # GC if necessary
-        gc! if size > @max_size
+        gc! if @size > @max_size
 
         value
       end
@@ -159,14 +163,6 @@ module Sprockets
         }.sort_by { |_, stat| stat.mtime.to_i }
       end
 
-      def size
-        @size ||= compute_size(find_caches)
-      end
-
-      def compute_size(caches)
-        caches.inject(0) { |sum, (_, stat)| sum + stat.size }
-      end
-
       def safe_mtime(fn)
         File.mtime(fn)
       rescue Errno::ENOENT
@@ -192,18 +188,18 @@ module Sprockets
         start_time = Time.now
 
         caches = find_caches
-        size = compute_size(caches)
+        size = caches.size
 
         delete_caches, keep_caches = caches.partition { |_, stat|
           deleted = size > @gc_size
-          size -= stat.size
+          size -= 1
           deleted
         }
 
         return if delete_caches.empty?
 
         FileUtils.remove(delete_caches.map(&:first), force: true)
-        @size = compute_size(keep_caches)
+        @size = keep_caches.size
 
         @logger.warn do
           secs = Time.now.to_f - start_time.to_f
