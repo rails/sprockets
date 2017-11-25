@@ -109,9 +109,9 @@ module Sprockets
     # source file.
     def depend_on(path)
       path = path.to_s if path.is_a?(Pathname)
-
-      if environment.absolute_path?(path) && environment.stat(path)
-        @dependencies << environment.build_file_digest_uri(path)
+      mdata = environment.meta_data(path)
+      if mdata && mdata[:file] && environment.absolute_path?(path)
+        @dependencies << mdata[:file_digest_uri]
       else
         resolve(path, compat: false)
       end
