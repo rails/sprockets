@@ -34,6 +34,12 @@ module Sprockets
       @cache = Cache.new(cache, logger)
     end
 
+    # Get and set paths where file meta information should only be partially cached
+    attr_reader :check_modified_paths
+    def check_modified_paths=(array_of_paths)
+      @check_modified_paths = array_of_paths.map {|path| path.to_s }
+    end
+
     # Return an `Cached`. Must be implemented by the subclass.
     def cached
       raise NotImplementedError
@@ -46,17 +52,13 @@ module Sprockets
     #
     # Returns a String digest or nil.
     def file_digest(path)
-      if stat = self.stat(path)
-        # Caveat: Digests are cached by the path's current mtime. Its possible
-        # for a files contents to have changed and its mtime to have been
-        # negligently reset thus appearing as if the file hasn't changed on
-        # disk. Also, the mtime is only read to the nearest second. It's
-        # also possible the file was updated more than once in a given second.
-        key = UnloadedAsset.new(path, self).file_digest_key(stat.mtime.to_i)
-        cache.fetch(key) do
-          self.stat_digest(path, stat)
-        end
-      end
+      # Caveat: Digests are cached by the path's current mtime. Its possible
+      # for a files contents to have changed and its mtime to have been
+      # negligently reset thus appearing as if the file hasn't changed on
+      # disk. Also, the mtime is only read to the nearest second. It's
+      # also possible the file was updated more than once in a given second.
+      mdata = self.meta_data(path)
+      mdata[:stat_digest] unless mdata.nil?
     end
 
     # Find asset by logical path or expanded path.
