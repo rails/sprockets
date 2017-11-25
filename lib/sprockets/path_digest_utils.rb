@@ -24,6 +24,21 @@ module Sprockets
       end
     end
 
+    # this method is needed for meta_data caching, stat_digest is cached
+    # otherwise, if self.entries gets called, like in stat_digest, it may call back to
+    # meta_data and loop until stack limit is reached
+    def stat_digest_dir(path, stat, dentries = [])
+      if stat.directory?
+        # If its a directive, digest the list of filenames
+        digest_class.digest(dentries.join(','))
+      elsif stat.file?
+        # If its a file, digest the contents
+        digest_class.file(path.to_s).digest
+      else
+        raise TypeError, "stat was not a directory or file: #{stat.ftype}"
+      end
+    end
+
     # Internal: Compute digest for path.
     #
     # path - String filename or directory path.

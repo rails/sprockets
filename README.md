@@ -5,6 +5,26 @@ It features declarative dependency management for JavaScript and CSS
 assets, as well as a powerful preprocessor pipeline that allows you to
 write assets in languages like CoffeeScript, Sass and SCSS.
 
+## For improved performance with rails and opal, ruby-hperloop or npm projects in development environment
+
+### Load paths
+The larger the amount of sprockets load paths, the slower sprockets will become. This effect is minimized by caching information 
+about files in the load paths, but that is only possible for static load paths, where files during application runtime are not expected to change.
+Load paths where files do change, like for example app/assets or app/hyperloop, should be kept at a minimum for good performance.
+It is the total amount of directories within these load paths, that affects performance, as sprockets currently will look in to each of them
+to find some asset, until it has found it. These load paths, to check for modified files during app development, can be configured.
+
+In your config/development.rb:
+```ruby
+  config.assets.configure do |env|
+    env.check_modified_paths = [Rails.root.join('app', 'assets'), Rails.root.join('app', 'hyperloop')]
+  end
+```
+This must be an array of absolute paths. Default is \[Sprockets::Environment.root\], which in rails defaults to Rails.root.
+
+### Cache
+Sprockets usually will look up a path in the filesystem first and this way cause a lot of filesystem traffic that will hurt performance. This fork caches additional information, to enable sprockets to check the cache first and so determine if it actually has to look up the path in the filesystem. This dramatically reduces filesystem accesses and increases performance. As the cache store has to work harder, it makes no sense to use the FileStore in this case, thus MemoryStore, DalliStore or RawDalliStore are recommended.
+In addition this fork eliminates the limited 1000 key LRU MemoryStore that got attached on every other store and delegates complete cache handling to the stores themself, who can then choose a better performing strategy (here the simple IntCache). 
 
 ## Installation
 

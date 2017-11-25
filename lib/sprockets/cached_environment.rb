@@ -15,9 +15,11 @@ module Sprockets
       initialize_configuration(environment)
 
       @cache   = environment.cache
+      @check_modified_paths = environment.check_modified_paths
       @stats   = Hash.new { |h, k| h[k] = _stat(k) }
       @entries = Hash.new { |h, k| h[k] = _entries(k) }
       @uris    = Hash.new { |h, k| h[k] = _load(k) }
+      @meta_datas = Hash.new { |h,k| h[k] = _meta_data(k) }
 
       @processor_cache_keys  = Hash.new { |h, k| h[k] = _processor_cache_key(k) }
       @resolved_dependencies = Hash.new { |h, k| h[k] = _resolve_dependency(k) }
@@ -59,11 +61,17 @@ module Sprockets
       @resolved_dependencies[str]
     end
 
+    # Internal: Cache Environment#load
+    alias_method :_meta_data, :meta_data
+    def meta_data(path)
+      @meta_datas[path]
+    end
+
     private
-      # Cache is immutable, any methods that try to change the runtime config
-      # should bomb.
-      def config=(config)
-        raise RuntimeError, "can't modify immutable cached environment"
-      end
+    # Cache is immutable, any methods that try to change the runtime config
+    # should bomb.
+    def config=(config)
+      raise RuntimeError, "can't modify immutable cached environment"
+    end
   end
 end

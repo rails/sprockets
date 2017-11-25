@@ -128,6 +128,7 @@ module Sprockets
 
         processors_dep_uri = build_processors_uri(type, file_type, engine_extnames, pipeline)
         dependencies = config[:dependencies] + [processors_dep_uri]
+        mdata = self.meta_data(unloaded.filename)
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
@@ -148,10 +149,10 @@ module Sprockets
           metadata[:digest]  = digest(source)
           metadata[:length]  = source.bytesize
         else
-          dependencies << build_file_digest_uri(unloaded.filename)
+          dependencies << mdata[:file_digest_uri]
           metadata = {
-            digest: file_digest(unloaded.filename),
-            length: self.stat(unloaded.filename).size,
+            digest: mdata ? mdata[:stat_digest] : nil,
+            length: mdata ? mdata[:size] : nil,
             dependencies: dependencies
           }
         end
@@ -173,14 +174,15 @@ module Sprockets
 
         # Deprecated: Avoid tracking Asset mtime
         asset[:mtime] = metadata[:dependencies].map { |u|
+
           if u.start_with?("file-digest:")
-            s = self.stat(parse_file_digest_uri(u))
-            s ? s.mtime.to_i : nil
+            dmdata = self.meta_data(parse_file_digest_uri(u))
+            dmdata && dmdata[:mtime] ? dmdata[:mtime].to_i : nil
           else
             nil
           end
         }.compact.max
-        asset[:mtime] ||= self.stat(unloaded.filename).mtime.to_i
+        asset[:mtime] ||= mdata[:mtime].to_i
 
         store_asset(asset, unloaded)
         asset
@@ -255,7 +257,7 @@ module Sprockets
       #           "processors:type=text/css&file_type=text/css&pipeline=self",
       #           "file-digest:///Full/path/app/assets/stylesheets"]
       #
-      # Returns back array of things that the given uri dpends on
+      # Returns back array of things that the given uri depends on
       # For example the environment version, if you're using a different version of sprockets
       # then the dependencies should be different, this is used only for generating cache key
       # for example the "environment-version" may be resolved to "environment-1.0-3.2.0" for

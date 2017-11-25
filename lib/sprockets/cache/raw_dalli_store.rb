@@ -1,26 +1,39 @@
+require 'dalli'
+require 'logger'
+require 'sprockets/encoding_utils'
+require 'sprockets/path_utils'
+
 module Sprockets
   class Cache
-    # Public: Basic in memory LRU cache.
+    # Public: A file system cache store that automatically cleans up old keys.
     #
     # Assign the instance to the Environment#cache.
     #
-    #     environment.cache = Sprockets::Cache::MemoryStore.new(1000)
+    #     environment.cache = Sprockets::Cache::FileStore.new("/tmp")
     #
     # See Also
     #
-    #   ActiveSupport::Cache::MemoryStore
+    #   ActiveSupport::Cache::FileStore
     #
-    class MemoryStore
-      # Internal: Default key limit for store.
-      DEFAULT_MAX_SIZE = 10000
+    class RawDalliStore
+      # Internal: Default standard error fatal logger.
+      #
+      # Returns a Logger.
+      def self.default_logger
+        logger = Logger.new($stderr)
+        logger.level = Logger::FATAL
+        logger
+      end
 
       # Public: Initialize the cache store.
       #
+      # root     - A String path to a directory to persist cached values to.
       # max_size - A Integer of the maximum number of keys the store will hold.
       #            (default: 1000).
-      def initialize(max_size = DEFAULT_MAX_SIZE)
-        @max_size = max_size
-        @cache = {}
+      def initialize(host = 'localhost', port = '11211', logger = self.class.default_logger)
+        @logger = logger
+        @dalli = Dalli::Client.new("#{host}:#{port}", value_max_bytes: 20 * 1024 * 1024)
+        puts "Sprockets Raw Dalli Cache"
       end
 
       # Public: Retrieve value from cache.
@@ -31,13 +44,7 @@ module Sprockets
       #
       # Returns Object or nil or the value is not set.
       def get(key)
-        exists = true
-        value = @cache.delete(key) { exists = false }
-        if exists
-          @cache[key] = value
-        else
-          nil
-        end
+        @dalli.get(key)
       end
 
       # Public: Set a key and value in the cache.
@@ -49,9 +56,7 @@ module Sprockets
       #
       # Returns Object value.
       def set(key, value)
-        @cache.delete(key)
-        @cache[key] = value
-        @cache.shift if @cache.size > @max_size
+        @dalli.set(key, value)
         value
       end
 
@@ -59,7 +64,7 @@ module Sprockets
       #
       # Returns String.
       def inspect
-        "#<#{self.class} size=#{@cache.size}/#{@max_size}>"
+        "#<#{self.class}>"
       end
     end
   end
