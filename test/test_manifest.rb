@@ -16,7 +16,7 @@ class TestManifest < Sprockets::TestCase
 
   def teardown
     FileUtils.remove_entry_secure(@dir) if File.exist?(@dir)
-    assert Dir["#{@dir}/*"].empty?
+    assert Dir["#{@dir}/*"].empty?, "Expected #{Dir["#{@dir}/*"]} to be empty but it was not"
   end
 
   test 'double rendering with link_directory raises an error' do
