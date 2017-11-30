@@ -16,6 +16,18 @@ require 'sprockets/source_map_utils'
 require 'sprockets/uri_tar'
 
 module Sprockets
+
+  class DoubleLinkError < Sprockets::Error
+    def initialize(parent_filename:, logical_path:, last_filename:, filename:)
+      message = String.new
+      message << "Multiple files with the same output path cannot be linked (#{logical_path.inspect})\n"
+      message << "In #{parent_filename.inspect} these files were linked:\n"
+      message << "  - #{last_filename}\n"
+      message << "  - #{filename}\n"
+      super(message)
+    end
+  end
+
   # `Base` class for `Environment` and `CachedEnvironment`.
   class Base
     include PathUtils, PathDependencyUtils, PathDigestUtils, DigestUtils, SourceMapUtils
@@ -73,14 +85,22 @@ module Sprockets
     def find_all_linked_assets(*args)
       return to_enum(__method__, *args) unless block_given?
 
-      asset = find_asset(*args)
+      parent_asset = asset = find_asset(*args)
       return unless asset
 
       yield asset
       stack = asset.links.to_a
+      linked_paths = {}
 
       while uri = stack.shift
         yield asset = load(uri)
+        if linked_paths[asset.logical_path]
+          raise DoubleLinkError.new(parent_filename: parent_asset.filename,
+                                    last_filename:   linked_paths[asset.logical_path],
+                                    logical_path:    asset.logical_path,
+                                    filename:        asset.filename )
+        end
+        linked_paths[asset.logical_path] = asset.filename
         stack = asset.links.to_a + stack
       end
 

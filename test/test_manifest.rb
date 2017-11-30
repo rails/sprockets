@@ -19,6 +19,17 @@ class TestManifest < Sprockets::TestCase
     assert Dir["#{@dir}/*"].empty?
   end
 
+  test 'double rendering with link_directory raises an error' do
+    config_manifest = 'link_directory_manifest.js'
+
+    @env.append_path(fixture_path('double'))
+    output_manifest_json = File.join(@dir, "manifest.json")
+    manifest = Sprockets::Manifest.new(@env, @dir, output_manifest_json)
+    assert_raises(Sprockets::DoubleLinkError) do
+      manifest.compile(config_manifest)
+    end
+  end
+
   test "specify full manifest filename" do
     directory = Dir::tmpdir
     filename  = File.join(directory, 'manifest.json')
