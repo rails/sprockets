@@ -612,7 +612,7 @@ In production you should generate your assets to a directory on disk and serve t
 On Rails you can generate assets by running:
 
 ```term
-$ RAIlS_ENV=production rake assets:precompile
+$ RAILS_ENV=production rake assets:precompile
 ```
 
 In development Rails will serve assets from `Sprockets::Server`.
