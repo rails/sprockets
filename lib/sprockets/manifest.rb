@@ -165,7 +165,12 @@ module Sprockets
       filenames            = []
       concurrent_exporters = []
 
+      assets_to_export = Concurrent::Array.new
       find(*args) do |asset|
+        assets_to_export << asset
+      end
+
+      assets_to_export.each do |asset|
         mtime = Time.now.iso8601
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,

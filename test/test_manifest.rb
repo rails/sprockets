@@ -28,7 +28,6 @@ class TestManifest < Sprockets::TestCase
     assert_raises(Sprockets::DoubleLinkError) do
       manifest.compile(config_manifest)
     end
-    FileUtils.remove_entry_secure("#{@dir}/stylesheets") if File.exist?("#{@dir}/stylesheets")
   end
 
   test "specify full manifest filename" do
