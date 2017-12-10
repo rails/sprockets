@@ -40,6 +40,8 @@ Sprockets has some key components that are:
 
 The processors are the most important components in Sprockets. All the functionality inside of Sprockets is implemented by a processor. This is similar to how Railties is also a rails engine. The interface for a processor is any `call`-able object that accepts an input hash and returns a hash as metadata.
 
+Example of valid sprockets processor
+
 ```ruby
 -> (input) {
   data = input[:data].gsub(";", "")
@@ -47,9 +49,7 @@ The processors are the most important components in Sprockets. All the functiona
 }
 ```
 
-Example of valid sprockets processor
-
-So this will be called, it's actually a valid Sprockets processor. It's doing something that is easy to understand. Just remove semicolons from the end of your JavaScript files, because we don't need semicolons in JavaScript code. So, it's taken an input that has some special keys that I'm going to talk about later and it has to return another hash that has data as a result of the processor running.
+So this will be called, it's actually a valid Sprockets processor. It's doing something that is easy to understand. Just remove semicolons from the end of your JavaScript files, because we don't need semicolons in JavaScript code. So, it's taken an input that has some special keys that I'm going to talk about later and it has to return another hash that has `data` as a result of the processor running.
 
 The input hash has these keys by default:
 - `:data` - String assets contents  
@@ -63,25 +63,24 @@ The input hash has these keys by default:
 - `:metadata` - Hash of processor metadata
 
 The return hash has these keys:
-- `:data` - Replaces the assets `input[:data]` to the next processor in the chain
-- `:required` - A Set of String asset URIs that `Bundle` processor should concatenate  together
+- `:data` - Replaces the assets `input[:data]` for the next processor in the chain
+- `:required` - A Set of String asset URIs that `Bundle` processor should concatenate together
 - `:stubbed` - A Set of String asset URIs that will be omitted from the `:required` set
 - `:links` - A Set of String asset URIs that should be compiled along with the assets
 - `:dependencies` - A Set of String cache URIs that should be monitored for caching
 - `:map` - An Array of source maps for the assets
 - `:charset` - The mime charset for an asset
 
-The `:required` is really interesting(as we will see later), each dependency from your asset files will be stored in this field.
+ The `:required` is really interesting(as we will see later), each dependency from your asset files will be stored in this field.
 
 There are a lot of interesting built-in processors as:
 
 - BabelProcessor
 - CoffeScriptProcessor
 - SassProcessor
-- BundlerProcessor
-- etc...
+- BundlerProcessor etc...
 
-BundlerProcessor is used to run concatenated assets rather than individual files.
+ BundlerProcessor is used to run concatenated assets rather than individual files.
 
 To register a processor in Sprockets, we use this syntax.
 
@@ -90,17 +89,14 @@ register_bundle_processor 'application/javascript', Bundle
 register_bundle_processor 'text/css', Bundle
 ```
 
- We are telling that for any `application/javascript` mime types file, we are using the `Bundle` processor to take care of these files and concatenating them in the same file. So the `Bundle` processor takes a single file asset and prepends all the `required` URIs in the contents.
+ We are telling that for any `application/javascript` mime type file, we are using the `Bundle` processor to take care of these files and concatenating them in the same file. So the `Bundle` processor takes a single file asset and prepends all the `required` URIs in the contents.
  
 ### Transformers
 
-A transformer is a processor that converts a file from one format to another format.
-So, one of the examples is the CoffeeScript transformer that gets CoffeeScript file and returns a JavaScript file.
+A transformer is a processor that converts a file from one format to another format. So, one of the examples is the CoffeeScript transformer that gets CoffeeScript file and returns a JavaScript file.
 
 ```ruby
-register_transformer 'text/coffescript',
-                     'application/javascript',
-                     CoffeScriptProcessor
+register_transformer 'text/coffescript', 'application/javascript', CoffeScriptProcessor
 ```
 
 The permutation of these processors are really simple.
@@ -130,10 +126,10 @@ So, it's a callable object that takes an input and it actually goes through the 
 Compressors are a special kind of bundle processors because it runs on the concatenated file. You register compressor using following syntax:
 
 ```ruby
-  register_compresor ‘application/javascript’, :uglify, UglifierCompressor
+  register_compressor ‘application/javascript’, :uglify, UglifierCompressor
 ```
 
-The main difference between the compressor and the bundle processor is compressors are used differently and you can have only compressor by mime types. So this Sprockets has a special syntax to enable compressors. You can, for instance, compress any JavaScript file using this syntax.
+The main difference between the compressor and the bundle processor is compressors are used differently and you can have only one compressor per mime types. So this Sprockets has a special syntax to enable compressors. You can, for instance, compress any JavaScript file using this syntax.
 
 ```ruby
   env.js_compressor = :uglify
@@ -150,10 +146,10 @@ I'm sure you all have seen directives before because they are just special comme
   //= require_tree .
 ```
 
-So it's telling us that to generate this `application.js` file, we have to require these three files, and also all the files inside the same directory of the application js. So, another special kind of directive that we have in Sprockets three (version 3) were the precompile lists that you are telling Sprockets to actually precompile these two files in production.
+So it's telling us that to generate this `application.js` file, we have to require these three files, and also all the files inside the same directory of the `application.js`. So, another special kind of directive that we have in Sprockets version 3 were the precompile lists that you are telling Sprockets to actually precompile these two files in production.
 
 ```ruby
-Rails.application.config.assets.precompile << %w(application.js application.css)
+  Rails.application.config.assets.precompile << %w(application.js application.css)
 ```
 
 Sprockets has special support to `Procs` on the precompilation, so before, in Sprockets three, we had this code that is telling us to precompile all the known JavaScript and stylesheet files in the app directory.
@@ -167,7 +163,7 @@ End
 config.assets.precompile = [LOOSE_APP_ASSETS, /(?:\/|\\|\A)application\.(.css|js)$/]
 ```
 
- As you can see, this code is not easy to understand, so in Sprockets four, we have a new syntax for that.
+ As you can see, this code is not easy to understand, so in Sprockets four (version 4), we have a new syntax for that.
 
 ```js
 // app/assets/config/manifest.js
@@ -202,8 +198,7 @@ This object is really simple, it actually only points the assets path the the fi
 
 ```ruby
 javascript_include_tag ‘application’
-#<script
-#src=”/assets/application.debug-ddbd4593b22ac054471df143715c8ce65ef84938965c7db19d8a322950ec65b6.js”>
+#<script src=”/assets/application.debug-ddbd4593b22ac054471df143715c8ce65ef84938965c7db19d8a322950ec65b6.js”>
 #</script>
 ```
 
@@ -267,8 +262,7 @@ Here we are actually getting the CoffeeScript source code from the CoffeeScript 
 
 All this gem does is configures generators, so if you don't use generators, you actually don't need the gem. And it also defines a template handler so you can call handler CoffeeScript files from your controllers.
 
-
-Assets generation in development
+### Assets generation in development
 
 In development, when you have this code, the javascript_include_tag,
 
@@ -305,7 +299,6 @@ register_pipeline :default do |env, type, file_type|
   env.default_processors_for(type, file_type)
 end
 ```
-
 
 ```ruby
 def default_processors_for(type, file_type)
