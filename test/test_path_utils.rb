@@ -44,7 +44,7 @@ class TestPathUtils < MiniTest::Test
       "source-maps",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
-    
+
     [ ['a', 'b'], ['a', 'b', '.', '..'] ].each do |dir_contents|
       Dir.stub :entries, dir_contents do
         assert_equal ['a', 'b'], entries(Dir.tmpdir)
@@ -210,6 +210,9 @@ class TestPathUtils < MiniTest::Test
       path_parents("#{root}/test/fixtures/default/POW.png", "#{root}/test")
     assert_equal ["#{root}/test/fixtures/default"],
       path_parents("#{root}/test/fixtures/default/POW.png", "#{root}/test/fixtures/default")
+
+    assert_equal ["/user/fixtures/default", "/user/fixtures", "/user", "/"],
+      path_parents("/user/fixtures/default/POW.png", "/")
   end
 
   def test_find_upwards
