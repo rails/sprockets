@@ -22,7 +22,7 @@ module Sprockets
       DEFAULT_MAX_SIZE = 25 * 1024 * 1024
       EXCLUDED_DIRS = ['.', '..'].freeze
       GITKEEP_FILES = ['.gitkeep', '.keep'].freeze
-      
+
       # Internal: Default standard error fatal logger.
       #
       # Returns a Logger.
@@ -143,64 +143,69 @@ module Sprockets
       end
 
       private
-        # Internal: Get all cache files along with stats.
-        #
-        # Returns an Array of [String filename, File::Stat] pairs sorted by
-        # mtime.
-        def find_caches
-          Dir.glob(File.join(@root, '**/*.cache')).reduce([]) { |stats, filename|
-            stat = safe_stat(filename)
-            # stat maybe nil if file was removed between the time we called
-            # dir.glob and the next stat
-            stats << [filename, stat] if stat
-            stats
-          }.sort_by { |_, stat| stat.mtime.to_i }
+      # Internal: Get all cache files along with stats.
+      #
+      # Returns an Array of [String filename, File::Stat] pairs sorted by
+      # mtime.
+      def find_caches
+        Dir.glob(File.join(@root, '**/*.cache')).reduce([]) { |stats, filename|
+          stat = safe_stat(filename)
+          # stat maybe nil if file was removed between the time we called
+          # dir.glob and the next stat
+          stats << [filename, stat] if stat
+          stats
+        }.sort_by { |_, stat| stat.mtime.to_i }
+      end
+
+      def size
+        @size ||= compute_size(find_caches)
+      end
+
+      # Internal: Computed cached files total size
+      #
+      # Returns an Integer
+      def compute_size(caches)
+        caches.inject(0) { |sum, (_, stat)| sum + stat.size }
+      end
+
+      def safe_stat(fn)
+        File.stat(fn)
+      rescue Errno::ENOENT
+        nil
+      end
+
+      def safe_open(path, &block)
+        if File.exist?(path)
+          File.open(path, 'rb', &block)
         end
+      rescue Errno::ENOENT
+      end
 
-        def size
-          @size ||= compute_size(find_caches)
+      # Internal: Check if total size of cached files large than @gc_size? If true, remove some file until the total size less than @gc_size
+      #
+      def gc!
+        start_time = Time.now
+
+        caches = find_caches
+        size = compute_size(caches)
+
+        delete_caches, keep_caches = caches.partition { |filename, stat|
+          deleted = size > @gc_size
+          size -= stat.size
+          deleted
+        }
+
+        return if delete_caches.empty?
+
+        FileUtils.remove(delete_caches.map(&:first), force: true)
+        @size = compute_size(keep_caches)
+
+        @logger.warn do
+          secs = Time.now.to_f - start_time.to_f
+          "#{self.class}[#{@root}] garbage collected " +
+            "#{delete_caches.size} files (#{(secs * 1000).to_i}ms)"
         end
-
-        def compute_size(caches)
-          caches.inject(0) { |sum, (_, stat)| sum + stat.size }
-        end
-
-        def safe_stat(fn)
-          File.stat(fn)
-        rescue Errno::ENOENT
-          nil
-        end
-
-        def safe_open(path, &block)
-          if File.exist?(path)
-            File.open(path, 'rb', &block)
-          end
-        rescue Errno::ENOENT
-        end
-
-        def gc!
-          start_time = Time.now
-
-          caches = find_caches
-          size = compute_size(caches)
-
-          delete_caches, keep_caches = caches.partition { |filename, stat|
-            deleted = size > @gc_size
-            size -= stat.size
-            deleted
-          }
-
-          return if delete_caches.empty?
-
-          FileUtils.remove(delete_caches.map(&:first), force: true)
-          @size = compute_size(keep_caches)
-
-          @logger.warn do
-            secs = Time.now.to_f - start_time.to_f
-            "#{self.class}[#{@root}] garbage collected " +
-              "#{delete_caches.size} files (#{(secs * 1000).to_i}ms)"
-          end
-        end
+      end
     end
   end
 end
