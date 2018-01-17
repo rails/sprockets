@@ -454,7 +454,7 @@ For example if you have this in your `application.css`
 }
 ```
 
-When you modify the `log.png` on disk, it will force `application.css` to be
+When you modify the `logo.png` on disk, it will force `application.css` to be
 recompiled so that the fingerprint will be correct in the generated asset.
 
 You can manually make sprockets depend on any other file that is generated
