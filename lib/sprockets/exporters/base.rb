@@ -21,7 +21,7 @@ module Sprockets
       # These will all be stored as accessible values. In addition a
       # +target+ will be available which is the target directory and
       # the asset's digest path combined.
-      def initialize(asset: nil, environment: nil, directory: nil)
+      def initialize(asset: :asset_not_set, environment: :environment_not_set, directory: :directory_not_set)
         @asset       = asset
         @environment = environment
         @directory   = directory
@@ -69,4 +69,3 @@ module Sprockets
     end
   end
 end
-

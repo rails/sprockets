@@ -37,6 +37,10 @@ module Sprockets
       ].freeze
     end
 
+    # Public: Translate some code by babel
+    #
+    # required - A hash type param with some nessesary attribute
+    # 
     def call(input)
       data = input[:data]
 
