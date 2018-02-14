@@ -5,14 +5,15 @@ cache: bundler
 sudo: false
 before_script: "unset _JAVA_OPTIONS"
 rvm:
-  - 2.2
-  - 2.3.4
-  - 2.4.1
+  - 2.2.9
+  - 2.3.6
+  - 2.4.3
+  - 2.5.0
   - ruby-head
 
 matrix:
   include:
-    - rvm: 2.3.4
+    - rvm: 2.5.0
       script: bundle exec rake test_isolated
   allow_failures:
     - rvm: ruby-head
