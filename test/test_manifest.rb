@@ -702,27 +702,31 @@ class TestManifest < Sprockets::TestCase
     end
   end
 
-  # Sleep duration to context switch between concurrent threads.
-  CONTEXT_SWITCH_DURATION = 0.001
-
-  # Record Processor sequence with a delay to test concurrency.
+  # Record Processor sequence with thread context-switching to test concurrency.
   class SlowProcessor
-    attr_reader :seq
+    attr_reader :seq, :threads, :total
 
-    def initialize
+    def initialize(total)
+      @total = total
       @seq = []
+      @threads = []
     end
 
     def call(_)
       seq << '0'
-      sleep CONTEXT_SWITCH_DURATION
+      threads << Thread.current
+      if threads.length == total
+        threads.map(&:run)
+      else
+        Thread.stop
+      end
       seq << '1'
       nil
     end
   end
 
   test 'concurrent processing' do
-    processor = SlowProcessor.new
+    processor = SlowProcessor.new(2)
     @env.register_postprocessor 'image/png', processor
     Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
     assert_equal %w(0 0 1 1), processor.seq
