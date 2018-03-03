@@ -77,6 +77,7 @@ module Sprockets
       end
 
       @data = data
+      @executor = Concurrent::FixedThreadPool.new([8, Concurrent.processor_count].min)
     end
 
     # Returns String path to manifest.json file.
@@ -115,6 +116,8 @@ module Sprockets
       @data['files'] ||= {}
     end
 
+    attr_accessor :executor
+
     # Public: Find all assets matching pattern set in environment.
     #
     # Returns Enumerator of Assets.
@@ -131,17 +134,16 @@ module Sprockets
       environment = self.environment.cached
 
       promises = paths.map do |path|
-        Concurrent::Promise.execute do
+        Concurrent::Promise.execute(executor: executor) do
           environment.find_all_linked_assets(path) do |asset|
             yield asset
           end
         end
       end
-      promises.each(&:wait!)
 
       if filters.any?
-        promises = environment.logical_paths.map do |logical_path, filename|
-          Concurrent::Promise.execute do
+        promises += environment.logical_paths.map do |logical_path, filename|
+          Concurrent::Promise.execute(executor: executor) do
             if filters.any? { |f| f.call(logical_path, filename) }
               environment.find_all_linked_assets(filename) do |asset|
                 yield asset
@@ -149,9 +151,9 @@ module Sprockets
             end
           end
         end
-        promises.each(&:wait!)
       end
 
+      Concurrent::Promise.zip(*promises).wait!
       nil
     end
 
