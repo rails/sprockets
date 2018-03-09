@@ -429,6 +429,21 @@ class TestFileStoreCaching < Sprockets::TestCase
     end
   end
 
+  test "no absolute paths are stored in the cache by accident" do
+    environment = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path(".")
+      env.cache = @cache
+    end
+    cache = environment.cache
+    def cache.set(key, value, local = false)
+      if value.to_s =~ /#{Dir.pwd}/
+        raise "Expected '#{value}' to not contain absolute path '#{Dir.pwd}' but did"
+      end
+    end
+
+    environment['schneems.js']
+  end
+
   test "no absolute paths are retuned from cache" do
     env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
