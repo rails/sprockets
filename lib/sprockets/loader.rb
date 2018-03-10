@@ -81,6 +81,8 @@ module Sprockets
           asset[:metadata][:links].map!             { |uri| expand_from_root(uri) } if asset[:metadata][:links]
           asset[:metadata][:stubbed].map!           { |uri| expand_from_root(uri) } if asset[:metadata][:stubbed]
           asset[:metadata][:required].map!          { |uri| expand_from_root(uri) } if asset[:metadata][:required]
+          asset[:metadata][:to_load].map!           { |uri| expand_from_root(uri) } if asset[:metadata][:to_load]
+          asset[:metadata][:to_link].map!           { |uri| expand_from_root(uri) } if asset[:metadata][:to_link]
           asset[:metadata][:dependencies].map!      { |uri| uri.start_with?("file-digest://") ? expand_from_root(uri) : uri } if asset[:metadata][:dependencies]
 
           asset[:metadata].each_key do |k|
@@ -140,7 +142,6 @@ module Sprockets
 
         # Read into memory and process if theres a processor pipeline
         if processors.any?
-
           result = call_processors(processors, {
             environment: self,
             cache: self.cache,
@@ -222,6 +223,16 @@ module Sprockets
           if cached_asset[:metadata][:required] && !cached_asset[:metadata][:required].empty?
             cached_asset[:metadata][:required] = cached_asset[:metadata][:required].dup
             cached_asset[:metadata][:required].map! { |uri| compress_from_root(uri) }
+          end
+
+          if cached_asset[:metadata][:to_load] && !cached_asset[:metadata][:to_load].empty?
+            cached_asset[:metadata][:to_load] = cached_asset[:metadata][:to_load].dup
+            cached_asset[:metadata][:to_load].map! { |uri| compress_from_root(uri) }
+          end
+
+          if cached_asset[:metadata][:to_link] && !cached_asset[:metadata][:to_link].empty?
+            cached_asset[:metadata][:to_link] = cached_asset[:metadata][:to_link].dup
+            cached_asset[:metadata][:to_link].map! { |uri| compress_from_root(uri) }
           end
 
           if cached_asset[:metadata][:dependencies] && !cached_asset[:metadata][:dependencies].empty?
