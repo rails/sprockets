@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rack",            "> 1", "< 3"
   s.add_dependency "concurrent-ruby", "~> 1.0"
 
+  s.add_development_dependency "m", ">= 0"
   s.add_development_dependency "babel-transpiler", "~> 0.6"
   s.add_development_dependency "closure-compiler", "~> 1.1"
   s.add_development_dependency "coffee-script-source", "~> 1.6"
