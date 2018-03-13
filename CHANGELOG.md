@@ -4,6 +4,10 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+## 4.0.0.beta7
+
+- Fix a year long bug that caused `Sprockets::FileNotFound` errors when the asset was present [#547]
+- Raise an error when two assets such as foo.js and foo.js.erb would produce the same output artifact (foo.js) [#549 #530]
 - Process `*.jst.eco.erb` files with ERBProcessor
 
 ## 4.0.0.beta6
