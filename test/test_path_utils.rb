@@ -31,7 +31,6 @@ class TestPathUtils < MiniTest::Test
       "context",
       "default",
       "directives",
-      "double",
       "encoding",
       "errors",
       "index-assets",
@@ -45,7 +44,7 @@ class TestPathUtils < MiniTest::Test
       "source-maps",
       "symlink"
     ], entries(File.expand_path("../fixtures", __FILE__))
-
+    
     [ ['a', 'b'], ['a', 'b', '.', '..'] ].each do |dir_contents|
       Dir.stub :entries, dir_contents do
         assert_equal ['a', 'b'], entries(Dir.tmpdir)
