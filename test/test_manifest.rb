@@ -19,6 +19,15 @@ class TestManifest < Sprockets::TestCase
     assert Dir["#{@dir}/*"].empty?, "Expected #{Dir["#{@dir}/*"]} to be empty but it was not"
   end
 
+  test 'linking same file twice does not raise an error' do
+    config_manifest = 'link_same_file_twice.js'
+
+    @env.append_path(fixture_path('double'))
+    output_manifest_json = File.join(@dir, "manifest.json")
+    manifest = Sprockets::Manifest.new(@env, @dir, output_manifest_json)
+    manifest.compile(config_manifest)
+  end
+
   test 'double rendering with link_directory raises an error' do
     config_manifest = 'link_directory_manifest.js'
 

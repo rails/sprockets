@@ -94,11 +94,15 @@ module Sprockets
 
       while uri = stack.shift
         yield asset = load(uri)
-        if linked_paths[asset.logical_path]
-          raise DoubleLinkError.new(parent_filename: parent_asset.filename,
-                                    last_filename:   linked_paths[asset.logical_path],
-                                    logical_path:    asset.logical_path,
-                                    filename:        asset.filename )
+
+        last_filename = linked_paths[asset.logical_path]
+        if last_filename && last_filename != asset.filename
+          raise DoubleLinkError.new(
+            parent_filename: parent_asset.filename,
+            last_filename:   last_filename,
+            logical_path:    asset.logical_path,
+            filename:        asset.filename
+          )
         end
         linked_paths[asset.logical_path] = asset.filename
         stack = asset.links.to_a + stack
