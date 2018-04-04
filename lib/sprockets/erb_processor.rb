@@ -18,7 +18,12 @@ class Sprockets::ERBProcessor
   end
 
   def call(input)
-    engine = ::ERB.new(input[:data], nil, '<>')
+    match = ERB.version.match(/\Aerb\.rb \[(?<version>[^ ]+) /)
+    if match && match[:version] >= "2.2.0" # Ruby 2.6+
+      engine = ::ERB.new(input[:data], trim_mode: '<>')
+    else
+      engine = ::ERB.new(input[:data], nil, '<>')
+    end
     engine.filename = input[:filename]
 
     context = input[:environment].context_class.new(input)
