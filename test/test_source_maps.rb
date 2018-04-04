@@ -40,7 +40,6 @@ class TestSourceMaps < Sprockets::TestCase
 
     assert_equal coffee_main_lines + child_lines, sub_a_js_section["offset"]["line"]
 
-    plain_js         = @env["plain.js"]
     plain_js_section = map["sections"][3]
     assert_equal sub_a_js_lines + coffee_main_lines + child_lines, plain_js_section["offset"]["line"]
   end
