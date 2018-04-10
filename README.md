@@ -390,7 +390,7 @@ Example:
 You can specify a file extension so any extra files will be ignored:
 
 ```js
-//= link_tree path/to/folder .js
+//= link_tree ./path/to/folder .js
 ```
 
 > Note: There is an intentional space between the path and the extension
