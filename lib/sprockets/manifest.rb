@@ -181,7 +181,7 @@ module Sprockets
           # Deprecated: Remove beta integrity attribute in next release.
           # Callers should DigestUtils.hexdigest_integrity_uri to compute the
           # digest themselves.
-          'integrity'    => DigestUtils.hexdigest_integrity_uri(asset.hexdigest)
+          'integrity'    => asset.integrity
         }
         assets[asset.logical_path] = asset.digest_path
 
