@@ -331,6 +331,13 @@ class TestServer < Sprockets::TestCase
     assert_equal "", last_response.body
   end
 
+  test "illegal access of a file asset" do
+    absolute_path = fixture_path("server/app/javascripts")
+
+    get "assets/file:%2f%2f//#{absolute_path}/foo.js"
+    assert_equal 403, last_response.status
+  end
+
   test "add new source to tree" do
     filename = fixture_path("server/app/javascripts/baz.js")
 

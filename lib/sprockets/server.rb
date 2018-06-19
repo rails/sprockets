@@ -115,7 +115,7 @@ module Sprockets
         #
         #     http://example.org/assets/../../../etc/passwd
         #
-        path.include?("..") || absolute_path?(path)
+        path.include?("..") || absolute_path?(path) || path.include?("://")
       end
 
       def head_request?(env)
