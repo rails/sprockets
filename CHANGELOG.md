@@ -1,3 +1,7 @@
+**3.7.2** (June 19, 2018)
+
+* Security release for [CVE-2018-3760](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-3760).
+
 **3.7.1** (December 19, 2016)
 
 * Ruby 2.4 support for Sprockets 3.
