@@ -2,11 +2,13 @@ require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
 require 'set'
+require 'sprockets/cached_digest_utils'
 
 module Sprockets
   # Internal: Hash functions and digest related utilities. Mixed into
   # Environment.
   module DigestUtils
+    include CachedDigestUtils
     extend self
 
     # Internal: Default digest class.
