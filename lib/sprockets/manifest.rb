@@ -53,7 +53,7 @@ module Sprockets
 
       # If directory is given w/o filename, pick a random manifest location
       if @directory && @filename.nil?
-        @filename = find_directory_manifest(@directory)
+        @filename = find_directory_manifest(@directory, logger)
       end
 
       unless @directory && @filename
