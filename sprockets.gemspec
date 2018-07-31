@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "uglifier", ">= 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"
   s.add_development_dependency "zopfli", "~> 0.0.4"
+  s.add_development_dependency "rubocop", "~> 0.58"
 
   s.required_ruby_version = '>= 2.2.0'
 
