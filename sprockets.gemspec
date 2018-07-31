@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
   unless RUBY_PLATFORM.include?('java')
     s.add_development_dependency "zopfli", "~> 0.0.4"
   end
+  s.add_development_dependency "rubocop", "~> 0.63"
 
   s.required_ruby_version = '>= 2.3.0'
 
