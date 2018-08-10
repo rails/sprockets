@@ -720,6 +720,8 @@ class TestEnvironment < Sprockets::TestCase
     old_asset_digest = @env["gallery.js"].hexdigest
     @env.version = 'v2'
     assert old_asset_digest == @env["gallery.js"].hexdigest
+
+    assert @env["gallery.js"].hexdigest == Digest::SHA256.new.update(File.binread(fixture_path('default/gallery.js'))).to_s
   end
 
   test "bundled asset is stale if its mtime is updated or deleted" do
