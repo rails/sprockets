@@ -48,8 +48,10 @@ module Sprockets
       path = URI::Generic::DEFAULT_PARSER.unescape(path)
       path.force_encoding(Encoding::UTF_8)
 
-      # Hack for parsing Windows "file:///C:/Users/IEUser" paths
-      path.gsub!(/^\/([a-zA-Z]:)/, '\1'.freeze)
+      # Hack for parsing Windows "/C:/Users/IEUser" paths
+      if File::ALT_SEPARATOR && path[2] == ':'
+        path = path[1..-1]
+      end
 
       [scheme, host, path, query]
     end
