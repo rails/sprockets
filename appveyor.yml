@@ -1,8 +1,12 @@
 install:
-  - set PATH=C:\Ruby22\bin;%PATH%
+  - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+  - bundle config --local path vendor/bundle
   - bundle install
 
 build: off
+
+cache:
+  - vendor/bundle
 
 before_test:
   - ruby -v
@@ -14,7 +18,7 @@ test_script:
 
 environment:
   matrix:
-    - RUBY_VERSION: 23
-    - RUBY_VERSION: 22
-    - RUBY_VERSION: 21
-    - RUBY_VERSION: 200
+    - RUBY_VERSION: 25-x64
+    - RUBY_VERSION: 24-x64
+    - RUBY_VERSION: 23-x64
+
