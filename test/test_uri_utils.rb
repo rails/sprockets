@@ -47,14 +47,16 @@ class TestURIUtils < MiniTest::Test
     parts = split_file_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal ['file', nil, '/usr/local/var/github/app/assets/javascripts/application.js', nil], parts
 
-    parts = split_file_uri("file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc")
-    assert_equal ['file', nil, 'C:/Documents and Settings/davris/FileSchemeURIs.doc', nil], parts
+    if DOSISH
+      parts = split_file_uri("file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc")
+      assert_equal ['file', nil, 'C:/Documents and Settings/davris/FileSchemeURIs.doc', nil], parts
 
-    parts = split_file_uri("file:///D:/Program%20Files/Viewer/startup.htm")
-    assert_equal ['file', nil, 'D:/Program Files/Viewer/startup.htm', nil], parts
+      parts = split_file_uri("file:///D:/Program%20Files/Viewer/startup.htm")
+      assert_equal ['file', nil, 'D:/Program Files/Viewer/startup.htm', nil], parts
 
-    parts = split_file_uri("file:///C:/Program%20Files/Music/Web%20Sys/main.html?REQUEST=RADIO")
-    assert_equal ['file', nil, 'C:/Program Files/Music/Web Sys/main.html', 'REQUEST=RADIO'], parts
+      parts = split_file_uri("file:///C:/Program%20Files/Music/Web%20Sys/main.html?REQUEST=RADIO")
+      assert_equal ['file', nil, 'C:/Program Files/Music/Web Sys/main.html', 'REQUEST=RADIO'], parts
+    end
   end
 
   def test_join_uri_path
@@ -69,15 +71,20 @@ class TestURIUtils < MiniTest::Test
   end
 
   def test_inverse_file_uri_functions
-    [
+    uris = [
       "file://localhost/etc/fstab",
       "file:///etc/fstab",
       "file:///usr/local/bin/ruby%20on%20rails",
       "file:///usr/local/var/github/app/assets/javascripts/application.js",
-      "file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript",
-      "file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc",
-      "file:///D:/Program%20Files/Viewer/startup.htm"
-    ].each do |uri|
+      "file:///usr/local/var/github/app/assets/javascripts/application.coffee?type=application/javascript"
+    ]
+    if DOSISH
+      uris.concat([
+          "file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc",
+          "file:///D:/Program%20Files/Viewer/startup.htm"
+        ])
+    end
+    uris.each do |uri|
       assert parts = split_file_uri(uri)
       assert_equal uri, join_file_uri(*parts)
     end
@@ -85,7 +92,9 @@ class TestURIUtils < MiniTest::Test
 
   def test_validate
     assert valid_asset_uri?("file:///usr/local/var/github/app/assets/javascripts/application.js")
-    assert valid_asset_uri?("file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert valid_asset_uri?("file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
     refute valid_asset_uri?("http:///usr/local/var/github/app/assets/javascripts/application.js")
     refute valid_asset_uri?("/usr/local/var/github/app/assets/javascripts/application.js")
   end
@@ -99,8 +108,10 @@ class TestURIUtils < MiniTest::Test
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal ["/usr/local/var/github/app/assets/javascripts/foo bar.js", {}],
       parse_asset_uri("file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js")
-    assert_equal ["C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js", {}],
-      parse_asset_uri("file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert_equal ["C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js", {}],
+        parse_asset_uri("file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
   end
 
   def test_parse_query_params
@@ -123,8 +134,10 @@ class TestURIUtils < MiniTest::Test
       build_asset_uri("/usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal "file:///usr/local/var/github/app/assets/javascripts/foo%20bar.js",
       build_asset_uri("/usr/local/var/github/app/assets/javascripts/foo bar.js")
-    assert_equal "file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
-      build_asset_uri("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert_equal "file:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+        build_asset_uri("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
   end
 
   def test_build_query_params
@@ -153,8 +166,10 @@ class TestURIUtils < MiniTest::Test
       parse_file_digest_uri("file-digest:///usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal "/usr/local/var/github/app/assets/javascripts/foo bar.js",
       parse_file_digest_uri("file-digest:///usr/local/var/github/app/assets/javascripts/foo%20bar.js")
-    assert_equal "C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
-      parse_file_digest_uri("file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert_equal "C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+        parse_file_digest_uri("file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
   end
 
   def test_build_file_digest_uri
@@ -162,8 +177,10 @@ class TestURIUtils < MiniTest::Test
       build_file_digest_uri("/usr/local/var/github/app/assets/javascripts/application.js")
     assert_equal "file-digest:///usr/local/var/github/app/assets/javascripts/foo%20bar.js",
       build_file_digest_uri("/usr/local/var/github/app/assets/javascripts/foo bar.js")
-    assert_equal "file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
-      build_file_digest_uri("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    if DOSISH
+      assert_equal "file-digest:///C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js",
+        build_file_digest_uri("C:/Users/IEUser/Documents/github/app/assets/javascripts/application.js")
+    end
   end
 
   def test_file_digest_raise_erorr_when_invalid_uri_scheme
