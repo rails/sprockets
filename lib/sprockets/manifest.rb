@@ -248,11 +248,12 @@ module Sprockets
       asset_versions.each do |logical_path, versions|
         current = assets[logical_path]
 
+        i = 0
         versions.reject { |path, _|
           path == current
         }.sort_by { |_, attrs|
           # Sort by timestamp
-          Time.parse(attrs['mtime'])
+          [Time.parse(attrs['mtime']), i += 1]
         }.reverse.each_with_index.drop_while { |(_, attrs), index|
           _age = [0, Time.now - Time.parse(attrs['mtime'])].max
           # Keep if under age or within the count limit

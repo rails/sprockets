@@ -92,7 +92,8 @@ module Sprockets
         end
       end
 
-      matches.sort_by! { |match, quality| -quality }
+      i = 0
+      matches.sort_by!{ |match, quality| [-quality, i += 1] }
       matches.map! { |match, quality| match }
       matches
     end
