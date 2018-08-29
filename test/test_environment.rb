@@ -332,10 +332,14 @@ module EnvironmentTests
   test "find html builder asset" do
     assert asset = @env.find_asset("nokogiri-html.html")
     assert_equal "text/html", asset.content_type
-    assert_equal <<-HTML, asset.to_s
+    if RUBY_PLATFORM.include?('java')
+      assert_equal '<html><body><span class="bold">Hello world</span></body></html>', asset.to_s
+    else
+      assert_equal <<-HTML, asset.to_s
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html><body><span class="bold">Hello world</span></body></html>
     HTML
+    end
   end
 
   test "find xml builder asset" do

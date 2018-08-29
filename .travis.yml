@@ -2,20 +2,24 @@ language: ruby
 
 cache: bundler
 
-sudo: false
+sudo: required
 before_script: "unset _JAVA_OPTIONS"
 rvm:
   - 2.2.9
-  - 2.3.6
-  - 2.4.3
-  - 2.5.0
+  - 2.3.7
+  - 2.4.4
+  - 2.5.1
+  - jruby-9.2.0.0
+  - jruby-head
   - ruby-head
 
 matrix:
   include:
-    - rvm: 2.5.0
+    - rvm: 2.5.1
       script: bundle exec rake test_isolated
   allow_failures:
+    - rvm: jruby-9.2.0.0
+    - rvm: jruby-head
     - rvm: ruby-head
   fast_finish: true
 

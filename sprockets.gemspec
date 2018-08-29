@@ -22,16 +22,22 @@ Gem::Specification.new do |s|
   s.add_development_dependency "eco", "~> 1.0"
   s.add_development_dependency "ejs", "~> 1.0"
   s.add_development_dependency "execjs", "~> 2.0"
-  s.add_development_dependency "jsminc", "~> 1.1"
+  unless RUBY_PLATFORM.include?('java')
+    s.add_development_dependency "jsminc", "~> 1.1"
+  end
   s.add_development_dependency "minitest", "~> 5.0"
   s.add_development_dependency "nokogiri", "~> 1.3"
   s.add_development_dependency "rack-test", "~> 0.6"
-  s.add_development_dependency "rake", "~> 10.0"
+  s.add_development_dependency "rake", "~> 12.0"
   s.add_development_dependency "sass", "~> 3.4"
-  s.add_development_dependency "sassc", ">= 1.12.1", "< 2.0"
+  unless RUBY_PLATFORM.include?('java')
+    s.add_development_dependency "sassc", ">= 1.12.1", "< 2.0"
+  end
   s.add_development_dependency "uglifier", ">= 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"
-  s.add_development_dependency "zopfli", "~> 0.0.4"
+  unless RUBY_PLATFORM.include?('java')
+    s.add_development_dependency "zopfli", "~> 0.0.4"
+  end
 
   s.required_ruby_version = '>= 2.2.0'
 
