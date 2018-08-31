@@ -202,7 +202,7 @@ module Sprockets
 
         if extname
           path = path.chomp(extname)
-          type, engines, pipeline = value.values_at(:type, :engines, :pipeline)
+          type, engines, pipeline = value
         end
 
         return path, type, engines, pipeline
