@@ -111,17 +111,37 @@ module Sprockets
       def compute_extname_map
         graph = {}
 
+        engine_extname_permutation = []
+
+        4.times do |n|
+          config[:engines].keys.permutation(n).each do |engine_extnames|
+            engine_extname_permutation << engine_extnames
+          end
+        end
+
+        mime_exts_grouped_by_mime_type = {}
+        config[:mime_exts].each do |format_extname,format_type|
+          mime_exts_grouped_by_mime_type[format_type] ||= []
+          mime_exts_grouped_by_mime_type[format_type] << format_extname
+        end
+
         ([nil] + pipelines.keys.map(&:to_s)).each do |pipeline|
-          pipeline_extname = ".#{pipeline}" if pipeline
-          ([[nil, nil]] + config[:mime_exts].to_a).each do |format_extname, format_type|
-            4.times do |n|
-              config[:engines].keys.permutation(n).each do |engine_extnames|
+          pipeline_extname = pipeline ? ".#{pipeline}" : ''.freeze
+          engine_extname_permutation.each do |engine_extnames|
+            mime_exts_grouped_by_mime_type.each do |format_type, format_extnames|
+              type = format_type
+              value = [type, engine_extnames, pipeline]
+              format_extnames.each do |format_extname|
                 key = "#{pipeline_extname}#{format_extname}#{engine_extnames.join}"
-                type = format_type || config[:engine_mime_types][engine_extnames.first]
-                graph[key] = {type: type, engines: engine_extnames, pipeline: pipeline}
+                graph[key] = value
+              end
+              if format_type == config[:engine_mime_types][engine_extnames.first]
+                key =  "#{pipeline_extname}#{engine_extnames.join}"
+                graph[key] = value
               end
             end
           end
+          graph[pipeline_extname] = [nil, [], pipeline]
         end
 
         graph
