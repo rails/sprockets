@@ -137,8 +137,10 @@ module Sprockets
       #
       # Returns true
       def clear(options=nil)
-        root_dirs = Dir.entries(@root).reject { |f| (EXCLUDED_DIRS + GITKEEP_FILES).include?(f) }
-        FileUtils.rm_r(root_dirs.collect{ |f| File.join(@root, f) })
+        if File.exist?(@root)
+          root_dirs = Dir.entries(@root).reject { |f| (EXCLUDED_DIRS + GITKEEP_FILES).include?(f) }
+          FileUtils.rm_r(root_dirs.collect{ |f| File.join(@root, f) })
+        end
         true
       end
 

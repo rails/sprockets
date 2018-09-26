@@ -672,4 +672,12 @@ class TestManifest < Sprockets::TestCase
     Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'troll.png')
     assert_equal %w(0 1 0 1), processor.seq
   end
+
+  test 'clobber works when cache_dir not created' do
+    @cache_dir = File.join(Dir::tmpdir, 'sprockets')
+    refute File.exist?(@cache_dir)
+    @env.cache = Sprockets::Cache::FileStore.new(@cache_dir)
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+    manifest.clobber
+  end
 end
