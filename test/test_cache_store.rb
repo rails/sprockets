@@ -170,6 +170,13 @@ class TestFileStore < MiniTest::Test
     refute @_store.get("corrupt")
   end
 
+  def test_clear_store_dir_not_exist
+    @cache_dir = File.join(Dir::tmpdir, 'sprockets')
+    refute File.exist?(@cache_dir)
+    @store = Sprockets::Cache::FileStore.new(@cache_dir)
+    assert @store.clear
+  end
+
   include CacheStoreTests
 end
 
