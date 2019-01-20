@@ -165,11 +165,11 @@ module Sprockets
   register_transformer 'application/javascript+function', 'application/javascript', JstProcessor
 
   # CSS processors
-  require 'sprockets/sass_processor'
+  require 'sprockets/sassc_processor'
   register_mime_type 'text/sass', extensions: ['.sass', '.css.sass']
   register_mime_type 'text/scss', extensions: ['.scss', '.css.scss']
-  register_transformer 'text/sass', 'text/css', SassProcessor
-  register_transformer 'text/scss', 'text/css', ScssProcessor
+  register_transformer 'text/sass', 'text/css', SasscProcessor
+  register_transformer 'text/scss', 'text/css', ScsscProcessor
   register_preprocessor 'text/sass', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_preprocessor 'text/scss', DirectiveProcessor.new(comments: ["//", ["/*", "*/"]])
   register_bundle_metadata_reducer 'text/css', :sass_dependencies, Set.new, :+
