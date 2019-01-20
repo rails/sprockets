@@ -2,7 +2,6 @@
 require 'sprockets_test'
 require 'shared_sass_tests'
 
-unless RUBY_PLATFORM.include?('java')
 silence_warnings do
   require 'sassc'
 end
@@ -131,5 +130,4 @@ class TestSasscFunctions < TestSprocketsSassc
   end
 
   include SharedSassTestFunctions
-end
 end
