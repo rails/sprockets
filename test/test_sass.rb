@@ -6,6 +6,9 @@ silence_warnings do
   require 'sass'
 end
 
+require 'sprockets/sass_processor'
+require 'sprockets/sass_compressor'
+
 class TestBaseSass < Sprockets::TestCase
   CACHE_PATH = File.expand_path("../../.sass-cache", __FILE__)
 
@@ -58,6 +61,8 @@ class TestSprocketsSass < TestBaseSass
       env.append_path(fixture_path('.'))
       env.append_path(fixture_path('compass'))
       env.append_path(fixture_path('octicons'))
+      env.register_transformer 'text/sass', 'text/css', Sprockets::SassProcessor.new
+      env.register_transformer 'text/scss', 'text/css', Sprockets::ScssProcessor.new
     end
   end
 
