@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require 'sprockets/autoload'
 require 'sprockets/sass_compressor'
-require 'base64'
 
 module Sprockets
   class SasscCompressor < SassCompressor

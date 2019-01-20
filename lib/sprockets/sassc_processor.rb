@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require 'sprockets/sass_processor'
 require 'sprockets/path_utils'
-require 'base64'
 
 module Sprockets
   class SasscProcessor < SassProcessor
