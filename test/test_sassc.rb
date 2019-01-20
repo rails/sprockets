@@ -43,12 +43,12 @@ end
 class TestNoSassFunctionSassC < TestBaseSassc
   module ::SassC::Script::Functions
     def javascript_path(path)
-      ::SassC::Script::String.new("/js/#{path.value}", :string)
+      ::SassC::Script::Value::String.new("/js/#{path.value}", :string)
     end
 
     module Compass
       def stylesheet_path(path)
-        ::SassC::Script::String.new("/css/#{path.value}", :string)
+        ::SassC::Script::Value::String.new("/css/#{path.value}", :string)
       end
     end
     include Compass
