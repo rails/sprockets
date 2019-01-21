@@ -1,12 +1,4 @@
 source "https://rubygems.org"
 gemspec
 
-if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.2.2")
-  gem 'rack', '< 2.0'
-else
-  gem "rack", github: 'rack/rack'
-end
-
-if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.0")
-  gem 'json', '< 2.0'
-end
+gem "rack", github: 'rack/rack'

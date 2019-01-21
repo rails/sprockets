@@ -7,7 +7,6 @@ before_script: "unset _JAVA_OPTIONS"
 before_install: gem install bundler -v '<2'
 
 rvm:
-  - 2.2.10
   - 2.3.8
   - 2.4.5
   - 2.5.3
