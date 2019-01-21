@@ -1,6 +1,8 @@
 require "rake/testtask"
 require "bundler/gem_tasks"
 
+task :default => :test
+
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.warning = true
@@ -22,5 +24,3 @@ begin
 rescue LoadError
   # We are in the production environment, where Rubocop is not required.
 end
-
-task default: [:rubocop, :test]
