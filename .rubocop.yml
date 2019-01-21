@@ -1,6 +1,7 @@
 AllCops:
   DisabledByDefault: true
   DisplayCopNames: true
+  TargetRubyVersion: 2.3
 
 Performance:
   Enabled: true
