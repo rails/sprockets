@@ -1,10 +1,32 @@
 # frozen_string_literal: true
 require 'sprockets/autoload'
-require 'sprockets/sass_compressor'
-require 'base64'
+require 'sprockets/source_map_utils'
 
 module Sprockets
-  class SasscCompressor < SassCompressor
+  # Public: Sass CSS minifier.
+  #
+  # To accept the default options
+  #
+  #     environment.register_bundle_processor 'text/css',
+  #       Sprockets::SasscCompressor
+  #
+  # Or to pass options to the Sass::Engine class.
+  #
+  #     environment.register_bundle_processor 'text/css',
+  #       Sprockets::SasscCompressor.new({ ... })
+  #
+  class SasscCompressor
+    # Public: Return singleton instance with default options.
+    #
+    # Returns SasscCompressor object.
+    def self.instance
+      @instance ||= new
+    end
+
+    def self.call(input)
+      instance.call(input)
+    end
+
     def initialize(options = {})
       @options = {
         syntax: :scss,

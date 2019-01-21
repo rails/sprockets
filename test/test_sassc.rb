@@ -2,7 +2,6 @@
 require 'sprockets_test'
 require 'shared_sass_tests'
 
-unless RUBY_PLATFORM.include?('java')
 silence_warnings do
   require 'sassc'
 end
@@ -43,12 +42,12 @@ end
 class TestNoSassFunctionSassC < TestBaseSassc
   module ::SassC::Script::Functions
     def javascript_path(path)
-      ::SassC::Script::String.new("/js/#{path.value}", :string)
+      ::SassC::Script::Value::String.new("/js/#{path.value}", :string)
     end
 
     module Compass
       def stylesheet_path(path)
-        ::SassC::Script::String.new("/css/#{path.value}", :string)
+        ::SassC::Script::Value::String.new("/css/#{path.value}", :string)
       end
     end
     include Compass
@@ -131,5 +130,4 @@ class TestSasscFunctions < TestSprocketsSassc
   end
 
   include SharedSassTestFunctions
-end
 end
