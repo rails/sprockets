@@ -121,7 +121,7 @@ module Sprockets
 
         header, directives = extract_directives(header)
 
-        data = String.new("")
+        data = +""
         data.force_encoding(body.encoding)
         data << header unless header.empty?
         data << body
@@ -139,7 +139,7 @@ module Sprockets
       #     [[1, "require", "foo"], [2, "require", "bar"]]
       #
       def extract_directives(header)
-        processed_header = String.new("")
+        processed_header = +""
         directives = []
 
         header.lines.each_with_index do |line, index|
