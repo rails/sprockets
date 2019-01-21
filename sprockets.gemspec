@@ -37,7 +37,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency "zopfli", "~> 0.0.4"
   end
 
-  s.required_ruby_version = '>= 2.2.0'
+  s.required_ruby_version = '>= 2.3.0'
 
   s.authors = ["Sam Stephenson", "Joshua Peek"]
   s.email = ["sstephenson@gmail.com", "josh@joshpeek.com"]
