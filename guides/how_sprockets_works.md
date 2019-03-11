@@ -247,7 +247,7 @@ For example, if we were to write the following in our template:
 
  This gem makes it possible to raise an exception that is telling you that we need to include that `foo.js` file in the manifest before using it in development. The exception in this example would be `Sprockets::Rails::Helper::AssetNotPrecompiled`.
 
-## saas-rails
+## sass-rails
 
 Another gem that we have is `sass-rails` gem, so like I said before, the `SassProcessor` is built-in into Sprockets itself, but there are some particularities of integrating Sass with Rails that needs to be done in this gem. The gem defines the generators that will be used by the Rails generator when we make a new scaffold that will also generate the corresponding Sass files. It also creates an importer that knows how to handle globs, paths, and ERB to support having something like this in your Sass files:
 
