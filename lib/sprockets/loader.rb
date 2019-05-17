@@ -64,6 +64,43 @@ module Sprockets
     end
 
     private
+      def compress_key_from_hash(hash, key)
+        return unless hash.key?(key)
+        value = hash[key].dup
+        return if !value
+
+        if block_given?
+          value.map! do |x|
+            if yield x
+             compress_from_root(x)
+            else
+             x
+            end
+          end
+        else
+          value.map! { |x| compress_from_root(x) }
+        end
+        hash[key] = value
+      end
+
+
+      def expand_key_from_hash(hash, key)
+        return unless hash.key?(key)
+        value = hash[key].dup
+        return if !value
+        if block_given?
+          value.map! do |x|
+            if yield x
+              expand_from_root(x)
+            else
+              x
+            end
+          end
+        else
+          value.map! { |x| expand_from_root(x) }
+        end
+        hash[key] = value
+      end
 
       # Internal: Load asset hash from cache
       #
@@ -77,17 +114,16 @@ module Sprockets
           asset[:uri]       = expand_from_root(asset[:uri])
           asset[:load_path] = expand_from_root(asset[:load_path])
           asset[:filename]  = expand_from_root(asset[:filename])
-          asset[:metadata][:included].map!          { |uri| expand_from_root(uri) } if asset[:metadata][:included]
-          asset[:metadata][:links].map!             { |uri| expand_from_root(uri) } if asset[:metadata][:links]
-          asset[:metadata][:stubbed].map!           { |uri| expand_from_root(uri) } if asset[:metadata][:stubbed]
-          asset[:metadata][:required].map!          { |uri| expand_from_root(uri) } if asset[:metadata][:required]
-          asset[:metadata][:to_load].map!           { |uri| expand_from_root(uri) } if asset[:metadata][:to_load]
-          asset[:metadata][:to_link].map!           { |uri| expand_from_root(uri) } if asset[:metadata][:to_link]
-          asset[:metadata][:dependencies].map!      { |uri| uri.start_with?("file-digest://") ? expand_from_root(uri) : uri } if asset[:metadata][:dependencies]
+          expand_key_from_hash(asset[:metadata], :included)
+          expand_key_from_hash(asset[:metadata], :stubbed)
+          expand_key_from_hash(asset[:metadata], :required)
+          expand_key_from_hash(asset[:metadata], :to_load)
+          expand_key_from_hash(asset[:metadata], :to_link)
+          expand_key_from_hash(asset[:metadata], :dependencies) { |uri| uri.start_with?("file-digest://") }
 
           asset[:metadata].each_key do |k|
             next unless k.match?(/_dependencies\z/) # rubocop:disable Performance/EndWith
-            asset[:metadata][k].map! { |uri| expand_from_root(uri) }
+            expand_key_from_hash(asset[:metadata], k)
           end
         end
         asset
@@ -205,48 +241,17 @@ module Sprockets
         if cached_asset[:metadata]
           # Deep dup to avoid modifying `asset`
           cached_asset[:metadata] = cached_asset[:metadata].dup
-          if cached_asset[:metadata][:included] && !cached_asset[:metadata][:included].empty?
-            cached_asset[:metadata][:included] = cached_asset[:metadata][:included].dup
-            cached_asset[:metadata][:included].map! { |uri| compress_from_root(uri) }
-          end
+          compress_key_from_hash(cached_asset[:metadata], :included)
+          compress_key_from_hash(cached_asset[:metadata], :links)
+          compress_key_from_hash(cached_asset[:metadata], :stubbed)
+          compress_key_from_hash(cached_asset[:metadata], :required)
+          compress_key_from_hash(cached_asset[:metadata], :to_load)
+          compress_key_from_hash(cached_asset[:metadata], :to_link)
+          compress_key_from_hash(cached_asset[:metadata], :dependencies) { |uri| uri.start_with?("file-digest://") }
 
-          if cached_asset[:metadata][:links] && !cached_asset[:metadata][:links].empty?
-            cached_asset[:metadata][:links] = cached_asset[:metadata][:links].dup
-            cached_asset[:metadata][:links].map! { |uri| compress_from_root(uri) }
-          end
-
-          if cached_asset[:metadata][:stubbed] && !cached_asset[:metadata][:stubbed].empty?
-            cached_asset[:metadata][:stubbed] = cached_asset[:metadata][:stubbed].dup
-            cached_asset[:metadata][:stubbed].map! { |uri| compress_from_root(uri) }
-          end
-
-          if cached_asset[:metadata][:required] && !cached_asset[:metadata][:required].empty?
-            cached_asset[:metadata][:required] = cached_asset[:metadata][:required].dup
-            cached_asset[:metadata][:required].map! { |uri| compress_from_root(uri) }
-          end
-
-          if cached_asset[:metadata][:to_load] && !cached_asset[:metadata][:to_load].empty?
-            cached_asset[:metadata][:to_load] = cached_asset[:metadata][:to_load].dup
-            cached_asset[:metadata][:to_load].map! { |uri| compress_from_root(uri) }
-          end
-
-          if cached_asset[:metadata][:to_link] && !cached_asset[:metadata][:to_link].empty?
-            cached_asset[:metadata][:to_link] = cached_asset[:metadata][:to_link].dup
-            cached_asset[:metadata][:to_link].map! { |uri| compress_from_root(uri) }
-          end
-
-          if cached_asset[:metadata][:dependencies] && !cached_asset[:metadata][:dependencies].empty?
-            cached_asset[:metadata][:dependencies] = cached_asset[:metadata][:dependencies].dup
-            cached_asset[:metadata][:dependencies].map! do |uri|
-              uri.start_with?("file-digest://".freeze) ? compress_from_root(uri) : uri
-            end
-          end
-
-          # compress all _dependencies in metadata like `sass_dependencies`
           cached_asset[:metadata].each do |key, value|
             next unless key.match?(/_dependencies\z/) # rubocop:disable Performance/EndWith
-            cached_asset[:metadata][key] = value.dup
-            cached_asset[:metadata][key].map! {|uri| compress_from_root(uri) }
+            compress_key_from_hash(cached_asset[:metadata], key)
           end
         end
 
