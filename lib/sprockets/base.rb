@@ -19,12 +19,12 @@ module Sprockets
 
   class DoubleLinkError < Sprockets::Error
     def initialize(parent_filename:, logical_path:, last_filename:, filename:)
-      message = String.new
-      message << "Multiple files with the same output path cannot be linked (#{logical_path.inspect})\n"
-      message << "In #{parent_filename.inspect} these files were linked:\n"
-      message << "  - #{last_filename}\n"
-      message << "  - #{filename}\n"
-      super(message)
+      super <<~MSG
+        Multiple files with the same output path cannot be linked (#{logical_path.inspect})
+        In #{parent_filename.inspect} these files were linked:
+          - #{last_filename}
+          - #{filename}
+      MSG
     end
   end
 
