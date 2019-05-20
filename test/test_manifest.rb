@@ -422,24 +422,27 @@ class TestManifest < Sprockets::TestCase
       manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{digest_path}")
 
+      Timecop.travel(Time.now + 1)
       File.open(filename, 'w') { |f| f.write "a;" }
-      mtime = Time.now + 1
+      mtime = Time.now
       File.utime(mtime, mtime, filename)
       new_digest_path1 = @env['application.js'].digest_path
 
       manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{new_digest_path1}")
 
+      Timecop.travel(Time.now + 1)
       File.open(filename, 'w') { |f| f.write "b;" }
-      mtime = Time.now + 2
+      mtime = Time.now
       File.utime(mtime, mtime, filename)
       new_digest_path2 = @env['application.js'].digest_path
 
       manifest.compile('application.js')
       assert File.exist?("#{@dir}/#{new_digest_path2}")
 
+      Timecop.travel(Time.now + 1)
       File.open(filename, 'w') { |f| f.write "c;" }
-      mtime = Time.now + 3
+      mtime = Time.now
       File.utime(mtime, mtime, filename)
       new_digest_path3 = @env['application.js'].digest_path
 
@@ -460,6 +463,8 @@ class TestManifest < Sprockets::TestCase
       assert data['files'][new_digest_path3]
       assert_equal new_digest_path3, data['assets']['application.js']
     end
+  ensure
+    Timecop.return
   end
 
   test "test manifest does not exist" do

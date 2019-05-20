@@ -86,14 +86,16 @@ module Sprockets
         raise TypeError, "unknown q_values type: #{q_values.class}"
       end
 
+      i = 0
       q_values.each do |accepted, quality|
         if match = available.find { |option| matcher.call(option, accepted) }
-          matches << [match, quality]
+          i += 1
+          matches << [-quality, i, match]
         end
       end
 
-      matches.sort_by! { |match, quality| -quality }
-      matches.map! { |match, quality| match }
+      matches.sort!
+      matches.map! { |_, _, match| match }
       matches
     end
 
