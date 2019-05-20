@@ -98,7 +98,7 @@ module Sprockets
     #
     # Returns true if path is relative, otherwise false.
     def relative_path?(path)
-      path =~ /^\.\.?($|#{SEPARATOR_PATTERN})/ ? true : false
+      path.match?(/^\.\.?($|#{SEPARATOR_PATTERN})/) ? true : false
     end
 
     # Public: Get relative path from `start` to `dest`.

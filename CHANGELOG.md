@@ -4,6 +4,8 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+- Minimum Ruby version for Sprockets 4 is now 2.5+ which matches minimum ruby verision of Rails [#604]
+
 ## 4.0.0.beta8
 
 - Security release for [CVE-2018-3760](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-3760)

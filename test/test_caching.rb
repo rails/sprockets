@@ -436,7 +436,7 @@ class TestFileStoreCaching < Sprockets::TestCase
     end
     cache = environment.cache
     def cache.set(key, value, local = false)
-      if value.to_s =~ /#{Dir.pwd}/
+      if value.to_s.match?(/#{Dir.pwd}/)
         raise "Expected '#{value}' to not contain absolute path '#{Dir.pwd}' but did"
       end
     end
