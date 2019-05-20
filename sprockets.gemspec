@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   unless RUBY_PLATFORM.include?('java')
     s.add_development_dependency "jsminc", "~> 1.1"
   end
+  s.add_development_dependency "timecop", "~> 0.9.1"
   s.add_development_dependency "minitest", "~> 5.0"
   s.add_development_dependency "nokogiri", "~> 1.3"
   s.add_development_dependency "rack-test", "~> 0.6"
