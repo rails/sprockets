@@ -161,29 +161,9 @@ module Sprockets
         if !key.instance_of?(Symbol)
           raise TypeError, "processor metadata[#{key.inspect}] expected to be a Symbol"
         end
-
-        if !valid_processor_metadata_value?(value)
-          raise TypeError, "processor metadata[:#{key}] returned a complex type: #{value.inspect}\n" +
-            "Only #{VALID_METADATA_TYPES.to_a.join(", ")} maybe used."
-        end
       end
 
       result
-    end
-
-    # Internal: Validate object is in validate metadata whitelist.
-    #
-    # value - Any Object
-    #
-    # Returns true if class is in whitelist otherwise false.
-    def valid_processor_metadata_value?(value)
-      if VALID_METADATA_VALUE_TYPES_HASH[value.class]
-        true
-      elsif VALID_METADATA_COMPOUND_TYPES_HASH[value.class]
-        value.all? { |v| valid_processor_metadata_value?(v) }
-      else
-        false
-      end
     end
   end
 end
