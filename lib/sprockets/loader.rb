@@ -86,7 +86,7 @@ module Sprockets
           asset[:metadata][:dependencies].map!      { |uri| uri.start_with?("file-digest://") ? expand_from_root(uri) : uri } if asset[:metadata][:dependencies]
 
           asset[:metadata].each_key do |k|
-            next unless k.to_s.end_with?('_dependencies')
+            next unless k.match?(/_dependencies\z/) # rubocop:disable Performance/EndWith
             asset[:metadata][k].map! { |uri| expand_from_root(uri) }
           end
         end
@@ -244,7 +244,7 @@ module Sprockets
 
           # compress all _dependencies in metadata like `sass_dependencies`
           cached_asset[:metadata].each do |key, value|
-            next unless key.to_s.end_with?('_dependencies')
+            next unless key.match?(/_dependencies\z/) # rubocop:disable Performance/EndWith
             cached_asset[:metadata][key] = value.dup
             cached_asset[:metadata][key].map! {|uri| compress_from_root(uri) }
           end

@@ -16,14 +16,8 @@ before_test:
 test_script:
   - bundle exec rake
 
-matrix:
-  allow_failures:
-    - RUBY_VERSION: 25-x64
-    - RUBY_VERSION: 24-x64
-
 environment:
   matrix:
+    - RUBY_VERSION: 26-x64
     - RUBY_VERSION: 25-x64
-    - RUBY_VERSION: 24-x64
-    - RUBY_VERSION: 23-x64
 
