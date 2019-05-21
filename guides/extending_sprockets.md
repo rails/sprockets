@@ -425,9 +425,7 @@ In Sprockets 2 and 3 the way you registered a processor was via `register_engine
 if env.respond_to?(:register_transformer)
   env.register_mime_type 'text/css', extensions: ['.css'], charset: :css
   env.register_preprocessor 'text/css', MySprocketsExtension
-end
-
-if env.respond_to?(:register_engine)
+elsif env.respond_to?(:register_engine)
   args = ['.css', MySprocketsExtension]
   args << { mime_type: 'text/css', silence_deprecation: true } if Sprockets::VERSION.start_with?("3")
   env.register_engine(*args)
