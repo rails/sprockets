@@ -2,6 +2,9 @@ require 'erb'
 
 module Sprockets
   class ERBProcessor
+    ERB_VERSION_MATCH = ERB.version.match(/\Aerb\.rb \[(?<version>[^ ]+) /)
+    ERB_DATA_TRIM = ERB_VERSION_MATCH && ERB_VERSION_MATCH[:version] >= "2.2.0" # Ruby 2.6+
+
     # Public: Return singleton instance with default options.
     #
     # Returns ERBProcessor object.
@@ -18,8 +21,7 @@ module Sprockets
     end
 
     def call(input)
-      match = ERB.version.match(/\Aerb\.rb \[(?<version>[^ ]+) /)
-      if match && match[:version] >= "2.2.0" # Ruby 2.6+
+      if ERB_DATA_TRIM
         engine = ::ERB.new(input[:data], trim_mode: '<>')
       else
         engine = ::ERB.new(input[:data], nil, '<>')
