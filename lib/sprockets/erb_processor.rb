@@ -18,7 +18,13 @@ module Sprockets
     end
 
     def call(input)
-      engine = ::ERB.new(input[:data], nil, '<>')
+      match = ERB.version.match(/\Aerb\.rb \[(?<version>[^ ]+) /)
+      if match && match[:version] >= "2.2.0" # Ruby 2.6+
+        engine = ::ERB.new(input[:data], trim_mode: '<>')
+      else
+        engine = ::ERB.new(input[:data], nil, '<>')
+      end
+
       context = input[:environment].context_class.new(input)
       klass = (class << context; self; end)
       klass.class_eval(&@block) if @block
