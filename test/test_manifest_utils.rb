@@ -32,6 +32,6 @@ class TestManifestUtils < MiniTest::Test
       find_directory_manifest("#{root}/with_two_manifests", logger)
     output = r.gets
 
-    assert_match(/W, \[[^\]]+\]  WARN -- : Found multiple manifests. Choosing the first alphabetically/, output)
+    assert_match(/W, \[[^\]]+\]  WARN -- : Found multiple manifests: .+ Choosing the first alphabetically: \.sprockets-manifest-00000000000000000000000000000000\.json/, output)
   end
 end

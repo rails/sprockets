@@ -38,7 +38,7 @@ module Sprockets
       entries = File.directory?(dirname) ? Dir.entries(dirname) : []
       manifest_entries = entries.select { |e| e =~ MANIFEST_RE }
       if manifest_entries.length > 1
-        logger.warn('Found multiple manifests. Choosing the first alphabetically.')
+        logger.warn("Found multiple manifests: #{manifest_entries}. Choosing the first alphabetically: #{manifest_entries.first}")
       end
       entry = manifest_entries.first || generate_manifest_path
       File.join(dirname, entry)
