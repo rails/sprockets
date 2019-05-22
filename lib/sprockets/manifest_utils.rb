@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'securerandom'
+require 'logger'
 
 module Sprockets
   # Public: Manifest utilities.
@@ -33,10 +34,13 @@ module Sprockets
     #     # => "/app/public/assets/.sprockets-manifest-abc123.json"
     #
     # Returns String filename.
-    def find_directory_manifest(dirname)
+    def find_directory_manifest(dirname, logger = Logger.new($stderr))
       entries = File.directory?(dirname) ? Dir.entries(dirname) : []
-      entry = entries.find { |e| e =~ MANIFEST_RE } ||
-        generate_manifest_path
+      manifest_entries = entries.select { |e| e =~ MANIFEST_RE }
+      if manifest_entries.length > 1
+        logger.warn("Found multiple manifests: #{manifest_entries}. Choosing the first alphabetically: #{manifest_entries.first}")
+      end
+      entry = manifest_entries.first || generate_manifest_path
       File.join(dirname, entry)
     end
   end

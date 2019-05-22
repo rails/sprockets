@@ -6,6 +6,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 - Minimum Ruby version for Sprockets 4 is now 2.5+ which matches minimum ruby verision of Rails [#604]
 - Fix threading bug introduced in Sprockets 4 [#603]
+- Warn when two potential manifest files exist. [#560]
 
 ## 4.0.0.beta8
 
@@ -54,4 +55,3 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Initial release of Sprockets 4
 
 Please upgrade to the latest Sprockets 3 version before upgrading to Sprockets 4. Check the 3.x branch for previous changes https://github.com/rails/sprockets/blob/3.x/CHANGELOG.md.
-
