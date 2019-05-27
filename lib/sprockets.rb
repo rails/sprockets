@@ -180,6 +180,7 @@ module Sprockets
     application/ecmascript-6
     application/javascript
     application/json
+    application/manifest+json
     application/xml
     text/coffeescript
     text/css
