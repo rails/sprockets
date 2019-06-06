@@ -193,7 +193,7 @@ Example
 "gallery"
 ```
 
-- `:content_type` - [String] The coresponding mime content type of the asset.
+- `:content_type` - [String] The corresponding mime content type of the asset.
 
 Example:
 
