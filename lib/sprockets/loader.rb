@@ -115,6 +115,7 @@ module Sprockets
           asset[:load_path] = expand_from_root(asset[:load_path])
           asset[:filename]  = expand_from_root(asset[:filename])
           expand_key_from_hash(asset[:metadata], :included)
+          expand_key_from_hash(asset[:metadata], :links)
           expand_key_from_hash(asset[:metadata], :stubbed)
           expand_key_from_hash(asset[:metadata], :required)
           expand_key_from_hash(asset[:metadata], :to_load)
