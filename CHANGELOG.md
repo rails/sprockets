@@ -4,6 +4,10 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+## 4.0.0.beta10
+
+- Fix YACB (Yet Another Caching Bug) [Fix broken expansion of asset link paths](https://github.com/rails/sprockets/pull/614)
+
 ## 4.0.0.beta9
 
 - Minimum Ruby version for Sprockets 4 is now 2.5+ which matches minimum ruby verision of Rails [#604]
