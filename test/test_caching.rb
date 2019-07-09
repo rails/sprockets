@@ -444,6 +444,30 @@ class TestFileStoreCaching < Sprockets::TestCase
     environment['schneems.js']
   end
 
+  test "no relative paths are present in an asset loaded from cache by accident" do
+    environment = Sprockets::Environment.new(fixture_path('default')) do |env|
+      env.append_path(".")
+      env.cache = @cache
+    end
+    environment['schneems.js']
+    asset = environment['schneems.js']
+    asset_hash = asset.to_hash
+
+    refute has_relative_value?(asset_hash), "Expected asset from cache to have no relative paths, but it does:\n#{asset_hash}"
+  end
+
+  def has_relative_value?(elem)
+    if elem.is_a?(Hash)
+      return elem.values.detect {|e| has_relative_value?(e) }
+    end
+    if elem.respond_to?(:each)
+      return elem.each.detect {|e| has_relative_value?(e) }
+    end
+
+    return elem.to_s.match(/file:\/\/[^\/]/)
+  end
+
+
   test "no absolute paths are retuned from cache" do
     env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
