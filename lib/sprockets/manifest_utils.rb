@@ -35,7 +35,7 @@ module Sprockets
     #
     # Returns String filename.
     def find_directory_manifest(dirname, logger = Logger.new($stderr))
-      entries = File.directory?(dirname) ? Dir.entries(dirname) : []
+      entries = File.directory?(dirname) ? Dir.entries(dirname).sort : []
       manifest_entries = entries.select { |e| e =~ MANIFEST_RE }
       if manifest_entries.length > 1
         logger.warn("Found multiple manifests: #{manifest_entries}. Choosing the first alphabetically: #{manifest_entries.first}")
