@@ -9,8 +9,6 @@ before_install: gem install bundler -v '<2'
 rvm:
   - 2.5.3
   - 2.6.0
-  - jruby-9.2.5.0
-  - jruby-head
   - ruby-head
 
 matrix:
@@ -20,8 +18,12 @@ matrix:
   include:
     - rvm: 2.6.0
       script: bundle exec rake rubocop
+    - rvm: jruby-head
+      env: JAVA_OPTS="--add-opens java.base/sun.nio.ch=org.jruby.dist --add-opens java.base/java.io=org.jruby.dist"
+    - rvm: jruby-9.2.8.0
+      env: JAVA_OPTS="--add-opens java.base/sun.nio.ch=org.jruby.dist --add-opens java.base/java.io=org.jruby.dist"
   allow_failures:
-    - rvm: jruby-9.2.5.0
+    - rvm: jruby-9.2.8.0
     - rvm: jruby-head
     - rvm: ruby-head
   fast_finish: true
