@@ -148,7 +148,7 @@ class TestSasscManifest < TestSprocketsSassc
   end
 
   test 'concurrency' do
-    100.times do
+    1000.times do
       env = Sprockets::Environment.new(".") do |env|
         env.append_path(fixture_path('sass'))
         env.register_preprocessor 'text/scss', Sprockets::ScsscProcessor.new
