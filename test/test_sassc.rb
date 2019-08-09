@@ -131,3 +131,38 @@ class TestSasscFunctions < TestSprocketsSassc
 
   include SharedSassTestFunctions
 end
+
+class TestSasscManifest < TestSprocketsSassc
+  extend Sprockets::TestDefinition
+
+  def setup
+    super
+    @dir = Dir.mktmpdir
+    FileUtils.mkdir_p(@dir)
+  end
+
+  def teardown
+    super
+    FileUtils.remove_entry_secure(@dir) if File.exist?(@dir)
+    assert Dir["#{@dir}/*"].empty?, "Expected #{Dir["#{@dir}/*"]} to be empty but it was not"
+  end
+
+  test 'concurrency' do
+    100.times do
+      env = Sprockets::Environment.new(".") do |env|
+        env.append_path(fixture_path('sass'))
+        env.register_preprocessor 'text/scss', Sprockets::ScsscProcessor.new
+        env.register_preprocessor 'text/scss', compressor
+        env.export_concurrent = true
+        env.context_class.class_eval do
+          def asset_path(path, options = {})
+            'test'
+          end
+        end
+      end
+
+      manifest = Sprockets::Manifest.new(env, @dir).compile('paths.scss', 'urls.scss')
+      assert_equal(2, manifest.size)
+    end
+  end
+end
