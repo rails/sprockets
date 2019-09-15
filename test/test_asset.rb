@@ -332,7 +332,7 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
+    @env.find_asset(logical_path, **{pipeline: @pipeline}.merge(options))
   end
 end
 
@@ -403,7 +403,7 @@ class ProcessedAssetTest < Sprockets::TestCase
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
+    @env.find_asset(logical_path, **{pipeline: @pipeline}.merge(options))
   end
 end
 
@@ -1110,7 +1110,7 @@ EOS
   end
 
   def asset(logical_path, options = {})
-    @env.find_asset(logical_path, {pipeline: @pipeline}.merge(options))
+    @env.find_asset(logical_path, **{pipeline: @pipeline}.merge(options))
   end
 
   def read(logical_path)
@@ -1245,7 +1245,7 @@ class AssetLogicalPathTest < Sprockets::TestCase
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      assert asset = @env.find_asset(filename, options), "couldn't find asset: #{filename}"
+      assert asset = @env.find_asset(filename, **options), "couldn't find asset: #{filename}"
       asset.logical_path
     end
   end
@@ -1308,7 +1308,7 @@ class AssetContentTypeTest < Sprockets::TestCase
     filename = fixture_path("paths/#{path}")
     assert File.exist?(filename), "#{filename} does not exist"
     silence_warnings do
-      assert asset = @env.find_asset(filename, options), "couldn't find asset: #{filename}"
+      assert asset = @env.find_asset(filename, **options), "couldn't find asset: #{filename}"
       asset.content_type
     end
   end
