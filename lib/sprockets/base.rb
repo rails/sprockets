@@ -75,8 +75,8 @@ module Sprockets
     end
 
     # Find asset by logical path or expanded path.
-    def find_asset(*args)
-      uri, _ = resolve(*args)
+    def find_asset(*args, **options)
+      uri, _ = resolve(*args, **options)
       if uri
         load(uri)
       end

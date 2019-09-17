@@ -27,8 +27,8 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    def find_asset(*args)
-      cached.find_asset(*args)
+    def find_asset(*args, **options)
+      cached.find_asset(*args, **options)
     end
 
     def find_asset!(*args)

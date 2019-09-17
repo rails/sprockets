@@ -255,15 +255,15 @@ class TestResolve < Sprockets::TestCase
     @env.append_path(random_path)
 
     error = assert_raises(Sprockets::FileNotFound) do
-      uri, _ = @env.resolve!("thisfiledoesnotexistandshouldraiseerrors", {})
+      uri, _ = @env.resolve!("thisfiledoesnotexistandshouldraiseerrors", **{})
       uri
     end
 
     assert_match(/#{ random_path }/, error.message)
   end
 
-  def resolve(path, options = {})
-    uri, _ = @env.resolve(path, options)
+  def resolve(path, **options)
+    uri, _ = @env.resolve(path, **options)
     uri
   end
 end
