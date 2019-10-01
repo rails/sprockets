@@ -436,7 +436,7 @@ module Sprockets
         digit = BASE64_VALUES[str[i]]
         raise ArgumentError unless digit
         continuation = (digit & VLQ_CONTINUATION_BIT) != 0
-        digit &= VLQ_CONTINUATION_BIT - 1
+        digit &= VLQ_BASE_MASK
           value += digit << shift
         if continuation
           shift += VLQ_BASE_SHIFT
