@@ -16,12 +16,12 @@ end
 $dir_entires_calls = nil
 class << Dir
   alias_method :original_entries, :entries
-  def entries(dirname, *args)
+  def entries(dirname, **args)
     if $dir_entires_calls
       $dir_entires_calls[dirname.to_s] ||= []
       $dir_entires_calls[dirname.to_s] << caller
     end
-    original_entries(dirname, *args)
+    original_entries(dirname, **args)
   end
 end
 
