@@ -428,21 +428,23 @@ module Sprockets
     # Returns an Array of Integers.
     def vlq_decode(str)
       result = []
-      chars = str.split('')
-      while chars.any?
-        vlq = 0
-        shift = 0
-        continuation = true
-        while continuation
-          char = chars.shift
-          raise ArgumentError unless char
-          digit = BASE64_VALUES[char]
-          continuation = false if (digit & VLQ_CONTINUATION_BIT) == 0
-          digit &= VLQ_BASE_MASK
-          vlq   += digit << shift
+      shift = 0
+      value = 0
+      i = 0
+
+      while i < str.size do
+        digit = BASE64_VALUES[str[i]]
+        raise ArgumentError unless digit
+        continuation = (digit & VLQ_CONTINUATION_BIT) != 0
+        digit &= VLQ_CONTINUATION_BIT - 1
+          value += digit << shift
+        if continuation
           shift += VLQ_BASE_SHIFT
+        else
+          result << ((value & 1) == 1 ? -(value >> 1) : value >> 1)
+          value = shift = 0
         end
-        result << (vlq & 1 == 1 ? -(vlq >> 1) : vlq >> 1)
+        i += 1
       end
       result
     end
