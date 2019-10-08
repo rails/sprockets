@@ -1,6 +1,6 @@
 # Building an Asset Processing Framework
 
-This guide is for using a Sprockets::Environment to process assets. You would use this class directly if you were building a feature similar to Rail's asset pipeline. If you aren't building an asset processing frameworks, you will want to refer to the [End User Asset Generation](end_user_asset_generation.md) guide instead. For a reference use of `Sprockets::Environemnt` see [sprockets-rails](http://github.com/rails/Sprockets-rails).
+This guide is for using a Sprockets::Environment to process assets. You would use this class directly if you were building a feature similar to Rail's asset pipeline. If you aren't building an asset processing frameworks, you will want to refer to the [End User Asset Generation](end_user_asset_generation.md) guide instead. For a reference use of `Sprockets::Environment` see [sprockets-rails](http://github.com/rails/Sprockets-rails).
 
 ## Understanding the Sprockets Environment
 
@@ -46,6 +46,16 @@ environment.append_path 'vendor/assets/bower_components'
 
 In general, you should append to the path by default and reserve
 prepending for cases where you need to override existing assets.
+
+## Precompile Files
+
+In addition to providing a path, you'll need to give sprockets an entry point to start precompiling files for production deployment. This is usually done via the `Sprockets::Manifest` class like:
+
+```
+SprocketsManifest#find(config.assets.precompile).map(&:logical_path).to_set
+```
+
+You can see an example in [sprockets-rails](https://github.com/rails/sprockets-rails/blob/49bf8022c8d3e1d7348b3fe2e0931b2e448f1f58/lib/sprockets/railtie.rb#L50).
 
 ### Accessing Assets
 
