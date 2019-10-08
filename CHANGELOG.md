@@ -4,6 +4,11 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+## 4.0.0
+
+- Fixes for Ruby 2.7 keyword arguments warnings [#625](https://github.com/rails/sprockets/pull/625)
+- Manifest files are sorted alphabetically [#626](https://github.com/rails/sprockets/pull/626)
+
 ## 4.0.0.beta10
 
 - Fix YACB (Yet Another Caching Bug) [Fix broken expansion of asset link paths](https://github.com/rails/sprockets/pull/614)
