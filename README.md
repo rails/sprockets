@@ -115,9 +115,9 @@ Here is a list of the available directives:
 - [`require_self`](#require_self) - Change order of where current contents are concatenated to current
 - [`require_directory`](#require_directory) - Add contents of each file in a folder to current
 - [`require_tree`](#require_tree) - Add contents of all files in all directories in a path to current
-- [`link`](#link) - Make target file compile and be publically available without adding contents to current
-- [`link_directory`](#link_directory) - Make target directory compile and be publically available without adding contents to current
-- [`link_tree`](#link_tree) - Make target tree compile and be publically available without adding contents to current
+- [`link`](#link) - Make target file compile and be publicly available without adding contents to current
+- [`link_directory`](#link_directory) - Make target directory compile and be publicly available without adding contents to current
+- [`link_tree`](#link_tree) - Make target tree compile and be publicly available without adding contents to current
 - [`depend_on`](#depend_on) - Recompile current file if target has changed
 - [`stub`](#stub) - Ignore target file
 
