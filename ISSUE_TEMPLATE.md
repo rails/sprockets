@@ -11,7 +11,7 @@ Tell us what happens instead
 - Sprockets version
 - Ruby version
 
-### Example App
+### Example App (Reproduction) - THIS IS IMPORTANT YOUR ISSUE LIKELY WILL NOT BE RESOLVED WITHOUT THIS
 
 Please provide an [example app](https://www.codetriage.com/example_app) that reproduces the problem. This will save maintainers time so they can spend it fixing your issues instead of trying to build a reproduction case from sparse instructions.
 
