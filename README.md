@@ -363,37 +363,69 @@ directory specified by *path*.
 ### link
 
 `link` *path* declares a dependency on the target *path* and adds it to a list
-of subdependencies to automatically be compiled when the asset is written out to
+of subdependencies to be compiled when the asset is written out to
 disk.
 
 Example:
 
-If you've got a `manifest.js` file and you want to explicitly make sure an `admin.js` file is
-generated and made available to the public you can link it like this:
+If you've got a `manifest.js` file and you want to specify that a `admin.js` source file should be
+generated and made available to the public you can link it by including this in the `manifest.js` file:
 
 ```
 //= link admin.js
 ```
 
+The argument to `link` is a _logical path_, that is it will be resolved according to the
+configured asset load paths. See [Accesing Assets](#accessing-assets) above. A path relative to
+the current file won't work, it must be a logical path.
+
+**Caution**: the "link" directive should always have an explicit extension on the end.
+
 ### link_directory
 
-`link_directory` *path* links all the files inside the directory specified by the *path*
+`link_directory` *path* links all the files inside the directory specified by the *path*. By "link", we mean they are specified as compilation targets to be written out to disk, and made available to be served to user-agents.
+
+Files in subdirectories will not be linked (Compare to [link_tree](#link_tree)).
+
+The *path* argument to `link_directory` is _not_ a logical path (it does not use the asset load paths), but is a path relative to the file the `link_directory` directive is found in, and can use `..` to  . For instance, you might want:
+
+```js
+//= link_directory ../stylesheets
+```
+
+`link_directory` can take an optional second argument with an extension or content-type, with the
+two arguments separated by a space:
+
+```js
+//= link_directory ../stylesheets text/css
+//= link_directory ../more_stylesheets .css
+
+This will limit the matching files to link to only files recognized as that type. An extension is
+just a shortcut for the type referenced, it does not need to match the source file exactly, but
+instead identifies the content-type the source file must be recognized as.
 
 ### link_tree
 
-`link_tree` *path* works like `link_directory`, but operates
+`link_tree` *path* works like [link_directory](#link_directory), but operates
 recursively to link all files in all subdirectories of the
 directory specified by *path*.
 
 Example:
 
-You can specify a file extension so any extra files will be ignored:
-
 ```js
-//= link_tree ./path/to/folder .js
+//= link_tree ./path/to/folder
 ```
 
-> Note: There is an intentional space between the path and the extension
+Like `link_directory`, the argument is path relative to the current file, it is *not* a 'logical path' tresolved against load paths.
+
+
+As with `link_directory`, you can also specify a second argument -- separated by a space --  so any extra files not matching the content-type specified will be ignored:
+
+```js
+//= link_tree ./path/to/folder text/javascript
+//= link_tree ./path/to/other_folder .js
+```
+
 
 ### depend_on
 
