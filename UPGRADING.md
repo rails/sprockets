@@ -4,10 +4,25 @@ Make sure that you're running the latest Sprockets 3 release. This document is a
 
 This upgrading guide touches on:
 
+- Upgrading as a Rails dependency
 - Source Maps
 - Manifest.js
 - ES6 support
 - Deprecated processor interface in 3.x is removed in 4.x
+
+## Upgrading as a Rails Dependency
+
+Your Rails app Gemfile may have a line requiring sass-rails 5.0:
+
+    gem 'sass-rails', '~> 5.0'
+    # or
+    gem 'sass-rails', '~> 5'
+
+These will prevent upgrade to sprockets 4, if you'd like to upgrade to sprockets 4 change to:
+
+    gem 'sass-rails', '>= 5'
+
+And then run `bundle update sass-rails sprockets` to get sass-rails 6.x and sprockets 4.x.
 
 ## Source Maps
 
