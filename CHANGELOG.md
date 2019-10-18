@@ -4,6 +4,8 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+- Fixes for Ruby 2.7 match with nil raises an exception [#646] (https://github.com/rails/sprockets/pull/646)
+
 ## 4.0.0
 
 - Fixes for Ruby 2.7 keyword arguments warnings [#625](https://github.com/rails/sprockets/pull/625)

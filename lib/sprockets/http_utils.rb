@@ -59,7 +59,7 @@ module Sprockets
       values.to_s.split(/\s*,\s*/).map do |part|
         value, parameters = part.split(/\s*;\s*/, 2)
         quality = 1.0
-        if md = /\Aq=([\d.]+)/.match(parameters)
+        if parameters && (md = /\Aq=([\d.]+)/.match(parameters))
           quality = md[1].to_f
         end
         [value, quality]
