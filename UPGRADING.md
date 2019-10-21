@@ -45,7 +45,7 @@ When compiling assets with Sprockets, Sprockets needs to decide which top-level 
 
 If you are using sprockets prior to 4.0, Rails will compile `application.css`, `application.js`; and *any* files found in your assets directory(ies) that are _not_ recognized as JS or CSS, but do have a filename extension. That latter was meant to apply to all your images usually in `./app/assets/images/`, but could have targetted other files as well.
 
-If you wanted to specify additional assets to deliver that were not included by this logic, for instance for a marketing page iwht its own CSS, you might add something like this:
+If you wanted to specify additional assets to deliver that were not included by this logic, for instance for a marketing page with its own CSS, you might add something like this:
 
 
 ```ruby
@@ -65,7 +65,7 @@ The default `manifest.js` created by `rails new` for the past few Rails versions
 //= link_directory ../stylesheets .css
 ```
 
-This says to include the contents of all file found in the `./app/assets/images` directory or any subdirectories. And any files recognized as CSS directly at `./app/assets/stylesheets`  or as JS at `./app/assets/javascripts` (not including subdirectories). (The JS line is not generated in Rails 6.0.0 apps, since Rails 6.0 apps do not manage JS with sprockets).
+This says to include the contents of all file found in the `./app/assets/images` directory or any subdirectories. And any files recognized as CSS directly at `./app/assets/stylesheets`  or as JS at `./app/assets/javascripts` (not including subdirectories). (The JS line is not generated in Rails 6.0 apps, since Rails 6.0 apps do not manage JS with sprockets).
 
 Since the default logic for determining top-level targets changed, you might find some files that were currently compiled by sprockets for delivery to browser no longer are. You will have to edit the `manifest.js` to specify those files.
 
