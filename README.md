@@ -399,6 +399,7 @@ two arguments separated by a space:
 ```js
 //= link_directory ../stylesheets text/css
 //= link_directory ../more_stylesheets .css
+```
 
 This will limit the matching files to link to only files recognized as that type. An extension is
 just a shortcut for the type referenced, it does not need to match the source file exactly, but
