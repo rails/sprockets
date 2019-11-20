@@ -213,7 +213,8 @@ module Sprockets
       #     //= require "./bar"
       #
       def process_require_directive(path)
-        @required << resolve(path, accept: @content_type, pipeline: :self)
+        has_extname = File.extname(path) != ""
+        @required << resolve(path, accept: has_extname ? nil : @content_type, pipeline: :self)
       end
 
       # `require_self` causes the body of the current file to be inserted
