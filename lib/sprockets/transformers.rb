@@ -101,8 +101,13 @@ module Sprockets
         config[:inverted_transformers][type].each do |subtype|
           accepts.push([subtype, q * 0.8])
         end
+        config[:transformers][type].keys.each do |parent_type|
+          config[:inverted_transformers][parent_type].each do |subtype|
+            accepts.push([subtype, q * 0.6])
+          end
+        end
       end
-      accepts
+      accepts.uniq { |(type, _q)| type }
     end
 
     # Internal: Compose multiple transformer steps into a single processor
