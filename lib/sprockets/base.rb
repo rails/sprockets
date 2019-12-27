@@ -115,8 +115,8 @@ module Sprockets
     #
     #     environment['application.js']
     #
-    def [](*args)
-      find_asset(*args)
+    def [](*args, **options)
+      find_asset(*args, **options)
     end
 
     # Find asset by logical path or expanded path.
