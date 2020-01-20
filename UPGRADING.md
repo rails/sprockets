@@ -55,7 +55,7 @@ config.assets.precompile += ["marketing.css"]
 
 If you are using Sprockets 4, Rails changes it's default logic for determining top-level targets.  It will now use _only_ a file at `./app/assets/config/manifest.js` for specifying top-level targets; this file may already exist in your Rails app (although Rails only starts automatically using it once you are using sprockets 4), if not you should create it.
 
-The `manifest.js` file is meant to specify what files to use as a top-level target using sprockets methods `link`, `link_directory`, and `link_tree`.
+The `manifest.js` file is meant to specify which files to use as a top-level target using sprockets methods `link`, `link_directory`, and `link_tree`.
 
 The default `manifest.js` created by `rails new` for the past few Rails versions looks like:
 
@@ -65,11 +65,11 @@ The default `manifest.js` created by `rails new` for the past few Rails versions
 //= link_directory ../stylesheets .css
 ```
 
-This says to include the contents of all file found in the `./app/assets/images` directory or any subdirectories. And any files recognized as CSS directly at `./app/assets/stylesheets`  or as JS at `./app/assets/javascripts` (not including subdirectories). (The JS line is not generated in Rails 6.0 apps, since Rails 6.0 apps do not manage JS with sprockets).
+This is meant to include the contents of all files found in the `./app/assets/images` directory or any subdirectories as well as any file recognized as JS directly at `./app/assets/javascripts` or as CSS directly at `./app/assets/stylesheets` (both not including subdirectories). (The JS line is not generated in Rails 6.0 apps, since Rails 6.0 apps do not manage JS with sprockets).
 
 Since the default logic for determining top-level targets changed, you might find some files that were currently compiled by sprockets for delivery to browser no longer are. You will have to edit the `manifest.js` to specify those files.
 
-You may also find that some files that were *not* previously compiled as top-level targets now are. For instance, if your existing app has any js files directly at `./app/assets/javascripts` or css/scss files `./app/assets/stylesheets`, Rails with Sprockets 4 will now compile them as top-level targets. Since they were not previously treated as such, you probably don't mean them to be; if they are .scss partials referencing variables meant to be defined in other files, it may even result in an error message that looks like `Undefined variable: $some_variable`.
+You may also find that some files that were *not* previously compiled as top-level targets are now. For instance, if your existing app has any js files directly at `./app/assets/javascripts` or css/scss files `./app/assets/stylesheets`, Rails with Sprockets 4 will now compile them as top-level targets. Since they were not previously treated as such, you probably don't mean them to be; if they are .scss partials referencing variables meant to be defined in other files, it may even result in an error message that looks like `Undefined variable: $some_variable`.
 
 To correct this, you can move these files to some _subdirectory_ of `./app/assets/stylesheets` or `javascripts`; or you can change the `manifest.js` to be more like how Rails with Sprockets 3 works, linking only the specific `application` files as top-level targets:
 
