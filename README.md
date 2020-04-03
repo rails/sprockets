@@ -119,6 +119,7 @@ Here is a list of the available directives:
 - [`link_directory`](#link_directory) - Make target directory compile and be publicly available without adding contents to current
 - [`link_tree`](#link_tree) - Make target tree compile and be publicly available without adding contents to current
 - [`depend_on`](#depend_on) - Recompile current file if target has changed
+- [`depend_on_directory`](#depend_on_directory) - Recompile current file if any files in target directory has changed
 - [`stub`](#stub) - Ignore target file
 
 You can see what each of these does below.
@@ -239,7 +240,7 @@ The first time this file is compiled the `application.js` output will be written
 
 So, if `b.js` changes it will get recompiled. However instead of having to recompile the other files from `a.js` to `z.js` since they did not change, we can use the prior intermediary files stored in the cached values . If these files were expensive to generate, then this "partial" asset cache strategy can save a lot of time.
 
-Directives such as `require`, `link`, and `depend_on` tell Sprockets what assets need to be re-compiled when a file changes. Files are considered "fresh" based on their mtime on disk and a combination of cache keys.
+Directives such as `require`, `link`, `depend_on`, and `depend_on_directory` tell Sprockets what assets need to be re-compiled when a file changes. Files are considered "fresh" based on their mtime on disk and a combination of cache keys.
 
 On Rails you can force a "clean" install by clearing the `public/assets` and `tmp/cache/assets` directories.
 
@@ -445,10 +446,52 @@ you need to tell sprockets that it needs to re-compile the file if `bar.data` ch
 var bar = '<%= File.read("bar.data") %>'
 ```
 
+To depend on an entire directory containing multiple files, use `depend_on_directory`
+
 ### depend_on_asset
 
 `depend_on_asset` *path* works like `depend_on`, but operates
 recursively reading the file and following the directives found. This is automatically implied if you use `link`, so consider if it just makes sense using `link` instead of `depend_on_asset`.
+
+### depend_on_directory
+
+`depend_on_directory` *path* declares all files in the given *path* without
+including them in the bundle. This is useful when you need to expire an
+asset's cache in response to a change in multiple files in a single directory.
+
+All paths are relative to your declaration and must begin with `./`
+
+Also, your must include these directories in your [load path](guides/building_an_asset_processing_framework.md#the-load-path).
+
+**Example:**
+
+If we've got a directory called `data` with files `a.data` and `b.data`
+
+```
+// ./data/a.data
+A
+```
+
+```
+// ./data/b.data
+B
+```
+
+```
+// ./file.js.erb
+//= depend_on_directory ./data
+var a = '<% File.read('data/a.data') %>'
+var b = '<% File.read('data/b.data') %>'
+```
+
+Would produce:
+
+```js
+var a = "A";
+var b = "B";
+```
+
+You can also see [Index files are proxies for folders](#index-files-are-proxies-for-folders) for another method of organizing folders that will give you more control.
 
 ### stub
 
@@ -491,9 +534,9 @@ When you modify the `logo.png` on disk, it will force `application.css` to be
 recompiled so that the fingerprint will be correct in the generated asset.
 
 You can manually make sprockets depend on any other file that is generated
-by sprockets by using the `depend_on` directive. Rails implements the above
-feature by auto calling `depend_on` on the original asset when the `asset_url`
-is used inside of an asset.
+by sprockets by using the `depend_on` or `depend_on_directory` directive. Rails
+implements the above feature by auto calling `depend_on` on the original asset
+when the `asset_url` is used inside of an asset.
 
 ### Styling with Sass and SCSS
 
