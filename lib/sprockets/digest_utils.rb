@@ -68,18 +68,8 @@ module Sprockets
       Encoding => ->(val, digest) {
         digest << 'Encoding'.freeze
         digest << val.name
-      },
+      }
     }
-    if 0.class != Integer # Ruby < 2.4
-      ADD_VALUE_TO_DIGEST[Fixnum] = ->(val, digest) {
-        digest << 'Integer'.freeze
-        digest << val.to_s
-      }
-      ADD_VALUE_TO_DIGEST[Bignum] = ->(val, digest) {
-        digest << 'Integer'.freeze
-        digest << val.to_s
-      }
-    end
 
     ADD_VALUE_TO_DIGEST.compare_by_identity.rehash
 
