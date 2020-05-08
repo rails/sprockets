@@ -177,6 +177,51 @@ class TestSourceMapUtils < MiniTest::Test
     ], Sprockets::SourceMapUtils.decode_source_map(combined)[:mappings]
   end
 
+  def test_concat_without_x_sprockets_linecount_works
+    abc_mappings = [
+      { source: 'a.js', generated: [1, 0], original: [1,  0] },
+      { source: 'b.js', generated: [2, 0], original: [20, 0] },
+      { source: 'c.js', generated: [3, 0], original: [30, 0] }
+    ].freeze
+
+    d_mapping = [
+      { source: 'd.js', generated: [1, 0], original: [1, 0] }
+    ].freeze
+
+    abc_map = {
+      "version" => 3,
+      "file" => "a.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(abc_mappings),
+      "sources" => ["a.js", "b.js", "c.js"],
+      "names" => [],
+      "x_sprockets_linecount" => 3
+    }
+
+    d_map = {
+      "version" => 3,
+      "file" => "d.js",
+      "mappings" => Sprockets::SourceMapUtils.encode_vlq_mappings(d_mapping),
+      "sources" => ["d.js"],
+      "names" => [],
+    }
+
+    combined = Sprockets::SourceMapUtils.concat_source_maps(deep_dup(abc_map), deep_dup(d_map))
+    assert_equal [
+      { source: 'a.js', generated: [1, 0], original: [1,  0] },
+      { source: 'b.js', generated: [2, 0], original: [20, 0] },
+      { source: 'c.js', generated: [3, 0], original: [30, 0] },
+      { source: 'd.js', generated: [4, 0], original: [1,  0] }
+    ], Sprockets::SourceMapUtils.decode_source_map(combined)[:mappings]
+
+    combined = Sprockets::SourceMapUtils.concat_source_maps(deep_dup(d_map), deep_dup(abc_map))
+    assert_equal [
+      { source: 'd.js', generated: [1, 0], original: [1,  0] },
+      { source: 'a.js', generated: [2, 0], original: [1,  0] },
+      { source: 'b.js', generated: [3, 0], original: [20, 0] },
+      { source: 'c.js', generated: [4, 0], original: [30, 0] }
+    ], Sprockets::SourceMapUtils.decode_source_map(combined)[:mappings]
+  end
+
   def test_combine_source_maps_returns_original
     abc_mappings = [
       { source: 'a.js', generated: [1, 0], original: [0,  0] },
