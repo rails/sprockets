@@ -189,6 +189,7 @@ module Sprockets
     text/scss
     text/yaml
     text/eco
+    text/ejs
   ), 'application/\2+ruby', '.erb', ERBProcessor)
 
   register_mime_type 'application/html+ruby', extensions: ['.html.erb', '.erb', '.rhtml'], charset: :html

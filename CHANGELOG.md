@@ -5,6 +5,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 ## Master
 
 - Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
+- Process `*.jst.ejs.erb` files with ERBProcessor [#674](https://github.com/rails/sprockets/pull/674)
 
 ## 4.0.2
 
