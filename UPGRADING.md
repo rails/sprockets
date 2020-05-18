@@ -53,7 +53,7 @@ If you wanted to specify additional assets to deliver that were not included by 
 config.assets.precompile += ["marketing.css"]
 ```
 
-If you are using Sprockets 4, Rails changes it's default logic for determining top-level targets.  It will now use _only_ a file at `./app/assets/config/manifest.js` for specifying top-level targets; this file may already exist in your Rails app (although Rails only starts automatically using it once you are using sprockets 4), if not you should create it.
+If you are using Sprockets 4, Rails changes its default logic for determining top-level targets.  It will now use _only_ a file at `./app/assets/config/manifest.js` for specifying top-level targets; this file may already exist in your Rails app (although Rails only starts automatically using it once you are using sprockets 4), if not you should create it.
 
 The `manifest.js` file is meant to specify which files to use as a top-level target using sprockets methods `link`, `link_directory`, and `link_tree`.
 
