@@ -78,7 +78,7 @@ module Sprockets
       offset = 0
       if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
         last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
-        offset += last_line_count
+        offset += last_line_count || 1
 
         last_offset = a["sections"].last["offset"]["line"]
         offset += last_offset
