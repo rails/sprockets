@@ -86,6 +86,7 @@ class TestManifest < Sprockets::TestCase
   end
 
   test "compile asset" do
+    @env.version = '1.1.2'
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 
     digest_path = @env['application.js'].digest_path
@@ -325,6 +326,29 @@ class TestManifest < Sprockets::TestCase
     assert_equal main_digest_path, data['assets']['explore-link.js']
     assert_equal dep_digest_path, data['assets']['gallery-link.js']
     assert_equal subdep_digest_path, data['assets']['gallery.js']
+  end
+
+  test "recompile asset when environment version is changed" do
+    manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
+
+    digest_path = @env['application.js'].digest_path
+    filename = fixture_path('default/application.coffee')
+
+    sandbox filename do
+      assert !File.exist?("#{@dir}/#{digest_path}"), Dir["#{@dir}/*"].inspect
+
+      manifest.compile('application.js')
+
+      assert File.exist?("#{@dir}/manifest.json")
+      assert File.exist?("#{@dir}/#{digest_path}")
+
+      @env.version = '1.1.3'
+      new_digest_path = @env['application.js'].digest_path
+
+      assert !File.exist?("#{@dir}/#{new_digest_path}"), Dir["#{@dir}/*"].inspect
+      manifest.compile('application.js')
+      assert File.exist?("#{@dir}/#{new_digest_path}")
+    end
   end
 
   test "recompile asset" do

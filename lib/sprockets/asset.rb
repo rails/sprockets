@@ -123,9 +123,14 @@ module Sprockets
       metadata[:digest]
     end
 
+    # Private: Return the version of the environment where the asset was generated.
+    def environment_version
+      metadata[:environment_version]
+    end
+
     # Public: Returns String hexdigest of source.
     def hexdigest
-      DigestUtils.pack_hexdigest(digest)
+      DigestUtils.pack_hexdigest(environment_version + digest)
     end
 
     # Pubic: ETag String of Asset.

@@ -435,6 +435,12 @@ class BundledAssetTest < Sprockets::TestCase
       @asset.digest_path
   end
 
+  test "environment version" do
+    @env.version = "v1"
+
+    assert_equal "v1", @env['application.js'].environment_version
+  end
+
   test "content type" do
     assert_equal "application/javascript", @asset.content_type
   end
