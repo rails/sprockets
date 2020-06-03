@@ -6,6 +6,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 - Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
 - Fix for when `x_sprockets_linecount` is missing from a source map.
+- Changing the version now busts the digest of assets with no preprocessor (eg. images) [#680](https://github.com/rails/sprockets/pull/680)
 
 
 ## 4.0.0

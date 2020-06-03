@@ -188,7 +188,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png",
+    assert_equal "POW-807d145b64b285d67ade03dcea1b193440650f62d1296a42deddcefcfa5ec6c6.png",
       @asset.digest_path
   end
 
@@ -209,19 +209,19 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    assert_equal [29, 162, 229, 157, 247, 93, 51, 216, 183, 76, 61, 113, 254, 237, 230, 152, 242, 3, 241, 54, 81, 44, 186, 171, 32, 198, 138, 91, 222, 189, 88, 0], @asset.digest.bytes.to_a
+    assert_equal [128, 125, 20, 91, 100, 178, 133, 214, 122, 222, 3, 220, 234, 27, 25, 52, 64, 101, 15, 98, 209, 41, 106, 66, 222, 221, 206, 252, 250, 94, 198, 198], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
-    assert_equal "1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800", @asset.hexdigest
+    assert_equal "807d145b64b285d67ade03dcea1b193440650f62d1296a42deddcefcfa5ec6c6", @asset.hexdigest
   end
 
   test "source base64digest" do
-    assert_equal "HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.base64digest
+    assert_equal "gH0UW2SyhdZ63gPc6hsZNEBlD2LRKWpC3t3O/PpexsY=", @asset.base64digest
   end
 
   test "integrity" do
-    assert_equal "sha256-HaLlnfddM9i3TD1x/u3mmPID8TZRLLqrIMaKW969WAA=", @asset.integrity
+    assert_equal "sha256-gH0UW2SyhdZ63gPc6hsZNEBlD2LRKWpC3t3O/PpexsY=", @asset.integrity
   end
 
   test "asset is fresh if its mtime is changed but its contents is the same" do
@@ -299,7 +299,7 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application.source-6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea.js",
+    assert_equal "application.source-403cc6173410e12cc40dbd17c89311d491e12ae1bf1434d18e71b82f4aca8d23.js",
       @asset.digest_path
   end
 
@@ -312,19 +312,19 @@ class SourceAssetTest < Sprockets::TestCase
   end
 
   test "source digest" do
-    assert_equal [106, 232, 1, 224, 40, 19, 191, 32, 154, 132, 168, 155, 140, 91, 94, 223, 94, 183, 112, 202, 158, 66, 83, 197, 104, 52, 192, 138, 47, 197, 219, 234], @asset.digest.bytes.to_a
+    assert_equal [64, 60, 198, 23, 52, 16, 225, 44, 196, 13, 189, 23, 200, 147, 17, 212, 145, 225, 42, 225, 191, 20, 52, 209, 142, 113, 184, 47, 74, 202, 141, 35], @asset.digest.bytes.to_a
   end
 
   test "source hexdigest" do
-    assert_equal "6ae801e02813bf209a84a89b8c5b5edf5eb770ca9e4253c56834c08a2fc5dbea", @asset.hexdigest
+    assert_equal "403cc6173410e12cc40dbd17c89311d491e12ae1bf1434d18e71b82f4aca8d23", @asset.hexdigest
   end
 
   test "source base64digest" do
-    assert_equal "augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.base64digest
+    assert_equal "QDzGFzQQ4SzEDb0XyJMR1JHhKuG/FDTRjnG4L0rKjSM=", @asset.base64digest
   end
 
   test "integrity" do
-    assert_equal "sha256-augB4CgTvyCahKibjFte3163cMqeQlPFaDTAii/F2+o=", @asset.integrity
+    assert_equal "sha256-QDzGFzQQ4SzEDb0XyJMR1JHhKuG/FDTRjnG4L0rKjSM=", @asset.integrity
   end
 
   test "to_s" do
@@ -885,7 +885,7 @@ class BundledAssetTest < Sprockets::TestCase
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
+define("POW.png", "POW-807d145b64b285d67ade03dcea1b193440650f62d1296a42deddcefcfa5ec6c6.png");
     EOS
     assert_equal [
       "file://#{fixture_path_for_uri("asset/POW.png")}?type=image/png&id=xxx",
@@ -903,7 +903,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
 
 define("application.js", "application-955b2dddd0d1449b1c617124b83b46300edadec06d561104f7f6165241b31a94.js")
 define("application.css", "application-46d50149c56fc370805f53c29f79b89a52d4cc479eeebcdc8db84ab116d7ab1a.css")
-define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png");
+define("POW.png", "POW-807d145b64b285d67ade03dcea1b193440650f62d1296a42deddcefcfa5ec6c6.png");
     EOS
 
     assert_equal [
@@ -985,7 +985,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
     assert asset = asset("link/asset_uri.css")
     assert_equal <<-EOS, asset.to_s
 .logo {
-  background: url(POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bdebd5800.png);
+  background: url(POW-807d145b64b285d67ade03dcea1b193440650f62d1296a42deddcefcfa5ec6c6.png);
 }
     EOS
     assert_equal [
