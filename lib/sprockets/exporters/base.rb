@@ -69,4 +69,3 @@ module Sprockets
     end
   end
 end
-

@@ -345,7 +345,7 @@ class TestSourceMaps < Sprockets::TestCase
     filename = fixture_path('source-maps/sub/a.js')
     sandbox filename do
       expected = JSON.parse(@env.find_asset('sub/directory.js.map').source).tap do |map|
-        index = map["sections"].find_index { |s| /sub\/a\.js$/ =~ s["map"]["file"] }
+        index = map["sections"].find_index { |s| s["map"]["file"].end_with?('sub/a.js') }
         map["sections"][index]["map"]["mappings"] << ";AACA"
         map["sections"][(index+1)..-1].each do |s|
           s["offset"]["line"] += 1

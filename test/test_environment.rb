@@ -720,6 +720,12 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal 2, asset.metadata[:selector_count]
   end
 
+  test "changing version changes the digest_path of the asset" do
+    old_asset_digest = @env["gallery.js"].digest_path
+    @env.version = 'v2'
+    assert old_asset_digest != @env["gallery.js"].digest_path
+  end
+
   test "changing version changes the digest of the asset" do
     old_asset_digest = @env["gallery.js"].hexdigest
     @env.version = 'v2'
