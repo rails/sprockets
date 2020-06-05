@@ -135,7 +135,13 @@ module Sprockets
 
     # Pubic: ETag String of Asset.
     def etag
-      DigestUtils.hexdigest(environment_version.to_s + digest)
+      version = environment_version
+
+      if version && version != ""
+        DigestUtils.hexdigest(version + digest)
+      else
+        DigestUtils.pack_hexdigest(digest)
+      end
     end
 
     # Public: Returns String base64 digest of source.
