@@ -145,7 +145,7 @@ module Sprockets
 
     # Public: A "named information" URL for subresource integrity.
     def integrity
-      DigestUtils.integrity_uri(metadata[:digest])
+      DigestUtils.integrity_uri(digest)
     end
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
