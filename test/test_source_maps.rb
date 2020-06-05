@@ -391,7 +391,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
     assert_equal [
-      "file:///#{ fixture_path('source-maps/sass/main.scss').delete_prefix(/\A\//, '') }?type=text/scss&pipeline=source"
+      "file:///#{ fixture_path('source-maps/sass/main.scss').delete_prefix('/') }?type=text/scss&pipeline=source"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
