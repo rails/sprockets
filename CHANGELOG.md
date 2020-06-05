@@ -2,6 +2,10 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## 4.0.2
+
+- Fix `etag` and digest path compilation that were generating string with invalid digest since 4.0.1.
+
 ## 4.0.1
 
 - Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
