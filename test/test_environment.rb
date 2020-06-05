@@ -723,13 +723,45 @@ class TestEnvironment < Sprockets::TestCase
   test "changing version changes the digest_path of the asset" do
     old_asset_digest = @env["gallery.js"].digest_path
     @env.version = 'v2'
-    assert old_asset_digest != @env["gallery.js"].digest_path
+    refute_equal old_asset_digest, @env["gallery.js"].digest_path
   end
 
-  test "changing version changes the digest of the asset" do
-    old_asset_digest = @env["gallery.js"].hexdigest
+  test "changing version changes the etag of the asset" do
+    old_asset_etag = @env["gallery.js"].etag
     @env.version = 'v2'
-    assert old_asset_digest != @env["gallery.js"].hexdigest
+    refute_equal old_asset_etag, @env["gallery.js"].etag
+  end
+
+  test "changing version does not changes the digest of the asset" do
+    old_asset_digest = @env["gallery.js"].digest
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_digest, @env["gallery.js"].digest
+  end
+
+  test "changing version does not changes the hexdigest of the asset" do
+    old_asset_hexdigest = @env["gallery.js"].hexdigest
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_hexdigest, @env["gallery.js"].hexdigest
+  end
+
+  test "changing version does not changes the base64digest of the asset" do
+    old_asset_base64digest = @env["gallery.js"].base64digest
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_base64digest, @env["gallery.js"].base64digest
+  end
+
+  test "changing version does not changes the integrity of the asset" do
+    old_asset_integrity = @env["gallery.js"].integrity
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_integrity, @env["gallery.js"].integrity
   end
 
   test "bundled asset is stale if its mtime is updated or deleted" do

@@ -130,11 +130,13 @@ module Sprockets
 
     # Public: Returns String hexdigest of source.
     def hexdigest
-      DigestUtils.pack_hexdigest(environment_version + digest)
+      DigestUtils.pack_hexdigest(digest)
     end
 
     # Pubic: ETag String of Asset.
-    alias_method :etag, :hexdigest
+    def etag
+      DigestUtils.pack_hexdigest(environment_version + digest)
+    end
 
     # Public: Returns String base64 digest of source.
     def base64digest
