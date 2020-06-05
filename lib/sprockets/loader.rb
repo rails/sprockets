@@ -197,14 +197,14 @@ module Sprockets
           metadata[:charset] = source.encoding.name.downcase unless metadata.key?(:charset)
           metadata[:digest]  = digest(source)
           metadata[:length]  = source.bytesize
-          metadata[:environment_version] = self.version
+          metadata[:environment_version] = version
         else
           dependencies << build_file_digest_uri(unloaded.filename)
           metadata = {
             digest: file_digest(unloaded.filename),
             length: self.stat(unloaded.filename).size,
             dependencies: dependencies,
-            environment_version: self.version,
+            environment_version: version,
           }
         end
 
