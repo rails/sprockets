@@ -726,6 +726,12 @@ class TestEnvironment < Sprockets::TestCase
     refute_equal old_asset_digest, @env["gallery.js"].digest_path
   end
 
+  test "changing version changes the digest_path of the asset when there is no preposessor" do
+    old_asset_digest = @env["blank.gif"].digest_path
+    @env.version = 'v2'
+    refute_equal old_asset_digest, @env["blank.gif"].digest_path
+  end
+
   test "changing version changes the etag of the asset" do
     old_asset_etag = @env["gallery.js"].etag
     @env.version = 'v2'
