@@ -2,11 +2,11 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
-## Master
+## 4.0.1
 
 - Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
 - Fix for when `x_sprockets_linecount` is missing from a source map.
-
+- Fix subresource integrity to match the digest of the asset.
 
 ## 4.0.0
 
