@@ -162,7 +162,7 @@ module Sprockets
     def split_subpath(path, subpath)
       return "" if path == subpath
       path = File.join(path, ''.freeze)
-      if subpath.start_with?(path)
+      if subpath and subpath.start_with?(path)
         subpath[path.length..-1]
       else
         nil
