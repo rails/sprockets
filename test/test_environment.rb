@@ -735,7 +735,17 @@ class TestEnvironment < Sprockets::TestCase
   test "changing version changes the etag of the asset" do
     old_asset_etag = @env["gallery.js"].etag
     @env.version = 'v2'
-    refute_equal old_asset_etag, @env["gallery.js"].etag
+    new_asset_etag =  @env["gallery.js"].etag
+    refute_equal old_asset_etag, new_asset_etag
+    assert_equal old_asset_etag.size, new_asset_etag.size
+  end
+
+  test "changing version to nil does not break etag" do
+    old_asset_etag = @env["gallery.js"].etag
+    @env.version = nil
+    new_asset_etag =  @env["gallery.js"].etag
+    assert_equal old_asset_etag, new_asset_etag
+    assert_equal old_asset_etag.size, new_asset_etag.size
   end
 
   test "changing version does not changes the digest of the asset" do
