@@ -69,8 +69,11 @@ module Rake
     #
     attr_accessor :assets
 
-    # Number of old assets to keep.
+    # Minimum number of old assets to keep. See Sprockets::Manifest#clean for more information.
     attr_accessor :keep
+
+    # Assets created within this age will be kept. See Sprockets::Manifest#clean for more information.
+    attr_accessor :age
 
     # Logger to use during rake tasks. Defaults to using stderr.
     #
@@ -103,6 +106,7 @@ module Rake
       @logger       = Logger.new($stderr)
       @logger.level = Logger::INFO
       @keep         = 2
+      @age          = 3600
 
       yield self if block_given?
 
@@ -130,7 +134,7 @@ module Rake
       desc name == :assets ? "Clean old assets" : "Clean old #{name} assets"
       task "clean_#{name}" do
         with_logger do
-          manifest.clean(keep)
+          manifest.clean(keep, age)
         end
       end
 
