@@ -123,13 +123,26 @@ module Sprockets
       metadata[:digest]
     end
 
+    # Private: Return the version of the environment where the asset was generated.
+    def environment_version
+      metadata[:environment_version]
+    end
+
     # Public: Returns String hexdigest of source.
     def hexdigest
       DigestUtils.pack_hexdigest(digest)
     end
 
     # Pubic: ETag String of Asset.
-    alias_method :etag, :hexdigest
+    def etag
+      version = environment_version
+
+      if version && version != ""
+        DigestUtils.hexdigest(version + digest)
+      else
+        DigestUtils.pack_hexdigest(digest)
+      end
+    end
 
     # Public: Returns String base64 digest of source.
     def base64digest
@@ -138,7 +151,7 @@ module Sprockets
 
     # Public: A "named information" URL for subresource integrity.
     def integrity
-      DigestUtils.integrity_uri(metadata[:digest])
+      DigestUtils.integrity_uri(digest)
     end
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack

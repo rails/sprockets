@@ -4,9 +4,17 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+- Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
+
+## 4.0.2
+
+- Fix `etag` and digest path compilation that were generating string with invalid digest since 4.0.1.
+
+## 4.0.1
+
 - Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
 - Fix for when `x_sprockets_linecount` is missing from a source map.
-- Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
+- Fix subresource integrity to match the digest of the asset.
 
 ## 4.0.0
 
