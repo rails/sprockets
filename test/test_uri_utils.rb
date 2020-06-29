@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'minitest/autorun'
 require 'sprockets/uri_utils'
+require 'pry'
 
 class TestURIUtils < MiniTest::Test
   include Sprockets::URIUtils
@@ -35,12 +36,16 @@ class TestURIUtils < MiniTest::Test
   end
 
   def test_split_file_uri
+    parts = split_file_uri("file:///usr/Company Name Dropbox/local/bin/myapp/assets")
+    assert_equal ['file', nil, '/usr/Company Name Dropbox/local/bin/myapp/assets', nil], parts
+
     parts = split_file_uri("file://localhost/etc/fstab")
     assert_equal ['file', 'localhost', '/etc/fstab', nil], parts
 
     parts = split_file_uri("file:///etc/fstab")
     assert_equal ['file', nil, '/etc/fstab', nil], parts
 
+    # binding.pry
     parts = split_file_uri("file:///usr/local/bin/ruby%20on%20rails")
     assert_equal ['file', nil, '/usr/local/bin/ruby on rails', nil], parts
 

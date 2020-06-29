@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'uri'
+require 'pry'
 
 module Sprockets
   # Internal: Asset URI related parsing utilities. Mixed into Environment.
@@ -43,6 +44,8 @@ module Sprockets
     #
     # Returns [scheme, host, path, query].
     def split_file_uri(uri)
+      # We need to parse out any potential spaces in the path
+      # uri = URI::Generic::DEFAULT_PARSER.escape(uri)
       scheme, _, host, _, _, path, _, query, _ = URI.split(uri)
 
       path = URI::Generic::DEFAULT_PARSER.unescape(path)
