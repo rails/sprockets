@@ -38,15 +38,27 @@ module Sprockets
       URI::Generic.new(scheme, userinfo, host, port, registry, path, opaque, query, fragment).to_s
     end
 
+    # Escaped URI: Return URI regardless of whether the string is initially escaped.
+    #              If the initial URI is escaped, then that gets returned. If not, then it is escaped.
+    #
+    # uri - String uri
+    #
+    # Returns uri
+    def escaped_uri(uri)
+      return uri if uri == URI::Generic::DEFAULT_PARSER.escape(URI::Generic::DEFAULT_PARSER.unescape(uri))
+      URI::Generic::DEFAULT_PARSER.escape(uri)
+    end
+
     # Internal: Parse file: URI into component parts.
     #
     # uri - String uri
     #
     # Returns [scheme, host, path, query].
     def split_file_uri(uri)
-      # We need to parse out any potential spaces in the path
-      # uri = URI::Generic::DEFAULT_PARSER.escape(uri)
-      scheme, _, host, _, _, path, _, query, _ = URI.split(uri)
+      # scheme, _, host, _, _, path, _, query, _ = URI.split(uri)
+
+      # We need to ensure that the URI being split is always escaped
+      scheme, _, host, _, _, path, _, query, _ = URI.split(escaped_uri(uri))
 
       path = URI::Generic::DEFAULT_PARSER.unescape(path)
       path.force_encoding(Encoding::UTF_8)

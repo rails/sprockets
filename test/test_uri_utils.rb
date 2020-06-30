@@ -45,7 +45,6 @@ class TestURIUtils < MiniTest::Test
     parts = split_file_uri("file:///etc/fstab")
     assert_equal ['file', nil, '/etc/fstab', nil], parts
 
-    # binding.pry
     parts = split_file_uri("file:///usr/local/bin/ruby%20on%20rails")
     assert_equal ['file', nil, '/usr/local/bin/ruby on rails', nil], parts
 
