@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require 'minitest/autorun'
 require 'sprockets/uri_utils'
-require 'pry'
 
 class TestURIUtils < MiniTest::Test
   include Sprockets::URIUtils

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'uri'
-require 'pry'
 
 module Sprockets
   # Internal: Asset URI related parsing utilities. Mixed into Environment.
