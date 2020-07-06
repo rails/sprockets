@@ -2,6 +2,10 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## Master
+
+- Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
+
 ## 4.0.2
 
 - Fix `etag` and digest path compilation that were generating string with invalid digest since 4.0.1.
