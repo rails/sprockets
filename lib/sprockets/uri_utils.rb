@@ -37,8 +37,7 @@ module Sprockets
       URI::Generic.new(scheme, userinfo, host, port, registry, path, opaque, query, fragment).to_s
     end
 
-    # Escaped URI: Return URI regardless of whether the string is initially escaped.
-    #              If the initial URI is escaped, then that gets returned. If not, then it is escaped.
+    # Internal: Escape the URI
     #
     # uri - String uri
     #
