@@ -42,7 +42,7 @@ module Sprockets
     # uri - String uri
     #
     # Returns String.
-    def escaped_uri(uri)
+    def escape_uri(uri)
       return uri if uri == URI::Generic::DEFAULT_PARSER.escape(URI::Generic::DEFAULT_PARSER.unescape(uri))
       URI::Generic::DEFAULT_PARSER.escape(uri)
     end
