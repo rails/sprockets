@@ -6,6 +6,10 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 - Fix bug where project Path with spaces throws a bad URI(is not URI?) error - Marc Gayle - https://github.com/marcamillion
 
+## Master
+
+- Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
+
 ## 4.0.2
 
 - Fix `etag` and digest path compilation that were generating string with invalid digest since 4.0.1.

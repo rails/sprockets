@@ -291,7 +291,7 @@ module Sprockets
       # Internal: Retrieves an asset based on its digest
       #
       # unloaded - An UnloadedAsset
-      # limit    - A Fixnum which sets the maximum number of versions of "histories"
+      # limit    - An Integer which sets the maximum number of versions of "histories"
       #            stored in the cache
       #
       # This method attempts to retrieve the last `limit` number of histories of an asset
