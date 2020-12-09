@@ -122,7 +122,7 @@ module Sprockets
       environment = self.environment.cached
       promises = args.flatten.map do |path|
         Concurrent::Promise.execute(executor: executor) do
-          environment.find_all_linked_assets(path) do |asset|
+          environment.find_all_assets(path) do |asset|
             yield asset
           end
         end

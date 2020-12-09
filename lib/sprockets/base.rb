@@ -129,6 +129,25 @@ module Sprockets
       end
     end
 
+    # Find all asset by a regexp filemask or a filepath.
+    def find_all_assets(*args, &block)
+      paths = config[:paths]
+
+      args.each do |arg|
+        if arg.is_a?(Regexp)
+          paths.each do |path|
+            files = Dir["#{path}/*"].select {|file| arg =~ file }
+
+            files.each do |file|
+              find_all_linked_assets(file, &block)
+            end
+          end
+        else
+          find_all_linked_assets(arg, &block)
+        end
+      end
+    end
+
     # Pretty inspect
     def inspect
       "#<#{self.class}:0x#{object_id.to_s(16)} " +
