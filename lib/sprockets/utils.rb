@@ -25,7 +25,7 @@ module Sprockets
 
     # Internal: Duplicate and store key/value on new frozen hash.
     #
-    # Seperated for recursive calls, always use hash_reassoc(hash, *keys).
+    # Separated for recursive calls, always use hash_reassoc(hash, *keys).
     #
     # hash - Hash
     # key  - Object key

@@ -6,7 +6,7 @@ module Sprockets
   #
   # A Processor is a general function that may modify or transform an asset as
   # part of the pipeline. CoffeeScript to JavaScript conversion, Minification
-  # or Concatenation are all implemented as seperate Processor steps.
+  # or Concatenation are all implemented as separate Processor steps.
   #
   # Processors maybe any object that responds to call. So procs or a class that
   # defines a self.call method.

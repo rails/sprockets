@@ -10,7 +10,7 @@ module Sprockets
   # Uses pipeline metadata:
   #
   #   :required - Ordered Set of asset URIs to prepend
-  #   :stubbed  - Set of asset URIs to substract from the required set.
+  #   :stubbed  - Set of asset URIs to subtract from the required set.
   #
   # Also see DirectiveProcessor.
   class Bundle
