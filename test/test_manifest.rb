@@ -71,7 +71,7 @@ class TestManifest < Sprockets::TestCase
     assert_equal path, manifest.filename
   end
 
-  test "specify manifest directory and seperate location" do
+  test "specify manifest directory and separate location" do
     root  = File.join(Dir::tmpdir, 'public')
     dir   = File.join(root, 'assets')
     path  = File.join(root, 'manifest-123.json')
@@ -172,7 +172,7 @@ class TestManifest < Sprockets::TestCase
     assert_equal dep_digest_path, data['assets']['coffee.js']
   end
 
-  test "compile to directory and seperate location" do
+  test "compile to directory and separate location" do
     manifest = Sprockets::Manifest.new(@env, File.join(@dir, 'manifest.json'))
 
     root  = File.join(Dir::tmpdir, 'public')

@@ -62,7 +62,7 @@ module Sprockets
     # Internal: Wrap a backend cache store.
     #
     # Always assign a backend cache store instance to Environment#cache= and
-    # use Environment#cache to retreive a wrapped interface.
+    # use Environment#cache to retrieve a wrapped interface.
     #
     # cache - A compatible backend cache store instance.
     def initialize(cache = nil, logger = self.class.default_logger)

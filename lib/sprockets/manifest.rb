@@ -15,7 +15,7 @@ module Sprockets
   # The JSON is part of the public API and should be considered stable. This
   # should make it easy to read from other programming languages and processes
   # that don't have sprockets loaded. See `#assets` and `#files` for more
-  # infomation about the structure.
+  # information about the structure.
   class Manifest
     include ManifestUtils
 
@@ -273,7 +273,7 @@ module Sprockets
       nil
     end
 
-    # Persist manfiest back to FS
+    # Persist manifest back to FS
     def save
       data = json_encode(@data)
       FileUtils.mkdir_p File.dirname(@filename)

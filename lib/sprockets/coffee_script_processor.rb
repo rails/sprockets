@@ -6,7 +6,7 @@ module Sprockets
   # Processor engine class for the CoffeeScript compiler.
   # Depends on the `coffee-script` and `coffee-script-source` gems.
   #
-  # For more infomation see:
+  # For more information see:
   #
   #   https://github.com/rails/ruby-coffee-script
   #

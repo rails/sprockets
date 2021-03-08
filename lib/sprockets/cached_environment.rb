@@ -4,7 +4,7 @@ require 'sprockets/base'
 module Sprockets
   # `CachedEnvironment` is a special cached version of `Environment`.
   #
-  # The expection is that all of its file system methods are cached
+  # The exception is that all of its file system methods are cached
   # for the instances lifetime. This makes `CachedEnvironment` much faster. This
   # behavior is ideal in production environments where the file system
   # is immutable.
