@@ -42,6 +42,7 @@ module Sprockets
       @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::SassC::VERSION}:#{@cache_version}".freeze
       @importer_class = options[:importer]
       @sass_config = options[:sass_config] || {}
+      @include_module_functions = Gem::Version.new(Autoload::SassC::VERSION) < Gem::Version.new('2.3.0')
       @functions = Module.new do
         include Functions
         include options[:functions] if options[:functions]
@@ -53,11 +54,17 @@ module Sprockets
       context = input[:environment].context_class.new(input)
 
       options = engine_options(input, context)
+      options[:functions] = @functions
       engine = Autoload::SassC::Engine.new(input[:data], options)
 
-      css = Utils.module_include(Autoload::SassC::Script::Functions, @functions) do
-        engine.render.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
+      css = if @include_module_functions
+        Utils.module_include(Autoload::SassC::Script::Functions, @functions) do
+          engine.render
+        end
+      else
+        engine.render
       end
+      css = css.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
 
       begin
         map = SourceMapUtils.format_source_map(JSON.parse(engine.source_map), input)
