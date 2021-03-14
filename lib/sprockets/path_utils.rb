@@ -160,6 +160,7 @@ module Sprockets
     # Returns relative String path if subpath is a subpath of path, or nil if
     # subpath is outside of path.
     def split_subpath(path, subpath)
+      return nil if subpath.nil?
       return "" if path == subpath
       path = File.join(path, ''.freeze)
       if subpath.start_with?(path)
