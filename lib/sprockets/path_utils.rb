@@ -359,7 +359,10 @@ module Sprockets
         yield f
       end
 
-      File.rename(tmpname, filename)
+      begin
+        File.rename(tmpname, filename)
+      rescue Errno::EACCES
+      end
     ensure
       File.delete(tmpname) if File.exist?(tmpname)
     end
