@@ -29,7 +29,7 @@ module Sprockets
         setup
       end
 
-      # Public: Callback that is executed after intialization
+      # Public: Callback that is executed after initialization
       #
       # Any setup that needs to be done can be performed in the +setup+
       # method. It will be called immediately after initialization.

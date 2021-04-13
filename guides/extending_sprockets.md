@@ -440,7 +440,7 @@ To understand why this is all needed, we can break down the parts. First is how 
 env.register_engine '.css', MySprocketsExtension, mime_type: 'text/css', silence_deprecation: true
 ```
 
-The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. We can pass in `silence_deprecation: true` to let Sprockets know that the inteface is going away, only do this on code you know works with Sprockets 4.
+The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. We can pass in `silence_deprecation: true` to let Sprockets know that the interface is going away, only do this on code you know works with Sprockets 4.
 
 To get the `register_engine` code working with Sprockets 2 we have to do some version detection since Sprockets 2 will error if you try to pass a hash into it:
 
