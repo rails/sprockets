@@ -1,0 +1,28 @@
+name: RuboCop
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [2.7]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v2
+      with:
+        path: /home/runner/bundle
+        key: bundle-use-ruby-gems-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: bundle-use-ruby-gems-
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Bundle install
+      run: |
+        gem install bundler -v 2.1.4
+        bundle config path /home/runner/bundle
+        bundle install
+    - name: Run linter
+      run: bundle exec rubocop --parallel

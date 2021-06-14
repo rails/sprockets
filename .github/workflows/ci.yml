@@ -1,0 +1,27 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { ruby: 2.5 }
+          - { ruby: 2.6 }
+          - { ruby: 2.7 }
+          - { ruby: 3.0 }
+          - { ruby: jruby, allow-failure: true }
+          - { ruby: jruby-head, allow-failure: true }
+          - { ruby: head, allow-failure: true }
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run tests
+        timeout-minutes: 10
+        run: bundle exec rake
