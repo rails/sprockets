@@ -88,6 +88,18 @@ Now you'll be able to use a `<%= stylesheet_link_tag "application" %>` or `<%= s
 
 If you have additional non-standard files you need to be top-level targets, instead of using `config.assets.precompile`, you can use `link`, `link_directory`, and `link_tree` directives in the `manifest.js`.
 
+If you are mounting Rails engines which provide their own assets, check to see if they define their own `manifest.js` file. That file can also be linked using the `link` directive:
+
+```js
+// app/assets/config/manifest.js
+//= link my_engine
+
+// my_engine/app/assets/config/my_engine.js
+//= link_directory ../stylesheets/my_engine .css
+```
+
+This example will direct Sprockets to include the manifest file for the engine `my_engine`; since that manifest uses `link_directory`, the CSS file at `my_engine/app/assets/stylesheets/my_engine/overrides.css` will be made available to Rails (most importantly, to the engine's templates) at `my_engine/overrides`.
+
 Existing `config.assets.precompile` settings will still work for string values (although it is discouraged), but if you were previously using regexp or proc values, they won't work at all with Sprockets 4, and if you try you'll get an exception raised that looks like `NoMethodError: undefined method 'start_with?'`
 
 Some assets will be compiled as top-level assets when they are referenced from inside of another asset. For example, the `asset_url` erb helper will automatically link assets:
