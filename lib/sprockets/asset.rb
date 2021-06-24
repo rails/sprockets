@@ -6,7 +6,7 @@ module Sprockets
   class Asset
     attr_reader :logical_path
 
-    # Private: Intialize Asset wrapper from attributes Hash.
+    # Private: Initialize Asset wrapper from attributes Hash.
     #
     # Asset wrappers should not be initialized directly, only
     # Environment#find_asset should vend them.
@@ -38,7 +38,7 @@ module Sprockets
     #
     # The API status of the keys is dependent on the pipeline processors
     # itself. So some values maybe considered public and others internal.
-    # See the pipeline proccessor documentation itself.
+    # See the pipeline processor documentation itself.
     #
     # Returns Hash.
     attr_reader :metadata
@@ -53,7 +53,7 @@ module Sprockets
 
     # Public: Internal URI to lookup asset by.
     #
-    # NOT a publically accessible URL.
+    # NOT a publicly accessible URL.
     #
     # Returns URI.
     attr_reader :uri
