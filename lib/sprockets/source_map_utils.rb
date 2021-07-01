@@ -38,8 +38,6 @@ module Sprockets
       filename      = input[:filename]
       load_path     = input[:load_path]
       load_paths    = input[:environment].config[:paths]
-      mime_exts     = input[:environment].config[:mime_exts]
-      pipeline_exts = input[:environment].config[:pipeline_exts]
       file          = PathUtils.split_subpath(load_path, filename)
       {
         "version"  => 3,
@@ -50,7 +48,7 @@ module Sprockets
           source = PathUtils.join(File.dirname(filename), source) unless PathUtils.absolute_path?(source)
           _, source = PathUtils.paths_split(load_paths, source)
           source = PathUtils.relative_path_from(file, source)
-          PathUtils.set_pipeline(source, mime_exts, pipeline_exts, :source)
+          source
         end,
         "names"    => map["names"]
       }
