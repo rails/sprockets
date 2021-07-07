@@ -250,7 +250,9 @@ module Sprockets
     #
     # Returns an Array of String paths.
     def path_parents(path, root = nil)
-      root = "#{root}#{File::SEPARATOR}" if root
+      if root
+        root = root == File::SEPARATOR ? root : "#{root}#{File::SEPARATOR}"
+      end
       parents = []
 
       loop do

@@ -211,6 +211,9 @@ class TestPathUtils < MiniTest::Test
       path_parents("#{root}/test/fixtures/default/POW.png", "#{root}/test")
     assert_equal ["#{root}/test/fixtures/default"],
       path_parents("#{root}/test/fixtures/default/POW.png", "#{root}/test/fixtures/default")
+
+    assert_equal ["/user/fixtures/default", "/user/fixtures", "/user", "/"],
+      path_parents("/user/fixtures/default/POW.png", "/")
   end
 
   def test_find_upwards
