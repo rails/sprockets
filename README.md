@@ -5,6 +5,19 @@ It features declarative dependency management for JavaScript and CSS
 assets, as well as a powerful preprocessor pipeline that allows you to
 write assets in languages like CoffeeScript, Sass and SCSS.
 
+## Content
+- [Installation](#installation)
+- [Upgrading to Sprockets 4.x](#upgrading-to-sprockets-4x)
+- [Guides](#guides)
+- [Behavior Overview](#behavior-overview)
+- [File Order Processing](#file-order-processing)
+- [Cache](#cache)
+- [Default Directives](#default-directives)
+- [ES6 Support](#es6-support)
+- [Contributing to Sprockets](CONTRIBUTING.md)
+- [Version History](CHANGELOG.md)
+- [MIT License](MIT-LICENSE)
+
 ## Installation
 
 Install Sprockets from RubyGems:
@@ -649,17 +662,3 @@ $ RAILS_ENV=production rake assets:precompile
 ```
 
 In development Rails will serve assets from `Sprockets::Server`.
-
-## Contributing to Sprockets
-
-Sprockets is the work of hundreds of contributors. You're encouraged to submit pull requests, propose
-features and discuss issues.
-
-See [CONTRIBUTING](CONTRIBUTING.md).
-
-### Version History
-
-Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGELOG.md)
-
-## License
-Sprockets is released under the [MIT License](MIT-LICENSE).
