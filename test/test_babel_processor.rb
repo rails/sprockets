@@ -10,6 +10,22 @@ class TestBabelProcessor < MiniTest::Test
     @env.append_path File.expand_path("../fixtures", __FILE__)
   end
 
+  def test_not_raise_100k_error
+    input = {
+      environment: @env,
+      content_type: 'application/ecmascript-6',
+      data: File.read(File.expand_path('../fixtures/asset/100k.js', __FILE__)),
+      metadata: {},
+      load_path: File.expand_path("../fixtures", __FILE__),
+      filename: File.expand_path("../fixtures/mod.es6", __FILE__),
+      cache: Sprockets::Cache.new,
+      source_path: "mod.source-XYZ.es6"
+    }
+
+    #should not raise error
+    Sprockets::BabelProcessor.call(input)
+  end
+
   def test_compile_es6_features_to_es5
     input = {
       environment: @env,

@@ -25,7 +25,8 @@ module Sprockets
     def initialize(options = {})
       @options = options.merge({
         'blacklist' => (options['blacklist'] || []) + ['useStrict'],
-        'sourceMap' => true
+        'sourceMap' => true,
+        'compact' => false
       }).freeze
 
       @cache_key = [
