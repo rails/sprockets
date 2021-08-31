@@ -606,19 +606,19 @@ Several JavaScript and CSS minifiers are available through shorthand.
 In Rails you will specify them with:
 
 ```ruby
-config.assets.js_compressor  = :uglify
+config.assets.js_compressor  = :terser
 config.assets.css_compressor = :scss
 ```
 
 If you're not using Rails, configure this directly on the "environment".
 
 ``` ruby
-environment.js_compressor  = :uglify
+environment.js_compressor  = :terser
 environment.css_compressor = :scss
 ```
 
 If you are using Sprockets directly with a Rack app, don't forget to add
-the `uglifier` and `sass` gems to your Gemfile when using above options.
+the `ruby-terser` and `sass` gems to your Gemfile when using above options.
 
 ### Gzip
 
