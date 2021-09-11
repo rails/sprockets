@@ -94,4 +94,17 @@ class TestDigestUtils < MiniTest::Test
     assert_equal "sha512-+uuYUxxe7oWIShQrWEmMn/fixz/rxDP4qcAZddXLDM3nN8/tpk1ZC2jXQk6N+mXE65jwfzNVUJL/qjA3y9KbuQ==",
       hexdigest_integrity_uri(sha512)
   end
+
+  def test_already_digested
+    refute already_digested?(nil)
+    refute already_digested?("application-d41d8cd98f00b204e9800998ecf8427z")
+    refute already_digested?("application-d41d8cd98f00b204e9800998ecf8427ef")
+    refute already_digested?("application-d41d8cd98f00b204e9800998ecf8427e-")
+
+    assert already_digested?("application-" + Digest::MD5.new.hexdigest)
+    assert already_digested?("application-" + Digest::SHA1.new.hexdigest)
+    assert already_digested?("application-" + Digest::SHA256.new.hexdigest)
+    assert already_digested?("application-" + Digest::SHA384.new.hexdigest)
+    assert already_digested?("application-" + Digest::SHA512.new.hexdigest)
+  end
 end

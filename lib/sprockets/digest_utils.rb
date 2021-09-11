@@ -179,6 +179,19 @@ module Sprockets
       integrity_uri(unpack_hexdigest(hexdigest))
     end
 
+    # Internal: Checks an asset name for a valid digest
+    #
+    # name - The name of the asset
+    #
+    # Returns true if the name contains a digest recognized by one of the valid digest classes
+    def already_digested?(name)
+      return if name.nil?
+
+      if hexdigest = name.scan(/[a-fA-F0-9]+\z/).last
+        detect_digest_class(unpack_hexdigest(hexdigest))
+      end
+    end
+
     private
       def build_digest(obj)
         digest = digest_class.new
