@@ -64,7 +64,11 @@ module Sprockets
     #
     # Returns String.
     def digest_path
-      logical_path.sub(/\.(\w+)$/) { |ext| "-#{etag}#{ext}" }
+      if DigestUtils.already_digested?(@name)
+        logical_path
+      else
+        logical_path.sub(/\.(\w+)$/) { |ext| "-#{etag}#{ext}" }
+      end
     end
 
     # Public: Return load path + logical path with digest spliced in.
