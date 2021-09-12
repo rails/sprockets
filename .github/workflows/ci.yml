@@ -3,16 +3,19 @@ on: [push, pull_request]
 jobs:
   tests:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ fromJSON(matrix.experimental) }}
+    name: ${{ matrix.ruby }}
     strategy:
       matrix:
+        experimental: [ false ]
         include:
           - { ruby: 2.5 }
           - { ruby: 2.6 }
           - { ruby: 2.7 }
-          - { ruby: 3.0 }
-          - { ruby: jruby, allow-failure: true }
-          - { ruby: jruby-head, allow-failure: true }
-          - { ruby: head, allow-failure: true }
+          - { ruby: "3.0" }
+          - { ruby: jruby, experimental: true }
+          - { ruby: jruby-head, experimental: true }
+          - { ruby: head, experimental: true }
 
     steps:
       - uses: actions/checkout@v2
