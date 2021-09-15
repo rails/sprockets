@@ -2,6 +2,7 @@
 require 'rack/utils'
 require 'set'
 require 'sprockets/errors'
+require 'delegate'
 
 module Sprockets
   # They are typically accessed by ERB templates. You can mix in custom helpers
