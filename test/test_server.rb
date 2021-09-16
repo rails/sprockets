@@ -129,6 +129,16 @@ class TestServer < Sprockets::TestCase
     assert_equal 304, last_response.status
   end
 
+  test "200 response for prehashed asset with etag digest by sprockets" do
+    get "/assets/prehashed-988881adc9fc3655077dc2d4d757d480b5ea0e11.js"
+    assert_equal 200, last_response.status
+
+    etag = last_response.headers['ETag']
+    digest = etag[/"(.+)"/, 1]
+
+    assert_equal 'edabfd0f1ac5fcdae82cc7d92d1c52abb671797a3948fa9040aec1db8e61c327', digest
+  end
+
   test "ok response with fingerprint and if-nonematch etags don't match" do
     get "/assets/application.js"
     assert_equal 200, last_response.status
@@ -298,7 +308,7 @@ class TestServer < Sprockets::TestCase
 
     sandbox filename do
       get "/assets/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar japanese = \"日本語\";\n", last_response.body
+      assert_equal %[var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nconsole.log("I was already hashed!");\nvar japanese = \"日本語\";\n], last_response.body
 
       File.open(filename, "w") do |f|
         f.write "var baz;\n"
@@ -309,7 +319,7 @@ class TestServer < Sprockets::TestCase
       File.utime(mtime, mtime, path)
 
       get "/assets/tree.js"
-      assert_equal "var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\nvar japanese = \"日本語\";\n", last_response.body
+      assert_equal %[var foo;\n\n(function() {\n  application.boot();\n})();\nvar bar;\nvar baz;\nconsole.log("I was already hashed!");\nvar japanese = \"日本語\";\n], last_response.body
     end
   end
 
