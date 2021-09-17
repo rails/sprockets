@@ -35,7 +35,8 @@ module Sprockets
       msg = "Served asset #{env['PATH_INFO']} -"
 
       # Extract the path from everything after the leading slash
-      path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      full_path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      path = full_path
 
       unless path.valid_encoding?
         return bad_request_response(env)
@@ -63,6 +64,15 @@ module Sprockets
 
       # Look up the asset.
       asset = find_asset(path)
+
+      # Fallback to looking up the asset with the full path.
+      # This will make assets that are hashed with webpack or
+      # other js bundlers work consistently between production
+      # and development pipelines.
+      if asset.nil? && (asset = find_asset(full_path))
+        if_match = asset.etag if fingerprint
+        fingerprint = asset.etag
+      end
 
       if asset.nil?
         status = :not_found
