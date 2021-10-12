@@ -183,13 +183,9 @@ module Sprockets
     #
     # name - The name of the asset
     #
-    # Returns true if the name contains a digest recognized by one of the valid digest classes
+    # Returns true if the name contains a digest like string and .digested before the extension
     def already_digested?(name)
-      return if name.nil?
-
-      if hexdigest = name.scan(/[a-fA-F0-9]+\z/).last
-        detect_digest_class(unpack_hexdigest(hexdigest))
-      end
+      return name =~ /-([0-9a-f]{7,128})\.digested/
     end
 
     private

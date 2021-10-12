@@ -1136,13 +1136,13 @@ class PreDigestedAssetTest < Sprockets::TestCase
   test "digest path" do
     path     = File.expand_path("test/fixtures/asset/application")
     original = "#{path}.js"
-    digested = "#{path}-d41d8cd98f00b204e9800998ecf8427e.js"
+    digested = "#{path}-d41d8cd98f00b204e9800998ecf8427e.digested.js"
     FileUtils.cp(original, digested)
 
-    assert_equal "application-d41d8cd98f00b204e9800998ecf8427e.js",
-      asset("application-d41d8cd98f00b204e9800998ecf8427e.js").digest_path
+    assert_equal "application-d41d8cd98f00b204e9800998ecf8427e.digested.js",
+      asset("application-d41d8cd98f00b204e9800998ecf8427e.digested.js").digest_path
   ensure
-    FileUtils.rm(digested) if File.exists?(digested)
+    FileUtils.rm(digested) if File.exist?(digested)
   end
 
   def asset(logical_path, options = {})
