@@ -112,7 +112,7 @@ module Sprockets
     # Public: Find all assets matching pattern set in environment.
     #
     # Returns Enumerator of Assets.
-    def find(*args)
+    def find(*args, &block)
       unless environment
         raise Error, "manifest requires environment for compilation"
       end
@@ -122,12 +122,13 @@ module Sprockets
       environment = self.environment.cached
       promises = args.flatten.map do |path|
         Concurrent::Promise.execute(executor: executor) do
-          environment.find_all_linked_assets(path) do |asset|
-            yield asset
-          end
+          environment.find_all_linked_assets(path).to_a
         end
       end
-      promises.each(&:wait!)
+
+      promises.each do |promise|
+        promise.value!.each(&block)
+      end
 
       nil
     end
