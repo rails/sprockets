@@ -132,6 +132,9 @@ module Sprockets
 
       mod.instance_methods.each do |sym|
         method = mod.instance_method(sym)
+        if base.method_defined?(sym)
+          base.send(:alias_method, sym, sym)
+        end
         base.send(:define_method, sym, method)
       end
 
