@@ -31,27 +31,27 @@ module Sprockets
 
     # Internal: Cache Environment#entries
     def entries(path)
-      @entries[path] ||= super(path)
+      @entries.fetch(path){ @entries[path] = super(path) }
     end
 
     # Internal: Cache Environment#stat
     def stat(path)
-      @stats[path] ||= super(path)
+      @stats.fetch(path){ @stats[path] = super(path) }
     end
 
     # Internal: Cache Environment#load
     def load(uri)
-      @uris[uri] ||= super(uri)
+      @uris.fetch(uri){ @uris[uri] = super(uri) }
     end
 
     # Internal: Cache Environment#processor_cache_key
     def processor_cache_key(str)
-      @processor_cache_keys[str] ||= super(str)
+      @processor_cache_keys.fetch(str){ @processor_cache_keys[str] = super(str) }
     end
 
     # Internal: Cache Environment#resolve_dependency
     def resolve_dependency(str)
-      @resolved_dependencies[str] ||= super(str)
+      @resolved_dependencies.fetch(str){ @resolved_dependencies[str] = super(str) }
     end
 
     private
