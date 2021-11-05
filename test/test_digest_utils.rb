@@ -97,14 +97,10 @@ class TestDigestUtils < MiniTest::Test
 
   def test_already_digested
     refute already_digested?(nil)
-    refute already_digested?("application-d41d8cd98f00b204e9800998ecf8427z")
-    refute already_digested?("application-d41d8cd98f00b204e9800998ecf8427ef")
-    refute already_digested?("application-d41d8cd98f00b204e9800998ecf8427e-")
+    refute already_digested?("application-abc123.digested")
+    refute already_digested?("application-abcd1234")
 
-    assert already_digested?("application-" + Digest::MD5.new.hexdigest)
-    assert already_digested?("application-" + Digest::SHA1.new.hexdigest)
-    assert already_digested?("application-" + Digest::SHA256.new.hexdigest)
-    assert already_digested?("application-" + Digest::SHA384.new.hexdigest)
-    assert already_digested?("application-" + Digest::SHA512.new.hexdigest)
+    assert already_digested?("application-abcd1234.digested")
+    assert already_digested?("application-abcd1234.digested.map")
   end
 end
