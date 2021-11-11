@@ -6,13 +6,11 @@ class TestDigestUtils < MiniTest::Test
   include Sprockets::DigestUtils
 
   def test_detect_digest_class
-    md5    = Digest::MD5.new.digest
     sha1   = Digest::SHA1.new.digest
     sha256 = Digest::SHA256.new.digest
     sha512 = Digest::SHA512.new.digest
 
     refute detect_digest_class("0000")
-    assert_equal Digest::MD5, detect_digest_class(md5)
     assert_equal Digest::SHA1, detect_digest_class(sha1)
     assert_equal Digest::SHA256, detect_digest_class(sha256)
     assert_equal Digest::SHA512, detect_digest_class(sha512)
