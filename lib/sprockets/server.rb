@@ -299,7 +299,7 @@ module Sprockets
       #     # => "0aa2105d29558f3eb790d411d7d8fb66"
       #
       def path_fingerprint(path)
-        path[/-([0-9a-f]{7,128})\.[^.]+\z/, 1]
+        path[/-([0-9a-zA-Z]{7,128})\.[^.]+\z/, 1]
       end
   end
 end

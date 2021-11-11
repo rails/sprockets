@@ -1145,6 +1145,18 @@ class PreDigestedAssetTest < Sprockets::TestCase
     FileUtils.rm(digested) if File.exist?(digested)
   end
 
+  test "digest base32 path" do
+    path     = File.expand_path("test/fixtures/asset/application")
+    original = "#{path}.js"
+    digested = "#{path}-TQDC3LZV.digested.js"
+    FileUtils.cp(original, digested)
+
+    assert_equal "application-TQDC3LZV.digested.js",
+      asset("application-TQDC3LZV.digested.js").digest_path
+  ensure
+    FileUtils.rm(digested) if File.exist?(digested)
+  end
+
   def asset(logical_path, options = {})
     @env.find_asset(logical_path, **{pipeline: @pipeline}.merge(options))
   end
