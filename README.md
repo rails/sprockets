@@ -376,7 +376,7 @@ generated and made available to the public you can link it by including this in 
 ```
 
 The argument to `link` is a _logical path_, that is it will be resolved according to the
-configured asset load paths. See [Accesing Assets](#accessing-assets) above. A path relative to
+configured asset load paths. See [Accessing Assets](#accessing-assets) above. A path relative to
 the current file won't work, it must be a logical path.
 
 **Caution**: the "link" directive should always have an explicit extension on the end.
