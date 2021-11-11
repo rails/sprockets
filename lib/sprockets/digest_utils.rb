@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
 require 'set'
@@ -19,7 +18,6 @@ module Sprockets
 
     # Internal: Maps digest bytesize to the digest class.
     DIGEST_SIZES = {
-      16 => Digest::MD5,
       20 => Digest::SHA1,
       32 => Digest::SHA256,
       48 => Digest::SHA384,
