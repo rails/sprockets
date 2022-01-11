@@ -618,7 +618,7 @@ environment.css_compressor = :scss
 ```
 
 If you are using Sprockets directly with a Rack app, don't forget to add
-the `ruby-terser` and `sass` gems to your Gemfile when using above options.
+the `terser` and `sass` gems to your Gemfile when using above options.
 
 ### Gzip
 
