@@ -18,8 +18,7 @@ module Sprockets
     end
 
     def call(input)
-      match = ERB.version.match(/\Aerb\.rb \[(?<version>[^ ]+) /)
-      if match && match[:version] >= "2.2.0" # Ruby 2.6+
+      if keyword_constructor? # Ruby 2.6+
         engine = ::ERB.new(input[:data], trim_mode: '<>')
       else
         engine = ::ERB.new(input[:data], nil, '<>')
@@ -31,6 +30,13 @@ module Sprockets
       engine.def_method(klass, :_evaluate_template, input[:filename])
       data = context._evaluate_template
       context.metadata.merge(data: data)
+    end
+
+    private
+
+    def keyword_constructor?
+      return @keyword_constructor if defined? @keyword_constructor
+      @keyword_constructor = ::ERB.instance_method(:initialize).parameters.include?([:key, :trim_mode])
     end
   end
 end
