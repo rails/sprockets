@@ -17,7 +17,7 @@ module Sprockets
   #       Sprockets::SassCompressor.new({ ... })
   #
   class SassCompressor
-    VERSION = '1'
+    VERSION = '2'
 
     # Public: Return singleton instance with default options.
     #
@@ -38,23 +38,22 @@ module Sprockets
 
     def initialize(options = {})
       @options = {
-        syntax: :scss,
-        cache: false,
-        read_cache: false,
-        style: :compressed
+        syntax: :css,
+        style: :compressed,
+        source_map: true
       }.merge(options).freeze
-      @cache_key = "#{self.class.name}:#{Autoload::Sass::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
+      @cache_key = "#{self.class.name}:#{Autoload::Sass::Embedded::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
     def call(input)
-      css, map = Autoload::Sass::Engine.new(
+      result = Autoload::Sass.compile_string(
         input[:data],
-        @options.merge(filename: input[:filename])
-      ).render_with_sourcemap('')
+        **@options.merge(url: URIUtils.build_asset_uri(input[:filename]))
+      )
 
-      css = css.sub("/*# sourceMappingURL= */\n", '')
+      css = result.css
 
-      map = SourceMapUtils.format_source_map(JSON.parse(map.to_json(css_uri: '')), input)
+      map = SourceMapUtils.format_source_map(JSON.parse(result.source_map), input)
       map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
 
       { data: css, map: map }

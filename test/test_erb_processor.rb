@@ -152,7 +152,7 @@ class TestERBProcessor < MiniTest::Test
       environment: environment,
       filename: "foo.js.erb",
       content_type: 'application/javascript',
-      data: "var sass_version = '<%= Sass::VERSION %>';",
+      data: "var sass_version = '<%= Sass::Embedded::VERSION %>';",
       metadata: {},
       cache: Sprockets::Cache.new
     }

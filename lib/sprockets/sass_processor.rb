@@ -13,12 +13,30 @@ module Sprockets
   #   https://github.com/rails/sass-rails
   #
   class SassProcessor
-    autoload :CacheStore, 'sprockets/sass_cache_store'
+    VERSION = '2'
 
     # Internal: Defines default sass syntax to use. Exposed so the ScssProcessor
     # may override it.
     def self.syntax
-      :sass
+      :indented
+    end
+
+    # Public: Convert ::Sass::Script::Functions to dart-sass functions option.
+    #
+    # Returns Hash object.
+    def self.functions(options = {})
+      functions = {}
+      instance = Class.new.extend(::Sass::Script::Functions)
+      instance.define_singleton_method(:options, ->() { options })
+      ::Sass::Script::Functions.public_instance_methods.each do |symbol|
+        parameters = instance.method(symbol).parameters
+          .filter { |parameter| parameter.first == :req }
+          .map { |parameter| "$#{parameter.last}" }
+        functions["#{symbol}(#{parameters.join(', ')})"] = lambda do |args|
+          instance.send(symbol, *args)
+        end
+      end
+      functions
     end
 
     # Public: Return singleton instance with default options.
@@ -46,8 +64,7 @@ module Sprockets
     #
     def initialize(options = {}, &block)
       @cache_version = options[:cache_version]
-      @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::Sass::VERSION}:#{@cache_version}".freeze
-      @importer_class = options[:importer] || Sass::Importers::Filesystem
+      @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::Sass::Embedded::VERSION}:#{@cache_version}".freeze
       @sass_config = options[:sass_config] || {}
       @functions = Module.new do
         include Functions
@@ -59,52 +76,43 @@ module Sprockets
     def call(input)
       context = input[:environment].context_class.new(input)
 
-      engine_options = merge_options({
-        filename: input[:filename],
-        syntax: self.class.syntax,
-        cache_store: build_cache_store(input, @cache_version),
-        load_paths: context.environment.paths.map { |p| @importer_class.new(p.to_s) },
-        importer: @importer_class.new(Pathname.new(context.filename).to_s),
-        sprockets: {
-          context: context,
-          environment: input[:environment],
-          dependencies: context.metadata[:dependencies]
-        }
-      })
+      result = Utils.module_include(::Sass::Script::Functions, @functions) do
+        options = merge_options({
+          functions: self.class.functions({
+            sprockets: {
+              context: context,
+              environment: input[:environment],
+              dependencies: context.metadata[:dependencies]
+            }
+          }),
+          syntax: self.class.syntax,
+          source_map: true,
+          load_paths: context.environment.paths,
+          url: URIUtils.build_asset_uri(input[:filename])
+        })
 
-      engine = Autoload::Sass::Engine.new(input[:data], engine_options)
-
-      css, map = Utils.module_include(Autoload::Sass::Script::Functions, @functions) do
-        engine.render_with_sourcemap('')
+        Autoload::Sass.compile_string(input[:data], **options)
       end
 
-      css = css.sub("\n/*# sourceMappingURL= */\n", '')
+      css = result.css
 
-      map = SourceMapUtils.format_source_map(JSON.parse(map.to_json(css_uri: '')), input)
+      map = SourceMapUtils.format_source_map(JSON.parse(result.source_map), input)
       map = SourceMapUtils.combine_source_maps(input[:metadata][:map], map)
 
       # Track all imported files
-      sass_dependencies = Set.new([input[:filename]])
-      engine.dependencies.map do |dependency|
-        sass_dependencies << dependency.options[:filename]
-        context.metadata[:dependencies] << URIUtils.build_file_digest_uri(dependency.options[:filename])
+      sass_dependencies = Set.new
+      result.loaded_urls.each do |url|
+        scheme, _host, path, _query = URIUtils.split_file_uri url
+        if scheme == 'file'
+          sass_dependencies << path
+          context.metadata[:dependencies] << URIUtils.build_file_digest_uri(path)
+        end
       end
 
       context.metadata.merge(data: css, sass_dependencies: sass_dependencies, map: map)
     end
 
     private
-
-    # Public: Build the cache store to be used by the Sass engine.
-    #
-    # input - the input hash.
-    # version - the cache version.
-    #
-    # Override this method if you need to use a different cache than the
-    # Sprockets cache.
-    def build_cache_store(input, version)
-      CacheStore.new(input[:cache], version)
-    end
 
     def merge_options(options)
       defaults = @sass_config.dup
@@ -139,14 +147,14 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_path(path, options = {})
-        path = path.value
+        path = path.text
 
         path, _, query, fragment = URI.split(path)[5..8]
         path     = sprockets_context.asset_path(path, options)
         query    = "?#{query}" if query
         fragment = "##{fragment}" if fragment
 
-        Autoload::Sass::Script::String.new("#{path}#{query}#{fragment}", :string)
+        Autoload::Sass::Value::String.new("#{path}#{query}#{fragment}", quoted: true)
       end
 
       # Public: Generate a asset url() link.
@@ -155,7 +163,7 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_url(path, options = {})
-        Autoload::Sass::Script::String.new("url(#{asset_path(path, options).value})")
+        Autoload::Sass::Value::String.new("url(#{asset_path(path, options).text})", quoted: false)
       end
 
       # Public: Generate url for image path.
@@ -272,8 +280,8 @@ module Sprockets
       #
       # Returns a Sass::Script::String.
       def asset_data_url(path)
-        url = sprockets_context.asset_data_uri(path.value)
-        Autoload::Sass::Script::String.new("url(" + url + ")")
+        url = sprockets_context.asset_data_uri(path.text)
+        Autoload::Sass::Value::String.new("url(" + url + ")", quoted: false)
       end
 
       protected
@@ -308,6 +316,10 @@ module Sprockets
     end
   end
 
-  # Deprecated: Use Sprockets::SassProcessor::Functions instead.
-  SassFunctions = SassProcessor::Functions
+  module ::Sass
+    module Script
+      module Functions
+      end
+    end
+  end
 end

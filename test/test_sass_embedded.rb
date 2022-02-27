@@ -1,10 +1,20 @@
 # frozen_string_literal: true
 require 'sprockets_test'
-require 'shared_sass_tests'
+require 'shared_sass_embedded_tests'
 
-silence_warnings do
-  require 'sass'
-end
+require 'sass'
+
+# Silent all sass compiler warnings during tests
+::Sass.module_eval {
+  [:compile, :compile_string].each do |symbol|
+    original_method = singleton_method(symbol)
+    silent_method = lambda do |source, **kwargs|
+      kwargs[:logger] = ::Sass::Logger.silent
+      original_method.call(source, **kwargs)
+    end
+    define_singleton_method symbol, silent_method
+  end
+}
 
 require 'sprockets/sass_processor'
 require 'sprockets/sass_compressor'
@@ -20,8 +30,8 @@ class TestBaseSass < Sprockets::TestCase
     ::Sass::Script::Functions
   end
 
-  def sass_engine
-    ::Sass::Engine
+  def processor
+    Sprockets::SassProcessor
   end
 
   def compressor
@@ -38,18 +48,18 @@ end
 class TestNoSassFunctionSass < TestBaseSass
   module ::Sass::Script::Functions
     def javascript_path(path)
-      ::Sass::Script::String.new("/js/#{path.value}", :string)
+      ::Sass::Value::String.new("/js/#{path.text}", quoted: true)
     end
 
     module Compass
       def stylesheet_path(path)
-        ::Sass::Script::String.new("/css/#{path.value}", :string)
+        ::Sass::Value::String.new("/css/#{path.text}", quoted: true)
       end
     end
     include Compass
   end
 
-  include SharedSassTestNoFunction
+  include SharedSassEmbeddedTestNoFunction
 end
 
 class TestSprocketsSass < TestBaseSass
@@ -72,18 +82,15 @@ class TestSprocketsSass < TestBaseSass
 
   def render(path)
     path = fixture_path(path)
-    silence_warnings do
-      @env.find_asset(path, accept: 'text/css').to_s
-    end
+    @env.find_asset(path, accept: 'text/css').to_s
   end
 
   test "raise sass error with line number" do
+    skip 'In dart sass this prints a warning instead of throwing error'
     begin
-      ::Sass::Util.silence_sass_warnings do
-        render('sass/error.sass')
-      end
+      render('sass/error.sass')
       flunk
-    rescue Sass::SyntaxError => error
+    rescue Sass::CompileError => error
       assert error.message.include?("invalid")
       trace = error.backtrace[0]
       assert trace.include?("error.sass")
@@ -93,9 +100,7 @@ class TestSprocketsSass < TestBaseSass
 
   test "track sass dependencies metadata" do
     asset = nil
-    silence_warnings do
-      asset = @env.find_asset('sass/import_partial.css')
-    end
+    asset = @env.find_asset('sass/import_partial.css')
     assert asset
     assert_equal [
       fixture_path('sass/_rounded.scss'),
@@ -103,11 +108,11 @@ class TestSprocketsSass < TestBaseSass
     ], asset.metadata[:sass_dependencies].to_a.sort
   end
 
-  include SharedSassTestSprockets
+  include SharedSassEmbeddedTestSprockets
 end
 
-class TestSassCompressor < TestBaseSass
-  include SharedSassTestCompressor
+class TestSassEmbeddedCompressor < TestBaseSass
+  include SharedSassEmbeddedTestCompressor
 end
 
 class TestSassFunctions < TestSprocketsSass
@@ -125,5 +130,5 @@ class TestSassFunctions < TestSprocketsSass
     end
   end
 
-  include SharedSassTestFunctions
+  include SharedSassEmbeddedTestFunctions
 end
