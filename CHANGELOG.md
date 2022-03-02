@@ -2,7 +2,7 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
-## Master
+## 4.0.3
 
 - Fix `Manifest#find` yielding from a Promise causing issue on Ruby 3.1.0-dev. [#720](https://github.com/rails/sprockets/pull/720)
 - Better detect the ERB version to avoid deprecation warnings. [#719](https://github.com/rails/sprockets/pull/719)
