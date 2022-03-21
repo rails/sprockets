@@ -10,13 +10,7 @@ write assets in languages like CoffeeScript, Sass and SCSS.
 Install Sprockets from RubyGems:
 
 ``` sh
-$ gem install sprockets
-```
-
-Or include it in your project's `Gemfile` with Bundler:
-
-``` ruby
-gem 'sprockets', '~> 4.0'
+$ bundle add sprockets
 ```
 
 ## Upgrading to Sprockets 4.x
