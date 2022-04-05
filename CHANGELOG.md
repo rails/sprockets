@@ -2,6 +2,10 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## Master
+
+- Fix `Sprockets::Server` to return lower-cased response headers to comply with Rack::Lint 3.0. [#744](https://github.com/rails/sprockets/pull/744)
+
 ## 4.0.3
 
 - Fix `Manifest#find` yielding from a Promise causing issue on Ruby 3.1.0-dev. [#720](https://github.com/rails/sprockets/pull/720)
