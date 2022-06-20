@@ -183,7 +183,7 @@ module Sprockets
     #
     # Returns true if the name contains a digest like string and .digested before the extension
     def already_digested?(name)
-      return name =~ /-([0-9a-f]{7,128})\.digested/
+      return name =~ /-([0-9a-zA-Z]{7,128})\.digested/
     end
 
     private
