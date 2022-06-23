@@ -109,7 +109,7 @@ class TestPathUtils < MiniTest::Test
     subpath = File.expand_path("../fixtures/default/app/application.js", __FILE__)
     assert_equal "app/application.js", split_subpath(path, subpath)
 
-    assert_equal nil, split_subpath(path, nil)
+    assert_nil split_subpath(path, nil)
 
     subpath = File.expand_path("../fixtures/default", __FILE__)
     assert_equal "", split_subpath(path, subpath)
