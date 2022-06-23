@@ -1,0 +1,32 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    name: ${{ matrix.ruby }}
+    strategy:
+      matrix:
+        fail-fast: [false]
+        experimental: [false]
+        include:
+          - { ruby: 2.5 }
+          - { ruby: 2.6 }
+          - { ruby: 2.7 }
+          - { ruby: "3.0" }
+          - { ruby: "3.1" }
+          - { ruby: jruby, experimental: true }
+          - { ruby: jruby-head, experimental: true }
+          - { ruby: head, experimental: true }
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run tests
+        timeout-minutes: 10
+        run: bundle exec rake

@@ -377,10 +377,18 @@ generated and made available to the public you can link it by including this in 
 ```
 
 The argument to `link` is a _logical path_, that is it will be resolved according to the
-configured asset load paths. See [Accesing Assets](#accessing-assets) above. A path relative to
+configured asset load paths. See [Accessing Assets](#accessing-assets) above. A path relative to
 the current file won't work, it must be a logical path.
 
 **Caution**: the "link" directive should always have an explicit extension on the end.
+
+`link` can also be used to include manifest files from mounted Rails engines:
+
+```
+//= link my_engine
+```
+
+This would find a manifest file at `my_engine/app/assets/config/my_engine.js` and include its directives.
 
 ### link_directory
 
@@ -649,19 +657,19 @@ Several JavaScript and CSS minifiers are available through shorthand.
 In Rails you will specify them with:
 
 ```ruby
-config.assets.js_compressor  = :uglify
+config.assets.js_compressor  = :terser
 config.assets.css_compressor = :scss
 ```
 
 If you're not using Rails, configure this directly on the "environment".
 
 ``` ruby
-environment.js_compressor  = :uglify
+environment.js_compressor  = :terser
 environment.css_compressor = :scss
 ```
 
 If you are using Sprockets directly with a Rack app, don't forget to add
-the `uglifier` and `sass` gems to your Gemfile when using above options.
+the `terser` and `sass` gems to your Gemfile when using above options.
 
 ### Gzip
 

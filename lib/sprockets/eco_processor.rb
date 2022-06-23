@@ -4,7 +4,7 @@ require 'sprockets/autoload'
 module Sprockets
   # Processor engine class for the Eco compiler. Depends on the `eco` gem.
   #
-  # For more infomation see:
+  # For more information see:
   #
   #   https://github.com/sstephenson/ruby-eco
   #   https://github.com/sstephenson/eco

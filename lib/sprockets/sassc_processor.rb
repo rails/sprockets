@@ -7,7 +7,7 @@ require 'uri'
 module Sprockets
   # Processor engine class for the SASS/SCSS compiler. Depends on the `sassc` gem.
   #
-  # For more infomation see:
+  # For more information see:
   #
   #   https://github.com/sass/sassc-ruby
   #   https://github.com/sass/sassc-rails

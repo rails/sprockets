@@ -130,7 +130,7 @@ module Sprockets
     #
     # mime_type - String MIME Type. Use '*/*' applies to all types.
     # key       - Symbol metadata key
-    # initial   - Initial memo to pass to the reduce funciton (default: nil)
+    # initial   - Initial memo to pass to the reduce function (default: nil)
     # block     - Proc accepting the memo accumulator and current value
     #
     # Returns nothing.

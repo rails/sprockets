@@ -4,8 +4,28 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
-- Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
+- Fix `Sprockets::Server` to return lower-cased response headers to comply with Rack::Lint 3.0. [#744](https://github.com/rails/sprockets/pull/744)
 - Adding new directive `depend_on_directory` [#668](https://github.com/rails/sprockets/pull/668)
+- Fix `application/js-sourcemap+json` charset [#669](https://github.com/rails/sprockets/pull/669)
+- Fix `CachedEnvironment` caching nil values [#723](https://github.com/rails/sprockets/pull/723)
+
+## 4.0.3
+
+- Fix `Manifest#find` yielding from a Promise causing issue on Ruby 3.1.0-dev. [#720](https://github.com/rails/sprockets/pull/720)
+- Better detect the ERB version to avoid deprecation warnings. [#719](https://github.com/rails/sprockets/pull/719)
+- Allow assets already fingerprinted to be served through `Sprockets::Server`
+- Do not fingerprint files that already contain a valid digest in their name
+- Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
+
+## 4.0.2
+
+- Fix `etag` and digest path compilation that were generating string with invalid digest since 4.0.1.
+
+## 4.0.1
+
+- Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
+- Fix for when `x_sprockets_linecount` is missing from a source map.
+- Fix subresource integrity to match the digest of the asset.
 
 ## 4.0.0
 
@@ -18,7 +38,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## 4.0.0.beta9
 
-- Minimum Ruby version for Sprockets 4 is now 2.5+ which matches minimum ruby verision of Rails [#604]
+- Minimum Ruby version for Sprockets 4 is now 2.5+ which matches minimum ruby version of Rails [#604]
 - Fix threading bug introduced in Sprockets 4 [#603]
 - Warn when two potential manifest files exist. [#560]
 

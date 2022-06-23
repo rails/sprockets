@@ -78,7 +78,7 @@ module Sprockets
       offset = 0
       if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
         last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
-        offset += last_line_count
+        offset += last_line_count || 1
 
         last_offset = a["sections"].last["offset"]["line"]
         offset += last_offset
@@ -140,7 +140,7 @@ module Sprockets
       }
     end
 
-    # Public: Combine two seperate source map transformations into a single
+    # Public: Combine two separate source map transformations into a single
     # mapping.
     #
     # Source transformations may happen in discrete steps producing separate
@@ -453,7 +453,7 @@ module Sprockets
     #
     # ary - Two dimensional Array of Integers.
     #
-    # Returns a VLQ encoded String seperated by , and ;.
+    # Returns a VLQ encoded String separated by , and ;.
     def vlq_encode_mappings(ary)
       ary.map { |group|
         group.map { |segment|

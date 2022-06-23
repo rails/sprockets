@@ -2,6 +2,7 @@
 require 'sprockets_test'
 
 $file_stat_calls = nil
+$file_exist_calls = nil
 class << File
   alias_method :original_stat, :stat
   def stat(filename)
@@ -10,6 +11,15 @@ class << File
       $file_stat_calls[filename.to_s] << caller
     end
     original_stat(filename)
+  end
+
+  alias_method :original_exist?, :exist?
+  def exist?(filename)
+    if $file_exist_calls
+      $file_exist_calls[filename.to_s] ||= []
+      $file_exist_calls[filename.to_s] << caller
+    end
+    original_exist?(filename)
   end
 end
 
@@ -56,6 +66,7 @@ class TestPerformance < Sprockets::TestCase
     $bundle_processor_calls = nil
     $cache_get_calls = nil
     $cache_set_calls = nil
+    $file_exist_calls = nil
   end
 
   test "simple file" do
@@ -451,6 +462,7 @@ class TestPerformance < Sprockets::TestCase
 
   def reset_stats!
     $file_stat_calls = {}
+    $file_exist_calls = {}
     $dir_entires_calls = {}
     $processor_calls = {}
     $bundle_processor_calls = {}
@@ -473,9 +485,15 @@ class TestPerformance < Sprockets::TestCase
       assert_equal 1, callers.size, "File.stat(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
     end
 
+    $file_exist_calls.each do |path, callers|
+      assert_equal 1, callers.size, "File.exist?(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
+    end
+
     $dir_entires_calls.each do |path, callers|
       assert_equal 1, callers.size, "Dir.entries(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
     end
+
+
   end
 
   def assert_no_processor_calls
