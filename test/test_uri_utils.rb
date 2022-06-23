@@ -35,6 +35,9 @@ class TestURIUtils < MiniTest::Test
   end
 
   def test_split_file_uri
+    parts = split_file_uri("file:///usr/Company Name Dropbox/local/bin/myapp/assets")
+    assert_equal ['file', nil, '/usr/Company Name Dropbox/local/bin/myapp/assets', nil], parts
+
     parts = split_file_uri("file://localhost/etc/fstab")
     assert_equal ['file', 'localhost', '/etc/fstab', nil], parts
 

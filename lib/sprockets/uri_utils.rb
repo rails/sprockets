@@ -37,13 +37,23 @@ module Sprockets
       URI::Generic.new(scheme, userinfo, host, port, registry, path, opaque, query, fragment).to_s
     end
 
+    # Internal: Escape the URI
+    #
+    # uri - String uri
+    #
+    # Returns String.
+    def escape_uri(uri)
+      return uri if uri == URI::Generic::DEFAULT_PARSER.escape(URI::Generic::DEFAULT_PARSER.unescape(uri))
+      URI::Generic::DEFAULT_PARSER.escape(uri)
+    end
+
     # Internal: Parse file: URI into component parts.
     #
     # uri - String uri
     #
     # Returns [scheme, host, path, query].
     def split_file_uri(uri)
-      scheme, _, host, _, _, path, _, query, _ = URI.split(uri)
+      scheme, _, host, _, _, path, _, query, _ = URI.split(escape_uri(uri))
 
       path = URI::Generic::DEFAULT_PARSER.unescape(path)
       path.force_encoding(Encoding::UTF_8)
