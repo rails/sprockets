@@ -7,14 +7,14 @@ jobs:
     name: ${{ matrix.ruby }}
     strategy:
       matrix:
-        fail-fast: [false]
         experimental: [false]
+        ruby:
+          - "2.5"
+          - "2.6"
+          - "2.7"
+          - "3.0"
+          - "3.1"
         include:
-          - { ruby: 2.5 }
-          - { ruby: 2.6 }
-          - { ruby: 2.7 }
-          - { ruby: "3.0" }
-          - { ruby: "3.1" }
           - { ruby: jruby, experimental: true }
           - { ruby: jruby-head, experimental: true }
           - { ruby: head, experimental: true }
