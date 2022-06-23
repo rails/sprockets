@@ -61,6 +61,26 @@ class TestRakeTask < Sprockets::TestCase
 
   end
 
+  test "clean" do
+    digest_path = @env['application.js'].digest_path
+    filename = fixture_path('default/application.coffee')
+
+    sandbox filename do
+      @rake[:assets].invoke
+      assert File.exist?("#{@dir}/#{digest_path}")
+
+      File.open(filename, 'w') { |f| f.write "change;" }
+      changed_digest_path = @env['application.js'].digest_path
+
+      @rake[:assets].invoke
+
+      @rake[:clean_assets].invoke(1, 0)
+
+      assert File.exist?("#{@dir}/#{digest_path}")
+      refute File.exist?("#{@dir}/#{changed_digest_path}")
+    end
+  end
+
   test "custom manifest directory" do
     Rake::SprocketsTask.new do |t|
       t.environment = nil

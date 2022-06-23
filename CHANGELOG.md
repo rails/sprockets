@@ -4,6 +4,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 
 ## Master
 
+- Allow age to be altered in asset:clean rake task.
 - Fix `Sprockets::Server` to return lower-cased response headers to comply with Rack::Lint 3.0. [#744](https://github.com/rails/sprockets/pull/744)
 - Adding new directive `depend_on_directory` [#668](https://github.com/rails/sprockets/pull/668)
 - Fix `application/js-sourcemap+json` charset [#669](https://github.com/rails/sprockets/pull/669)
