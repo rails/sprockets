@@ -51,6 +51,7 @@ module Sprockets
   register_mime_type 'application/json', extensions: ['.json'], charset: :unicode
   register_mime_type 'application/ruby', extensions: ['.rb']
   register_mime_type 'application/xml', extensions: ['.xml']
+  register_mime_type 'application/manifest+json', extensions: ['.webmanifest']
   register_mime_type 'text/css', extensions: ['.css'], charset: :css
   register_mime_type 'text/html', extensions: ['.html', '.htm'], charset: :html
   register_mime_type 'text/plain', extensions: ['.txt', '.text']
@@ -180,6 +181,7 @@ module Sprockets
     application/ecmascript-6
     application/javascript
     application/json
+    application/manifest+json
     application/xml
     text/coffeescript
     text/css

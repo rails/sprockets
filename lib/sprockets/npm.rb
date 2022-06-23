@@ -8,7 +8,7 @@ module Sprockets
     # load_path    - String environment path
     # logical_path - String path relative to base
     #
-    # Returns candiate filenames.
+    # Returns candidate filenames.
     def resolve_alternates(load_path, logical_path)
       candidates, deps = super
 

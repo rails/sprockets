@@ -720,10 +720,64 @@ class TestEnvironment < Sprockets::TestCase
     assert_equal 2, asset.metadata[:selector_count]
   end
 
-  test "changing version changes the digest of the asset" do
-    old_asset_digest = @env["gallery.js"].hexdigest
+  test "changing version changes the digest_path of the asset" do
+    old_asset_digest = @env["gallery.js"].digest_path
     @env.version = 'v2'
-    assert old_asset_digest != @env["gallery.js"].hexdigest
+    refute_equal old_asset_digest, @env["gallery.js"].digest_path
+  end
+
+  test "changing version changes the digest_path of the asset when there is no preposessor" do
+    old_asset_digest = @env["blank.gif"].digest_path
+    @env.version = 'v2'
+    refute_equal old_asset_digest, @env["blank.gif"].digest_path
+  end
+
+  test "changing version changes the etag of the asset" do
+    old_asset_etag = @env["gallery.js"].etag
+    @env.version = 'v2'
+    new_asset_etag =  @env["gallery.js"].etag
+    refute_equal old_asset_etag, new_asset_etag
+    assert_equal old_asset_etag.size, new_asset_etag.size
+  end
+
+  test "changing version to nil does not break etag" do
+    old_asset_etag = @env["gallery.js"].etag
+    @env.version = nil
+    new_asset_etag =  @env["gallery.js"].etag
+    assert_equal old_asset_etag, new_asset_etag
+    assert_equal old_asset_etag.size, new_asset_etag.size
+  end
+
+  test "changing version does not changes the digest of the asset" do
+    old_asset_digest = @env["gallery.js"].digest
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_digest, @env["gallery.js"].digest
+  end
+
+  test "changing version does not changes the hexdigest of the asset" do
+    old_asset_hexdigest = @env["gallery.js"].hexdigest
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_hexdigest, @env["gallery.js"].hexdigest
+  end
+
+  test "changing version does not changes the base64digest of the asset" do
+    old_asset_base64digest = @env["gallery.js"].base64digest
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_base64digest, @env["gallery.js"].base64digest
+  end
+
+  test "changing version does not changes the integrity of the asset" do
+    old_asset_integrity = @env["gallery.js"].integrity
+
+    @env.version = 'v2'
+
+    assert_equal old_asset_integrity, @env["gallery.js"].integrity
   end
 
   test "bundled asset is stale if its mtime is updated or deleted" do
@@ -786,7 +840,7 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
-  test "seperate contexts classes for each instance" do
+  test "separate contexts classes for each instance" do
     e1 = new_environment
     e2 = new_environment
 

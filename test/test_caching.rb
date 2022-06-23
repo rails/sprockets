@@ -319,7 +319,7 @@ class TestCaching < Sprockets::TestCase
     end
   end
 
-  test "seperate cache for dependencies under a different load path" do
+  test "separate cache for dependencies under a different load path" do
     env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path("app")
       env.append_path("vendor/gems/jquery-1-9")
