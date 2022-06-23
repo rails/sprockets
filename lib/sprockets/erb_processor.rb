@@ -18,8 +18,7 @@ class Sprockets::ERBProcessor
   end
 
   def call(input)
-    match = ERB.version.match(/\Aerb\.rb \[(?<version>[^ ]+) /)
-    if match && match[:version] >= "2.2.0" # Ruby 2.6+
+    if keyword_constructor? # Ruby 2.6+
       engine = ::ERB.new(input[:data], trim_mode: '<>')
     else
       engine = ::ERB.new(input[:data], nil, '<>')
@@ -33,5 +32,12 @@ class Sprockets::ERBProcessor
 
     data = engine.result(context.instance_eval('binding'))
     context.metadata.merge(data: data)
+  end
+
+  private
+
+  def keyword_constructor?
+    return @keyword_constructor if defined? @keyword_constructor
+    @keyword_constructor = ::ERB.instance_method(:initialize).parameters.include?([:key, :trim_mode])
   end
 end

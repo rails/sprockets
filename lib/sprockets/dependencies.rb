@@ -40,7 +40,7 @@ module Sprockets
       end
     end
 
-    # Public: Add environmental dependency inheirted by all assets.
+    # Public: Add environmental dependency inherited by all assets.
     #
     # uri - String dependency URI
     #

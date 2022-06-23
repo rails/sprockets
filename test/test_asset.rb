@@ -1124,6 +1124,44 @@ EOS
   end
 end
 
+class PreDigestedAssetTest < Sprockets::TestCase
+  def setup
+    @env = Sprockets::Environment.new
+    @env.append_path(fixture_path('asset'))
+    @env.cache = {}
+
+    @pipeline = nil
+  end
+
+  test "digest path" do
+    path     = File.expand_path("test/fixtures/asset/application")
+    original = "#{path}.js"
+    digested = "#{path}-d41d8cd98f00b204e9800998ecf8427e.digested.js"
+    FileUtils.cp(original, digested)
+
+    assert_equal "application-d41d8cd98f00b204e9800998ecf8427e.digested.js",
+      asset("application-d41d8cd98f00b204e9800998ecf8427e.digested.js").digest_path
+  ensure
+    FileUtils.rm(digested) if File.exist?(digested)
+  end
+
+  test "digest base32 path" do
+    path     = File.expand_path("test/fixtures/asset/application")
+    original = "#{path}.js"
+    digested = "#{path}-TQDC3LZV.digested.js"
+    FileUtils.cp(original, digested)
+
+    assert_equal "application-TQDC3LZV.digested.js",
+      asset("application-TQDC3LZV.digested.js").digest_path
+  ensure
+    FileUtils.rm(digested) if File.exist?(digested)
+  end
+
+  def asset(logical_path, options = {})
+    @env.find_asset(logical_path, **{pipeline: @pipeline}.merge(options))
+  end
+end
+
 
 class DebugAssetTest < Sprockets::TestCase
   def setup

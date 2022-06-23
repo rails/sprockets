@@ -1,6 +1,6 @@
 module Sprockets
   module Exporters
-    # Convienence class for all exporters to inherit from
+    # Convenience class for all exporters to inherit from
     #
     # An exporter is responsible for exporting a Sprockets::Asset
     # to a file system. For example the Exporters::File class
@@ -29,7 +29,7 @@ module Sprockets
         setup
       end
 
-      # Public: Callback that is executed after intialization
+      # Public: Callback that is executed after initialization
       #
       # Any setup that needs to be done can be performed in the +setup+
       # method. It will be called immediately after initialization.

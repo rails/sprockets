@@ -119,7 +119,7 @@ Your exporter gets initialized once for each asset to be exported by sprockets w
  - environment (Instance of Sprockets::Environment)
  - directory (Instance of String)
 
-A `setup` method is called right after the exporter is initalized. Your exporter is expected implement a `skip?` method. If this method returns true then sprockets will skip your exporter and move to the next one. An instance of `Sprockets::Logger` is passed into this method that can be used to indicate to the user what is happening. This method is called synchronously.
+A `setup` method is called right after the exporter is initialized. Your exporter is expected implement a `skip?` method. If this method returns true then sprockets will skip your exporter and move to the next one. An instance of `Sprockets::Logger` is passed into this method that can be used to indicate to the user what is happening. This method is called synchronously.
 
 The work of writing the new asset to disk is performed in the `call` method. This method is potentially called in a new thread and should not mutate any global state. A `write` method is provided that takes a `filename` to be written to (full path) and yields an IO object.
 
@@ -411,7 +411,7 @@ module MySprocketsExtension
 end
 ```
 
-If your application is making serious modifications to the source file (an example could be a coffee script file generating JS will be signifigantly different) then you'll want to calculate and return an appropriate `map` key in the `metadata` hash. See the "metadata" section for more info on doing this.
+If your application is making serious modifications to the source file (an example could be a coffee script file generating JS will be significantly different) then you'll want to calculate and return an appropriate `map` key in the `metadata` hash. See the "metadata" section for more info on doing this.
 
 Once you've written your processor to run on all 3 versions of Sprockets you will need to register it. This is covered next.
 
@@ -440,7 +440,7 @@ To understand why this is all needed, we can break down the parts. First is how 
 env.register_engine '.css', MySprocketsExtension, mime_type: 'text/css', silence_deprecation: true
 ```
 
-The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. We can pass in `silence_deprecation: true` to let Sprockets know that the inteface is going away, only do this on code you know works with Sprockets 4.
+The use of `register_engine` is deprecated in Sprockets 3 and you will get a deprecation warning about it's use. We can pass in `silence_deprecation: true` to let Sprockets know that the interface is going away, only do this on code you know works with Sprockets 4.
 
 To get the `register_engine` code working with Sprockets 2 we have to do some version detection since Sprockets 2 will error if you try to pass a hash into it:
 

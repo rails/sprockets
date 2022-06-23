@@ -43,7 +43,7 @@ How do you know if source maps are working correctly? Try adding a syntax error 
 
 When compiling assets with Sprockets, Sprockets needs to decide which top-level targets to compile, usually `application.css`, `application.js`, and images.
 
-If you are using sprockets prior to 4.0, Rails will compile `application.css`, `application.js`; and *any* files found in your assets directory(ies) that are _not_ recognized as JS or CSS, but do have a filename extension. That latter was meant to apply to all your images usually in `./app/assets/images/`, but could have targetted other files as well.
+If you are using sprockets prior to 4.0, Rails will compile `application.css`, `application.js`; and *any* files found in your assets directory(ies) that are _not_ recognized as JS or CSS, but do have a filename extension. That latter was meant to apply to all your images usually in `./app/assets/images/`, but could have targeted other files as well.
 
 If you wanted to specify additional assets to deliver that were not included by this logic, for instance for a marketing page with its own CSS, you might add something like this:
 

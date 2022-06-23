@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'digest/md5'
 require 'digest/sha1'
 require 'digest/sha2'
 require 'set'
@@ -19,7 +18,6 @@ module Sprockets
 
     # Internal: Maps digest bytesize to the digest class.
     DIGEST_SIZES = {
-      16 => Digest::MD5,
       20 => Digest::SHA1,
       32 => Digest::SHA256,
       48 => Digest::SHA384,
@@ -177,6 +175,15 @@ module Sprockets
     # Returns a String or nil if hash algorithm is incompatible.
     def hexdigest_integrity_uri(hexdigest)
       integrity_uri(unpack_hexdigest(hexdigest))
+    end
+
+    # Internal: Checks an asset name for a valid digest
+    #
+    # name - The name of the asset
+    #
+    # Returns true if the name contains a digest like string and .digested before the extension
+    def already_digested?(name)
+      return name =~ /-([0-9a-zA-Z]{7,128})\.digested/
     end
 
     private
