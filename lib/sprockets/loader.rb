@@ -195,14 +195,16 @@ module Sprockets
           source = result.delete(:data)
           metadata = result
           metadata[:charset] = source.encoding.name.downcase unless metadata.key?(:charset)
-          metadata[:digest]  = digest(self.version + source)
+          metadata[:digest]  = digest(source)
           metadata[:length]  = source.bytesize
+          metadata[:environment_version] = version
         else
           dependencies << build_file_digest_uri(unloaded.filename)
           metadata = {
             digest: file_digest(unloaded.filename),
             length: self.stat(unloaded.filename).size,
-            dependencies: dependencies
+            dependencies: dependencies,
+            environment_version: version,
           }
         end
 
@@ -289,7 +291,7 @@ module Sprockets
       # Internal: Retrieves an asset based on its digest
       #
       # unloaded - An UnloadedAsset
-      # limit    - A Fixnum which sets the maximum number of versions of "histories"
+      # limit    - An Integer which sets the maximum number of versions of "histories"
       #            stored in the cache
       #
       # This method attempts to retrieve the last `limit` number of histories of an asset

@@ -60,6 +60,17 @@ class TestSourceMaps < Sprockets::TestCase
     ], get_sources(map)
   end
 
+  test "reads the data transcoded to UTF-8" do
+    processor = Proc.new do |input|
+      assert_equal Encoding::UTF_8, input[:data].encoding
+      { data: input[:data] }
+    end
+    @env.register_processor('application/javascript', processor)
+    assert asset = @env.find_asset('plain.js', pipeline: :debug)
+  ensure
+    @env.unregister_preprocessor('application/javascript', processor)
+  end
+
   test "builds a minified source map" do
     @env.js_compressor = Sprockets::UglifierCompressor.new
 
@@ -345,7 +356,7 @@ class TestSourceMaps < Sprockets::TestCase
     filename = fixture_path('source-maps/sub/a.js')
     sandbox filename do
       expected = JSON.parse(@env.find_asset('sub/directory.js.map').source).tap do |map|
-        index = map["sections"].find_index { |s| /sub\/a\.js$/ =~ s["map"]["file"] }
+        index = map["sections"].find_index { |s| s["map"]["file"].end_with?('sub/a.js') }
         map["sections"][index]["map"]["mappings"] << ";AACA"
         map["sections"][(index+1)..-1].each do |s|
           s["offset"]["line"] += 1
@@ -391,7 +402,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
     assert_equal [
-      "file:///#{ fixture_path('source-maps/sass/main.scss').sub(/\A\//, '') }?type=text/scss&pipeline=source"
+      "file:///#{ fixture_path('source-maps/sass/main.scss').delete_prefix('/') }?type=text/scss&pipeline=source"
     ], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)

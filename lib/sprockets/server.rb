@@ -35,7 +35,8 @@ module Sprockets
       msg = "Served asset #{env['PATH_INFO']} -"
 
       # Extract the path from everything after the leading slash
-      path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      full_path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      path = full_path
 
       unless path.valid_encoding?
         return bad_request_response(env)
@@ -63,6 +64,15 @@ module Sprockets
 
       # Look up the asset.
       asset = find_asset(path)
+
+      # Fallback to looking up the asset with the full path.
+      # This will make assets that are hashed with webpack or
+      # other js bundlers work consistently between production
+      # and development pipelines.
+      if asset.nil? && (asset = find_asset(full_path))
+        if_match = asset.etag if fingerprint
+        fingerprint = asset.etag
+      end
 
       if asset.nil?
         status = :not_found
@@ -138,39 +148,39 @@ module Sprockets
       # Returns a 400 Forbidden response tuple
       def bad_request_response(env)
         if head_request?(env)
-          [ 400, { "Content-Type" => "text/plain", "Content-Length" => "0" }, [] ]
+          [ 400, { "content-type" => "text/plain", "content-length" => "0" }, [] ]
         else
-          [ 400, { "Content-Type" => "text/plain", "Content-Length" => "11" }, [ "Bad Request" ] ]
+          [ 400, { "content-type" => "text/plain", "content-length" => "11" }, [ "Bad Request" ] ]
         end
       end
 
       # Returns a 403 Forbidden response tuple
       def forbidden_response(env)
         if head_request?(env)
-          [ 403, { "Content-Type" => "text/plain", "Content-Length" => "0" }, [] ]
+          [ 403, { "content-type" => "text/plain", "content-length" => "0" }, [] ]
         else
-          [ 403, { "Content-Type" => "text/plain", "Content-Length" => "9" }, [ "Forbidden" ] ]
+          [ 403, { "content-type" => "text/plain", "content-length" => "9" }, [ "Forbidden" ] ]
         end
       end
 
       # Returns a 404 Not Found response tuple
       def not_found_response(env)
         if head_request?(env)
-          [ 404, { "Content-Type" => "text/plain", "Content-Length" => "0", "X-Cascade" => "pass" }, [] ]
+          [ 404, { "content-type" => "text/plain", "content-length" => "0", "x-cascade" => "pass" }, [] ]
         else
-          [ 404, { "Content-Type" => "text/plain", "Content-Length" => "9", "X-Cascade" => "pass" }, [ "Not found" ] ]
+          [ 404, { "content-type" => "text/plain", "content-length" => "9", "x-cascade" => "pass" }, [ "Not found" ] ]
         end
       end
 
       def method_not_allowed_response
-        [ 405, { "Content-Type" => "text/plain", "Content-Length" => "18" }, [ "Method Not Allowed" ] ]
+        [ 405, { "content-type" => "text/plain", "content-length" => "18" }, [ "Method Not Allowed" ] ]
       end
 
       def precondition_failed_response(env)
         if head_request?(env)
-          [ 412, { "Content-Type" => "text/plain", "Content-Length" => "0", "X-Cascade" => "pass" }, [] ]
+          [ 412, { "content-type" => "text/plain", "content-length" => "0", "x-cascade" => "pass" }, [] ]
         else
-          [ 412, { "Content-Type" => "text/plain", "Content-Length" => "19", "X-Cascade" => "pass" }, [ "Precondition Failed" ] ]
+          [ 412, { "content-type" => "text/plain", "content-length" => "19", "x-cascade" => "pass" }, [ "Precondition Failed" ] ]
         end
       end
 
@@ -179,7 +189,7 @@ module Sprockets
       def javascript_exception_response(exception)
         err  = "#{exception.class.name}: #{exception.message}\n  (in #{exception.backtrace[0]})"
         body = "throw Error(#{err.inspect})"
-        [ 200, { "Content-Type" => "application/javascript", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+        [ 200, { "content-type" => "application/javascript", "content-length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Returns a CSS response that hides all elements on the page and
@@ -232,7 +242,7 @@ module Sprockets
           }
         CSS
 
-        [ 200, { "Content-Type" => "text/css; charset=utf-8", "Content-Length" => body.bytesize.to_s }, [ body ] ]
+        [ 200, { "content-type" => "text/css; charset=utf-8", "content-length" => body.bytesize.to_s }, [ body ] ]
       end
 
       # Escape special characters for use inside a CSS content("...") string
@@ -248,18 +258,18 @@ module Sprockets
         headers = {}
 
         # Set caching headers
-        headers["Cache-Control"] = +"public"
-        headers["ETag"]          = %("#{etag}")
+        headers["cache-control"] = +"public"
+        headers["etag"]          = %("#{etag}")
 
         # If the request url contains a fingerprint, set a long
         # expires on the response
         if path_fingerprint(env["PATH_INFO"])
-          headers["Cache-Control"] << ", max-age=31536000, immutable"
+          headers["cache-control"] << ", max-age=31536000, immutable"
 
         # Otherwise set `must-revalidate` since the asset could be modified.
         else
-          headers["Cache-Control"] << ", must-revalidate"
-          headers["Vary"] = "Accept-Encoding"
+          headers["cache-control"] << ", must-revalidate"
+          headers["vary"] = "Accept-Encoding"
         end
 
         headers
@@ -269,7 +279,7 @@ module Sprockets
         headers = {}
 
         # Set content length header
-        headers["Content-Length"] = length.to_s
+        headers["content-length"] = length.to_s
 
         # Set content type header
         if type = asset.content_type
@@ -277,7 +287,7 @@ module Sprockets
           if type.start_with?("text/") && asset.charset
             type += "; charset=#{asset.charset}"
           end
-          headers["Content-Type"] = type
+          headers["content-type"] = type
         end
 
         headers.merge(cache_headers(env, asset.etag))
@@ -289,7 +299,7 @@ module Sprockets
       #     # => "0aa2105d29558f3eb790d411d7d8fb66"
       #
       def path_fingerprint(path)
-        path[/-([0-9a-f]{7,128})\.[^.]+\z/, 1]
+        path[/-([0-9a-zA-Z]{7,128})\.[^.]+\z/, 1]
       end
   end
 end

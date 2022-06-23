@@ -59,9 +59,9 @@ module Sprockets
 
     # Deprecated: Assign a `Digest` implementation class. This maybe any Ruby
     # `Digest::` implementation such as `Digest::SHA256` or
-    # `Digest::MD5`.
+    # `Digest::SHA512`.
     #
-    #     environment.digest_class = Digest::MD5
+    #     environment.digest_class = Digest::SHA512
     #
     def digest_class=(klass)
       self.config = config.merge(digest_class: klass).freeze

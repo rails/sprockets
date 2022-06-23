@@ -14,7 +14,7 @@ module Sprockets
   # information that is needed to build a source map file.
   #
   # To add this comment we must have an asset we can link to.
-  # To do this we ensure that the original aset is loaded, then
+  # To do this we ensure that the original asset is loaded, then
   # we use a use a special mime type. For example `application/js-sourcemap+json`
   # for a JS source map.
   #

@@ -25,7 +25,7 @@ module Sprockets
 
     # Internal: Duplicate and store key/value on new frozen hash.
     #
-    # Seperated for recursive calls, always use hash_reassoc(hash, *keys).
+    # Separated for recursive calls, always use hash_reassoc(hash, *keys).
     #
     # hash - Hash
     # key  - Object key
@@ -132,6 +132,9 @@ module Sprockets
 
       mod.instance_methods.each do |sym|
         method = mod.instance_method(sym)
+        if base.method_defined?(sym)
+          base.send(:alias_method, sym, sym)
+        end
         base.send(:define_method, sym, method)
       end
 

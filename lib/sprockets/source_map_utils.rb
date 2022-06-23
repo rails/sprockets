@@ -140,7 +140,7 @@ module Sprockets
       }
     end
 
-    # Public: Combine two seperate source map transformations into a single
+    # Public: Combine two separate source map transformations into a single
     # mapping.
     #
     # Source transformations may happen in discrete steps producing separate
@@ -453,7 +453,7 @@ module Sprockets
     #
     # ary - Two dimensional Array of Integers.
     #
-    # Returns a VLQ encoded String seperated by , and ;.
+    # Returns a VLQ encoded String separated by , and ;.
     def vlq_encode_mappings(ary)
       ary.map { |group|
         group.map { |segment|

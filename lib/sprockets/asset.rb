@@ -6,7 +6,7 @@ module Sprockets
   class Asset
     attr_reader :logical_path
 
-    # Private: Intialize Asset wrapper from attributes Hash.
+    # Private: Initialize Asset wrapper from attributes Hash.
     #
     # Asset wrappers should not be initialized directly, only
     # Environment#find_asset should vend them.
@@ -38,7 +38,7 @@ module Sprockets
     #
     # The API status of the keys is dependent on the pipeline processors
     # itself. So some values maybe considered public and others internal.
-    # See the pipeline proccessor documentation itself.
+    # See the pipeline processor documentation itself.
     #
     # Returns Hash.
     attr_reader :metadata
@@ -53,7 +53,7 @@ module Sprockets
 
     # Public: Internal URI to lookup asset by.
     #
-    # NOT a publically accessible URL.
+    # NOT a publicly accessible URL.
     #
     # Returns URI.
     attr_reader :uri
@@ -64,7 +64,11 @@ module Sprockets
     #
     # Returns String.
     def digest_path
-      logical_path.sub(/\.(\w+)$/) { |ext| "-#{etag}#{ext}" }
+      if DigestUtils.already_digested?(@name)
+        logical_path
+      else
+        logical_path.sub(/\.(\w+)$/) { |ext| "-#{etag}#{ext}" }
+      end
     end
 
     # Public: Return load path + logical path with digest spliced in.
@@ -123,13 +127,26 @@ module Sprockets
       metadata[:digest]
     end
 
+    # Private: Return the version of the environment where the asset was generated.
+    def environment_version
+      metadata[:environment_version]
+    end
+
     # Public: Returns String hexdigest of source.
     def hexdigest
       DigestUtils.pack_hexdigest(digest)
     end
 
     # Pubic: ETag String of Asset.
-    alias_method :etag, :hexdigest
+    def etag
+      version = environment_version
+
+      if version && version != ""
+        DigestUtils.hexdigest(version + digest)
+      else
+        DigestUtils.pack_hexdigest(digest)
+      end
+    end
 
     # Public: Returns String base64 digest of source.
     def base64digest
@@ -138,7 +155,7 @@ module Sprockets
 
     # Public: A "named information" URL for subresource integrity.
     def integrity
-      DigestUtils.integrity_uri(metadata[:digest])
+      DigestUtils.integrity_uri(digest)
     end
 
     # Public: Add enumerator to allow `Asset` instances to be used as Rack
