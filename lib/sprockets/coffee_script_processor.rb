@@ -20,7 +20,7 @@ module Sprockets
     def self.call(input)
       data = input[:data]
 
-      js, map = input[:cache].fetch([self.cache_key, data]) do
+      js, map = input[:cache].fetch([self.cache_key, data, input[:filename]]) do
         result = Autoload::CoffeeScript.compile(
           data,
           sourceMap: "v3",
