@@ -5,6 +5,9 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 ## Master
 
 - Fix `Sprockets::Server` to return lower-cased response headers to comply with Rack::Lint 3.0. [#744](https://github.com/rails/sprockets/pull/744)
+- Adding new directive `depend_on_directory` [#668](https://github.com/rails/sprockets/pull/668)
+- Fix `application/js-sourcemap+json` charset [#669](https://github.com/rails/sprockets/pull/669)
+- Fix `CachedEnvironment` caching nil values [#723](https://github.com/rails/sprockets/pull/723)
 
 ## 4.0.3
 
@@ -13,7 +16,6 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Allow assets already fingerprinted to be served through `Sprockets::Server`
 - Do not fingerprint files that already contain a valid digest in their name
 - Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
-- Fix `CachedEnvironment` caching nil values [#723](https://github.com/rails/sprockets/pull/723)
 
 ## 4.0.2
 
@@ -22,7 +24,6 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 ## 4.0.1
 
 - Fix for Ruby 2.7 keyword arguments warning in `base.rb`. [#660](https://github.com/rails/sprockets/pull/660)
-- Fix `application/js-sourcemap+json` charset [#669](https://github.com/rails/sprockets/pull/669)
 - Fix for when `x_sprockets_linecount` is missing from a source map.
 - Fix subresource integrity to match the digest of the asset.
 
