@@ -43,7 +43,7 @@ How do you know if source maps are working correctly? Try adding a syntax error 
 
 When compiling assets with Sprockets, Sprockets needs to decide which top-level targets to compile, usually `application.css`, `application.js`, and images.
 
-If you are using sprockets prior to 4.0, Rails will compile `application.css`, `application.js`; and *any* files found in your assets directory(ies) that are _not_ recognized as JS or CSS, but do have a filename extension. That latter was meant to apply to all your images usually in `./app/assets/images/`, but could have targetted other files as well.
+If you are using sprockets prior to 4.0, Rails will compile `application.css`, `application.js`; and *any* files found in your assets directory(ies) that are _not_ recognized as JS or CSS, but do have a filename extension. That latter was meant to apply to all your images usually in `./app/assets/images/`, but could have targeted other files as well.
 
 If you wanted to specify additional assets to deliver that were not included by this logic, for instance for a marketing page with its own CSS, you might add something like this:
 
@@ -87,6 +87,18 @@ To correct this, you can move these files to some _subdirectory_ of `./app/asset
 Now you'll be able to use a `<%= stylesheet_link_tag "application" %>` or `<%= stylesheet_link_tag "marketing" %>` in your code.
 
 If you have additional non-standard files you need to be top-level targets, instead of using `config.assets.precompile`, you can use `link`, `link_directory`, and `link_tree` directives in the `manifest.js`.
+
+If you are mounting Rails engines which provide their own assets, check to see if they define their own `manifest.js` file. That file can also be linked using the `link` directive:
+
+```js
+// app/assets/config/manifest.js
+//= link my_engine
+
+// my_engine/app/assets/config/my_engine.js
+//= link_directory ../stylesheets/my_engine .css
+```
+
+This example will direct Sprockets to include the manifest file for the engine `my_engine`; since that manifest uses `link_directory`, the CSS file at `my_engine/app/assets/stylesheets/my_engine/overrides.css` will be made available to Rails (most importantly, to the engine's templates) at `my_engine/overrides`.
 
 Existing `config.assets.precompile` settings will still work for string values (although it is discouraged), but if you were previously using regexp or proc values, they won't work at all with Sprockets 4, and if you try you'll get an exception raised that looks like `NoMethodError: undefined method 'start_with?'`
 

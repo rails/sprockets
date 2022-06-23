@@ -6,13 +6,11 @@ class TestDigestUtils < MiniTest::Test
   include Sprockets::DigestUtils
 
   def test_detect_digest_class
-    md5    = Digest::MD5.new.digest
     sha1   = Digest::SHA1.new.digest
     sha256 = Digest::SHA256.new.digest
     sha512 = Digest::SHA512.new.digest
 
     refute detect_digest_class("0000")
-    assert_equal Digest::MD5, detect_digest_class(md5)
     assert_equal Digest::SHA1, detect_digest_class(sha1)
     assert_equal Digest::SHA256, detect_digest_class(sha256)
     assert_equal Digest::SHA512, detect_digest_class(sha512)
@@ -93,5 +91,14 @@ class TestDigestUtils < MiniTest::Test
 
     assert_equal "sha512-+uuYUxxe7oWIShQrWEmMn/fixz/rxDP4qcAZddXLDM3nN8/tpk1ZC2jXQk6N+mXE65jwfzNVUJL/qjA3y9KbuQ==",
       hexdigest_integrity_uri(sha512)
+  end
+
+  def test_already_digested
+    refute already_digested?(nil)
+    refute already_digested?("application-abc123.digested")
+    refute already_digested?("application-abcd1234")
+
+    assert already_digested?("application-abcd1234.digested")
+    assert already_digested?("application-abcd1234.digested.map")
   end
 end

@@ -6,7 +6,7 @@ module Sprockets
   # Processor engine class for the CoffeeScript compiler.
   # Depends on the `coffee-script` and `coffee-script-source` gems.
   #
-  # For more infomation see:
+  # For more information see:
   #
   #   https://github.com/rails/ruby-coffee-script
   #
@@ -20,7 +20,7 @@ module Sprockets
     def self.call(input)
       data = input[:data]
 
-      js, map = input[:cache].fetch([self.cache_key, data]) do
+      js, map = input[:cache].fetch([self.cache_key, data, input[:filename]]) do
         result = Autoload::CoffeeScript.compile(
           data,
           sourceMap: "v3",

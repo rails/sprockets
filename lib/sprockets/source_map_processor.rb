@@ -9,7 +9,7 @@ module Sprockets
   # When a file is passed in it will have a `application/js-sourcemap+json`
   # or `application/css-sourcemap+json` mime type. The filename will be
   # match the original asset. The original asset is loaded. As it
-  # gets processed by Sprockets it will aquire all information
+  # gets processed by Sprockets it will acquire all information
   # needed to build a source map file in the `asset.to_hash[:metadata][:map]`
   # key.
   #

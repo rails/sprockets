@@ -840,7 +840,7 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
-  test "seperate contexts classes for each instance" do
+  test "separate contexts classes for each instance" do
     e1 = new_environment
     e2 = new_environment
 

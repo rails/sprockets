@@ -2,6 +2,7 @@
 require 'rack/utils'
 require 'set'
 require 'sprockets/errors'
+require 'delegate'
 
 module Sprockets
   # They are typically accessed by ERB templates. You can mix in custom helpers
@@ -210,7 +211,7 @@ module Sprockets
     #
     # NOTE: This helper is currently not implemented and should be
     # customized by the application. Though, in the future, some
-    # basics implemention may be provided with different methods that
+    # basic implementation may be provided with different methods that
     # are required to be overridden.
     def asset_path(path, options = {})
       message = <<-EOS
