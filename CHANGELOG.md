@@ -10,6 +10,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Fix `application/js-sourcemap+json` charset [#669](https://github.com/rails/sprockets/pull/669)
 - Fix `CachedEnvironment` caching nil values [#723](https://github.com/rails/sprockets/pull/723)
 - Process `*.jst.ejs.erb` files with ERBProcessor [#674](https://github.com/rails/sprockets/pull/674)
+- Fix cache key for coffee script processor to be dependent on the filename [#670](https://github.com/rails/sprockets/pull/670)
 
 ## 4.0.3
 
@@ -18,7 +19,6 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Allow assets already fingerprinted to be served through `Sprockets::Server`
 - Do not fingerprint files that already contain a valid digest in their name
 - Remove remaining support for Ruby < 2.4.[#672](https://github.com/rails/sprockets/pull/672)
-- Fix cache key for coffee script processor to be dependent on the filename [#670](https://github.com/rails/sprockets/pull/670)
 
 ## 4.0.2
 
