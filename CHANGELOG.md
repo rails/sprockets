@@ -8,6 +8,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Adding new directive `depend_on_directory` [#668](https://github.com/rails/sprockets/pull/668)
 - Fix `application/js-sourcemap+json` charset [#669](https://github.com/rails/sprockets/pull/669)
 - Fix `CachedEnvironment` caching nil values [#723](https://github.com/rails/sprockets/pull/723)
+- Process `*.jst.ejs.erb` files with ERBProcessor [#674](https://github.com/rails/sprockets/pull/674)
 
 ## 4.0.3
 
