@@ -381,6 +381,14 @@ the current file won't work, it must be a logical path.
 
 **Caution**: the "link" directive should always have an explicit extension on the end.
 
+`link` can also be used to include manifest files from mounted Rails engines:
+
+```
+//= link my_engine
+```
+
+This would find a manifest file at `my_engine/app/assets/config/my_engine.js` and include its directives.
+
 ### link_directory
 
 `link_directory` *path* links all the files inside the directory specified by the *path*. By "link", we mean they are specified as compilation targets to be written out to disk, and made available to be served to user-agents.
