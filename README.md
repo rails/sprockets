@@ -385,10 +385,10 @@ the current file won't work, it must be a logical path.
 `link` can also be used to include manifest files from mounted Rails engines:
 
 ```
-//= link my_engine
+//= link my_engine_manifest
 ```
 
-This would find a manifest file at `my_engine/app/assets/config/my_engine.js` and include its directives.
+This would find a manifest file at `my_engine/app/assets/config/my_engine_manifest.js` and include its directives.
 
 ### link_directory
 
