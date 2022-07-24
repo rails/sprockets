@@ -28,11 +28,11 @@ module Sprockets
 
     # Public: Remove Exporting processor `klass` for `mime_type`.
     #
-    #     environment.unregister_exporter '*/*', Sprockets::Exporters::Zlib
+    #     environment.unregister_exporter '*/*', Sprockets::Exporters::ZlibExporter
     #
     # Can be called without a mime type
     #
-    #     environment.unregister_exporter Sprockets::Exporters::Zlib
+    #     environment.unregister_exporter Sprockets::Exporters::ZlibExporter
     #
     # Does not remove any exporters that depend on `klass`.
     def unregister_exporter(mime_types, exporter = nil)
