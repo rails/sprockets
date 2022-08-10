@@ -1,6 +1,6 @@
 # Building an Asset Processing Framework
 
-This guide is for using a Sprockets::Environment to process assets. You would use this class directly if you were building a feature similar to Rail's asset pipeline. If you aren't building an asset processing frameworks, you will want to refer to the [End User Asset Generation](end_user_asset_generation.md) guide instead. For a reference use of `Sprockets::Environment` see [sprockets-rails](http://github.com/rails/Sprockets-rails).
+This guide is for using a Sprockets::Environment to process assets. You would use this class directly if you were building a feature similar to Rail's asset pipeline. If you aren't building an asset processing frameworks, you will want to refer to the [Readme](../README.md). For a reference use of `Sprockets::Environment` see [sprockets-rails](http://github.com/rails/Sprockets-rails).
 
 ## Understanding the Sprockets Environment
 
