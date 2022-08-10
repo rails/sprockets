@@ -525,7 +525,7 @@ Generated files are cached. If you're using an `ENV` var then
 when you change then ENV var the asset will be forced to
 recompile. This behavior is only true for environment variables,
 if you are pulling a value from somewhere else, such as a database,
-must manually invalidate the cache to see the change.
+you must manually invalidate the cache to see the change.
 
 If you're using Rails, there are helpers you can use such as `asset_url`
 that will cause a recompile if the value changes.
