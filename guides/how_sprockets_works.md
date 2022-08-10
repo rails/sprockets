@@ -328,7 +328,7 @@ register_pipeline :default do |env, type, file_type|
 end
 
 def default_processors_for(type, file_type)
-  Bundle_processors = config[:bundle_processors][type]
+  bundled_processors = config[:bundle_processors][type]
   if bundled_processors.any?
     bundled_processors
   else
