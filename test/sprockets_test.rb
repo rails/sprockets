@@ -4,6 +4,7 @@ require "sprockets"
 require "sprockets/environment"
 require "fileutils"
 require "timecop"
+require "rack/lint"
 
 old_verbose, $VERBOSE = $VERBOSE, false
 Encoding.default_external = 'UTF-8'
