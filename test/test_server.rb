@@ -36,15 +36,15 @@ class TestServer < Sprockets::TestCase
   test "serve single source file" do
     get "/assets/foo.js"
     assert_equal 200, last_response.status
-    assert_equal "9", last_response.headers['Content-Length']
-    assert_equal "Accept-Encoding", last_response.headers['Vary']
+    assert_equal "9", last_response.headers['content-length']
+    assert_equal "Accept-Encoding", last_response.headers['vary']
     assert_equal "var foo;\n", last_response.body
   end
 
   test "serve single self file" do
     get "/assets/foo.self.js"
     assert_equal 200, last_response.status
-    assert_equal "9", last_response.headers['Content-Length']
+    assert_equal "9", last_response.headers['content-length']
     assert_equal "var foo;\n", last_response.body
   end
 
@@ -64,15 +64,15 @@ class TestServer < Sprockets::TestCase
     assert_equal 200, last_response.status
     assert_equal "\n(function() {\n  application.boot();\n})();\n",
       last_response.body
-    assert_equal "43", last_response.headers['Content-Length']
+    assert_equal "43", last_response.headers['content-length']
   end
 
   test "serve source with content type headers" do
     get "/assets/application.js"
-    assert_equal "application/javascript", last_response.headers['Content-Type']
+    assert_equal "application/javascript", last_response.headers['content-type']
 
     get "/assets/bootstrap.css"
-    assert_equal "text/css; charset=utf-8", last_response.headers['Content-Type']
+    assert_equal "text/css; charset=utf-8", last_response.headers['content-type']
   end
 
   test "serve source with etag headers" do
@@ -80,14 +80,14 @@ class TestServer < Sprockets::TestCase
 
     get "/assets/application.js"
     assert_equal "\"#{digest}\"",
-      last_response.headers['ETag']
+      last_response.headers['etag']
   end
 
   test "not modified partial response when if-none-match etags match" do
     get "/assets/application.js"
     assert_equal 200, last_response.status
     etag, cache_control, expires, vary = last_response.headers.values_at(
-      'ETag', 'Cache-Control', 'Expires', 'Vary'
+      'etag', 'cache-control', 'expires', 'vary'
     )
 
     assert_nil expires
@@ -97,15 +97,15 @@ class TestServer < Sprockets::TestCase
     assert_equal 304, last_response.status
 
     # Allow 304 headers
-    assert_equal cache_control, last_response.headers['Cache-Control']
-    assert_equal etag, last_response.headers['ETag']
+    assert_equal cache_control, last_response.headers['cache-control']
+    assert_equal etag, last_response.headers['etag']
     assert_nil last_response.headers['Expires']
-    assert_equal vary, last_response.headers['Vary']
+    assert_equal vary, last_response.headers['vary']
 
     # Disallowed 304 headers
-    refute last_response.headers['Content-Type']
-    refute last_response.headers['Content-Length']
-    refute last_response.headers['Content-Encoding']
+    refute last_response.headers['content-type']
+    refute last_response.headers['content-length']
+    refute last_response.headers['content-encoding']
   end
 
   test "response when if-none-match etags don't match" do
@@ -113,15 +113,15 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_NONE_MATCH' => "nope"
 
     assert_equal 200, last_response.status
-    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
-    assert_equal '52', last_response.headers['Content-Length']
+    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['etag']
+    assert_equal '52', last_response.headers['content-length']
   end
 
   test "not modified partial response with fingerprint and if-none-match etags match" do
     get "/assets/application.js"
     assert_equal 200, last_response.status
 
-    etag   = last_response.headers['ETag']
+    etag   = last_response.headers['etag']
     digest = etag[/"(.+)"/, 1]
 
     get "/assets/application-#{digest}.js", {},
@@ -133,7 +133,7 @@ class TestServer < Sprockets::TestCase
     get "/assets/prehashed-988881adc9fc3655077dc2d4d757d480b5ea0e11.js"
     assert_equal 200, last_response.status
 
-    etag = last_response.headers['ETag']
+    etag = last_response.headers['etag']
     digest = etag[/"(.+)"/, 1]
 
     assert_equal 'edabfd0f1ac5fcdae82cc7d92d1c52abb671797a3948fa9040aec1db8e61c327', digest
@@ -143,7 +143,7 @@ class TestServer < Sprockets::TestCase
     get "/assets/esbuild-TQDC3LZV.digested.js"
     assert_equal 200, last_response.status
 
-    etag = last_response.headers['ETag']
+    etag = last_response.headers['etag']
     digest = etag[/"(.+)"/, 1]
 
     assert_equal '3ebac3dc00b383de6cbdfa470d105f5a9f22708fb72c63db917ad37f288ac708', digest
@@ -153,7 +153,7 @@ class TestServer < Sprockets::TestCase
     get "/assets/application.js"
     assert_equal 200, last_response.status
 
-    etag   = last_response.headers['ETag']
+    etag   = last_response.headers['etag']
     digest = etag[/"(.+)"/, 1]
 
     get "/assets/application-#{digest}.js", {},
@@ -177,7 +177,7 @@ class TestServer < Sprockets::TestCase
     get "/assets/application.js"
     assert_equal 200, last_response.status
 
-    etag = last_response.headers['ETag']
+    etag = last_response.headers['etag']
 
     get "/assets/application-0000000000000000000000000000000000000000.js", {},
       'HTTP_IF_NONE_MATCH' => etag
@@ -187,14 +187,14 @@ class TestServer < Sprockets::TestCase
   test "ok partial response when if-match etags match" do
     get "/assets/application.js"
     assert_equal 200, last_response.status
-    etag = last_response.headers['ETag']
+    etag = last_response.headers['etag']
 
     get "/assets/application.js", {},
       'HTTP_IF_MATCH' => etag
 
     assert_equal 200, last_response.status
-    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['ETag']
-    assert_equal '52', last_response.headers['Content-Length']
+    assert_equal '"b452c9ae1d5c8d9246653e0d93bc83abce0ee09ef725c0f0a29a41269c217b83"', last_response.headers['etag']
+    assert_equal '52', last_response.headers['content-length']
   end
 
   test "precondition failed with if-match is a mismatch" do
@@ -202,7 +202,7 @@ class TestServer < Sprockets::TestCase
       'HTTP_IF_MATCH' => '"000"'
     assert_equal 412, last_response.status
 
-    refute last_response.headers['ETag']
+    refute last_response.headers['etag']
   end
 
   test "not found with if-match" do
@@ -225,23 +225,23 @@ class TestServer < Sprockets::TestCase
 
   test "fingerprint digest sets expiration to the future" do
     get "/assets/application.js"
-    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+    digest = last_response.headers['etag'][/"(.+)"/, 1]
 
     get "/assets/application-#{digest}.js"
     assert_equal 200, last_response.status
-    assert_match %r{max-age}, last_response.headers['Cache-Control']
-    assert_match %r{immutable}, last_response.headers['Cache-Control']
+    assert_match %r{max-age}, last_response.headers['cache-control']
+    assert_match %r{immutable}, last_response.headers['cache-control']
   end
 
   test "fingerprint digest of file self" do
     get "/assets/application.self.js"
-    digest = last_response.headers['ETag'][/"(.+)"/, 1]
+    digest = last_response.headers['etag'][/"(.+)"/, 1]
 
     get "/assets/application.self-#{digest}.js"
     assert_equal 200, last_response.status
     assert_equal "\n(function() {\n  application.boot();\n})();\n", last_response.body
-    assert_equal "43", last_response.headers['Content-Length']
-    assert_match %r{max-age}, last_response.headers['Cache-Control']
+    assert_equal "43", last_response.headers['content-length']
+    assert_match %r{max-age}, last_response.headers['cache-control']
   end
 
   test "bad fingerprint digest returns a 404" do
@@ -250,14 +250,14 @@ class TestServer < Sprockets::TestCase
 
     head "/assets/application-0000000000000000000000000000000000000000.js"
     assert_equal 404, last_response.status
-    assert_equal "0", last_response.headers['Content-Length']
+    assert_equal "0", last_response.headers['content-length']
     assert_equal "", last_response.body
   end
 
   test "missing source" do
     get "/assets/none.js"
     assert_equal 404, last_response.status
-    assert_equal "pass", last_response.headers['X-Cascade']
+    assert_equal "pass", last_response.headers['x-cascade']
   end
 
   test "re-throw JS exceptions in the browser" do
@@ -302,7 +302,7 @@ class TestServer < Sprockets::TestCase
 
     head "/assets/.-0000000./etc/passwd"
     assert_equal 403, last_response.status
-    assert_equal "0", last_response.headers['Content-Length']
+    assert_equal "0", last_response.headers['content-length']
     assert_equal "", last_response.body
   end
 
@@ -336,8 +336,8 @@ class TestServer < Sprockets::TestCase
   test "serving static assets" do
     get "/assets/logo.png"
     assert_equal 200, last_response.status
-    assert_equal "image/png", last_response.headers['Content-Type']
-    refute last_response.headers['Content-Encoding']
+    assert_equal "image/png", last_response.headers['content-type']
+    refute last_response.headers['content-encoding']
     assert_equal File.binread(fixture_path("server/app/images/logo.png")), last_response.body
   end
 
@@ -347,8 +347,8 @@ class TestServer < Sprockets::TestCase
 
     head "/assets/foo.js"
     assert_equal 200, last_response.status
-    assert_equal "application/javascript", last_response.headers['Content-Type']
-    assert_equal "0", last_response.headers['Content-Length']
+    assert_equal "application/javascript", last_response.headers['content-type']
+    assert_equal "0", last_response.headers['content-length']
     assert_equal "", last_response.body
 
     post "/assets/foo.js"
