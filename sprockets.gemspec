@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.files = Dir["README.md", "CHANGELOG.md", "MIT-LICENSE", "lib/**/*.rb"]
   s.executables = ["sprockets"]
 
-  s.add_dependency "rack",            "> 1", "< 4"
+  s.add_dependency "rack",            ">= 2.2.4", "< 4"
   s.add_dependency "concurrent-ruby", "~> 1.0"
 
   s.add_development_dependency "m", ">= 0"
