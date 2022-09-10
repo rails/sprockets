@@ -2,7 +2,7 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
-- Add support for Rack 3.0 [#758](https://github.com/rails/sprockets/pull/758)
+- Add support for Rack 3.0. Headers set by sprockets will now be lower case. [#758](https://github.com/rails/sprockets/pull/758)
 
 ## 4.1.0
 
