@@ -97,12 +97,12 @@ module Sprockets
     #
     #   Fingerprint path (String):
     #     logical_path: Logical path (String)
-    #     mtime: ISO8601 mtime (String)
+    #     mtime: ISO8601 mtime (String) always "1970-01-01T00:00:01+00:00"
     #     digest: Base64 hex digest (String)
     #
     #  { "application-2e8e9a7c6b0aafa0c9bdeec90ea30213.js" =>
     #      { 'logical_path' => "application.js",
-    #        'mtime' => "2011-12-13T21:47:08-06:00",
+    #        'mtime' => "1970-01-01T00:00:01+00:00",
     #        'digest' => "2e8e9a7c6b0aafa0c9bdeec90ea30213" } }
     #
     def files
@@ -172,7 +172,7 @@ module Sprockets
       end
 
       assets_to_export.each do |asset|
-        mtime = Time.now.iso8601
+        mtime = Time.at(1).utc.to_datetime.iso8601 # for reproducibility
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
           'mtime'        => mtime,
