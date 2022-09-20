@@ -118,33 +118,38 @@ module Sprockets
       buf
     end
 
+    MODULE_INCLUDE_MUTEX = Mutex.new
+    private_constant :MODULE_INCLUDE_MUTEX
+
     # Internal: Inject into target module for the duration of the block.
     #
     # mod - Module
     #
     # Returns result of block.
     def module_include(base, mod)
-      old_methods = {}
+      MODULE_INCLUDE_MUTEX.synchronize do
+        old_methods = {}
 
-      mod.instance_methods.each do |sym|
-        old_methods[sym] = base.instance_method(sym) if base.method_defined?(sym)
-      end
-
-      mod.instance_methods.each do |sym|
-        method = mod.instance_method(sym)
-        if base.method_defined?(sym)
-          base.send(:alias_method, sym, sym)
+        mod.instance_methods.each do |sym|
+          old_methods[sym] = base.instance_method(sym) if base.method_defined?(sym)
         end
-        base.send(:define_method, sym, method)
-      end
 
-      yield
-    ensure
-      mod.instance_methods.each do |sym|
-        base.send(:undef_method, sym) if base.method_defined?(sym)
-      end
-      old_methods.each do |sym, method|
-        base.send(:define_method, sym, method)
+        mod.instance_methods.each do |sym|
+          method = mod.instance_method(sym)
+          if base.method_defined?(sym)
+            base.send(:alias_method, sym, sym)
+          end
+          base.send(:define_method, sym, method)
+        end
+
+        yield
+      ensure
+        mod.instance_methods.each do |sym|
+          base.send(:undef_method, sym) if base.method_defined?(sym)
+        end
+        old_methods.each do |sym, method|
+          base.send(:define_method, sym, method)
+        end
       end
     end
 
