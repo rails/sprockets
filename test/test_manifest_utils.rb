@@ -6,8 +6,10 @@ require 'logger'
 class TestManifestUtils < MiniTest::Test
   include Sprockets::ManifestUtils
 
-  def test_generate_manifest_path
-    assert_match(MANIFEST_RE, generate_manifest_path)
+  def test_returns_no_manifest_nil
+    root = File.expand_path("../fixtures/manifest_utils", __FILE__)
+    assert_equal nil,
+      find_directory_manifest("#{root}/")
   end
 
   def test_find_directory_manifest

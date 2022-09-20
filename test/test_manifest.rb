@@ -50,11 +50,10 @@ class TestManifest < Sprockets::TestCase
     assert_equal filename, manifest.path
   end
 
-  test "specify manifest directory yields random .sprockets-manifest-*.json" do
+  test "specify manifest directory reproducible .sprockets-manifest-*.json" do
     manifest = Sprockets::Manifest.new(@env, @dir)
 
     assert_equal @dir, manifest.directory
-    assert_match(/^\.sprockets-manifest-[a-f0-9]{32}.json/, File.basename(manifest.filename))
 
     manifest.save
     assert_match(/^\.sprockets-manifest-[a-f0-9]{32}.json/, File.basename(manifest.filename))

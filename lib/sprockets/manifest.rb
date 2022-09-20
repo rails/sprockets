@@ -56,14 +56,14 @@ module Sprockets
         @filename = find_directory_manifest(@directory, logger)
       end
 
-      unless @directory && @filename
-        raise ArgumentError, "manifest requires output filename"
+      unless @directory
+        raise ArgumentError, "manifest requires output directory"
       end
 
       data = {}
 
       begin
-        if File.exist?(@filename)
+        if !@filename.nil? && File.exist?(@filename)
           data = json_decode(File.read(@filename))
         end
       rescue JSON::ParserError => e
@@ -172,7 +172,7 @@ module Sprockets
       end
 
       assets_to_export.each do |asset|
-        mtime = Time.now.iso8601
+        mtime = Time.at(1).utc.to_datetime.iso8601 # for reproducibility
         files[asset.digest_path] = {
           'logical_path' => asset.logical_path,
           'mtime'        => mtime,
@@ -277,6 +277,13 @@ module Sprockets
     # Persist manifest back to FS
     def save
       data = json_encode(@data)
+
+      # If directory is given w/o filename, use reproducible manifest location
+      if @directory && @filename.nil?
+        etag = DigestUtils.pack_hexdigest(DigestUtils.digest(@data))
+        @filename = File.join(@directory, ".sprockets-manifest-#{etag}.json")
+      end
+
       FileUtils.mkdir_p File.dirname(@filename)
       PathUtils.atomic_write(@filename) do |f|
         f.write(data)

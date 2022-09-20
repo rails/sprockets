@@ -12,7 +12,7 @@ module Sprockets
       module ZlibArchiver
         def self.call(file, source, mtime)
           gz = Zlib::GzipWriter.new(file, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime
+          gz.mtime = 1 # for reproducibility
           gz.write(source)
           gz.close
 
