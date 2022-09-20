@@ -4,32 +4,30 @@ module Sprockets
     class Gzip
       # Private: Generates a gzipped file based off of reference asset.
       #
-      #     ZlibArchiver.call(file, source, mtime)
+      #     ZlibArchiver.call(file, source)
       #
       # Compresses a given `source` using stdlib Zlib algorithm
-      # writes contents to the `file` passed in. Sets `mtime` of
-      # written file to passed in `mtime`
+      # writes contents to the `file` passed in.
       module ZlibArchiver
-        def self.call(file, source, mtime)
+        def self.call(file, source)
           gz = Zlib::GzipWriter.new(file, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime
+          gz.mtime = 1 # for reproducibility
           gz.write(source)
           gz.close
 
-          File.utime(mtime, mtime, file.path)
+          File.utime(1, 1, file.path)
         end
       end
 
       # Private: Generates a gzipped file based off of reference asset.
       #
-      #     ZopfliArchiver.call(file, source, mtime)
+      #     ZopfliArchiver.call(file, source)
       #
       # Compresses a given `source` using the zopfli gem
-      # writes contents to the `file` passed in. Sets `mtime` of
-      # written file to passed in `mtime`
+      # writes contents to the `file` passed in.
       module ZopfliArchiver
-        def self.call(file, source, mtime)
-          compressed_source = Autoload::Zopfli.deflate(source, format: :gzip, mtime: mtime)
+        def self.call(file, source)
+          compressed_source = Autoload::Zopfli.deflate(source, format: :gzip, mtime: 1)
           file.write(compressed_source)
           file.close
 
@@ -89,8 +87,7 @@ module Sprockets
       #
       # Returns nothing.
       def compress(file, target)
-        mtime = Sprockets::PathUtils.stat(target).mtime
-        archiver.call(file, source, mtime)
+        archiver.call(file, source)
 
         nil
       end
