@@ -294,6 +294,20 @@ In Sprockets 4 file types are no longer "chainable" this means that if you wante
 
 The reason for the change is to have more explicit behavior. It helps sprockets know to do the right thing, decreases magic, and increases speed. It also means that as a library maintainer you must tell sprockets all the extensions you want your project to work with. Going with the coffee script example. You would need to register a mime type
 
+For example, adding ERB support for React assets (`*.jsx.erb`) in [The Asset Pipeline](https://guides.rubyonrails.org/asset_pipeline.html):
+
+```ruby
+# config/initializers/assets.rb
+
+if defined?(Sprockets) && Sprockets::VERSION >= "4"
+  Rails.application.config.assets.configure do |env|
+    env.register_mime_type('application/jsx+ruby', extensions: ['.jsx.erb', '.js.jsx.erb', '.es6.jsx.erb'])
+    env.register_transformer('application/jsx+ruby', 'application/jsx', Sprockets::ERBProcessor)
+  end
+end
+
+```
+
 <!---
 Right now sprockets uses an "internal interface" to register erb files. I'm not actually sure how to register support for an ERB file correctly without using that interface, need to do more research
 
