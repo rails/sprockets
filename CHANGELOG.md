@@ -3,6 +3,7 @@
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
 - Fix for precompile issues when multiple extensions map to the same MIME type (eg. `.jpeg` / `.jpg`). [#781](https://github.com/rails/sprockets/pull/781)
+- Fix `application/css-sourcemap+json` charset [#764](https://github.com/rails/sprockets/pull/764)
 
 ## 4.2.0
 
