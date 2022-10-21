@@ -11,6 +11,10 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Add support for Rack 3.0. Headers set by sprockets will now be lower case. [#758](https://github.com/rails/sprockets/pull/758)
 - Make `Sprockets::Utils.module_include` thread safe on JRuby. [#759](https://github.com/rails/sprockets/pull/759)
 
+## 4.1.1
+
+- Fix `Sprockets::Server` to return response headers to be compatible with Rack::Lint 2.0.
+
 ## 4.1.0
 
 - Allow age to be altered in asset:clean rake task.
