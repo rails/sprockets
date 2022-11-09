@@ -137,7 +137,7 @@ module Sprockets
       DigestUtils.pack_hexdigest(digest)
     end
 
-    # Pubic: ETag String of Asset.
+    # Public: ETag String of Asset.
     def etag
       version = environment_version
 
