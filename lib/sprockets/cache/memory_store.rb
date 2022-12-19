@@ -22,6 +22,7 @@ module Sprockets
       def initialize(max_size = DEFAULT_MAX_SIZE)
         @max_size = max_size
         @cache = {}
+        @mutex = Mutex.new
       end
 
       # Public: Retrieve value from cache.
@@ -32,12 +33,14 @@ module Sprockets
       #
       # Returns Object or nil or the value is not set.
       def get(key)
-        exists = true
-        value = @cache.delete(key) { exists = false }
-        if exists
-          @cache[key] = value
-        else
-          nil
+        @mutex.synchronize do
+          exists = true
+          value = @cache.delete(key) { exists = false }
+          if exists
+            @cache[key] = value
+          else
+            nil
+          end
         end
       end
 
@@ -50,9 +53,11 @@ module Sprockets
       #
       # Returns Object value.
       def set(key, value)
-        @cache.delete(key)
-        @cache[key] = value
-        @cache.shift if @cache.size > @max_size
+        @mutex.synchronize do
+          @cache.delete(key)
+          @cache[key] = value
+          @cache.shift if @cache.size > @max_size
+        end
         value
       end
 
@@ -60,14 +65,18 @@ module Sprockets
       #
       # Returns String.
       def inspect
-        "#<#{self.class} size=#{@cache.size}/#{@max_size}>"
+        @mutex.synchronize do
+          "#<#{self.class} size=#{@cache.size}/#{@max_size}>"
+        end
       end
 
       # Public: Clear the cache
       #
       # Returns true
       def clear(options=nil)
-        @cache.clear
+        @mutex.synchronize do
+          @cache.clear
+        end
         true
       end
     end
