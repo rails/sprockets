@@ -31,27 +31,27 @@ module Sprockets
 
     # Internal: Cache Environment#entries
     def entries(path)
-      @entries.compute_if_absent(path) { super(path) }
+      @entries.fetch_or_store(path) { super(path) }
     end
 
     # Internal: Cache Environment#stat
     def stat(path)
-      @stats.compute_if_absent(path) { super(path) }
+      @stats.fetch_or_store(path) { super(path) }
     end
 
     # Internal: Cache Environment#load
     def load(uri)
-      @uris.compute_if_absent(uri) { super(uri) }
+      @uris.fetch_or_store(uri) { super(uri) }
     end
 
     # Internal: Cache Environment#processor_cache_key
     def processor_cache_key(str)
-      @processor_cache_keys.compute_if_absent(str) { super(str) }
+      @processor_cache_keys.fetch_or_store(str) { super(str) }
     end
 
     # Internal: Cache Environment#resolve_dependency
     def resolve_dependency(str)
-      @resolved_dependencies.compute_if_absent(str) { super(str) }
+      @resolved_dependencies.fetch_or_store(str) { super(str) }
     end
 
     private
