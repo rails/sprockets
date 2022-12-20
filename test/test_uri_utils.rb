@@ -39,23 +39,23 @@ class TestURIUtils < MiniTest::Test
     assert_equal ['file', 'localhost', '/etc/fstab', nil], parts
 
     parts = split_file_uri("file:///etc/fstab")
-    assert_equal ['file', nil, '/etc/fstab', nil], parts
+    assert_equal ['file', '', '/etc/fstab', nil], parts
 
     parts = split_file_uri("file:///usr/local/bin/ruby%20on%20rails")
-    assert_equal ['file', nil, '/usr/local/bin/ruby on rails', nil], parts
+    assert_equal ['file', '', '/usr/local/bin/ruby on rails', nil], parts
 
     parts = split_file_uri("file:///usr/local/var/github/app/assets/javascripts/application.js")
-    assert_equal ['file', nil, '/usr/local/var/github/app/assets/javascripts/application.js', nil], parts
+    assert_equal ['file', '', '/usr/local/var/github/app/assets/javascripts/application.js', nil], parts
 
     if DOSISH
       parts = split_file_uri("file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc")
-      assert_equal ['file', nil, 'C:/Documents and Settings/davris/FileSchemeURIs.doc', nil], parts
+      assert_equal ['file', '', 'C:/Documents and Settings/davris/FileSchemeURIs.doc', nil], parts
 
       parts = split_file_uri("file:///D:/Program%20Files/Viewer/startup.htm")
-      assert_equal ['file', nil, 'D:/Program Files/Viewer/startup.htm', nil], parts
+      assert_equal ['file', '', 'D:/Program Files/Viewer/startup.htm', nil], parts
 
       parts = split_file_uri("file:///C:/Program%20Files/Music/Web%20Sys/main.html?REQUEST=RADIO")
-      assert_equal ['file', nil, 'C:/Program Files/Music/Web Sys/main.html', 'REQUEST=RADIO'], parts
+      assert_equal ['file', '', 'C:/Program Files/Music/Web Sys/main.html', 'REQUEST=RADIO'], parts
     end
   end
 

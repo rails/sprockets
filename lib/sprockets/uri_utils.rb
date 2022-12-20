@@ -53,7 +53,7 @@ module Sprockets
         path = path[1..-1]
       end
 
-      [scheme, host, path, query]
+      [scheme, host || '', path, query]
     end
 
     # Internal: Join file: URI component parts into String.

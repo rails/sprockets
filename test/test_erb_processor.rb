@@ -32,6 +32,8 @@ class TestERBProcessor < MiniTest::Test
     old_env_value = ::ENV['ERB_ENV_TEST_VALUE']
     ::ENV['ERB_ENV_TEST_VALUE'] = 'success'
 
+    skip 'https://github.com/oracle/truffleruby/issues/2810' if RUBY_ENGINE == 'truffleruby'
+
     root = File.expand_path("../fixtures", __FILE__)
     environment = Sprockets::Environment.new(root)
     environment.append_path 'default'
@@ -55,6 +57,8 @@ class TestERBProcessor < MiniTest::Test
 
   def test_compile_erb_template_that_depends_on_empty_env
     old_env_value = ::ENV.delete('ERB_ENV_TEST_VALUE')
+
+    skip 'https://github.com/oracle/truffleruby/issues/2810' if RUBY_ENGINE == 'truffleruby'
 
     root = File.expand_path("../fixtures", __FILE__)
     environment = Sprockets::Environment.new(root)

@@ -2,6 +2,7 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+- Fix thread safety of `Sprockets::CachedEnvironment` and `Sprockets::Cache::MemoryStore`. [#771](https://github.com/rails/sprockets/pull/771)
 - Add support for Rack 3.0. Headers set by sprockets will now be lower case. [#758](https://github.com/rails/sprockets/pull/758)
 - Make `Sprockets::Utils.module_include` thread safe on JRuby. [#759](https://github.com/rails/sprockets/pull/759)
 

@@ -16,11 +16,11 @@ module Sprockets
       initialize_configuration(environment)
 
       @cache   = environment.cache
-      @stats   = {}
-      @entries = {}
-      @uris    = {}
-      @processor_cache_keys = {}
-      @resolved_dependencies = {}
+      @stats   = Concurrent::Map.new
+      @entries = Concurrent::Map.new
+      @uris    = Concurrent::Map.new
+      @processor_cache_keys = Concurrent::Map.new
+      @resolved_dependencies = Concurrent::Map.new
     end
 
     # No-op return self as cached environment.
@@ -31,27 +31,27 @@ module Sprockets
 
     # Internal: Cache Environment#entries
     def entries(path)
-      @entries.fetch(path){ @entries[path] = super(path) }
+      @entries.fetch_or_store(path) { super(path) }
     end
 
     # Internal: Cache Environment#stat
     def stat(path)
-      @stats.fetch(path){ @stats[path] = super(path) }
+      @stats.fetch_or_store(path) { super(path) }
     end
 
     # Internal: Cache Environment#load
     def load(uri)
-      @uris.fetch(uri){ @uris[uri] = super(uri) }
+      @uris.fetch_or_store(uri) { super(uri) }
     end
 
     # Internal: Cache Environment#processor_cache_key
     def processor_cache_key(str)
-      @processor_cache_keys.fetch(str){ @processor_cache_keys[str] = super(str) }
+      @processor_cache_keys.fetch_or_store(str) { super(str) }
     end
 
     # Internal: Cache Environment#resolve_dependency
     def resolve_dependency(str)
-      @resolved_dependencies.fetch(str){ @resolved_dependencies[str] = super(str) }
+      @resolved_dependencies.fetch_or_store(str) { super(str) }
     end
 
     private

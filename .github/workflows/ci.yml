@@ -17,6 +17,8 @@ jobs:
         include:
           - { ruby: jruby, experimental: true }
           - { ruby: jruby-head, experimental: true }
+          - { ruby: truffleruby, experimental: true }
+          - { ruby: truffleruby-head, experimental: true }
           - { ruby: head, experimental: true }
 
     steps:

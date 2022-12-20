@@ -52,6 +52,8 @@ class TestDigestUtils < MiniTest::Test
   end
 
   def test_fail_to_unmarshal_not_enough_data
+    skip "TypeError on TruffleRuby" if RUBY_ENGINE == "truffleruby"
+
     assert_raises ArgumentError do
       Marshal.load("")
     end
