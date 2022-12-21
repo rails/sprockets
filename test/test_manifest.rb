@@ -694,6 +694,13 @@ class TestManifest < Sprockets::TestCase
     refute_equal %w(0 1 0 1), processor.seq
   end
 
+  test 'concurrent processing with a duplicated asset' do
+    processor = SlowProcessor.new
+    @env.register_postprocessor 'image/png', processor
+    Sprockets::Manifest.new(@env, @dir).compile('logo.png', 'logo.png')
+    refute_equal %w(0 1 0 1), processor.seq
+  end
+
   test 'sequential processing' do
     @env.export_concurrent = false
     processor = SlowProcessor.new

@@ -2,6 +2,9 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## Unreleased
+- Fix thread safety of FileStore cache. [#773](https://github.com/rails/sprockets/pull/773)
+
 ## 4.2.0
 
 - Rack 3 compatibility. [#758](https://github.com/rails/sprockets/pull/758)

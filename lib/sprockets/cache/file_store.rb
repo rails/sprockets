@@ -56,7 +56,7 @@ module Sprockets
       def get(key)
         path = File.join(@root, "#{key}.cache")
 
-        value = safe_open(path) do |f|
+        value = PathUtils.safe_open(path) do |f|
           begin
             EncodingUtils.unmarshaled_deflated(f.read, Zlib::MAX_WBITS)
           rescue Exception => e
@@ -171,13 +171,6 @@ module Sprockets
           File.stat(fn)
         rescue Errno::ENOENT
           nil
-        end
-
-        def safe_open(path, &block)
-          if File.exist?(path)
-            File.open(path, 'rb', &block)
-          end
-        rescue Errno::ENOENT
         end
 
         def gc!

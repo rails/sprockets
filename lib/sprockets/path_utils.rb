@@ -337,6 +337,11 @@ module Sprockets
       nil
     end
 
+    # two assets could produce the same cache file if processed concurrently
+    # on Windows, this situation could lead to EACCES errors, so let's protect it
+    FILE_ACCESS_MUTEX = Mutex.new
+    private_constant :FILE_ACCESS_MUTEX
+
     # Public: Write to a file atomically. Useful for situations where you
     # don't want other processes or threads to see half-written files.
     #
@@ -359,9 +364,20 @@ module Sprockets
         yield f
       end
 
-      File.rename(tmpname, filename)
+      FILE_ACCESS_MUTEX.synchronize do
+        File.rename(tmpname, filename)
+      end
     ensure
       File.delete(tmpname) if File.exist?(tmpname)
+    end
+
+    def safe_open(path, &block)
+      FILE_ACCESS_MUTEX.synchronize do
+        if File.exist?(path)
+          File.open(path, 'rb', &block)
+        end
+      end
+    rescue Errno::ENOENT
     end
   end
 end
