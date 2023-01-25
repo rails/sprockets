@@ -52,7 +52,9 @@ class TestDigestUtils < MiniTest::Test
   end
 
   def test_fail_to_unmarshal_not_enough_data
-    skip "TypeError on TruffleRuby" if RUBY_ENGINE == "truffleruby"
+    if RUBY_ENGINE == 'truffleruby' and Gem::Version.new(RUBY_ENGINE_VERSION) < Gem::Version.new('23.0.0.a')
+      skip "TypeError on TruffleRuby < 23.0"
+    end
 
     assert_raises ArgumentError do
       Marshal.load("")
