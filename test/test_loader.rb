@@ -39,6 +39,14 @@ class TestLoader < Sprockets::TestCase
     assert_raises Sprockets::ConversionError do
       @env.load("file://#{fixture_path_for_uri('default/gallery.js')}?type=text/css")
     end
+
+    assert asset = @env.load("file://#{fixture_path_for_uri('default/blue_jpg.jpg')}?type=image/jpeg")
+    assert_equal fixture_path('default/blue_jpg.jpg'), asset.filename
+    assert_equal 'blue_jpg.jpg', asset.logical_path
+
+    assert asset = @env.load("file://#{fixture_path_for_uri('default/blue_jpeg.jpeg')}?type=image/jpeg")
+    assert_equal fixture_path('default/blue_jpeg.jpeg'), asset.filename
+    assert_equal 'blue_jpeg.jpeg', asset.logical_path
   end
 
   test 'load outside asset' do

@@ -165,7 +165,9 @@ module Sprockets
         end
 
         if type = unloaded.params[:type]
-          logical_path += config[:mime_types][type][:extensions].first
+          extensions = config[:mime_types][type][:extensions]
+          extension = extensions.include?(extname) ? extname : extensions.first
+          logical_path += extension
         end
 
         if type != file_type && !config[:transformers][file_type][type]
