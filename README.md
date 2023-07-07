@@ -469,7 +469,7 @@ asset's cache in response to a change in multiple files in a single directory.
 
 All paths are relative to your declaration and must begin with `./`
 
-Also, your must include these directories in your [load path](guides/building_an_asset_processing_framework.md#the-load-path).
+Also, you must include these directories in your [load path](guides/building_an_asset_processing_framework.md#the-load-path).
 
 **Example:**
 
