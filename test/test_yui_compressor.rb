@@ -3,7 +3,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/yui_compressor'
 
-class TestYUICompressor < MiniTest::Test
+class TestYUICompressor < Minitest::Test
   def test_compress_javascript
     input = {
       content_type: 'application/javascript',
