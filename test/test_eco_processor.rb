@@ -3,7 +3,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/eco_processor'
 
-class TestEcoProcessor < MiniTest::Test
+class TestEcoProcessor < Minitest::Test
   def test_compile_eco_template_to_js
     input = {
       content_type: 'application/javascript',

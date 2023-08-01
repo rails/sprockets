@@ -4,7 +4,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/uglifier_compressor'
 
-class TestUglifierCompressor < MiniTest::Test
+class TestUglifierCompressor < Minitest::Test
   def setup
     @env = Sprockets::Environment.new
     @env.append_path File.expand_path("../fixtures", __FILE__)

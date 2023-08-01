@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'minitest/autorun'
 
-class TestRequire < MiniTest::Test
+class TestRequire < Minitest::Test
   parallelize_me!
 
   ROOT = File.expand_path("../..", __FILE__)

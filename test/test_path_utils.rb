@@ -2,7 +2,7 @@
 require 'minitest/autorun'
 require 'sprockets/path_utils'
 
-class TestPathUtils < MiniTest::Test
+class TestPathUtils < Minitest::Test
   include Sprockets::PathUtils
 
   DOSISH = File::ALT_SEPARATOR != nil

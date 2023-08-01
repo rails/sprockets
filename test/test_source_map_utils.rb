@@ -2,7 +2,7 @@
 require 'minitest/autorun'
 require 'sprockets/source_map_utils'
 
-class TestSourceMapUtils < MiniTest::Test
+class TestSourceMapUtils < Minitest::Test
 
   def deep_dup(object)
     Marshal.load( Marshal.dump(object) )

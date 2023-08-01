@@ -93,7 +93,7 @@ module Sprockets::TestDefinition
   end
 end
 
-class Sprockets::TestCase < MiniTest::Test
+class Sprockets::TestCase < Minitest::Test
   extend Sprockets::TestDefinition
 
   FIXTURE_ROOT = File.join(__dir__, "fixtures")

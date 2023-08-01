@@ -37,7 +37,7 @@ class TestCallingProcessors < Sprockets::TestCase
   end
 end
 
-class TestProcessorUtils < MiniTest::Test
+class TestProcessorUtils < Minitest::Test
   include Sprockets::ProcessorUtils
 
   class Processor
