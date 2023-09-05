@@ -2,6 +2,8 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## 4.2.1
+
 - Fix for precompile issues when multiple extensions map to the same MIME type (eg. `.jpeg` / `.jpg`). [#781](https://github.com/rails/sprockets/pull/781)
 - Fix `application/css-sourcemap+json` charset [#764](https://github.com/rails/sprockets/pull/764)
 - Fix compatibility with Rack 2 applications. [#790](https://github.com/rails/sprockets/pull/790)
@@ -12,7 +14,7 @@ Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprocket
 - Fix thread safety of `Sprockets::CachedEnvironment` and `Sprockets::Cache::MemoryStore`. [#771](https://github.com/rails/sprockets/pull/771)
 - Add support for Rack 3.0. Headers set by sprockets will now be lower case. [#758](https://github.com/rails/sprockets/pull/758)
 - Make `Sprockets::Utils.module_include` thread safe on JRuby. [#759](https://github.com/rails/sprockets/pull/759)
-- Fix typo in `asset.rb` file. [#768](https://github.com/rails/sprockets/pull/768) 
+- Fix typo in `asset.rb` file. [#768](https://github.com/rails/sprockets/pull/768)
 
 ## 4.1.1
 
