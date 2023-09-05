@@ -91,7 +91,7 @@ module Sprockets
 
   require 'sprockets/source_map_processor'
   register_mime_type 'application/js-sourcemap+json', extensions: ['.js.map'], charset: :unicode
-  register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map']
+  register_mime_type 'application/css-sourcemap+json', extensions: ['.css.map'], charset: :unicode
   register_transformer 'application/javascript', 'application/js-sourcemap+json', SourceMapProcessor
   register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapProcessor
 

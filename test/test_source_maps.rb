@@ -60,7 +60,7 @@ class TestSourceMaps < Sprockets::TestCase
     ], get_sources(map)
   end
 
-  test "reads the data transcoded to UTF-8" do
+  test "reads js data transcoded to UTF-8" do
     processor = Proc.new do |input|
       assert_equal Encoding::UTF_8, input[:data].encoding
       { data: input[:data] }
@@ -69,6 +69,17 @@ class TestSourceMaps < Sprockets::TestCase
     assert asset = @env.find_asset('plain.js', pipeline: :debug)
   ensure
     @env.unregister_preprocessor('application/javascript', processor)
+  end
+
+  test "reads css data transcoded to UTF-8" do
+    processor = Proc.new do |input|
+      assert_equal Encoding::UTF_8, input[:data].encoding
+      { data: input[:data] }
+    end
+    @env.register_processor('text/css', processor)
+    assert asset = @env.find_asset('sass/precompiled/main.css', pipeline: :debug)
+  ensure
+    @env.unregister_preprocessor('text/css', processor)
   end
 
   test "builds a minified source map" do
