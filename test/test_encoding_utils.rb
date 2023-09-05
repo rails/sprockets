@@ -3,7 +3,7 @@
 require 'minitest/autorun'
 require 'sprockets/encoding_utils'
 
-class TestDigestUtils < MiniTest::Test
+class TestDigestUtils < Minitest::Test
   include Sprockets::EncodingUtils
 
   def test_deflate

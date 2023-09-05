@@ -5,7 +5,7 @@ require 'sprockets/cache'
 require 'sprockets/coffee_script_processor'
 require 'sprockets/source_map_utils'
 
-class TestCoffeeScriptProcessor < MiniTest::Test
+class TestCoffeeScriptProcessor < Minitest::Test
   def setup
     @env = Sprockets::Environment.new
     @env.append_path File.expand_path("../fixtures", __FILE__)

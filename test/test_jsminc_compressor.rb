@@ -4,7 +4,7 @@ require 'sprockets/cache'
 unless RUBY_PLATFORM.include?('java')
   require 'sprockets/jsminc_compressor'
 
-  class TestJSMincCompressor < MiniTest::Test
+  class TestJSMincCompressor < Minitest::Test
 
     def test_compress_javascript
       input = {

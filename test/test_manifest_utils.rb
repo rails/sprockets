@@ -3,7 +3,7 @@ require 'minitest/autorun'
 require 'sprockets/manifest_utils'
 require 'logger'
 
-class TestManifestUtils < MiniTest::Test
+class TestManifestUtils < Minitest::Test
   include Sprockets::ManifestUtils
 
   def test_generate_manifest_path
