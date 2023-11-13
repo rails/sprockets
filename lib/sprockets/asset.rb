@@ -98,7 +98,8 @@ module Sprockets
         @source
       else
         # File is read everytime to avoid memory bloat of large binary files
-        File.binread(filename)
+        file = File.binread(filename)
+        file.encoding == Encoding::BINARY ? file : file.force_encoding('utf-8')
       end
     end
 
