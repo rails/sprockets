@@ -42,7 +42,9 @@ module Sprockets
       @cache_key = "#{self.class.name}:#{VERSION}:#{Autoload::SassC::VERSION}:#{@cache_version}".freeze
       @importer_class = options[:importer]
       @sass_config = options[:sass_config] || {}
+      parameters_include_functions = parameters_include_functions?
       @functions = Module.new do
+        include Autoload::SassC::Script::Functions if parameters_include_functions
         include Functions
         include options[:functions] if options[:functions]
         class_eval(&block) if block_given?
@@ -55,9 +57,13 @@ module Sprockets
       options = engine_options(input, context)
       engine = Autoload::SassC::Engine.new(input[:data], options)
 
-      css = Utils.module_include(Autoload::SassC::Script::Functions, @functions) do
-        engine.render.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
-      end
+      css = if parameters_include_functions?
+              engine.render
+            else
+              Utils.module_include(Autoload::SassC::Script::Functions, @functions) do
+                engine.render
+              end
+            end.sub(/^\n^\/\*# sourceMappingURL=.*\*\/$/m, '')
 
       begin
         map = SourceMapUtils.format_source_map(JSON.parse(engine.source_map), input)
@@ -84,6 +90,15 @@ module Sprockets
 
       options.merge!(defaults)
       options
+    end
+
+    def parameters_include_functions?
+      if defined?(@@parameters_include_functions)
+        @@parameters_include_functions
+      else
+        @@parameters_include_functions =
+          Autoload::SassC::FunctionsHandler.instance_method(:setup).parameters.include?([:key, :functions])
+      end
     end
 
     # Public: Functions injected into Sass context during Sprockets evaluation.
@@ -275,6 +290,7 @@ module Sprockets
         filename: input[:filename],
         syntax: self.class.syntax,
         load_paths: input[:environment].paths,
+        functions: @functions,
         importer: @importer_class,
         source_map_contents: false,
         source_map_file: "#{input[:filename]}.map",
