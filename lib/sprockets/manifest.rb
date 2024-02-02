@@ -120,14 +120,14 @@ module Sprockets
       return to_enum(__method__, *args) unless block_given?
 
       environment = self.environment.cached
-      promises = args.flatten.map do |path|
-        Concurrent::Promise.execute(executor: executor) do
+      futures = args.flatten.map do |path|
+        Concurrent::Promises.future_on(executor) do
           environment.find_all_linked_assets(path).to_a
         end
       end
 
-      promises.each do |promise|
-        promise.value!.each(&block)
+      futures.each do |future|
+        future.value!.each(&block)
       end
 
       nil
@@ -188,15 +188,15 @@ module Sprockets
 
         filenames << asset.filename
 
-        promise      = nil
+        future = nil
         exporters_for_asset(asset) do |exporter|
           next if exporter.skip?(logger)
 
-          if promise.nil?
-            promise = Concurrent::Promise.new(executor: executor) { exporter.call }
-            concurrent_exporters << promise.execute
+          if future.nil?
+            future = Concurrent::Promises.future_on(executor) { exporter.call }
+            concurrent_exporters << future
           else
-            concurrent_exporters << promise.then { exporter.call }
+            concurrent_exporters << future.then { exporter.call }
           end
         end
       end
