@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'sprockets/utils'
 
-class TestUtils < MiniTest::Test
+class TestUtils < Minitest::Test
   include Sprockets::Utils
 
   def test_duplicable_pre_ruby_2_4
@@ -192,6 +192,7 @@ class TestUtils < MiniTest::Test
     def foo
       1
     end
+    alias_method :foo, :foo
   end
 
   module ScopedFunctions

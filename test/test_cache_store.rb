@@ -62,7 +62,7 @@ module CacheStoreTests
     @store.set("foo", "bar")
     assert_equal "bar", @store.get("foo")
     @store.set("foo", nil)
-    assert_equal nil, @store.get("foo")
+    assert_nil @store.get("foo")
   end
 
   def test_fetch
@@ -71,7 +71,7 @@ module CacheStoreTests
   end
 end
 
-class TestNullStore < MiniTest::Test
+class TestNullStore < Minitest::Test
   def setup
     @_store = Sprockets::Cache::NullStore.new
     @store = Sprockets::Cache.new(Sprockets::Cache::NullStore.new)
@@ -85,7 +85,7 @@ class TestNullStore < MiniTest::Test
   include CacheStoreNullTests
 end
 
-class TestMemoryStore < MiniTest::Test
+class TestMemoryStore < Minitest::Test
   def setup
     @_store = Sprockets::Cache::MemoryStore.new
     @store = Sprockets::Cache.new(@_store)
@@ -118,7 +118,7 @@ class TestMemoryStore < MiniTest::Test
   end
 end
 
-class TestZeroMemoryStore < MiniTest::Test
+class TestZeroMemoryStore < Minitest::Test
   def setup
     @_store = Sprockets::Cache::MemoryStore.new(0)
     @store = Sprockets::Cache.new(@_store)
@@ -131,7 +131,7 @@ class TestZeroMemoryStore < MiniTest::Test
   include CacheStoreNullTests
 end
 
-class TestFileStore < MiniTest::Test
+class TestFileStore < Minitest::Test
   def setup
     @root = Dir::mktmpdir "sprockets-file-store"
     @_store = Sprockets::Cache::FileStore.new(@root)
@@ -159,7 +159,7 @@ class TestFileStore < MiniTest::Test
   include CacheStoreTests
 end
 
-class TestZeroFileStore < MiniTest::Test
+class TestZeroFileStore < Minitest::Test
   def setup
     @tmpdir = Dir::mktmpdir "sprockets-file-store-zero"
     @_store = Sprockets::Cache::FileStore.new(@tmpdir, 0)

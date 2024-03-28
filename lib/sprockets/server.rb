@@ -251,11 +251,11 @@ module Sprockets
         # If the request url contains a fingerprint, set a long
         # expires on the response
         if path_fingerprint(env["PATH_INFO"])
-          headers["Cache-Control"] << ", max-age=31536000"
+          headers["Cache-Control"] += ", max-age=31536000"
 
         # Otherwise set `must-revalidate` since the asset could be modified.
         else
-          headers["Cache-Control"] << ", must-revalidate"
+          headers["Cache-Control"] += ", must-revalidate"
           headers["Vary"] = "Accept-Encoding"
         end
 

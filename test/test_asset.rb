@@ -1,3 +1,5 @@
+# frozen_string_literal: false
+
 require "sprockets_test"
 
 module AssetTests
@@ -117,7 +119,7 @@ module FreshnessTests
 
     sandbox filename do
       write(filename, "a;")
-      asset = asset('test.js')
+      assert asset('test.js')
 
       File.unlink(filename)
 
@@ -132,7 +134,7 @@ module FreshnessTests
     sandbox main, dep do
       write(main, "//= depend_on test-dep\n")
       write(dep, "a;")
-      asset = asset('test-main.js')
+      assert asset('test-main.js')
 
       File.unlink(dep)
 
@@ -215,7 +217,7 @@ class BinaryStaticAssetTest < Sprockets::TestCase
   end
 
   test "charset is nil" do
-    assert_equal nil, @asset.charset
+    assert_nil @asset.charset
   end
 
   test "length" do
@@ -1312,7 +1314,7 @@ class AssetContentTypeTest < Sprockets::TestCase
   end
 
   test "content type" do
-    assert_equal nil, content_type("empty")
+    assert_nil content_type("empty")
 
     assert_equal "application/javascript", content_type("application.js")
     assert_equal "text/css", content_type("application.css")
@@ -1324,7 +1326,7 @@ class AssetContentTypeTest < Sprockets::TestCase
 
     assert_equal "text/css", content_type("store.css.erb")
     assert_equal "text/plain", content_type("files.erb")
-    assert_equal nil, content_type("store.foo")
+    assert_nil content_type("store.foo")
 
     assert_equal "application/javascript", content_type("application.coffee")
     assert_equal "text/css", content_type("application.scss")
@@ -1347,7 +1349,7 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("jquery.ext/form.js")
     assert_equal "application/javascript", content_type("jquery-coffee.min.coffee")
     assert_equal "application/javascript", content_type("jquery-custom.min.js.erb")
-    assert_equal nil, content_type("jquery.js.min")
+    assert_nil content_type("jquery.js.min")
 
     assert_equal "application/javascript", content_type("all.coffee/plain.js")
     assert_equal "application/javascript", content_type("all.coffee/hot.coffee")
@@ -1357,7 +1359,7 @@ class AssetContentTypeTest < Sprockets::TestCase
     assert_equal "application/javascript", content_type("bar-ng.ngt.haml")
     assert_equal "application/javascript", content_type("baz-ng.js.ngt")
 
-    assert_equal nil, content_type("sprite.css.embed")
+    assert_nil content_type("sprite.css.embed")
 
     assert_equal "application/javascript", content_type("traceur.es6")
     assert_equal "application/javascript", content_type("traceur.js.es6")

@@ -105,7 +105,7 @@ module Sprockets
   register_bundle_processor 'application/javascript', Bundle
   register_bundle_processor 'text/css', Bundle
 
-  register_bundle_metadata_reducer '*/*', :data, proc { "" }, :concat
+  register_bundle_metadata_reducer '*/*', :data, proc { "" }, :+
   register_bundle_metadata_reducer 'application/javascript', :data, proc { "" }, Utils.method(:concat_javascript_sources)
   register_bundle_metadata_reducer '*/*', :links, :+
 

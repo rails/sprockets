@@ -125,7 +125,7 @@ Sprockets.register_transformer 'application/javascript', 'application/js-sourcem
 Sprockets.register_transformer 'text/css', 'application/css-sourcemap+json', SourceMapTransformer
 
 
-class Sprockets::TestCase < MiniTest::Test
+class Sprockets::TestCase < Minitest::Test
   FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "fixtures"))
 
   def self.test(name, &block)

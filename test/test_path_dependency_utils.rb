@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'sprockets/path_dependency_utils'
 
-class TestPathDependencyUtils < MiniTest::Test
+class TestPathDependencyUtils < Minitest::Test
   include Sprockets::PathDependencyUtils
 
   def test_entries_with_dependencies

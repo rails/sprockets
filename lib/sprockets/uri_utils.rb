@@ -50,6 +50,9 @@ module Sprockets
       # Hack for parsing Windows "file:///C:/Users/IEUser" paths
       path.gsub!(/^\/([a-zA-Z]:)/, '\1'.freeze)
 
+      host = nil if host && host.empty?
+      query = nil if query && query.empty?
+
       [scheme, host, path, query]
     end
 

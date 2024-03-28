@@ -19,7 +19,7 @@ class TestCallingProcessors < Sprockets::TestCase
     end
     @env.register_processor('image/png' , processor)
     asset = @env['troll.png']
-    assert_equal nil, asset.charset
+    assert_nil asset.charset
   ensure
     @env.unregister_preprocessor('image/png' , processor)
   end
@@ -36,7 +36,7 @@ class TestCallingProcessors < Sprockets::TestCase
   end
 end
 
-class TestProcessorUtils < MiniTest::Test
+class TestProcessorUtils < Minitest::Test
   include Sprockets::ProcessorUtils
 
   class Processor

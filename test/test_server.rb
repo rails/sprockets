@@ -112,7 +112,8 @@ class TestServer < Sprockets::TestCase
     # Allow 304 headers
     assert_equal cache_control, last_response.headers['Cache-Control']
     assert_equal etag, last_response.headers['ETag']
-    assert_equal expires, last_response.headers['Expires']
+    assert_nil expires
+    assert_nil last_response.headers['Expires']
     assert_equal vary, last_response.headers['Vary']
 
     # Disallowed 304 headers
@@ -288,8 +289,8 @@ class TestServer < Sprockets::TestCase
   test "re-throw JS exceptions in the browser" do
     get "/assets/missing_require.js"
     assert_equal 200, last_response.status
-    assert_match /Sprockets::FileNotFound: couldn't find file 'notfound' with type 'application\/javascript'/, last_response.body
-    assert_match /(in #{fixture_path("server/vendor/javascripts/missing_require.js")}:1)/, last_response.body
+    assert_match(/Sprockets::FileNotFound: couldn't find file 'notfound' with type 'application\/javascript'/, last_response.body)
+    assert_match(/(in #{fixture_path("server/vendor/javascripts/missing_require.js")}:1)/, last_response.body)
   end
 
   test "display CSS exceptions in the browser" do

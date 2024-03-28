@@ -22,6 +22,7 @@ class << Dir
     end
     original_entries(dirname, *args)
   end
+  ruby2_keywords :entries if respond_to?(:ruby2_keywords, true)
 end
 
 class TestPerformance < Sprockets::TestCase

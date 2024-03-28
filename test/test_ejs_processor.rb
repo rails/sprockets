@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/ejs_processor'
 
-class TestEjsProcessor < MiniTest::Test
+class TestEjsProcessor < Minitest::Test
   def test_compile_ejs_template_to_js
     input = {
       content_type: 'application/javascript',

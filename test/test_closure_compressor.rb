@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/closure_compressor'
 
-class TestClosureCompressor < MiniTest::Test
+class TestClosureCompressor < Minitest::Test
   def test_compress_javascript
     input = {
       :data => "function foo() {\n  return true;\n}",
