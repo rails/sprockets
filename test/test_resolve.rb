@@ -260,7 +260,7 @@ class TestResolve < Sprockets::TestCase
       uri
     end
 
-    assert_match /#{ random_path }/, error.message
+    assert_match(/#{ random_path }/, error.message)
   end
 
   def resolve(path, options = {})
