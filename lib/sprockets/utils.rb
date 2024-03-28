@@ -102,6 +102,7 @@ module Sprockets
     #
     # Returns buf String.
     def concat_javascript_sources(buf, source)
+      buf = +buf
       if source.bytesize > 0
         buf << source
 

@@ -1,5 +1,7 @@
 require 'sprockets_test'
 
+return if "test".frozen? # The sass gem isn't frozen string literal compatible
+
 silence_warnings do
   require 'sass'
 end
