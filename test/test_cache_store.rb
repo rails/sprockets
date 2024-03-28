@@ -62,7 +62,7 @@ module CacheStoreTests
     @store.set("foo", "bar")
     assert_equal "bar", @store.get("foo")
     @store.set("foo", nil)
-    assert_equal nil, @store.get("foo")
+    assert_nil @store.get("foo")
   end
 
   def test_fetch

@@ -112,7 +112,8 @@ class TestServer < Sprockets::TestCase
     # Allow 304 headers
     assert_equal cache_control, last_response.headers['Cache-Control']
     assert_equal etag, last_response.headers['ETag']
-    assert_equal expires, last_response.headers['Expires']
+    assert_nil expires
+    assert_nil last_response.headers['Expires']
     assert_equal vary, last_response.headers['Vary']
 
     # Disallowed 304 headers
