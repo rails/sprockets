@@ -192,6 +192,7 @@ class TestUtils < Minitest::Test
     def foo
       1
     end
+    alias_method :foo, :foo
   end
 
   module ScopedFunctions
