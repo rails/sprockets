@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'sprockets/uri_utils'
 
-class TestURIUtils < MiniTest::Test
+class TestURIUtils < Minitest::Test
   include Sprockets::URIUtils
 
   DOSISH = File::ALT_SEPARATOR != nil

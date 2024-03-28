@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/jst_processor'
 
-class TestJstProcessor < MiniTest::Test
+class TestJstProcessor < Minitest::Test
   def test_export_js_template_in_JST
     input = {
       name: 'users/show',

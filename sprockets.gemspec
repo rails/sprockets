@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest", "~> 5.0"
   s.add_development_dependency "nokogiri", "~> 1.3"
   s.add_development_dependency "rack-test", "~> 0.6"
-  s.add_development_dependency "rake", "~> 10.0"
+  s.add_development_dependency "rake"
   s.add_development_dependency "sass", "~> 3.1"
   s.add_development_dependency "uglifier", "~> 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"

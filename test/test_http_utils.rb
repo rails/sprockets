@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'sprockets/http_utils'
 
-class TestHTTPUtils < MiniTest::Test
+class TestHTTPUtils < Minitest::Test
   include Sprockets::HTTPUtils
 
   def test_match_mime_type

@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require 'sprockets/cache'
 require 'sprockets/uglifier_compressor'
 
-class TestUglifierCompressor < MiniTest::Test
+class TestUglifierCompressor < Minitest::Test
   def test_compress_javascript
     input = {
       content_type: 'application/javascript',

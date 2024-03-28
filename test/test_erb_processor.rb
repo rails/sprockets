@@ -3,7 +3,7 @@ require 'sprockets'
 require 'sprockets/cache'
 require 'sprockets/erb_processor'
 
-class TestERBProcessor < MiniTest::Test
+class TestERBProcessor < Minitest::Test
 
   def uri_path(path)
     path = '/' + path if path[1] == ':' # Windows path / drive letter

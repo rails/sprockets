@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'sprockets/digest_utils'
 
-class TestDigestUtils < MiniTest::Test
+class TestDigestUtils < Minitest::Test
   include Sprockets::DigestUtils
 
   def test_detect_digest_class
