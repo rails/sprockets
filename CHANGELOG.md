@@ -1,3 +1,7 @@
+**3.7.3** (March 28, 2024)
+
+* Various compatibility fixes for newer Ruby versions.
+
 **3.7.2** (June 19, 2018)
 
 * Security release for [CVE-2018-3760](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-3760).
