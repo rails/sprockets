@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.files = Dir["README.md", "CHANGELOG.md", "LICENSE", "lib/**/*.rb"]
   s.executables = ["sprockets"]
 
+  s.add_dependency "base64"
   s.add_dependency "rack",            "> 1", "< 3"
   s.add_dependency "concurrent-ruby", "~> 1.0"
 
