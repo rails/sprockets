@@ -18,7 +18,7 @@ module Sprockets
   # The returned dependency set can be passed to resolve_dependencies(deps)
   # to check if the returned result is still fresh. In this case, entry always
   # returns a single path, but multiple calls should accumulate dependencies
-  # into a single set thats saved off and checked later.
+  # into a single set that's saved off and checked later.
   #
   #     resolve_dependencies(deps)
   #     # => "\x01\x02\x03"
