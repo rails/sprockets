@@ -1123,7 +1123,7 @@ define("POW.png", "POW-1da2e59df75d33d8b74c3d71feede698f203f136512cbaab20c68a5bd
       asset("project.js").digest_path
   end
 
-  test "multiple charset defintions are stripped from css bundle" do
+  test "multiple charset definitions are stripped from css bundle" do
     assert_equal "\n.foo {}\n\n.bar {}\n\n\n", asset("charset.css").to_s
   end
 

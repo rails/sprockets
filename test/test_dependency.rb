@@ -14,6 +14,6 @@ class DependencyTest < Sprockets::TestCase
 
   def test_env_dependency
     assert_equal @env.resolve_dependency('env:DEPENDENCY_TEST_VALUE'), 'Hello'
-    assert_nil @env.resolve_dependency('env:NONEXISTANT_DEPENDENCY_TEST_VALUE')
+    assert_nil @env.resolve_dependency('env:NONEXISTENT_DEPENDENCY_TEST_VALUE')
   end
 end
