@@ -20,6 +20,8 @@ module Sprockets
   module URIUtils
     extend self
 
+    URI_PARSER = defined?(URI::RFC2396_PARSER) ? URI::RFC2396_PARSER : URI::RFC2396_Parser.new
+
     # Internal: Parse URI into component parts.
     #
     # uri - String uri
@@ -44,7 +46,7 @@ module Sprockets
     def split_file_uri(uri)
       scheme, _, host, _, _, path, _, query, _ = URI.split(uri)
 
-      path = URI::Generic::DEFAULT_PARSER.unescape(path)
+      path = URI_PARSER.unescape(path)
       path.force_encoding(Encoding::UTF_8)
 
       # Hack for parsing Windows "file:///C:/Users/IEUser" paths
@@ -63,7 +65,7 @@ module Sprockets
       str = "#{scheme}://"
       str << host if host
       path = "/#{path}" unless path.start_with?("/")
-      str << URI::Generic::DEFAULT_PARSER.escape(path)
+      str << URI_PARSER.escape(path)
       str << "?#{query}" if query
       str
     end
@@ -162,7 +164,7 @@ module Sprockets
         when Integer
           query << "#{key}=#{value}"
         when String, Symbol
-          query << "#{key}=#{URI::Generic::DEFAULT_PARSER.escape(value.to_s)}"
+          query << "#{key}=#{URI_PARSER.escape(value.to_s)}"
         when TrueClass
           query << "#{key}"
         when FalseClass, NilClass
@@ -182,7 +184,7 @@ module Sprockets
     def parse_uri_query_params(query)
       query.to_s.split('&').reduce({}) do |h, p|
         k, v = p.split('=', 2)
-        v = URI::Generic::DEFAULT_PARSER.unescape(v) if v
+        v = URI_PARSER.unescape(v) if v
         h[k.to_sym] = v || true
         h
       end
