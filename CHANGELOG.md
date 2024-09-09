@@ -1,3 +1,7 @@
+**3.7.4** (March 28, 2024)
+
+* Fix deprecated calls to the `uri` gem.
+
 **3.7.3** (March 28, 2024)
 
 * Various compatibility fixes for newer Ruby versions.
