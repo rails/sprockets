@@ -1,3 +1,7 @@
+**3.7.5** (Spet 19, 2024)
+
+* Fix `Sprockets::Base#unescape` #808.
+
 **3.7.4** (March 28, 2024)
 
 * Fix deprecated calls to the `uri` gem.
