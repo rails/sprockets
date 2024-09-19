@@ -155,7 +155,7 @@ module Sprockets
       end
 
       def unescape(str)
-        URIUtils::URI_PARSER.unescape(str)
+        str = URIUtils::URI_PARSER.unescape(str)
         str.force_encoding(Encoding.default_internal) if Encoding.default_internal
         str
       end
