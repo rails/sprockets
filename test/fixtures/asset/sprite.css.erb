@@ -3,9 +3,8 @@
  */
 
 <%
-  require 'base64'
   path = File.expand_path("../POW.png", __FILE__)
-  data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+  data = [File.open(path, "rb") { |f| f.read }].pack('m')
 %>
 .pow {
   background: url(data:image/png;base64,<%= data %>) no-repeat;

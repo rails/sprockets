@@ -47,8 +47,7 @@ class TestContext < Sprockets::TestCase
   test "extend context" do
     @env.context_class.class_eval do
       def datauri(path)
-        require 'base64'
-        Base64.encode64(File.open(path, "rb") { |f| f.read })
+        [File.open(path, "rb") { |f| f.read }].pack('m')
       end
     end
 
@@ -89,14 +88,13 @@ class TestCustomProcessor < Sprockets::TestCase
     assert_equal "var Foo = {};\n\nvar Bar = {};\n", @env['application.js'].to_s
   end
 
-  require 'base64'
   DataUriProcessor = proc do |input|
     env = input[:environment]
     data = input[:data]
     data.gsub(/url\(\"(.+?)\"\)/) do
       uri, _ = env.resolve($1)
       path, _ = env.parse_asset_uri(uri)
-      data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+      data = [File.open(path, "rb") { |f| f.read }].pack('m')
       "url(data:image/png;base64,#{data})"
     end
   end
@@ -111,14 +109,12 @@ class TestCustomProcessor < Sprockets::TestCase
   end
 
   test "block custom processor" do
-    require 'base64'
-
     @env.register_preprocessor 'text/css' do |input|
       env = input[:environment]
       input[:data].gsub(/url\(\"(.+?)\"\)/) do
         uri, _ = env.resolve($1)
         path, _ = env.parse_asset_uri(uri)
-        data = Base64.encode64(File.open(path, "rb") { |f| f.read })
+        data = [File.open(path, "rb") { |f| f.read }].pack('m')
         "url(data:image/png;base64,#{data})"
       end
     end
