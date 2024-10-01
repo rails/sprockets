@@ -97,7 +97,7 @@ module Sprockets
       if @source
         @source
       else
-        # File is read everytime to avoid memory bloat of large binary files
+        # File is read every time to avoid memory bloat of large binary files
         File.binread(filename)
       end
     end

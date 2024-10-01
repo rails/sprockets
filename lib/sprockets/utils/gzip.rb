@@ -49,7 +49,7 @@ module Sprockets
 
       # What non-text mime types should we compress? This list comes from:
       # https://www.fastly.com/blog/new-gzip-settings-and-deciding-what-compress
-      COMPRESSABLE_MIME_TYPES = {
+      COMPRESSIBLE_MIME_TYPES = {
         "application/vnd.ms-fontobject" => true,
         "application/x-font-opentype" => true,
         "application/x-font-ttf" => true,
@@ -71,7 +71,7 @@ module Sprockets
         # can be compressed.
         #
         # We also check against our list of non-text compressible mime types
-        @charset || COMPRESSABLE_MIME_TYPES.include?(@content_type)
+        @charset || COMPRESSIBLE_MIME_TYPES.include?(@content_type)
       end
 
       # Private: Opposite of `can_compress?`.

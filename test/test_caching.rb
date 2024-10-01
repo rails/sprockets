@@ -468,7 +468,7 @@ class TestFileStoreCaching < Sprockets::TestCase
   end
 
 
-  test "no absolute paths are retuned from cache" do
+  test "no absolute paths are returned from cache" do
     env1 = Sprockets::Environment.new(fixture_path('default')) do |env|
       env.append_path(".")
       env.cache = @cache
