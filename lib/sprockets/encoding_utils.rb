@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'base64'
 require 'stringio'
 require 'zlib'
 
@@ -71,7 +70,7 @@ module Sprockets
     #
     # Returns a encoded String
     def base64(str)
-      Base64.strict_encode64(str)
+      [str].pack("m0")
     end
 
 
