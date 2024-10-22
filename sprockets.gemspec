@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rack",            ">= 2.2.4", "< 4"
   s.add_dependency "concurrent-ruby", "~> 1.0"
+  s.add_dependency "logger"
 
   s.add_development_dependency "m", ">= 0"
   s.add_development_dependency "babel-transpiler", "~> 0.6"
