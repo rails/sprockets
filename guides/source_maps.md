@@ -302,7 +302,7 @@ digit.to_s(2)
 # or "000000"
 ```
 
-Whe then generate a `vl` by shifting the digit with the default value of `shift` which is 0
+When then generate a `vl` by shifting the digit with the default value of `shift` which is 0
 
 ```
 vlq   += digit << shift

@@ -179,7 +179,7 @@ module Sprockets
         processors_dep_uri = build_processors_uri(type, file_type, pipeline)
         dependencies = config[:dependencies] + [processors_dep_uri]
 
-        # Read into memory and process if theres a processor pipeline
+        # Read into memory and process if there's a processor pipeline
         if processors.any?
           result = call_processors(processors, {
             environment: self,
