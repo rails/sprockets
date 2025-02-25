@@ -377,7 +377,7 @@ class NpmDirectiveProcessor < Sprockets::DirectiveProcessor
       pipeline: :self,
       load_paths: dirs
      )
-    @dependecies.merge(deps)
+    @dependencies.merge(deps)
     @required << uri
   end
 end

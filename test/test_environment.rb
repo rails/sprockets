@@ -818,7 +818,7 @@ class TestEnvironment < Sprockets::TestCase
     end
   end
 
-  test "bundled asset cached if theres an error building it" do
+  test "bundled asset cached if there's an error building it" do
     @env.cache = nil
 
     filename = File.join(fixture_path("default"), "tmp.coffee")

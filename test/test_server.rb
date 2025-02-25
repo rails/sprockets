@@ -211,7 +211,7 @@ class TestServer < Sprockets::TestCase
     assert_equal 404, last_response.status
   end
 
-  test "if sources didnt change the server shouldnt rebundle" do
+  test "if sources didn't change the server shouldn't rebundle" do
     get "/assets/application.js"
     asset_before = @env["application.js"]
     assert asset_before
