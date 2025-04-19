@@ -2,6 +2,12 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## 4.2.2
+
+- Added missing dependency on `logger`. [#813](https://github.com/rails/sprockets/pull/813)
+- Fix `URI::RFC3986_PARSER` warnings. [#812](https://github.com/rails/sprockets/pull/812)
+- Removed dependency on `base64`. [#810](https://github.com/rails/sprockets/pull/810)
+
 ## 4.2.1
 
 - Fix for precompile issues when multiple extensions map to the same MIME type (eg. `.jpeg` / `.jpg`). [#781](https://github.com/rails/sprockets/pull/781)
