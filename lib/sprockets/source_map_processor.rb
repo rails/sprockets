@@ -38,12 +38,17 @@ module Sprockets
       dependencies.merge(asset.metadata[:dependencies])
 
       map["file"] = PathUtils.split_subpath(input[:load_path], input[:filename])
-      sources = map["sections"] ? map["sections"].map { |s| s["map"]["sources"] }.flatten : map["sources"]
+      sections = map["sections"] ? map["sections"] : [{ "map" => map }]
+      sections.each do |section|
+        section["map"]["sourcesContent"] = section["map"]["sources"].map do |source|
+          source = PathUtils.join(File.dirname(map["file"]), source)
+          uri, _ = env.resolve!(source)
+          next nil unless uri.start_with? "file://"
 
-      sources.each do |source|
-        source = PathUtils.join(File.dirname(map["file"]), source)
-        uri, _ = env.resolve!(source)
-        links << uri
+          path = URIUtils.split_file_uri(uri)[2]
+          next nil unless File.exist?(path)
+          File.read(path)
+        end
       end
 
       json = JSON.generate(map)

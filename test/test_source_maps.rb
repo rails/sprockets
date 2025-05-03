@@ -16,7 +16,10 @@ class TestSourceMaps < Sprockets::TestCase
   end
 
   def get_sources(map)
-    map["sections"].reduce([]) { |r, s| r | s["map"]["sources"] }
+    map["sections"].reduce([]) { |r, s| r + s["map"]["sources"] }
+  end
+  def get_sourcesContent(map)
+    map["sections"].reduce([]) { |r, s| r + (s["map"]["sourcesContent"] || s["map"]["sources"].map { nil }) }
   end
 
   # Offset should be the line that the asset starts on minus one
@@ -47,17 +50,19 @@ class TestSourceMaps < Sprockets::TestCase
   test "builds a source map for js files" do
     asset = @env['child.js']
     map = asset.metadata[:map]
-    assert_equal ["child.source.js"], get_sources(map)
+    assert_equal ["child.js"], get_sources(map)
+    assert_equal [nil], get_sourcesContent(map)
   end
 
   test "builds a concatenated source map" do
     asset = @env['application.js']
     map = asset.metadata[:map]
     assert_equal [
-      "project.source.coffee",
-      "users.source.coffee",
-      "application.source.coffee"
+      "project.coffee",
+      "users.coffee",
+      "application.coffee"
     ], get_sources(map)
+    assert_equal [nil, nil, nil], get_sourcesContent(map)
   end
 
   test "reads js data transcoded to UTF-8" do
@@ -89,20 +94,22 @@ class TestSourceMaps < Sprockets::TestCase
     map = Sprockets::SourceMapUtils.decode_source_map(asset.metadata[:map])
     assert map[:mappings].all? { |mapping| mapping[:generated][0] == 1 }
     assert_equal [
-      "project.source.coffee",
-      "users.source.coffee",
-      "application.source.coffee"
+      "project.coffee",
+      "users.coffee",
+      "application.coffee"
     ], map[:sources]
+    assert_nil map[:sourcesContent]
   end
 
   test "builds a source map with js dependency" do
     asset = @env['parent.js']
     map = asset.metadata[:map]
     assert_equal [
-      "child.source.js",
-      "users.source.coffee",
-      "parent.source.js"
+      "child.js",
+      "users.coffee",
+      "parent.js"
     ], get_sources(map)
+    assert_equal [nil, nil, nil], get_sourcesContent(map)
   end
 
   test "rebuilds a source map when related dependency has changed" do
@@ -133,9 +140,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/coffee/main.coffee'), asset.filename
     assert_equal "coffee/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
-    assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/coffee/main.coffee')}?type=text/coffeescript&pipeline=source"
-    ], normalize_uris(asset.links)
+    assert_equal [], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -148,7 +153,37 @@ class TestSourceMaps < Sprockets::TestCase
             "version"  => 3,
             "file"     => "coffee/main.coffee",
             "mappings" => "AACA;AAAA,MAAA,sDAAA;IAAA;;EAAA,MAAA,GAAW;;EACX,QAAA,GAAW;;EAGX,IAAgB,QAAhB;IAAA,MAAA,GAAS,CAAC,GAAV;;;EAGA,MAAA,GAAS,SAAC,CAAD;WAAO,CAAA,GAAI;EAAX;;EAGT,IAAA,GAAO,CAAC,CAAD,EAAI,CAAJ,EAAO,CAAP,EAAU,CAAV,EAAa,CAAb;;EAGP,IAAA,GACE;IAAA,IAAA,EAAQ,IAAI,CAAC,IAAb;IACA,MAAA,EAAQ,MADR;IAEA,IAAA,EAAQ,SAAC,CAAD;aAAO,CAAA,GAAI,MAAA,CAAO,CAAP;IAAX,CAFR;;;EAKF,IAAA,GAAO,SAAA;AACL,QAAA;IADM,uBAAQ;WACd,KAAA,CAAM,MAAN,EAAc,OAAd;EADK;;EAIP,IAAsB,8CAAtB;IAAA,KAAA,CAAM,YAAN,EAAA;;;EAGA,KAAA;;AAAS;SAAA,sCAAA;;mBAAA,IAAI,CAAC,IAAL,CAAU,GAAV;AAAA;;;AA1BT",
-            "sources"  => ["main.source.coffee"],
+            "sources"  => ["main.coffee"],
+            "sourcesContent"=>[
+              "# Assignment:\n" +
+              "number   = 42\n" +
+              "opposite = true\n" +
+              "\n" +
+              "# Conditions:\n" +
+              "number = -42 if opposite\n" +
+              "\n" +
+              "# Functions:\n" +
+              "square = (x) -> x * x\n" +
+              "\n" +
+              "# Arrays:\n" +
+              "list = [1, 2, 3, 4, 5]\n" +
+              "\n" +
+              "# Objects:\n" +
+              "math =\n" +
+              "  root:   Math.sqrt\n" +
+              "  square: square\n" +
+              "  cube:   (x) -> x * square x\n" +
+              "\n" +
+              "# Splats:\n" +
+              "race = (winner, runners...) ->\n" +
+              "  print winner, runners\n" +
+              "\n" +
+              "# Existence:\n" +
+              "alert \"I knew it!\" if elvis?\n" +
+              "\n" +
+              "# Array comprehensions:\n" +
+              "cubes = (math.cube num for num in list)\n"
+            ],
             "names"    => [],
             "x_sprockets_linecount"=>47
           }
@@ -188,9 +223,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/babel/main.es6'), asset.filename
     assert_equal "babel/main.js.map", asset.logical_path
     assert_equal "application/js-sourcemap+json", asset.content_type
-    assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/babel/main.es6')}?type=application/ecmascript-6&pipeline=source"
-    ], normalize_uris(asset.links)
+    assert_equal [], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -203,7 +236,37 @@ class TestSourceMaps < Sprockets::TestCase
             "version"  => 3,
             "file"     => "babel/main.es6",
             "mappings" => ";;;;;;;;;;AACA,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAA,CAAC;SAAI,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;AACjC,IAAI,IAAI,GAAG,KAAK,CAAC,GAAG,CAAC,UAAC,CAAC,EAAE,CAAC;SAAK,CAAC,GAAG,CAAC;CAAA,CAAC,CAAC;;IAEhC,WAAW;YAAX,WAAW;;AACJ,WADP,WAAW,CACH,QAAQ,EAAE,SAAS,EAAE;0BAD7B,WAAW;;AAEb,+BAFE,WAAW,6CAEP,QAAQ,EAAE,SAAS,EAAE;GAE5B;;eAJG,WAAW;;WAKT,gBAAC,MAAM,EAAE;AACb,iCANE,WAAW,wCAME;KAChB;;;WACmB,yBAAG;AACrB,aAAO,IAAI,KAAK,CAAC,OAAO,EAAE,CAAC;KAC5B;;;SAVG,WAAW;GAAS,KAAK,CAAC,IAAI;;AAapC,IAAI,SAAS,uBACV,MAAM,CAAC,QAAQ,0BAAG;MACb,GAAG,EAAM,GAAG,EAEV,IAAI;;;;AAFN,WAAG,GAAG,CAAC,EAAE,GAAG,GAAG,CAAC;;;AAEd,YAAI,GAAG,GAAG;;AACd,WAAG,GAAG,GAAG,CAAC;AACV,WAAG,IAAI,IAAI,CAAC;;eACN,GAAG;;;;;;;;;;;CAEZ,EACF,CAAA",
-            "sources"  => ["main.source.es6"],
+            "sources"  => ["main.es6"],
+            "sourcesContent"=>[
+              "\n" +
+              "var odds = evens.map(v => v + 1);\n" +
+              "var nums = evens.map((v, i) => v + i);\n" +
+              "\n" +
+              "class SkinnedMesh extends THREE.Mesh {\n" +
+              "  constructor(geometry, materials) {\n" +
+              "    super(geometry, materials);\n" +
+              "\n" +
+              "  }\n" +
+              "  update(camera) {\n" +
+              "    super.update();\n" +
+              "  }\n" +
+              "  static defaultMatrix() {\n" +
+              "    return new THREE.Matrix4();\n" +
+              "  }\n" +
+              "}\n" +
+              "\n" +
+              "var fibonacci = {\n" +
+              "  [Symbol.iterator]: function*() {\n" +
+              "    var pre = 0, cur = 1;\n" +
+              "    for (;;) {\n" +
+              "      var temp = pre;\n" +
+              "      pre = cur;\n" +
+              "      cur += temp;\n" +
+              "      yield cur;\n" +
+              "    }\n" +
+              "  }\n" +
+              "}\n"
+            ],
             "names"    => [],
             "x_sprockets_linecount"=>66
           }
@@ -248,9 +311,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
-    assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/sass/main.scss')}?type=text/scss&pipeline=source"
-    ], normalize_uris(asset.links)
+    assert_equal [], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -263,7 +324,24 @@ class TestSourceMaps < Sprockets::TestCase
             "version"  => 3,
             "file"     => "sass/main.scss",
             "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI,GACjB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAY,GAAI;;AAPhC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI,GACtB",
-            "sources"  => ['main.source.scss'],
+            "sources"  => ['main.scss'],
+            "sourcesContent"=>[
+              "nav {\n" +
+              "  ul {\n" +
+              "    margin: 0;\n" +
+              "    padding: 0;\n" +
+              "    list-style: none;\n" +
+              "  }\n" +
+              "\n" +
+              "  li { display: inline-block; }\n" +
+              "\n" +
+              "  a {\n" +
+              "    display: block;\n" +
+              "    padding: 6px 12px;\n" +
+              "    text-decoration: none;\n" +
+              "  }\n" +
+              "}\n"
+            ],
             "names"    => [],
             "x_sprockets_linecount"=>12
           }
@@ -289,10 +367,7 @@ class TestSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/sass/with-import.scss'), asset.filename
     assert_equal "sass/with-import.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
-    assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/sass/_imported.scss')}?type=text/scss&pipeline=source",
-      "file://#{fixture_path_for_uri('source-maps/sass/with-import.scss')}?type=text/scss&pipeline=source"
-    ], normalize_uris(asset.links)
+    assert_equal [], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -306,8 +381,14 @@ class TestSourceMaps < Sprockets::TestCase
             "file"     => "sass/with-import.scss",
             "mappings" => "ACAA,AAAA,IAAI,CAAC;EAAE,KAAK,EAAE,GAAG,GAAI;;ADErB,AAAA,GAAG,CAAC;EAAE,KAAK,EAAE,IAAI,GAAI",
             "sources"  => [
-              "with-import.source.scss",
-              "_imported.source.scss",
+              "with-import.scss",
+              "_imported.scss",
+            ],
+            "sourcesContent" => [
+              "@import 'imported';\n" +
+              "\n" +
+              "nav { color: blue; }\n",
+              "body { color: red; }\n"
             ],
             "names"    => [],
             "x_sprockets_linecount"=>5
@@ -344,23 +425,38 @@ class TestSourceMaps < Sprockets::TestCase
   test "source maps work with index alias" do
     asset = @env.find_asset("foo.js",  pipeline: :debug)
     mapUrl = asset.source.match(/^\/\/# sourceMappingURL=(.*)$/)[1]
-    assert_equal "foo/index.js-008b5ccb5459dc75d7fd51bf5b1ac79fe54d05157d50586c16e558f33d28e9c4.map", mapUrl
+    assert_equal "foo/index.js-0537e98484a750b47c100f542e6992f7f2fbc09b355f47f1206a9d3adffb65ce.map", mapUrl
 
     map = JSON.parse(@env.find_asset('foo/index.js.map').source)
     assert_equal [
-      "file.source.coffee",
-      "index.source.js"
+      "file.coffee",
+      "index.js"
     ], get_sources(map)
+    assert_equal [
+      "console.log(\"foo/file.coffee\") if 1 < 2\n",
+      "//= require ./file\n" +
+      "console.log(\"foo.js\");\n"
+    ], get_sourcesContent(map)
   end
 
   test "relative sources at different depths" do
     assert @env.find_asset("sub/directory.js", pipeline: :debug)
     assert map = JSON.parse(@env.find_asset("sub/directory.js.map").source)
     assert_equal [
-      "a.source.js",
-      "modules/something.source.js",
-      "directory.source.js"
+      "a.js",
+      "modules/something.js",
+      "directory.js"
     ], get_sources(map)
+    assert_equal [
+      "function a() {\n" +
+      "  console.log('sub/a.js')  \n" +
+      "}\n",
+      "console.log(\"something.js\")\n",
+      "//= require ./a\n" +
+      "//= require ./modules/something\n" +
+      "console.log('sub/directory.js');\n" +
+      "a();\n"
+    ], get_sourcesContent(map)
   end
 
   test "source maps are updated correctly after file change" do
@@ -372,6 +468,7 @@ class TestSourceMaps < Sprockets::TestCase
         map["sections"][(index+1)..-1].each do |s|
           s["offset"]["line"] += 1
         end
+        map["sections"][index]["map"]["sourcesContent"][0] << "console.log('newline');\n"
       end
 
       File.open(filename, 'a') do |file|
@@ -412,9 +509,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/sass/main.scss'), asset.filename
     assert_equal "sass/main.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
-    assert_equal [
-      "file:///#{ fixture_path('source-maps/sass/main.scss').delete_prefix('/') }?type=text/scss&pipeline=source"
-    ], normalize_uris(asset.links)
+    assert_equal [], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -427,7 +522,24 @@ class TestSasscSourceMaps < Sprockets::TestCase
             "version"  => 3,
             "file"     => "sass/main.scss",
             "mappings" => "AAAA,AACE,GADC,CACD,EAAE,CAAC;EACD,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,IAAI,GACjB;;AALH,AAOE,GAPC,CAOD,EAAE,CAAC;EAAE,OAAO,EAAE,YAAY,GAAI;;AAPhC,AASE,GATC,CASD,CAAC,CAAC;EACA,OAAO,EAAE,KAAK;EACd,OAAO,EAAE,QAAQ;EACjB,eAAe,EAAE,IAAI,GACtB",
-            "sources"  => ["main.source.scss"],
+            "sources"  => ["main.scss"],
+            "sourcesContent"=>[
+              "nav {\n" +
+              "  ul {\n" +
+              "    margin: 0;\n" +
+              "    padding: 0;\n" +
+              "    list-style: none;\n" +
+              "  }\n" +
+              "\n" +
+              "  li { display: inline-block; }\n" +
+              "\n" +
+              "  a {\n" +
+              "    display: block;\n" +
+              "    padding: 6px 12px;\n" +
+              "    text-decoration: none;\n" +
+              "  }\n" +
+              "}\n"
+            ],
             "names"    => [],
             "x_sprockets_linecount"=>12
           }
@@ -453,10 +565,7 @@ class TestSasscSourceMaps < Sprockets::TestCase
     assert_equal fixture_path('source-maps/sass/with-import.scss'), asset.filename
     assert_equal "sass/with-import.css.map", asset.logical_path
     assert_equal "application/css-sourcemap+json", asset.content_type
-    assert_equal [
-      "file://#{fixture_path_for_uri('source-maps/sass/_imported.scss')}?type=text/scss&pipeline=source",
-      "file://#{fixture_path_for_uri('source-maps/sass/with-import.scss')}?type=text/scss&pipeline=source"
-    ], normalize_uris(asset.links)
+    assert_equal [], normalize_uris(asset.links)
 
     assert map = JSON.parse(asset.source)
     assert_equal({
@@ -470,8 +579,14 @@ class TestSasscSourceMaps < Sprockets::TestCase
             "file"     => "sass/with-import.scss",
             "mappings" => "ACAA,AAAA,IAAI,CAAC;EAAE,KAAK,EAAE,GAAG,GAAI;;ADErB,AAAA,GAAG,CAAC;EAAE,KAAK,EAAE,IAAI,GAAI",
             "sources"  => [
-              "with-import.source.scss",
-              "_imported.source.scss"
+              "with-import.scss",
+              "_imported.scss"
+            ],
+            "sourcesContent" => [
+              "@import 'imported';\n" +
+              "\n" +
+              "nav { color: blue; }\n",
+              "body { color: red; }\n"
             ],
             "names"    => [],
             "x_sprockets_linecount"=>5
