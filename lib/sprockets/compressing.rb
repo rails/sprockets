@@ -106,7 +106,7 @@ module Sprockets
     #
     #     environment.gzip = false
     #
-    # To enable set to a truthy value. By default zlib wil
+    # To enable set to a truthy value. By default zlib will
     # be used to gzip assets. If you have the Zopfli gem
     # installed you can specify the zopfli algorithm to be used
     # instead:
