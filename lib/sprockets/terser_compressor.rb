@@ -9,7 +9,7 @@ module Sprockets
     def initialize(options = {})
       @options = options.dup
       @options[:comments] ||= :none
-      @options.merge!(Rails.application.config.assets.terser.to_h) if defined?(Rails)
+      @options.merge!(::Rails.application.config.assets.terser.to_h) if defined?(::Rails)
       @cache_key = -"#{self.class.name}:#{Autoload::Terser::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}"
       @terser = ::Terser.new(@options)
     end
