@@ -9,6 +9,7 @@ module Sprockets
     autoload :JSMinC, 'sprockets/autoload/jsminc'
     autoload :Sass, 'sprockets/autoload/sass'
     autoload :SassC, 'sprockets/autoload/sassc'
+    autoload :Terser, 'sprockets/autoload/terser'
     autoload :Uglifier, 'sprockets/autoload/uglifier'
     autoload :YUI, 'sprockets/autoload/yui'
     autoload :Zopfli, 'sprockets/autoload/zopfli'
