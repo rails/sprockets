@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake", "~> 13.2"
   s.add_development_dependency "sass", "~> 3.4"
   s.add_development_dependency "sassc", "~> 2.0"
+  s.add_development_dependency "terser", ">= 1.2"
   s.add_development_dependency "uglifier", ">= 2.3"
   s.add_development_dependency "yui-compressor", "~> 0.12"
   unless RUBY_PLATFORM.include?('java')
