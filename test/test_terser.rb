@@ -6,7 +6,7 @@ require 'terser'
 class TestTerserCompressor < Minitest::Test
   def setup
     @env = Sprockets::Environment.new
-    @env.js_compressor = Terser.new
+    @env.js_compressor = :terser
     @cache = Sprockets::Cache.new
 
     @tmpdir = Dir.mktmpdir
@@ -18,7 +18,7 @@ class TestTerserCompressor < Minitest::Test
   end
 
   def test_terser_configured_as_compressor
-    assert_equal :js_compressor, @env.js_compressor
+    assert_equal Sprockets::TerserCompressor, @env.js_compressor
   end
 
   def test_compress_javascript_through_sprockets
