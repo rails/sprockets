@@ -85,6 +85,6 @@ class TestSprockets < Sprockets::TestCase
   def sprockets(*args)
     script = File.expand_path("../../bin/sprockets", __FILE__)
     lib    = File.expand_path("../../lib", __FILE__)
-    `ruby -I#{lib} #{script} #{Shellwords.join(args)} 2>&1`
+    `#{RbConfig.ruby} -I#{lib} #{script} #{Shellwords.join(args)} 2>&1`
   end
 end
