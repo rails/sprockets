@@ -15,7 +15,7 @@ class TestDigestUtils < Minitest::Test
   def test_gzip
     output = gzip("foobar")
     assert_equal 26, output.length
-    assert_equal [31, 139, 8, 0, 1, 0, 0, 0], output.bytes.take(8)
+    assert_equal [31, 139, 8, 0, Sprockets::EncodingUtils::GZIP_MTIME, 0, 0, 0], output.bytes.take(8)
   end
 
   def test_base64
