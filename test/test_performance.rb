@@ -23,13 +23,13 @@ class << File
   end
 end
 
-$dir_entires_calls = nil
+$dir_entries_calls = nil
 class << Dir
   alias_method :original_entries, :entries
   def entries(dirname, **args)
-    if $dir_entires_calls
-      $dir_entires_calls[dirname.to_s] ||= []
-      $dir_entires_calls[dirname.to_s] << caller
+    if $dir_entries_calls
+      $dir_entries_calls[dirname.to_s] ||= []
+      $dir_entries_calls[dirname.to_s] << caller
     end
     original_entries(dirname, **args)
   end
@@ -61,7 +61,7 @@ class TestPerformance < Sprockets::TestCase
 
   def teardown
     $file_stat_calls = nil
-    $dir_entires_calls = nil
+    $dir_entries_calls = nil
     $processor_calls = nil
     $bundle_processor_calls = nil
     $cache_get_calls = nil
@@ -463,7 +463,7 @@ class TestPerformance < Sprockets::TestCase
   def reset_stats!
     $file_stat_calls = {}
     $file_exist_calls = {}
-    $dir_entires_calls = {}
+    $dir_entries_calls = {}
     $processor_calls = {}
     $bundle_processor_calls = {}
     $cache_get_calls = {}
@@ -475,7 +475,7 @@ class TestPerformance < Sprockets::TestCase
       assert_equal 0, callers.size, "File.stat(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
     end
 
-    $dir_entires_calls.each do |path, callers|
+    $dir_entries_calls.each do |path, callers|
       assert_equal 0, callers.size, "Dir.entries(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
     end
   end
@@ -489,7 +489,7 @@ class TestPerformance < Sprockets::TestCase
       assert_equal 1, callers.size, "File.exist?(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
     end
 
-    $dir_entires_calls.each do |path, callers|
+    $dir_entries_calls.each do |path, callers|
       assert_equal 1, callers.size, "Dir.entries(#{path.inspect}) called #{callers.size} times\n\n#{format_callers(callers)}"
     end
 

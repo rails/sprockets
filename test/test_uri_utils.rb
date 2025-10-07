@@ -123,7 +123,7 @@ class TestURIUtils < Minitest::Test
       parse_asset_uri("file:///usr/local/var/github/app/assets/views/users.html?type=text/html;%20charset=utf-8")
   end
 
-  def test_asset_uri_raise_erorr_when_invalid_uri_scheme
+  def test_asset_uri_raise_error_when_invalid_uri_scheme
     assert_raises URI::InvalidURIError do
       parse_asset_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
     end
@@ -183,7 +183,7 @@ class TestURIUtils < Minitest::Test
     end
   end
 
-  def test_file_digest_raise_erorr_when_invalid_uri_scheme
+  def test_file_digest_raise_error_when_invalid_uri_scheme
     assert_raises URI::InvalidURIError do
       parse_file_digest_uri("http:///usr/local/var/github/app/assets/javascripts/application.js")
     end
