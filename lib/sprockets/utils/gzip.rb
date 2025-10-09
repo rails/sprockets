@@ -10,13 +10,15 @@ module Sprockets
       # writes contents to the `file` passed in. Sets `mtime` of
       # written file to passed in `mtime`
       module ZlibArchiver
-        def self.call(file, source, mtime)
+        MTIME = RUBY_VERSION >= "2.7" ? 0 : 1
+
+        def self.call(file, source)
           gz = Zlib::GzipWriter.new(file, Zlib::BEST_COMPRESSION)
-          gz.mtime = mtime
+          gz.mtime = MTIME
           gz.write(source)
           gz.close
 
-          File.utime(mtime, mtime, file.path)
+          nil
         end
       end
 
@@ -28,8 +30,8 @@ module Sprockets
       # writes contents to the `file` passed in. Sets `mtime` of
       # written file to passed in `mtime`
       module ZopfliArchiver
-        def self.call(file, source, mtime)
-          compressed_source = Autoload::Zopfli.deflate(source, format: :gzip, mtime: mtime)
+        def self.call(file, source)
+          compressed_source = Autoload::Zopfli.deflate(source, format: :gzip)
           file.write(compressed_source)
           file.close
 
@@ -90,7 +92,8 @@ module Sprockets
       # Returns nothing.
       def compress(file, target)
         mtime = Sprockets::PathUtils.stat(target).mtime
-        archiver.call(file, source, mtime)
+        archiver.call(file, source)
+        File.utime(mtime, mtime, file.path)
 
         nil
       end

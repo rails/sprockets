@@ -50,6 +50,8 @@ module Sprockets
       Marshal.load(marshaled)
     end
 
+    GZIP_MTIME = RUBY_VERSION >= "2.7" ? 0 : 1
+
     # Public: Use gzip to compress data.
     #
     # str - String data
@@ -58,7 +60,7 @@ module Sprockets
     def gzip(str)
       io = StringIO.new
       gz = Zlib::GzipWriter.new(io, Zlib::BEST_COMPRESSION)
-      gz.mtime = 1
+      gz.mtime = Sprockets::EncodingUtils::GZIP_MTIME
       gz << str
       gz.finish
       io.string
