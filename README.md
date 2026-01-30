@@ -44,7 +44,7 @@ If you want to work on Sprockets or better understand how it works read [How Spr
 
 You can interact with Sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with Sprockets.
 
-Since you are likely using Sprockets through another framework (such as the [the Rails asset pipeline](http://guides.rubyonrails.org/asset_pipeline.html)), there will be configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
+Since you are likely using Sprockets through another framework (such as the [Rails asset pipeline](http://guides.rubyonrails.org/asset_pipeline.html)), there will be configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.
 
 #### Accessing Assets
 
@@ -119,7 +119,7 @@ Here is a list of the available directives:
 - [`link_directory`](#link_directory) - Make target directory compile and be publicly available without adding contents to current
 - [`link_tree`](#link_tree) - Make target tree compile and be publicly available without adding contents to current
 - [`depend_on`](#depend_on) - Recompile current file if target has changed
-- [`depend_on_directory`](#depend_on_directory) - Recompile current file if any files in target directory has changed
+- [`depend_on_directory`](#depend_on_directory) - Recompile current file if any files in target directory have changed
 - [`stub`](#stub) - Ignore target file
 
 You can see what each of these does below.
@@ -150,7 +150,7 @@ When "asking" for a compiled file, you always ask for the extension you want. Fo
 asset_path("application.css")
 ```
 
-Sprockets understands that `application.scss.erb` will compile down to a `application.css`. Ask for what you need, not what you have.
+Sprockets understands that `application.scss.erb` will compile down to an `application.css`. Ask for what you need, not what you have.
 
 If this isn't working like you expect, make sure you didn't typo an extension, and make sure the file is on a "load path" (see framework docs for adding new load paths).
 
@@ -174,7 +174,7 @@ beta.js
 jquery.js
 ```
 
-Then `alpha.js` will be loaded before either of the other two. This can be a problem if `alpha.js` uses jquery. For this reason it is not recommend to use `require_directory` with files that are ordering dependent. You can either require individual files manually:
+Then `alpha.js` will be loaded before either of the other two. This can be a problem if `alpha.js` uses jquery. For this reason it is not recommended to use `require_directory` with files that are ordering dependent. You can either require individual files manually:
 
 ```js
 //= require jquery
@@ -253,7 +253,7 @@ Directives take a path or a path to a file. Paths for directive can be relative 
 //= require ../foo.js
 ```
 
-This would load the file up one directory and named `foo.js`. However this isn't required if `foo.js` is on one of Sprocket's load paths. You can simply use
+This would load a file named `foo.js` from one directory up. However this isn't required if `foo.js` is on one of Sprocket's load paths. You can simply use
 
 ```js
 //= require foo.js
@@ -396,7 +396,7 @@ This would find a manifest file at `my_engine/app/assets/config/my_engine_manife
 
 Files in subdirectories will not be linked (Compare to [link_tree](#link_tree)).
 
-The *path* argument to `link_directory` is _not_ a logical path (it does not use the asset load paths), but is a path relative to the file the `link_directory` directive is found in, and can use `..` to  . For instance, you might want:
+The *path* argument to `link_directory` is _not_ a logical path (it does not use the asset load paths), but is a path relative to the file the `link_directory` directive is found in, and can use `..` to reference parent directories. For instance, you might want:
 
 ```js
 //= link_directory ../stylesheets
@@ -426,7 +426,7 @@ Example:
 //= link_tree ./path/to/folder
 ```
 
-Like `link_directory`, the argument is path relative to the current file, it is *not* a 'logical path' tresolved against load paths.
+Like `link_directory`, the argument is a path relative to the current file, it is *not* a 'logical path' resolved against load paths.
 
 
 As with `link_directory`, you can also specify a second argument -- separated by a space --  so any extra files not matching the content-type specified will be ignored:
@@ -469,7 +469,7 @@ asset's cache in response to a change in multiple files in a single directory.
 
 All paths are relative to your declaration and must begin with `./`
 
-Also, your must include these directories in your [load path](guides/building_an_asset_processing_framework.md#the-load-path).
+Also, you must include these directories in your [load path](guides/building_an_asset_processing_framework.md#the-load-path).
 
 **Example:**
 
@@ -488,8 +488,8 @@ B
 ```
 // ./file.js.erb
 //= depend_on_directory ./data
-var a = '<% File.read('data/a.data') %>'
-var b = '<% File.read('data/b.data') %>'
+var a = '<%= File.read("data/a.data") %>'
+var b = '<%= File.read("data/b.data") %>'
 ```
 
 Would produce:
@@ -514,7 +514,7 @@ Sprockets provides an ERB engine for preprocessing assets using
 embedded Ruby code. Append `.erb` to a CSS or JavaScript asset's
 filename to enable the ERB engine.
 
-For example if you have an `app/application/javascripts/app_name.js.erb`
+For example if you have an `app/assets/javascripts/app_name.js.erb`
 you could have this in the template
 
 ```js
@@ -559,7 +559,7 @@ Sprockets supports both Sass syntaxes. For the original
 whitespace-sensitive syntax, use the extension `.sass`. For the
 new SCSS syntax, use the extension `.scss`.
 
-In Rails if you have `app/application/stylesheets/foo.scss` it can
+In Rails if you have `app/assets/stylesheets/foo.scss` it can
 be referenced with `<%= asset_path("foo.css") %>`. When referencing
 an asset in Rails, always specify the extension you want. Sprockets will
 convert `foo.scss` to `foo.css`.
@@ -580,7 +580,7 @@ on your system to invoke it.
 To write JavaScript assets with CoffeeScript, use the extension
 `.coffee`.
 
-In Rails if you have `app/application/javascripts/foo.coffee` it can
+In Rails if you have `app/assets/javascripts/foo.coffee` it can
 be referenced with `<%= asset_path("foo.js") %>`. When referencing
 an asset in Rails, always specify the extension you want. Sprockets will
 convert `foo.coffee` to `foo.js`.
