@@ -48,40 +48,26 @@ module Sprockets
       full_path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
       path = full_path
 
-      unless path.valid_encoding?
-        return bad_request_response(env)
-      end
+      return bad_request_response(env) unless path.valid_encoding?
+      return forbidden_response(env) if forbidden_request?(path)
+
+      asset = find_asset(path)
 
       # Strip fingerprint
-      if fingerprint = path_fingerprint(path)
+      if asset.nil? && fingerprint = path_fingerprint(path)
         path = path.sub("-#{fingerprint}", '')
-      end
-
-      # URLs containing a `".."` are rejected for security reasons.
-      if forbidden_request?(path)
-        return forbidden_response(env)
+        return forbidden_response(env) if forbidden_request?(path)
+        asset = find_asset(path)
       end
 
       if fingerprint
-        if_match = fingerprint
+        if_match = asset&.etag
       elsif env['HTTP_IF_MATCH']
         if_match = env['HTTP_IF_MATCH'][/"(\w+)"$/, 1]
       end
 
       if env['HTTP_IF_NONE_MATCH']
         if_none_match = env['HTTP_IF_NONE_MATCH'][/"(\w+)"$/, 1]
-      end
-
-      # Look up the asset.
-      asset = find_asset(path)
-
-      # Fallback to looking up the asset with the full path.
-      # This will make assets that are hashed with webpack or
-      # other js bundlers work consistently between production
-      # and development pipelines.
-      if asset.nil? && (asset = find_asset(full_path))
-        if_match = asset.etag if fingerprint
-        fingerprint = asset.etag
       end
 
       if asset.nil?
