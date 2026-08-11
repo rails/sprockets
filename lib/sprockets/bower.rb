@@ -46,7 +46,7 @@ module Sprockets
     #
     # Returns nothing.
     def read_bower_main(dirname, filename)
-      bower = JSON.parse(File.read(filename), create_additions: false)
+      bower = JSON.parse(File.read(filename))
 
       case bower['main']
       when String

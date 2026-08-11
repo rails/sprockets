@@ -37,7 +37,7 @@ module Sprockets
     #
     # Returns nothing.
     def read_package_directives(dirname, filename)
-      package = JSON.parse(File.read(filename), create_additions: false)
+      package = JSON.parse(File.read(filename))
 
       case package['main']
       when String
