@@ -315,7 +315,7 @@ module Sprockets
       end
 
       def json_decode(obj)
-        JSON.parse(obj, create_additions: false)
+        JSON.parse(obj)
       end
 
       def json_encode(obj)
