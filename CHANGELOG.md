@@ -2,6 +2,11 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## 4.3.0
+
+- Fixed compatibility with `json` 3+.
+- Do not set variable `GZip#mtime` but do always set `File#mtime`. [#821](https://github.com/rails/sprockets/pull/821)
+
 ## 4.2.2
 
 - Added missing dependency on `logger`. [#813](https://github.com/rails/sprockets/pull/813)
