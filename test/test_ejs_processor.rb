@@ -10,7 +10,7 @@ class TestEjsProcessor < Minitest::Test
       data: "<span>Hello, <%= name %></p>",
       cache: Sprockets::Cache.new
     }
-    assert Sprockets::EjsProcessor.call(input).match(/<span>Hello, /)
+    assert Sprockets::EjsProcessor.call(input).include?('<span>Hello, ')
   end
 
   def test_cache_key

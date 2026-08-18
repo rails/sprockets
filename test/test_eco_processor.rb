@@ -10,7 +10,7 @@ class TestEcoProcessor < Minitest::Test
       data: "<span>Hello, <%= name %></p>",
       cache: Sprockets::Cache.new
     }
-    assert Sprockets::EcoProcessor.call(input).match(/<span>Hello, /)
+    assert Sprockets::EcoProcessor.call(input).include?('<span>Hello, ')
   end
 
   def test_cache_key
