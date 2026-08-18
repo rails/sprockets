@@ -91,6 +91,8 @@ module Sprockets
       SEPARATOR_PATTERN = "#{Regexp.quote(File::SEPARATOR)}"
     end
 
+    RELATIVE_PATH_PATTERN = /^\.\.?($|#{SEPARATOR_PATTERN})/
+
     # Public: Check if path is explicitly relative.
     # Starts with "./" or "../".
     #
@@ -98,7 +100,7 @@ module Sprockets
     #
     # Returns true if path is relative, otherwise false.
     def relative_path?(path)
-      path.match?(/^\.\.?($|#{SEPARATOR_PATTERN})/) ? true : false
+      path.match?(RELATIVE_PATH_PATTERN) ? true : false
     end
 
     # Public: Get relative path from `start` to `dest`.
