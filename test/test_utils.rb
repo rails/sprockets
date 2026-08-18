@@ -103,7 +103,7 @@ class TestUtils < Minitest::Test
   end
 
   def apply_concat_javascript_sources(*args)
-    args.reduce(+"", &method(:concat_javascript_sources))
+    args.reduce(+"") { |buf, source| concat_javascript_sources(buf, source) }
   end
 
 

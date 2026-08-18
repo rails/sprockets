@@ -23,7 +23,7 @@ class TestCoffeeScriptProcessor < Minitest::Test
       metadata: { mapping: [] }
     }
     result = Sprockets::CoffeeScriptProcessor.call(input)
-    assert result[:data].match(/var square/)
+    assert result[:data].include?('var square')
     assert_equal 13, Sprockets::SourceMapUtils.decode_source_map(result[:map])[:mappings].size
     assert_equal ["squared.source.coffee"], result[:map]["sources"]
   end
