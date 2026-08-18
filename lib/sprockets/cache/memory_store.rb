@@ -18,7 +18,7 @@ module Sprockets
       # Public: Initialize the cache store.
       #
       # max_size - A Integer of the maximum number of keys the store will hold.
-      #            (default: 1000).
+      #            (default: 1000). Can be set to +false+ for no limit.
       def initialize(max_size = DEFAULT_MAX_SIZE)
         @max_size = max_size
         @cache = {}
@@ -56,7 +56,7 @@ module Sprockets
         @mutex.synchronize do
           @cache.delete(key)
           @cache[key] = value
-          @cache.shift if @cache.size > @max_size
+          @cache.shift if @max_size && @cache.size > @max_size
         end
         value
       end

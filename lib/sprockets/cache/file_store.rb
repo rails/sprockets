@@ -36,13 +36,13 @@ module Sprockets
       #
       # root     - A String path to a directory to persist cached values to.
       # max_size - A Integer of the maximum size the store will hold (in bytes).
-      #            (default: 25MB).
+      #            (default: 25MB). Can be set to +false+ for no limit.
       # logger   - The logger to which some info will be printed.
       #            (default logger level is FATAL and won't output anything).
       def initialize(root, max_size = DEFAULT_MAX_SIZE, logger = self.class.default_logger)
         @root     = root
         @max_size = max_size
-        @gc_size  = max_size * 0.75
+        @gc_size  = max_size * 0.75 if max_size
         @logger   = logger
       end
 
@@ -111,11 +111,13 @@ module Sprockets
         # Write data
         PathUtils.atomic_write(path) do |f|
           f.write(raw)
-          @size = size + f.size unless exists
+          if defined?(@size) && !exists
+            @size += f.size
+          end
         end
 
         # GC if necessary
-        gc! if size > @max_size
+        gc! if @max_size && size > @max_size
 
         value
       end
