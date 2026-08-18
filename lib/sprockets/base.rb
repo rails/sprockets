@@ -55,6 +55,13 @@ module Sprockets
     end
     alias_method :index, :cached
 
+    # By default sprockets tries to quickly revalidate the cache for a source file
+    # by comparing its last modified time.
+    # This is efficient in development, but in some CI or producton environments
+    # where the source files are restored from version control, the last modified time
+    # tend to be somewhat random, and checking it is just needless overhead.
+    attr_accessor :ignore_mtime
+
     # Internal: Compute digest for path.
     #
     # path - String filename or directory path.
@@ -62,14 +69,18 @@ module Sprockets
     # Returns a String digest or nil.
     def file_digest(path)
       if stat = self.stat(path)
-        # Caveat: Digests are cached by the path's current mtime. Its possible
-        # for a files contents to have changed and its mtime to have been
-        # negligently reset thus appearing as if the file hasn't changed on
-        # disk. Also, the mtime is only read to the nearest second. It's
-        # also possible the file was updated more than once in a given second.
-        key = UnloadedAsset.new(path, self).file_digest_key(stat.mtime.to_i)
-        cache.fetch(key) do
+        if ignore_mtime
           self.stat_digest(path, stat)
+        else
+          # Caveat: Digests are cached by the path's current mtime. Its possible
+          # for a files contents to have changed and its mtime to have been
+          # negligently reset thus appearing as if the file hasn't changed on
+          # disk. Also, the mtime is only read to the nearest second. It's
+          # also possible the file was updated more than once in a given second.
+          key = UnloadedAsset.new(path, self).file_digest_key(stat.mtime.to_i)
+          cache.fetch(key) do
+            self.stat_digest(path, stat)
+          end
         end
       end
     end
