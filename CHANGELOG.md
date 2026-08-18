@@ -2,6 +2,11 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+## 4.4.0
+
+- Implement `ignore_mtime` option. [#831](https://github.com/rails/sprockets/pull/832)
+- Allow disabling cache limits. [#831](https://github.com/rails/sprockets/pull/831)
+
 ## 4.3.0
 
 - Fixed compatibility with `json` 3+.
