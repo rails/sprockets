@@ -55,13 +55,6 @@ module Sprockets
     end
     alias_method :index, :cached
 
-    # By default sprockets tries to quickly revalidate the cache for a source file
-    # by comparing its last modified time.
-    # This is efficient in development, but in some CI or producton environments
-    # where the source files are restored from version control, the last modified time
-    # tend to be somewhat random, and checking it is just needless overhead.
-    attr_accessor :ignore_mtime
-
     # Internal: Compute digest for path.
     #
     # path - String filename or directory path.
