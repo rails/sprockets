@@ -2,9 +2,13 @@
 
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
+# 4.4.1
+
+- Fix the `ignore_mtime` option to be shared between environments. [#834](https://github.com/rails/sprockets/pull/834)
+
 ## 4.4.0
 
-- Implement `ignore_mtime` option. [#831](https://github.com/rails/sprockets/pull/832)
+- Implement `ignore_mtime` option. [#832](https://github.com/rails/sprockets/pull/832)
 - Allow disabling cache limits. [#831](https://github.com/rails/sprockets/pull/831)
 
 ## 4.3.0
