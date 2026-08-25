@@ -67,6 +67,19 @@ module Sprockets
       self.config = config.merge(digest_class: klass).freeze
     end
 
+    def ignore_mtime
+      config[:ignore_mtime]
+    end
+
+    # By default sprockets tries to quickly revalidate the cache for a source file
+    # by comparing its last modified time.
+    # This is efficient in development, but in some CI or producton environments
+    # where the source files are restored from version control, the last modified time
+    # tend to be somewhat random, and checking it is just needless overhead.
+    def ignore_mtime=(ignore_mtime)
+      self.config = config.merge(ignore_mtime: ignore_mtime).freeze
+    end
+
     # This class maybe mutated and mixed in with custom helpers.
     #
     #     environment.context_class.instance_eval do
