@@ -1229,7 +1229,7 @@ class DebugAssetTest < Sprockets::TestCase
   end
 
   test "digest path" do
-    assert_equal "application.debug-dee339ce0ee2dc7cdfa0d36dff3ef946cebe1bd3e414515d40c3cafc49c0a51a.js",
+    assert_equal "application.debug-5bafea519f7aae9679023c6441b8c3623b4147cf5bca607abc5aab0c35ce6618.js",
       @asset.digest_path
   end
 
@@ -1262,7 +1262,7 @@ document.on('dom:loaded', function() {
   $('search').focus();
 });
 
-//# sourceMappingURL=application.js-95e519d4e0f0a5c4c7d24787ded990b0d027f7ad30b39f402c4c5e3196a41e8b.map
+//# sourceMappingURL=application.js-ba55f2ffb2663c056b196f7874897ca13fc2fb892dfdda1f9535d105e3c9ee25.map
 EOS
 
     assert_equal expected, @asset.to_s

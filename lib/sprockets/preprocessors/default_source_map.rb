@@ -15,14 +15,12 @@ module Sprockets
         load_path     = input[:load_path]
         lines         = input[:data].lines.length
         basename      = File.basename(filename)
-        mime_exts     = input[:environment].config[:mime_exts]
-        pipeline_exts = input[:environment].config[:pipeline_exts]
         if map.nil? || map.empty?
           result[:map] = {
             "version"   => 3,
             "file"      => PathUtils.split_subpath(load_path, filename),
             "mappings"  => default_mappings(lines),
-            "sources"   => [PathUtils.set_pipeline(basename, mime_exts, pipeline_exts, :source)],
+            "sources"   => [basename],
             "names"     => []
           }
         else
