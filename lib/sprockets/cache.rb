@@ -194,11 +194,8 @@ module Sprockets
       end
 
       def get_cache_wrapper(cache)
-        if cache.is_a?(Cache)
-          cache
-
-        # `Cache#get(key)` for Memcache
-        elsif cache.respond_to?(:get)
+        # `Cache#get(key)` for Memcache and other Cache instances
+        if cache.respond_to?(:get)
           GetWrapper.new(cache)
 
         # `Cache#[key]` so `Hash` can be used
