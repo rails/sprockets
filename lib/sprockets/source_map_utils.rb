@@ -72,12 +72,16 @@ module Sprockets
     # Returns a new source map hash.
     def concat_source_maps(a, b)
       return a || b unless a && b
-      a = make_index_map(a)
+      a = make_index_map(a).dup
+      a["sections"] = a["sections"].dup
       b = make_index_map(b)
 
       offset = 0
       if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
-        last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
+        last_section = a["sections"].last.dup
+        last_section["map"] = last_section["map"].dup
+        a["sections"][-1] = last_section
+        last_line_count = last_section["map"].delete("x_sprockets_linecount")
         offset += last_line_count || 1
 
         last_offset = a["sections"].last["offset"]["line"]
