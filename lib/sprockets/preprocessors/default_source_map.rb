@@ -26,7 +26,7 @@ module Sprockets
             "names"     => []
           }
         else
-          result[:map] = map
+          result[:map] = map.dup
         end
 
         result[:map]["x_sprockets_linecount"] = lines
