@@ -24,6 +24,10 @@ module Sprockets
     URI_PARSER = defined?(URI::RFC2396_PARSER) ? URI::RFC2396_PARSER : URI::Generic::DEFAULT_PARSER
     private_constant :URI_PARSER
 
+    URI_PATH_UNSAFE = Regexp.union(URI_PARSER.regexp[:UNSAFE], /\?/)
+    URI_QUERY_UNSAFE = Regexp.union(URI_PARSER.regexp[:UNSAFE], /&/)
+    private_constant :URI_PATH_UNSAFE, :URI_QUERY_UNSAFE
+
     # Internal: Parse URI into component parts.
     #
     # uri - String uri
@@ -66,7 +70,7 @@ module Sprockets
       str = +"#{scheme}://"
       str << host if host
       path = "/#{path}" unless path.start_with?("/".freeze)
-      str << URI_PARSER.escape(path)
+      str << URI_PARSER.escape(path, URI_PATH_UNSAFE)
       str << "?#{query}" if query
       str
     end
@@ -165,7 +169,7 @@ module Sprockets
         when Integer
           query << "#{key}=#{value}"
         when String, Symbol
-          query << "#{key}=#{URI_PARSER.escape(value.to_s)}"
+          query << "#{key}=#{URI_PARSER.escape(value.to_s, URI_QUERY_UNSAFE)}"
         when TrueClass
           query << "#{key}"
         when FalseClass, NilClass
