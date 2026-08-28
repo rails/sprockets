@@ -196,8 +196,8 @@ module Sprockets
       if map["sections"]
         map["sections"].each do |s|
           mappings += decode_source_map(s["map"])[:mappings].each do |m|
+            m[:generated][1] += s["offset"]["column"] if m[:generated][0] == 1
             m[:generated][0] += s["offset"]["line"]
-            m[:generated][1] += s["offset"]["column"]
           end
           sources |= s["map"]["sources"]
           names   |= s["map"]["names"]

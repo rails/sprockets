@@ -714,3 +714,5 @@ Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGE
 
 ## License
 Sprockets is released under the [MIT License](MIT-LICENSE).
+
+Index source map column offsets apply only to the first generated line of each section, while line offsets apply to all lines.
