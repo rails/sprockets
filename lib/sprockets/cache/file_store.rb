@@ -149,8 +149,7 @@ module Sprockets
       private
         # Internal: Get all cache files along with stats.
         #
-        # Returns an Array of [String filename, File::Stat] pairs sorted by
-        # mtime.
+        # Returns an Array of [String filename, File::Stat] pairs.
         def find_caches
           Dir.glob(File.join(@root, '**/*.cache')).reduce([]) { |stats, filename|
             stat = safe_stat(filename)
@@ -158,7 +157,7 @@ module Sprockets
             # dir.glob and the next stat
             stats << [filename, stat] if stat
             stats
-          }.sort_by { |_, stat| stat.mtime.to_i }
+          }
         end
 
         def size
@@ -185,7 +184,7 @@ module Sprockets
         def gc!
           start_time = Time.now
 
-          caches = find_caches
+          caches = find_caches.sort_by { |_, stat| stat.mtime.to_i }
           size = compute_size(caches)
 
           delete_caches, keep_caches = caches.partition { |filename, stat|
