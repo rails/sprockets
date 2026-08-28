@@ -714,3 +714,5 @@ Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGE
 
 ## License
 Sprockets is released under the [MIT License](MIT-LICENSE).
+
+Loading a cached asset expands its paths on a copy, preserving reusable cache entries across application roots.

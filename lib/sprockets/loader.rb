@@ -111,6 +111,8 @@ module Sprockets
       def asset_from_cache(key)
         asset = cache.get(key, true)
         if asset
+          asset = asset.dup
+          asset[:metadata] = asset[:metadata].dup
           asset[:uri]       = expand_from_root(asset[:uri])
           asset[:load_path] = expand_from_root(asset[:load_path])
           asset[:filename]  = expand_from_root(asset[:filename])
