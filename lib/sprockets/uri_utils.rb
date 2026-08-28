@@ -24,7 +24,7 @@ module Sprockets
     URI_PARSER = defined?(URI::RFC2396_PARSER) ? URI::RFC2396_PARSER : URI::Generic::DEFAULT_PARSER
     private_constant :URI_PARSER
 
-    URI_PATH_UNSAFE = Regexp.union(URI_PARSER.regexp[:UNSAFE], /\?/)
+    URI_PATH_UNSAFE = Regexp.union(URI_PARSER.regexp[:UNSAFE], /[?\[\]]/)
     URI_QUERY_UNSAFE = Regexp.union(URI_PARSER.regexp[:UNSAFE], /&/)
     private_constant :URI_PATH_UNSAFE, :URI_QUERY_UNSAFE
 

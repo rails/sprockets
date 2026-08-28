@@ -715,4 +715,4 @@ Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGE
 ## License
 Sprockets is released under the [MIT License](MIT-LICENSE).
 
-Asset filenames containing `?` and query values containing `&` are escaped as components, preserving existing plus, slash and percent handling.
+Asset filenames containing `?`, `[` or `]` and query values containing `&` are escaped as components, preserving existing plus, slash and percent handling.
