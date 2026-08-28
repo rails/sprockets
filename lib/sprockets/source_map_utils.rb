@@ -446,6 +446,7 @@ module Sprockets
         end
         i += 1
       end
+      raise ArgumentError unless shift.zero?
       result
     end
 
