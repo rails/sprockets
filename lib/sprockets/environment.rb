@@ -31,12 +31,12 @@ module Sprockets
       cached.find_asset(*args, **options)
     end
 
-    def find_asset!(*args)
-      cached.find_asset!(*args)
+    def find_asset!(*args, **options)
+      cached.find_asset!(*args, **options)
     end
 
-    def find_all_linked_assets(*args, &block)
-      cached.find_all_linked_assets(*args, &block)
+    def find_all_linked_assets(*args, **options, &block)
+      cached.find_all_linked_assets(*args, **options, &block)
     end
 
     def load(*args)

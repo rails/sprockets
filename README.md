@@ -714,3 +714,5 @@ Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGE
 
 ## License
 Sprockets is released under the [MIT License](MIT-LICENSE).
+
+Environment wrappers and linked-asset enumeration forward keyword options, including deferred enumerators. Base#find_asset! additionally needs the existing correction in PR #792.

@@ -86,10 +86,10 @@ module Sprockets
       end
     end
 
-    def find_all_linked_assets(*args)
-      return to_enum(__method__, *args) unless block_given?
+    def find_all_linked_assets(*args, **options)
+      return to_enum(__method__, *args, **options) unless block_given?
 
-      parent_asset = asset = find_asset(*args)
+      parent_asset = asset = find_asset(*args, **options)
       return unless asset
 
       yield asset
