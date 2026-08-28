@@ -68,7 +68,7 @@ module Sprockets
           end
         end
 
-        if value
+        unless value.nil?
           FileUtils.touch(path)
           value
         end

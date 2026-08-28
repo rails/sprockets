@@ -115,7 +115,7 @@ module Sprockets
     def get(key, local = false)
       expanded_key = expand_key(key)
 
-      if local && value = @fetch_cache.get(expanded_key)
+      if local && !(value = @fetch_cache.get(expanded_key)).nil?
         return value
       end
 
