@@ -102,8 +102,12 @@ module Sprockets
             Zlib::MAX_MEM_LEVEL,
             Zlib::DEFAULT_STRATEGY
           )
-          deflater << marshaled
-          raw = deflater.finish
+          begin
+            deflater << marshaled
+            raw = deflater.finish
+          ensure
+            deflater.close
+          end
         else
           raw = marshaled
         end

@@ -24,6 +24,8 @@ module Sprockets
       )
       deflater << str
       deflater.finish
+    ensure
+      deflater.close if deflater
     end
 
     # Internal: Unmarshal optionally deflated data.
@@ -42,9 +44,12 @@ module Sprockets
         marshaled = str
       else
         begin
-          marshaled = Zlib::Inflate.new(window_bits).inflate(str)
+          inflater = Zlib::Inflate.new(window_bits)
+          marshaled = inflater.inflate(str)
         rescue Zlib::DataError
           marshaled = str
+        ensure
+          inflater.close if inflater
         end
       end
       Marshal.load(marshaled)
