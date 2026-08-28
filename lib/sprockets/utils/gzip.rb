@@ -19,6 +19,8 @@ module Sprockets
           gz.close
 
           nil
+        ensure
+          gz.close if gz && !gz.closed?
         end
       end
 
@@ -33,9 +35,10 @@ module Sprockets
         def self.call(file, source)
           compressed_source = Autoload::Zopfli.deflate(source, format: :gzip)
           file.write(compressed_source)
-          file.close
 
           nil
+        ensure
+          file.close
         end
       end
 

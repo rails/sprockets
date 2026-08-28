@@ -64,6 +64,8 @@ module Sprockets
       gz << str
       gz.finish
       io.string
+    ensure
+      gz.close if gz && !gz.closed?
     end
 
     # Public: Use base64 to encode data.
