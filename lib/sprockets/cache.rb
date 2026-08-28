@@ -154,7 +154,7 @@ module Sprockets
     #
     # Returns truthy on success, potentially raises exception on failure
     def clear(options=nil)
-      @cache_wrapper.clear
+      @cache_wrapper.clear(options)
       @fetch_cache.clear
     end
 

@@ -223,6 +223,8 @@ Now in your `application.js` will correctly load the `foo.min.js` before `foo-ui
 
 ## Cache
 
+`environment.cache.clear(options)` forwards the options to the underlying cache backend.
+
 Compiling assets is slow. It requires a lot of disk use to pull assets off of hard drives, a lot of RAM to manipulate those files in memory, and a lot of CPU for compilation operations. Because of this Sprockets has a cache to speed up asset compilation times. That's the good news. The bad news, is that sprockets has a cache and if you've found a bug it's likely going to involve the cache.
 
 By default Sprockets uses the file system to cache assets. It makes sense that Sprockets does not want to generate assets that already exist on disk in `public/assets`, what might not be as intuitive is that Sprockets needs to cache "partial" assets.
