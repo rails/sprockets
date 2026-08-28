@@ -88,8 +88,8 @@ module Sprockets
         # Ensure directory exists
         FileUtils.mkdir_p File.dirname(path)
 
-        # Check if cache exists before writing
-        exists = File.exist?(path)
+        # Record the previous size before replacing the cache file
+        previous_size = safe_stat(path)&.size || 0
 
         # Serialize value
         marshaled = Marshal.dump(value)
@@ -111,8 +111,8 @@ module Sprockets
         # Write data
         PathUtils.atomic_write(path) do |f|
           f.write(raw)
-          if defined?(@size) && !exists
-            @size += f.size
+          if defined?(@size)
+            @size += f.size - previous_size
           end
         end
 
