@@ -37,6 +37,7 @@ module Sprockets
     attr_reader :cache_key
 
     def initialize(options = {})
+      options = options.dup
       options[:comments] ||= :none
 
       @options = options

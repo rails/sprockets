@@ -36,7 +36,7 @@ module Sprockets
     attr_reader :cache_key
 
     def initialize(options = {})
-      @options = options
+      @options = options.dup
       @cache_key = "#{self.class.name}:#{Autoload::YUI::Compressor::VERSION}:#{VERSION}:#{DigestUtils.digest(options)}".freeze
     end
 
