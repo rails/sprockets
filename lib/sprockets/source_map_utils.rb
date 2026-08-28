@@ -195,12 +195,13 @@ module Sprockets
       mappings, sources, names = [], [], []
       if map["sections"]
         map["sections"].each do |s|
-          mappings += decode_source_map(s["map"])[:mappings].each do |m|
+          section = decode_source_map(s["map"])
+          mappings += section[:mappings].each do |m|
             m[:generated][0] += s["offset"]["line"]
             m[:generated][1] += s["offset"]["column"]
           end
-          sources |= s["map"]["sources"]
-          names   |= s["map"]["names"]
+          sources |= section[:sources]
+          names   |= section[:names]
         end
       else
         mappings = decode_vlq_mappings(map["mappings"], sources: map["sources"], names: map["names"])
