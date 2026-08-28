@@ -45,7 +45,7 @@ module Sprockets
       msg = "Served asset #{env['PATH_INFO']} -"
 
       # Extract the path from everything after the leading slash
-      full_path = Rack::Utils.unescape(env['PATH_INFO'].to_s.sub(/^\//, ''))
+      full_path = Rack::Utils.unescape_path(env['PATH_INFO'].to_s.sub(/^\//, '')).force_encoding(Encoding::UTF_8)
       path = full_path
 
       unless path.valid_encoding?
