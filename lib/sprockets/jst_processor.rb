@@ -19,6 +19,8 @@ module Sprockets
   #       'application/javascript', JstProcessor.new(namespace: 'App.templates')
   #
   class JstProcessor
+    VERSION = '1'
+
     def self.default_namespace
       'this.JST'
     end
@@ -34,8 +36,15 @@ module Sprockets
       instance.call(input)
     end
 
+    def self.cache_key
+      instance.cache_key
+    end
+
+    attr_reader :cache_key
+
     def initialize(namespace: self.class.default_namespace)
-      @namespace = namespace
+      @namespace = namespace.to_s.dup.freeze
+      @cache_key = "#{self.class.name}:#{VERSION}:#{@namespace}".freeze
     end
 
     def call(input)
