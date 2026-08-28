@@ -13,9 +13,11 @@ module Sprockets
 
     # :stopdoc:
     if Gem::Version.new(Rack::RELEASE) < Gem::Version.new("3")
+      ALLOW = "Allow"
       X_CASCADE = "X-Cascade"
       VARY = "Vary"
     else
+      ALLOW = "allow"
       X_CASCADE = "x-cascade"
       VARY = "vary"
     end
@@ -183,7 +185,7 @@ module Sprockets
       end
 
       def method_not_allowed_response
-        [ 405, { Rack::CONTENT_TYPE => "text/plain", Rack::CONTENT_LENGTH => "18" }, [ "Method Not Allowed" ] ]
+        [ 405, { Rack::CONTENT_TYPE => "text/plain", Rack::CONTENT_LENGTH => "18", ALLOW => "GET, HEAD" }, [ "Method Not Allowed" ] ]
       end
 
       def precondition_failed_response(env)
