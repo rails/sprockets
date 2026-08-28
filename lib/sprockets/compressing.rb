@@ -47,8 +47,8 @@ module Sprockets
     #
     # The compressor object must respond to `compress`.
     def css_compressor=(compressor)
-      unregister_bundle_processor 'text/css', @css_compressor if defined? @css_compressor
-      @css_compressor = nil
+      unregister_bundle_processor 'text/css', @css_compressor_processor if defined? @css_compressor_processor
+      @css_compressor_processor = @css_compressor = nil
       return unless compressor
 
       if compressor.is_a?(Symbol)
@@ -61,6 +61,7 @@ module Sprockets
       end
 
       register_bundle_processor 'text/css', klass
+      @css_compressor_processor = klass
     end
 
     # Return JS compressor or nil if none is set
@@ -74,8 +75,8 @@ module Sprockets
     #
     # The compressor object must respond to `compress`.
     def js_compressor=(compressor)
-      unregister_bundle_processor 'application/javascript', @js_compressor if defined? @js_compressor
-      @js_compressor = nil
+      unregister_bundle_processor 'application/javascript', @js_compressor_processor if defined? @js_compressor_processor
+      @js_compressor_processor = @js_compressor = nil
       return unless compressor
 
       if compressor.is_a?(Symbol)
@@ -88,6 +89,7 @@ module Sprockets
       end
 
       register_bundle_processor 'application/javascript', klass
+      @js_compressor_processor = klass
     end
 
     # Public: Checks if Gzip is enabled.
