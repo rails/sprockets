@@ -69,7 +69,11 @@ module Sprockets
         end
 
         if value
-          FileUtils.touch(path)
+          begin
+            File.utime(nil, nil, path)
+          rescue Errno::ENOENT
+            # Another cache user may have removed the file after it was read.
+          end
           value
         end
       end
