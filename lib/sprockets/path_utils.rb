@@ -147,7 +147,7 @@ module Sprockets
     # Returns string path with pipeline parsed in
     def set_pipeline(path, mime_exts, pipeline_exts, pipeline)
       extension, _ = match_path_extname(path, mime_exts)
-      path.chomp!(extension)
+      path = path.chomp(extension)
       pipeline_old, _ = match_path_extname(path, pipeline_exts)
       path.chomp!(pipeline_old)
 
