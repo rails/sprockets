@@ -42,6 +42,8 @@ If you want to work on Sprockets or better understand how it works read [How Spr
 
 ## Behavior Overview
 
+Default source-map line counting avoids retaining an array of every source line.
+
 You can interact with Sprockets primarily through directives and file extensions. This section covers how to use each of these things, and the defaults that ship with Sprockets.
 
 Since you are likely using Sprockets through another framework (such as the [Rails asset pipeline](http://guides.rubyonrails.org/asset_pipeline.html)), there will be configuration options you can toggle that will change behavior such as what directories or files get compiled. For that documentation you should see your framework's documentation.

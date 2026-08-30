@@ -9,11 +9,17 @@ module Sprockets
     # available.
     class DefaultSourceMap
       def call(input)
-        result        = { data: input[:data] }
+        data          = input[:data]
+        result        = { data: data }
         map           = input[:metadata][:map]
         filename      = input[:filename]
         load_path     = input[:load_path]
-        lines         = input[:data].lines.length
+        if data.encoding.ascii_compatible?
+          lines  = data.b.count("\n")
+          lines += 1 unless data.empty? || data.end_with?("\n")
+        else
+          lines = data.each_line.count
+        end
         basename      = File.basename(filename)
         mime_exts     = input[:environment].config[:mime_exts]
         pipeline_exts = input[:environment].config[:pipeline_exts]
