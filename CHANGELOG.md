@@ -1,5 +1,7 @@
 **Master**
 
+- Preserve input maps and nested index-map structure when concatenating source maps. [Oskar Eichler](https://github.com/OskarEichler)
+
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
 # 4.4.1

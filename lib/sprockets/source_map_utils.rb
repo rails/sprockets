@@ -72,26 +72,26 @@ module Sprockets
     # Returns a new source map hash.
     def concat_source_maps(a, b)
       return a || b unless a && b
-      a = make_index_map(a)
+      a = make_index_map(a).dup
+      a["sections"] = a["sections"].dup
       b = make_index_map(b)
 
       offset = 0
-      if a["sections"].count != 0 && !a["sections"].last["map"]["mappings"].empty?
-        last_line_count = a["sections"].last["map"].delete("x_sprockets_linecount")
-        offset += last_line_count || 1
+      a["sections"].reverse_each.with_index do |section, reverse_index|
+        map, line_count = extract_last_source_map_line(section["map"])
+        next unless line_count
 
-        last_offset = a["sections"].last["offset"]["line"]
-        offset += last_offset
+        section = section.dup
+        section["map"] = map
+        a["sections"][-reverse_index - 1] = section
+        offset = section["offset"]["line"] + line_count
+        break
       end
 
       a["sections"] += b["sections"].map do |section|
         {
           "offset" => section["offset"].merge({ "line" => section["offset"]["line"] + offset }),
-          "map"    => section["map"].merge({
-            "sources" => section["map"]["sources"].map do |source|
-              PathUtils.relative_path_from(a["file"], PathUtils.join(File.dirname(b["file"]), source))
-            end
-          })
+          "map"    => rebase_source_map_sources(section["map"], from: b["file"], to: a["file"])
         }
       end
       a
@@ -478,6 +478,44 @@ module Sprockets
       end
 
       mappings
+    end
+
+    private
+
+    def extract_last_source_map_line(map)
+      if map["sections"]
+        map["sections"].reverse_each.with_index do |section, reverse_index|
+          child, line_count = extract_last_source_map_line(section["map"])
+          next unless line_count
+
+          section = section.dup
+          section["map"] = child
+          map = map.dup
+          map["sections"] = map["sections"].dup
+          map["sections"][-reverse_index - 1] = section
+          return map, section["offset"]["line"] + line_count
+        end
+        [map, nil]
+      elsif map.key?("x_sprockets_linecount") || !map["mappings"].empty?
+        map = map.dup
+        [map, map.delete("x_sprockets_linecount") || 1]
+      else
+        [map, nil]
+      end
+    end
+
+    def rebase_source_map_sources(map, from:, to:)
+      map = map.dup
+      if map["sections"]
+        map["sections"] = map["sections"].map do |section|
+          section.merge("map" => rebase_source_map_sources(section["map"], from: from, to: to))
+        end
+      else
+        map["sources"] = map["sources"].map do |source|
+          PathUtils.relative_path_from(to, PathUtils.join(File.dirname(from), source))
+        end
+      end
+      map
     end
   end
 end
