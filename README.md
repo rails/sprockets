@@ -714,3 +714,5 @@ Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGE
 
 ## License
 Sprockets is released under the [MIT License](MIT-LICENSE).
+
+Conditional asset requests support ETag lists, wildcards and weak `If-None-Match` comparison.

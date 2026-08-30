@@ -65,11 +65,11 @@ module Sprockets
       if fingerprint
         if_match = fingerprint
       elsif env['HTTP_IF_MATCH']
-        if_match = env['HTTP_IF_MATCH'][/"(\w+)"$/, 1]
+        if_match = env['HTTP_IF_MATCH']
       end
 
       if env['HTTP_IF_NONE_MATCH']
-        if_none_match = env['HTTP_IF_NONE_MATCH'][/"(\w+)"$/, 1]
+        if_none_match = env['HTTP_IF_NONE_MATCH']
       end
 
       # Look up the asset.
@@ -88,9 +88,9 @@ module Sprockets
         status = :not_found
       elsif fingerprint && asset.etag != fingerprint
         status = :not_found
-      elsif if_match && asset.etag != if_match
+      elsif if_match && !etag_match?(if_match, asset.etag)
         status = :precondition_failed
-      elsif if_none_match && asset.etag == if_none_match
+      elsif if_none_match && etag_match?(if_none_match, asset.etag, weak: true)
         status = :not_modified
       else
         status = :ok
@@ -102,7 +102,7 @@ module Sprockets
         ok_response(asset, env)
       when :not_modified
         logger.info "#{msg} 304 Not Modified (#{time_elapsed.call}ms)"
-        not_modified_response(env, if_none_match)
+        not_modified_response(env, asset.etag)
       when :not_found
         logger.info "#{msg} 404 Not Found (#{time_elapsed.call}ms)"
         not_found_response(env)
@@ -129,6 +129,14 @@ module Sprockets
     end
 
     private
+      def etag_match?(header, etag, weak: false)
+        header.to_s.split(',').any? do |candidate|
+          candidate = candidate.strip
+          candidate = candidate.delete_prefix('W/') if weak
+          candidate == '*' || candidate == etag || candidate == %Q("#{etag}")
+        end
+      end
+
       def forbidden_request?(path)
         # Prevent access to files elsewhere on the file system
         #
