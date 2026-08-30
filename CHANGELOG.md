@@ -1,5 +1,7 @@
 **Master**
 
+- Ignore representations with a zero quality value during content negotiation. [Oskar Eichler](https://github.com/OskarEichler)
+
 Get upgrade notes from Sprockets 3.x to 4.x at https://github.com/rails/sprockets/blob/master/UPGRADING.md
 
 # 4.4.1

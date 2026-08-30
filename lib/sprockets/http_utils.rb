@@ -88,6 +88,8 @@ module Sprockets
 
       i = 0
       q_values.each do |accepted, quality|
+        next unless quality.positive?
+
         if match = available.find { |option| matcher.call(option, accepted) }
           i += 1
           matches << [-quality, i, match]
