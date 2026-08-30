@@ -38,7 +38,7 @@ module Sprockets
       dependencies.merge(asset.metadata[:dependencies])
 
       map["file"] = PathUtils.split_subpath(input[:load_path], input[:filename])
-      sources = map["sections"] ? map["sections"].map { |s| s["map"]["sources"] }.flatten : map["sources"]
+      sources = source_map_sources(map)
 
       sources.each do |source|
         source = PathUtils.join(File.dirname(map["file"]), source)
@@ -62,5 +62,14 @@ module Sprockets
         source_map_content_type
       end
     end
+
+    def self.source_map_sources(map)
+      if map["sections"]
+        map["sections"].flat_map { |section| source_map_sources(section["map"]) }
+      else
+        map["sources"]
+      end
+    end
+    private_class_method :source_map_sources
   end
 end
