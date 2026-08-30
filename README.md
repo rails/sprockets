@@ -714,3 +714,5 @@ Please see the [CHANGELOG](https://github.com/rails/sprockets/tree/master/CHANGE
 
 ## License
 Sprockets is released under the [MIT License](MIT-LICENSE).
+
+Generating a source map asset leaves the input asset's source map unchanged.

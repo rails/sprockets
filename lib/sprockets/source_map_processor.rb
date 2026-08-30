@@ -29,7 +29,7 @@ module Sprockets
 
       uri, _ = env.resolve!(input[:filename], accept: self.original_content_type(input[:content_type]))
       asset  = env.load(uri)
-      map    = asset.metadata[:map]
+      map    = asset.metadata[:map].dup
 
       # TODO: Because of the default piplene hack we have to apply dependencies
       #       from compiled asset to the source map, otherwise the source map cache
