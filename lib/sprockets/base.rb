@@ -126,8 +126,8 @@ module Sprockets
     # Find asset by logical path or expanded path.
     #
     # If the asset is not found an error will be raised.
-    def find_asset!(*args)
-      uri, _ = resolve!(*args)
+    def find_asset!(*args, **options)
+      uri, _ = resolve!(*args, **options)
       if uri
         load(uri)
       end

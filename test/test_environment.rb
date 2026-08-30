@@ -382,6 +382,13 @@ module EnvironmentTests
     assert_equal [137, 80, 78, 71, 13, 10, 26, 10, 60, 115], asset.to_s[0, 10].bytes.to_a
   end
 
+  test "find asset bang forwards keyword options" do
+    asset = @env.find_asset!("logo", accept: "image/svg+xml")
+
+    assert_equal "image/svg+xml", asset.content_type
+    assert_equal "logo.svg", asset.logical_path
+  end
+
   test "full path svg transformer" do
     assert @env.find_asset(fixture_path("default/logo.svg"))
     refute @env.find_asset(fixture_path("default/logo.png"))
