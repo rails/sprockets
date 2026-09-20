@@ -114,7 +114,11 @@ module Sprockets
       logger.error "Error compiling asset #{path}:"
       logger.error "#{e.class.name}: #{e.message}"
 
-      case File.extname(path)
+      # path may still be nil here if the exception was raised before it
+      # was assigned (e.g. Rack::Utils.unescape raising on malformed
+      # percent-encoding in PATH_INFO) - File.extname(nil) would itself
+      # raise a TypeError, masking the original exception.
+      case File.extname(path.to_s)
       when ".js"
         # Re-throw JavaScript asset exceptions to the browser
         logger.info "#{msg} 500 Internal Server Error\n\n"

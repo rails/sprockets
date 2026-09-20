@@ -33,6 +33,22 @@ class TestServer < Sprockets::TestCase
     @app ||= Rack::Lint.new(default_app)
   end
 
+  test "invalid percent-encoding in PATH_INFO raises the original error, not a TypeError from the rescue handler" do
+    # Rack::Utils.unescape raises ArgumentError for a malformed escape
+    # (e.g. a bare trailing "%") before `path` is ever assigned in
+    # Server#call. rack-test's own `get` helper can't even construct a
+    # request for this URI (it fails URI parsing itself), so build the
+    # Rack env by hand and call the environment directly.
+    env_hash = {
+      'REQUEST_METHOD' => 'GET',
+      'PATH_INFO' => '/controllers/0%',
+      'rack.input' => StringIO.new('')
+    }
+
+    error = assert_raises(ArgumentError) { @env.call(env_hash) }
+    assert_match(/%-encoding/, error.message)
+  end
+
   test "serve single source file" do
     get "/assets/foo.js"
     assert_equal 200, last_response.status
